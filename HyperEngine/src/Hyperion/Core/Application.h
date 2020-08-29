@@ -4,8 +4,8 @@
 
 #include "Rendering/Window.h"
 
-namespace Hyperion {
-
+namespace Hyperion 
+{
 	class Application
 	{
 	private:

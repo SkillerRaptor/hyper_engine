@@ -2,8 +2,8 @@
 
 #include "Utilities/Timestep.h"
 
-namespace Hyperion {
-
+namespace Hyperion 
+{
 	Application* Application::m_Instance;
 
 	Application::Application()

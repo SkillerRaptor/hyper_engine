@@ -1,7 +1,7 @@
 #include "Timestep.h"
 
-namespace Hyperion {
-
+namespace Hyperion 
+{
 	Timestep::Timestep(double seconds)
 		: m_Seconds(seconds)
 	{
