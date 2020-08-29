@@ -15,8 +15,10 @@ namespace Hyperion
 		m_Window = new Window("HyperEngine", 1280, 720, false);
 	}
 
-	Application::~Application()
+	void Application::Shutdown()
 	{
+		m_Running = false;
+		delete m_Window;
 	}
 
 	void Application::Run()
@@ -69,11 +71,5 @@ namespace Hyperion
 	Application* Application::Get()
 	{
 		return m_Instance;
-	}
-
-	void Application::Shutdown()
-	{
-		m_Running = false;
-		delete m_Window;
 	}
 }

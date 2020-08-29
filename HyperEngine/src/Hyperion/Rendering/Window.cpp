@@ -1,5 +1,7 @@
 #include "Window.h"
 
+#include "Utilities/Base.h"
+
 namespace Hyperion
 {
     Window::Window(std::string title, unsigned int width, unsigned int height, bool vSync)
@@ -28,7 +30,7 @@ namespace Hyperion
 
         if (m_Window == nullptr)
         {
-            std::cout << "Failed to create GLFW window" << std::endl;
+            HP_CORE_FATAL("Failed to create GLFW window");
             glfwTerminate();
             std::exit(-1);
         }
@@ -40,7 +42,7 @@ namespace Hyperion
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
-            std::cout << "Failed to initialize GLAD" << std::endl;
+            HP_CORE_FATAL("Failed to initialize GLAD");
             std::exit(-1);
         }
     }

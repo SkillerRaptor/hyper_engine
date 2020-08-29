@@ -7,6 +7,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "Utilities/Base.h"
+
 namespace Hyperion
 {
 	Shader::Shader(std::string vertexShader, std::string fragmentShader, std::string geometryShader)
@@ -49,7 +51,7 @@ namespace Hyperion
 		}
 		catch (std::exception exception)
 		{
-			std::cout << "Shader: Failed to read shader files" << std::endl;
+			HP_CORE_ERROR("Shader: Failed to read shader files");
 			return false;
 		}
 		
@@ -202,7 +204,7 @@ namespace Hyperion
 			break;
 		}
 
-		std::cout << "Shader - Compile-time error : " << shaderType << " | " << message << std::endl;
+		HP_CORE_ERROR("Shader - Compile-time error: % | %", shaderType, message);
 		return false;
 	}
 
@@ -219,7 +221,7 @@ namespace Hyperion
 		char* message = (char*)_malloca(sizeof(char) * length);
 		glGetProgramInfoLog(id, length, &length, message);
 
-		std::cout << "Shader - Link-time error : Program | " << message << std::endl;
+		HP_CORE_ERROR("Shader - Link-time error: Program | %", message);
 		return false;
 	}
 
