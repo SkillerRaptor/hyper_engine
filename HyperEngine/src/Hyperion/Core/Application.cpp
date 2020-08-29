@@ -1,9 +1,15 @@
 #include "Application.h"
 
+#include "Utilities/Timestep.h"
+
 namespace Hyperion {
+
+	Application* Application::m_Instance;
 
 	Application::Application()
 	{
+		m_Instance = this;
+
 		m_Window = new Window("HyperEngine", 1280, 720, false);
 	}
 
@@ -41,7 +47,7 @@ namespace Hyperion {
 			const long long currentTimeNow = std::chrono::time_point_cast<std::chrono::milliseconds>(currentTime).time_since_epoch().count();
 			const long long timeSinceEpoch = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();
 
-			const float interpolation = static_cast<float>(timeSinceEpoch + skipTicks - currentTimeNow) / static_cast<float>(skipTicks);
+			const Timestep timeStep = static_cast<double>(timeSinceEpoch + skipTicks - currentTimeNow) / static_cast<double>(skipTicks);
 
 			if (!m_Running) break;
 
@@ -51,6 +57,16 @@ namespace Hyperion {
 
 			m_Window->OnUpdate();
 		}
+	}
+
+	Window* Application::GetWindow() const
+	{
+		return m_Window;
+	}
+
+	Application* Application::Get()
+	{
+		return m_Instance;
 	}
 
 	void Application::Shutdown()

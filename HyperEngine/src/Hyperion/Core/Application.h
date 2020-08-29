@@ -12,11 +12,16 @@ namespace Hyperion {
 		Window* m_Window;
 		bool m_Running = true;
 
+		static Application* m_Instance;
+
 	public:
 		Application();
 		virtual ~Application();
 
 		void Run();
+
+		Window* GetWindow() const;
+		static Application* Get();
 
 	private:
 		void Shutdown();

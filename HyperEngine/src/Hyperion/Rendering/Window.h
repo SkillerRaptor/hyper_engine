@@ -49,7 +49,7 @@ namespace Hyperion
 		void SetVSync(bool vSync);
 		bool IsVSync() const;
 
-		GLFWwindow* GetWindow() const;
+		GLFWwindow* GetNativeWindow() const;
 		const WindowData& GetWindowData() const;
 
 	private:

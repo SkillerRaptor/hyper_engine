@@ -123,7 +123,7 @@ namespace Hyperion
         return m_Data.VSync;
     }
 
-    GLFWwindow* Window::GetWindow() const
+    GLFWwindow* Window::GetNativeWindow() const
     {
         return m_Window;
     }
