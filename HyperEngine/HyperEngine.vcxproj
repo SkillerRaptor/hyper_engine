@@ -98,6 +98,10 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Hyperion\Rendering\Buffers\FrameBuffer.cpp" />
+    <ClCompile Include="src\Hyperion\Rendering\Buffers\IndexBuffer.cpp" />
+    <ClCompile Include="src\Hyperion\Rendering\Buffers\VertexArray.cpp" />
+    <ClCompile Include="src\Hyperion\Rendering\Buffers\VertexBuffer.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Shader.cpp">
       <SubType>
       </SubType>
@@ -114,6 +118,11 @@
     <ClCompile Include="src\Hyperion\Rendering\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Hyperion\Rendering\Buffers\FrameBuffer.h" />
+    <ClInclude Include="src\Hyperion\Rendering\Buffers\IndexBuffer.h" />
+    <ClInclude Include="src\Hyperion\Rendering\Buffers\Vertex.h" />
+    <ClInclude Include="src\Hyperion\Rendering\Buffers\VertexArray.h" />
+    <ClInclude Include="src\Hyperion\Rendering\Buffers\VertexBuffer.h" />
     <ClInclude Include="src\Hyperion\Rendering\Shader.h">
       <SubType>
       </SubType>
