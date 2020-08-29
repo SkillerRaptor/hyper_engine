@@ -133,6 +133,10 @@
     <ClCompile Include="src\Hyperion\Rendering\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Hyperion\Events\Event.h" />
+    <ClInclude Include="src\Hyperion\Events\KeyEvents.h" />
+    <ClInclude Include="src\Hyperion\Events\MouseEvents.h" />
+    <ClInclude Include="src\Hyperion\Events\WindowEvents.h" />
     <ClInclude Include="src\Hyperion\Memory\PoolAllocator.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix2.h" />

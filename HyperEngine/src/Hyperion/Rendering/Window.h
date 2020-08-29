@@ -1,9 +1,12 @@
 #pragma once
 
 #include <iostream>
+#include <queue>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include "Events/Event.h"
 
 namespace Hyperion
 {
@@ -17,6 +20,7 @@ namespace Hyperion
 		unsigned int YPos;
 
 		bool VSync;
+		std::queue<std::shared_ptr<Event>>* EventBus;
 	};
 
 	class Window
@@ -26,7 +30,7 @@ namespace Hyperion
 		WindowData m_Data;
 
 	public:
-		Window(std::string title = "HyperEngine", unsigned int width = 1280, unsigned int height = 720, bool vSync = false);
+		Window(std::string title = "HyperEngine", unsigned int width = 1280, unsigned int height = 720, bool vSync = false, std::queue<std::shared_ptr<Event>>* eventBus = nullptr);
 		virtual ~Window();
 
 		void OnUpdate();
@@ -53,7 +57,7 @@ namespace Hyperion
 		const WindowData& GetWindowData() const;
 
 	private:
-		void InitWindow(std::string title, int width, int height, bool vSync);
+		void InitWindow(std::string title, int width, int height, bool vSync, std::queue<std::shared_ptr<Event>>* eventBus);
 		void ShutdownWindow();
 	};
 }

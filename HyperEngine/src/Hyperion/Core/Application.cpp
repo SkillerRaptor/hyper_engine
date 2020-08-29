@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+#include "Events/WindowEvents.h"
 #include "Utilities/Random.h"
 #include "Utilities/Timestep.h"
 
@@ -13,7 +14,7 @@ namespace Hyperion
 	{
 		m_Instance = this;
 
-		m_Window = new Window("HyperEngine", 1280, 720, false);
+		m_Window = new Window("HyperEngine", 1280, 720, false, &m_EventBus);
 
 		Random::Init();
 	}
@@ -58,12 +59,29 @@ namespace Hyperion
 
 			if (!m_Running) break;
 
-			/* Events */
+			while (m_EventBus.size() > 0)
+			{
+				std::shared_ptr<Event> e = m_EventBus.front();
+				if (e->Handled) continue;
+				OnEvent(*e);
+				m_EventBus.pop();
+			}
 
 			/* Layer Update & Render */
 
 			m_Window->OnUpdate();
 		}
+	}
+
+	void Application::OnEvent(Event& event)
+	{
+		EventDispatcher dispatcher(event);
+
+		dispatcher.Dispatch<WindowCloseEvent>([&](WindowCloseEvent& e)
+			{
+				Shutdown();
+				return false;
+			});
 	}
 
 	Window* Application::GetWindow() const

@@ -2,11 +2,15 @@
 
 #include "Utilities/Log.h"
 
+#include "Events/KeyEvents.h"
+#include "Events/MouseEvents.h"
+#include "Events/WindowEvents.h"
+
 namespace Hyperion
 {
-    Window::Window(std::string title, unsigned int width, unsigned int height, bool vSync)
+    Window::Window(std::string title, unsigned int width, unsigned int height, bool vSync, std::queue<std::shared_ptr<Event>>* eventBus)
     {
-        InitWindow(title, width, height, vSync);
+        InitWindow(title, width, height, vSync, eventBus);
     }
 
     Window::~Window()
@@ -14,12 +18,13 @@ namespace Hyperion
         ShutdownWindow();
     }
 
-    void Window::InitWindow(std::string title, int width, int height, bool vSync)
+    void Window::InitWindow(std::string title, int width, int height, bool vSync, std::queue<std::shared_ptr<Event>>* eventBus)
     {
         m_Data.Title = title;
         m_Data.Width = width;
         m_Data.Height = height;
         m_Data.VSync = vSync;
+        m_Data.EventBus = eventBus;
 
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -45,6 +50,87 @@ namespace Hyperion
             HP_CORE_FATAL("Failed to initialize GLAD");
             std::exit(-1);
         }
+
+        glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
+            {
+                WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+                data.Width = width;
+                data.Height = height;
+
+                glViewport(0, 0, width, height);
+                data.EventBus->push(std::make_shared<WindowResizeEvent>(width, height));
+            });
+
+        glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
+            {
+                WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+                data.EventBus->push(std::make_shared<WindowCloseEvent>());
+            });
+
+        glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, int x, int y)
+            {
+                WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+                data.XPos = x;
+                data.YPos = y;
+
+                data.EventBus->push(std::make_shared<WindowMovedEvent>(x, y));
+            });
+
+        glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+            {
+                switch (action)
+                {
+                case GLFW_PRESS:
+                {
+                    WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+                    data.EventBus->push(std::make_shared<KeyPressedEvent>(key, 0));
+                    break;
+                }
+                case GLFW_RELEASE:
+                {
+                    WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+                    data.EventBus->push(std::make_shared<KeyReleasedEvent>(key));
+                    break;
+                }
+                case GLFW_REPEAT:
+                {
+                    WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+                    data.EventBus->push(std::make_shared<KeyPressedEvent>(key, 1));
+                    break;
+                }
+                }
+            });
+
+        glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
+            {
+                switch (action)
+                {
+                case GLFW_PRESS:
+                {
+                    WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+                    data.EventBus->push(std::make_shared<MouseButtonPressedEvent>(button));
+                    break;
+                }
+                case GLFW_RELEASE:
+                {
+                    WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+                    data.EventBus->push(std::make_shared<MouseButtonReleasedEvent>(button));
+                    break;
+                }
+                }
+            });
+
+        glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
+            {
+                WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+                data.EventBus->push(std::make_shared<MouseScrolledEvent>((float)xOffset, (float)yOffset));
+            });
+
+        glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
+            {
+                WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+                data.EventBus->push(std::make_shared<MouseMovedEvent>((float)xPos, (float)yPos));
+            });
     }
 
     void Window::ShutdownWindow()
