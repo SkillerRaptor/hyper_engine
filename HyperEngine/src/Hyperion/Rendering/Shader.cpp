@@ -3,6 +3,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <fstream>
+#include <iostream>
+#include <sstream>
+
 namespace Hyperion
 {
 	Shader::Shader(std::string vertexShader, std::string fragmentShader, std::string geometryShader)

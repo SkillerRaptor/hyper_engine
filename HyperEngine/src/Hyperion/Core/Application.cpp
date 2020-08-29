@@ -1,5 +1,7 @@
 #include "Application.h"
 
+#include <chrono>
+
 #include "Utilities/Timestep.h"
 
 namespace Hyperion 

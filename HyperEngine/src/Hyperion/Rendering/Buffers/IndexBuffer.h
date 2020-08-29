@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hppch.h"
+#include <iostream>
 
 namespace Hyperion 
 {

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "hppch.h"
-
 #include "Vertex.h"
 
 namespace Hyperion 

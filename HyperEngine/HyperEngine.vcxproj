@@ -119,7 +119,6 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="src\Hyperion\Utilities\Input.cpp" />
-    <ClCompile Include="src\Hyperion\hppch.cpp" />
     <ClCompile Include="src\Hyperion\Core\Application.cpp" />
     <ClCompile Include="src\Hyperion\Utilities\Timestep.cpp" />
     <ClCompile Include="vendor\GL\src\glad.c" />
@@ -148,7 +147,6 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="src\Hyperion\Utilities\Input.h" />
-    <ClInclude Include="src\Hyperion\hppch.h" />
     <ClInclude Include="src\Hyperion\Core\Application.h" />
     <ClInclude Include="src\Hyperion.h" />
     <ClInclude Include="src\Hyperion\Core\EntryPoint.h" />
