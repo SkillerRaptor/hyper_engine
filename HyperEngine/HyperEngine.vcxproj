@@ -98,6 +98,14 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Hyperion\Maths\Matrix.cpp" />
+    <ClCompile Include="src\Hyperion\Maths\Matrix2.cpp" />
+    <ClCompile Include="src\Hyperion\Maths\Matrix3.cpp" />
+    <ClCompile Include="src\Hyperion\Maths\Matrix4.cpp" />
+    <ClCompile Include="src\Hyperion\Maths\Vector.cpp" />
+    <ClCompile Include="src\Hyperion\Maths\Vector2.cpp" />
+    <ClCompile Include="src\Hyperion\Maths\Vector3.cpp" />
+    <ClCompile Include="src\Hyperion\Maths\Vector4.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\FrameBuffer.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\IndexBuffer.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\VertexArray.cpp" />
@@ -118,6 +126,14 @@
     <ClCompile Include="src\Hyperion\Rendering\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Hyperion\Maths\Matrix.h" />
+    <ClInclude Include="src\Hyperion\Maths\Matrix2.h" />
+    <ClInclude Include="src\Hyperion\Maths\Matrix3.h" />
+    <ClInclude Include="src\Hyperion\Maths\Matrix4.h" />
+    <ClInclude Include="src\Hyperion\Maths\Vector.h" />
+    <ClInclude Include="src\Hyperion\Maths\Vector2.h" />
+    <ClInclude Include="src\Hyperion\Maths\Vector3.h" />
+    <ClInclude Include="src\Hyperion\Maths\Vector4.h" />
     <ClInclude Include="src\Hyperion\Rendering\Buffers\FrameBuffer.h" />
     <ClInclude Include="src\Hyperion\Rendering\Buffers\IndexBuffer.h" />
     <ClInclude Include="src\Hyperion\Rendering\Buffers\Vertex.h" />
