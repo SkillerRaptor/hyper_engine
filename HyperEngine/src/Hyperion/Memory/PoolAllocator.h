@@ -63,7 +63,7 @@ namespace Hyperion
 			PoolChunk<T>* poolChunk = m_Head;
 			m_Head = poolChunk->NextPoolChunk; 
 
-			T* cls = new (std::addressof(poolChunk->Value)) T(std::forward<Targs>(Fargs)...)
+			T* cls = new (std::addressof(poolChunk->Value)) T(std::forward<Targs>(Fargs)...);
 			m_Allocations++;
 			return cls;
 		}

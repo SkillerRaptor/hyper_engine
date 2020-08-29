@@ -91,12 +91,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Sandbox.cpp" />
+    <ClCompile Include="src\SandboxLayer.cpp" />
     <ClCompile Include="vendor\GL\src\glad.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HyperEngine\HyperEngine.vcxproj">
       <Project>{73a9a8fd-4437-406e-8720-a15030117347}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\SandboxLayer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,6 +15,7 @@ namespace Hyperion
 		m_Instance = this;
 
 		m_Window = new Window("HyperEngine", 1280, 720, false, &m_EventBus);
+		m_LayerStack = new LayerStack();
 
 		Random::Init();
 	}
@@ -23,6 +24,16 @@ namespace Hyperion
 	{
 		m_Running = false;
 		delete m_Window;
+	}
+
+	void Application::PushLayer(Layer* layer)
+	{
+		m_LayerStack->PushLayer(layer);
+	}
+
+	void Application::PopLayer(Layer* layer)
+	{
+		m_LayerStack->PopLayer(layer);
 	}
 
 	void Application::Run()
@@ -42,7 +53,8 @@ namespace Hyperion
 			loops = 0;
 			while (std::chrono::system_clock::now() > currentTime && loops < ticksPerFrame)
 			{
-				/* Layer Tick */
+				for (Layer* layer : m_LayerStack->GetLayers())
+					layer->OnTick(currentTick);
 
 				currentTick++;
 				if (currentTick >= ticksPerSecond)
@@ -67,7 +79,11 @@ namespace Hyperion
 				m_EventBus.pop();
 			}
 
-			/* Layer Update & Render */
+			for (Layer* layer : m_LayerStack->GetLayers())
+			{
+				layer->OnUpdate(timeStep);
+				layer->OnRender();
+			}
 
 			m_Window->OnUpdate();
 		}

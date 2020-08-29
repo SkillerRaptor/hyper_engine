@@ -100,6 +100,8 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Hyperion\Layers\Layer.cpp" />
+    <ClCompile Include="src\Hyperion\Layers\LayerStack.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Matrix.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Matrix2.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Matrix3.cpp" />
@@ -137,6 +139,8 @@
     <ClInclude Include="src\Hyperion\Events\KeyEvents.h" />
     <ClInclude Include="src\Hyperion\Events\MouseEvents.h" />
     <ClInclude Include="src\Hyperion\Events\WindowEvents.h" />
+    <ClInclude Include="src\Hyperion\Layers\Layer.h" />
+    <ClInclude Include="src\Hyperion\Layers\LayerStack.h" />
     <ClInclude Include="src\Hyperion\Memory\PoolAllocator.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix2.h" />
