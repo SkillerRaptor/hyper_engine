@@ -132,6 +132,7 @@
     <ClCompile Include="src\Hyperion\Rendering\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Hyperion\Memory\PoolAllocator.h" />
     <ClInclude Include="src\Hyperion\Utilities\Base.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix2.h" />

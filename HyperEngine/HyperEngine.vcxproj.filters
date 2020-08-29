@@ -161,5 +161,8 @@
     <ClInclude Include="src\Hyperion\Utilities\Random.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Hyperion\Memory\PoolAllocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
