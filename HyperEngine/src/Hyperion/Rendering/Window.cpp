@@ -1,6 +1,6 @@
 #include "Window.h"
 
-#include "Utilities/Base.h"
+#include "Utilities/Log.h"
 
 namespace Hyperion
 {

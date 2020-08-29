@@ -61,6 +61,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -83,6 +84,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -98,7 +100,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Hyperion\Utilities\Base.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Matrix.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Matrix2.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Matrix3.cpp" />
@@ -133,7 +134,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Hyperion\Memory\PoolAllocator.h" />
-    <ClInclude Include="src\Hyperion\Utilities\Base.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix2.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix3.h" />

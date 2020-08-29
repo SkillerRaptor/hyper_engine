@@ -1,13 +1,13 @@
 #include "Shader.h"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
-#include "Utilities/Base.h"
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include "Utilities/Log.h"
 
 namespace Hyperion
 {
@@ -19,9 +19,9 @@ namespace Hyperion
 
 	bool Shader::LoadShader(std::string vertexShader, std::string fragmentShader, std::string geometryShader)
 	{
-		const char* vertexCode = nullptr;
-		const char* fragmentCode = nullptr;
-		const char* geometryCode = nullptr;
+		std::string vertexTempCode;
+		std::string fragmentTempCode;
+		std::string geometryTempCode;
 
 		try
 		{
@@ -36,8 +36,8 @@ namespace Hyperion
 			vertexShaderFile.close();
 			fragmentShaderFile.close();
 
-			vertexCode = vertexShaderStream.str().c_str();
-			fragmentCode = fragmentShaderStream.str().c_str();
+			vertexTempCode = vertexShaderStream.str();
+			fragmentTempCode = fragmentShaderStream.str();
 
 			if (geometryShader.c_str() != nullptr)
 			{
@@ -46,7 +46,7 @@ namespace Hyperion
 
 				geometryShaderStream << geometryShaderFile.rdbuf();
 				geometryShaderFile.close();
-				geometryCode = geometryShaderStream.str().c_str();
+				geometryTempCode = geometryShaderStream.str();
 			}
 		}
 		catch (std::exception exception)
@@ -54,6 +54,10 @@ namespace Hyperion
 			HP_CORE_ERROR("Shader: Failed to read shader files");
 			return false;
 		}
+
+		const char* vertexCode = vertexTempCode.c_str();
+		const char* fragmentCode = fragmentTempCode.c_str();
+		const char* geometryCode = geometryTempCode.c_str();
 		
 		unsigned int vertexShaderId = 0;
 		unsigned int fragmentShaderId = 0;

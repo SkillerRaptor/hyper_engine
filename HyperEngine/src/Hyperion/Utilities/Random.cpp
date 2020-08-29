@@ -23,7 +23,7 @@ namespace Hyperion
 
 	float Random::Float(int start, int end)
 	{
-		return (float) (start + (Float() * (end - start)));
+		return (float) (start + (Float() * ((float) end - start)));
 	}
 
 	double Random::Double()
@@ -34,7 +34,7 @@ namespace Hyperion
 
 	double Random::Double(int start, int end)
 	{
-		return (double) (start + (Double() * (end - start)));
+		return (double) (start + (Double() * ((double) end - start)));
 	}
 
 	bool Random::Bool()

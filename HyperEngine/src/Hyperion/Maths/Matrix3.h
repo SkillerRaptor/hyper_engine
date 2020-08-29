@@ -54,7 +54,7 @@ namespace Hyperion
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			os << "[" << matrix.matrix[i][0] << ", " << matrix.matrix[i][1] << ", " << matrix.matrix[i][2] << ", " << matrix.matrix[i][3] << "]";
+			os << "[" << matrix.matrix[i][0] << ", " << matrix.matrix[i][1] << ", " << matrix.matrix[i][2] << "]";
 			if (i != 3)
 				os << std::endl;
 		}

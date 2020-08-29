@@ -2,8 +2,6 @@
 
 namespace Hyperion {
 
-	#define PI 3.141592653589793238462643383279502884L
-
 	Matrix4 Matrix::Scale(Matrix4 matrix, Vector3 vector)
 	{
 		Matrix4 mat(matrix);
@@ -24,7 +22,7 @@ namespace Hyperion {
 
 	Matrix4 Matrix::RotateX(Matrix4 matrix, float degrees)
 	{
-		float angle = (float) degrees * PI / 180;
+		float angle = (float) degrees * ((float) M_PI) / 180;
 		Matrix4 mat(matrix);
 		mat[1][1] = cos(angle);
 		mat[2][1] = sin(angle);
@@ -35,7 +33,7 @@ namespace Hyperion {
 
 	Matrix4 Matrix::RotateY(Matrix4 matrix, float degrees)
 	{
-		float angle = (float) degrees * PI / 180;
+		float angle = (float) degrees * ((float) M_PI) / 180;
 		Matrix4 mat(matrix);
 		mat[0][0] = cos(angle);
 		mat[0][2] = sin(angle);
@@ -46,7 +44,7 @@ namespace Hyperion {
 
 	Matrix4 Matrix::RotateZ(Matrix4 matrix, float degrees)
 	{
-		float angle = (float) degrees * PI / 180;
+		float angle = (float) degrees * ((float) M_PI) / 180;
 		Matrix4 mat(matrix);
 		mat[0][0] = cos(angle);
 		mat[0][1] = -sin(angle);
@@ -81,7 +79,7 @@ namespace Hyperion {
 	Matrix4 Matrix::Perspective(float degrees, float aspectRatio, float near, float far)
 	{
 		Matrix4 matrix(1.0f);
-		float angle = (float) degrees * PI / 180;
+		float angle = (float) degrees * ((float) M_PI) / 180;
 		float tanAngle = tan(angle / 2);
 		matrix[0][0] = 1 / (aspectRatio * tanAngle);
 		matrix[1][1] = 1 / tanAngle;
