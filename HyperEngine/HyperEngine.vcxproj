@@ -60,6 +60,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -81,6 +82,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -99,12 +101,14 @@
     <ClCompile Include="src\Hyperion\hppch.cpp" />
     <ClCompile Include="src\Hyperion\Core\Application.cpp" />
     <ClCompile Include="vendor\GL\src\glad.c" />
+    <ClCompile Include="src\Hyperion\Rendering\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Hyperion\hppch.h" />
     <ClInclude Include="src\Hyperion\Core\Application.h" />
     <ClInclude Include="src\Hyperion.h" />
     <ClInclude Include="src\Hyperion\Core\EntryPoint.h" />
+    <ClInclude Include="src\Hyperion\Rendering\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

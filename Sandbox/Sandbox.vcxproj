@@ -60,6 +60,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)HyperEngine\src\;$(SolutionDir)HyperEngine\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -77,6 +78,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)HyperEngine\src\;$(SolutionDir)HyperEngine\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
