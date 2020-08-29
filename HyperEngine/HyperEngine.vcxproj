@@ -98,17 +98,37 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Hyperion\Rendering\Shader.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="src\Hyperion\Rendering\Texture2D.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="src\Hyperion\Utilities\Input.cpp" />
     <ClCompile Include="src\Hyperion\hppch.cpp" />
     <ClCompile Include="src\Hyperion\Core\Application.cpp" />
+    <ClCompile Include="src\Hyperion\Utilities\Timestep.cpp" />
     <ClCompile Include="vendor\GL\src\glad.c" />
     <ClCompile Include="src\Hyperion\Rendering\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Hyperion\Rendering\Shader.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Rendering\Texture2D.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\Input.h" />
     <ClInclude Include="src\Hyperion\hppch.h" />
     <ClInclude Include="src\Hyperion\Core\Application.h" />
     <ClInclude Include="src\Hyperion.h" />
     <ClInclude Include="src\Hyperion\Core\EntryPoint.h" />
     <ClInclude Include="src\Hyperion\Rendering\Window.h" />
+    <ClInclude Include="src\Hyperion\Utilities\Timestep.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
