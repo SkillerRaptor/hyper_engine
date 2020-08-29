@@ -98,6 +98,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Hyperion\Utilities\Base.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Matrix.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Matrix2.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Matrix3.cpp" />
@@ -120,11 +121,18 @@
     </ClCompile>
     <ClCompile Include="src\Hyperion\Utilities\Input.cpp" />
     <ClCompile Include="src\Hyperion\Core\Application.cpp" />
+    <ClCompile Include="src\Hyperion\Utilities\Log.cpp" />
+    <ClCompile Include="src\Hyperion\Utilities\Logger.cpp" />
+    <ClCompile Include="src\Hyperion\Utilities\Random.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="src\Hyperion\Utilities\Timestep.cpp" />
     <ClCompile Include="vendor\GL\src\glad.c" />
     <ClCompile Include="src\Hyperion\Rendering\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Hyperion\Utilities\Base.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix2.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix3.h" />
@@ -151,6 +159,12 @@
     <ClInclude Include="src\Hyperion.h" />
     <ClInclude Include="src\Hyperion\Core\EntryPoint.h" />
     <ClInclude Include="src\Hyperion\Rendering\Window.h" />
+    <ClInclude Include="src\Hyperion\Utilities\Log.h" />
+    <ClInclude Include="src\Hyperion\Utilities\Logger.h" />
+    <ClInclude Include="src\Hyperion\Utilities\Random.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="src\Hyperion\Utilities\Timestep.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

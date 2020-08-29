@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+#include "Utilities/Random.h"
 #include "Utilities/Timestep.h"
 
 namespace Hyperion 
@@ -13,6 +14,8 @@ namespace Hyperion
 		m_Instance = this;
 
 		m_Window = new Window("HyperEngine", 1280, 720, false);
+
+		Random::Init();
 	}
 
 	void Application::Shutdown()

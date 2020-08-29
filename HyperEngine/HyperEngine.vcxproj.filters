@@ -72,6 +72,18 @@
     <ClCompile Include="src\Hyperion\Maths\Matrix2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Hyperion\Utilities\Base.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hyperion\Utilities\Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hyperion\Utilities\Log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hyperion\Utilities\Random.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Hyperion.h">
@@ -135,6 +147,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Hyperion\Maths\Matrix2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\Base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\Logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\Log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\Random.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
