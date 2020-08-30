@@ -100,6 +100,18 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Hyperion\ECS\Entity.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="src\Hyperion\ECS\EntitySystem.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="src\Hyperion\ECS\World.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="src\Hyperion\Layers\Layer.cpp" />
     <ClCompile Include="src\Hyperion\Layers\LayerStack.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Matrix.cpp" />
@@ -135,6 +147,21 @@
     <ClCompile Include="src\Hyperion\Rendering\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Hyperion\ECS\ComponentHandle.h" />
+    <ClInclude Include="src\Hyperion\ECS\Components.h" />
+    <ClInclude Include="src\Hyperion\ECS\Entity.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\ECS\EntitySystem.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\ECS\Systems\CharacterControllerSystem.h" />
+    <ClInclude Include="src\Hyperion\ECS\World.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="src\Hyperion\Events\Event.h" />
     <ClInclude Include="src\Hyperion\Events\KeyEvents.h" />
     <ClInclude Include="src\Hyperion\Events\MouseEvents.h" />
