@@ -5,8 +5,7 @@
 
 namespace Hyperion
 {
-
-	struct TransformComponent : Component
+	struct TransformComponent : public Component
 	{
 		Vector3 Position;
 		Vector3 Rotation;
@@ -16,7 +15,7 @@ namespace Hyperion
 			: Position(position), Rotation(rotation), Scale(scale) {}
 	};
 
-	struct CharacterControllerComponent : Component
+	struct CharacterControllerComponent : public Component
 	{
 		float Speed;
 

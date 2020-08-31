@@ -14,10 +14,11 @@ namespace Hyperion
 
 		virtual void Update(World* world, Timestep timeStep) override
 		{
-			world->Each<CharacterControllerComponent, TransformComponent>([&](Entity* entity, CharacterControllerComponent characterController, TransformComponent transform)
+			std::cout << "Update CharacterControllerSystem" << std::endl;
+			world->Each<CharacterControllerComponent, TransformComponent>([&](Entity* entity, CharacterControllerComponent* characterController, TransformComponent* transform)
 				{
-					transform.Position.x += (float)(characterController.Speed * timeStep * Input::GetAxis("Horizontal"));
-					transform.Position.y -= (float)(characterController.Speed * timeStep * Input::GetAxis("Vertical"));
+					transform->Position.x += (float)(characterController->Speed * timeStep * Input::GetAxis("Horizontal"));
+					transform->Position.y -= (float)(characterController->Speed * timeStep * Input::GetAxis("Vertical"));
 				});
 		}
 	};

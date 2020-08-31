@@ -122,6 +122,7 @@
     <ClCompile Include="src\Hyperion\Maths\Vector2.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Vector3.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Vector4.cpp" />
+    <ClCompile Include="src\Hyperion\Memory\PoolAllocator.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\FrameBuffer.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\IndexBuffer.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\VertexArray.cpp" />
@@ -147,7 +148,7 @@
     <ClCompile Include="src\Hyperion\Rendering\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Hyperion\ECS\ComponentHandle.h" />
+    <ClInclude Include="src\Hyperion\ECS\Component.h" />
     <ClInclude Include="src\Hyperion\ECS\Components.h" />
     <ClInclude Include="src\Hyperion\ECS\Entity.h">
       <SubType>
@@ -168,6 +169,9 @@
     <ClInclude Include="src\Hyperion\Events\WindowEvents.h" />
     <ClInclude Include="src\Hyperion\Layers\Layer.h" />
     <ClInclude Include="src\Hyperion\Layers\LayerStack.h" />
+    <ClInclude Include="src\Hyperion\Memory\FreeAllocator.h" />
+    <ClInclude Include="src\Hyperion\Memory\LinearAllocator.h" />
+    <ClInclude Include="src\Hyperion\Memory\PageAllocator.h" />
     <ClInclude Include="src\Hyperion\Memory\PoolAllocator.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix.h" />
     <ClInclude Include="src\Hyperion\Maths\Matrix2.h" />
@@ -177,6 +181,7 @@
     <ClInclude Include="src\Hyperion\Maths\Vector2.h" />
     <ClInclude Include="src\Hyperion\Maths\Vector3.h" />
     <ClInclude Include="src\Hyperion\Maths\Vector4.h" />
+    <ClInclude Include="src\Hyperion\Memory\StackAllocator.h" />
     <ClInclude Include="src\Hyperion\Rendering\Buffers\FrameBuffer.h" />
     <ClInclude Include="src\Hyperion\Rendering\Buffers\IndexBuffer.h" />
     <ClInclude Include="src\Hyperion\Rendering\Buffers\Vertex.h" />
