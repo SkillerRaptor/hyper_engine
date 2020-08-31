@@ -2,13 +2,16 @@
 
 #include <memory>
 
+#include "Utilities/NonCopyable.h"
+#include "Utilities/NonMoveable.h"
+
 namespace Hyperion
 {
 	struct PoolChunk {
 		PoolChunk* NextPoolChunk;
 	};
 
-	class PoolAllocator
+	class PoolAllocator : public NonCopyable, NonMoveable
 	{
 	private:
 		size_t m_Size;
@@ -17,11 +20,6 @@ namespace Hyperion
 
 	public:
 		explicit PoolAllocator(size_t size = 1024);
-
-		PoolAllocator(const PoolAllocator& poolAllocator) = delete;
-		PoolAllocator& operator=(const PoolAllocator& poolAllocator) = delete;
-		PoolAllocator(PoolAllocator&& poolAllocator) = delete;
-		PoolAllocator& operator=(PoolAllocator&& poolAllocator) = delete;
 
 		void* Allocate(size_t size);
 		void Deallocate(void* chunk, size_t size = 0);

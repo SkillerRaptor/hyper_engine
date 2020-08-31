@@ -4,48 +4,49 @@
 
 namespace Hyperion
 {
-	bool Input::IsKeyUp(int keyCode)
+	bool Input::IsKeyUp(KeyCode keyCode)
 	{
 		GLFWwindow* window = Application::Get()->GetWindow()->GetNativeWindow();
 		int state = glfwGetKey(window, keyCode);
 		return state == GLFW_PRESS;
 	}
 
-	bool Input::IsKeyPressed(int keyCode)
+	bool Input::IsKeyPressed(KeyCode keyCode)
 	{
 		GLFWwindow* window = Application::Get()->GetWindow()->GetNativeWindow();
 		int state = glfwGetKey(window, keyCode);
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
 	}
 
-	bool Input::IsKeyDown(int keyCode)
+	bool Input::IsKeyDown(KeyCode keyCode)
 	{
 		GLFWwindow* window = Application::Get()->GetWindow()->GetNativeWindow();
 		int state = glfwGetKey(window, keyCode);
 		return state == GLFW_RELEASE;
 	}
 
-	float Input::GetAxis(const char* axis)
+	float Input::GetAxis(InputAxis axis)
 	{
 		GLFWwindow* window = Application::Get()->GetWindow()->GetNativeWindow();
-		if (axis == "Horizontal")
+		switch (axis)
 		{
-			if (IsKeyPressed(GLFW_KEY_A) || IsKeyPressed(GLFW_KEY_LEFT))
+		case InputAxis::HORIZONTAL:
+			if (IsKeyPressed(KeyCode::A) || IsKeyPressed(KeyCode::Left))
 				return 1;
-			if (IsKeyPressed(GLFW_KEY_D) || IsKeyPressed(GLFW_KEY_RIGHT))
+			if (IsKeyPressed(KeyCode::D) || IsKeyPressed(KeyCode::Right))
 				return -1;
-		}
-		else if (axis == "Vertical")
-		{
-			if (IsKeyPressed(GLFW_KEY_W) || IsKeyPressed(GLFW_KEY_UP))
+			break;
+		case InputAxis::VERTICAL:
+			if (IsKeyPressed(KeyCode::W) || IsKeyPressed(KeyCode::Up))
 				return 1;
-			if (IsKeyPressed(GLFW_KEY_S) || IsKeyPressed(GLFW_KEY_DOWN))
+			if (IsKeyPressed(KeyCode::S) || IsKeyPressed(KeyCode::Down))
 				return -1;
+			break;
 		}
 		return 0;
 	}
 
-	bool Input::IsMouseButtonPressed(int button)
+	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
 		GLFWwindow* window = Application::Get()->GetWindow()->GetNativeWindow();
 		int state = glfwGetKey(window, button);

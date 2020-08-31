@@ -59,7 +59,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\src\Platform\;$(SolutionDir)$(ProjectName)\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -82,7 +82,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\src\Platform\;$(SolutionDir)$(ProjectName)\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -143,6 +143,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="src\Hyperion\Utilities\Timer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="src\Hyperion\Utilities\Timestep.cpp" />
     <ClCompile Include="vendor\GL\src\glad.c" />
     <ClCompile Include="src\Hyperion\Rendering\Window.cpp" />
@@ -200,9 +204,17 @@
     <ClInclude Include="src\Hyperion.h" />
     <ClInclude Include="src\Hyperion\Core\EntryPoint.h" />
     <ClInclude Include="src\Hyperion\Rendering\Window.h" />
+    <ClInclude Include="src\Hyperion\Utilities\KeyCodes.h" />
     <ClInclude Include="src\Hyperion\Utilities\Log.h" />
     <ClInclude Include="src\Hyperion\Utilities\Logger.h" />
+    <ClInclude Include="src\Hyperion\Utilities\MouseCodes.h" />
+    <ClInclude Include="src\Hyperion\Utilities\NonCopyable.h" />
+    <ClInclude Include="src\Hyperion\Utilities\NonMoveable.h" />
     <ClInclude Include="src\Hyperion\Utilities\Random.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\Timer.h">
       <SubType>
       </SubType>
     </ClInclude>

@@ -99,6 +99,9 @@
     <ClCompile Include="src\Hyperion\Memory\PoolAllocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Hyperion\Utilities\Timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Hyperion.h">
@@ -222,6 +225,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Hyperion\Memory\PageAllocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\NonCopyable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\NonMoveable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\MouseCodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\KeyCodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\Timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
