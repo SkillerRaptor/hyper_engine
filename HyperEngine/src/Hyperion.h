@@ -20,6 +20,12 @@
 
 /* Utilities */
 #include "Hyperion/Utilities/Input.h"
+#include "Hyperion/Utilities/KeyCodes.h"
 #include "Hyperion/Utilities/Log.h"
+#include "Hyperion/Utilities/MouseCodes.h"
+#include "Hyperion/Utilities/NonCopyable.h"
+#include "Hyperion/Utilities/NonMoveable.h"
 #include "Hyperion/Utilities/Random.h"
+#include "Hyperion/Utilities/SortingAlgorithms.h"
+#include "Hyperion/Utilities/Timer.h"
 #include "Hyperion/Utilities/Timestep.h"
