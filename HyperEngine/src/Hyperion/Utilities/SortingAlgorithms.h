@@ -1,45 +1,46 @@
 #pragma once
 
+#include <iostream>
 #include <cmath>
 
 namespace Hyperion
 {
 	namespace Sorting
 	{
-		void Swap(int* list, int index)
-		{
-			Swap(list, index, index + 1);
-		}
-
-		void Swap(float* list, int index)
-		{
-			Swap(list, index, index + 1);
-		}
-
-		void Swap(double* list, int index)
-		{
-			Swap(list, index, index + 1);
-		}
-
-		void Swap(int* list, int indexOne, int indexTwo)
+		void Swap(int* list, size_t indexOne, size_t indexTwo)
 		{
 			int temp = list[indexOne];
 			list[indexOne] = list[indexTwo];
 			list[indexTwo] = temp;
 		}
 
-		void Swap(float* list, int indexOne, int indexTwo)
+		void Swap(float* list, size_t indexOne, size_t indexTwo)
 		{
 			float temp = list[indexOne];
 			list[indexOne] = list[indexTwo];
 			list[indexTwo] = temp;
 		}
 
-		void Swap(double* list, int indexOne, int indexTwo)
+		void Swap(double* list, size_t indexOne, size_t indexTwo)
 		{
 			double temp = list[indexOne];
 			list[indexOne] = list[indexTwo];
 			list[indexTwo] = temp;
+		}
+
+		void Swap(int* list, size_t index)
+		{
+			Swap(list, index, index + 1);
+		}
+
+		void Swap(float* list, size_t index)
+		{
+			Swap(list, index, index + 1);
+		}
+
+		void Swap(double* list, size_t index)
+		{
+			Swap(list, index, index + 1);
 		}
 
 		void BubbleSort(int* list, size_t arraySize)
