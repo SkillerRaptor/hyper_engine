@@ -2,8 +2,7 @@
 
 /* Include File for HyperEngine Application / Projects */
 
-/* Memory */
-#include "Hyperion/Memory/PoolAllocator.h"
+/* Entity Component System */
 
 /* Events */
 #include "Hyperion/Events/Event.h"
@@ -13,6 +12,13 @@
 
 /* Layers */
 #include "Hyperion/Layers/Layer.h"
+
+/* Maths */
+#include "Hyperion/Maths/Matrix.h"
+#include "Hyperion/Maths/Vector.h"
+
+/* Memory */
+#include "Hyperion/Memory/PoolAllocator.h"
 
 /* Rendering */
 #include "Hyperion/Rendering/Shader.h"

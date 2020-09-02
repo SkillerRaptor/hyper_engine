@@ -30,7 +30,7 @@ namespace Hyperion
 
 	Entity* World::ConstructEntity()
 	{
-		Entity* entity = new Entity(m_Entities.size());
+		Entity* entity = new Entity((unsigned int) m_Entities.size());
 		m_Entities.push_back(entity);
 		return entity;
 	}
