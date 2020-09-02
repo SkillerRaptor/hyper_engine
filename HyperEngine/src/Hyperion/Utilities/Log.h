@@ -21,6 +21,7 @@ namespace Hyperion
 
 	public:
 		Log();
+		~Log();
 
 		static const std::shared_ptr<Log> GetInstace();
 

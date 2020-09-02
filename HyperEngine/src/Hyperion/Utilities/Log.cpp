@@ -9,6 +9,11 @@ namespace Hyperion
 		Init();
 	}
 
+	Log::~Log()
+	{
+		Shutdown();
+	}
+
 	const std::shared_ptr<Log> Log::GetInstace()
 	{
 		if (m_Instance == nullptr)
