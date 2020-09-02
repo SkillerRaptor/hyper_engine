@@ -57,9 +57,10 @@ namespace Hyperion
 		std::chrono::time_point currentTime = std::chrono::system_clock::now();
 
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
+
+		Texture frameTexture;
 		while (m_Running)
 		{
-			Texture frameTexture;
 			frameTexture.SetWidth(m_Window->GetWindowData().Width);
 			frameTexture.SetHeight(m_Window->GetWindowData().Height);
 			frameTexture.GenerateTexture(nullptr, true);

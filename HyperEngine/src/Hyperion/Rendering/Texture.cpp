@@ -13,6 +13,11 @@ namespace Hyperion
 	{
 	}
 
+	Texture::~Texture()
+	{
+		if(m_TextureID != 0) glDeleteTextures(1, &m_TextureID);
+	}
+
 	bool Texture::LoadTexture(TextureType textureType, const char* filePath, bool alpha)
 	{
 		unsigned char* textureData = stbi_load(filePath, &m_Width, &m_Height, &m_Channels, 0);

@@ -24,6 +24,7 @@ namespace Hyperion
 
 	public:
 		Texture();
+		~Texture();
 
 		bool LoadTexture(TextureType textureType, const char* filePath, bool alpha = false);
 		void GenerateTexture(unsigned char* textureData, bool alpha);
