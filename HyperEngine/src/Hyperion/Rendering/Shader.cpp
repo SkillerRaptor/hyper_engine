@@ -11,13 +11,12 @@
 
 namespace Hyperion
 {
-	Shader::Shader(std::string vertexShader, std::string fragmentShader, std::string geometryShader)
+	Shader::Shader()
 		: m_ShaderId(0), m_UniformCache({})
 	{
-		LoadShader(vertexShader, fragmentShader, geometryShader);
 	}
 
-	bool Shader::LoadShader(std::string vertexShader, std::string fragmentShader, std::string geometryShader)
+	bool Shader::LoadShader(const char* vertexShader, const char* fragmentShader, const char* geometryShader)
 	{
 		std::string vertexTempCode;
 		std::string fragmentTempCode;
@@ -39,7 +38,7 @@ namespace Hyperion
 			vertexTempCode = vertexShaderStream.str();
 			fragmentTempCode = fragmentShaderStream.str();
 
-			if (geometryShader.c_str() != nullptr)
+			if (geometryShader != nullptr)
 			{
 				std::ifstream     geometryShaderFile(geometryShader);
 				std::stringstream geometryShaderStream;
@@ -58,24 +57,24 @@ namespace Hyperion
 		const char* vertexCode = vertexTempCode.c_str();
 		const char* fragmentCode = fragmentTempCode.c_str();
 		const char* geometryCode = geometryTempCode.c_str();
-		
+
 		unsigned int vertexShaderId = 0;
 		unsigned int fragmentShaderId = 0;
 		unsigned int geometryShaderId = 0;
 
-		vertexShader = glCreateShader(GL_VERTEX_SHADER);
+		vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertexShaderId, 1, &vertexCode, nullptr);
 		glCompileShader(vertexShaderId);
 		if (!CheckShaderErrors(vertexShaderId, GL_VERTEX_SHADER)) return false;
 
-		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+		fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
 		glShaderSource(fragmentShaderId, 1, &fragmentCode, nullptr);
 		glCompileShader(fragmentShaderId);
 		if (!CheckShaderErrors(fragmentShaderId, GL_FRAGMENT_SHADER)) return false;
 
 		if (geometryCode != nullptr)
 		{
-			geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+			geometryShaderId = glCreateShader(GL_GEOMETRY_SHADER);
 			glShaderSource(geometryShaderId, 1, &geometryCode, nullptr);
 			glCompileShader(geometryShaderId);
 			if (!CheckShaderErrors(geometryShaderId, GL_GEOMETRY_SHADER)) return false;

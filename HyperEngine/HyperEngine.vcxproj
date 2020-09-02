@@ -127,11 +127,15 @@
     <ClCompile Include="src\Hyperion\Rendering\Buffers\IndexBuffer.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\VertexArray.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\VertexBuffer.cpp" />
+    <ClCompile Include="src\Hyperion\Rendering\ResourceManager.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="src\Hyperion\Rendering\Shader.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="src\Hyperion\Rendering\Texture2D.cpp">
+    <ClCompile Include="src\Hyperion\Rendering\Texture.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -191,11 +195,15 @@
     <ClInclude Include="src\Hyperion\Rendering\Buffers\Vertex.h" />
     <ClInclude Include="src\Hyperion\Rendering\Buffers\VertexArray.h" />
     <ClInclude Include="src\Hyperion\Rendering\Buffers\VertexBuffer.h" />
+    <ClInclude Include="src\Hyperion\Rendering\ResourceManager.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="src\Hyperion\Rendering\Shader.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Rendering\Texture2D.h">
+    <ClInclude Include="src\Hyperion\Rendering\Texture.h">
       <SubType>
       </SubType>
     </ClInclude>

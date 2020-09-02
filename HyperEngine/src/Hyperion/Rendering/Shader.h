@@ -17,8 +17,8 @@ namespace Hyperion
 		std::unordered_map<std::string, unsigned int> m_UniformCache;
 
 	public:
-		Shader(std::string vertexShader, std::string fragmentShader, std::string geometryShader = nullptr);
-		bool LoadShader(std::string vertexShader, std::string fragmentShader, std::string geometryShader);
+		Shader();
+		bool LoadShader(const char* vertexShader, const char* fragmentShader, const char* geometryShader);
 
 		void UseShader();
 

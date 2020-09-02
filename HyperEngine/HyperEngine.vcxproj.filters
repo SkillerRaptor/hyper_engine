@@ -33,9 +33,6 @@
     <ClCompile Include="src\Hyperion\Rendering\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hyperion\Rendering\Texture2D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Hyperion\Rendering\Buffers\FrameBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -102,6 +99,12 @@
     <ClCompile Include="src\Hyperion\Utilities\Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Hyperion\Rendering\Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hyperion\Rendering\ResourceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Hyperion\Core\EntryPoint.h">
@@ -120,9 +123,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Hyperion\Rendering\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Hyperion\Rendering\Texture2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Hyperion\Rendering\Buffers\FrameBuffer.h">
@@ -243,6 +243,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Hyperion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Rendering\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Rendering\ResourceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

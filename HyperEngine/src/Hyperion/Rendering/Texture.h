@@ -12,7 +12,7 @@ namespace Hyperion
 		HEIGHT
 	};
 
-	class Texture2D
+	class Texture
 	{
 	private:
 		unsigned int m_TextureID;
@@ -23,8 +23,7 @@ namespace Hyperion
 		int m_Channels;
 
 	public:
-		Texture2D();
-		~Texture2D();
+		Texture();
 
 		bool LoadTexture(TextureType textureType, const char* filePath, bool alpha = false);
 		void GenerateTexture(unsigned char* textureData, bool alpha);
