@@ -1,4 +1,4 @@
-#include "SandboxLayer.h"
+#include "SandboxLayer.hpp"
 
 SandboxLayer::SandboxLayer()
 	: Layer("Sandbox Layer")

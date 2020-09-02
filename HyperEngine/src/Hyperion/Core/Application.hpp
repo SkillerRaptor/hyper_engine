@@ -2,9 +2,9 @@
 
 #include <queue>
 
-#include "Events/Event.h"
-#include "Layers/LayerStack.h"
-#include "Rendering/Window.h"
+#include "Events/Event.hpp"
+#include "Layers/LayerStack.hpp"
+#include "Rendering/Window.hpp"
 
 namespace Hyperion 
 {

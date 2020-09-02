@@ -1,4 +1,4 @@
-#include "FrameBuffer.h"
+#include "FrameBuffer.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

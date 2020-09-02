@@ -1,4 +1,4 @@
-#include "Shader.h"
+#include "Shader.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -7,7 +7,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "Utilities/Log.h"
+#include "Utilities/Log.hpp"
 
 namespace Hyperion
 {

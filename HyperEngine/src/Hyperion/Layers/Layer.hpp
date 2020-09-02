@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "Events/Event.h"
-#include "Utilities/Timestep.h"
+#include "Events/Event.hpp"
+#include "Utilities/Timestep.hpp"
 
 namespace Hyperion 
 {

@@ -3,10 +3,10 @@
 #include <string>
 #include <unordered_map>
 
-#include "Shader.h"
-#include "Texture.h"
-#include "Utilities/NonCopyable.h"
-#include "Utilities/NonMoveable.h"
+#include "Shader.hpp"
+#include "Texture.hpp"
+#include "Utilities/NonCopyable.hpp"
+#include "Utilities/NonMoveable.hpp"
 
 namespace Hyperion
 {

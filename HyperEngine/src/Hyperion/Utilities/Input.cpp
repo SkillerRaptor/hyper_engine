@@ -1,6 +1,6 @@
-#include "Input.h"
+#include "Input.hpp"
 
-#include "Core/Application.h"
+#include "Core/Application.hpp"
 
 namespace Hyperion
 {

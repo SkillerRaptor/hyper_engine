@@ -3,9 +3,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include "Matrix2.h"
-#include "Matrix3.h"
-#include "Matrix4.h"
+#include "Matrix2.hpp"
+#include "Matrix3.hpp"
+#include "Matrix4.hpp"
 
 namespace Hyperion 
 {

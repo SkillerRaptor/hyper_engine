@@ -1,12 +1,12 @@
-#include "Application.h"
+#include "Application.hpp"
 
 #include <chrono>
 
-#include "Events/WindowEvents.h"
-#include "Rendering/Texture.h"
-#include "Rendering/Buffers/FrameBuffer.h"
-#include "Utilities/Random.h"
-#include "Utilities/Timestep.h"
+#include "Events/WindowEvents.hpp"
+#include "Rendering/Texture.hpp"
+#include "Rendering/Buffers/FrameBuffer.hpp"
+#include "Utilities/Random.hpp"
+#include "Utilities/Timestep.hpp"
 
 namespace Hyperion 
 {

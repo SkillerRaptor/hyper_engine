@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Component.h"
-#include "Maths/Vector.h"
+#include "Component.hpp"
+#include "Maths/Vector.hpp"
 
 namespace Hyperion
 {

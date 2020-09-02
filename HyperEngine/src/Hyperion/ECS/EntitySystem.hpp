@@ -1,7 +1,7 @@
 #pragma once
 
-#include "World.h"
-#include "Utilities/Timestep.h"
+#include "World.hpp"
+#include "Utilities/Timestep.hpp"
 
 namespace Hyperion
 {

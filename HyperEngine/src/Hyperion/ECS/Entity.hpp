@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Component.h"
+#include "Component.hpp"
 
 namespace Hyperion
 {

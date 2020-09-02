@@ -1,10 +1,10 @@
-#include "Window.h"
+#include "Window.hpp"
 
-#include "Utilities/Log.h"
+#include "Utilities/Log.hpp"
 
-#include "Events/KeyEvents.h"
-#include "Events/MouseEvents.h"
-#include "Events/WindowEvents.h"
+#include "Events/KeyEvents.hpp"
+#include "Events/MouseEvents.hpp"
+#include "Events/WindowEvents.hpp"
 
 namespace Hyperion
 {

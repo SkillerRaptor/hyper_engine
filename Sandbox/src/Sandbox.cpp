@@ -1,5 +1,5 @@
-#include <Hyperion/Core/Application.h>
-#include <Hyperion/Core/EntryPoint.h>
+#include <Hyperion/Core/Application.hpp>
+#include <Hyperion/Core/EntryPoint.hpp>
 
 class Sandbox : public Hyperion::Application
 {

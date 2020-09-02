@@ -1,4 +1,4 @@
-#include "Random.h"
+#include "Random.hpp"
 
 namespace Hyperion
 {

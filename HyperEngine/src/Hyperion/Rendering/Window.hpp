@@ -6,7 +6,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "Events/Event.h"
+#include "Events/Event.hpp"
 
 namespace Hyperion
 {

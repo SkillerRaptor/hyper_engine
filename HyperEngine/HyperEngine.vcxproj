@@ -167,85 +167,85 @@
     <ClCompile Include="vendor\ImGui\include\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Hyperion\ECS\Component.h" />
-    <ClInclude Include="src\Hyperion\ECS\Components.h" />
-    <ClInclude Include="src\Hyperion\ECS\Entity.h">
+    <ClInclude Include="src\Hyperion\ECS\Component.hpp" />
+    <ClInclude Include="src\Hyperion\ECS\Components.hpp" />
+    <ClInclude Include="src\Hyperion\ECS\Entity.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\ECS\EntitySystem.h">
+    <ClInclude Include="src\Hyperion\ECS\EntitySystem.hpp">
       <SubType>
       </SubType>
     </ClInclude>
     <ClInclude Include="src\Hyperion\ECS\Systems\CharacterControllerSystem.h" />
-    <ClInclude Include="src\Hyperion\ECS\World.h">
+    <ClInclude Include="src\Hyperion\ECS\World.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Events\Event.h" />
-    <ClInclude Include="src\Hyperion\Events\KeyEvents.h" />
-    <ClInclude Include="src\Hyperion\Events\MouseEvents.h" />
-    <ClInclude Include="src\Hyperion\Events\WindowEvents.h" />
-    <ClInclude Include="src\Hyperion\Layers\ImGuiLayer.h">
+    <ClInclude Include="src\Hyperion\Events\Event.hpp" />
+    <ClInclude Include="src\Hyperion\Events\KeyEvents.hpp" />
+    <ClInclude Include="src\Hyperion\Events\MouseEvents.hpp" />
+    <ClInclude Include="src\Hyperion\Events\WindowEvents.hpp" />
+    <ClInclude Include="src\Hyperion\Layers\ImGuiLayer.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Layers\Layer.h" />
-    <ClInclude Include="src\Hyperion\Layers\LayerStack.h" />
-    <ClInclude Include="src\Hyperion\Memory\FreeAllocator.h" />
-    <ClInclude Include="src\Hyperion\Memory\LinearAllocator.h" />
-    <ClInclude Include="src\Hyperion\Memory\PageAllocator.h" />
-    <ClInclude Include="src\Hyperion\Memory\PoolAllocator.h" />
-    <ClInclude Include="src\Hyperion\Maths\Matrix.h" />
-    <ClInclude Include="src\Hyperion\Maths\Matrix2.h" />
-    <ClInclude Include="src\Hyperion\Maths\Matrix3.h" />
-    <ClInclude Include="src\Hyperion\Maths\Matrix4.h" />
-    <ClInclude Include="src\Hyperion\Maths\Vector.h" />
-    <ClInclude Include="src\Hyperion\Maths\Vector2.h" />
-    <ClInclude Include="src\Hyperion\Maths\Vector3.h" />
-    <ClInclude Include="src\Hyperion\Maths\Vector4.h" />
-    <ClInclude Include="src\Hyperion\Memory\StackAllocator.h" />
-    <ClInclude Include="src\Hyperion\Rendering\Buffers\FrameBuffer.h" />
-    <ClInclude Include="src\Hyperion\Rendering\Buffers\IndexBuffer.h" />
-    <ClInclude Include="src\Hyperion\Rendering\Buffers\Vertex.h" />
-    <ClInclude Include="src\Hyperion\Rendering\Buffers\VertexArray.h" />
-    <ClInclude Include="src\Hyperion\Rendering\Buffers\VertexBuffer.h" />
-    <ClInclude Include="src\Hyperion\Rendering\ResourceManager.h">
+    <ClInclude Include="src\Hyperion\Layers\Layer.hpp" />
+    <ClInclude Include="src\Hyperion\Layers\LayerStack.hpp" />
+    <ClInclude Include="src\Hyperion\Memory\FreeAllocator.hpp" />
+    <ClInclude Include="src\Hyperion\Memory\LinearAllocator.hpp" />
+    <ClInclude Include="src\Hyperion\Memory\PageAllocator.hpp" />
+    <ClInclude Include="src\Hyperion\Memory\PoolAllocator.hpp" />
+    <ClInclude Include="src\Hyperion\Maths\Matrix.hpp" />
+    <ClInclude Include="src\Hyperion\Maths\Matrix2.hpp" />
+    <ClInclude Include="src\Hyperion\Maths\Matrix3.hpp" />
+    <ClInclude Include="src\Hyperion\Maths\Matrix4.hpp" />
+    <ClInclude Include="src\Hyperion\Maths\Vector.hpp" />
+    <ClInclude Include="src\Hyperion\Maths\Vector2.hpp" />
+    <ClInclude Include="src\Hyperion\Maths\Vector3.hpp" />
+    <ClInclude Include="src\Hyperion\Maths\Vector4.hpp" />
+    <ClInclude Include="src\Hyperion\Memory\StackAllocator.hpp" />
+    <ClInclude Include="src\Hyperion\Rendering\Buffers\FrameBuffer.hpp" />
+    <ClInclude Include="src\Hyperion\Rendering\Buffers\IndexBuffer.hpp" />
+    <ClInclude Include="src\Hyperion\Rendering\Buffers\Vertex.hpp" />
+    <ClInclude Include="src\Hyperion\Rendering\Buffers\VertexArray.hpp" />
+    <ClInclude Include="src\Hyperion\Rendering\Buffers\VertexBuffer.hpp" />
+    <ClInclude Include="src\Hyperion\Rendering\ResourceManager.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Rendering\Shader.h">
+    <ClInclude Include="src\Hyperion\Rendering\Shader.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Rendering\Texture.h">
+    <ClInclude Include="src\Hyperion\Rendering\Texture.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Utilities\Input.h" />
-    <ClInclude Include="src\Hyperion\Core\Application.h" />
-    <ClInclude Include="src\Hyperion.h" />
-    <ClInclude Include="src\Hyperion\Core\EntryPoint.h" />
-    <ClInclude Include="src\Hyperion\Rendering\Window.h" />
-    <ClInclude Include="src\Hyperion\Utilities\KeyCodes.h" />
-    <ClInclude Include="src\Hyperion\Utilities\Log.h" />
-    <ClInclude Include="src\Hyperion\Utilities\Logger.h" />
-    <ClInclude Include="src\Hyperion\Utilities\MouseCodes.h" />
-    <ClInclude Include="src\Hyperion\Utilities\NonCopyable.h" />
-    <ClInclude Include="src\Hyperion\Utilities\NonMoveable.h" />
-    <ClInclude Include="src\Hyperion\Utilities\Random.h">
+    <ClInclude Include="src\Hyperion\Utilities\Input.hpp" />
+    <ClInclude Include="src\Hyperion\Core\Application.hpp" />
+    <ClInclude Include="src\Hyperion.hpp" />
+    <ClInclude Include="src\Hyperion\Core\EntryPoint.hpp" />
+    <ClInclude Include="src\Hyperion\Rendering\Window.hpp" />
+    <ClInclude Include="src\Hyperion\Utilities\KeyCodes.hpp" />
+    <ClInclude Include="src\Hyperion\Utilities\Log.hpp" />
+    <ClInclude Include="src\Hyperion\Utilities\Logger.hpp" />
+    <ClInclude Include="src\Hyperion\Utilities\MouseCodes.hpp" />
+    <ClInclude Include="src\Hyperion\Utilities\NonCopyable.hpp" />
+    <ClInclude Include="src\Hyperion\Utilities\NonMoveable.hpp" />
+    <ClInclude Include="src\Hyperion\Utilities\Random.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Utilities\SortingAlgorithms.h">
+    <ClInclude Include="src\Hyperion\Utilities\SortingAlgorithms.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Utilities\Timer.h">
+    <ClInclude Include="src\Hyperion\Utilities\Timer.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Utilities\Timestep.h" />
+    <ClInclude Include="src\Hyperion\Utilities\Timestep.hpp" />
     <ClInclude Include="vendor\Assimp\include\assimp\aabb.h" />
     <ClInclude Include="vendor\Assimp\include\assimp\ai_assert.h" />
     <ClInclude Include="vendor\Assimp\include\assimp\anim.h" />

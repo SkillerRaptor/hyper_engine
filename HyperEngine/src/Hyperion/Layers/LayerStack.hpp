@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include "Layer.h"
-#include "ImGuiLayer.h"
+#include "Layer.hpp"
+#include "ImGuiLayer.hpp"
 
 namespace Hyperion 
 {

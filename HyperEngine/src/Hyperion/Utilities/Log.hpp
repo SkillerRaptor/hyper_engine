@@ -3,7 +3,7 @@
 #include <thread>
 #include <Windows.h>
 
-#include "Logger.h"
+#include "Logger.hpp"
 
 namespace Hyperion 
 {

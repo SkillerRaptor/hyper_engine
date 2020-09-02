@@ -4,10 +4,10 @@
 #include <type_traits>
 #include <unordered_map>
 
-#include "Component.h"
-#include "Entity.h"
+#include "Component.hpp"
+#include "Entity.hpp"
 //#include "EntitySystem.h"
-#include "Utilities/Timestep.h"
+#include "Utilities/Timestep.hpp"
 
 namespace Hyperion
 {

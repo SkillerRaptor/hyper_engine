@@ -1,4 +1,4 @@
-#include "Matrix2.h"
+#include "Matrix2.hpp"
 
 namespace Hyperion
 {

@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "Utilities/NonCopyable.h"
-#include "Utilities/NonMoveable.h"
+#include "Utilities/NonCopyable.hpp"
+#include "Utilities/NonMoveable.hpp"
 
 namespace Hyperion
 {

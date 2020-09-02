@@ -1,4 +1,4 @@
-#include "EntitySystem.h"
+#include "EntitySystem.hpp"
 
 namespace Hyperion
 {

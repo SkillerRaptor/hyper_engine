@@ -1,6 +1,6 @@
-#include "ResourceManager.h"
+#include "ResourceManager.hpp"
 
-#include "Utilities/Log.h"
+#include "Utilities/Log.hpp"
 
 namespace Hyperion
 {

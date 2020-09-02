@@ -47,9 +47,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\SandboxLayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="vendor\Assimp\include\assimp\Compiler\poppack1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1164,6 +1161,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vendor\StbImage\include\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SandboxLayer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Layer.h"
-#include "Utilities/Timestep.h"
+#include "Layer.hpp"
+#include "Utilities/Timestep.hpp"
 
 namespace Hyperion
 {

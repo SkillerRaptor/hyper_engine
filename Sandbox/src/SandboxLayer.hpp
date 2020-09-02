@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Hyperion.h>
+#include <Hyperion.hpp>
 
 using namespace Hyperion;
 
