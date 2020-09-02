@@ -51,6 +51,13 @@ namespace Hyperion
             std::exit(-1);
         }
 
+        HP_CORE_INFO("");
+        HP_CORE_INFO("OpenGL Info:");
+        HP_CORE_INFO("  Vendor: %", glGetString(GL_VENDOR));
+        HP_CORE_INFO("  Renderer: %", glGetString(GL_RENDERER));
+        HP_CORE_INFO("  Version: %", glGetString(GL_VERSION));
+        HP_CORE_INFO("");
+
         glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
             {
                 WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);

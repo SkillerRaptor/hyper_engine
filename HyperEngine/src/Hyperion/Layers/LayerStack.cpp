@@ -4,10 +4,14 @@ namespace Hyperion
 {
 	LayerStack::LayerStack()
 	{
+		m_ImGuiLayer = new ImGuiLayer();
+		m_ImGuiLayer->OnAttach();
 	}
 
 	LayerStack::~LayerStack()
 	{
+		m_ImGuiLayer->OnDetach();
+		delete m_ImGuiLayer;
 	}
 
 	void LayerStack::PushLayer(Layer* layer)
@@ -33,5 +37,15 @@ namespace Hyperion
 	void LayerStack::PopLayer()
 	{
 		m_Layers.pop_back();
+	}
+
+	ImGuiLayer* LayerStack::GetImGuiLayer() const
+	{
+		return m_ImGuiLayer;
+	}
+
+	const std::vector<Layer*> LayerStack::GetLayers() const
+	{
+		return m_Layers;
 	}
 }

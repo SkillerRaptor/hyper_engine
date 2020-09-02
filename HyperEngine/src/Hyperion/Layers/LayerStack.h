@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Layer.h"
+#include "ImGuiLayer.h"
 
 namespace Hyperion 
 {
@@ -11,6 +12,7 @@ namespace Hyperion
 	{
 	private:
 		std::vector<Layer*> m_Layers;
+		ImGuiLayer* m_ImGuiLayer;
 
 	public:
 		LayerStack();
@@ -22,7 +24,8 @@ namespace Hyperion
 		void PopLayer(std::string layerName);
 		void PopLayer();
 
-		const std::vector<Layer*> GetLayers() const { return m_Layers; }
+		ImGuiLayer* GetImGuiLayer() const;
+		const std::vector<Layer*> GetLayers() const;
 	};
 }
 

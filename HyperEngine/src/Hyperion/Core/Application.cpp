@@ -3,6 +3,8 @@
 #include <chrono>
 
 #include "Events/WindowEvents.h"
+#include "Rendering/Texture.h"
+#include "Rendering/Buffers/FrameBuffer.h"
 #include "Utilities/Random.h"
 #include "Utilities/Timestep.h"
 
@@ -23,6 +25,14 @@ namespace Hyperion
 	void Application::Shutdown()
 	{
 		m_Running = false;
+
+		for (Layer* layer : m_LayerStack->GetLayers())
+		{
+			layer->OnDetach();
+			m_LayerStack->PopLayer();
+		}
+
+		delete m_LayerStack;
 		delete m_Window;
 	}
 
@@ -49,6 +59,14 @@ namespace Hyperion
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 		while (m_Running)
 		{
+			Texture frameTexture;
+			frameTexture.SetWidth(m_Window->GetWindowData().Width);
+			frameTexture.SetHeight(m_Window->GetWindowData().Height);
+			frameTexture.GenerateTexture(nullptr, true);
+
+			FrameBuffer frameBuffer;
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, frameTexture.GetTextureId(), 0);
+
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			loops = 0;
 			while (std::chrono::system_clock::now() > currentTime && loops < ticksPerFrame)
@@ -79,11 +97,20 @@ namespace Hyperion
 				m_EventBus.pop();
 			}
 
+			if (!m_Running) break;
+
 			for (Layer* layer : m_LayerStack->GetLayers())
 			{
 				layer->OnUpdate(timeStep);
 				layer->OnRender();
 			}
+
+			frameBuffer.Unbind();
+
+			if (!m_Running) break;
+
+			m_LayerStack->GetImGuiLayer()->OnUpdate(timeStep);
+			m_LayerStack->GetImGuiLayer()->OnRender(frameTexture.GetTextureId());
 
 			m_Window->OnUpdate();
 		}

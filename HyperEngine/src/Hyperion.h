@@ -22,7 +22,7 @@
 
 /* Rendering */
 #include "Hyperion/Rendering/Shader.h"
-#include "Hyperion/Rendering/Texture2D.h"
+#include "Hyperion/Rendering/Texture.h"
 
 /* Utilities */
 #include "Hyperion/Utilities/Input.h"
