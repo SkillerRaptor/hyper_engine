@@ -42,7 +42,7 @@ namespace Hyperion
 		return vec;
 	}
 
-	Vector4 Vector4::operator+(Vector4 vector) const
+	Vector4 Vector4::operator+(const Vector4& vector) const
 	{
 		Vector4 vec;
 		vec.x = x + vector.x;
@@ -62,7 +62,7 @@ namespace Hyperion
 		return vec;
 	}
 
-	Vector4 Vector4::operator-(Vector4 vector) const
+	Vector4 Vector4::operator-(const Vector4& vector) const
 	{
 		Vector4 vec;
 		vec.x = x - vector.x;
@@ -82,7 +82,7 @@ namespace Hyperion
 		return vec;
 	}
 
-	Vector4 Vector4::operator*(Vector4 vector) const
+	Vector4 Vector4::operator*(const Vector4& vector) const
 	{
 		Vector4 vec;
 		vec.x = x * vector.x;
@@ -102,7 +102,7 @@ namespace Hyperion
 		return vec;
 	}
 
-	Vector4 Vector4::operator/(Vector4 vector) const
+	Vector4 Vector4::operator/(const Vector4& vector) const
 	{
 		Vector4 vec;
 		vec.x = x / vector.x;
@@ -121,7 +121,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Vector4& Vector4::operator+=(Vector4 vector)
+	Vector4& Vector4::operator+=(const Vector4& vector)
 	{
 		x += vector.x;
 		y += vector.y;
@@ -139,7 +139,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Vector4& Vector4::operator-=(Vector4 vector)
+	Vector4& Vector4::operator-=(const Vector4& vector)
 	{
 		x -= vector.x;
 		y -= vector.y;
@@ -157,7 +157,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Vector4& Vector4::operator*=(Vector4 vector)
+	Vector4& Vector4::operator*=(const Vector4& vector)
 	{
 		x *= vector.x;
 		y *= vector.y;
@@ -175,12 +175,22 @@ namespace Hyperion
 		return *this;
 	}
 
-	Vector4& Vector4::operator/=(Vector4 vector)
+	Vector4& Vector4::operator/=(const Vector4& vector)
 	{
 		x /= vector.x;
 		y /= vector.y;
 		z /= vector.z;
 		w /= vector.w;
 		return *this;
+	}
+
+	bool Vector4::operator==(const Vector4& vector)
+	{
+		return (x == vector.x && y == vector.y && z == vector.z && w == vector.w);
+	}
+
+	bool Vector4::operator!=(const Vector4& vector)
+	{
+		return (x != vector.x && y != vector.y && z != vector.z && w != vector.w);
 	}
 }

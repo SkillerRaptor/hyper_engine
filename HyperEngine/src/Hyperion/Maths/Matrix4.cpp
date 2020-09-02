@@ -44,7 +44,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix4 Matrix4::operator+(Matrix4 matrix4) const
+	Matrix4 Matrix4::operator+(const Matrix4& matrix4) const
 	{
 		Matrix4 mat;
 		for (int i = 0; i < 4; i++)
@@ -53,7 +53,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix4 Matrix4::operator+=(Matrix4 matrix4)
+	Matrix4 Matrix4::operator+=(const Matrix4& matrix4)
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
@@ -61,7 +61,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix4 Matrix4::operator+(Vector4& vector) const
+	Matrix4 Matrix4::operator+(const Vector4& vector) const
 	{
 		Matrix4 mat;
 		for (int i = 0; i < 4; i++)
@@ -74,7 +74,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix4 Matrix4::operator+=(Vector4& vector)
+	Matrix4 Matrix4::operator+=(const Vector4& vector)
 	{
 		for (int i = 0; i < 4; i++)
 		{
@@ -105,7 +105,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix4 Matrix4::operator-(Matrix4 matrix4) const
+	Matrix4 Matrix4::operator-(const Matrix4& matrix4) const
 	{
 		Matrix4 mat;
 		for (int i = 0; i < 4; i++)
@@ -114,7 +114,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix4 Matrix4::operator-=(Matrix4 matrix4)
+	Matrix4 Matrix4::operator-=(const Matrix4& matrix4)
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
@@ -122,7 +122,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix4 Matrix4::operator-(Vector4& vector) const
+	Matrix4 Matrix4::operator-(const Vector4& vector) const
 	{
 		Matrix4 mat;
 		for (int i = 0; i < 4; i++)
@@ -135,7 +135,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix4 Matrix4::operator-=(Vector4& vector)
+	Matrix4 Matrix4::operator-=(const Vector4& vector)
 	{
 		for (int i = 0; i < 4; i++)
 		{
@@ -166,7 +166,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix4 Matrix4::operator*(Matrix4 matrix4) const
+	Matrix4 Matrix4::operator*(const Matrix4& matrix4) const
 	{
 		Matrix4 mat;
 		for (int i = 0; i < 4; i++)
@@ -175,7 +175,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix4 Matrix4::operator*=(Matrix4 matrix4)
+	Matrix4 Matrix4::operator*=(const Matrix4& matrix4)
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
@@ -183,7 +183,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix4 Matrix4::operator*(Vector4& vector) const
+	Matrix4 Matrix4::operator*(const Vector4& vector) const
 	{
 		Matrix4 mat;
 		for (int i = 0; i < 4; i++)
@@ -196,7 +196,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix4 Matrix4::operator*=(Vector4& vector)
+	Matrix4 Matrix4::operator*=(const Vector4& vector)
 	{
 		for (int i = 0; i < 4; i++)
 		{
@@ -227,7 +227,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix4 Matrix4::operator/(Matrix4 matrix4) const
+	Matrix4 Matrix4::operator/(const Matrix4& matrix4) const
 	{
 		Matrix4 mat;
 		for (int i = 0; i < 4; i++)
@@ -236,7 +236,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix4 Matrix4::operator/=(Matrix4 matrix4)
+	Matrix4 Matrix4::operator/=(const Matrix4& matrix4)
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
@@ -244,7 +244,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix4 Matrix4::operator/(Vector4& vector) const
+	Matrix4 Matrix4::operator/(const Vector4& vector) const
 	{
 		Matrix4 mat;
 		for (int i = 0; i < 4; i++)
@@ -257,7 +257,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix4 Matrix4::operator/=(Vector4& vector)
+	Matrix4 Matrix4::operator/=(const Vector4& vector)
 	{
 		for (int i = 0; i < 4; i++)
 		{
@@ -267,5 +267,23 @@ namespace Hyperion
 			matrix[i][3] /= vector.w;
 		}
 		return *this;
+	}
+
+	bool Matrix4::operator==(const Matrix4& matrix4)
+	{
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				if (matrix[i][j] != matrix4.matrix[i][j])
+					return false;
+		return true;
+	}
+
+	bool Matrix4::operator!=(const Matrix4& matrix4)
+	{
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				if (matrix[i][j] != matrix4.matrix[i][j])
+					return true;
+		return false;
 	}
 }

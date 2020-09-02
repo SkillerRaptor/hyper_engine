@@ -19,31 +19,34 @@ namespace Hyperion
 
 		Matrix3 operator+(float value) const;
 		Matrix3 operator+=(float value);
-		Matrix3 operator+(Matrix3 matrix3) const;
-		Matrix3 operator+=(Matrix3 matrix3);
-		Matrix3 operator+(Vector3& vector) const;
-		Matrix3 operator+=(Vector3& vector);
+		Matrix3 operator+(const Matrix3& matrix3) const;
+		Matrix3 operator+=(const Matrix3& matrix3);
+		Matrix3 operator+(const Vector3& vector) const;
+		Matrix3 operator+=(const Vector3& vector);
 
 		Matrix3 operator-(float value) const;
 		Matrix3 operator-=(float value);
-		Matrix3 operator-(Matrix3 matrix3) const;
-		Matrix3 operator-=(Matrix3 matrix3);
-		Matrix3 operator-(Vector3& vector) const;
-		Matrix3 operator-=(Vector3& vector);
+		Matrix3 operator-(const Matrix3& matrix3) const;
+		Matrix3 operator-=(const Matrix3& matrix3);
+		Matrix3 operator-(const Vector3& vector) const;
+		Matrix3 operator-=(const Vector3& vector);
 
 		Matrix3 operator*(float value) const;
 		Matrix3 operator*=(float value);
-		Matrix3 operator*(Matrix3 matrix3) const;
-		Matrix3 operator*=(Matrix3 matrix3);
-		Matrix3 operator*(Vector3& vector) const;
-		Matrix3 operator*=(Vector3& vector);
+		Matrix3 operator*(const Matrix3& matrix3) const;
+		Matrix3 operator*=(const Matrix3& matrix3);
+		Matrix3 operator*(const Vector3& vector) const;
+		Matrix3 operator*=(const Vector3& vector);
 
 		Matrix3 operator/(float value) const;
 		Matrix3 operator/=(float value);
-		Matrix3 operator/(Matrix3 matrix3) const;
-		Matrix3 operator/=(Matrix3 matrix3);
-		Matrix3 operator/(Vector3& vector) const;
-		Matrix3 operator/=(Vector3& vector);
+		Matrix3 operator/(const Matrix3& matrix3) const;
+		Matrix3 operator/=(const Matrix3& matrix3);
+		Matrix3 operator/(const Vector3& vector) const;
+		Matrix3 operator/=(const Vector3& vector);
+
+		bool operator==(const Matrix3& matrix4);
+		bool operator!=(const Matrix3& matrix4);
 
 		float* operator[](size_t i) { return matrix[i]; }
 

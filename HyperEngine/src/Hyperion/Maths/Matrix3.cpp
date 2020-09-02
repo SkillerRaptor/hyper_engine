@@ -44,7 +44,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix3 Matrix3::operator+(Matrix3 matrix3) const
+	Matrix3 Matrix3::operator+(const Matrix3& matrix3) const
 	{
 		Matrix3 mat;
 		for (int i = 0; i < 3; i++)
@@ -53,7 +53,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix3 Matrix3::operator+=(Matrix3 matrix3)
+	Matrix3 Matrix3::operator+=(const Matrix3& matrix3)
 	{
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 3; j++)
@@ -61,7 +61,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix3 Matrix3::operator+(Vector3& vector) const
+	Matrix3 Matrix3::operator+(const Vector3& vector) const
 	{
 		Matrix3 mat;
 		for (int i = 0; i < 3; i++)
@@ -73,7 +73,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix3 Matrix3::operator+=(Vector3& vector)
+	Matrix3 Matrix3::operator+=(const Vector3& vector)
 	{
 		for (int i = 0; i < 3; i++)
 		{
@@ -103,7 +103,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix3 Matrix3::operator-(Matrix3 matrix3) const
+	Matrix3 Matrix3::operator-(const Matrix3& matrix3) const
 	{
 		Matrix3 mat;
 		for (int i = 0; i < 3; i++)
@@ -112,7 +112,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix3 Matrix3::operator-=(Matrix3 matrix3)
+	Matrix3 Matrix3::operator-=(const Matrix3& matrix3)
 	{
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 3; j++)
@@ -120,7 +120,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix3 Matrix3::operator-(Vector3& vector) const
+	Matrix3 Matrix3::operator-(const Vector3& vector) const
 	{
 		Matrix3 mat;
 		for (int i = 0; i < 3; i++)
@@ -132,7 +132,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix3 Matrix3::operator-=(Vector3& vector)
+	Matrix3 Matrix3::operator-=(const Vector3& vector)
 	{
 		for (int i = 0; i < 3; i++)
 		{
@@ -162,7 +162,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix3 Matrix3::operator*(Matrix3 matrix3) const
+	Matrix3 Matrix3::operator*(const Matrix3& matrix3) const
 	{
 		Matrix3 mat;
 		for (int i = 0; i < 3; i++)
@@ -171,7 +171,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix3 Matrix3::operator*=(Matrix3 matrix3)
+	Matrix3 Matrix3::operator*=(const Matrix3& matrix3)
 	{
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 3; j++)
@@ -179,7 +179,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix3 Matrix3::operator*(Vector3& vector) const
+	Matrix3 Matrix3::operator*(const Vector3& vector) const
 	{
 		Matrix3 mat;
 		for (int i = 0; i < 3; i++)
@@ -191,7 +191,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix3 Matrix3::operator*=(Vector3& vector)
+	Matrix3 Matrix3::operator*=(const Vector3& vector)
 	{
 		for (int i = 0; i < 3; i++)
 		{
@@ -221,7 +221,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix3 Matrix3::operator/(Matrix3 matrix3) const
+	Matrix3 Matrix3::operator/(const Matrix3& matrix3) const
 	{
 		Matrix3 mat;
 		for (int i = 0; i < 3; i++)
@@ -230,7 +230,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix3 Matrix3::operator/=(Matrix3 matrix3)
+	Matrix3 Matrix3::operator/=(const Matrix3& matrix3)
 	{
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 3; j++)
@@ -238,7 +238,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix3 Matrix3::operator/(Vector3& vector) const
+	Matrix3 Matrix3::operator/(const Vector3& vector) const
 	{
 		Matrix3 mat;
 		for (int i = 0; i < 3; i++)
@@ -250,7 +250,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix3 Matrix3::operator/=(Vector3& vector)
+	Matrix3 Matrix3::operator/=(const Vector3& vector)
 	{
 		for (int i = 0; i < 3; i++)
 		{
@@ -259,5 +259,23 @@ namespace Hyperion
 			matrix[i][2] /= vector.z;
 		}
 		return *this;
+	}
+
+	bool Matrix3::operator==(const Matrix3& matrix3)
+	{
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++)
+				if (matrix[i][j] != matrix3.matrix[i][j])
+					return false;
+		return true;
+	}
+
+	bool Matrix3::operator!=(const Matrix3& matrix3)
+	{
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++)
+				if (matrix[i][j] != matrix3.matrix[i][j])
+					return true;
+		return false;
 	}
 }

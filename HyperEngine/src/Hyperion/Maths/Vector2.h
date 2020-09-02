@@ -21,28 +21,31 @@ namespace Hyperion
 		Vector2 operator-() const;
 
 		Vector2 operator+(float value) const;
-		Vector2 operator+(Vector2 vector) const;
+		Vector2 operator+(const Vector2& vector) const;
 
 		Vector2 operator-(float value) const;
-		Vector2 operator-(Vector2 vector) const;
+		Vector2 operator-(const Vector2& vector) const;
 
 		Vector2 operator*(float value) const;
-		Vector2 operator*(Vector2 vector) const;
+		Vector2 operator*(const Vector2& vector) const;
 
 		Vector2 operator/(float value) const;
-		Vector2 operator/(Vector2 vector) const;
+		Vector2 operator/(const Vector2& vector) const;
 
 		Vector2& operator+=(float value);
-		Vector2& operator+=(Vector2 vector);
+		Vector2& operator+=(const Vector2& vector);
 
 		Vector2& operator-=(float value);
-		Vector2& operator-=(Vector2 vector);
+		Vector2& operator-=(const Vector2& vector);
 
 		Vector2& operator*=(float value);
-		Vector2& operator*=(Vector2 vector);
+		Vector2& operator*=(const Vector2& vector);
 
 		Vector2& operator/=(float value);
-		Vector2& operator/=(Vector2 vector);
+		Vector2& operator/=(const Vector2& vector);
+
+		bool operator==(const Vector2& vector);
+		bool operator!=(const Vector2& vector);
 
 		friend std::ostream& operator<<(std::ostream& os, const Vector2& vector);
 	};

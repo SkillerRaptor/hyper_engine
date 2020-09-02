@@ -44,7 +44,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix2 Matrix2::operator+(Matrix2 matrix2) const
+	Matrix2 Matrix2::operator+(const Matrix2& matrix2) const
 	{
 		Matrix2 mat;
 		for (int i = 0; i < 2; i++)
@@ -53,7 +53,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix2 Matrix2::operator+=(Matrix2 matrix2)
+	Matrix2 Matrix2::operator+=(const Matrix2& matrix2)
 	{
 		for (int i = 0; i < 2; i++)
 			for (int j = 0; j < 2; j++)
@@ -61,7 +61,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix2 Matrix2::operator+(Vector2& vector) const
+	Matrix2 Matrix2::operator+(const Vector2& vector) const
 	{
 		Matrix2 mat;
 		for (int i = 0; i < 2; i++)
@@ -72,7 +72,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix2 Matrix2::operator+=(Vector2& vector)
+	Matrix2 Matrix2::operator+=(const Vector2& vector)
 	{
 		for (int i = 0; i < 2; i++)
 		{
@@ -101,7 +101,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix2 Matrix2::operator-(Matrix2 matrix2) const
+	Matrix2 Matrix2::operator-(const Matrix2& matrix2) const
 	{
 		Matrix2 mat;
 		for (int i = 0; i < 2; i++)
@@ -110,7 +110,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix2 Matrix2::operator-=(Matrix2 matrix2)
+	Matrix2 Matrix2::operator-=(const Matrix2& matrix2)
 	{
 		for (int i = 0; i < 2; i++)
 			for (int j = 0; j < 2; j++)
@@ -118,7 +118,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix2 Matrix2::operator-(Vector2& vector) const
+	Matrix2 Matrix2::operator-(const Vector2& vector) const
 	{
 		Matrix2 mat;
 		for (int i = 0; i < 2; i++)
@@ -129,7 +129,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix2 Matrix2::operator-=(Vector2& vector)
+	Matrix2 Matrix2::operator-=(const Vector2& vector)
 	{
 		for (int i = 0; i < 2; i++)
 		{
@@ -158,7 +158,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix2 Matrix2::operator*(Matrix2 matrix2) const
+	Matrix2 Matrix2::operator*(const Matrix2& matrix2) const
 	{
 		Matrix2 mat;
 		for (int i = 0; i < 2; i++)
@@ -167,7 +167,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix2 Matrix2::operator*=(Matrix2 matrix2)
+	Matrix2 Matrix2::operator*=(const Matrix2& matrix2)
 	{
 		for (int i = 0; i < 2; i++)
 			for (int j = 0; j < 2; j++)
@@ -175,7 +175,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix2 Matrix2::operator*(Vector2& vector) const
+	Matrix2 Matrix2::operator*(const Vector2& vector) const
 	{
 		Matrix2 mat;
 		for (int i = 0; i < 2; i++)
@@ -186,7 +186,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix2 Matrix2::operator*=(Vector2& vector)
+	Matrix2 Matrix2::operator*=(const Vector2& vector)
 	{
 		for (int i = 0; i < 2; i++)
 		{
@@ -215,7 +215,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix2 Matrix2::operator/(Matrix2 matrix2) const
+	Matrix2 Matrix2::operator/(const Matrix2& matrix2) const
 	{
 		Matrix2 mat;
 		for (int i = 0; i < 2; i++)
@@ -224,7 +224,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix2 Matrix2::operator/=(Matrix2 matrix2)
+	Matrix2 Matrix2::operator/=(const Matrix2& matrix2)
 	{
 		for (int i = 0; i < 2; i++)
 			for (int j = 0; j < 2; j++)
@@ -232,7 +232,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Matrix2 Matrix2::operator/(Vector2& vector) const
+	Matrix2 Matrix2::operator/(const Vector2& vector) const
 	{
 		Matrix2 mat;
 		for (int i = 0; i < 2; i++)
@@ -243,7 +243,7 @@ namespace Hyperion
 		return mat;
 	}
 
-	Matrix2 Matrix2::operator/=(Vector2& vector)
+	Matrix2 Matrix2::operator/=(const Vector2& vector)
 	{
 		for (int i = 0; i < 2; i++)
 		{
@@ -251,5 +251,23 @@ namespace Hyperion
 			matrix[i][1] /= vector.y;
 		}
 		return *this;
+	}
+
+	bool Matrix2::operator==(const Matrix2& matrix2)
+	{
+		for (int i = 0; i < 2; i++)
+			for (int j = 0; j < 2; j++)
+				if (matrix[i][j] != matrix2.matrix[i][j])
+					return false;
+		return true;
+	}
+
+	bool Matrix2::operator!=(const Matrix2& matrix2)
+	{
+		for (int i = 0; i < 2; i++)
+			for (int j = 0; j < 2; j++)
+				if (matrix[i][j] != matrix2.matrix[i][j])
+					return true;
+		return false;
 	}
 }

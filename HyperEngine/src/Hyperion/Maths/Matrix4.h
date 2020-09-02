@@ -19,31 +19,34 @@ namespace Hyperion
 
 		Matrix4 operator+(float value) const;
 		Matrix4 operator+=(float value);
-		Matrix4 operator+(Matrix4 matrix4) const;
-		Matrix4 operator+=(Matrix4 matrix4);
-		Matrix4 operator+(Vector4& vector) const;
-		Matrix4 operator+=(Vector4& vector);
+		Matrix4 operator+(const Matrix4& matrix4) const;
+		Matrix4 operator+=(const Matrix4& matrix4);
+		Matrix4 operator+(const Vector4& vector) const;
+		Matrix4 operator+=(const Vector4& vector);
 
 		Matrix4 operator-(float value) const;
 		Matrix4 operator-=(float value);
-		Matrix4 operator-(Matrix4 matrix4) const;
-		Matrix4 operator-=(Matrix4 matrix4);
-		Matrix4 operator-(Vector4& vector) const;
-		Matrix4 operator-=(Vector4& vector);
+		Matrix4 operator-(const Matrix4& matrix4) const;
+		Matrix4 operator-=(const Matrix4& matrix4);
+		Matrix4 operator-(const Vector4& vector) const;
+		Matrix4 operator-=(const Vector4& vector);
 
         Matrix4 operator*(float value) const;
 		Matrix4 operator*=(float value);
-		Matrix4 operator*(Matrix4 matrix4) const;
-		Matrix4 operator*=(Matrix4 matrix4);
-		Matrix4 operator*(Vector4& vector) const;
-		Matrix4 operator*=(Vector4& vector);
+		Matrix4 operator*(const Matrix4& matrix4) const;
+		Matrix4 operator*=(const Matrix4& matrix4);
+		Matrix4 operator*(const Vector4& vector) const;
+		Matrix4 operator*=(const Vector4& vector);
 
 		Matrix4 operator/(float value) const;
 		Matrix4 operator/=(float value);
-		Matrix4 operator/(Matrix4 matrix4) const;
-		Matrix4 operator/=(Matrix4 matrix4);
-		Matrix4 operator/(Vector4& vector) const;
-		Matrix4 operator/=(Vector4& vector);
+		Matrix4 operator/(const Matrix4& matrix4) const;
+		Matrix4 operator/=(const Matrix4& matrix4);
+		Matrix4 operator/(const Vector4& vector) const;
+		Matrix4 operator/=(const Vector4& vector);
+
+		bool operator==(const Matrix4& matrix4);
+		bool operator!=(const Matrix4& matrix4);
 
 		float* operator[](size_t i) { return matrix[i]; }
 

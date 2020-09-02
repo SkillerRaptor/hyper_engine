@@ -38,7 +38,7 @@ namespace Hyperion
 		return vec;
 	}
 
-	Vector2 Vector2::operator+(Vector2 vector) const
+	Vector2 Vector2::operator+(const Vector2& vector) const
 	{
 		Vector2 vec;
 		vec.x = x + vector.x;
@@ -54,7 +54,7 @@ namespace Hyperion
 		return vec;
 	}
 
-	Vector2 Vector2::operator-(Vector2 vector) const
+	Vector2 Vector2::operator-(const Vector2& vector) const
 	{
 		Vector2 vec;
 		vec.x = x - vector.x;
@@ -70,7 +70,7 @@ namespace Hyperion
 		return vec;
 	}
 
-	Vector2 Vector2::operator*(Vector2 vector) const
+	Vector2 Vector2::operator*(const Vector2& vector) const
 	{
 		Vector2 vec;
 		vec.x = x * vector.x;
@@ -86,7 +86,7 @@ namespace Hyperion
 		return vec;
 	}
 
-	Vector2 Vector2::operator/(Vector2 vector) const
+	Vector2 Vector2::operator/(const Vector2& vector) const
 	{
 		Vector2 vec;
 		vec.x = x / vector.x;
@@ -101,7 +101,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Vector2& Vector2::operator+=(Vector2 vector)
+	Vector2& Vector2::operator+=(const Vector2& vector)
 	{
 		x += vector.x;
 		y += vector.y;
@@ -115,7 +115,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Vector2& Vector2::operator-=(Vector2 vector)
+	Vector2& Vector2::operator-=(const Vector2& vector)
 	{
 		x -= vector.x;
 		y -= vector.y;
@@ -129,7 +129,7 @@ namespace Hyperion
 		return *this;
 	}
 
-	Vector2& Vector2::operator*=(Vector2 vector)
+	Vector2& Vector2::operator*=(const Vector2& vector)
 	{
 		x *= vector.x;
 		y *= vector.y;
@@ -143,10 +143,20 @@ namespace Hyperion
 		return *this;
 	}
 
-	Vector2& Vector2::operator/=(Vector2 vector)
+	Vector2& Vector2::operator/=(const Vector2& vector)
 	{
 		x /= vector.x;
 		y /= vector.y;
 		return *this;
+	}
+
+	bool Vector2::operator==(const Vector2& vector)
+	{
+		return (x == vector.x && y == vector.y);
+	}
+
+	bool Vector2::operator!=(const Vector2& vector)
+	{
+		return (x != vector.x && y != vector.y);
 	}
 }
