@@ -131,9 +131,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Hyperion\ECS\Systems\CharacterControllerSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="vendor\Assimp\include\assimp\Compiler\poppack1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1392,6 +1389,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Hyperion\Utilities\Input.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\ECS\Systems\CharacterControllerSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

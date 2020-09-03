@@ -177,7 +177,7 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\ECS\Systems\CharacterControllerSystem.h" />
+    <ClInclude Include="src\Hyperion\ECS\Systems\CharacterControllerSystem.hpp" />
     <ClInclude Include="src\Hyperion\ECS\World.hpp">
       <SubType>
       </SubType>
