@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <queue>
 
 #include "Shader.hpp"
 #include "Texture.hpp"
@@ -13,20 +14,25 @@ namespace Hyperion
 	class ResourceManager : public NonCopyable, NonMoveable 
 	{
 	private:
-		static std::unordered_map<std::string, Shader> m_ShadersCache;
-		static std::unordered_map<std::string, Texture> m_TexturesCache;
+		static std::unordered_map<int, Shader> m_ShaderCache;
+		static std::unordered_map<int, Texture> m_TextureCache;
+		static std::queue<int> m_ShaderIds;
+		static std::queue<int> m_TextureIds;
 
 	public:
 		ResourceManager() = delete;
 		~ResourceManager() = delete;
 
-		static Texture LoadTexture(std::string name, TextureType textureType, const char* filePath, bool alpha = false);
-		static Shader LoadShader(std::string name, const char* vertexShader, const char* fragmentShader, const char* geometryShader = nullptr);
+		static int LoadTexture(TextureType textureType, const char* filePath, bool alpha = false);
+		static int LoadShader(const char* vertexShader, const char* fragmentShader, const char* geometryShader = nullptr);
 
-		static void SetTexture(std::string name, Texture texture);
-		static void SetShader(std::string name, Shader shader);
+		static void SetTexture(int textureId, Texture texture);
+		static void SetShader(int shaderId, Shader shader);
 
-		static Texture* GetTexture(std::string name);
-		static Shader* GetShader(std::string name);
+		static void DeleteTexture(int textureId);
+		static void DeleteShader(int shaderId);
+
+		static Texture& GetTexture(int textureId);
+		static Shader& GetShader(int shaderId);
 	};
 }

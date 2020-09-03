@@ -4,52 +4,68 @@
 
 namespace Hyperion
 {
-	std::unordered_map<std::string, Texture> ResourceManager::m_TexturesCache = {};
-	std::unordered_map<std::string, Shader> ResourceManager::m_ShadersCache = {};
+	std::unordered_map<int, Texture> ResourceManager::m_TextureCache = {};
+	std::unordered_map<int, Shader> ResourceManager::m_ShaderCache = {};
+	std::queue<int> ResourceManager::m_ShaderIds = {};
+	std::queue<int> ResourceManager::m_TextureIds = {};
 
-	Texture ResourceManager::LoadTexture(std::string name, TextureType textureType, const char* filePath, bool alpha)
+	int ResourceManager::LoadTexture(TextureType textureType, const char* filePath, bool alpha)
 	{
 		Texture texture;
 		if (texture.LoadTexture(textureType, filePath, alpha))
 		{
-			ResourceManager::m_TexturesCache[name] = texture;
-			HP_CORE_DEBUG("Texture % loaded...", name);
+			//ResourceManager::m_TextureCache[name] = texture;
+			//HP_CORE_DEBUG("Texture % loaded...", name);
 		}
 		else
-			HP_CORE_DEBUG("Texture % not loaded...", name);
-		return texture;
+		{
+			HP_CORE_DEBUG("Texture not loaded...");
+			return -1;
+		}
 	}
 
-	Shader ResourceManager::LoadShader(std::string name, const char* vertexShader, const char* fragmentShader, const char* geometryShader)
+	int ResourceManager::LoadShader(const char* vertexShader, const char* fragmentShader, const char* geometryShader)
 	{
 		Shader shader;
 		if (shader.LoadShader(vertexShader, fragmentShader, geometryShader))
 		{
-			ResourceManager::m_ShadersCache[name] = shader;
-			HP_CORE_DEBUG("Shader % loaded...", name);
+			//ResourceManager::m_ShaderCache[name] = shader;
+			//HP_CORE_DEBUG("Shader % loaded...", name);
 		}
 		else
-			HP_CORE_DEBUG("Shader % not loaded...", name);
-		return shader;
+		{
+			HP_CORE_DEBUG("Shader not loaded...");
+			return -1;
+		}
 	}
 
-	void ResourceManager::SetTexture(std::string name, Texture texture)
+	void ResourceManager::SetTexture(int textureId, Texture texture)
 	{
-		ResourceManager::m_TexturesCache[name] = texture;
+		ResourceManager::m_TextureCache[textureId] = texture;
 	}
 
-	void ResourceManager::SetShader(std::string name, Shader shader)
+	void ResourceManager::SetShader(int shaderId, Shader shader)
 	{
-		ResourceManager::m_ShadersCache[name] = shader;
+		ResourceManager::m_ShaderCache[shaderId] = shader;
 	}
 
-	Texture* ResourceManager::GetTexture(std::string name)
+	void ResourceManager::DeleteTexture(int textureId)
 	{
-		return &ResourceManager::m_TexturesCache[name];
+		ResourceManager::m_TextureCache.erase(textureId);
 	}
 
-	Shader* ResourceManager::GetShader(std::string name)
+	void ResourceManager::DeleteShader(int shaderId)
 	{
-		return &ResourceManager::m_ShadersCache[name];
+		ResourceManager::m_ShaderCache.erase(shaderId);
+	}
+
+	Texture& ResourceManager::GetTexture(int textureId)
+	{
+		return ResourceManager::m_TextureCache[textureId];
+	}
+
+	Shader& ResourceManager::GetShader(int shaderId)
+	{
+		return ResourceManager::m_ShaderCache[shaderId];
 	}
 }
