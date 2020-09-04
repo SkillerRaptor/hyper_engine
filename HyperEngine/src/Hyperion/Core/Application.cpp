@@ -3,7 +3,6 @@
 #include <chrono>
 
 #include "Events/WindowEvents.hpp"
-#include "Rendering/Texture.hpp"
 #include "Rendering/Buffers/FrameBuffer.hpp"
 #include "Utilities/Random.hpp"
 #include "Utilities/Timestep.hpp"
@@ -58,15 +57,15 @@ namespace Hyperion
 
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 
-		Texture frameTexture;
+		//Texture frameTexture;
 		while (m_Running)
 		{
-			frameTexture.SetWidth(m_Window->GetWindowData().Width);
-			frameTexture.SetHeight(m_Window->GetWindowData().Height);
-			frameTexture.GenerateTexture(nullptr, true);
+			//frameTexture.SetWidth(m_Window->GetWindowData().Width);
+			//frameTexture.SetHeight(m_Window->GetWindowData().Height);
+			//frameTexture.GenerateTexture(nullptr, true);
 
 			FrameBuffer frameBuffer;
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, frameTexture.GetTextureId(), 0);
+			//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, frameTexture.GetTextureId(), 0);
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			loops = 0;
@@ -111,7 +110,7 @@ namespace Hyperion
 			if (!m_Running) break;
 
 			m_LayerStack->GetImGuiLayer()->OnUpdate(timeStep);
-			m_LayerStack->GetImGuiLayer()->OnRender(frameTexture.GetTextureId());
+			m_LayerStack->GetImGuiLayer()->OnRender(-1/*frameTexture.GetTextureId()*/);
 
 			m_Window->OnUpdate();
 		}

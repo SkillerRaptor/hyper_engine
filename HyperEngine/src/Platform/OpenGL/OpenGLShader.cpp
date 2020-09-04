@@ -1,8 +1,6 @@
-#include "Shader.hpp"
+#include "OpenGLShader.hpp"
 
 #include <fstream>
-#include <iostream>
-#include <sstream>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,21 +9,21 @@
 
 namespace Hyperion
 {
-	Shader::Shader()
-		: m_ShaderId(0), m_UniformCache({})
+	OpenGLShader::OpenGLShader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader)
+		: Shader(vertexShader, fragmentShader, geometryShader)
 	{
 	}
 
-	bool Shader::LoadShader(const char* vertexShader, const char* fragmentShader, const char* geometryShader)
+	bool OpenGLShader::LoadShader()
 	{
-		std::string vertexTempCode;
-		std::string fragmentTempCode;
-		std::string geometryTempCode;
+		std::string vertexCode;
+		std::string fragmentCode;
+		std::string geometryCode;
 
 		try
 		{
-			std::ifstream vertexShaderFile(vertexShader);
-			std::ifstream fragmentShaderFile(fragmentShader);
+			std::ifstream vertexShaderFile(m_VertexShaderPath);
+			std::ifstream fragmentShaderFile(m_FragmentShaderPath);
 
 			std::stringstream vertexShaderStream, fragmentShaderStream;
 
@@ -35,17 +33,17 @@ namespace Hyperion
 			vertexShaderFile.close();
 			fragmentShaderFile.close();
 
-			vertexTempCode = vertexShaderStream.str();
-			fragmentTempCode = fragmentShaderStream.str();
+			vertexCode = vertexShaderStream.str();
+			fragmentCode = fragmentShaderStream.str();
 
-			if (geometryShader != nullptr)
+			if (m_GeometryShaderPath != "")
 			{
-				std::ifstream     geometryShaderFile(geometryShader);
+				std::ifstream geometryShaderFile(m_GeometryShaderPath);
 				std::stringstream geometryShaderStream;
 
 				geometryShaderStream << geometryShaderFile.rdbuf();
 				geometryShaderFile.close();
-				geometryTempCode = geometryShaderStream.str();
+				geometryCode = geometryShaderStream.str();
 			}
 		}
 		catch (std::exception exception)
@@ -54,13 +52,14 @@ namespace Hyperion
 			return false;
 		}
 
-		const char* vertexCode = vertexTempCode.c_str();
-		const char* fragmentCode = fragmentTempCode.c_str();
-		const char* geometryCode = geometryTempCode.c_str();
+		return GenerateShader(vertexCode.c_str(), fragmentCode.c_str(), geometryCode != "" ? geometryCode.c_str() : nullptr);
+	}
 
-		unsigned int vertexShaderId = 0;
-		unsigned int fragmentShaderId = 0;
-		unsigned int geometryShaderId = 0;
+	bool OpenGLShader::GenerateShader(const char* vertexCode, const char* fragmentCode, const char* geometryCode)
+	{
+		uint32_t vertexShaderId = 0;
+		uint32_t fragmentShaderId = 0;
+		uint32_t geometryShaderId = 0;
 
 		vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertexShaderId, 1, &vertexCode, nullptr);
@@ -96,87 +95,88 @@ namespace Hyperion
 		return true;
 	}
 
-	void Shader::UseShader()
+	void OpenGLShader::DeleteShader()
+	{
+		m_UniformCache.clear();
+		glDeleteProgram(m_ShaderId);
+	}
+
+	void OpenGLShader::UseShader() const
 	{
 		glUseProgram(m_ShaderId);
 	}
 
-	void Shader::SetFloat(std::string name, float value)
-	{
-		glUniform1f(GetUniformLocation(name), value);
-	}
-
-	void Shader::SetFloatArray(std::string name, unsigned int count, const float* value)
-	{
-		glUniform1fv(GetUniformLocation(name), count, value);
-	}
-
-	void Shader::SetInteger(std::string name, int value)
+	void OpenGLShader::SetInteger(const std::string& name, int value)
 	{
 		glUniform1i(GetUniformLocation(name), value);
 	}
 
-	void Shader::SetUnsignedInteger(std::string name, unsigned int value)
+	void OpenGLShader::SetUnsignedInteger(const std::string& name, unsigned int value)
 	{
 		glUniform1ui(GetUniformLocation(name), value);
 	}
 
-	void Shader::SetIntegerArray(std::string name, unsigned int count, const int* value)
+	void OpenGLShader::SetIntegerArray(const std::string& name, size_t count, int* values)
 	{
-		glUniform1iv(GetUniformLocation(name), count, value);
+		glUniform1iv(GetUniformLocation(name), static_cast<GLsizei>(count), values);
 	}
 
-	void Shader::SetVector2(std::string name, float x, float y)
+	void OpenGLShader::SetFloat(const std::string& name, float value)
+	{
+		glUniform1f(GetUniformLocation(name), value);
+	}
+
+	void OpenGLShader::SetFloatArray(const std::string& name, size_t count, float* values)
+	{
+		glUniform1fv(GetUniformLocation(name), static_cast<GLsizei>(count), values);
+	}
+
+	void OpenGLShader::SetVector2(const std::string& name, float x, float y)
 	{
 		glUniform2f(GetUniformLocation(name), x, y);
 	}
 
-	void Shader::SetVector2(std::string name, const glm::vec2& value)
+	void OpenGLShader::SetVector2(const std::string& name, const Vector2& vector)
 	{
-		glUniform2f(GetUniformLocation(name), value.x, value.y);
+		glUniform2f(GetUniformLocation(name), vector.x, vector.y);
 	}
 
-	void Shader::SetVector3(std::string name, float x, float y, float z)
+	void OpenGLShader::SetVector3(const std::string& name, float x, float y, float z)
 	{
 		glUniform3f(GetUniformLocation(name), x, y, z);
 	}
 
-	void Shader::SetVector3(std::string name, const glm::vec3& value)
+	void OpenGLShader::SetVector3(const std::string& name, const Vector3& vector)
 	{
-		glUniform3f(GetUniformLocation(name), value.x, value.y, value.z);
+		glUniform3f(GetUniformLocation(name), vector.x, vector.y, vector.z);
 	}
 
-	void Shader::SetVector4(std::string name, float x, float y, float z, float w)
+	void OpenGLShader::SetVector4(const std::string& name, float x, float y, float z, float w)
 	{
 		glUniform4f(GetUniformLocation(name), x, y, z, w);
 	}
 
-	void Shader::SetVector4(std::string name, const glm::vec4& value)
+	void OpenGLShader::SetVector4(const std::string& name, const Vector4& vector)
 	{
-		glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w);
+		glUniform4f(GetUniformLocation(name), vector.x, vector.y, vector.z, vector.w);
 	}
 
-	void Shader::SetMatrix2(std::string name, const glm::mat2& matrix)
+	void OpenGLShader::SetMatrix2(const std::string& name, const Matrix2& matrix)
 	{
-		glUniformMatrix2fv(GetUniformLocation(name), 1, false, glm::value_ptr(matrix));
+		glUniformMatrix2fv(GetUniformLocation(name), 1, false, &matrix.matrix[0][0]);
 	}
 
-	void Shader::SetMatrix3(std::string name, const glm::mat3& matrix)
+	void OpenGLShader::SetMatrix3(const std::string& name, const Matrix3& matrix)
 	{
-		glUniformMatrix3fv(GetUniformLocation(name), 1, false, glm::value_ptr(matrix));
+		glUniformMatrix2fv(GetUniformLocation(name), 1, false, &matrix.matrix[0][0]);
 	}
 
-	void Shader::SetMatrix4(std::string name, const glm::mat4& matrix)
+	void OpenGLShader::SetMatrix4(const std::string& name, const Matrix4& matrix)
 	{
-		glUniformMatrix4fv(GetUniformLocation(name), 1, false, glm::value_ptr(matrix));
+		glUniformMatrix2fv(GetUniformLocation(name), 1, false, &matrix.matrix[0][0]);
 	}
 
-	unsigned int Shader::GetShaderId() const
-	{
-		return m_ShaderId;
-	}
-
-	bool Shader::CheckShaderErrors(unsigned int id, unsigned int shader)
+	bool OpenGLShader::CheckShaderErrors(uint32_t id, uint32_t shader)
 	{
 		int success;
 		glGetShaderiv(id, GL_COMPILE_STATUS, &success);
@@ -211,7 +211,7 @@ namespace Hyperion
 		return false;
 	}
 
-	bool Shader::CheckProgramErrors(unsigned int id)
+	bool OpenGLShader::CheckProgramErrors(uint32_t id)
 	{
 		int success;
 		glGetProgramiv(id, GL_LINK_STATUS, &success);
@@ -228,7 +228,7 @@ namespace Hyperion
 		return false;
 	}
 
-	unsigned int Shader::GetUniformLocation(std::string name)
+	uint32_t OpenGLShader::GetUniformLocation(std::string name)
 	{
 		if (m_UniformCache.find(name) == m_UniformCache.end())
 			m_UniformCache[name] = glGetUniformLocation(m_ShaderId, name.c_str());
