@@ -1,9 +1,9 @@
 #include "OpenGLShader.hpp"
 
-#include <fstream>
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include <fstream>
 
 #include "Utilities/Log.hpp"
 
