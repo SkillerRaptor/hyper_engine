@@ -1,10 +1,10 @@
 #pragma once
 
-#include <iostream>
-#include <queue>
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include <iostream>
+#include <queue>
 
 #include "Events/Event.hpp"
 
