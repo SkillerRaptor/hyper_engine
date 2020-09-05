@@ -145,9 +145,7 @@
     </ClCompile>
     <ClCompile Include="src\Hyperion\Utilities\Timestep.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLShaderManager.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLTextureManager.cpp" />
     <ClCompile Include="vendor\GLM\include\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\GL\src\glad.c" />
@@ -204,15 +202,7 @@
     <ClInclude Include="src\Hyperion\Rendering\Buffers\VertexArray.hpp" />
     <ClInclude Include="src\Hyperion\Rendering\Buffers\VertexBuffer.hpp" />
     <ClInclude Include="src\Hyperion\Rendering\RenderContext.hpp" />
-    <ClInclude Include="src\Hyperion\Rendering\Shader.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="src\Hyperion\Rendering\ShaderManager.hpp" />
-    <ClInclude Include="src\Hyperion\Rendering\Texture.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="src\Hyperion\Rendering\TextureManager.hpp" />
     <ClInclude Include="src\Hyperion\Utilities\Input.hpp" />
     <ClInclude Include="src\Hyperion\Core\Application.hpp" />
@@ -239,9 +229,7 @@
     </ClInclude>
     <ClInclude Include="src\Hyperion\Utilities\Timestep.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLShader.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLShaderManager.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLTextureManager.hpp" />
     <ClInclude Include="vendor\Assimp\include\assimp\aabb.h" />
     <ClInclude Include="vendor\Assimp\include\assimp\ai_assert.h" />
