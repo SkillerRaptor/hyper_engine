@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Utilities/NonCopyable.hpp"
+#include "Utilities/NonMoveable.hpp"
+
 namespace Hyperion
 {
 	enum class TextureType
@@ -23,7 +26,7 @@ namespace Hyperion
 		TextureType TextureType = TextureType::DEFAULT;
 	};
 
-	class TextureManager
+	class TextureManager : public NonCopyable, NonMoveable
 	{
 	public:
 		TextureManager() = default;

@@ -21,8 +21,9 @@
 #include "Hyperion/Memory/PoolAllocator.hpp"
 
 /* Rendering */
-#include "Hyperion/Rendering/Shader.hpp"
-#include "Hyperion/Rendering/Texture.hpp"
+#include "Hyperion/Rendering/RenderContext.hpp"
+#include "Hyperion/Rendering/ShaderManager.hpp"
+#include "Hyperion/Rendering/TextureManager.hpp"
 
 /* Utilities */
 #include "Hyperion/Utilities/Input.hpp"

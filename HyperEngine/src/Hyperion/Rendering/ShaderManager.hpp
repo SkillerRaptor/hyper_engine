@@ -2,6 +2,8 @@
 
 #include "Maths/Matrix.hpp"
 #include "Maths/Vector.hpp"
+#include "Utilities/NonCopyable.hpp"
+#include "Utilities/NonMoveable.hpp"
 
 namespace Hyperion
 {
@@ -12,7 +14,7 @@ namespace Hyperion
 		std::string GeometryShaderPath = "";
 	};
 
-	class ShaderManager
+	class ShaderManager : public NonCopyable, NonMoveable
 	{
 	public:
 		ShaderManager() = default;
