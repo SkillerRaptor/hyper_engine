@@ -7,6 +7,8 @@
 #include "Utilities/Random.hpp"
 #include "Utilities/Timestep.hpp"
 
+#include "Platform/OpenGL/OpenGLWindow.hpp"
+
 namespace Hyperion 
 {
 	Application* Application::m_Instance;
@@ -15,9 +17,12 @@ namespace Hyperion
 	{
 		m_Instance = this;
 
-		m_Window = new Window("HyperEngine", 1280, 720, false, &m_EventBus);
-		m_LayerStack = new LayerStack();
+		/* Currently only OpenGL */
+		m_Window = new OpenGLWindow("HyperEngine", 1280, 720, false, &m_EventBus);
+		m_Window->InitWindow();
 
+		m_LayerStack = new LayerStack();
+		
 		Random::Init();
 	}
 
@@ -30,6 +35,8 @@ namespace Hyperion
 			layer->OnDetach();
 			m_LayerStack->PopLayer();
 		}
+
+		m_Window->ShutdownWindow();
 
 		delete m_LayerStack;
 		delete m_Window;
@@ -112,7 +119,7 @@ namespace Hyperion
 			m_LayerStack->GetImGuiLayer()->OnUpdate(timeStep);
 			m_LayerStack->GetImGuiLayer()->OnRender(-1/*frameTexture.GetTextureId()*/);
 
-			m_Window->OnUpdate();
+			m_Window->OnUpdate(timeStep);
 		}
 	}
 
@@ -127,7 +134,7 @@ namespace Hyperion
 			});
 	}
 
-	Window* Application::GetWindow() const
+	Window* Application::GetNativeWindow() const
 	{
 		return m_Window;
 	}

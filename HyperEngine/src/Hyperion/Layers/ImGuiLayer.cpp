@@ -19,7 +19,7 @@ namespace Hyperion
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::Get()->GetWindow()->GetNativeWindow()), true);
+		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow()), true);
 		ImGui_ImplOpenGL3_Init("#version 330");
 
 		SetupStyle();

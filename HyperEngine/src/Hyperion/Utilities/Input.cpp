@@ -6,28 +6,28 @@ namespace Hyperion
 {
 	bool Input::IsKeyUp(KeyCode keyCode)
 	{
-		GLFWwindow* window = Application::Get()->GetWindow()->GetNativeWindow();
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow());
 		int state = glfwGetKey(window, keyCode);
 		return state == GLFW_PRESS;
 	}
 
 	bool Input::IsKeyPressed(KeyCode keyCode)
 	{
-		GLFWwindow* window = Application::Get()->GetWindow()->GetNativeWindow();
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow());
 		int state = glfwGetKey(window, keyCode);
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
 	}
 
 	bool Input::IsKeyDown(KeyCode keyCode)
 	{
-		GLFWwindow* window = Application::Get()->GetWindow()->GetNativeWindow();
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow());
 		int state = glfwGetKey(window, keyCode);
 		return state == GLFW_RELEASE;
 	}
 
 	float Input::GetAxis(InputAxis axis)
 	{
-		GLFWwindow* window = Application::Get()->GetWindow()->GetNativeWindow();
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow());
 		switch (axis)
 		{
 		case InputAxis::HORIZONTAL:
@@ -48,14 +48,14 @@ namespace Hyperion
 
 	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
-		GLFWwindow* window = Application::Get()->GetWindow()->GetNativeWindow();
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow());
 		int state = glfwGetKey(window, button);
 		return state == GLFW_PRESS;
 	}
 
 	float Input::GetMouseX()
 	{
-		GLFWwindow* window = Application::Get()->GetWindow()->GetNativeWindow();
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow());
 		double xPos, yPos;
 		glfwGetCursorPos(window, &xPos, &yPos);
 		return (float)xPos;
@@ -63,7 +63,7 @@ namespace Hyperion
 
 	float Input::GetMouseY()
 	{
-		GLFWwindow* window = Application::Get()->GetWindow()->GetNativeWindow();
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow());
 		double xPos, yPos;
 		glfwGetCursorPos(window, &xPos, &yPos);
 		return (float)yPos;

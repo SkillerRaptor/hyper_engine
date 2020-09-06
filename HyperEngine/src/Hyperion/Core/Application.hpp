@@ -27,7 +27,7 @@ namespace Hyperion
 
 		void Run();
 
-		Window* GetWindow() const;
+		Window* GetNativeWindow() const;
 		static Application* Get();
 
 	private:

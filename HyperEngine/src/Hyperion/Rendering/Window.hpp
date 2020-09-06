@@ -6,18 +6,20 @@
 #include <iostream>
 #include <queue>
 
+#include "RenderContext.hpp"
 #include "Events/Event.hpp"
+#include "Utilities/Timestep.hpp"
 
 namespace Hyperion
 {
 	struct WindowData
 	{
 		std::string Title;
-		unsigned int Width;
-		unsigned int Height;
+		uint32_t Width;
+		uint32_t Height;
 
-		unsigned int XPos;
-		unsigned int YPos;
+		uint32_t XPos;
+		uint32_t YPos;
 
 		bool VSync;
 		std::queue<std::shared_ptr<Event>>* EventBus;
@@ -25,39 +27,41 @@ namespace Hyperion
 
 	class Window
 	{
-	private:
-		GLFWwindow* m_Window;
+	protected:
+		RenderContext* m_Context;
 		WindowData m_Data;
 
 	public:
-		Window(std::string title = "HyperEngine", unsigned int width = 1280, unsigned int height = 720, bool vSync = false, std::queue<std::shared_ptr<Event>>* eventBus = nullptr);
-		virtual ~Window();
+		Window(std::string title, uint32_t width, uint32_t height, bool vSync, std::queue<std::shared_ptr<Event>>* eventBus)
+			: m_Context(nullptr), m_Data({ title, width, height, 0, 0, vSync, eventBus }) {}
+		virtual ~Window() = default;
 
-		void OnUpdate();
+		virtual void InitWindow() = 0;
+		virtual void ShutdownWindow() = 0;
 
-		void SetTitle(std::string title);
-		std::string GetTitle() const;
+		virtual void OnTick(int currentTick) = 0;
+		virtual void OnUpdate(Timestep timeStep) = 0;
+		virtual void OnRender() = 0;
 
-		void SetWidth(int width);
-		int GetWidth() const;
+		virtual void SetTitle(std::string title) = 0;
+		virtual std::string GetTitle() const = 0;
 
-		void SetHeight(int height);
-		int GetHeight() const;
+		virtual void SetWidth(uint32_t width) = 0;
+		virtual uint32_t GetWidth() const = 0;
 
-		void SetXPos(int xPos);
-		int GetXPos() const;
+		virtual void SetHeight(uint32_t height) = 0;
+		virtual uint32_t GetHeight() const = 0;
 
-		void SetYPos(int yPos);
-		int GetYPos() const;
+		virtual void SetXPos(uint32_t xPos) = 0;
+		virtual uint32_t GetXPos() const = 0;
 
-		void SetVSync(bool vSync);
-		bool IsVSync() const;
+		virtual void SetYPos(uint32_t yPos) = 0;
+		virtual uint32_t GetYPos() const = 0;
 
-		GLFWwindow* GetNativeWindow() const;
-		const WindowData& GetWindowData() const;
+		virtual void SetVSync(bool vSync) = 0;
+		virtual bool IsVSync() const = 0;
 
-	private:
-		void InitWindow(std::string title, int width, int height, bool vSync, std::queue<std::shared_ptr<Event>>* eventBus);
-		void ShutdownWindow();
+		virtual void* GetWindow() const = 0;
+		virtual const WindowData& GetWindowData() const = 0;
 	};
 }

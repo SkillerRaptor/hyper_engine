@@ -59,7 +59,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\src\Platform\;$(SolutionDir)$(ProjectName)\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\src\;$(SolutionDir)$(ProjectName)\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -82,7 +82,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\src\Platform\;$(SolutionDir)$(ProjectName)\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\src\;$(SolutionDir)$(ProjectName)\src\Hyperion\;$(SolutionDir)$(ProjectName)\vendor\GL\include\;$(SolutionDir)$(ProjectName)\vendor\GLFW\include\;$(SolutionDir)$(ProjectName)\vendor\GLM\include\;$(SolutionDir)$(ProjectName)\vendor\ImGui\include\;$(SolutionDir)$(ProjectName)\vendor\StbImage\include\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -147,9 +147,12 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLShaderManager.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLTextureManager.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLWindow.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="vendor\GLM\include\glm\detail\glm.cpp" />
     <ClCompile Include="vendor\GL\src\glad.c" />
-    <ClCompile Include="src\Hyperion\Rendering\Window.cpp" />
     <ClCompile Include="vendor\ImGui\include\imgui\imgui.cpp" />
     <ClCompile Include="vendor\ImGui\include\imgui\imgui_demo.cpp" />
     <ClCompile Include="vendor\ImGui\include\imgui\imgui_draw.cpp" />
@@ -231,6 +234,10 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLShaderManager.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLTextureManager.hpp" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLWindow.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="vendor\Assimp\include\assimp\aabb.h" />
     <ClInclude Include="vendor\Assimp\include\assimp\ai_assert.h" />
     <ClInclude Include="vendor\Assimp\include\assimp\anim.h" />
