@@ -2,9 +2,7 @@
 
 #include <Hyperion.hpp>
 
-using namespace Hyperion;
-
-class SandboxLayer : public Layer
+class SandboxLayer : public Hyperion::Layer
 {
 private:
 public:
@@ -14,8 +12,8 @@ public:
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
 
-	virtual void OnEvent(Event& event) override;
+	virtual void OnEvent(Hyperion::Event& event) override;
 	virtual void OnTick(int currentTick) override;
-	virtual void OnUpdate(Timestep timeStep) override;
+	virtual void OnUpdate(Hyperion::Timestep timeStep) override;
 	virtual void OnRender() override;
 };

@@ -17,7 +17,7 @@ void SandboxLayer::OnDetach()
 {
 }
 
-void SandboxLayer::OnEvent(Event& event)
+void SandboxLayer::OnEvent(Hyperion::Event& event)
 {
 }
 
@@ -25,7 +25,7 @@ void SandboxLayer::OnTick(int currentTick)
 {
 }
 
-void SandboxLayer::OnUpdate(Timestep timeStep)
+void SandboxLayer::OnUpdate(Hyperion::Timestep timeStep)
 {
 }
 
