@@ -7,6 +7,7 @@ namespace Hyperion
 {
 	namespace Sorting
 	{
+		/* Swap 2 Values from an int list */
 		void Swap(int* list, size_t indexOne, size_t indexTwo)
 		{
 			int temp = list[indexOne];
@@ -14,6 +15,7 @@ namespace Hyperion
 			list[indexTwo] = temp;
 		}
 
+		/* Swap 2 Values from a float list */
 		void Swap(float* list, size_t indexOne, size_t indexTwo)
 		{
 			float temp = list[indexOne];
@@ -21,6 +23,7 @@ namespace Hyperion
 			list[indexTwo] = temp;
 		}
 
+		/* Swap 2 Values from an double list list */
 		void Swap(double* list, size_t indexOne, size_t indexTwo)
 		{
 			double temp = list[indexOne];
@@ -28,16 +31,19 @@ namespace Hyperion
 			list[indexTwo] = temp;
 		}
 
+		/* Swap a Value and the next Value from an int list */
 		void Swap(int* list, size_t index)
 		{
 			Swap(list, index, index + 1);
 		}
 
+		/* Swap a Value and the next Value from a float list */
 		void Swap(float* list, size_t index)
 		{
 			Swap(list, index, index + 1);
 		}
 
+		/* Swap a Value and the next Value from a double list */
 		void Swap(double* list, size_t index)
 		{
 			Swap(list, index, index + 1);
