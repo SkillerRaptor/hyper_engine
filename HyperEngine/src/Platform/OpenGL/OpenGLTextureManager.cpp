@@ -37,17 +37,9 @@ namespace Hyperion
 		textureData.Width = width;
 		textureData.Height = height;
 		textureData.Channels = channels;
+
+		GenerateTexture(&textureData, textureData.Channels >= 4);
 		
-		glGenTextures(1, &textureData.TextureId);
-		glBindTexture(GL_TEXTURE_2D, textureData.TextureId);
-
-		glTexParameteri(textureData.TextureId, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(textureData.TextureId, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(textureData.TextureId, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(textureData.TextureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, textureData.Channels >= 4 ? GL_RGBA : GL_RGB, textureData.Width, textureData.Height, 0, textureData.Channels >= 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, textureData.Data);
-
 		stbi_image_free(textureData.Data);
 
 		uint32_t textureId = 0;
@@ -70,15 +62,7 @@ namespace Hyperion
 		textureData.Height = height;
 		textureData.TextureType = textureType;
 
-		glGenTextures(1, &textureData.TextureId);
-		glBindTexture(GL_TEXTURE_2D, textureData.TextureId);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureData.Width, textureData.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		GenerateTexture(&textureData, true);
 
 		uint32_t textureId = 0;
 		if (!m_TextureIds.empty())
@@ -91,6 +75,20 @@ namespace Hyperion
 		m_Textures.emplace(textureId, std::move(textureData));
 		HP_CORE_DEBUG("Texture % created...", textureId);
 		return textureId;
+	}
+
+	void OpenGLTextureManager::GenerateTexture(TextureData* textureData, bool alpha)
+	{
+		OpenGLTextureData* data = static_cast<OpenGLTextureData*>(textureData);
+		glGenTextures(1, &data->TextureId);
+		glBindTexture(GL_TEXTURE_2D, data->TextureId);
+
+		glTexParameteri(data->Data != nullptr ? data->TextureId : GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(data->Data != nullptr ? data->TextureId : GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(data->Data != nullptr ? data->TextureId : GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(data->Data != nullptr ? data->TextureId : GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, alpha ? GL_RGBA : GL_RGB, data->Width, data->Height, 0, alpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data->Data);
 	}
 
 	bool OpenGLTextureManager::BindTexture(uint32_t handle, uint32_t textureSlot)
@@ -112,11 +110,25 @@ namespace Hyperion
 		return true;
 	}
 
+	void OpenGLTextureManager::SetWidth(uint32_t handle, uint32_t width)
+	{
+		if (m_Textures.find(handle) == m_Textures.end())
+			return;
+		m_Textures[handle].Width = width;
+	}
+
 	uint32_t OpenGLTextureManager::GetWidth(uint32_t handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return -1;
 		return m_Textures[handle].Width;
+	}
+
+	void OpenGLTextureManager::SetHeight(uint32_t handle, uint32_t height)
+	{
+		if (m_Textures.find(handle) == m_Textures.end())
+			return;
+		m_Textures[handle].Height = height;
 	}
 
 	uint32_t OpenGLTextureManager::GetHeight(uint32_t handle)
@@ -133,18 +145,25 @@ namespace Hyperion
 		return m_Textures[handle].Channels;
 	}
 
-	unsigned char* OpenGLTextureManager::GetData(uint32_t handle)
+	const unsigned char* OpenGLTextureManager::GetData(uint32_t handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return nullptr;
 		return m_Textures[handle].Data;
 	}
 
-	std::string OpenGLTextureManager::GetPath(uint32_t handle)
+	const std::string& OpenGLTextureManager::GetPath(uint32_t handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return "";
 		return m_Textures[handle].Path;
+	}
+
+	void OpenGLTextureManager::SetTextureType(uint32_t handle, TextureType textureType)
+	{
+		if (m_Textures.find(handle) == m_Textures.end())
+			return;
+		m_Textures[handle].TextureType = textureType;
 	}
 
 	TextureType OpenGLTextureManager::GetTextureType(uint32_t handle)
@@ -153,6 +172,7 @@ namespace Hyperion
 			return TextureType::DEFAULT;
 		return m_Textures[handle].TextureType;
 	}
+
 	TextureData* OpenGLTextureManager::GetTextureData(uint32_t handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
