@@ -59,7 +59,7 @@ namespace Hyperion
 		else
 			textureId = static_cast<uint32_t>(m_Textures.size());
 		m_Textures.emplace(textureId, std::move(textureData));
-		HP_CORE_DEBUG("Texture % loaded...");
+		HP_CORE_DEBUG("Texture % loaded...", textureId);
 		return textureId;
 	}
 
@@ -89,7 +89,7 @@ namespace Hyperion
 		else
 			textureId = static_cast<uint32_t>(m_Textures.size());
 		m_Textures.emplace(textureId, std::move(textureData));
-		HP_CORE_DEBUG("Texture % created...");
+		HP_CORE_DEBUG("Texture % created...", textureId);
 		return textureId;
 	}
 
@@ -152,5 +152,11 @@ namespace Hyperion
 		if (m_Textures.find(handle) == m_Textures.end())
 			return TextureType::DEFAULT;
 		return m_Textures[handle].TextureType;
+	}
+	TextureData* OpenGLTextureManager::GetTextureData(uint32_t handle)
+	{
+		if (m_Textures.find(handle) == m_Textures.end())
+			return nullptr;
+		return &m_Textures[handle];
 	}
 }

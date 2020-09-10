@@ -130,6 +130,8 @@ namespace Hyperion
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 				data.EventBus->push(std::make_shared<MouseMovedEvent>((float)xPos, (float)yPos));
 			});
+
+		m_Context = new OpenGLContext();
 	}
 
 	void OpenGLWindow::ShutdownWindow()
@@ -221,6 +223,11 @@ namespace Hyperion
 	void* OpenGLWindow::GetWindow() const
 	{
 		return m_Window;
+	}
+
+	RenderContext* OpenGLWindow::GetContext() const
+	{
+		return m_Context;
 	}
 
 	const WindowData& OpenGLWindow::GetWindowData() const

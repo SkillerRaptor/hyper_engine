@@ -43,5 +43,6 @@ namespace Hyperion
 		virtual unsigned char* GetData(uint32_t handle) = 0;
 		virtual std::string GetPath(uint32_t handle) = 0;
 		virtual TextureType GetTextureType(uint32_t handle) = 0;
+		virtual TextureData* GetTextureData(uint32_t handle) = 0;
 	};
 }

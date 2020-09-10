@@ -12,7 +12,6 @@ namespace Hyperion
 		RenderContext() = default;
 		~RenderContext() = default;
 
-		virtual void Init() = 0;
 		virtual ShaderManager* GetShaderManager() = 0;
 		virtual TextureManager* GetTextureManager() = 0;
 	};

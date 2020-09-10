@@ -16,7 +16,6 @@ namespace Hyperion
 		OpenGLContext();
 		~OpenGLContext();
 		
-		virtual void Init() override;
 		virtual ShaderManager* GetShaderManager() override;
 		virtual TextureManager* GetTextureManager() override;
 	};

@@ -62,6 +62,7 @@ namespace Hyperion
 		virtual bool IsVSync() const = 0;
 
 		virtual void* GetWindow() const = 0;
+		virtual RenderContext* GetContext() const = 0;
 		virtual const WindowData& GetWindowData() const = 0;
 	};
 }

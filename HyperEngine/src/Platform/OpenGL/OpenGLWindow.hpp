@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
 
+#include "OpenGLContext.hpp"
 #include "Rendering/Window.hpp"
 
 namespace Hyperion
@@ -42,6 +43,7 @@ namespace Hyperion
 		virtual bool IsVSync() const override;
 
 		virtual void* GetWindow() const override;
-		virtual const WindowData& GetWindowData() const override;
+		virtual RenderContext* GetContext() const override;
+		const virtual WindowData& GetWindowData() const override;
 	};
 }

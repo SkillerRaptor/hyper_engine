@@ -64,15 +64,17 @@ namespace Hyperion
 
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 
+		uint32_t handle = m_Window->GetContext()->GetTextureManager()->CreateTexture(m_Window->GetWindowData().Width, m_Window->GetWindowData().Height, TextureType::FRAMEBUFFER);
 		//Texture frameTexture;
 		while (m_Running)
 		{
+			//m_Window->GetContext()->GetTextureManager()->Set(m_Window->GetWindowData().Width, m_Window->GetWindowData().Height);
 			//frameTexture.SetWidth(m_Window->GetWindowData().Width);
 			//frameTexture.SetHeight(m_Window->GetWindowData().Height);
 			//frameTexture.GenerateTexture(nullptr, true);
 
 			FrameBuffer frameBuffer;
-			//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, frameTexture.GetTextureId(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, static_cast<OpenGLTextureData*>(m_Window->GetContext()->GetTextureManager()->GetTextureData(handle))->TextureId, 0);
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			loops = 0;
@@ -117,7 +119,7 @@ namespace Hyperion
 			if (!m_Running) break;
 
 			m_LayerStack->GetImGuiLayer()->OnUpdate(timeStep);
-			m_LayerStack->GetImGuiLayer()->OnRender(-1/*frameTexture.GetTextureId()*/);
+			m_LayerStack->GetImGuiLayer()->OnRender(static_cast<OpenGLTextureData*>(m_Window->GetContext()->GetTextureManager()->GetTextureData(handle))->TextureId);
 
 			m_Window->OnUpdate(timeStep);
 		}

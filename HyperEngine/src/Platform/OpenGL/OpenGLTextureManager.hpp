@@ -12,7 +12,7 @@ namespace Hyperion
 {
 	struct OpenGLTextureData : public TextureData
 	{
-		uint32_t TextureId;
+		uint32_t TextureId = -1;
 	};
 
 	class OpenGLTextureManager : public TextureManager
@@ -36,5 +36,6 @@ namespace Hyperion
 		virtual unsigned char* GetData(uint32_t handle) override;
 		virtual std::string GetPath(uint32_t handle) override;
 		virtual TextureType GetTextureType(uint32_t handle) override;
+		virtual TextureData* GetTextureData(uint32_t handle) override;
 	};
 }
