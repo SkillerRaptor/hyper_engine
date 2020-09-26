@@ -18,8 +18,8 @@ namespace Hyperion
 
 		void Restart();
 		void Stop();
-		double Elapsed();
 
+		double Elapsed() const;
 		operator double() const;
 	};
 }

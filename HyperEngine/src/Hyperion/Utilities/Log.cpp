@@ -17,7 +17,7 @@ namespace Hyperion
 	const Ref<Log> Log::GetInstace()
 	{
 		if (m_Instance == nullptr)
-			m_Instance = std::make_shared<Log>();
+			m_Instance = CreateRef<Log>();
 		return m_Instance;
 	}
 
@@ -27,11 +27,11 @@ namespace Hyperion
 
 		m_MessageQueue = std::queue<std::pair<Level, std::string>>();
 
-		m_CoreLogger = std::make_shared<Logger>(&m_MessageQueue);
+		m_CoreLogger = CreateRef<Logger>(&m_MessageQueue);
 		m_CoreLogger->SetName("Core");
 		m_CoreLogger->SetLevel(Level::HP_ALL);
 
-		m_ClientLogger = std::make_shared<Logger>(&m_MessageQueue);
+		m_ClientLogger = CreateRef<Logger>(&m_MessageQueue);
 		m_ClientLogger->SetName("Client");
 		m_ClientLogger->SetLevel(Level::HP_ALL);
 

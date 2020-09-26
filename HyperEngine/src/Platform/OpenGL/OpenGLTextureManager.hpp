@@ -37,7 +37,7 @@ namespace Hyperion
 		virtual uint32_t GetHeight(uint32_t handle) override;
 		virtual uint8_t GetChannels(uint32_t handle) override;
 		virtual const unsigned char* GetData(uint32_t handle) override;
-		virtual const std::string& GetPath(uint32_t handle) override;
+		virtual const std::string GetPath(uint32_t handle) override;
 		virtual void SetTextureType(uint32_t handle, TextureType textureType) override;
 		virtual TextureType GetTextureType(uint32_t handle) override;
 		virtual TextureData* GetTextureData(uint32_t handle) override;
