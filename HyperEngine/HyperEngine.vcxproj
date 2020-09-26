@@ -222,10 +222,7 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Utilities\SortingAlgorithms.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\SortingAlgorithms.hpp" />
     <ClInclude Include="src\Hyperion\Utilities\Timer.hpp">
       <SubType>
       </SubType>

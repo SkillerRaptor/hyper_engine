@@ -17,7 +17,6 @@ namespace Hyperion
 	{
 		m_Instance = this;
 
-		/* Currently only OpenGL */
 		m_Window = new OpenGLWindow("HyperEngine", 1280, 720, false, &m_EventBus);
 		m_Window->InitWindow();
 
@@ -70,9 +69,9 @@ namespace Hyperion
 
 		while (m_Running)
 		{
-			//textureManager->SetWidth(bufferTexture, m_Window->GetWindowData().Width);
-			//textureManager->SetHeight(bufferTexture, m_Window->GetWindowData().Height);
-			//textureManager->GenerateTexture(textureManager->GetTextureData(bufferTexture), true);
+			textureManager->SetWidth(bufferTexture, m_Window->GetWindowData().Width);
+			textureManager->SetHeight(bufferTexture, m_Window->GetWindowData().Height);
+			textureManager->GenerateTexture(textureManager->GetTextureData(bufferTexture), true);
 
 			FrameBuffer frameBuffer;
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, bufferTextureId, 0);

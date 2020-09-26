@@ -33,6 +33,5 @@
 #include "Hyperion/Utilities/NonCopyable.hpp"
 #include "Hyperion/Utilities/NonMoveable.hpp"
 #include "Hyperion/Utilities/Random.hpp"
-//#include "Hyperion/Utilities/SortingAlgorithms.hpp"
 #include "Hyperion/Utilities/Timer.hpp"
 #include "Hyperion/Utilities/Timestep.hpp"
