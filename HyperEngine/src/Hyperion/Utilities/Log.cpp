@@ -2,7 +2,7 @@
 
 namespace Hyperion 
 {
-	std::shared_ptr<Log> Log::m_Instance;
+	Ref<Log> Log::m_Instance;
 
 	Log::Log()
 	{
@@ -14,7 +14,7 @@ namespace Hyperion
 		Shutdown();
 	}
 
-	const std::shared_ptr<Log> Log::GetInstace()
+	const Ref<Log> Log::GetInstace()
 	{
 		if (m_Instance == nullptr)
 			m_Instance = std::make_shared<Log>();

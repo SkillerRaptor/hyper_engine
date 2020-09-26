@@ -161,6 +161,7 @@
     <ClCompile Include="vendor\ImGui\include\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Hyperion\Core\Core.hpp" />
     <ClInclude Include="src\Hyperion\ECS\Component.hpp" />
     <ClInclude Include="src\Hyperion\ECS\Components.hpp" />
     <ClInclude Include="src\Hyperion\ECS\Entity.hpp">
@@ -222,7 +223,6 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Utilities\SortingAlgorithms.hpp" />
     <ClInclude Include="src\Hyperion\Utilities\Timer.hpp">
       <SubType>
       </SubType>

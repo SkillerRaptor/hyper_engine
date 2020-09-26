@@ -4,6 +4,7 @@
 #include <glfw/glfw3.h>
 
 #include "OpenGLContext.hpp"
+#include "Core/Core.hpp"
 #include "Rendering/Window.hpp"
 
 namespace Hyperion
@@ -14,7 +15,7 @@ namespace Hyperion
 		GLFWwindow* m_Window;
 
 	public:
-		OpenGLWindow(std::string title, uint32_t width, uint32_t height, bool vSync, std::queue<std::shared_ptr<Event>>* eventBus);
+		OpenGLWindow(std::string title, uint32_t width, uint32_t height, bool vSync, std::queue<Ref<Event>>* eventBus);
 		~OpenGLWindow();
 
 		virtual void InitWindow() override;

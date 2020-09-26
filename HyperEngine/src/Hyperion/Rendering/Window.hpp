@@ -7,6 +7,7 @@
 #include <queue>
 
 #include "RenderContext.hpp"
+#include "Core/Core.hpp"
 #include "Events/Event.hpp"
 #include "Utilities/Timestep.hpp"
 
@@ -22,7 +23,7 @@ namespace Hyperion
 		uint32_t YPos;
 
 		bool VSync;
-		std::queue<std::shared_ptr<Event>>* EventBus;
+		std::queue<Ref<Event>>* EventBus;
 	};
 
 	class Window
@@ -32,7 +33,7 @@ namespace Hyperion
 		WindowData m_Data;
 
 	public:
-		Window(std::string title, uint32_t width, uint32_t height, bool vSync, std::queue<std::shared_ptr<Event>>* eventBus)
+		Window(std::string title, uint32_t width, uint32_t height, bool vSync, std::queue<Ref<Event>>* eventBus)
 			: m_Context(nullptr), m_Data({ title, width, height, 0, 0, vSync, eventBus }) {}
 		virtual ~Window() = default;
 

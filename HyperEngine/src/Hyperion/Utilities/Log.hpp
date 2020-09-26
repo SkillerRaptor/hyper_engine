@@ -4,6 +4,7 @@
 #include <Windows.h>
 
 #include "Logger.hpp"
+#include "Core/Core.hpp"
 
 namespace Hyperion 
 {
@@ -12,21 +13,21 @@ namespace Hyperion
 	private:
 		std::thread m_LoggerThread;
 		std::queue<std::pair<Level, std::string>> m_MessageQueue;
-		std::shared_ptr<Logger> m_CoreLogger;
-		std::shared_ptr<Logger> m_ClientLogger;
+		Ref<Logger> m_CoreLogger;
+		Ref<Logger> m_ClientLogger;
 
 		bool m_Running;
 
-		static std::shared_ptr<Log> m_Instance;
+		static Ref<Log> m_Instance;
 
 	public:
 		Log();
 		~Log();
 
-		static const std::shared_ptr<Log> GetInstace();
+		static const Ref<Log> GetInstace();
 
-		const std::shared_ptr<Logger> GetCoreLogger() const { return m_CoreLogger; }
-		const std::shared_ptr<Logger> GetClientLogger() const { return m_ClientLogger; }
+		const Ref<Logger> GetCoreLogger() const { return m_CoreLogger; }
+		const Ref<Logger> GetClientLogger() const { return m_ClientLogger; }
 
 		void Shutdown();
 

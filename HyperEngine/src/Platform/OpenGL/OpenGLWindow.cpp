@@ -7,7 +7,7 @@
 
 namespace Hyperion
 {
-	OpenGLWindow::OpenGLWindow(std::string title, uint32_t width, uint32_t height, bool vSync, std::queue<std::shared_ptr<Event>>* eventBus)
+	OpenGLWindow::OpenGLWindow(std::string title, uint32_t width, uint32_t height, bool vSync, std::queue<Ref<Event>>* eventBus)
 		: Window(title, width, height, vSync, eventBus)
 	{
 	}

@@ -1403,7 +1403,7 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLWindow.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Utilities\SortingAlgorithms.hpp">
+    <ClInclude Include="src\Hyperion\Core\Core.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

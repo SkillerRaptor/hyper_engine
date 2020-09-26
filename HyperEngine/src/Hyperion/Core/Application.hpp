@@ -2,6 +2,7 @@
 
 #include <queue>
 
+#include "Core.hpp"
 #include "Events/Event.hpp"
 #include "Layers/LayerStack.hpp"
 #include "Rendering/Window.hpp"
@@ -15,7 +16,7 @@ namespace Hyperion
 		LayerStack* m_LayerStack;
 		bool m_Running = true;
 
-		std::queue<std::shared_ptr<Event>> m_EventBus;
+		std::queue<Ref<Event>> m_EventBus;
 
 		static Application* m_Instance;
 

@@ -100,7 +100,7 @@ namespace Hyperion
 
 			while (m_EventBus.size() > 0)
 			{
-				std::shared_ptr<Event> e = m_EventBus.front();
+				Ref<Event> e = m_EventBus.front();
 				if (e->Handled) continue;
 				OnEvent(*e);
 				m_EventBus.pop();
