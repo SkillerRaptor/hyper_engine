@@ -40,49 +40,48 @@ namespace Hyperion
 		void PrintDebug(const char* format);
 
 		template<typename T, typename... Targs>
-		void PrintInfo(const char* format, T value, Targs... Fargs)
+		void PrintInfo(const char* format, T&& value, Targs&&... Fargs)
 		{
-			Print(Level::HP_INFO, format, value, Fargs...);
+			Print(Level::HP_INFO, format, value, std::forward<Targs>(Fargs)...);
 		}
 
 		template<typename T, typename... Targs>
-		void PrintTrace(const char* format, T value, Targs... Fargs)
+		void PrintTrace(const char* format, T&& value, Targs&&... Fargs)
 		{
-			Print(Level::HP_TRACE, format, value, Fargs...);
+			Print(Level::HP_TRACE, format, value, std::forward<Targs>(Fargs)...);
 		}
 
 		template<typename T, typename... Targs>
-		void PrintWarn(const char* format, T value, Targs... Fargs)
+		void PrintWarn(const char* format, T&& value, Targs&&... Fargs)
 		{
-			Print(Level::HP_WARN, format, value, Fargs...);
+			Print(Level::HP_WARN, format, value, std::forward<Targs>(Fargs)...);
 		}
 
 		template<typename T, typename... Targs>
-		void PrintError(const char* format, T value, Targs... Fargs)
+		void PrintError(const char* format, T&& value, Targs&&... Fargs)
 		{
-			Print(Level::HP_ERROR, format, value, Fargs...);
+			Print(Level::HP_ERROR, format, value, std::forward<Targs>(Fargs)...);
 		}
 
 		template<typename T, typename... Targs>
-		void PrintFatal(const char* format, T value, Targs... Fargs)
+		void PrintFatal(const char* format, T&& value, Targs&&... Fargs)
 		{
-			Print(Level::HP_FATAL, format, value, Fargs...);
+			Print(Level::HP_FATAL, format, value, std::forward<Targs>(Fargs)...);
 		}
 
 		template<typename T, typename... Targs>
-		void PrintDebug(const char* format, T value, Targs... Fargs)
+		void PrintDebug(const char* format, T&& value, Targs&&... Fargs)
 		{
-			Print(Level::HP_DEBUG, format, value, Fargs...);
+			Print(Level::HP_DEBUG, format, value, std::forward<Targs>(Fargs)...);
 		}
 
 		template<typename T, typename... Targs>
-		void Print(Level level, const char* format, T value, Targs... Fargs)
+		void Print(Level level, const char* format, T&& value, Targs&&... Fargs)
 		{
 			std::stringstream ss;
 
 			ss << m_Name << " " << ConvertLevelToString(level) << ": ";
-
-			FormatString(ss, format, value, Fargs...);
+			FormatString(ss, format, value, std::forward<Targs>(Fargs)...);
 
 			ss << std::endl;
 
@@ -95,7 +94,7 @@ namespace Hyperion
 		}
 
 		template<typename T, typename... Targs>
-		void FormatString(std::stringstream& ss, const char* format, T value, Targs... Fargs)
+		void FormatString(std::stringstream& ss, const char* format, T&& value, Targs&&... Fargs)
 		{
 			for (; *format != '\0'; format++) {
 				if (*format == '%') {
