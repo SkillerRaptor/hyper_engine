@@ -136,6 +136,8 @@ namespace Hyperion
 
 	void OpenGLWindow::ShutdownWindow()
 	{
+		delete m_Context;
+
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 	}

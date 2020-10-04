@@ -12,7 +12,7 @@ namespace Hyperion
 	class OpenGLWindow : public Window
 	{
 	private:
-		GLFWwindow* m_Window;
+		GLFWwindow* m_Window = nullptr;
 
 	public:
 		OpenGLWindow(std::string title, uint32_t width, uint32_t height, bool vSync, std::queue<Ref<Event>>* eventBus);

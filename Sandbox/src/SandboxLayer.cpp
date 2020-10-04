@@ -11,6 +11,7 @@ SandboxLayer::~SandboxLayer()
 
 void SandboxLayer::OnAttach()
 {
+	//uint32_t shaderHandle = m_RenderContext->GetShaderManager()->CreateShader("", "");
 }
 
 void SandboxLayer::OnDetach()

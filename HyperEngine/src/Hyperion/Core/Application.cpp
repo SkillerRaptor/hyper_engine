@@ -43,6 +43,7 @@ namespace Hyperion
 
 	void Application::PushLayer(Layer* layer)
 	{
+		layer->SetRenderContext(m_Window->GetContext());
 		m_LayerStack->PushLayer(layer);
 	}
 
@@ -67,13 +68,13 @@ namespace Hyperion
 		uint32_t bufferTexture = textureManager->CreateTexture(m_Window->GetWindowData().Width, m_Window->GetWindowData().Height, TextureType::FRAMEBUFFER);
 		uint32_t bufferTextureId = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(bufferTexture))->TextureId;
 
+		FrameBuffer frameBuffer;
+
 		while (m_Running)
 		{
 			textureManager->SetWidth(bufferTexture, m_Window->GetWindowData().Width);
 			textureManager->SetHeight(bufferTexture, m_Window->GetWindowData().Height);
-			textureManager->GenerateTexture(textureManager->GetTextureData(bufferTexture), true);
-
-			FrameBuffer frameBuffer;
+			
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, bufferTextureId, 0);
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
