@@ -110,6 +110,14 @@ namespace Hyperion
 		return true;
 	}
 
+	bool OpenGLTextureManager::DeleteTextureData(uint32_t handle)
+	{
+		if (m_Textures.find(handle) == m_Textures.end())
+			return false;
+		glDeleteTextures(1, &m_Textures[handle].TextureId);
+		return true;
+	}
+
 	void OpenGLTextureManager::SetWidth(uint32_t handle, uint32_t width)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())

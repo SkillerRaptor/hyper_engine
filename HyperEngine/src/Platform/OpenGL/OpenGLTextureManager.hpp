@@ -30,6 +30,7 @@ namespace Hyperion
 		virtual void GenerateTexture(TextureData* textureData, bool alpha) override;
 		virtual bool BindTexture(uint32_t handle, uint32_t textureSlot) override;
 		virtual bool DeleteTexture(uint32_t handle) override;
+		virtual bool DeleteTextureData(uint32_t handle) override;
 
 		virtual void SetWidth(uint32_t handle, uint32_t width) override;
 		virtual uint32_t GetWidth(uint32_t handle) override;

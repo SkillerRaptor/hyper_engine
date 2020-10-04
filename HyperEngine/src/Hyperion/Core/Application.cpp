@@ -72,8 +72,10 @@ namespace Hyperion
 
 		while (m_Running)
 		{
-			textureManager->SetWidth(bufferTexture, m_Window->GetWindowData().Width);
-			textureManager->SetHeight(bufferTexture, m_Window->GetWindowData().Height);
+			OpenGLTextureData* textureData = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(bufferTexture));
+			textureData->Width = m_Window->GetWindowData().Width;
+			textureData->Height = m_Window->GetWindowData().Height;
+			textureManager->GenerateTexture(textureData, true);
 			
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, bufferTextureId, 0);
 
@@ -123,6 +125,8 @@ namespace Hyperion
 			m_LayerStack->GetImGuiLayer()->OnRender(bufferTextureId);
 
 			m_Window->OnUpdate(timeStep);
+
+			textureManager->DeleteTextureData(bufferTexture);
 		}
 	}
 
