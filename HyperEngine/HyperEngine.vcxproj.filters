@@ -81,9 +81,6 @@
     <ClCompile Include="src\Hyperion\ECS\World.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hyperion\ECS\Entity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Hyperion\ECS\EntitySystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1253,13 +1250,7 @@
     <ClInclude Include="src\Hyperion\Core\Application.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\ECS\Component.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Hyperion\ECS\Components.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Hyperion\ECS\Entity.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Hyperion\ECS\EntitySystem.hpp">

@@ -100,10 +100,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Hyperion\ECS\Entity.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
     <ClCompile Include="src\Hyperion\ECS\EntitySystem.cpp">
       <SubType>
       </SubType>
@@ -162,12 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Hyperion\Core\Core.hpp" />
-    <ClInclude Include="src\Hyperion\ECS\Component.hpp" />
     <ClInclude Include="src\Hyperion\ECS\Components.hpp" />
-    <ClInclude Include="src\Hyperion\ECS\Entity.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="src\Hyperion\ECS\EntitySystem.hpp">
       <SubType>
       </SubType>

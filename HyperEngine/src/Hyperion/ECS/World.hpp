@@ -4,18 +4,16 @@
 #include <type_traits>
 #include <unordered_map>
 
-#include "Component.hpp"
-#include "Entity.hpp"
-//#include "EntitySystem.h"
 #include "Utilities/Timestep.hpp"
 
 namespace Hyperion
 {
+	class EntitySystem;
+
 	class World
 	{
 	private:
-		std::vector<Entity*> m_Entities;
-		//std::vector<EntitySystem*> m_EntitySystems;
+		std::vector<EntitySystem*> m_EntitySystems;
 
 	public:
 		World();
@@ -25,23 +23,12 @@ namespace Hyperion
 		void Update(Timestep timeStep);
 		void Render();
 
-		Entity* ConstructEntity();
-		void DeleteEntity(Entity* entity);
+		uint32_t ConstructEntity();
+		void DeleteEntity(uint32_t entity);
 
 		template<class... Components>
-		void Each(const typename std::common_type<std::function<void(Entity*, Components*...)>>::type function)
+		void Each(const typename std::common_type<std::function<void(Components&...)>>::type function)
 		{
-			for (Entity* entity : m_Entities)
-			{
-				bool breakIteration = false;
-				([]<typename T>() {
-					if (breakIteration) return;
-					if (!entity->HasComponent<T>())
-						breakIteration = true;
-				}.template operator() < Components > (), ...);
-				if(breakIteration == false)
-					function(entity, entity->GetComponent<Components>()...);
-			}
 		}
 	};
 }

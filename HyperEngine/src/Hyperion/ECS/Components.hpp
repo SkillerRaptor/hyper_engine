@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Component.hpp"
 #include "Maths/Vector.hpp"
 
 namespace Hyperion
 {
-	struct TransformComponent : public Component
+	struct TransformComponent
 	{
 		Vector3 Position;
 		Vector3 Rotation;
@@ -15,7 +14,7 @@ namespace Hyperion
 			: Position(position), Rotation(rotation), Scale(scale) {}
 	};
 
-	struct CharacterControllerComponent : public Component
+	struct CharacterControllerComponent 
 	{
 		float Speed;
 
