@@ -1,6 +1,6 @@
 #pragma once
 
-#include "World.hpp"
+#include "Registry.hpp"
 #include "Utilities/Timestep.hpp"
 
 namespace Hyperion
@@ -11,8 +11,8 @@ namespace Hyperion
 		EntitySystem();
 		~EntitySystem();
 
-		virtual void Tick(World* world, int currentTick) {};
-		virtual void Update(World* world, Timestep timeStep) {};
-		virtual void Render(World* world) {};
+		virtual void Tick(Registry& registry, int currentTick) {};
+		virtual void Update(Registry& registry, Timestep timeStep) {};
+		virtual void Render(Registry& registry) {};
 	};
 }

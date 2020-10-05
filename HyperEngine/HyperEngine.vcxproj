@@ -100,11 +100,15 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Hyperion\ECS\ComponentBuffer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="src\Hyperion\ECS\EntitySystem.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="src\Hyperion\ECS\World.cpp">
+    <ClCompile Include="src\Hyperion\ECS\Registry.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -162,13 +166,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Hyperion\Core\Core.hpp" />
+    <ClInclude Include="src\Hyperion\ECS\ComponentBuffer.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="src\Hyperion\ECS\Components.hpp" />
     <ClInclude Include="src\Hyperion\ECS\EntitySystem.hpp">
       <SubType>
       </SubType>
     </ClInclude>
     <ClInclude Include="src\Hyperion\ECS\Systems\CharacterControllerSystem.hpp" />
-    <ClInclude Include="src\Hyperion\ECS\World.hpp">
+    <ClInclude Include="src\Hyperion\ECS\Registry.hpp">
       <SubType>
       </SubType>
     </ClInclude>

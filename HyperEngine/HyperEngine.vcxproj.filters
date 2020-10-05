@@ -78,9 +78,6 @@
     <ClCompile Include="src\Hyperion\Layers\LayerStack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hyperion\ECS\World.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Hyperion\ECS\EntitySystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -127,6 +124,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Hyperion\Utilities\Hasher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hyperion\ECS\ComponentBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hyperion\ECS\Registry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1259,9 +1262,6 @@
     <ClInclude Include="src\Hyperion\ECS\EntitySystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\ECS\World.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Hyperion\Events\Event.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1401,6 +1401,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Hyperion\Utilities\Hasher.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\ECS\ComponentBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\ECS\Registry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

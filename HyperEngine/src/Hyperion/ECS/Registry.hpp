@@ -27,34 +27,51 @@ namespace Hyperion
 		void Update(Timestep timeStep);
 		void Render();
 
-		uint32_t ConstructEntity();
+		uint32_t ConstructEntity(const std::string& name = std::string());
 		void DeleteEntity(uint32_t entity);
 
 		template<class T, typename... Args>
-		T& AddComponent(uint32_t entity, Args... args)
+		T& AddComponent(uint32_t entity, Args&&... args)
 		{
-			HP_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
-
-			T cls = { std::forward<Args>(args)... };
-			return cls;
+			if (m_Entities.find(entity) == m_Entities.end())
+			{
+				HP_CORE_ASSERT(true, "Entity does not exist!");
+				return;
+			}
+			return m_Entities[entity].AddComponent<T>(std::forward<Args>(args)...);
 		}
 
 		template<class T>
-		T& RemoveComponent(uint32_t entity)
+		void RemoveComponent(uint32_t entity)
 		{
-			HP_CORE_ASSERT(!HasComponent<T>(), "Entity does not has component!");
+			if (m_Entities.find(entity) == m_Entities.end())
+			{
+				HP_CORE_ASSERT(true, "Entity does not exist!");
+				return;
+			}
+			return m_Entities[entity].RemoveComponent<T>();
 		}
 
 		template<class T>
 		T& GetComponent(uint32_t entity)
 		{
-			HP_CORE_ASSERT(!HasComponent<T>(), "Entity does not has component!");
+			if (m_Entities.find(entity) == m_Entities.end())
+			{
+				HP_CORE_ASSERT(true, "Entity does not exist!");
+				return;
+			}
+			return m_Entities[entity].GetComponent<T>();
 		}
 
 		template<class T>
 		bool HasComponent(uint32_t entity)
 		{
-			std::string = typeid(T).name();
+			if (m_Entities.find(entity) == m_Entities.end())
+			{
+				HP_CORE_ASSERT(true, "Entity does not exist!");
+				return;
+			}
+			return m_Entities[entity].HasComponent<T>();
 		}
 
 		template<class... Components>
