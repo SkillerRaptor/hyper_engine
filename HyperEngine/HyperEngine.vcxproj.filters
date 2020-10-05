@@ -78,9 +78,6 @@
     <ClCompile Include="src\Hyperion\Layers\LayerStack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hyperion\ECS\EntitySystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Hyperion\Memory\PoolAllocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -126,10 +123,10 @@
     <ClCompile Include="src\Hyperion\Utilities\Hasher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hyperion\ECS\ComponentBuffer.cpp">
+    <ClCompile Include="src\Hyperion\ECS\Registry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hyperion\ECS\Registry.cpp">
+    <ClCompile Include="src\Hyperion\Utilities\Structures\Array.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1295,9 +1292,6 @@
     <ClInclude Include="src\Hyperion\Maths\Matrix4.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Maths\Vector.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Hyperion\Maths\Vector2.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1407,6 +1401,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Hyperion\ECS\Registry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\Structures\Pair.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\Structures\View.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\Structures\Vector.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Maths\Vector.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

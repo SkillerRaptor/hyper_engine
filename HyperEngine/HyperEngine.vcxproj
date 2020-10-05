@@ -100,14 +100,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Hyperion\ECS\ComponentBuffer.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
-    <ClCompile Include="src\Hyperion\ECS\EntitySystem.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
     <ClCompile Include="src\Hyperion\ECS\Registry.cpp">
       <SubType>
       </SubType>
@@ -143,6 +135,7 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="src\Hyperion\Utilities\Structures\Array.hpp" />
     <ClCompile Include="src\Hyperion\Utilities\Timer.cpp">
       <SubType>
       </SubType>
@@ -190,6 +183,7 @@
     </ClInclude>
     <ClInclude Include="src\Hyperion\Layers\Layer.hpp" />
     <ClInclude Include="src\Hyperion\Layers\LayerStack.hpp" />
+    <ClInclude Include="src\Hyperion\Maths\Vector.hpp" />
     <ClInclude Include="src\Hyperion\Memory\FreeAllocator.hpp" />
     <ClInclude Include="src\Hyperion\Memory\LinearAllocator.hpp" />
     <ClInclude Include="src\Hyperion\Memory\PageAllocator.hpp" />
@@ -198,7 +192,6 @@
     <ClInclude Include="src\Hyperion\Maths\Matrix2.hpp" />
     <ClInclude Include="src\Hyperion\Maths\Matrix3.hpp" />
     <ClInclude Include="src\Hyperion\Maths\Matrix4.hpp" />
-    <ClInclude Include="src\Hyperion\Maths\Vector.hpp" />
     <ClInclude Include="src\Hyperion\Maths\Vector2.hpp" />
     <ClInclude Include="src\Hyperion\Maths\Vector3.hpp" />
     <ClInclude Include="src\Hyperion\Maths\Vector4.hpp" />
@@ -230,6 +223,9 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\Structures\Pair.hpp" />
+    <ClInclude Include="src\Hyperion\Utilities\Structures\Vector.hpp" />
+    <ClInclude Include="src\Hyperion\Utilities\Structures\View.hpp" />
     <ClInclude Include="src\Hyperion\Utilities\Timer.hpp">
       <SubType>
       </SubType>
