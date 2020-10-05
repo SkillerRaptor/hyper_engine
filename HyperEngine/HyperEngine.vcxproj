@@ -127,6 +127,10 @@
     <ClCompile Include="src\Hyperion\Rendering\Buffers\IndexBuffer.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\VertexArray.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\VertexBuffer.cpp" />
+    <ClCompile Include="src\Hyperion\Utilities\Hasher.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="src\Hyperion\Utilities\Input.cpp" />
     <ClCompile Include="src\Hyperion\Core\Application.cpp" />
     <ClCompile Include="src\Hyperion\Utilities\Log.cpp" />
@@ -199,6 +203,10 @@
     <ClInclude Include="src\Hyperion\Rendering\RenderContext.hpp" />
     <ClInclude Include="src\Hyperion\Rendering\ShaderManager.hpp" />
     <ClInclude Include="src\Hyperion\Rendering\TextureManager.hpp" />
+    <ClInclude Include="src\Hyperion\Utilities\Hasher.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="src\Hyperion\Utilities\Input.hpp" />
     <ClInclude Include="src\Hyperion\Core\Application.hpp" />
     <ClInclude Include="src\Hyperion.hpp" />

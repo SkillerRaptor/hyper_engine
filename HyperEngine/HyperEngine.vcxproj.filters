@@ -126,6 +126,9 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Hyperion\Utilities\Hasher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vendor\Assimp\include\assimp\Compiler\poppack1.h">
@@ -1395,6 +1398,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Hyperion\Core\Core.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hyperion\Utilities\Hasher.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
