@@ -33,49 +33,45 @@ namespace Hyperion
 		template<class T, typename... Args>
 		T& AddComponent(uint32_t entity, Args&&... args)
 		{
-			if (m_Entities.find(entity) == m_Entities.end())
-			{
-				HP_CORE_ASSERT(true, "Entity does not exist!");
-				return;
-			}
+			HP_CORE_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exist!");
 			return m_Entities[entity].AddComponent<T>(std::forward<Args>(args)...);
 		}
 
 		template<class T>
 		void RemoveComponent(uint32_t entity)
 		{
-			if (m_Entities.find(entity) == m_Entities.end())
-			{
-				HP_CORE_ASSERT(true, "Entity does not exist!");
-				return;
-			}
+			HP_CORE_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exist!");
 			return m_Entities[entity].RemoveComponent<T>();
 		}
 
 		template<class T>
 		T& GetComponent(uint32_t entity)
 		{
-			if (m_Entities.find(entity) == m_Entities.end())
-			{
-				HP_CORE_ASSERT(true, "Entity does not exist!");
-				return;
-			}
+			HP_CORE_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exist!");
 			return m_Entities[entity].GetComponent<T>();
 		}
 
 		template<class T>
 		bool HasComponent(uint32_t entity)
 		{
-			if (m_Entities.find(entity) == m_Entities.end())
-			{
-				HP_CORE_ASSERT(true, "Entity does not exist!");
-				return;
-			}
+			HP_CORE_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exist!");
 			return m_Entities[entity].HasComponent<T>();
 		}
 
-		template<class... Components>
-		void Each(const typename std::common_type<std::function<void(Components&...)>>::type function)
+		template<class... T>
+		void Each(const typename std::common_type<std::function<void(T&...)>>::type function)
+		{
+		}
+
+		//template<class... T>
+		//View<T...> GetView()
+		//{
+		//	View<T...> view = View<T...>();
+		//	return view;
+		//}
+
+		template<class... T>
+		void GetComponents()
 		{
 		}
 	};

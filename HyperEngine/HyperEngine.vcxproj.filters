@@ -1406,9 +1406,6 @@
     <ClInclude Include="src\Hyperion\Utilities\Structures\Pair.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Hyperion\Utilities\Structures\View.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Hyperion\Utilities\Structures\Vector.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

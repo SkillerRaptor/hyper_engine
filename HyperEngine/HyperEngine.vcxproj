@@ -225,7 +225,6 @@
     </ClInclude>
     <ClInclude Include="src\Hyperion\Utilities\Structures\Pair.hpp" />
     <ClInclude Include="src\Hyperion\Utilities\Structures\Vector.hpp" />
-    <ClInclude Include="src\Hyperion\Utilities\Structures\View.hpp" />
     <ClInclude Include="src\Hyperion\Utilities\Timer.hpp">
       <SubType>
       </SubType>
