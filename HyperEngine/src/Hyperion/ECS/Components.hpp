@@ -18,23 +18,23 @@ namespace Hyperion
 
 	struct TransformComponent
 	{
-		Vector3 Position;
-		Vector3 Rotation;
-		Vector3 Scale;
+		Vector3<float> Position;
+		Vector3<float> Rotation;
+		Vector3<float> Scale;
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent& transformComponent) = default;
-		TransformComponent(const Vector3& position, const Vector3& rotation, const Vector3& scale)
+		TransformComponent(const Vector3<float>& position, const Vector3<float>& rotation, const Vector3<float>& scale)
 			: Position(position), Rotation(rotation), Scale(scale) {}
 	};
 
 	struct SpriteRendererComponent
 	{
-		Vector4 Color;
+		Vector4<float> Color;
 
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent& spriteRendererComponent) = default;
-		SpriteRendererComponent(const Vector4& color)
+		SpriteRendererComponent(const Vector4<float>& color)
 			: Color(color) {}
 	};
 

@@ -21,29 +21,29 @@ namespace Hyperion
 		Matrix2 operator+=(float value);
 		Matrix2 operator+(const Matrix2& matrix2) const;
 		Matrix2 operator+=(const Matrix2& matrix2);
-		Matrix2 operator+(const Vector2& vector) const;
-		Matrix2 operator+=(const Vector2& vector);
+		Matrix2 operator+(const Vector2<float>& vector) const;
+		Matrix2 operator+=(const Vector2<float>& vector);
 
 		Matrix2 operator-(float value) const;
 		Matrix2 operator-=(float value);
 		Matrix2 operator-(const Matrix2& matrix2) const;
 		Matrix2 operator-=(const Matrix2& matrix2);
-		Matrix2 operator-(const Vector2& vector) const;
-		Matrix2 operator-=(const Vector2& vector);
+		Matrix2 operator-(const Vector2<float>& vector) const;
+		Matrix2 operator-=(const Vector2<float>& vector);
 
 		Matrix2 operator*(float value) const;
 		Matrix2 operator*=(float value);
 		Matrix2 operator*(const Matrix2& matrix2) const;
 		Matrix2 operator*=(const Matrix2& matrix2);
-		Matrix2 operator*(const Vector2& vector) const;
-		Matrix2 operator*=(const Vector2& vector);
+		Matrix2 operator*(const Vector2<float>& vector) const;
+		Matrix2 operator*=(const Vector2<float>& vector);
 
 		Matrix2 operator/(float value) const;
 		Matrix2 operator/=(float value);
 		Matrix2 operator/(const Matrix2& matrix2) const;
 		Matrix2 operator/=(const Matrix2& matrix2);
-		Matrix2 operator/(const Vector2& vector) const;
-		Matrix2 operator/=(const Vector2& vector);
+		Matrix2 operator/(const Vector2<float>& vector) const;
+		Matrix2 operator/=(const Vector2<float>& vector);
 
 		bool operator==(const Matrix2& matrix2);
 		bool operator!=(const Matrix2& matrix2);

@@ -2,7 +2,7 @@
 
 namespace Hyperion {
 
-	Matrix4 Matrix::Scale(Matrix4 matrix, Vector3 vector)
+	Matrix4 Matrix::Scale(Matrix4 matrix, Vector3<float> vector)
 	{
 		Matrix4 mat(matrix);
 		mat[0][0] = matrix[0][0] * vector.x;
@@ -11,7 +11,7 @@ namespace Hyperion {
 		return mat;
 	}
 
-	Matrix4 Matrix::Translate(Matrix4 matrix, Vector3 vector)
+	Matrix4 Matrix::Translate(Matrix4 matrix, Vector3<float> vector)
 	{
 		Matrix4 mat(matrix);
 		mat[0][3] = vector.x;

@@ -21,7 +21,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>ClangCL</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -68,7 +68,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\vendor\GLFW\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -114,10 +114,6 @@
     <ClCompile Include="src\Hyperion\Maths\Matrix2.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Matrix3.cpp" />
     <ClCompile Include="src\Hyperion\Maths\Matrix4.cpp" />
-    <ClCompile Include="src\Hyperion\Maths\Vector.cpp" />
-    <ClCompile Include="src\Hyperion\Maths\Vector2.cpp" />
-    <ClCompile Include="src\Hyperion\Maths\Vector3.cpp" />
-    <ClCompile Include="src\Hyperion\Maths\Vector4.cpp" />
     <ClCompile Include="src\Hyperion\Memory\PoolAllocator.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\FrameBuffer.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\IndexBuffer.cpp" />
@@ -755,6 +751,9 @@
     <None Include="vendor\GLM\include\glm\gtx\vector_angle.inl" />
     <None Include="vendor\GLM\include\glm\gtx\vector_query.inl" />
     <None Include="vendor\GLM\include\glm\gtx\wrap.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="vendor\GLFW\lib\glfw3.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

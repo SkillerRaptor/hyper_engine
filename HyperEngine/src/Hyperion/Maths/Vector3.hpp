@@ -1,57 +1,202 @@
 #pragma once
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
+#include <type_traits>
+
+#include "Vector2.hpp"
 
 namespace Hyperion 
 {
+	template <typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
 	class Vector3
 	{
 	public:
-		float x;
-		float y;
-		float z;
+		T x, y, z;
 
 	public:
-		Vector3();
-		Vector3(const Vector3& vector);
-		Vector3(float x, float y, float z);
+		Vector3()
+			: x(0), y(0), z(0) {}
+		Vector3(const Vector3<T>& xyz)
+			: x(xyz.x), y(xyz.y), z(xyz.z) {}
+		Vector3(T x, T y, T z)
+			: x(x), y(y), z(z) {}
+		Vector3(const Vector2<T>& xy, T z)
+			: x(xy.x), y(xy.y), z(z) {}
+		Vector3(T x, const Vector2<T>& yz)
+			: x(x), y(yz.y), z(yz.z) {}
 
-		float magnitude() const;
+		float Magnitude() const
+		{
+			return sqrt(x * x + y * y + z * z);
+		}
 
-		Vector3 operator-() const;
+		/* Negate */
+		Vector3<T> operator-() const
+		{
+			Vector3<T> vec;
+			vec.x = -x;
+			vec.y = -y;
+			vec.z = -z;
+			return vec;
+		}
 
-		Vector3 operator+(float value) const;
-		Vector3 operator+(const Vector3& vector) const;
+		/* Adding */
+		Vector3<T> operator+(T value) const
+		{
+			Vector3<T> vec;
+			vec.x = x + value;
+			vec.y = y + value;
+			vec.z = z + value;
+			return vec;
+		}
 
-		Vector3 operator-(float value) const;
-		Vector3 operator-(const Vector3& vector) const;
+		Vector3<T> operator+(const Vector3<T>& vector) const
+		{
+			Vector3<T> vec;
+			vec.x = x + vector.x;
+			vec.y = y + vector.y;
+			vec.z = z + vector.z;
+			return vec;
+		}
 
-		Vector3 operator*(float value) const;
-		Vector3 operator*(const Vector3& vector) const;
+		Vector3<T>& operator+=(T value)
+		{
+			x += value;
+			y += value;
+			z += value;
+			return *this;
+		}
 
-		Vector3 operator/(float value) const;
-		Vector3 operator/(const Vector3& vector) const;
+		Vector3<T>& operator+=(const Vector3<T>& vector)
+		{
+			x += vector.x;
+			y += vector.y;
+			z += vector.z;
+			return *this;
+		}
 
-		Vector3& operator+=(float value);
-		Vector3& operator+=(const Vector3& vector);
+		/* Subtracting */
+		Vector3<T> operator-(T value) const
+		{
+			Vector3<T> vec;
+			vec.x = x - value;
+			vec.y = y - value;
+			vec.z = z - value;
+			return vec;
+		}
 
-		Vector3& operator-=(float value);
-		Vector3& operator-=(const Vector3& vector);
+		Vector3<T> operator-(const Vector3<T>& vector) const
+		{
+			Vector3<T> vec;
+			vec.x = x - vector.x;
+			vec.y = y - vector.y;
+			vec.z = z - vector.z;
+			return vec;
+		}
 
-		Vector3& operator*=(float value);
-		Vector3& operator*=(const Vector3& vector);
+		Vector3<T>& operator-=(T value)
+		{
+			x -= value;
+			y -= value;
+			z -= value;
+			return *this;
+		}
 
-		Vector3& operator/=(float value);
-		Vector3& operator/=(const Vector3& vector);
+		Vector3<T>& operator-=(const Vector3<T>& vector)
+		{
+			x -= vector.x;
+			y -= vector.y;
+			z -= vector.z;
+			return *this;
+		}
 
-		bool operator==(const Vector3& vector);
-		bool operator!=(const Vector3& vector);
+		/* Multiplying */
+		Vector3<T> operator*(T value) const
+		{
+			Vector3<T> vec;
+			vec.x = x * value;
+			vec.y = y * value;
+			vec.z = z * value;
+			return vec;
+		}
 
-		friend std::ostream& operator<<(std::ostream& os, const Vector3& vector);
+		Vector3<T> operator*(const Vector3<T>& vector) const
+		{
+			Vector3<T> vec;
+			vec.x = x * vector.x;
+			vec.y = y * vector.y;
+			vec.z = z * vector.z;
+			return vec;
+		}
+
+		Vector3<T>& operator*=(T value)
+		{
+			x *= value;
+			y *= value;
+			z *= value;
+			return *this;
+		}
+
+		Vector3<T>& operator*=(const Vector3<T>& vector)
+		{
+			x *= vector.x;
+			y *= vector.y;
+			z *= vector.z;
+			return *this;
+		}
+
+		/* Dividing */
+		Vector3<T> operator/(T value) const
+		{
+			Vector3<T> vec;
+			vec.x = x / value;
+			vec.y = y / value;
+			vec.z = z / value;
+			return vec;
+		}
+
+		Vector3<T> operator/(const Vector3<T>& vector) const
+		{
+			Vector3<T> vec;
+			vec.x = x / vector.x;
+			vec.y = y / vector.y;
+			vec.z = z / vector.z;
+			return vec;
+		}
+
+		Vector3<T>& operator/=(T value)
+		{
+			x /= value;
+			y /= value;
+			z /= value;
+			return *this;
+		}
+
+		Vector3<T>& operator/=(const Vector3<T>& vector)
+		{
+			x /= vector.x;
+			y /= vector.y;
+			z /= vector.z;
+			return *this;
+		}
+
+		/* Comparsion */
+		bool operator==(const Vector3<T>& vector)
+		{
+			return (x == vector.x && y == vector.y && z == vector.z);
+		}
+
+		bool operator!=(const Vector3<T>& vector) 
+		{
+			return (x != vector.x || y != vector.y || z != vector.z);
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const Vector3<T>& vector);
 	};
 
-	inline std::ostream& operator<<(std::ostream& os, const Vector3& vector)
+	template <typename T>
+	inline std::ostream& operator<<(std::ostream& os, const Vector3<T>& vector)
 	{
 		os << "X: " << vector.x << ", Y: " << vector.y << ", Z: " << vector.z;
 		return os;

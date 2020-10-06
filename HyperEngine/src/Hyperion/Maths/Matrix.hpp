@@ -11,8 +11,8 @@ namespace Hyperion
 {
 	class Matrix
 	{
-		static Matrix4 Scale(Matrix4 matrix, Vector3 vector);
-		static Matrix4 Translate(Matrix4 matrix, Vector3 vector);
+		static Matrix4 Scale(Matrix4 matrix, Vector3<float> vector);
+		static Matrix4 Translate(Matrix4 matrix, Vector3<float> vector);
 
 		static Matrix4 RotateX(Matrix4 matrix, float degrees);
 		static Matrix4 RotateY(Matrix4 matrix, float degreesx2);

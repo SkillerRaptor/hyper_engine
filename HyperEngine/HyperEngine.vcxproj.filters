@@ -42,18 +42,6 @@
     <ClCompile Include="src\Hyperion\Maths\Matrix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hyperion\Maths\Vector.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Hyperion\Maths\Vector2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Hyperion\Maths\Vector3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Hyperion\Maths\Vector4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Hyperion\Maths\Matrix4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1846,5 +1834,8 @@
     <None Include="vendor\GLM\include\glm\gtx\wrap.inl">
       <Filter>Header Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="vendor\GLFW\lib\glfw3.lib" />
   </ItemGroup>
 </Project>
