@@ -27,7 +27,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>ClangCL</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -68,7 +68,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>glfw3.lib;</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\vendor\GLFW\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -93,7 +93,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\vendor\GLFW\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -110,10 +110,6 @@
     </ClCompile>
     <ClCompile Include="src\Hyperion\Layers\Layer.cpp" />
     <ClCompile Include="src\Hyperion\Layers\LayerStack.cpp" />
-    <ClCompile Include="src\Hyperion\Maths\Matrix.cpp" />
-    <ClCompile Include="src\Hyperion\Maths\Matrix2.cpp" />
-    <ClCompile Include="src\Hyperion\Maths\Matrix3.cpp" />
-    <ClCompile Include="src\Hyperion\Maths\Matrix4.cpp" />
     <ClCompile Include="src\Hyperion\Memory\PoolAllocator.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\FrameBuffer.cpp" />
     <ClCompile Include="src\Hyperion\Rendering\Buffers\IndexBuffer.cpp" />

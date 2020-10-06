@@ -39,18 +39,6 @@
     <ClCompile Include="src\Hyperion\Rendering\Buffers\VertexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hyperion\Maths\Matrix.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Hyperion\Maths\Matrix4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Hyperion\Maths\Matrix3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Hyperion\Maths\Matrix2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Hyperion\Utilities\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

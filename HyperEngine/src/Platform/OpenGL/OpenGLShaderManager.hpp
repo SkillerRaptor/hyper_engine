@@ -46,9 +46,9 @@ namespace Hyperion
 		virtual void SetVector4(uint32_t handle, const std::string& name, float x, float y, float z, float w) override;
 		virtual void SetVector4(uint32_t handle, const std::string& name, const Vector4<float>& vector) override;
 
-		virtual void SetMatrix2(uint32_t handle, const std::string& name, const Matrix2& matrix) override;
-		virtual void SetMatrix3(uint32_t handle, const std::string& name, const Matrix3& matrix) override;
-		virtual void SetMatrix4(uint32_t handle, const std::string& name, const Matrix4& matrix) override;
+		virtual void SetMatrix2(uint32_t handle, const std::string& name, const Matrix2<float>& matrix) override;
+		virtual void SetMatrix3(uint32_t handle, const std::string& name, const Matrix3<float>& matrix) override;
+		virtual void SetMatrix4(uint32_t handle, const std::string& name, const Matrix4<float>& matrix) override;
 
 		virtual std::string GetVertexShaderPath(uint32_t handle) override;
 		virtual std::string GetFragmentShaderPath(uint32_t handle) override;
