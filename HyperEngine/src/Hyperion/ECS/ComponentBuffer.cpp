@@ -25,6 +25,13 @@ namespace Hyperion
 		if (alignment != 0 && m_Offset % alignment != 0)
 			padding = ((currentAddress / alignment) + 1) * alignment - currentAddress;
 
+		if (!m_FreeList.empty())
+		{
+			std::pair<size_t, void*> ptrPair = m_FreeList.front();
+			m_FreeList.pop();
+			return ptrPair;
+		}
+
 		if (m_Offset + padding + size > m_TotalSize)
 			return std::pair<uint32_t, void*>(-1, nullptr);
 
@@ -37,9 +44,9 @@ namespace Hyperion
 		return std::pair<size_t, void*>(m_Offset - size, (void*) nextAddress);
 	}
 
-	void ComponentBuffer::Free(void* ptr)
+	void ComponentBuffer::Free(std::pair<size_t, void*> ptrPair)
 	{
-		free(ptr);
+		m_FreeList.push(ptrPair);
 	}
 
 	void* ComponentBuffer::Get(size_t offset)

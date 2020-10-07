@@ -99,9 +99,9 @@ namespace Hyperion
 		{
 			uint32_t componentId = Hasher::PrimeHasher(typeid(T).name());
 			void* componentPair = m_Components[componentId]->Get(offset);
-			T* component = static_cast<T*>(componentPair.second);
+			T* component = static_cast<T*>(componentPair);
 			component->~T();
-			m_Components[componentId]->Free(component);
+			m_Components[componentId]->Free(std::pair<size_t, void*>(offset, component));
 		}
 
 		template <typename T>

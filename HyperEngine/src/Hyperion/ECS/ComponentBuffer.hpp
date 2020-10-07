@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+
 #include "Core/Core.hpp"
 
 namespace Hyperion
@@ -8,6 +10,8 @@ namespace Hyperion
 	{
 	private:
 		void* m_Data = nullptr;
+
+		std::queue<std::pair<size_t, void*>> m_FreeList;
 
 		size_t m_TotalSize;
 		size_t m_Size;
@@ -18,7 +22,7 @@ namespace Hyperion
 		~ComponentBuffer();
 
 		std::pair<size_t, void*> Allocate(const size_t& size, const size_t& alignment = 0);
-		void Free(void* ptr);
+		void Free(std::pair<size_t, void*> ptrPair);
 
 		void* Get(size_t offset);
 
