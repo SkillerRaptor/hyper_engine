@@ -25,5 +25,7 @@ namespace Hyperion
 		void OnTick(int currentTick);
 		void OnRender();
 		void OnUpdate(Timestep timeStep);
+
+		Registry& GetRegistry();
 	};
 }

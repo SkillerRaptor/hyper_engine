@@ -38,4 +38,9 @@ namespace Hyperion
 	{
 		m_Systems.OnUpdate(timeStep);
 	}
+
+	Registry& Scene::GetRegistry()
+	{
+		return m_Registry;
+	}
 }

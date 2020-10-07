@@ -20,7 +20,6 @@ namespace Hyperion
 	std::pair<size_t, void*> ComponentBuffer::Allocate(const size_t& size, const size_t& alignment)
 	{
 		size_t padding = 0;
-		size_t paddingAddress = 0;
 		const size_t currentAddress = (size_t) m_Data + m_Offset;
 
 		if (alignment != 0 && m_Offset % alignment != 0)
@@ -33,7 +32,6 @@ namespace Hyperion
 
 		const size_t nextAddress = currentAddress + padding;
 		m_Offset += size;
-
 		m_Size++;
 
 		return std::pair<size_t, void*>(m_Offset - size, (void*) nextAddress);

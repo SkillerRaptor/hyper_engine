@@ -18,7 +18,7 @@ namespace Hyperion
 	{
 	private:
 		std::unordered_map<uint32_t, std::unordered_map<uint32_t, size_t>> m_Entities;
-		std::unordered_map<uint32_t, ComponentBuffer> m_Components;
+		std::unordered_map<uint32_t, ComponentBuffer*> m_Components;
 
 	public:
 		Registry();
@@ -86,9 +86,9 @@ namespace Hyperion
 		{
 			uint32_t componentId = Hasher::PrimeHasher(typeid(T).name());
 			if (m_Components.find(componentId) == m_Components.end())
-				m_Components[componentId] = ComponentBuffer(10);
+				m_Components[componentId] = new ComponentBuffer(sizeof(T) * 500);
 
-			std::pair <size_t, void*> componentPair = m_Components[componentId].Allocate(sizeof(T));
+			std::pair <size_t, void*> componentPair = m_Components[componentId]->Allocate(sizeof(T));
 			T* component = static_cast<T*>(componentPair.second);
 			new (component) T(std::forward<Args>(args)...);
 			return std::pair<size_t, T&>(componentPair.first, *component);
@@ -98,17 +98,17 @@ namespace Hyperion
 		void DeleteComponentFromBuffer(size_t offset)
 		{
 			uint32_t componentId = Hasher::PrimeHasher(typeid(T).name());
-			void* componentPair = m_Components[componentId].Get(offset);
+			void* componentPair = m_Components[componentId]->Get(offset);
 			T* component = static_cast<T*>(componentPair.second);
 			component->~T();
-			m_Components[componentId].Free(component);
+			m_Components[componentId]->Free(component);
 		}
 
 		template <typename T>
 		T& GetComponentFromBuffer(size_t offset)
 		{
 			uint32_t componentId = Hasher::PrimeHasher(typeid(T).name());
-			void* componentPtr = m_Components[componentId].Get(offset);
+			void* componentPtr = m_Components[componentId]->Get(offset);
 			T* component = static_cast<T*>(componentPtr);
 			return *component;
 		}
