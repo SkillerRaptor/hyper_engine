@@ -35,8 +35,10 @@
 .vs/
 *.sln
 */*.vcxproj
+*/*/*.vcxproj
 */*/*/*.vcxproj
 */*.filters
+*/*/*.filters
 */*/*/*.filters
 */*.user
 bin/
