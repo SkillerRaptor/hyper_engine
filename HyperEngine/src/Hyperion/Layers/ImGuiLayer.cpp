@@ -20,6 +20,16 @@ namespace Hyperion
 
 	void ImGuiLayer::OnAttach()
 	{
+		m_Scene = CreateRef<Scene>();
+		m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>();
+
+		m_SceneHierarchyPanel->SetContext(m_Scene);
+
+		m_Scene->CreateEntity("Square One");
+		m_Scene->CreateEntity("Square Two");
+		m_Scene->CreateEntity("Square Three");
+		m_Scene->CreateEntity("Camera");
+
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -48,11 +58,7 @@ namespace Hyperion
 	{
 		ShowDockingMenu();
 
-		ImGui::Begin("Hierarchy");
-		ImGui::PushTextWrapPos();
-		ImGui::Text("Here you can see your files.");
-		ImGui::PopTextWrapPos();
-		ImGui::End();
+		m_SceneHierarchyPanel->OnRender();
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		style.WindowPadding = ImVec2(2, 2);
@@ -71,11 +77,6 @@ namespace Hyperion
 		ImGui::PopTextWrapPos();
 		ImGui::End();
 
-		ImGui::Begin("Inspector");
-		ImGui::PushTextWrapPos();
-		ImGui::Text("Here you can see the components from an entity.");
-		ImGui::PopTextWrapPos();
-		ImGui::End();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}

@@ -62,6 +62,12 @@ namespace Hyperion
 			return components.find(Hasher::PrimeHasher(typeid(T).name())) != components.end();
 		}
 
+		void Each(const typename std::common_type<std::function<void(uint32_t)>>::type function)
+		{
+			for (auto& entity : m_Entities)
+				function(entity.first);
+		}
+
 		template<class... T>
 		void Each(const typename std::common_type<std::function<void(T&...)>>::type function)
 		{

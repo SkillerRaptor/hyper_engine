@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Layer.hpp"
+#include "SceneHierarchyPanel.hpp"
+#include "Core/Core.hpp"
+#include "ECS/Scene.hpp"
 #include "Utilities/Timestep.hpp"
 
 namespace Hyperion
@@ -8,6 +11,8 @@ namespace Hyperion
 	class ImGuiLayer : public Layer
 	{
 	private:
+		Ref<Scene> m_Scene;
+		Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
 		uint32_t m_FrameTextureId;
 
 	public:
