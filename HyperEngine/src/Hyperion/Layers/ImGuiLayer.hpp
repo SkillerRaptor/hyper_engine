@@ -7,6 +7,9 @@ namespace Hyperion
 {
 	class ImGuiLayer : public Layer
 	{
+	private:
+		uint32_t m_FrameTextureId;
+
 	public:
 		ImGuiLayer();
 		virtual ~ImGuiLayer();
@@ -15,7 +18,10 @@ namespace Hyperion
 		virtual void OnDetach() override;
 
 		virtual void OnUpdate(Timestep timeStep) override;
-		void OnRender(unsigned int frameTexture);
+		virtual void OnRender() override;
+
+		void SetFrameTextureId(uint32_t frameTextureId);
+		uint32_t GetFrameTextureId() const;
 
 	private:
 		void SetupStyle();

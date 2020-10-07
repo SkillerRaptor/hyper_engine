@@ -44,7 +44,7 @@ namespace Hyperion
 		ImGui::NewFrame();
 	}
 
-	void ImGuiLayer::OnRender(unsigned int frameTexture)
+	void ImGuiLayer::OnRender()
 	{
 		ShowDockingMenu();
 
@@ -59,8 +59,7 @@ namespace Hyperion
 
 		ImGui::Begin("Editor");
 		ImGui::BeginChild("GameRenderer");
-		//Renderer2D::GetCamera()->SetSize(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
-		ImGui::Image((ImTextureID)(intptr_t)frameTexture, ImGui::GetWindowSize(), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image((ImTextureID)(intptr_t) m_FrameTextureId, ImGui::GetWindowSize(), ImVec2(0, 1), ImVec2(1, 0));
 		ImGui::EndChild();
 		ImGui::End();
 
@@ -222,5 +221,15 @@ namespace Hyperion
 		if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
 		if (ImGui::MenuItem("Delete", "Del")) {}
 		ImGui::EndMenu();
+	}
+
+	void ImGuiLayer::SetFrameTextureId(uint32_t frameTextureId)
+	{
+		m_FrameTextureId = frameTextureId;
+	}
+
+	uint32_t ImGuiLayer::GetFrameTextureId() const
+	{
+		return m_FrameTextureId;
 	}
 }

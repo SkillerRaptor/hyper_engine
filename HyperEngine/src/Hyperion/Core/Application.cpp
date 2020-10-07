@@ -68,6 +68,8 @@ namespace Hyperion
 		uint32_t bufferTexture = textureManager->CreateTexture(m_Window->GetWindowData().Width, m_Window->GetWindowData().Height, TextureType::FRAMEBUFFER);
 		uint32_t bufferTextureId = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(bufferTexture))->TextureId;
 
+		m_LayerStack->GetImGuiLayer()->SetFrameTextureId(bufferTextureId);
+
 		FrameBuffer frameBuffer;
 
 		while (m_Running)
@@ -122,7 +124,7 @@ namespace Hyperion
 			if (!m_Running) break;
 
 			m_LayerStack->GetImGuiLayer()->OnUpdate(timeStep);
-			m_LayerStack->GetImGuiLayer()->OnRender(bufferTextureId);
+			m_LayerStack->GetImGuiLayer()->OnRender();
 
 			m_Window->OnUpdate(timeStep);
 
