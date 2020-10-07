@@ -65,20 +65,21 @@ namespace Hyperion
 		template<class... T>
 		void Each(const typename std::common_type<std::function<void(T&...)>>::type function)
 		{
-			function(GetComponent<T>(0)...);
+			for (auto& entity : m_Entities)
+			{
+				bool shouldSkip = false;
+				auto lambda = [&]<typename C>() mutable {
+					if (shouldSkip)
+						return;
+					if (!HasComponent<C>(entity.first))
+						shouldSkip = true;
+				};
+				(lambda.template operator() < T > (), ...);
+				if (shouldSkip)
+					continue;
+				function(GetComponent<T>(entity.first)...);
+			}
 		}
-
-		//template<class... T>
-		//View<T...> GetView()
-		//{
-		//	View<T...> view = View<T...>();
-		//	return view;
-		//}
-
-		//template<class... T>
-		//void GetComponents()
-		//{
-		//}
 
 	private:
 		template <typename T, typename... Args>
