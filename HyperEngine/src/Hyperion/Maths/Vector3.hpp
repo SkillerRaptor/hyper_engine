@@ -19,6 +19,8 @@ namespace Hyperion
 			: x(0), y(0), z(0) {}
 		Vector3(const Vector3<T>& xyz)
 			: x(xyz.x), y(xyz.y), z(xyz.z) {}
+		Vector3(T xyz)
+			: x(xyz), y(xyz), z(xyz) {}
 		Vector3(T x, T y, T z)
 			: x(x), y(y), z(z) {}
 		Vector3(const Vector2<T>& xy, T z)
@@ -190,6 +192,12 @@ namespace Hyperion
 		bool operator!=(const Vector3<T>& vector) 
 		{
 			return (x != vector.x || y != vector.y || z != vector.z);
+		}
+
+		/* Conversion */
+		operator float*()
+		{
+			return reinterpret_cast<float*>(this);
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const Vector3<T>& vector);

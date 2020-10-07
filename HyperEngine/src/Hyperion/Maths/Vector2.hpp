@@ -17,6 +17,8 @@ namespace Hyperion
 			: x(0), y(0) {}
 		Vector2(const Vector2<T>& xy)
 			: x(xy.x), y(xy.y) {}
+		Vector2(T xy)
+			: x(xy), y(xy) {}
 		Vector2(T x, T y)
 			: x(x), y(y) {}
 
@@ -167,6 +169,12 @@ namespace Hyperion
 		bool operator!=(const Vector2<T>& vector)
 		{
 			return (x != vector.x || y != vector.y);
+		}
+
+		/* Conversion */
+		operator float* ()
+		{
+			return reinterpret_cast<float*>(this);
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const Vector2<T>& vector);
