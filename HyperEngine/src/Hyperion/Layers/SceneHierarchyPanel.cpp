@@ -77,7 +77,7 @@ namespace Hyperion
 
 			ImGui::Text("Tag");
 			ImGui::SameLine();
-			if (ImGui::InputText("", buffer, sizeof(buffer)))
+			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 				tag = std::string(buffer);
 		}
 
@@ -85,21 +85,19 @@ namespace Hyperion
 		{
 			if (ImGui::TreeNodeEx((void*) typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
 			{
-				auto& position = registry.GetComponent<TransformComponent>(entity).Position;
-				auto& rotation = registry.GetComponent<TransformComponent>(entity).Rotation;
-				auto& scale = registry.GetComponent<TransformComponent>(entity).Scale;
+				TransformComponent& transformComponent = registry.GetComponent<TransformComponent>(entity);
 
 				ImGui::Text("Position");
 				ImGui::SameLine();
-				ImGui::DragFloat3("", position, 0.5f);
+				ImGui::DragFloat3("##X", transformComponent.Position, 0.1f);
 
 				ImGui::Text("Rotation");
 				ImGui::SameLine();
-				ImGui::DragFloat3("", rotation, 0.5f);
+				ImGui::DragFloat3("##Y", transformComponent.Rotation, 0.1f);
 
 				ImGui::Text("Scale   ");
 				ImGui::SameLine();
-				ImGui::DragFloat3("", scale, 0.5f);
+				ImGui::DragFloat3("##Z", transformComponent.Scale, 0.1f);
 
 				ImGui::TreePop();
 			}
