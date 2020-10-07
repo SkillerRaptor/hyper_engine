@@ -27,7 +27,6 @@
 *.lib
 
 # Executables
-*.exe
 *.out
 *.app
 
@@ -41,8 +40,10 @@
 */*/*.filters
 */*/*/*.filters
 */*.user
-bin/
-bin-int/
+/bin/
+/bin-int/
+*/*/*/bin/
+*/*/*/bin-int/
 
 # Visual C++ cache files
 ipch/
