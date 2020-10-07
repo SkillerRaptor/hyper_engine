@@ -1,7 +1,8 @@
 #pragma once
 
+#include "EntitySystem.hpp"
 #include "ECS/Components.hpp"
-#include "ECS/EntitySystem.hpp"
+#include "ECS/Registry.hpp"
 #include "Utilities/Input.hpp"
 
 namespace Hyperion
@@ -14,7 +15,6 @@ namespace Hyperion
 
 		virtual void Update(Registry& registry, Timestep timeStep) override
 		{
-			std::cout << "Update CharacterControllerSystem" << std::endl;
 			registry.Each<CharacterControllerComponent, TransformComponent>([&](CharacterControllerComponent& characterController, TransformComponent& transform)
 				{
 					transform.Position.x += (float)(characterController.Speed * timeStep * Input::GetAxis(InputAxis::HORIZONTAL));

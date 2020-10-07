@@ -1,61 +1,29 @@
 #pragma once
 
-#include <tuple>
-#include <unordered_map>
-
 #include "Core/Core.hpp"
-#include "Utilities/Hasher.hpp"
 
 namespace Hyperion
 {
 	class ComponentBuffer
 	{
 	private:
-		std::unordered_map<uint32_t, void*> m_Components;
+		void* m_Data = nullptr;
+
+		size_t m_TotalSize;
+		size_t m_Size;
+		size_t m_Offset;
 
 	public:
-		template<class T, typename... Args>
-		T& AddComponent(Args&&... args)
-		{
-			HP_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
-			uint32_t componentId = Hasher::PrimeHasher(typeid(T).name());
-			m_Components.emplace(componentId, new T(std::forward<Args>(args)...));
-			return GetComponent<T>();
-		}
+		ComponentBuffer(size_t totalSize = 1024);
+		~ComponentBuffer();
 
-		template<class T>
-		void RemoveComponent()
-		{
-			HP_CORE_ASSERT(HasComponent<T>(), "Entity does not has component!");
-			uint32_t componentId = Hasher::PrimeHasher(typeid(T).name());
-			m_Components.erase(componentId);
-		}
+		std::pair<size_t, void*> Allocate(const size_t& size, const size_t& alignment = 0);
+		void Free(void* ptr);
 
-		template<class T>
-		T& GetComponent()
-		{
-			HP_CORE_ASSERT(HasComponent<T>(), "Entity does not has component!");
-			uint32_t componentId = Hasher::PrimeHasher(typeid(T).name());
-			return *static_cast<T*>(m_Components[componentId]);
-		}
+		void* Get(size_t offset);
 
-		template<class T>
-		bool HasComponent()
-		{
-			uint32_t componentId = Hasher::PrimeHasher(typeid(T).name());
-			return m_Components.find(componentId) != m_Components.end();
-		}
+		const size_t Size() const { return m_Size; }
 
-		template<class... T>
-		std::tuple<T...> GetComponents()
-		{
-			([]<class Component>()
-			{
-				if (HasComponent<Component>())
-				{
-
-				}
-			}.template operator()<T>(), ...);
-		}
+	private:
 	};
 }

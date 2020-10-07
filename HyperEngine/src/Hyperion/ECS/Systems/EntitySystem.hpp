@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Registry.hpp"
+#include "ECS/Registry.hpp"
 #include "Utilities/Timestep.hpp"
 
 namespace Hyperion

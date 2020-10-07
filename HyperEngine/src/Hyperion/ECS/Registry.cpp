@@ -1,7 +1,6 @@
 #include "Registry.hpp"
 
 #include "Components.hpp"
-#include "EntitySystem.hpp"
 
 namespace Hyperion
 {
@@ -13,31 +12,14 @@ namespace Hyperion
 	{
 	}
 
-	void Registry::Tick(int currentTick)
-	{
-		for (EntitySystem* entitySystem : m_EntitySystems)
-			entitySystem->Tick(*this, currentTick);
-	}
-
-	void Registry::Update(Timestep timeStep)
-	{
-		for (EntitySystem* entitySystem : m_EntitySystems)
-			entitySystem->Update(*this, timeStep);
-	}
-
-	void Registry::Render()
-	{
-		for (EntitySystem* entitySystem : m_EntitySystems)
-			entitySystem->Render(*this);
-	}
-
 	uint32_t Registry::ConstructEntity(const std::string& name)
 	{
-		static uint32_t entityId = 0;
-		ComponentBuffer componentBuffer;
-		componentBuffer.AddComponent<TransformComponent>();
-		componentBuffer.AddComponent<TagComponent>(name.empty() ? "Entity" : name);
-		m_Entities.emplace(entityId++, std::move(componentBuffer));
+		uint32_t entityId = Hasher::PrimeHasher(name);
+		m_Entities.emplace(entityId, std::unordered_map<uint32_t, size_t>());
+
+		AddComponent<TransformComponent>(entityId);
+		AddComponent<TagComponent>(entityId, name.empty() ? "Entity" : name);
+
 		return entityId;
 	}
 
