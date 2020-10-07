@@ -29,11 +29,11 @@ namespace Hyperion
 
 		m_CoreLogger = CreateRef<Logger>(&m_MessageQueue);
 		m_CoreLogger->SetName("Core");
-		m_CoreLogger->SetLevel(Level::HP_ALL);
+		m_CoreLogger->SetLevel(Level::HP_LEVEL_ALL);
 
 		m_ClientLogger = CreateRef<Logger>(&m_MessageQueue);
 		m_ClientLogger->SetName("Client");
-		m_ClientLogger->SetLevel(Level::HP_ALL);
+		m_ClientLogger->SetLevel(Level::HP_LEVEL_ALL);
 
 		m_LoggerThread = std::thread(&Log::RunThread, this);
 	}
@@ -52,22 +52,22 @@ namespace Hyperion
 				std::pair<Level, std::string> message = m_MessageQueue.front();
 				switch (message.first)
 				{
-				case Level::HP_INFO: default:
+				case Level::HP_LEVEL_INFO: default:
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
 					break;
-				case Level::HP_TRACE:
+				case Level::HP_LEVEL_TRACE:
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 					break;
-				case Level::HP_WARN:
+				case Level::HP_LEVEL_WARN:
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN);
 					break;
-				case Level::HP_ERROR:
+				case Level::HP_LEVEL_ERROR:
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_INTENSITY);
 					break;
-				case Level::HP_FATAL:
+				case Level::HP_LEVEL_FATAL:
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
 					break;
-				case Level::HP_DEBUG:
+				case Level::HP_LEVEL_DEBUG:
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 					break;
 				}

@@ -33,6 +33,9 @@
 
 # Visual Studio
 .vs/
+*.sln
+*.vcxproj
+*.filter
 *.user
 bin/
 bin-int/
@@ -47,8 +50,6 @@ ipch/
 *.cachefile
 
 # Others
-Projects/
-*/vendor/
 *.ini
 *.cfg
 *.json

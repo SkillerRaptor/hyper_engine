@@ -1,5 +1,10 @@
 #include "ImGuiLayer.hpp"
 
+#include <imgui.h>
+#include <imgui_internal.h>
+#include "Platform/OpenGL/ImGuiGLFWRenderer.h"
+#include "Platform/OpenGL/ImGuiOpenGLRenderer.h"
+
 #include "Core/Application.hpp"
 
 namespace Hyperion
