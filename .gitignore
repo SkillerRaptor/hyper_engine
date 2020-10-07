@@ -34,9 +34,11 @@
 # Visual Studio
 .vs/
 *.sln
-*.vcxproj
-*.filter
-*.user
+*/*.vcxproj
+*/*/*/*.vcxproj
+*/*.filters
+*/*/*/*.filters
+*/*.user
 bin/
 bin-int/
 
