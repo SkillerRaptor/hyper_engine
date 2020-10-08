@@ -192,17 +192,44 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix4<T> operator*(const Vector4<float>& vector) const
+		//Matrix4<T> operator*(const Vector4<float>& vector) const
+		//{
+		//	Matrix4<T> mat;
+		//	for (size_t i = 0; i < 4; i++)
+		//	{
+		//		mat.matrix[i][0] = matrix[i][0] * vector.x;
+		//		mat.matrix[i][1] = matrix[i][1] * vector.y;
+		//		mat.matrix[i][2] = matrix[i][2] * vector.z;
+		//		mat.matrix[i][3] = matrix[i][3] * vector.w;
+		//	}
+		//	return mat;
+		//}		
+		
+		Vector4<T> operator*(const Vector4<float>& vector) const
 		{
-			Matrix4<T> mat;
-			for (size_t i = 0; i < 4; i++)
-			{
-				mat.matrix[i][0] = matrix[i][0] * vector.x;
-				mat.matrix[i][1] = matrix[i][1] * vector.y;
-				mat.matrix[i][2] = matrix[i][2] * vector.z;
-				mat.matrix[i][3] = matrix[i][3] * vector.w;
-			}
-			return mat;
+			Vector4<T> vec;
+
+			vec.x += matrix[0][0] * vector.x;
+			vec.x += matrix[0][1] * vector.y;
+			vec.x += matrix[0][2] * vector.z;
+			vec.x += matrix[0][3] * vector.w;
+
+			vec.y += matrix[1][0] * vector.x;
+			vec.y += matrix[1][1] * vector.y;
+			vec.y += matrix[1][2] * vector.z;
+			vec.y += matrix[1][3] * vector.w;
+
+			vec.z += matrix[2][0] * vector.x;
+			vec.z += matrix[2][1] * vector.y;
+			vec.z += matrix[2][2] * vector.z;
+			vec.z += matrix[2][3] * vector.w;
+
+			vec.w += matrix[3][0] * vector.x;
+			vec.w += matrix[3][1] * vector.y;
+			vec.w += matrix[3][2] * vector.z;
+			vec.w += matrix[3][3] * vector.w;
+
+			return vec;
 		}
 
 		Matrix4<T> operator*=(const Vector4<float>& vector)

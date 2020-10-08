@@ -56,9 +56,9 @@ namespace Hyperion
 		m_QuadIndexBuffer->Bind();
 		delete[] quadIndices;
 
-		m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
-		m_QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
-		m_QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
+		m_QuadVertexPositions[0] = {  0.5f,  0.5f, 0.0f, 1.0f };
+		m_QuadVertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
+		m_QuadVertexPositions[2] = { -0.5f, -0.5f, 0.0f, 1.0f };
 		m_QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 
 		m_QuadVertexArray->Init();

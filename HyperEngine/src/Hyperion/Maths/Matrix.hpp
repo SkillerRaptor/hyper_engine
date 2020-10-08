@@ -25,9 +25,9 @@ namespace Hyperion
 		Matrix4<T> Translate(Matrix4<T> matrix, Vector3<T> vector)
 		{
 			Matrix4<T> mat(matrix);
-			mat[0][3] = vector.x;
-			mat[1][3] = vector.y;
-			mat[2][3] = vector.z;
+			mat[3][0] = vector.x;
+			mat[3][1] = vector.y;
+			mat[3][2] = vector.z;
 			return mat;
 		}
 
