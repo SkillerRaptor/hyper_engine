@@ -7,7 +7,7 @@
 
 namespace Hyperion
 {
-	template <typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+	template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 	class Matrix2
 	{
 	public:
@@ -72,7 +72,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix2<T> operator+(const Vector2<float>& vector) const
+		Matrix2<T> operator+(const Vector2<>& vector) const
 		{
 			Matrix2<T> mat;
 			for (size_t i = 0; i < 2; i++)
@@ -83,7 +83,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix2<T> operator+=(const Vector2<float>& vector)
+		Matrix2<T> operator+=(const Vector2<>& vector)
 		{
 			for (size_t i = 0; i < 2; i++)
 			{
@@ -128,7 +128,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix2<T> operator-(const Vector2<float>& vector) const
+		Matrix2<T> operator-(const Vector2<>& vector) const
 		{
 			Matrix2<T> mat;
 			for (size_t i = 0; i < 2; i++)
@@ -139,7 +139,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix2<T> operator-=(const Vector2<float>& vector)
+		Matrix2<T> operator-=(const Vector2<>& vector)
 		{
 			for (size_t i = 0; i < 2; i++)
 			{
@@ -184,7 +184,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix2<T> operator*(const Vector2<float>& vector) const
+		Matrix2<T> operator*(const Vector2<>& vector) const
 		{
 			Matrix2<T> mat;
 			for (size_t i = 0; i < 2; i++)
@@ -195,7 +195,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix2<T> operator*=(const Vector2<float>& vector)
+		Matrix2<T> operator*=(const Vector2<>& vector)
 		{
 			for (size_t i = 0; i < 2; i++)
 			{
@@ -240,7 +240,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix2<T> operator/(const Vector2<float>& vector) const
+		Matrix2<T> operator/(const Vector2<>& vector) const
 		{
 			Matrix2<T> mat;
 			for (size_t i = 0; i < 2; i++)
@@ -251,7 +251,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix2<T> operator/=(const Vector2<float>& vector)
+		Matrix2<T> operator/=(const Vector2<>& vector)
 		{
 			for (size_t i = 0; i < 2; i++)
 			{

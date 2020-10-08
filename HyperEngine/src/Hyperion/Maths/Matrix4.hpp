@@ -7,7 +7,7 @@
 
 namespace Hyperion 
 {
-	template <typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+	template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
     class Matrix4
     {
     public:
@@ -72,7 +72,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix4<T> operator+(const Vector4<float>& vector) const
+		Matrix4<T> operator+(const Vector4<>& vector) const
 		{
 			Matrix4<T> mat;
 			for (size_t i = 0; i < 4; i++)
@@ -85,7 +85,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix4<T> operator+=(const Vector4<float>& vector)
+		Matrix4<T> operator+=(const Vector4<>& vector)
 		{
 			for (size_t i = 0; i < 4; i++)
 			{
@@ -132,7 +132,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix4<T> operator-(const Vector4<float>& vector) const
+		Matrix4<T> operator-(const Vector4<>& vector) const
 		{
 			Matrix4<T> mat;
 			for (size_t i = 0; i < 4; i++)
@@ -145,7 +145,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix4<T> operator-=(const Vector4<float>& vector)
+		Matrix4<T> operator-=(const Vector4<>& vector)
 		{
 			for (size_t i = 0; i < 4; i++)
 			{
@@ -192,7 +192,7 @@ namespace Hyperion
 			return *this;
 		}
 		
-		Vector4<T> operator*(const Vector4<float>& vector) const
+		Vector4<T> operator*(const Vector4<>& vector) const
 		{
 			Vector4<T> vec = Vector4<T>();
 
@@ -203,7 +203,7 @@ namespace Hyperion
 			return vec;
 		}
 
-		Matrix4<T> operator*=(const Vector4<float>& vector)
+		Matrix4<T> operator*=(const Vector4<>& vector)
 		{
 			for (size_t i = 0; i < 4; i++)
 			{
@@ -250,7 +250,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix4<T> operator/(const Vector4<float>& vector) const
+		Matrix4<T> operator/(const Vector4<>& vector) const
 		{
 			Matrix4<T> mat;
 			for (size_t i = 0; i < 4; i++)
@@ -263,7 +263,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix4<T> operator/=(const Vector4<float>& vector)
+		Matrix4<T> operator/=(const Vector4<>& vector)
 		{
 			for (size_t i = 0; i < 4; i++)
 			{

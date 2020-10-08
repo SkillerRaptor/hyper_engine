@@ -32,9 +32,9 @@ namespace Hyperion
 		uint32_t squareThree = m_Scene->CreateEntity("Square Three");
 		m_CameraEntity = m_Scene->CreateEntity("Camera");
 
-		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareOne, Vector4<float>(1.0f, 0.0f, 0.0f, 1.0f));
-		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareTwo, Vector4<float>(0.0f, 1.0f, 0.0f, 1.0f));
-		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareThree, Vector4<float>(0.0f, 0.0f, 1.0f, 1.0f));
+		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareOne, Vector4<>(1.0f, 0.0f, 0.0f, 1.0f));
+		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareTwo, Vector4<>(0.0f, 1.0f, 0.0f, 1.0f));
+		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareThree, Vector4<>(0.0f, 0.0f, 1.0f, 1.0f));
 		m_Scene->GetRegistry().AddComponent<CameraComponent>(m_CameraEntity, 1280, 720, 1.0f, 0.1f, 1.0f);
 		m_Scene->GetRegistry().AddComponent<CameraControllerComponent>(m_CameraEntity, 0.01f, 1.0f);
 

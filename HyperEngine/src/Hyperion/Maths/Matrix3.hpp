@@ -7,7 +7,7 @@
 
 namespace Hyperion 
 {
-	template <typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+	template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 	class Matrix3
 	{
 	public:
@@ -72,7 +72,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix3<T> operator+(const Vector3<float>& vector) const
+		Matrix3<T> operator+(const Vector3<>& vector) const
 		{
 			Matrix3<T> mat;
 			for (size_t i = 0; i < 3; i++)
@@ -84,7 +84,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix3<T> operator+=(const Vector3<float>& vector)
+		Matrix3<T> operator+=(const Vector3<>& vector)
 		{
 			for (size_t i = 0; i < 3; i++)
 			{
@@ -130,7 +130,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix3<T> operator-(const Vector3<float>& vector) const
+		Matrix3<T> operator-(const Vector3<>& vector) const
 		{
 			Matrix3<T> mat;
 			for (size_t i = 0; i < 3; i++)
@@ -142,7 +142,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix3<T> operator-=(const Vector3<float>& vector)
+		Matrix3<T> operator-=(const Vector3<>& vector)
 		{
 			for (size_t i = 0; i < 3; i++)
 			{
@@ -188,7 +188,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix3<T> operator*(const Vector3<float>& vector) const
+		Matrix3<T> operator*(const Vector3<>& vector) const
 		{
 			Matrix3<T> mat;
 			for (size_t i = 0; i < 3; i++)
@@ -200,7 +200,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix3<T> operator*=(const Vector3<float>& vector)
+		Matrix3<T> operator*=(const Vector3<>& vector)
 		{
 			for (size_t i = 0; i < 3; i++)
 			{
@@ -246,7 +246,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix3<T> operator/(const Vector3<float>& vector) const
+		Matrix3<T> operator/(const Vector3<>& vector) const
 		{
 			Matrix3<T> mat;
 			for (size_t i = 0; i < 3; i++)
@@ -258,7 +258,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix3<T> operator/=(const Vector3<float>& vector)
+		Matrix3<T> operator/=(const Vector3<>& vector)
 		{
 			for (size_t i = 0; i < 3; i++)
 			{

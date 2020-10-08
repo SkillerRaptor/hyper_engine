@@ -182,7 +182,7 @@ namespace Hyperion
 		glUniform2f(GetUniformLocation(m_Shaders[handle], name), x, y);
 	}
 
-	void OpenGLShaderManager::SetVector2(uint32_t handle, const std::string& name, const Vector2<float>& vector)
+	void OpenGLShaderManager::SetVector2(uint32_t handle, const std::string& name, const Vector2<>& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
@@ -196,7 +196,7 @@ namespace Hyperion
 		glUniform3f(GetUniformLocation(m_Shaders[handle], name), x, y, z);
 	}
 
-	void OpenGLShaderManager::SetVector3(uint32_t handle, const std::string& name, const Vector3<float>& vector)
+	void OpenGLShaderManager::SetVector3(uint32_t handle, const std::string& name, const Vector3<>& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
@@ -210,28 +210,28 @@ namespace Hyperion
 		glUniform4f(GetUniformLocation(m_Shaders[handle], name), x, y, z, w);
 	}
 
-	void OpenGLShaderManager::SetVector4(uint32_t handle, const std::string& name, const Vector4<float>& vector)
+	void OpenGLShaderManager::SetVector4(uint32_t handle, const std::string& name, const Vector4<>& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform4f(GetUniformLocation(m_Shaders[handle], name), vector.x, vector.y, vector.z, vector.w);
 	}
 
-	void OpenGLShaderManager::SetMatrix2(uint32_t handle, const std::string& name, const Matrix2<float>& matrix)
+	void OpenGLShaderManager::SetMatrix2(uint32_t handle, const std::string& name, const Matrix2<>& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniformMatrix2fv(GetUniformLocation(m_Shaders[handle], name), 1, false, &matrix.matrix[0][0]);
 	}
 
-	void OpenGLShaderManager::SetMatrix3(uint32_t handle, const std::string& name, const Matrix3<float>& matrix)
+	void OpenGLShaderManager::SetMatrix3(uint32_t handle, const std::string& name, const Matrix3<>& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniformMatrix3fv(GetUniformLocation(m_Shaders[handle], name), 1, false, &matrix.matrix[0][0]);
 	}
 
-	void OpenGLShaderManager::SetMatrix4(uint32_t handle, const std::string& name, const Matrix4<float>& matrix)
+	void OpenGLShaderManager::SetMatrix4(uint32_t handle, const std::string& name, const Matrix4<>& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;

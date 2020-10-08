@@ -19,23 +19,23 @@ namespace Hyperion
 
 	struct TransformComponent
 	{
-		Vector3<float> Position;
-		Vector3<float> Rotation;
-		Vector3<float> Scale;
+		Vector3<> Position;
+		Vector3<> Rotation;
+		Vector3<> Scale;
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent& transformComponent) = default;
-		TransformComponent(const Vector3<float>& position, const Vector3<float>& rotation, const Vector3<float>& scale)
+		TransformComponent(const Vector3<>& position, const Vector3<>& rotation, const Vector3<>& scale)
 			: Position(position), Rotation(rotation), Scale(scale) {}
 	};
 
 	struct SpriteRendererComponent
 	{
-		Vector4<float> Color;
+		Vector4<> Color;
 
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent& spriteRendererComponent) = default;
-		SpriteRendererComponent(const Vector4<float>& color)
+		SpriteRendererComponent(const Vector4<>& color)
 			: Color(color) {}
 	};
 
@@ -48,8 +48,8 @@ namespace Hyperion
 		float NearPlane;
 		float FarPlane;
 
-		Matrix4<float> ProjectionMatrix = Matrix4<float>(1.0f);
-		Matrix4<float> TransformationMatrix = Matrix4<float>(1.0f);
+		Matrix4<> ProjectionMatrix = Matrix4<>(1.0f);
+		Matrix4<> TransformationMatrix = Matrix4<>(1.0f);
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;

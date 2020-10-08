@@ -11,7 +11,7 @@ namespace Hyperion
 {
 	namespace Matrix
 	{
-		template <typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+		template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 		Matrix4<T> Scale(Matrix4<T> matrix, Vector3<T> vector)
 		{
 			Matrix4<T> mat(matrix);

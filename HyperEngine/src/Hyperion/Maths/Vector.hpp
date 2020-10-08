@@ -8,7 +8,7 @@ namespace Hyperion
 {
 	namespace Vector
 	{
-		template<typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+		template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 		Vector2<T> Normalize(Vector2<T>& vector)
 		{
 			Vector2<T> vec;
@@ -17,7 +17,7 @@ namespace Hyperion
 			return vec;
 		}
 
-		template<typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+		template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 		Vector3<T> Normalize(Vector3<T>& vector)
 		{
 			Vector3<T> vec;
@@ -27,7 +27,7 @@ namespace Hyperion
 			return vec;
 		}
 
-		template<typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+		template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 		Vector4<T> Normalize(Vector4<T>& vector)
 		{
 			Vector4<T> vec;
@@ -38,28 +38,28 @@ namespace Hyperion
 			return vec;
 		}
 
-		template<typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+		template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 		float Dot(Vector2<T>& vectorOne, Vector2<T>& vectorTwo)
 		{
 			Vector2<T> vec = Normalize(vectorOne) * Normalize(vectorTwo);
 			return vec.x + vec.y;
 		}
 
-		template<typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+		template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 		float Dot(Vector3<T>& vectorOne, Vector3<T>& vectorTwo)
 		{
 			Vector3<T> vec = Normalize(vectorOne) * Normalize(vectorTwo);
 			return vec.x + vec.y + vec.z;
 		}
 
-		template<typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+		template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 		float Dot(Vector4<T>& vectorOne, Vector4<T>& vectorTwo)
 		{
 			Vector4<T> vec = Normalize(vectorOne) * Normalize(vectorTwo);
 			return vec.x + vec.y + vec.z + vec.w;
 		}
 
-		template<typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+		template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 		Vector3<T> Cross(Vector3<T>& vectorOne, Vector3<T>& vectorTwo)
 		{
 			Vector3<T> vec;

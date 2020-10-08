@@ -9,7 +9,7 @@
 
 namespace Hyperion 
 {
-	template <typename T = float, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+	template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 	class Vector4
 	{
 	public:
