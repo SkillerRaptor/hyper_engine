@@ -59,12 +59,13 @@ namespace Hyperion
 
 	struct CameraControllerComponent
 	{
-		float Speed;
+		float MoveSpeed;
+		float ZoomSpeed;
 
 		CameraControllerComponent() = default;
 		CameraControllerComponent(const CameraControllerComponent&) = default;
-		CameraControllerComponent(float speed)
-			: Speed(speed) {}
+		CameraControllerComponent(float moveSpeed, float zoomSpeed)
+			: MoveSpeed(moveSpeed), ZoomSpeed(zoomSpeed)  {}
 	};
 
 	struct CharacterControllerComponent 

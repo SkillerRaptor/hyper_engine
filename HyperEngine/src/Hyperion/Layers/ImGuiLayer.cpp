@@ -35,6 +35,7 @@ namespace Hyperion
 		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareTwo, Vector4<float>(0.0f, 1.0f, 0.0f, 1.0f));
 		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareThree, Vector4<float>(0.0f, 0.0f, 1.0f, 1.0f));
 		m_Scene->GetRegistry().AddComponent<CameraComponent>(m_CameraEntity, 1280.0f, 720.0f, 1.0f, 0.1f, 1.0f);
+		m_Scene->GetRegistry().AddComponent<CameraControllerComponent>(m_CameraEntity, 0.01f, 1.0f);
 
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();

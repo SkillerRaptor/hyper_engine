@@ -13,6 +13,6 @@ namespace Hyperion
 		virtual void Update(Registry& registry, Timestep timeStep) {};
 		virtual void Render(Registry& registry) {};
 
-		virtual void OnEvent(Event& event) {};
+		virtual void OnEvent(Registry& registry, Event& event) {};
 	};
 }

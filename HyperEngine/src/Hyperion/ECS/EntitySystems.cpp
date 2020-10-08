@@ -28,6 +28,6 @@ namespace Hyperion
 	void EntitySystems::OnEvent(Event& event)
 	{
 		for (const auto& entitySystem : m_Systems)
-			entitySystem.second->OnEvent(event);
+			entitySystem.second->OnEvent(m_Registry, event);
 	}
 }

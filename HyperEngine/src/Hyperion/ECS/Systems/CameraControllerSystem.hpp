@@ -3,6 +3,7 @@
 #include "ECS/EntitySystem.hpp"
 #include "ECS/Components.hpp"
 #include "ECS/Registry.hpp"
+#include "Events/MouseEvents.hpp"
 #include "Utilities/Input.hpp"
 
 namespace Hyperion
@@ -15,10 +16,26 @@ namespace Hyperion
 
 		virtual void Update(Registry& registry, Timestep timeStep) override
 		{
-			registry.Each<CameraControllerComponent, TransformComponent>([&](CameraControllerComponent& cameraController, TransformComponent& transform)
+			registry.Each<CameraControllerComponent, CameraComponent, TransformComponent>([&](CameraControllerComponent& cameraController, CameraComponent& cameraComponent, TransformComponent& transform)
 				{
-					transform.Position.x += (float)(cameraController.Speed * timeStep * Input::GetAxis(InputAxis::HORIZONTAL));
-					transform.Position.y -= (float)(cameraController.Speed * timeStep * Input::GetAxis(InputAxis::VERTICAL));
+					transform.Position.x += (float)(cameraController.MoveSpeed * timeStep * Input::GetAxis(InputAxis::HORIZONTAL));
+					transform.Position.y -= (float)(cameraController.MoveSpeed * timeStep * Input::GetAxis(InputAxis::VERTICAL));
+				});
+		}
+
+		virtual void OnEvent(Registry& registry, Event& event) override
+		{
+			EventDispatcher dispatcher(event);
+			
+			dispatcher.Dispatch<MouseScrolledEvent>([&](MouseScrolledEvent& e)
+				{
+					registry.Each<CameraControllerComponent, CameraComponent, TransformComponent>([&](CameraControllerComponent& cameraController, CameraComponent& cameraComponent, TransformComponent& transform)
+						{
+							float& zoom = cameraComponent.Zoom;
+							zoom -= e.GetYOffset() * cameraController.ZoomSpeed;
+							zoom = (zoom < cameraController.ZoomSpeed) ? cameraController.ZoomSpeed : zoom;
+						});
+					return false;
 				});
 		}
 	};

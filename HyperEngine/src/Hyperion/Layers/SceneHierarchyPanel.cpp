@@ -148,5 +148,37 @@ namespace Hyperion
 				ImGui::TreePop();
 			}
 		}
+
+		if (registry.HasComponent<CameraControllerComponent>(entity))
+		{
+			if (ImGui::TreeNodeEx((void*) typeid(CameraControllerComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
+			{
+				CameraControllerComponent& cameraControllerComponent = registry.GetComponent<CameraControllerComponent>(entity);
+
+				ImGui::Text("Move Speed");
+				ImGui::SameLine();
+				ImGui::DragFloat("##MoveSpeedCamera", &cameraControllerComponent.MoveSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
+
+				ImGui::Text("Zoom Speed");
+				ImGui::SameLine();
+				ImGui::DragFloat("##ZoomSpeedCamera", &cameraControllerComponent.ZoomSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
+
+				ImGui::TreePop();
+			}
+		}
+
+		if (registry.HasComponent<CharacterControllerComponent>(entity))
+		{
+			if (ImGui::TreeNodeEx((void*) typeid(CharacterControllerComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
+			{
+				CharacterControllerComponent& characterControllerComponent = registry.GetComponent<CharacterControllerComponent>(entity);
+
+				ImGui::Text("Speed");
+				ImGui::SameLine();
+				ImGui::DragFloat("##SpeedCharacter", &characterControllerComponent.Speed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
+
+				ImGui::TreePop();
+			}
+		}
 	}
 }
