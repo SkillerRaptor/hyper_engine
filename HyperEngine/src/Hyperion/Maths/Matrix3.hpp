@@ -290,7 +290,8 @@ namespace Hyperion
 
 		float* operator[](size_t i) { return matrix[i]; }
 
-		friend std::ostream& operator<<(std::ostream& os, const Matrix3<T>& matrix);
+		template <typename U>
+		friend std::ostream& operator<<(std::ostream& os, const Matrix3<U>& matrix);
 	};
 
 	template <typename T>

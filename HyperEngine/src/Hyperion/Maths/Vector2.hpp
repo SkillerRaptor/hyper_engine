@@ -177,7 +177,8 @@ namespace Hyperion
 			return reinterpret_cast<float*>(this);
 		}
 
-		friend std::ostream& operator<<(std::ostream& os, const Vector2<T>& vector);
+		template <typename U>
+		friend std::ostream& operator<<(std::ostream& os, const Vector2<U>& vector);
 	};
 
 	template <typename T>
