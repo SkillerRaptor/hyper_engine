@@ -7,8 +7,8 @@
 #include "Core/Application.hpp"
 #include "ECS/Components.hpp"
 #include "Events/WindowEvents.hpp"
-#include "Platform/OpenGL/ImGuiGLFWRenderer.h"
-#include "Platform/OpenGL/ImGuiOpenGLRenderer.h"
+#include "Platform/OpenGL/ImGuiGLFWRenderer.hpp"
+#include "Platform/OpenGL/ImGuiOpenGLRenderer.hpp"
 
 namespace Hyperion
 {
