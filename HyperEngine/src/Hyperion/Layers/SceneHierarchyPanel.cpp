@@ -27,7 +27,95 @@ namespace Hyperion
 			});
 
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+		{
 			m_SelectedEntity = -1;
+			m_PopupOpen = false;
+		}
+
+		if (ImGui::IsMouseDown(1) && ImGui::IsWindowHovered())
+			m_PopupOpen = true;
+
+		if (m_PopupOpen)
+			if (ImGui::IsWindowHovered())
+				ImGui::OpenPopup("Right Click");
+			else
+			{
+				m_PopupOpen = false;
+				ImGui::CloseCurrentPopup();
+			}
+				
+		if (ImGui::BeginPopup("Right Click"))
+		{
+			if (ImGui::BeginMenu("2D Objects"))
+			{
+				if (ImGui::MenuItem("Quad"))
+				{
+
+				}
+				if (ImGui::MenuItem("Triangle"))
+				{
+
+				}
+				if (ImGui::MenuItem("Circle"))
+				{
+
+				}
+				if (ImGui::BeginMenu("Lights"))
+				{
+					if (ImGui::MenuItem("Orthographic Camera"))
+					{
+
+					}
+					if (ImGui::MenuItem("Projection Camera"))
+					{
+
+					}
+					ImGui::EndMenu();
+				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("3D Objects"))
+			{
+				if (ImGui::MenuItem("Cube"))
+				{
+
+				}
+				if (ImGui::MenuItem("Sphere"))
+				{
+
+				}
+				if (ImGui::BeginMenu("Lights"))
+				{
+					if (ImGui::MenuItem("Spot Light"))
+					{
+
+					}
+					if (ImGui::MenuItem("Directional Light"))
+					{
+
+					}
+					if (ImGui::MenuItem("Point Light"))
+					{
+
+					}
+					ImGui::EndMenu();
+				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Cameras"))
+			{
+				if (ImGui::MenuItem("Orthographic Camera"))
+				{
+
+				}
+				if (ImGui::MenuItem("Projection Camera"))
+				{
+
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndPopup();
+		}
 
 		ImGui::End();
 

@@ -9,6 +9,7 @@ namespace Hyperion
 	{
 	private:
 		Ref<Scene> m_Context;
+		bool m_PopupOpen = false;
 		uint32_t m_SelectedEntity = -1;
 
 	public:
