@@ -38,13 +38,13 @@ namespace Hyperion
 		virtual void SetFloatArray(uint32_t handle, const std::string& name, size_t count, float* values) override;
 
 		virtual void SetVector2(uint32_t handle, const std::string& name, float x, float y) override;
-		virtual void SetVector2(uint32_t handle, const std::string& name, const Vector2<>& vector) override;
+		virtual void SetVector2(uint32_t handle, const std::string& name, const Vec2& vector) override;
 
 		virtual void SetVector3(uint32_t handle, const std::string& name, float x, float y, float z) override;
-		virtual void SetVector3(uint32_t handle, const std::string& name, const Vector3<>& vector) override;
+		virtual void SetVector3(uint32_t handle, const std::string& name, const Vec3& vector) override;
 
 		virtual void SetVector4(uint32_t handle, const std::string& name, float x, float y, float z, float w) override;
-		virtual void SetVector4(uint32_t handle, const std::string& name, const Vector4<>& vector) override;
+		virtual void SetVector4(uint32_t handle, const std::string& name, const Vec4& vector) override;
 
 		virtual void SetMatrix2(uint32_t handle, const std::string& name, const Matrix2<>& matrix) override;
 		virtual void SetMatrix3(uint32_t handle, const std::string& name, const Matrix3<>& matrix) override;

@@ -12,7 +12,7 @@ namespace Hyperion
 	const uint32_t Renderer2D::MaxVertices = MaxQuads * 4;
 	const uint32_t Renderer2D::MaxIndices = MaxQuads * 6;
 
-	Vector4<> Renderer2D::m_QuadVertexPositions[4];
+	Vec4 Renderer2D::m_QuadVertexPositions[4];
 
 	Ref<VertexArray> Renderer2D::m_QuadVertexArray;
 	Ref<VertexBuffer> Renderer2D::m_QuadVertexBuffer;
@@ -64,7 +64,7 @@ namespace Hyperion
 		m_QuadVertexArray->Init();
 	}
 
-	void Renderer2D::BeginScene(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, const Vector3<>& position)
+	void Renderer2D::BeginScene(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, const Vec3& position)
 	{
 		float aspectRatio = (float) width / height;
 
@@ -108,7 +108,7 @@ namespace Hyperion
 		m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
 	}
 
-	void Renderer2D::DrawQuad(const Vector3<>& position, const Vector3<>& rotation, const Vector3<>& scale, const Vector4<>& color)
+	void Renderer2D::DrawQuad(const Vec3& position, const Vec3& rotation, const Vec3& scale, const Vec4& color)
 	{
 		constexpr size_t quadVertexCount = 4;
 		const float tilingFactor = 1.0f;
@@ -118,7 +118,7 @@ namespace Hyperion
 
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
-			m_QuadVertexBufferPtr->Position = Vector3<>(position.x + m_QuadVertexPositions[i].x, position.y + m_QuadVertexPositions[i].y, position.z + m_QuadVertexPositions[i].z);
+			m_QuadVertexBufferPtr->Position = Vec3(position.x + m_QuadVertexPositions[i].x, position.y + m_QuadVertexPositions[i].y, position.z + m_QuadVertexPositions[i].z);
 			m_QuadVertexBufferPtr->Color = color;
 			m_QuadVertexBufferPtr->TexCoords = {};
 			m_QuadVertexBufferPtr->TexId = -1;

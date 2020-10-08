@@ -32,9 +32,9 @@ namespace Hyperion
 		uint32_t squareThree = m_Scene->CreateEntity("Square Three");
 		m_CameraEntity = m_Scene->CreateEntity("Camera");
 
-		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareOne, Vector4<>(1.0f, 0.0f, 0.0f, 1.0f));
-		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareTwo, Vector4<>(0.0f, 1.0f, 0.0f, 1.0f));
-		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareThree, Vector4<>(0.0f, 0.0f, 1.0f, 1.0f));
+		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareOne, Vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareTwo, Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareThree, Vec4(0.0f, 0.0f, 1.0f, 1.0f));
 		m_Scene->GetRegistry().AddComponent<CameraComponent>(m_CameraEntity, 1280, 720, 1.0f, 0.1f, 1.0f);
 		m_Scene->GetRegistry().AddComponent<CameraControllerComponent>(m_CameraEntity, 0.01f, 1.0f);
 
@@ -89,7 +89,7 @@ namespace Hyperion
 		ImGuizmo::SetRect(startPos.x, startPos.y, pos.x, pos.y);
 		ImGuizmo::Manipulate(cameraComponent.TransformationMatrix, cameraComponent.ProjectionMatrix, ImGuizmo::TRANSLATE, ImGuizmo::WORLD, transform, nullptr, nullptr);
 
-		transformComponent.Position = Vector3(transform[3][0], transform[3][1], transform[3][2]);
+		transformComponent.Position = Vec3(transform[3][0], transform[3][1], transform[3][2]);
 
 		*m_StartX = (uint32_t) startPos.x;
 		*m_StartY = (uint32_t) startPos.y;

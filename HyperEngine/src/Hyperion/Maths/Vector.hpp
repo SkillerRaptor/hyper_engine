@@ -6,6 +6,40 @@
 
 namespace Hyperion 
 {
+	typedef Vector2<signed char> ByteVec2;
+	typedef Vector3<signed char> ByteVec3;
+	typedef Vector4<signed char> ByteVec4;
+	typedef Vector2<unsigned char> UByteVec2;
+	typedef Vector3<unsigned char> UByteVec3;
+	typedef Vector4<unsigned char> UByteVec4;
+	typedef Vector2<short> ShortVec2;
+	typedef Vector3<short> ShortVec3;
+	typedef Vector4<short> ShortVec4;
+	typedef Vector2<unsigned short> UShortVec2;
+	typedef Vector3<unsigned short> UShortVec3;
+	typedef Vector4<unsigned short> UShortVec4;
+	typedef Vector2<int> IntVec2;
+	typedef Vector3<int> IntVec3;
+	typedef Vector4<int> IntVec4;
+	typedef Vector2<unsigned int> UIntVec2;
+	typedef Vector3<unsigned int> UIntVec3;
+	typedef Vector4<unsigned int> UIntVec4;
+	typedef Vector2<long> LongVec2;
+	typedef Vector3<long> LongVec3;
+	typedef Vector4<long> LongVec4;
+	typedef Vector2<unsigned long> ULongVec2;
+	typedef Vector3<unsigned long> ULongVec3;
+	typedef Vector4<unsigned long> ULongVec4;
+	typedef Vector2<float> Vec2;
+	typedef Vector3<float> Vec3;
+	typedef Vector4<float> Vec4;
+	typedef Vector2<double> DoubleVec2;
+	typedef Vector3<double> DoubleVec3;
+	typedef Vector4<double> DoubleVec4;
+	typedef Vector2<long double> LDoubleVec2;
+	typedef Vector3<long double> LDoubleVec3;
+	typedef Vector4<long double> LDoubleVec4;
+
 	namespace Vector
 	{
 		template <typename T = float, typename = std::enable_if_t<std::is_arithmetic_v<T>>>

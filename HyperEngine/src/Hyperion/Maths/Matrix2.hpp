@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 
-#include "Vector2.hpp"
+#include "Vector.hpp"
 
 namespace Hyperion
 {
@@ -72,7 +72,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix2<T> operator+(const Vector2<>& vector) const
+		Matrix2<T> operator+(const Vec2& vector) const
 		{
 			Matrix2<T> mat;
 			for (size_t i = 0; i < 2; i++)
@@ -83,7 +83,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix2<T> operator+=(const Vector2<>& vector)
+		Matrix2<T> operator+=(const Vec2& vector)
 		{
 			for (size_t i = 0; i < 2; i++)
 			{
@@ -128,7 +128,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix2<T> operator-(const Vector2<>& vector) const
+		Matrix2<T> operator-(const Vec2& vector) const
 		{
 			Matrix2<T> mat;
 			for (size_t i = 0; i < 2; i++)
@@ -139,7 +139,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix2<T> operator-=(const Vector2<>& vector)
+		Matrix2<T> operator-=(const Vec2& vector)
 		{
 			for (size_t i = 0; i < 2; i++)
 			{
@@ -184,7 +184,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix2<T> operator*(const Vector2<>& vector) const
+		Matrix2<T> operator*(const Vec2& vector) const
 		{
 			Matrix2<T> mat;
 			for (size_t i = 0; i < 2; i++)
@@ -195,7 +195,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix2<T> operator*=(const Vector2<>& vector)
+		Matrix2<T> operator*=(const Vec2& vector)
 		{
 			for (size_t i = 0; i < 2; i++)
 			{
@@ -240,7 +240,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		Matrix2<T> operator/(const Vector2<>& vector) const
+		Matrix2<T> operator/(const Vec2& vector) const
 		{
 			Matrix2<T> mat;
 			for (size_t i = 0; i < 2; i++)
@@ -251,7 +251,7 @@ namespace Hyperion
 			return mat;
 		}
 
-		Matrix2<T> operator/=(const Vector2<>& vector)
+		Matrix2<T> operator/=(const Vec2& vector)
 		{
 			for (size_t i = 0; i < 2; i++)
 			{

@@ -182,7 +182,7 @@ namespace Hyperion
 		glUniform2f(GetUniformLocation(m_Shaders[handle], name), x, y);
 	}
 
-	void OpenGLShaderManager::SetVector2(uint32_t handle, const std::string& name, const Vector2<>& vector)
+	void OpenGLShaderManager::SetVector2(uint32_t handle, const std::string& name, const Vec2& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
@@ -196,7 +196,7 @@ namespace Hyperion
 		glUniform3f(GetUniformLocation(m_Shaders[handle], name), x, y, z);
 	}
 
-	void OpenGLShaderManager::SetVector3(uint32_t handle, const std::string& name, const Vector3<>& vector)
+	void OpenGLShaderManager::SetVector3(uint32_t handle, const std::string& name, const Vec3& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
@@ -210,7 +210,7 @@ namespace Hyperion
 		glUniform4f(GetUniformLocation(m_Shaders[handle], name), x, y, z, w);
 	}
 
-	void OpenGLShaderManager::SetVector4(uint32_t handle, const std::string& name, const Vector4<>& vector)
+	void OpenGLShaderManager::SetVector4(uint32_t handle, const std::string& name, const Vec4& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;

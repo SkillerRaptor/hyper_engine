@@ -22,7 +22,7 @@ namespace Hyperion
 		static const uint32_t MaxVertices;
 		static const uint32_t MaxIndices;
 
-		static Vector4<> m_QuadVertexPositions[4];
+		static Vec4 m_QuadVertexPositions[4];
 
 		static Ref<VertexArray> m_QuadVertexArray;
 		static Ref<VertexBuffer> m_QuadVertexBuffer;
@@ -39,13 +39,13 @@ namespace Hyperion
 	public:
 		static void Init();
 
-		static void BeginScene(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, const Vector3<>& position);
+		static void BeginScene(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, const Vec3& position);
 		static void EndScene();
 
 		static void Flush();
 		static void FlushAndReset();
 
-		static void DrawQuad(const Vector3<>& position, const Vector3<>& rotation, const Vector3<>& scale, const Vector4<>& color);
+		static void DrawQuad(const Vec3& position, const Vec3& rotation, const Vec3& scale, const Vec4& color);
 
 		static void SetShaderManager(ShaderManager* shaderManager);
 		static void SetTextureManager(TextureManager* textureManager);
