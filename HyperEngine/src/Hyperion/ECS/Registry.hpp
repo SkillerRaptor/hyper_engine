@@ -87,6 +87,35 @@ namespace Hyperion
 			}
 		}
 
+		std::vector<uint32_t> GetEntities()
+		{
+			std::vector<uint32_t> entities;
+			for (auto& entity : m_Entities)
+				entities.push_back(entity.first);
+			return entities;
+		}
+
+		template<class... T>
+		std::vector<uint32_t> GetEntities()
+		{
+			std::vector<uint32_t> entities;
+			for (auto& entity : m_Entities)
+			{
+				bool shouldSkip = false;
+				auto lambda = [&]<typename C>() mutable {
+					if (shouldSkip)
+						return;
+					if (!HasComponent<C>(entity.first))
+						shouldSkip = true;
+				};
+				(lambda.template operator() < T > (), ...);
+				if (shouldSkip)
+					continue;
+				entites.push_back(entity.first);
+			}
+			return entities;
+		}
+
 	private:
 		template <typename T, typename... Args>
 		std::pair<size_t, T&> AddComponentToBuffer(Args&&... args)
