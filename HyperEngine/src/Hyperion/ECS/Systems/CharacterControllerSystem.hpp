@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EntitySystem.hpp"
+#include "ECS/EntitySystem.hpp"
 #include "ECS/Components.hpp"
 #include "ECS/Registry.hpp"
 #include "Utilities/Input.hpp"

@@ -77,7 +77,7 @@ namespace Hyperion
 		else
 			shaderId = static_cast<uint32_t>(m_Shaders.size());
 		m_Shaders.emplace(shaderId, std::move(shaderData));
-		HP_CORE_DEBUG("Shader % loaded...");
+		HP_CORE_DEBUG("Shader % loaded...", shaderId);
 		return shaderId;
 	}
 

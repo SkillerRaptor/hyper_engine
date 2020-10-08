@@ -17,7 +17,7 @@ namespace Hyperion
 		uint32_t entityId = Hasher::PrimeHasher(name);
 		m_Entities.emplace(entityId, std::unordered_map<uint32_t, size_t>());
 
-		AddComponent<TransformComponent>(entityId, Vector3<float>(0.0f, 0.0f, 0.0f), Vector3<float>(0.0f, 0.0f, 0.0f), Vector3<float>(0.0f, 0.0f, 0.0f));
+		AddComponent<TransformComponent>(entityId, Vector3<float>(0.0f, 0.0f, 0.0f), Vector3<float>(0.0f, 0.0f, 0.0f), Vector3<float>(10.0f, 10.0f, 10.0f));
 		AddComponent<TagComponent>(entityId, name.empty() ? "Entity" : name);
 
 		return entityId;

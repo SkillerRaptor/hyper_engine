@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "Maths/Matrix.hpp"
 #include "Maths/Vector.hpp"
 
 namespace Hyperion
@@ -36,6 +37,34 @@ namespace Hyperion
 		SpriteRendererComponent(const SpriteRendererComponent& spriteRendererComponent) = default;
 		SpriteRendererComponent(const Vector4<float>& color)
 			: Color(color) {}
+	};
+
+	struct CameraComponent
+	{
+		uint32_t Width;
+		uint32_t Height;
+
+		float Zoom;
+		float NearPlane;
+		float FarPlane;
+
+		Matrix4<float> ProjectionMatrix = Matrix4<float>(1.0f);
+		Matrix4<float> TransformationMatrix = Matrix4<float>(1.0f);
+
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
+		CameraComponent(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane)
+			: Width(width), Height(height), Zoom(zoom), NearPlane(nearPlane), FarPlane(farPlane) {}
+	};
+
+	struct CameraControllerComponent
+	{
+		float Speed;
+
+		CameraControllerComponent() = default;
+		CameraControllerComponent(const CameraControllerComponent&) = default;
+		CameraControllerComponent(float speed)
+			: Speed(speed) {}
 	};
 
 	struct CharacterControllerComponent 

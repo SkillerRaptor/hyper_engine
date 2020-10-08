@@ -2,9 +2,9 @@
 
 namespace Hyperion 
 {
-	LayerStack::LayerStack()
+	LayerStack::LayerStack(Ref<Scene> scene)
 	{
-		m_ImGuiLayer = new ImGuiLayer();
+		m_ImGuiLayer = new ImGuiLayer(scene);
 		m_ImGuiLayer->OnAttach();
 	}
 

@@ -15,7 +15,7 @@ namespace Hyperion
 		ImGuiLayer* m_ImGuiLayer;
 
 	public:
-		LayerStack();
+		LayerStack(Ref<Scene> scene);
 		~LayerStack();
 
 		void PushLayer(Layer* layer);

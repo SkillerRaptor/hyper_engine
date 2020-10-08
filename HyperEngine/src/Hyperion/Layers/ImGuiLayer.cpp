@@ -2,15 +2,17 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+
+#include "Core/Application.hpp"
+#include "ECS/Components.hpp"
+#include "Events/WindowEvents.hpp"
 #include "Platform/OpenGL/ImGuiGLFWRenderer.h"
 #include "Platform/OpenGL/ImGuiOpenGLRenderer.h"
 
-#include "Core/Application.hpp"
-
 namespace Hyperion
 {
-	ImGuiLayer::ImGuiLayer()
-		: Layer("ImGui Layer")
+	ImGuiLayer::ImGuiLayer(Ref<Scene> scene)
+		: Layer("ImGui Layer"), m_Scene(scene)
 	{
 	}
 
@@ -20,15 +22,19 @@ namespace Hyperion
 
 	void ImGuiLayer::OnAttach()
 	{
-		m_Scene = CreateRef<Scene>();
 		m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>();
 
 		m_SceneHierarchyPanel->SetContext(m_Scene);
 
-		m_Scene->CreateEntity("Square One");
-		m_Scene->CreateEntity("Square Two");
-		m_Scene->CreateEntity("Square Three");
-		m_Scene->CreateEntity("Camera");
+		uint32_t squareOne = m_Scene->CreateEntity("Square One");
+		uint32_t squareTwo = m_Scene->CreateEntity("Square Two");
+		uint32_t squareThree = m_Scene->CreateEntity("Square Three");
+		m_CameraEntity = m_Scene->CreateEntity("Camera");
+
+		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareOne, Vector4<float>(1.0f, 0.0f, 0.0f, 1.0f));
+		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareTwo, Vector4<float>(0.0f, 1.0f, 0.0f, 1.0f));
+		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareThree, Vector4<float>(0.0f, 0.0f, 1.0f, 1.0f));
+		m_Scene->GetRegistry().AddComponent<CameraComponent>(m_CameraEntity, 1280.0f, 720.0f, 1.0f, 0.1f, 1.0f);
 
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
@@ -64,8 +70,24 @@ namespace Hyperion
 		style.WindowPadding = ImVec2(2, 2);
 
 		ImGui::Begin("Editor");
-		ImGui::BeginChild("GameRenderer");
-		ImGui::Image((ImTextureID)(intptr_t) m_FrameTextureId, ImGui::GetWindowSize(), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::BeginChild("EditorRenderer");
+
+		ImVec2 startPos = ImGui::GetWindowPos();
+		ImVec2 pos = ImGui::GetWindowSize();
+
+		*m_StartX = startPos.x;
+		*m_StartY = startPos.y;
+		*m_SizeX = pos.x;
+		*m_SizeY = pos.y;
+
+		m_Scene->GetRegistry().Each<CameraComponent>([&](CameraComponent& cameraComponent)
+			{
+				cameraComponent.Width = pos.x;
+				cameraComponent.Height = pos.y;
+			});
+
+		ImGui::Image((ImTextureID)(intptr_t)m_FrameTextureId, pos, ImVec2(0, 1), ImVec2(1, 0));
+
 		ImGui::EndChild();
 		ImGui::End();
 
@@ -232,5 +254,25 @@ namespace Hyperion
 	uint32_t ImGuiLayer::GetFrameTextureId() const
 	{
 		return m_FrameTextureId;
+	}
+
+	void ImGuiLayer::SetStartX(uint32_t* startX)
+	{
+		m_StartX = startX;
+	}
+
+	void ImGuiLayer::SetStartY(uint32_t* startY)
+	{
+		m_StartY = startY;
+	}
+
+	void ImGuiLayer::SetSizeX(uint32_t* sizeX)
+	{
+		m_SizeX = sizeX;
+	}
+
+	void ImGuiLayer::SetSizeY(uint32_t* sizeY)
+	{
+		m_SizeY = sizeY;
 	}
 }

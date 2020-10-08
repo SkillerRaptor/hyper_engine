@@ -15,7 +15,7 @@ namespace Hyperion
 	{
 		glGenBuffers(1, &m_RendererId);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indexCount, indices, (indices == nullptr ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * indexCount, indices, (indices == nullptr ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 

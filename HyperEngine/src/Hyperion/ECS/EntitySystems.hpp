@@ -5,6 +5,7 @@
 
 #include "EntitySystem.hpp"
 #include "Core/Core.hpp"
+#include "Events/Event.hpp"
 #include "Utilities/Hasher.hpp"
 #include "Utilities/Timestep.hpp"
 
@@ -24,6 +25,8 @@ namespace Hyperion
 		void OnTick(int currentTick);
 		void OnRender();
 		void OnUpdate(Timestep timeStep);
+
+		void OnEvent(Event& event);
 
 		template <typename T, typename = typename std::enable_if<std::is_base_of<EntitySystem, T>::value, T>::type>
 		void AddSystem()

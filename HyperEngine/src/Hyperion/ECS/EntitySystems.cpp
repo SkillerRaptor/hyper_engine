@@ -24,4 +24,10 @@ namespace Hyperion
 		for (const auto& entitySystem : m_Systems)
 			entitySystem.second->Update(m_Registry, timeStep);
 	}
+
+	void EntitySystems::OnEvent(Event& event)
+	{
+		for (const auto& entitySystem : m_Systems)
+			entitySystem.second->OnEvent(event);
+	}
 }

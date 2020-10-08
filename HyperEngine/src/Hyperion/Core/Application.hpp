@@ -18,6 +18,10 @@ namespace Hyperion
 
 		std::queue<Ref<Event>> m_EventBus;
 
+		Ref<Scene> m_Scene;
+		uint32_t m_StartX, m_StartY;
+		uint32_t m_SizeX, m_SizeY;
+
 		static Application* m_Instance;
 
 	public:

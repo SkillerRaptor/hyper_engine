@@ -3,7 +3,9 @@
 #include <string>
 
 #include "Registry.hpp"
-#include "Systems/EntitySystems.hpp"
+#include "EntitySystems.hpp"
+#include "Core/Core.hpp"
+#include "Events/Event.hpp"
 #include "Utilities/Timestep.hpp"
 
 namespace Hyperion
@@ -11,8 +13,8 @@ namespace Hyperion
 	class Scene
 	{
 	private:
-		Registry m_Registry;
-		EntitySystems m_Systems;
+		Ref<Registry> m_Registry;
+		Ref<EntitySystems> m_Systems;
 
 	public:
 		Scene();
@@ -25,6 +27,8 @@ namespace Hyperion
 		void OnTick(int currentTick);
 		void OnRender();
 		void OnUpdate(Timestep timeStep);
+
+		void OnEvent(Event& event);
 
 		Registry& GetRegistry();
 	};

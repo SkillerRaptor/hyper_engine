@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include <limits>
+
 #include "ECS/Components.hpp"
 
 namespace Hyperion
@@ -89,15 +91,59 @@ namespace Hyperion
 
 				ImGui::Text("Position");
 				ImGui::SameLine();
-				ImGui::DragFloat3("##X", transformComponent.Position, 0.1f);
+				ImGui::DragFloat3("##X", transformComponent.Position, 0.01f);
 
 				ImGui::Text("Rotation");
 				ImGui::SameLine();
-				ImGui::DragFloat3("##Y", transformComponent.Rotation, 0.1f);
+				ImGui::DragFloat3("##Y", transformComponent.Rotation, 0.01f);
 
 				ImGui::Text("Scale   ");
 				ImGui::SameLine();
-				ImGui::DragFloat3("##Z", transformComponent.Scale, 0.1f);
+				ImGui::DragFloat3("##Z", transformComponent.Scale, 0.01f);
+
+				ImGui::TreePop();
+			}
+		}
+
+		if (registry.HasComponent<SpriteRendererComponent>(entity))
+		{
+			if (ImGui::TreeNodeEx((void*) typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
+			{
+				SpriteRendererComponent& spriteRendererComponent = registry.GetComponent<SpriteRendererComponent>(entity);
+
+				ImGui::Text("Color");
+				ImGui::SameLine();
+				ImGui::ColorEdit4("##Color", spriteRendererComponent.Color);
+
+				ImGui::TreePop();
+			}
+		}
+
+		if (registry.HasComponent<CameraComponent>(entity))
+		{
+			if (ImGui::TreeNodeEx((void*) typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
+			{
+				CameraComponent& cameraComponent = registry.GetComponent<CameraComponent>(entity);
+
+				ImGui::Text("Width     ");
+				ImGui::SameLine();
+				ImGui::DragInt("##Width", (int*) &cameraComponent.Width, 1.0f);
+
+				ImGui::Text("Height    ");
+				ImGui::SameLine();
+				ImGui::DragInt("##Height", (int*)& cameraComponent.Height);
+
+				ImGui::Text("Zoom      ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Zoom", &cameraComponent.Zoom, 0.1f, 0.1f, (std::numeric_limits<float>::max)());
+
+				ImGui::Text("Near Plane");
+				ImGui::SameLine();
+				ImGui::DragFloat("##NearPlane", &cameraComponent.NearPlane);
+
+				ImGui::Text("Far Plane ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##FarPlane", &cameraComponent.FarPlane);
 
 				ImGui::TreePop();
 			}
