@@ -28,6 +28,7 @@ project "HyperEngine"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.stb_image}"
 	}
 
@@ -36,6 +37,7 @@ project "HyperEngine"
 		"GLFW",
 		"Glad",
 		"ImGui",
+		"ImGuizmo",
 		"opengl32.lib"
 	}
 

@@ -28,6 +28,7 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "%{wks.location}/HyperEngine/vendor/GLFW/include"
 IncludeDir["Glad"] = "%{wks.location}/HyperEngine/vendor/Glad/include"
 IncludeDir["ImGui"] = "%{wks.location}/HyperEngine/vendor/imgui"
+IncludeDir["ImGuizmo"] = "%{wks.location}/HyperEngine/vendor/ImGuizmo"
 IncludeDir["stb_image"] = "%{wks.location}/HyperEngine/vendor/stb_image"
 
 group "Dependencies"
@@ -35,6 +36,7 @@ group "Dependencies"
 	include "HyperEngine/vendor/GLFW"
 	include "HyperEngine/vendor/Glad"
 	include "HyperEngine/vendor/imgui"
+	include "HyperEngine/vendor/ImGuizmo"
 group ""
 
 include "HyperEngine"

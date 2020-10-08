@@ -2,6 +2,7 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <ImGuizmo.h>
 
 #include "Core/Application.hpp"
 #include "ECS/Components.hpp"
@@ -59,6 +60,8 @@ namespace Hyperion
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::SetOrthographic(true);
+		ImGuizmo::BeginFrame();
 	}
 
 	void ImGuiLayer::OnRender()
@@ -75,6 +78,18 @@ namespace Hyperion
 
 		ImVec2 startPos = ImGui::GetWindowPos();
 		ImVec2 pos = ImGui::GetWindowSize();
+
+		CameraComponent& cameraComponent = m_Scene->GetRegistry().GetComponent<CameraComponent>(m_CameraEntity);
+		TransformComponent& transformComponent = m_Scene->GetRegistry().GetComponent<TransformComponent>(2570868010);
+
+		Matrix4 transform = Matrix4(1.0f);
+		transform = Matrix::Translate(Matrix4(1.0f), transformComponent.Position);
+
+		ImGuizmo::Enable(true);
+		ImGuizmo::SetRect(startPos.x, startPos.y, pos.x, pos.y);
+		ImGuizmo::Manipulate(cameraComponent.TransformationMatrix, cameraComponent.ProjectionMatrix, ImGuizmo::TRANSLATE, ImGuizmo::WORLD, transform, nullptr, nullptr);
+
+		transformComponent.Position = Vector3(transform[3][0], transform[3][1], transform[3][2]);
 
 		*m_StartX = (uint32_t) startPos.x;
 		*m_StartY = (uint32_t) startPos.y;

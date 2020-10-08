@@ -294,7 +294,16 @@ namespace Hyperion
 			return false;
 		}
 
-		float* operator[](size_t i) { return matrix[i]; }
+		/* Conversion */
+		float* operator[](size_t i) 
+		{ 
+			return matrix[i]; 
+		}
+
+		operator float* ()
+		{
+			return reinterpret_cast<float*>(this);
+		}
 
 		template <typename U>
         friend std::ostream& operator<<(std::ostream& os, const Matrix4<U>& matrix);
