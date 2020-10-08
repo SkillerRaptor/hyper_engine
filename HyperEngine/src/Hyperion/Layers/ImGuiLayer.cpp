@@ -34,7 +34,7 @@ namespace Hyperion
 		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareOne, Vector4<float>(1.0f, 0.0f, 0.0f, 1.0f));
 		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareTwo, Vector4<float>(0.0f, 1.0f, 0.0f, 1.0f));
 		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareThree, Vector4<float>(0.0f, 0.0f, 1.0f, 1.0f));
-		m_Scene->GetRegistry().AddComponent<CameraComponent>(m_CameraEntity, 1280.0f, 720.0f, 1.0f, 0.1f, 1.0f);
+		m_Scene->GetRegistry().AddComponent<CameraComponent>(m_CameraEntity, 1280, 720, 1.0f, 0.1f, 1.0f);
 		m_Scene->GetRegistry().AddComponent<CameraControllerComponent>(m_CameraEntity, 0.01f, 1.0f);
 
 		ImGui::CreateContext();
@@ -76,15 +76,15 @@ namespace Hyperion
 		ImVec2 startPos = ImGui::GetWindowPos();
 		ImVec2 pos = ImGui::GetWindowSize();
 
-		*m_StartX = startPos.x;
-		*m_StartY = startPos.y;
-		*m_SizeX = pos.x;
-		*m_SizeY = pos.y;
+		*m_StartX = (uint32_t) startPos.x;
+		*m_StartY = (uint32_t) startPos.y;
+		*m_SizeX = (uint32_t) pos.x;
+		*m_SizeY = (uint32_t) pos.y;
 
 		m_Scene->GetRegistry().Each<CameraComponent>([&](CameraComponent& cameraComponent)
 			{
-				cameraComponent.Width = pos.x;
-				cameraComponent.Height = pos.y;
+				cameraComponent.Width = (uint32_t) pos.x;
+				cameraComponent.Height = (uint32_t) pos.y;
 			});
 
 		ImGui::Image((ImTextureID)(intptr_t)m_FrameTextureId, pos, ImVec2(0, 1), ImVec2(1, 0));
