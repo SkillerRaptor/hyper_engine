@@ -18,7 +18,7 @@ namespace Hyperion
 	{
 		m_Instance = this;
 
-		m_Window = new OpenGLWindow("HyperEngine", 1280, 720, false, &m_EventBus);
+		m_Window = new OpenGLWindow("HyperEngine", 1920, 1080, false, &m_EventBus);
 		m_Window->InitWindow();
 
 		m_Scene = CreateRef<Scene>();

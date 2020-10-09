@@ -39,7 +39,7 @@ namespace Hyperion
 
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
-		m_Font = io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 14.0f);
+		m_Font = io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 15.0f);
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow()), true);
