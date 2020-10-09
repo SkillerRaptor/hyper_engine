@@ -69,8 +69,8 @@ namespace Hyperion
 		float aspectRatio = (float) width / height;
 
 		m_ShaderManager->UseShader(0);
-		m_ShaderManager->SetMatrix4(0, "u_ProjectionMatrix", Matrix::Ortho<>(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, nearPlane, farPlane));
-		m_ShaderManager->SetMatrix4(0, "u_TransformationMatrix", Matrix::Translate<>(Matrix4<>(1.0f), position));
+		m_ShaderManager->SetMatrix4(0, "u_ProjectionMatrix", Matrix::Ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, nearPlane, farPlane));
+		m_ShaderManager->SetMatrix4(0, "u_TransformationMatrix", Matrix::Translate(Matrix4<>(1.0f), position));
 
 		m_QuadCount = 0;
 		m_QuadIndexCount = 0;

@@ -221,21 +221,21 @@ namespace Hyperion
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
-		glUniformMatrix2fv(GetUniformLocation(m_Shaders[handle], name), 1, false, &matrix.matrix[0][0]);
+		glUniformMatrix2fv(GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
 	}
 
 	void OpenGLShaderManager::SetMatrix3(uint32_t handle, const std::string& name, const Matrix3<>& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
-		glUniformMatrix3fv(GetUniformLocation(m_Shaders[handle], name), 1, false, &matrix.matrix[0][0]);
+		glUniformMatrix3fv(GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
 	}
 
 	void OpenGLShaderManager::SetMatrix4(uint32_t handle, const std::string& name, const Matrix4<>& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
-		glUniformMatrix4fv(GetUniformLocation(m_Shaders[handle], name), 1, false, &matrix.matrix[0][0]);
+		glUniformMatrix4fv(GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
 	}
 
 	std::string OpenGLShaderManager::GetVertexShaderPath(uint32_t handle)
