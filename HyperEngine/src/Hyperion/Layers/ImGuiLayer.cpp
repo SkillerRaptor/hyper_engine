@@ -1,6 +1,5 @@
 #include "ImGuiLayer.hpp"
 
-#include <imgui.h>
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
 
@@ -40,6 +39,7 @@ namespace Hyperion
 
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
+		m_Font = io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 14.0f);
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow()), true);
@@ -62,6 +62,8 @@ namespace Hyperion
 		ImGui::NewFrame();
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::BeginFrame();
+
+		ImGui::PushFont(m_Font);
 	}
 
 	void ImGuiLayer::OnRender()
@@ -91,15 +93,15 @@ namespace Hyperion
 
 		//transformComponent.Position = Vec3(transform[3][0], transform[3][1], transform[3][2]);
 
-		*m_StartX = (uint32_t) startPos.x;
-		*m_StartY = (uint32_t) startPos.y;
-		*m_SizeX = (uint32_t) pos.x;
-		*m_SizeY = (uint32_t) pos.y;
+		*m_StartX = (uint32_t)startPos.x;
+		*m_StartY = (uint32_t)startPos.y;
+		*m_SizeX = (uint32_t)pos.x;
+		*m_SizeY = (uint32_t)pos.y;
 
 		m_Scene->GetRegistry().Each<CameraComponent>([&](CameraComponent& cameraComponent)
 			{
-				cameraComponent.Width = (uint32_t) pos.x;
-				cameraComponent.Height = (uint32_t) pos.y;
+				cameraComponent.Width = (uint32_t)pos.x;
+				cameraComponent.Height = (uint32_t)pos.y;
 			});
 
 		ImGui::Image((ImTextureID)(intptr_t)m_FrameTextureId, pos, ImVec2(0, 1), ImVec2(1, 0));
@@ -115,6 +117,8 @@ namespace Hyperion
 		ImGui::PopTextWrapPos();
 		ImGui::End();
 
+		ImGui::PopFont();
+
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
@@ -128,9 +132,9 @@ namespace Hyperion
 		style.WindowPadding = ImVec2(15, 15);
 		style.WindowRounding = 5.0f;
 		style.FramePadding = ImVec2(5, 5);
-		style.FrameRounding = 4.0f;
+		style.FrameRounding = 0.5f;
 		style.ItemSpacing = ImVec2(12, 8);
-		style.ItemInnerSpacing = ImVec2(8, 6);
+		style.ItemInnerSpacing = ImVec2(6, 3);
 		style.IndentSpacing = 25.0f;
 		style.ScrollbarSize = 15.0f;
 		style.ScrollbarRounding = 9.0f;

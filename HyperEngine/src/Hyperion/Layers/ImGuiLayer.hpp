@@ -1,5 +1,7 @@
 #pragma once
 
+#include <imgui.h>
+
 #include "Layer.hpp"
 #include "SceneHierarchyPanel.hpp"
 #include "Core/Core.hpp"
@@ -13,6 +15,7 @@ namespace Hyperion
 	private:
 		Ref<Scene> m_Scene;
 		Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
+		ImFont* m_Font;
 		uint32_t m_FrameTextureId;
 		uint32_t m_CameraEntity;
 
