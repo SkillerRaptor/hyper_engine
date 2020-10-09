@@ -122,12 +122,9 @@ namespace Hyperion
 		transform = Matrix::Translate(transform, position);
 		transform = Matrix::Scale(transform, scale);
 
-		std::cout << "Start!" << std::endl;
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
 			Vec4 transformVector = transform * m_QuadVertexPositions[i];
-			std::cout << transformVector << std::endl;
-
 			Vec3 rotatedVector = Vec3(transformVector.x, transformVector.y, transformVector.z);
 			if (rotation.x != 0) rotatedVector = Quaternion::RotateVector(rotatedVector, rotation.x, Vec3(1.0f, 0.0f, 0.0f));
 			if (rotation.y != 0) rotatedVector = Quaternion::RotateVector(rotatedVector, rotation.y, Vec3(0.0f, 1.0f, 0.0f));

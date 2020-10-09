@@ -1,5 +1,6 @@
 #include "Scene.hpp"
 
+#include "Entity.hpp"
 #include "Systems/CameraControllerSystem.hpp"
 #include "Systems/CharacterControllerSystem.hpp"
 #include "Systems/SpriteRendererSystem.hpp"
@@ -25,9 +26,14 @@ namespace Hyperion
 		m_Systems->AddSystem<SpriteRendererSystem>();
 	}
 
-	uint32_t Scene::CreateEntity(const std::string& name)
+	Entity Scene::CreateEntity(const std::string& name)
 	{
-		return m_Registry->ConstructEntity(name);
+		return Entity(m_Registry->ConstructEntity(name), this);
+	}
+
+	void Scene::DeleteEntity(Entity& entity)
+	{
+		m_Registry->DeleteEntity(entity.GetEntityHandle());
 	}
 
 	void Scene::OnTick(int currentTick)
@@ -48,6 +54,14 @@ namespace Hyperion
 	void Scene::OnEvent(Event& event)
 	{
 		m_Systems->OnEvent(event);
+	}
+
+	void Scene::Each(const typename std::common_type<std::function<void(Entity)>>::type function)
+	{
+		m_Registry->Each([&](EnTT entity)
+			{
+				function(Entity(entity, this));
+			});
 	}
 
 	Registry& Scene::GetRegistry()

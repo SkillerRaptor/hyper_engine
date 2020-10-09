@@ -10,6 +10,8 @@
 
 namespace Hyperion
 {
+	class Entity;
+
 	class Scene
 	{
 	private:
@@ -22,13 +24,16 @@ namespace Hyperion
 		
 		void Init();
 
-		uint32_t CreateEntity(const std::string& name = std::string());
+		Entity CreateEntity(const std::string& name = std::string());
+		void DeleteEntity(Entity& entity);
 
 		void OnTick(int currentTick);
 		void OnRender();
 		void OnUpdate(Timestep timeStep);
 
 		void OnEvent(Event& event);
+
+		void Each(const typename std::common_type<std::function<void(Entity)>>::type function);
 
 		Registry& GetRegistry();
 	};

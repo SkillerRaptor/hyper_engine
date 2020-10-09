@@ -4,7 +4,7 @@
 #include <ImGuizmo.h>
 
 #include "Core/Application.hpp"
-#include "ECS/Components.hpp"
+#include "ECS/ECS.hpp"
 #include "Events/WindowEvents.hpp"
 #include "Platform/OpenGL/ImGuiGLFWRenderer.hpp"
 #include "Platform/OpenGL/ImGuiOpenGLRenderer.hpp"
@@ -26,16 +26,16 @@ namespace Hyperion
 
 		m_SceneHierarchyPanel->SetContext(m_Scene);
 
-		uint32_t squareOne = m_Scene->CreateEntity("Square One");
-		uint32_t squareTwo = m_Scene->CreateEntity("Square Two");
-		uint32_t squareThree = m_Scene->CreateEntity("Square Three");
+		Entity squareOne = m_Scene->CreateEntity("Square One");
+		Entity squareTwo = m_Scene->CreateEntity("Square Two");
+		Entity squareThree = m_Scene->CreateEntity("Square Three");
 		m_CameraEntity = m_Scene->CreateEntity("Camera");
 
-		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareOne, Vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareTwo, Vec4(0.0f, 1.0f, 0.0f, 1.0f));
-		m_Scene->GetRegistry().AddComponent<SpriteRendererComponent>(squareThree, Vec4(0.0f, 0.0f, 1.0f, 1.0f));
-		m_Scene->GetRegistry().AddComponent<CameraComponent>(m_CameraEntity, 1280, 720, 1.0f, 0.1f, 1.0f);
-		m_Scene->GetRegistry().AddComponent<CameraControllerComponent>(m_CameraEntity, 0.01f, 1.0f);
+		squareOne.AddComponent<SpriteRendererComponent>(Vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		squareTwo.AddComponent<SpriteRendererComponent>(Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+		squareThree.AddComponent<SpriteRendererComponent>(Vec4(0.0f, 0.0f, 1.0f, 1.0f));
+		m_CameraEntity.AddComponent<CameraComponent>(1280, 720, 1.0f, 0.1f, 1.0f);
+		m_CameraEntity.AddComponent<CameraControllerComponent>(0.01f, 1.0f);
 
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
@@ -81,7 +81,7 @@ namespace Hyperion
 		ImVec2 startPos = ImGui::GetWindowPos();
 		ImVec2 pos = ImGui::GetWindowSize();
 
-		CameraComponent& cameraComponent = m_Scene->GetRegistry().GetComponent<CameraComponent>(m_CameraEntity);
+		CameraComponent& cameraComponent = m_CameraEntity.GetComponent<CameraComponent>();
 		//TransformComponent& transformComponent = m_Scene->GetRegistry().GetComponent<TransformComponent>(2570868010);
 
 		//Mat4 transform = Mat4(1.0f);

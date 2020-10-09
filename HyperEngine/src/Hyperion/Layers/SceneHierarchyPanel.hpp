@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Core.hpp"
-#include "ECS/Scene.hpp"
+#include "ECS/ECS.hpp"
 
 namespace Hyperion
 {
@@ -12,7 +12,7 @@ namespace Hyperion
 		bool m_GlobalPopupOpen = false;
 		bool m_AddComponentPopupOpen = false;
 		bool m_RemoveComponentPopupOpen = false;
-		uint32_t m_SelectedEntity = -1;
+		Entity m_SelectedEntity;
 
 	public:
 		SceneHierarchyPanel();
@@ -23,8 +23,8 @@ namespace Hyperion
 		void SetContext(const Ref<Scene>& context);
 
 	private:
-		void DrawEntityNode(uint32_t entity);
-		void DrawComponents(uint32_t entity);
+		void DrawEntityNode(Entity entity);
+		void DrawComponents();
 
 		void DrawSelection();
 

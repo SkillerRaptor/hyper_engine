@@ -16,8 +16,8 @@ namespace Hyperion
 		Ref<Scene> m_Scene;
 		Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
 		ImFont* m_Font;
+		Entity m_CameraEntity;
 		uint32_t m_FrameTextureId;
-		uint32_t m_CameraEntity;
 
 		uint32_t* m_StartX;
 		uint32_t* m_StartY;

@@ -22,14 +22,14 @@ namespace Hyperion
 	{
 		ImGui::Begin("Hierarchy");
 
-		m_Context->GetRegistry().Each([&](uint32_t entity)
+		m_Context->Each([&](Entity entity)
 			{
 				DrawEntityNode(entity);
 			});
 
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 		{
-			m_SelectedEntity = -1;
+			m_SelectedEntity = {};
 			m_GlobalPopupOpen = false;
 		}
 
@@ -49,8 +49,8 @@ namespace Hyperion
 		ImGui::End();
 
 		ImGui::Begin("Inspector");
-		if (m_SelectedEntity != -1)
-			DrawComponents(m_SelectedEntity);
+		if (m_SelectedEntity.GetEntityHandle() > 0)
+			DrawComponents();
 		ImGui::End();
 	}
 
@@ -59,14 +59,14 @@ namespace Hyperion
 		m_Context = context;
 	}
 
-	void SceneHierarchyPanel::DrawEntityNode(uint32_t entity)
+	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	{
-		auto& tag = m_Context->GetRegistry().GetComponent<TagComponent>(entity).Tag;
+		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity, flags, tag.c_str());
+		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 
-		if (m_SelectedEntity == entity)
+		if ((uint32_t)m_SelectedEntity == (uint32_t)entity)
 			DrawSelection();
 
 		if (ImGui::IsItemHovered())
@@ -77,15 +77,15 @@ namespace Hyperion
 
 		if (opened)
 		{
-			if (m_Context->GetRegistry().HasComponent<TransformComponent>(entity))
+			if (entity.HasComponent<TransformComponent>())
 				ImGui::BulletText("Transform Component");
-			if (m_Context->GetRegistry().HasComponent<SpriteRendererComponent>(entity))
+			if (entity.HasComponent<SpriteRendererComponent>())
 				ImGui::BulletText("Sprite Renderer Component");
-			if (m_Context->GetRegistry().HasComponent<CameraComponent>(entity))
+			if (entity.HasComponent<CameraComponent>())
 				ImGui::BulletText("Camera Component");
-			if (m_Context->GetRegistry().HasComponent<CameraControllerComponent>(entity))
+			if (entity.HasComponent<CameraControllerComponent>())
 				ImGui::BulletText("Camera Controller Component");
-			if (m_Context->GetRegistry().HasComponent<CharacterControllerComponent>(entity))
+			if (entity.HasComponent<CharacterControllerComponent>())
 				ImGui::BulletText("Character Controller Component");
 			/*
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
@@ -98,15 +98,16 @@ namespace Hyperion
 		}
 	}
 
-	void SceneHierarchyPanel::DrawComponents(uint32_t entity)
+	void SceneHierarchyPanel::DrawComponents()
 	{
 		Registry& registry = m_Context->GetRegistry();
 
 		ImGui::PushItemWidth(-1.0f);
 
-		if (registry.HasComponent<TagComponent>(entity))
+		Entity& entity = m_SelectedEntity;
+		if (entity.HasComponent<TagComponent>())
 		{
-			auto& tag = registry.GetComponent<TagComponent>(entity).Tag;
+			auto& tag = entity.GetComponent<TagComponent>().Tag;
 
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
@@ -122,14 +123,14 @@ namespace Hyperion
 			style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 		}
 
-		if (registry.HasComponent<TransformComponent>(entity))
+		if (entity.HasComponent<TransformComponent>())
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 			ImGui::Columns(2);
 			ImGui::Separator();
 			if (ImGui::TreeNodeEx((void*) typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
 			{
-				TransformComponent& transformComponent = registry.GetComponent<TransformComponent>(entity);
+				TransformComponent& transformComponent = entity.GetComponent<TransformComponent>();
 				ImGui::NextColumn();
 				ImGui::NextColumn();
 
@@ -177,14 +178,14 @@ namespace Hyperion
 			ImGui::PopStyleVar();
 		}
 
-		if (registry.HasComponent<SpriteRendererComponent>(entity))
+		if (entity.HasComponent<SpriteRendererComponent>())
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 			ImGui::Columns(2);
 			ImGui::Separator();
 			if (ImGui::TreeNodeEx((void*) typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
 			{
-				SpriteRendererComponent& spriteRendererComponent = registry.GetComponent<SpriteRendererComponent>(entity);
+				SpriteRendererComponent& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
 				ImGui::NextColumn();
 				ImGui::NextColumn();
 
@@ -200,14 +201,14 @@ namespace Hyperion
 			ImGui::PopStyleVar();
 		}
 
-		if (registry.HasComponent<CameraComponent>(entity))
+		if (entity.HasComponent<CameraComponent>())
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 			ImGui::Columns(2);
 			ImGui::Separator();
 			if (ImGui::TreeNodeEx((void*) typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
 			{
-				CameraComponent& cameraComponent = registry.GetComponent<CameraComponent>(entity);
+				CameraComponent& cameraComponent = entity.GetComponent<CameraComponent>();
 				ImGui::NextColumn();
 				ImGui::NextColumn();
 
@@ -247,14 +248,14 @@ namespace Hyperion
 			ImGui::PopStyleVar();
 		}
 
-		if (registry.HasComponent<CameraControllerComponent>(entity))
+		if (entity.HasComponent<CameraControllerComponent>())
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 			ImGui::Columns(2);
 			ImGui::Separator();
 			if (ImGui::TreeNodeEx((void*) typeid(CameraControllerComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
 			{
-				CameraControllerComponent& cameraControllerComponent = registry.GetComponent<CameraControllerComponent>(entity);
+				CameraControllerComponent& cameraControllerComponent = entity.GetComponent<CameraControllerComponent>();
 				ImGui::NextColumn();
 				ImGui::NextColumn();
 
@@ -276,14 +277,14 @@ namespace Hyperion
 			ImGui::PopStyleVar();
 		}
 
-		if (registry.HasComponent<CharacterControllerComponent>(entity))
+		if (entity.HasComponent<CharacterControllerComponent>())
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 			ImGui::Columns(2);
 			ImGui::Separator();
 			if (ImGui::TreeNodeEx((void*) typeid(CharacterControllerComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
 			{
-				CharacterControllerComponent& characterControllerComponent = registry.GetComponent<CharacterControllerComponent>(entity);
+				CharacterControllerComponent& characterControllerComponent = entity.GetComponent<CharacterControllerComponent>();
 				ImGui::NextColumn();
 				ImGui::NextColumn();
 
@@ -317,16 +318,16 @@ namespace Hyperion
 		bool addComponent = false;
 		bool removeComponent = false;
 
-		if (!registry.HasComponent<SpriteRendererComponent>(m_SelectedEntity) ||
-			!registry.HasComponent<CameraComponent>(m_SelectedEntity) ||
-			!registry.HasComponent<CameraControllerComponent>(m_SelectedEntity) ||
-			!registry.HasComponent<CharacterControllerComponent>(m_SelectedEntity))
+		if (!m_SelectedEntity.HasComponent<SpriteRendererComponent>() ||
+			!m_SelectedEntity.HasComponent<CameraComponent>() ||
+			!m_SelectedEntity.HasComponent<CameraControllerComponent>() ||
+			!m_SelectedEntity.HasComponent<CharacterControllerComponent>())
 			addComponent = true;
 
-		if (registry.HasComponent<SpriteRendererComponent>(m_SelectedEntity) ||
-			registry.HasComponent<CameraComponent>(m_SelectedEntity) ||
-			registry.HasComponent<CameraControllerComponent>(m_SelectedEntity) ||
-			registry.HasComponent<CharacterControllerComponent>(m_SelectedEntity))
+		if (m_SelectedEntity.HasComponent<SpriteRendererComponent>() ||
+			m_SelectedEntity.HasComponent<CameraComponent>() ||
+			m_SelectedEntity.HasComponent<CameraControllerComponent>() ||
+			m_SelectedEntity.HasComponent<CharacterControllerComponent>())
 			removeComponent = true;
 
 		if (addComponent)
@@ -456,11 +457,11 @@ namespace Hyperion
 		if (ImGui::BeginPopup("ComponentAddPopup"))
 		{
 			Registry& registry = m_Context->GetRegistry();
-			if (!registry.HasComponent<SpriteRendererComponent>(m_SelectedEntity))
+			if (!m_SelectedEntity.HasComponent<SpriteRendererComponent>())
 			{
 				if (ImGui::MenuItem("Sprite Renderer Component"))
 				{
-					registry.AddComponent<SpriteRendererComponent>(m_SelectedEntity, Vec4(1.0f));
+					m_SelectedEntity.AddComponent<SpriteRendererComponent>(Vec4(1.0f));
 					m_AddComponentPopupOpen = false;
 					ImGui::CloseCurrentPopup();
 				}
@@ -468,11 +469,11 @@ namespace Hyperion
 					DrawSelection();
 			}
 
-			if (!registry.HasComponent<CameraComponent>(m_SelectedEntity))
+			if (!m_SelectedEntity.HasComponent<CameraComponent>())
 			{
 				if (ImGui::MenuItem("Camera Component"))
 				{
-					registry.AddComponent<CameraComponent>(m_SelectedEntity, 1280, 720, 1.0f, 0.1f, 1.0f);
+					m_SelectedEntity.AddComponent<CameraComponent>(1280, 720, 1.0f, 0.1f, 1.0f);
 					m_AddComponentPopupOpen = false;
 					ImGui::CloseCurrentPopup();
 				}
@@ -480,11 +481,11 @@ namespace Hyperion
 					DrawSelection();
 			}
 
-			if (!registry.HasComponent<CameraControllerComponent>(m_SelectedEntity))
+			if (!m_SelectedEntity.HasComponent<CameraControllerComponent>())
 			{
 				if (ImGui::MenuItem("Camera Controller Component"))
 				{
-					registry.AddComponent<CameraControllerComponent>(m_SelectedEntity, 0.01f, 1.0f);
+					m_SelectedEntity.AddComponent<CameraControllerComponent>(0.01f, 1.0f);
 					m_AddComponentPopupOpen = false;
 					ImGui::CloseCurrentPopup();
 				}
@@ -492,11 +493,11 @@ namespace Hyperion
 					DrawSelection();
 			}
 
-			if (!registry.HasComponent<CharacterControllerComponent>(m_SelectedEntity))
+			if (!m_SelectedEntity.HasComponent<CharacterControllerComponent>())
 			{
 				if (ImGui::MenuItem("Character Controller Component"))
 				{
-					registry.AddComponent<CharacterControllerComponent>(m_SelectedEntity, 1.0f);
+					m_SelectedEntity.AddComponent<CharacterControllerComponent>(1.0f);
 					m_AddComponentPopupOpen = false;
 					ImGui::CloseCurrentPopup();
 				}
@@ -512,11 +513,11 @@ namespace Hyperion
 		if (ImGui::BeginPopup("ComponentRemovePopup"))
 		{
 			Registry& registry = m_Context->GetRegistry();
-			if (registry.HasComponent<SpriteRendererComponent>(m_SelectedEntity))
+			if (m_SelectedEntity.HasComponent<SpriteRendererComponent>())
 			{
 				if (ImGui::MenuItem("Sprite Renderer Component"))
 				{
-					registry.RemoveComponent<SpriteRendererComponent>(m_SelectedEntity);
+					m_SelectedEntity.RemoveComponent<SpriteRendererComponent>();
 					m_RemoveComponentPopupOpen = false;
 					ImGui::CloseCurrentPopup();
 				}
@@ -524,11 +525,11 @@ namespace Hyperion
 					DrawSelection();
 			}
 
-			if (registry.HasComponent<CameraComponent>(m_SelectedEntity))
+			if (m_SelectedEntity.HasComponent<CameraComponent>())
 			{
 				if (ImGui::MenuItem("Camera Component"))
 				{
-					registry.RemoveComponent<CameraComponent>(m_SelectedEntity);
+					m_SelectedEntity.RemoveComponent<CameraComponent>();
 					m_RemoveComponentPopupOpen = false;
 					ImGui::CloseCurrentPopup();
 				}
@@ -536,11 +537,11 @@ namespace Hyperion
 					DrawSelection();
 			}
 
-			if (registry.HasComponent<CameraControllerComponent>(m_SelectedEntity))
+			if (m_SelectedEntity.HasComponent<CameraControllerComponent>())
 			{
 				if (ImGui::MenuItem("Camera Controller Component"))
 				{
-					registry.RemoveComponent<CameraControllerComponent>(m_SelectedEntity);
+					m_SelectedEntity.RemoveComponent<CameraControllerComponent>();
 					m_RemoveComponentPopupOpen = false;
 					ImGui::CloseCurrentPopup();
 				}
@@ -548,11 +549,11 @@ namespace Hyperion
 					DrawSelection();
 			}
 
-			if (registry.HasComponent<CharacterControllerComponent>(m_SelectedEntity))
+			if (m_SelectedEntity.HasComponent<CharacterControllerComponent>())
 			{
 				if (ImGui::MenuItem("Character Controller Component"))
 				{
-					registry.RemoveComponent<CharacterControllerComponent>(m_SelectedEntity);
+					m_SelectedEntity.RemoveComponent<CharacterControllerComponent>();
 					m_RemoveComponentPopupOpen = false;
 					ImGui::CloseCurrentPopup();
 				}
