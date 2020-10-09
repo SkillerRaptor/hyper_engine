@@ -75,8 +75,6 @@ namespace Hyperion
 		ImGuiStyle& style = ImGui::GetStyle();
 		style.WindowPadding = ImVec2(2, 2);
 
-		ImGui::ShowDemoWindow();
-
 		ImGui::Begin("Editor");
 		ImGui::BeginChild("EditorRenderer");
 
@@ -137,7 +135,7 @@ namespace Hyperion
 		style.FrameRounding = 2.0f;
 		style.ItemSpacing = ImVec2(6, 6);
 		style.ItemInnerSpacing = ImVec2(6, 3);
-		style.IndentSpacing = 16.0f;
+		style.IndentSpacing = 12.0f;
 		style.ScrollbarSize = 10.0f;
 		style.ScrollbarRounding = 9.0f;
 		style.GrabMinSize = 4.0f;

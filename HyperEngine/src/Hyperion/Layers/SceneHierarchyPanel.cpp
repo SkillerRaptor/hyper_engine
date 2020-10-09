@@ -140,25 +140,42 @@ namespace Hyperion
 				ImGui::NextColumn();
 				ImGui::NextColumn();
 
-				//ImGui::AlignTextToFramePadding();
+				float width = ImGui::GetContentRegionAvailWidth() / 3;
+
 				ImGui::Text("Position");
 				ImGui::NextColumn();
-				ImGui::SetNextItemWidth(-1);
-				ImGui::DragFloat3("##X", transformComponent.Position, 0.01f);
+				ImGui::SetNextItemWidth(width);
+				ImGui::DragFloat("##XX", &transformComponent.Position.x, 0.01f, 0.0f, 0.0f, "X: %.3f", 1.0f);
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(width);
+				ImGui::DragFloat("##XY", &transformComponent.Position.y, 0.01f, 0.0f, 0.0f, "Y: %.3f", 1.0f);
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(width);
+				ImGui::DragFloat("##XZ", &transformComponent.Position.z, 0.01f, 0.0f, 0.0f, "Z: %.3f", 1.0f);
 				ImGui::NextColumn();
 
-				//ImGui::AlignTextToFramePadding();
 				ImGui::Text("Rotation");
 				ImGui::NextColumn();
-				ImGui::SetNextItemWidth(-1);
-				ImGui::DragFloat3("##Y", transformComponent.Rotation, 0.01f);
+				ImGui::SetNextItemWidth(width);
+				ImGui::DragFloat("##YX", &transformComponent.Rotation.x, 0.01f, 0.0f, 0.0f, "X: %.3f", 1.0f);
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(width);
+				ImGui::DragFloat("##YY", &transformComponent.Rotation.y, 0.01f, 0.0f, 0.0f, "Y: %.3f", 1.0f);
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(width);
+				ImGui::DragFloat("##YZ", &transformComponent.Rotation.z, 0.01f, 0.0f, 0.0f, "Z: %.3f", 1.0f);
 				ImGui::NextColumn();
 
-				//ImGui::AlignTextToFramePadding();
 				ImGui::Text("Scale");
 				ImGui::NextColumn();
-				ImGui::SetNextItemWidth(-1);
-				ImGui::DragFloat3("##Z", transformComponent.Scale, 0.01f);
+				ImGui::SetNextItemWidth(width);
+				ImGui::DragFloat("##ZX", &transformComponent.Scale.x, 0.01f, 0.0f, 0.0f, "X: %.3f", 1.0f);
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(width);
+				ImGui::DragFloat("##ZY", &transformComponent.Scale.y, 0.01f, 0.0f, 0.0f, "Y: %.3f", 1.0f);
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(width);
+				ImGui::DragFloat("##ZZ", &transformComponent.Scale.z, 0.01f, 0.0f, 0.0f, "Z: %.3f", 1.0f);
 				ImGui::NextColumn();
 
 				ImGui::TreePop();
@@ -288,9 +305,13 @@ namespace Hyperion
 			ImGui::Columns(1);
 			ImGui::PopStyleVar();
 		}
+
 		ImGui::Columns(1);
 		ImGui::Separator();
-		ImGui::Button("Add Component", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f));
+		if (ImGui::Button("Add Component", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f)))
+		{
+
+		}
 	}
 
 	void SceneHierarchyPanel::DrawGlobalPopup()
