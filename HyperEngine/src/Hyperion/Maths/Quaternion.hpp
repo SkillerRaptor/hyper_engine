@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vector.hpp"
+#include "Matrix.hpp"
 
 namespace Hyperion
 {
@@ -12,6 +13,7 @@ namespace Hyperion
 
 	public:
 		Quaternion();
+		Quaternion(Vec3 vector);
 		Quaternion(float scalar, Vec3 axis);
 		~Quaternion();
 
@@ -36,6 +38,9 @@ namespace Hyperion
 		static Quaternion ConvertToUnitNorm(Quaternion quaternion);
 		static Quaternion Conjugate(Quaternion quaternion);
 		static Quaternion Inverse(Quaternion quaternion);
+		static Quaternion RotateQuaternion(float angle, Vec3 axis);
 		static Vec3 RotateVector(Vec3 vector, float angle, Vec3 axis);
+		static Mat4 ConvertToMatrix(Vec4 vector);
+		static Mat4 ConvertToMatrix(Quaternion quaternion);
 	};
 }

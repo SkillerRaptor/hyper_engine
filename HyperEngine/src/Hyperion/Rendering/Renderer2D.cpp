@@ -118,19 +118,24 @@ namespace Hyperion
 		if (m_QuadIndexCount >= MaxIndices)
 			FlushAndReset();
 
-		Mat4 transform = Mat4(1.0f);
-		transform = Matrix::Translate(transform, position);
-		transform = Matrix::Scale(transform, scale);
+		Mat4 translateMatrix = Mat4(1.0f);
+		translateMatrix = Matrix::Translate(translateMatrix, position);
+
+		Mat4 scaleMatrix = Mat4(1.0f);
+		scaleMatrix = Matrix::Scale(scaleMatrix, scale);
+
+		Vec4 relativeTranslation = Vec4(0.5f * scale.x, 0.5f * scale.y, 0.5f * scale.z, 1.0f);
 
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
-			Vec4 transformVector = transform * m_QuadVertexPositions[i];
-			Vec3 rotatedVector = Vec3(transformVector.x, transformVector.y, transformVector.z);
-			if (rotation.x != 0) rotatedVector = Quaternion::RotateVector(rotatedVector, rotation.x, Vec3(1.0f, 0.0f, 0.0f));
-			if (rotation.y != 0) rotatedVector = Quaternion::RotateVector(rotatedVector, rotation.y, Vec3(0.0f, 1.0f, 0.0f));
-			if (rotation.z != 0) rotatedVector = Quaternion::RotateVector(rotatedVector, rotation.z, Vec3(0.0f, 0.0f, 1.0f));
+			Vec4 translatedVector = scaleMatrix * m_QuadVertexPositions[i];
 
-			m_QuadVertexBufferPtr->Position = rotatedVector;
+			Mat4 rotationMatrix = Quaternion::ConvertToMatrix(Quaternion(rotation));
+			translatedVector = rotationMatrix * translatedVector;
+
+			translatedVector = translateMatrix * translatedVector;
+
+			m_QuadVertexBufferPtr->Position = Vec3(translatedVector.x, translatedVector.y, translatedVector.z);
 			m_QuadVertexBufferPtr->Color = color;
 			m_QuadVertexBufferPtr->TexCoords = {};
 			m_QuadVertexBufferPtr->TexId = -1;
