@@ -44,6 +44,9 @@ namespace Hyperion
 
 	private:
 		void SetupStyle();
+
+		void DrawSelection();
+
 		void ShowDockingMenu();
 		void ShowMenuFile();
 		void ShowMenuEdit();

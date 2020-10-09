@@ -185,6 +185,15 @@ namespace Hyperion
 		style.Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
 	}
 
+	void ImGuiLayer::DrawSelection()
+	{
+		ImVec2 pos = ImGui::GetCursorScreenPos();
+		pos.x -= 5.0f;
+		pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
+		ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
+		ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false, 5.0f);
+	}
+
 	void ImGuiLayer::ShowDockingMenu()
 	{
 		ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_PassthruCentralNode;
@@ -244,25 +253,62 @@ namespace Hyperion
 	void ImGuiLayer::ShowMenuFile()
 	{
 		if (ImGui::MenuItem("New", "Ctrl+N")) {}
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		if (ImGui::MenuItem("Open Recent", "")) {}
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		if (ImGui::MenuItem("Save As..", "")) {}
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		ImGui::Separator();
+
 		if (ImGui::BeginMenu("Options"))
 			ImGui::EndMenu();
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		ImGui::EndMenu();
 	}
 
 	void ImGuiLayer::ShowMenuEdit()
 	{
 		if (ImGui::MenuItem("Undo", "Ctrl+Z")) {}
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		if (ImGui::MenuItem("Redo", "Ctrl+Y", false, false)) {}
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		ImGui::Separator();
+
 		if (ImGui::MenuItem("Cut", "Ctrl+X")) {}
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		if (ImGui::MenuItem("Copy", "Ctrl+C")) {}
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		if (ImGui::MenuItem("Delete", "Del")) {}
+		if (ImGui::IsItemHovered())
+			DrawSelection();
 		ImGui::EndMenu();
 	}
 

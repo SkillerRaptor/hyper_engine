@@ -370,84 +370,107 @@ namespace Hyperion
 		{
 			if (ImGui::BeginMenu("2D Objects"))
 			{
+				if (ImGui::IsItemHovered())
+					DrawSelection();
+
 				if (ImGui::MenuItem("Quad"))
 				{
 					m_Context->CreateEntity();
-					if (ImGui::IsItemHovered())
-						DrawSelection();
-				}
-				if (ImGui::MenuItem("Triangle"))
-				{
-					if (ImGui::IsItemHovered())
-						DrawSelection();
-				}
-				if (ImGui::MenuItem("Circle"))
-				{
-					if (ImGui::IsItemHovered())
-						DrawSelection();
-				}
-				if (ImGui::MenuItem("Light"))
-				{
-					if (ImGui::IsItemHovered())
-						DrawSelection();
 				}
 				if (ImGui::IsItemHovered())
 					DrawSelection();
+
+				if (ImGui::MenuItem("Triangle"))
+				{
+				}
+				if (ImGui::IsItemHovered())
+					DrawSelection();
+
+				if (ImGui::MenuItem("Circle"))
+				{
+				}
+				if (ImGui::IsItemHovered())
+					DrawSelection();
+
+				if (ImGui::MenuItem("Light"))
+				{
+				}
+				if (ImGui::IsItemHovered())
+					DrawSelection();
+
 				ImGui::EndMenu();
 			}
+			if (ImGui::IsItemHovered())
+				DrawSelection();
 			if (ImGui::BeginMenu("3D Objects"))
 			{
+				if (ImGui::IsItemHovered())
+					DrawSelection();
+
 				if (ImGui::MenuItem("Cube"))
 				{
-					if (ImGui::IsItemHovered())
-						DrawSelection();
 				}
+				if (ImGui::IsItemHovered())
+					DrawSelection();
+
 				if (ImGui::MenuItem("Sphere"))
 				{
-					if (ImGui::IsItemHovered())
-						DrawSelection();
 				}
+				if (ImGui::IsItemHovered())
+					DrawSelection();
+
 				if (ImGui::BeginMenu("Lights"))
 				{
 					if (ImGui::MenuItem("Spot Light"))
 					{
-						if (ImGui::IsItemHovered())
-							DrawSelection();
-					}
-					if (ImGui::MenuItem("Directional Light"))
-					{
-						if (ImGui::IsItemHovered())
-							DrawSelection();
-					}
-					if (ImGui::MenuItem("Point Light"))
-					{
-						if (ImGui::IsItemHovered())
-							DrawSelection();
 					}
 					if (ImGui::IsItemHovered())
 						DrawSelection();
+
+					if (ImGui::MenuItem("Directional Light"))
+					{
+					}
+					if (ImGui::IsItemHovered())
+						DrawSelection();
+
+					if (ImGui::MenuItem("Point Light"))
+					{
+					}
+					if (ImGui::IsItemHovered())
+						DrawSelection();
+
 					ImGui::EndMenu();
 				}
 				if (ImGui::IsItemHovered())
 					DrawSelection();
+
 				ImGui::EndMenu();
 			}
+			if (ImGui::IsItemHovered())
+				DrawSelection();
+
 			if (ImGui::BeginMenu("Cameras"))
 			{
+				if (ImGui::IsItemHovered())
+					DrawSelection();
+
 				if (ImGui::MenuItem("Orthographic Camera"))
 				{
-					if (ImGui::IsItemHovered())
-						DrawSelection();
-				}
-				if (ImGui::MenuItem("Projection Camera"))
-				{
-					if (ImGui::IsItemHovered())
-						DrawSelection();
 				}
 				if (ImGui::IsItemHovered())
 					DrawSelection();
+
+				if (ImGui::MenuItem("Projection Camera"))
+				{
+				}
+				if (ImGui::IsItemHovered())
+					DrawSelection();
+
 				ImGui::EndMenu();
 			}
+			if (ImGui::IsItemHovered())
+				DrawSelection();
+
 			ImGui::EndPopup();
 		}
 	}
