@@ -176,7 +176,7 @@ namespace Hyperion
 			Matrix3<T> mat;
 			for (size_t i = 0; i < 3; i++)
 				for (size_t j = 0; j < 3; j++)
-					mat.matrix[i][j] = matrix[i][j] * matrix3.matrix[i][j];
+					mat.matrix[i][j] = matrix[i][j] * matrix3.matrix[j][i];
 			return mat;
 		}
 
@@ -184,7 +184,7 @@ namespace Hyperion
 		{
 			for (size_t i = 0; i < 3; i++)
 				for (size_t j = 0; j < 3; j++)
-					matrix[i][j] *= matrix3.matrix[i][j];
+					matrix[i][j] *= matrix3.matrix[j][i];
 			return *this;
 		}
 
@@ -198,6 +198,17 @@ namespace Hyperion
 				mat.matrix[i][2] = matrix[i][2] * vector.z;
 			}
 			return mat;
+		}
+
+		Vector3<T> operator*(Vec3& vector) const
+		{
+			Vector3<T> vec = Vector3<T>();
+
+			for (size_t i = 0; i < 3; i++)
+				for (size_t j = 0; j < 3; j++)
+					vec[i] += matrix[i][j] * vector[j];
+
+			return vec;
 		}
 
 		Matrix3<T> operator*=(const Vec3& vector)

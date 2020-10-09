@@ -180,7 +180,7 @@ namespace Hyperion
 			Matrix4<T> mat;
 			for (size_t i = 0; i < 4; i++)
 				for (size_t j = 0; j < 4; j++)
-					mat.matrix[i][j] = matrix[i][j] * matrix4.matrix[i][j];
+					mat.matrix[i][j] = matrix[i][j] * matrix4.matrix[j][i];
 			return mat;
 		}
 
@@ -188,7 +188,7 @@ namespace Hyperion
 		{
 			for (size_t i = 0; i < 4; i++)
 				for (size_t j = 0; j < 4; j++)
-					matrix[i][j] *= matrix4.matrix[i][j];
+					matrix[i][j] *= matrix4.matrix[j][i];
 			return *this;
 		}
 		
@@ -202,16 +202,6 @@ namespace Hyperion
 		
 			return vec;
 		}
-
-		//Vector4<T> operator*(Vec4& vector) const
-		//{
-		//	Vector4<T> vec = Vector4<T>();
-		//
-		//	for (size_t i = 0; i < 4; i++)
-		//		vec[i] += matrix[i][i] * vector[i] + matrix[i][3];
-		//
-		//	return vec;
-		//}
 
 		Matrix4<T> operator*=(const Vec4& vector)
 		{

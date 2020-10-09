@@ -172,7 +172,7 @@ namespace Hyperion
 			Matrix2<T> mat;
 			for (size_t i = 0; i < 2; i++)
 				for (size_t j = 0; j < 2; j++)
-					mat.matrix[i][j] = matrix[i][j] * matrix2.matrix[i][j];
+					mat.matrix[i][j] = matrix[i][j] * matrix2.matrix[j][i];
 			return mat;
 		}
 
@@ -180,7 +180,7 @@ namespace Hyperion
 		{
 			for (size_t i = 0; i < 2; i++)
 				for (size_t j = 0; j < 2; j++)
-					matrix[i][j] *= matrix2.matrix[i][j];
+					matrix[i][j] *= matrix2.matrix[j][i];
 			return *this;
 		}
 
@@ -193,6 +193,17 @@ namespace Hyperion
 				mat.matrix[i][1] = matrix[i][1] * vector.y;
 			}
 			return mat;
+		}
+
+		Vector2<T> operator*(Vec2& vector) const
+		{
+			Vector2<T> vec = Vector2<T>();
+
+			for (size_t i = 0; i < 2; i++)
+				for (size_t j = 0; j < 2; j++)
+					vec[i] += matrix[i][j] * vector[j];
+
+			return vec;
 		}
 
 		Matrix2<T> operator*=(const Vec2& vector)
