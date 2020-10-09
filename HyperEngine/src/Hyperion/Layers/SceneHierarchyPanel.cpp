@@ -1,6 +1,7 @@
 #include "SceneHierarchyPanel.hpp"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 #include <limits>
 
@@ -30,13 +31,11 @@ namespace Hyperion
 		{
 			m_SelectedEntity = -1;
 			m_GlobalPopupOpen = false;
-			m_ItemPopupOpen = false;
 		}
 
-		if (ImGui::IsMouseDown(1) && ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered())
+		if (ImGui::IsMouseDown(1) && ImGui::IsWindowHovered())
 		{
 			m_GlobalPopupOpen = true;
-			if (m_ItemPopupOpen) m_ItemPopupOpen = false;
 		}
 
 		if (m_GlobalPopupOpen)
@@ -49,23 +48,6 @@ namespace Hyperion
 			}
 
 		DrawGlobalPopup();
-
-		if (ImGui::IsMouseDown(1) && ImGui::IsAnyItemHovered() && m_SelectedEntity != -1)
-		{
-			m_ItemPopupOpen = true;
-			if (m_GlobalPopupOpen) m_GlobalPopupOpen = false;
-		}
-
-		if (m_ItemPopupOpen)
-			if (m_SelectedEntity != -1)
-				ImGui::OpenPopup("ItemPopup");
-			else
-			{
-				m_ItemPopupOpen = false;
-				ImGui::CloseCurrentPopup();
-			}
-
-		DrawItemPopup();
 
 		ImGui::End();
 
@@ -84,8 +66,24 @@ namespace Hyperion
 	{
 		auto& tag = m_Context->GetRegistry().GetComponent<TagComponent>(entity).Tag;
 
-		ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity, flags, tag.c_str());
+
+		if (m_SelectedEntity == entity)
+		{
+			ImVec2 pos = ImGui::GetCursorScreenPos();
+			pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
+			ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
+			ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false);
+		}
+
+		if (ImGui::IsItemHovered())
+		{
+			ImVec2 pos = ImGui::GetCursorScreenPos();
+			pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
+			ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
+			ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false);
+		}
 
 		if (ImGui::IsItemClicked())
 			m_SelectedEntity = entity;
@@ -292,6 +290,7 @@ namespace Hyperion
 		}
 		ImGui::Columns(1);
 		ImGui::Separator();
+		ImGui::Button("Add Component", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f));
 	}
 
 	void SceneHierarchyPanel::DrawGlobalPopup()
@@ -356,107 +355,6 @@ namespace Hyperion
 				{
 
 				}
-				ImGui::EndMenu();
-			}
-			ImGui::EndPopup();
-		}
-	}
-
-	void SceneHierarchyPanel::DrawItemPopup()
-	{
-		if (ImGui::BeginPopup("ItemPopup"))
-		{
-			if (!m_Context->GetRegistry().HasComponent<SpriteRendererComponent>(m_SelectedEntity))
-			{
-				if (ImGui::BeginMenu("Add Component"))
-				{
-					if (!m_Context->GetRegistry().HasComponent<SpriteRendererComponent>(m_SelectedEntity))
-					{
-						if (ImGui::MenuItem("Sprite Renderer Component"))
-						{
-							m_Context->GetRegistry().AddComponent<SpriteRendererComponent>(m_SelectedEntity, Vec4(1.0f));
-							m_ItemPopupOpen = false;
-							ImGui::CloseCurrentPopup();
-						}
-					}
-
-					/*
-					if (!m_Context->GetRegistry().HasComponent<CameraComponent>(m_SelectedEntity))
-					{
-						if (ImGui::MenuItem("Camera Component"))
-						{
-							m_Context->GetRegistry().AddComponent<CameraComponent>(m_SelectedEntity, 1280, 720, 1.0f, 0.1f, 1.0f);
-							m_ItemPopupOpen = false;
-							ImGui::CloseCurrentPopup();
-						}
-					}
-
-					if (!m_Context->GetRegistry().HasComponent<CameraControllerComponent>(m_SelectedEntity))
-					{
-						if (ImGui::MenuItem("Camera Controller Component"))
-						{
-							m_Context->GetRegistry().AddComponent<CameraControllerComponent>(m_SelectedEntity, 0.01f, 1.0f);
-							m_ItemPopupOpen = false;
-							ImGui::CloseCurrentPopup();
-						}
-					}
-
-					if (!m_Context->GetRegistry().HasComponent<CharacterControllerComponent>(m_SelectedEntity))
-					{
-						if (ImGui::MenuItem("Character Controller Component"))
-						{
-							m_Context->GetRegistry().AddComponent<CharacterControllerComponent>(m_SelectedEntity, 1.0f);
-							m_ItemPopupOpen = false;
-							ImGui::CloseCurrentPopup();
-						}
-					}
-					*/
-					ImGui::EndMenu();
-				}
-			}
-			if (ImGui::BeginMenu("Remove Component"))
-			{
-				if (m_Context->GetRegistry().HasComponent<SpriteRendererComponent>(m_SelectedEntity))
-				{
-					if (ImGui::MenuItem("Sprite Renderer Component"))
-					{
-						m_Context->GetRegistry().RemoveComponent<SpriteRendererComponent>(m_SelectedEntity);
-						m_ItemPopupOpen = false;
-						ImGui::CloseCurrentPopup();
-					}
-				}
-
-				/*
-				if (!m_Context->GetRegistry().HasComponent<CameraComponent>(m_SelectedEntity))
-				{
-					if (ImGui::MenuItem("Camera Component"))
-					{
-						m_Context->GetRegistry().AddComponent<CameraComponent>(m_SelectedEntity, 1280, 720, 1.0f, 0.1f, 1.0f);
-						m_ItemPopupOpen = false;
-						ImGui::CloseCurrentPopup();
-					}
-				}
-
-				if (!m_Context->GetRegistry().HasComponent<CameraControllerComponent>(m_SelectedEntity))
-				{
-					if (ImGui::MenuItem("Camera Controller Component"))
-					{
-						m_Context->GetRegistry().AddComponent<CameraControllerComponent>(m_SelectedEntity, 0.01f, 1.0f);
-						m_ItemPopupOpen = false;
-						ImGui::CloseCurrentPopup();
-					}
-				}
-
-				if (!m_Context->GetRegistry().HasComponent<CharacterControllerComponent>(m_SelectedEntity))
-				{
-					if (ImGui::MenuItem("Character Controller Component"))
-					{
-						m_Context->GetRegistry().AddComponent<CharacterControllerComponent>(m_SelectedEntity, 1.0f);
-						m_ItemPopupOpen = false;
-						ImGui::CloseCurrentPopup();
-					}
-				}
-				*/
 				ImGui::EndMenu();
 			}
 			ImGui::EndPopup();

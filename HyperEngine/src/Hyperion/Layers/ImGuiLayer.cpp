@@ -75,6 +75,8 @@ namespace Hyperion
 		ImGuiStyle& style = ImGui::GetStyle();
 		style.WindowPadding = ImVec2(2, 2);
 
+		ImGui::ShowDemoWindow();
+
 		ImGui::Begin("Editor");
 		ImGui::BeginChild("EditorRenderer");
 
@@ -131,14 +133,14 @@ namespace Hyperion
 
 		style.WindowPadding = ImVec2(15, 15);
 		style.WindowRounding = 5.0f;
-		style.FramePadding = ImVec2(5, 5);
-		style.FrameRounding = 0.5f;
-		style.ItemSpacing = ImVec2(12, 8);
+		style.FramePadding = ImVec2(6, 3);
+		style.FrameRounding = 2.0f;
+		style.ItemSpacing = ImVec2(6, 6);
 		style.ItemInnerSpacing = ImVec2(6, 3);
-		style.IndentSpacing = 25.0f;
-		style.ScrollbarSize = 15.0f;
+		style.IndentSpacing = 16.0f;
+		style.ScrollbarSize = 10.0f;
 		style.ScrollbarRounding = 9.0f;
-		style.GrabMinSize = 5.0f;
+		style.GrabMinSize = 4.0f;
 		style.GrabRounding = 3.0f;
 
 		style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
@@ -166,7 +168,7 @@ namespace Hyperion
 		style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.46f, 0.47f, 0.48f, 1.00f);
 		style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.42f, 0.42f, 0.42f, 1.00f);
 		style.Colors[ImGuiCol_Header] = ImVec4(0.70f, 0.70f, 0.70f, 0.31f);
-		style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.70f, 0.70f, 0.70f, 0.80f);
+		style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 		style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.48f, 0.50f, 0.52f, 1.00f);
 		style.Colors[ImGuiCol_Separator] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
 		style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.72f, 0.72f, 0.72f, 0.78f);
