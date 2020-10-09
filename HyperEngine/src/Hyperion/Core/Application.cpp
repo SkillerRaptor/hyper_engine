@@ -21,7 +21,7 @@ namespace Hyperion
 		m_Window = new OpenGLWindow("HyperEngine", 1920, 1080, false, &m_EventBus);
 		m_Window->InitWindow();
 
-		m_Scene = CreateRef<Scene>();
+		m_Scene = CreateRef<Scene>("Main Scene");
 
 		m_LayerStack = new LayerStack(m_Scene);
 		m_LayerStack->GetImGuiLayer()->SetStartX(&m_StartX);

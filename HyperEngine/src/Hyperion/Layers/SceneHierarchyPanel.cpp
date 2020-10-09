@@ -22,30 +22,37 @@ namespace Hyperion
 	{
 		ImGui::Begin("Hierarchy");
 
-		m_Context->Each([&](Entity entity)
-			{
-				DrawEntityNode(entity);
-			});
-
-		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
+		ImGui::SetNextItemOpen(true);
+		if (ImGui::TreeNodeEx(m_Context->GetName().c_str(), flags))
 		{
-			m_SelectedEntity = {};
-			m_GlobalPopupOpen = false;
-		}
+			m_Context->Each([&](Entity entity)
+				{
+					DrawEntityNode(entity);
+				});
 
-		if (ImGui::IsMouseDown(1) && ImGui::IsWindowHovered())
-			m_GlobalPopupOpen = true;
-
-		if (m_GlobalPopupOpen)
-			if (ImGui::IsWindowHovered())
-				ImGui::OpenPopup("GlobalPopup");
-			else
+			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 			{
+				m_SelectedEntity = {};
 				m_GlobalPopupOpen = false;
-				ImGui::CloseCurrentPopup();
 			}
 
-		DrawGlobalPopup();
+			if (ImGui::IsMouseDown(1) && ImGui::IsWindowHovered())
+				m_GlobalPopupOpen = true;
+
+			if (m_GlobalPopupOpen)
+				if (ImGui::IsWindowHovered())
+					ImGui::OpenPopup("GlobalPopup");
+				else
+				{
+					m_GlobalPopupOpen = false;
+					ImGui::CloseCurrentPopup();
+				}
+
+			DrawGlobalPopup();
+
+			ImGui::TreePop();
+		}
 		ImGui::End();
 
 		ImGui::Begin("Inspector");
@@ -74,6 +81,32 @@ namespace Hyperion
 
 		if (ImGui::IsItemClicked())
 			m_SelectedEntity = entity;
+
+		if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
+		{
+			std::map<EnTT, std::unordered_map<uint32_t, size_t>>::iterator it = m_Context->GetRegistry().GetEntitiesMap().find(entity.GetEntityHandle());
+			ImGui::GetMouseDragDelta(0).y < 0.f ? it-- : it++;
+			if (it != m_Context->GetRegistry().GetEntitiesMap().end())
+			{
+				// TODO: Swap Items
+			}
+		}
+
+		if (ImGui::BeginDragDropSource()) {
+			ImGui::SetDragDropPayload("_ENTITY", &entity, sizeof(Entity));
+			ImGui::Text("This is a drag and drop source");
+			ImGui::EndDragDropSource();
+		}
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_ENTITY"))
+			{
+				HP_CORE_ASSERT(payload->DataSize == sizeof(Entity), "Not an Entity");
+				Entity entity = *(const Entity*) payload->Data;
+				std::cout << entity.GetComponent<TagComponent>().Tag << std::endl;
+			}
+			ImGui::EndDragDropTarget();
+		}
 
 		if (opened)
 		{

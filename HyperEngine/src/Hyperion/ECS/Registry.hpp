@@ -19,6 +19,7 @@ namespace Hyperion
 	class Registry
 	{
 	private:
+		// TODO: Use Poolallocator
 		std::map<EnTT, std::unordered_map<uint32_t, size_t>> m_Entities;
 		std::unordered_map<uint32_t, ComponentBuffer*> m_Components;
 
@@ -95,6 +96,11 @@ namespace Hyperion
 			for (auto& entity : m_Entities)
 				entities.push_back(entity.first);
 			return entities;
+		}
+
+		std::map<EnTT, std::unordered_map<uint32_t, size_t>>& GetEntitiesMap()
+		{
+			return m_Entities;
 		}
 
 		template<class... T>

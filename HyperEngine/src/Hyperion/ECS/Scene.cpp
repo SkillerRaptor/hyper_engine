@@ -7,7 +7,8 @@
 
 namespace Hyperion
 {
-	Scene::Scene()
+	Scene::Scene(const std::string& name)
+		: m_Name(name)
 	{
 		Init();
 	}
@@ -67,5 +68,15 @@ namespace Hyperion
 	Registry& Scene::GetRegistry()
 	{
 		return *m_Registry;
+	}
+
+	void Scene::SetName(const std::string& name)
+	{
+		m_Name = name;
+	}
+
+	std::string Scene::GetName() const
+	{
+		return m_Name;
 	}
 }

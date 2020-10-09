@@ -15,11 +15,12 @@ namespace Hyperion
 	class Scene
 	{
 	private:
+		std::string m_Name;
 		Ref<Registry> m_Registry;
 		Ref<EntitySystems> m_Systems;
 
 	public:
-		Scene();
+		Scene(const std::string& name);
 		~Scene();
 		
 		void Init();
@@ -36,5 +37,8 @@ namespace Hyperion
 		void Each(const typename std::common_type<std::function<void(Entity)>>::type function);
 
 		Registry& GetRegistry();
+
+		void SetName(const std::string& name);
+		std::string GetName() const;
 	};
 }
