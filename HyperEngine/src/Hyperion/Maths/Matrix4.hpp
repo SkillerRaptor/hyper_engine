@@ -192,16 +192,26 @@ namespace Hyperion
 			return *this;
 		}
 		
-		Vector4<T> operator*(const Vec4& vector) const
+		Vector4<T> operator*(Vec4& vector) const
 		{
 			Vector4<T> vec = Vector4<T>();
-
+		
 			for (size_t i = 0; i < 4; i++)
 				for (size_t j = 0; j < 4; j++)
-					vec[i] += matrix[i][j] * vector[i];
-
+					vec[i] += matrix[i][j] * vector[j];
+		
 			return vec;
 		}
+
+		//Vector4<T> operator*(Vec4& vector) const
+		//{
+		//	Vector4<T> vec = Vector4<T>();
+		//
+		//	for (size_t i = 0; i < 4; i++)
+		//		vec[i] += matrix[i][i] * vector[i] + matrix[i][3];
+		//
+		//	return vec;
+		//}
 
 		Matrix4<T> operator*=(const Vec4& vector)
 		{

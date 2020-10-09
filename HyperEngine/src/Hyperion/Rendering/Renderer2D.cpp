@@ -116,9 +116,15 @@ namespace Hyperion
 		if (m_QuadIndexCount >= MaxIndices)
 			FlushAndReset();
 
+		Mat4 transform = Mat4(1.0f);
+		transform = Matrix::Translate(transform, position);
+		//transform += Matrix::Rotate(Mat4(1.0f), rotation);
+		transform = Matrix::Scale(transform, scale);
+
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
-			m_QuadVertexBufferPtr->Position = Vec3(position.x + m_QuadVertexPositions[i].x, position.y + m_QuadVertexPositions[i].y, position.z + m_QuadVertexPositions[i].z);
+			Vec4 transformVector = transform * m_QuadVertexPositions[i];
+			m_QuadVertexBufferPtr->Position = Vec3(transformVector.x, transformVector.y, transformVector.z);
 			m_QuadVertexBufferPtr->Color = color;
 			m_QuadVertexBufferPtr->TexCoords = {};
 			m_QuadVertexBufferPtr->TexId = -1;

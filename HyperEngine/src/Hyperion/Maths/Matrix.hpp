@@ -52,17 +52,21 @@ namespace Hyperion
 			Vec3 Scale;
 		};
 
-		Transform GetTransformFromMatrix(Matrix4<float> matrix);
+		Transform GetTransformFromMatrix(Mat4 matrix);
 
-		Matrix4<float> Scale(Matrix4<float> matrix, Vector3<float> vector);
-		Matrix4<float> Translate(Matrix4<float> matrix, Vector3<float> vector);
+		Mat2 Inverse(Mat2 matrix);
+		Mat3 Inverse(Mat3 matrix);
+		Mat4 Inverse(Mat4 matrix);
 
-		Matrix4<float> Rotate(Matrix4<float> matrix, Vector3<float> degrees);
-		Matrix4<float> RotateX(Matrix4<float> matrix, float degrees);
-		Matrix4<float> RotateY(Matrix4<float> matrix, float degrees);
-		Matrix4<float> RotateZ(Matrix4<float> matrix, float degrees);
+		Mat4 Scale(Mat4 matrix, Vec3 vector);
+		Mat4 Translate(Mat4 matrix, Vec3 vector);
 
-		Matrix4<float> Ortho(float left, float right, float bottom, float top, float nearPlane, float farPlane);
-		Matrix4<float> Perspective(float degrees, float aspectRatio, float nearPlane, float farPlane);
+		Mat4 Rotate(Mat4 matrix, Vec3 degrees);
+		Mat4 RotateX(Mat4 matrix, float degrees);
+		Mat4 RotateY(Mat4 matrix, float degrees);
+		Mat4 RotateZ(Mat4 matrix, float degrees);
+
+		Mat4 Ortho(float left, float right, float bottom, float top, float nearPlane, float farPlane);
+		Mat4 Perspective(float degrees, float aspectRatio, float nearPlane, float farPlane);
 	};
 }
