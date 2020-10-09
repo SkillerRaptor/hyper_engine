@@ -528,7 +528,7 @@ namespace Hyperion
 			{
 				if (ImGui::MenuItem("Camera Component"))
 				{
-					registry.AddComponent<CameraComponent>(m_SelectedEntity, 1280, 720, 1.0f, 0.1f, 1.0f);
+					registry.RemoveComponent<CameraComponent>(m_SelectedEntity);
 					m_RemoveComponentPopupOpen = false;
 					ImGui::CloseCurrentPopup();
 				}
@@ -540,7 +540,7 @@ namespace Hyperion
 			{
 				if (ImGui::MenuItem("Camera Controller Component"))
 				{
-					registry.AddComponent<CameraControllerComponent>(m_SelectedEntity, 0.01f, 1.0f);
+					registry.RemoveComponent<CameraControllerComponent>(m_SelectedEntity);
 					m_RemoveComponentPopupOpen = false;
 					ImGui::CloseCurrentPopup();
 				}
@@ -552,7 +552,7 @@ namespace Hyperion
 			{
 				if (ImGui::MenuItem("Character Controller Component"))
 				{
-					registry.AddComponent<CharacterControllerComponent>(m_SelectedEntity, 1.0f);
+					registry.RemoveComponent<CharacterControllerComponent>(m_SelectedEntity);
 					m_RemoveComponentPopupOpen = false;
 					ImGui::CloseCurrentPopup();
 				}
