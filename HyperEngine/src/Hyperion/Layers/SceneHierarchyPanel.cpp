@@ -92,11 +92,23 @@ namespace Hyperion
 
 		if (opened)
 		{
+			if (m_Context->GetRegistry().HasComponent<TransformComponent>(entity))
+				ImGui::BulletText("Transform Component");
+			if (m_Context->GetRegistry().HasComponent<SpriteRendererComponent>(entity))
+				ImGui::BulletText("Sprite Renderer Component");
+			if (m_Context->GetRegistry().HasComponent<CameraComponent>(entity))
+				ImGui::BulletText("Camera Component");
+			if (m_Context->GetRegistry().HasComponent<CameraControllerComponent>(entity))
+				ImGui::BulletText("Camera Controller Component");
+			if (m_Context->GetRegistry().HasComponent<CharacterControllerComponent>(entity))
+				ImGui::BulletText("Character Controller Component");
+			/*
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 			bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity, flags, tag.c_str());
 
 			if (opened)
 				ImGui::TreePop();
+				*/
 			ImGui::TreePop();
 		}
 	}
@@ -292,23 +304,61 @@ namespace Hyperion
 	{
 		if (ImGui::BeginPopup("ItemPopup"))
 		{
-			if (ImGui::BeginMenu("Add Component"))
+			if (!m_Context->GetRegistry().HasComponent<SpriteRendererComponent>(m_SelectedEntity))
 			{
-				if (!m_Context->GetRegistry().HasComponent<TransformComponent>(m_SelectedEntity))
+				if (ImGui::BeginMenu("Add Component"))
 				{
-					if (ImGui::MenuItem("Transform Component"))
+					if (!m_Context->GetRegistry().HasComponent<SpriteRendererComponent>(m_SelectedEntity))
 					{
-						m_Context->GetRegistry().AddComponent<TransformComponent>(m_SelectedEntity, Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(10.0f, 10.0f, 10.0f));
-						m_ItemPopupOpen = false;
-						ImGui::CloseCurrentPopup();
+						if (ImGui::MenuItem("Sprite Renderer Component"))
+						{
+							m_Context->GetRegistry().AddComponent<SpriteRendererComponent>(m_SelectedEntity, Vec4(1.0f));
+							m_ItemPopupOpen = false;
+							ImGui::CloseCurrentPopup();
+						}
 					}
-				}
 
-				if (!m_Context->GetRegistry().HasComponent<SpriteRendererComponent>(m_SelectedEntity))
+					/*
+					if (!m_Context->GetRegistry().HasComponent<CameraComponent>(m_SelectedEntity))
+					{
+						if (ImGui::MenuItem("Camera Component"))
+						{
+							m_Context->GetRegistry().AddComponent<CameraComponent>(m_SelectedEntity, 1280, 720, 1.0f, 0.1f, 1.0f);
+							m_ItemPopupOpen = false;
+							ImGui::CloseCurrentPopup();
+						}
+					}
+
+					if (!m_Context->GetRegistry().HasComponent<CameraControllerComponent>(m_SelectedEntity))
+					{
+						if (ImGui::MenuItem("Camera Controller Component"))
+						{
+							m_Context->GetRegistry().AddComponent<CameraControllerComponent>(m_SelectedEntity, 0.01f, 1.0f);
+							m_ItemPopupOpen = false;
+							ImGui::CloseCurrentPopup();
+						}
+					}
+
+					if (!m_Context->GetRegistry().HasComponent<CharacterControllerComponent>(m_SelectedEntity))
+					{
+						if (ImGui::MenuItem("Character Controller Component"))
+						{
+							m_Context->GetRegistry().AddComponent<CharacterControllerComponent>(m_SelectedEntity, 1.0f);
+							m_ItemPopupOpen = false;
+							ImGui::CloseCurrentPopup();
+						}
+					}
+					*/
+					ImGui::EndMenu();
+				}
+			}
+			if (ImGui::BeginMenu("Remove Component"))
+			{
+				if (m_Context->GetRegistry().HasComponent<SpriteRendererComponent>(m_SelectedEntity))
 				{
 					if (ImGui::MenuItem("Sprite Renderer Component"))
 					{
-						m_Context->GetRegistry().AddComponent<SpriteRendererComponent>(m_SelectedEntity, Vec4(1.0f));
+						m_Context->GetRegistry().RemoveComponent<SpriteRendererComponent>(m_SelectedEntity);
 						m_ItemPopupOpen = false;
 						ImGui::CloseCurrentPopup();
 					}
