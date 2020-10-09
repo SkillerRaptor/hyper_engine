@@ -43,13 +43,20 @@ namespace Hyperion
 	namespace Vector
 	{
 		Vec2 Normalize(Vec2& vector);
+		Vec2 Normalize(const Vec2& vector);
 		Vec3 Normalize(Vec3& vector);
+		Vec3 Normalize(const Vec3& vector);
 		Vec4 Normalize(Vec4& vector);
+		Vec4 Normalize(const Vec4& vector);
 
 		float Dot(Vec2& vectorOne, Vec2& vectorTwo);
+		float Dot(const Vec2& vectorOne, const Vec2& vectorTwo);
 		float Dot(Vec3& vectorOne, Vec3& vectorTwo);
+		float Dot(const Vec3& vectorOne, const Vec3& vectorTwo);
 		float Dot(Vec4& vectorOne, Vec4& vectorTwo);
+		float Dot(const Vec4& vectorOne, const Vec4& vectorTwo);
 
 		Vec3 Cross(Vec3& vectorOne, Vec3& vectorTwo);
+		Vec3 Cross(const Vec3& vectorOne, const Vec3& vectorTwo);
 	};
 }

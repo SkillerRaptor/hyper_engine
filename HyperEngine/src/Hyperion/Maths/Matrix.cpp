@@ -1,5 +1,8 @@
 #include "Matrix.hpp"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 namespace Hyperion
 {
 	namespace Matrix
@@ -55,45 +58,6 @@ namespace Hyperion
 			mat[0][3] = vector.x;
 			mat[1][3] = vector.y;
 			mat[2][3] = vector.z;
-			return mat;
-		}
-
-		Mat4 Rotate(Mat4 matrix, Vec3 degrees)
-		{
-			Mat4 mat(matrix);
-			return mat;
-		}
-
-		Mat4 RotateX(Mat4 matrix, float degrees)
-		{
-			float angle = (float)degrees * ((float)M_PI) / 180;
-			Mat4 mat(matrix);
-			mat[1][1] = cos(angle);
-			mat[1][2] = -sin(angle);
-			mat[2][1] = sin(angle);
-			mat[2][2] = cos(angle);
-			return mat;
-		}
-
-		Mat4 RotateY(Mat4 matrix, float degrees)
-		{
-			float angle = (float)degrees * ((float)M_PI) / 180;
-			Mat4 mat(matrix);
-			mat[0][0] = cos(angle);
-			mat[0][2] = sin(angle);
-			mat[2][0] = -sin(angle);
-			mat[2][2] = cos(angle);
-			return mat;
-		}
-
-		Mat4 RotateZ(Mat4 matrix, float degrees)
-		{
-			float angle = (float)degrees * ((float)M_PI) / 180;
-			Mat4 mat(matrix);
-			mat[0][0] = cos(angle);
-			mat[0][1] = -sin(angle);
-			mat[1][0] = sin(angle);
-			mat[1][1] = cos(angle);
 			return mat;
 		}
 

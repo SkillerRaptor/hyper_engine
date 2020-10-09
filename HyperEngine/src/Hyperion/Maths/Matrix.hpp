@@ -1,8 +1,5 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 #include "Matrix2.hpp"
 #include "Matrix3.hpp"
 #include "Matrix4.hpp"
@@ -60,11 +57,6 @@ namespace Hyperion
 
 		Mat4 Scale(Mat4 matrix, Vec3 vector);
 		Mat4 Translate(Mat4 matrix, Vec3 vector);
-
-		Mat4 Rotate(Mat4 matrix, Vec3 degrees);
-		Mat4 RotateX(Mat4 matrix, float degrees);
-		Mat4 RotateY(Mat4 matrix, float degrees);
-		Mat4 RotateZ(Mat4 matrix, float degrees);
 
 		Mat4 Ortho(float left, float right, float bottom, float top, float nearPlane, float farPlane);
 		Mat4 Perspective(float degrees, float aspectRatio, float nearPlane, float farPlane);
