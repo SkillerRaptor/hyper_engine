@@ -1,6 +1,9 @@
 #include "Registry.hpp"
 
+#include <limits>
+
 #include "Components.hpp"
+#include "Utilities/Random.hpp"
 
 namespace Hyperion
 {
@@ -14,7 +17,8 @@ namespace Hyperion
 
 	uint32_t Registry::ConstructEntity(const std::string& name)
 	{
-		uint32_t entityId = Hasher::PrimeHasher(name);
+		uint32_t hashedName = Hasher::PrimeHasher(name);
+		uint32_t entityId = hashedName + Random::Int(1, (std::numeric_limits<uint32_t>::max)() - hashedName - 1);
 		m_Entities.emplace(entityId, std::unordered_map<uint32_t, size_t>());
 
 		Mat4 transform = Mat4();
