@@ -10,7 +10,8 @@ namespace Hyperion
 	private:
 		Ref<Scene> m_Context;
 		bool m_GlobalPopupOpen = false;
-		bool m_ComponentPopupOpen = false;
+		bool m_AddComponentPopupOpen = false;
+		bool m_RemoveComponentPopupOpen = false;
 		uint32_t m_SelectedEntity = -1;
 
 	public:
@@ -28,6 +29,7 @@ namespace Hyperion
 		void DrawSelection();
 
 		void DrawGlobalPopup();
-		void DrawComponentPopup();
+		void DrawAddComponentPopup();
+		void DrawRemoveComponentPopup();
 	};
 }
