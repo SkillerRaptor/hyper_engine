@@ -34,9 +34,7 @@ namespace Hyperion
 		}
 
 		if (ImGui::IsMouseDown(1) && ImGui::IsWindowHovered())
-		{
 			m_GlobalPopupOpen = true;
-		}
 
 		if (m_GlobalPopupOpen)
 			if (ImGui::IsWindowHovered())
@@ -48,7 +46,6 @@ namespace Hyperion
 			}
 
 		DrawGlobalPopup();
-
 		ImGui::End();
 
 		ImGui::Begin("Inspector");
@@ -70,20 +67,10 @@ namespace Hyperion
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity, flags, tag.c_str());
 
 		if (m_SelectedEntity == entity)
-		{
-			ImVec2 pos = ImGui::GetCursorScreenPos();
-			pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
-			ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
-			ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false);
-		}
+			DrawSelection();
 
 		if (ImGui::IsItemHovered())
-		{
-			ImVec2 pos = ImGui::GetCursorScreenPos();
-			pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
-			ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
-			ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false);
-		}
+			DrawSelection();
 
 		if (ImGui::IsItemClicked())
 			m_SelectedEntity = entity;
@@ -106,7 +93,7 @@ namespace Hyperion
 
 			if (opened)
 				ImGui::TreePop();
-				*/
+			*/
 			ImGui::TreePop();
 		}
 	}
@@ -308,10 +295,26 @@ namespace Hyperion
 
 		ImGui::Columns(1);
 		ImGui::Separator();
-		if (ImGui::Button("Add Component", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f)))
-		{
 
-		}
+		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+			m_ComponentPopupOpen = false;
+
+		if (ImGui::Button("Add Component", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f)))
+			m_ComponentPopupOpen = true;
+
+		if (m_ComponentPopupOpen)
+			ImGui::OpenPopup("ComponentPopup");
+
+		DrawComponentPopup();
+	}
+
+	void SceneHierarchyPanel::DrawSelection()
+	{
+		ImVec2 pos = ImGui::GetCursorScreenPos();
+		pos.x -= 1.0f;
+		pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
+		ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
+		ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false, 1.0f);
 	}
 
 	void SceneHierarchyPanel::DrawGlobalPopup()
@@ -323,60 +326,211 @@ namespace Hyperion
 				if (ImGui::MenuItem("Quad"))
 				{
 					m_Context->CreateEntity();
+					if (ImGui::IsItemHovered())
+						DrawSelection();
 				}
 				if (ImGui::MenuItem("Triangle"))
 				{
-
+					if (ImGui::IsItemHovered())
+						DrawSelection();
 				}
 				if (ImGui::MenuItem("Circle"))
 				{
-
+					if (ImGui::IsItemHovered())
+						DrawSelection();
 				}
 				if (ImGui::MenuItem("Light"))
 				{
-
+					if (ImGui::IsItemHovered())
+						DrawSelection();
 				}
+				if (ImGui::IsItemHovered())
+					DrawSelection();
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("3D Objects"))
 			{
 				if (ImGui::MenuItem("Cube"))
 				{
-
+					if (ImGui::IsItemHovered())
+						DrawSelection();
 				}
 				if (ImGui::MenuItem("Sphere"))
 				{
-
+					if (ImGui::IsItemHovered())
+						DrawSelection();
 				}
 				if (ImGui::BeginMenu("Lights"))
 				{
 					if (ImGui::MenuItem("Spot Light"))
 					{
-
+						if (ImGui::IsItemHovered())
+							DrawSelection();
 					}
 					if (ImGui::MenuItem("Directional Light"))
 					{
-
+						if (ImGui::IsItemHovered())
+							DrawSelection();
 					}
 					if (ImGui::MenuItem("Point Light"))
 					{
-
+						if (ImGui::IsItemHovered())
+							DrawSelection();
 					}
+					if (ImGui::IsItemHovered())
+						DrawSelection();
 					ImGui::EndMenu();
 				}
+				if (ImGui::IsItemHovered())
+					DrawSelection();
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Cameras"))
 			{
 				if (ImGui::MenuItem("Orthographic Camera"))
 				{
-
+					if (ImGui::IsItemHovered())
+						DrawSelection();
 				}
 				if (ImGui::MenuItem("Projection Camera"))
 				{
-
+					if (ImGui::IsItemHovered())
+						DrawSelection();
 				}
+				if (ImGui::IsItemHovered())
+					DrawSelection();
 				ImGui::EndMenu();
+			}
+			ImGui::EndPopup();
+		}
+	}
+
+	void SceneHierarchyPanel::DrawComponentPopup()
+	{
+		if (ImGui::BeginPopup("ComponentPopup"))
+		{
+			Registry& registry = m_Context->GetRegistry();
+			if (
+				!registry.HasComponent<SpriteRendererComponent>(m_SelectedEntity) || 
+				!registry.HasComponent<CameraComponent>(m_SelectedEntity) ||
+				!registry.HasComponent<CameraControllerComponent>(m_SelectedEntity) ||
+				!registry.HasComponent<CharacterControllerComponent>(m_SelectedEntity))
+			{
+				if (ImGui::BeginMenu("Add Component"))
+				{
+					if (!registry.HasComponent<SpriteRendererComponent>(m_SelectedEntity))
+					{
+						if (ImGui::MenuItem("Sprite Renderer Component"))
+						{
+							registry.AddComponent<SpriteRendererComponent>(m_SelectedEntity, Vec4(1.0f));
+							m_ComponentPopupOpen = false;
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::IsItemHovered())
+							DrawSelection();
+					}
+
+					if (!registry.HasComponent<CameraComponent>(m_SelectedEntity))
+					{
+						if (ImGui::MenuItem("Camera Component"))
+						{
+							registry.AddComponent<CameraComponent>(m_SelectedEntity, 1280, 720, 1.0f, 0.1f, 1.0f);
+							m_ComponentPopupOpen = false;
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::IsItemHovered())
+							DrawSelection();
+					}
+
+					if (!registry.HasComponent<CameraControllerComponent>(m_SelectedEntity))
+					{
+						if (ImGui::MenuItem("Camera Controller Component"))
+						{
+							registry.AddComponent<CameraControllerComponent>(m_SelectedEntity, 0.01f, 1.0f);
+							m_ComponentPopupOpen = false;
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::IsItemHovered())
+							DrawSelection();
+					}
+
+					if (!registry.HasComponent<CharacterControllerComponent>(m_SelectedEntity))
+					{
+						if (ImGui::MenuItem("Character Controller Component"))
+						{
+							registry.AddComponent<CharacterControllerComponent>(m_SelectedEntity, 1.0f);
+							m_ComponentPopupOpen = false;
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::IsItemHovered())
+							DrawSelection();
+					}
+
+					if (ImGui::IsItemHovered())
+						DrawSelection();
+					ImGui::EndMenu();
+				}
+			}
+			if (
+				registry.HasComponent<SpriteRendererComponent>(m_SelectedEntity) ||
+				registry.HasComponent<CameraComponent>(m_SelectedEntity) ||
+				registry.HasComponent<CameraControllerComponent>(m_SelectedEntity) ||
+				registry.HasComponent<CharacterControllerComponent>(m_SelectedEntity))
+			{
+				if (ImGui::BeginMenu("Remove Component"))
+				{
+					if (registry.HasComponent<SpriteRendererComponent>(m_SelectedEntity))
+					{
+						if (ImGui::MenuItem("Sprite Renderer Component"))
+						{
+							registry.RemoveComponent<SpriteRendererComponent>(m_SelectedEntity);
+							m_ComponentPopupOpen = false;
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::IsItemHovered())
+							DrawSelection();
+					}
+
+					if (!registry.HasComponent<CameraComponent>(m_SelectedEntity))
+					{
+						if (ImGui::MenuItem("Camera Component"))
+						{
+							registry.AddComponent<CameraComponent>(m_SelectedEntity, 1280, 720, 1.0f, 0.1f, 1.0f);
+							m_ComponentPopupOpen = false;
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::IsItemHovered())
+							DrawSelection();
+					}
+
+					if (!registry.HasComponent<CameraControllerComponent>(m_SelectedEntity))
+					{
+						if (ImGui::MenuItem("Camera Controller Component"))
+						{
+							registry.AddComponent<CameraControllerComponent>(m_SelectedEntity, 0.01f, 1.0f);
+							m_ComponentPopupOpen = false;
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::IsItemHovered())
+							DrawSelection();
+					}
+
+					if (!registry.HasComponent<CharacterControllerComponent>(m_SelectedEntity))
+					{
+						if (ImGui::MenuItem("Character Controller Component"))
+						{
+							registry.AddComponent<CharacterControllerComponent>(m_SelectedEntity, 1.0f);
+							m_ComponentPopupOpen = false;
+							ImGui::CloseCurrentPopup();
+						}
+						if (ImGui::IsItemHovered())
+							DrawSelection();
+					}
+
+					if (ImGui::IsItemHovered())
+						DrawSelection();
+					ImGui::EndMenu();
+				}
 			}
 			ImGui::EndPopup();
 		}
