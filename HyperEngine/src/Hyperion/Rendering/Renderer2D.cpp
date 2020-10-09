@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "Maths/Quaternion.hpp"
+
 namespace Hyperion
 {
 	ShaderManager* Renderer2D::m_ShaderManager;
@@ -118,13 +120,20 @@ namespace Hyperion
 
 		Mat4 transform = Mat4(1.0f);
 		transform = Matrix::Translate(transform, position);
-		//transform += Matrix::Rotate(Mat4(1.0f), rotation);
 		transform = Matrix::Scale(transform, scale);
 
+		std::cout << "Start!" << std::endl;
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
 			Vec4 transformVector = transform * m_QuadVertexPositions[i];
-			m_QuadVertexBufferPtr->Position = Vec3(transformVector.x, transformVector.y, transformVector.z);
+			std::cout << transformVector << std::endl;
+
+			Vec3 rotatedVector = Vec3(transformVector.x, transformVector.y, transformVector.z);
+			if (rotation.x != 0) rotatedVector = Quaternion::RotateVector(rotatedVector, rotation.x, Vec3(1.0f, 0.0f, 0.0f));
+			if (rotation.y != 0) rotatedVector = Quaternion::RotateVector(rotatedVector, rotation.y, Vec3(0.0f, 1.0f, 0.0f));
+			if (rotation.z != 0) rotatedVector = Quaternion::RotateVector(rotatedVector, rotation.z, Vec3(0.0f, 0.0f, 1.0f));
+
+			m_QuadVertexBufferPtr->Position = rotatedVector;
 			m_QuadVertexBufferPtr->Color = color;
 			m_QuadVertexBufferPtr->TexCoords = {};
 			m_QuadVertexBufferPtr->TexId = -1;

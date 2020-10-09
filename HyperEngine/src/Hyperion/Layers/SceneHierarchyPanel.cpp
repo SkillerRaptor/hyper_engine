@@ -150,13 +150,13 @@ namespace Hyperion
 				ImGui::Text("Rotation");
 				ImGui::NextColumn();
 				ImGui::SetNextItemWidth(width);
-				ImGui::DragFloat("##YX", &transformComponent.Rotation.x, 0.1f, 0.0f, 360.0f, "X: %.2f", 1.0f);
+				ImGui::DragFloat("##YX", &transformComponent.Rotation.x, 1.0f, 0.0f, 360.0f, "X: %.2f", 1.0f);
 				ImGui::SameLine();
 				ImGui::SetNextItemWidth(width);
-				ImGui::DragFloat("##YY", &transformComponent.Rotation.y, 0.1f, 0.0f, 360.0f, "Y: %.2f", 1.0f);
+				ImGui::DragFloat("##YY", &transformComponent.Rotation.y, 1.0f, 0.0f, 360.0f, "Y: %.2f", 1.0f);
 				ImGui::SameLine();
 				ImGui::SetNextItemWidth(width);
-				ImGui::DragFloat("##YZ", &transformComponent.Rotation.z, 0.1f, 0.0f, 360.0f, "Z: %.2f", 1.0f);
+				ImGui::DragFloat("##YZ", &transformComponent.Rotation.z, 1.0f, 0.0f, 360.0f, "Z: %.2f", 1.0f);
 				ImGui::NextColumn();
 
 				ImGui::Text("Scale");
