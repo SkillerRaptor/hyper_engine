@@ -253,7 +253,7 @@ namespace Hyperion
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 			ImGui::Columns(2);
 			ImGui::Separator();
-			if (ImGui::TreeNodeEx((void*) typeid(CameraControllerComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
+			if (ImGui::TreeNodeEx((void*) typeid(CameraControllerComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera Controller"))
 			{
 				CameraControllerComponent& cameraControllerComponent = entity.GetComponent<CameraControllerComponent>();
 				ImGui::NextColumn();
@@ -282,7 +282,7 @@ namespace Hyperion
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 			ImGui::Columns(2);
 			ImGui::Separator();
-			if (ImGui::TreeNodeEx((void*) typeid(CharacterControllerComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
+			if (ImGui::TreeNodeEx((void*) typeid(CharacterControllerComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Character Controller"))
 			{
 				CharacterControllerComponent& characterControllerComponent = entity.GetComponent<CharacterControllerComponent>();
 				ImGui::NextColumn();
