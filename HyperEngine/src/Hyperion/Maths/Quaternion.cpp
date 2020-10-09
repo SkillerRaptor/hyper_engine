@@ -136,12 +136,12 @@ namespace Hyperion
 	Quaternion Quaternion::RotateQuaternion(float angle, Vec3 axis)
 	{
 		float radians = (float) angle * ((float)M_PI) / 180;
-		double factor = sin(radians / 2.0f);
+		float factor = sin(radians / 2.0f);
 		Vec3 rotationAxis;
 		rotationAxis.x = axis.x * factor;
 		rotationAxis.y = axis.y * factor;
 		rotationAxis.z = axis.z * factor;
-		double w = cos(radians / 2.0f);
+		float w = cos(radians / 2.0f);
 		return Normalize(Quaternion(w, rotationAxis));
 	}
 
