@@ -48,8 +48,8 @@ namespace Hyperion
 		float NearPlane;
 		float FarPlane;
 
-		Matrix4<> ProjectionMatrix = Matrix4<>(1.0f);
-		Matrix4<> TransformationMatrix = Matrix4<>(1.0f);
+		Mat4 ProjectionMatrix = Mat4(1.0f);
+		Mat4 TransformationMatrix = Mat4(1.0f);
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;

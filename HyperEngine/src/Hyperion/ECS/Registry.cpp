@@ -17,10 +17,10 @@ namespace Hyperion
 		uint32_t entityId = Hasher::PrimeHasher(name);
 		m_Entities.emplace(entityId, std::unordered_map<uint32_t, size_t>());
 
-		Matrix4<> transform = Matrix4<>();
-		transform += Matrix::Translate(Matrix4<>(1.0f), Vec3(0.0f));
-		//transform = Matrix::Rotate(Matrix4<>(1.0f), Vec3(0.0f));
-		transform += Matrix::Scale(Matrix4<>(1.0f), Vec3(10.0f));
+		Mat4 transform = Mat4();
+		transform += Matrix::Translate(Mat4(1.0f), Vec3(0.0f));
+		//transform = Matrix::Rotate(Mat4(1.0f), Vec3(0.0f));
+		transform += Matrix::Scale(Mat4(1.0f), Vec3(10.0f));
 
 		AddComponent<TransformComponent>(entityId, Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(10.0f, 10.0f, 10.0f));
 		AddComponent<TagComponent>(entityId, name.empty() ? "Entity" : name);

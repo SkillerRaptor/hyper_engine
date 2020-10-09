@@ -82,8 +82,8 @@ namespace Hyperion
 		CameraComponent& cameraComponent = m_Scene->GetRegistry().GetComponent<CameraComponent>(m_CameraEntity);
 		TransformComponent& transformComponent = m_Scene->GetRegistry().GetComponent<TransformComponent>(2570868010);
 
-		Matrix4 transform = Matrix4(1.0f);
-		transform = Matrix::Translate(Matrix4(1.0f), transformComponent.Position);
+		Mat4 transform = Mat4(1.0f);
+		transform = Matrix::Translate(Mat4(1.0f), transformComponent.Position);
 
 		ImGuizmo::Enable(true);
 		ImGuizmo::SetRect(startPos.x, startPos.y, pos.x, pos.y);
