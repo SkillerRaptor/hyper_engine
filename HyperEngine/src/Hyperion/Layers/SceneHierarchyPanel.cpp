@@ -122,9 +122,9 @@ namespace Hyperion
 	{
 		Registry& registry = m_Context->GetRegistry();
 
-		ImGui::PushItemWidth(-1.0f);
-
 		Entity& entity = m_SelectedEntity;
+
+		ImGui::PushItemWidth(-1.0f);
 		if (entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -373,15 +373,30 @@ namespace Hyperion
 
 			DrawRemoveComponentPopup();
 		}
-	}
 
-	void SceneHierarchyPanel::DrawSelection()
-	{
-		ImVec2 pos = ImGui::GetCursorScreenPos();
-		pos.x -= 5.0f;
-		pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
-		ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
-		ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false, 5.0f);
+		bool upComponent = false;
+		bool downComponent = false;
+
+		std::vector<uint32_t>& entities = m_Context->GetRegistry().GetEntities();
+		std::vector<uint32_t>::iterator position = std::find(entities.begin(), entities.end(), entity.GetEntityHandle());
+		uint64_t distance = std::abs(std::distance(entities.begin(), position));
+
+		if (distance > 0 && distance < (uint64_t) entities.size())
+			upComponent = true;
+
+		if (distance >= 0 && distance < (uint64_t) (entities.size() - 1))
+			downComponent = true;
+
+		if (upComponent)
+		{
+			if (ImGui::Button("Move Entity Up", ImVec2(downComponent ? ImGui::GetContentRegionAvailWidth() * 0.5f : ImGui::GetContentRegionAvailWidth(), 0.0f)))
+				std::iter_swap(position, position - 1);
+			if (downComponent) ImGui::SameLine();
+		}
+
+		if (downComponent)
+			if (ImGui::Button("Move Entity Down", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f)))
+				std::iter_swap(position, position + 1);
 	}
 
 	void SceneHierarchyPanel::DrawGlobalPopup()
@@ -605,5 +620,14 @@ namespace Hyperion
 			}
 			ImGui::EndPopup();
 		}
+	}
+
+	void SceneHierarchyPanel::DrawSelection()
+	{
+		ImVec2 pos = ImGui::GetCursorScreenPos();
+		pos.x -= 5.0f;
+		pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
+		ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
+		ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false, 5.0f);
 	}
 }

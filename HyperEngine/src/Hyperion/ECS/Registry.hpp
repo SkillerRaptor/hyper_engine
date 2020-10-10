@@ -92,19 +92,19 @@ namespace Hyperion
 		template<class... T>
 		void Each(const typename std::common_type<std::function<void(T&...)>>::type function)
 		{
-			for (auto& entity : m_Entities)
+			for (std::vector<uint32_t>::reverse_iterator it = m_Entities.rbegin(); it != m_Entities.rend(); ++it)
 			{
 				bool shouldSkip = false;
 				auto lambda = [&]<typename C>() mutable {
 					if (shouldSkip)
 						return;
-					if (!HasComponent<C>(entity))
+					if (!HasComponent<C>(*it))
 						shouldSkip = true;
 				};
 				(lambda.template operator() < T > (), ...);
 				if (shouldSkip)
 					continue;
-				function(GetComponent<T>(entity)...);
+				function(GetComponent<T>(*it)...);
 			}
 		}
 
