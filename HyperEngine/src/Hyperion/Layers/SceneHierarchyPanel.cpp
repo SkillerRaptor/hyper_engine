@@ -33,7 +33,7 @@ namespace Hyperion
 
 			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 			{
-				m_SelectedEntity = {};
+				m_SelectedEntity = { 0, nullptr };
 				m_GlobalPopupOpen = false;
 			}
 
@@ -56,7 +56,7 @@ namespace Hyperion
 		ImGui::End();
 
 		ImGui::Begin("Inspector");
-		if (m_SelectedEntity.GetEntityHandle() > 0)
+		if (m_SelectedEntity.GetEntityHandle() != 0)
 			DrawComponents();
 		ImGui::End();
 	}
@@ -84,12 +84,14 @@ namespace Hyperion
 
 		if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
 		{
+			/*
 			std::map<EnTT, std::unordered_map<uint32_t, size_t>>::iterator it = m_Context->GetRegistry().GetEntitiesMap().find(entity.GetEntityHandle());
 			ImGui::GetMouseDragDelta(0).y < 0.f ? it-- : it++;
 			if (it != m_Context->GetRegistry().GetEntitiesMap().end())
 			{
 				// TODO: Swap Items
 			}
+			*/
 		}
 
 		if (ImGui::BeginDragDropSource()) {
@@ -102,7 +104,7 @@ namespace Hyperion
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_ENTITY"))
 			{
 				HP_CORE_ASSERT(payload->DataSize == sizeof(Entity), "Not an Entity");
-				Entity entity = *(const Entity*) payload->Data;
+				Entity entity = *(const Entity*)payload->Data;
 				std::cout << entity.GetComponent<TagComponent>().Tag << std::endl;
 			}
 			ImGui::EndDragDropTarget();

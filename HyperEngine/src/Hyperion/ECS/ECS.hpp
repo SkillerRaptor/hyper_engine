@@ -2,7 +2,6 @@
 
 #include "ComponentBuffer.hpp"
 #include "Components.hpp"
-#include "EnTT.hpp"
 #include "Entity.hpp"
 #include "EntitySystem.hpp"
 #include "EntitySystems.hpp"

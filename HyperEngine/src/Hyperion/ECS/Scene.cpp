@@ -59,7 +59,7 @@ namespace Hyperion
 
 	void Scene::Each(const typename std::common_type<std::function<void(Entity)>>::type function)
 	{
-		m_Registry->Each([&](EnTT entity)
+		m_Registry->Each([&](uint32_t entity)
 			{
 				function(Entity(entity, this));
 			});

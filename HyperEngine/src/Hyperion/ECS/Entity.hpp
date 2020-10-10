@@ -2,7 +2,6 @@
 
 #include <cstdint>
 
-#include "EnTT.hpp"
 #include "Scene.hpp"
 
 namespace Hyperion
@@ -10,14 +9,12 @@ namespace Hyperion
 	class Entity
 	{
 	private:
-		EnTT m_EntityHandle;
+		uint32_t m_EntityHandle;
 		Scene* m_Scene;
 
 	public:
-		Entity()
-			: m_EntityHandle({}), m_Scene(nullptr) {}
 		Entity(const Entity& other) = default;
-		Entity(EnTT entityHandle, Scene* scene)
+		Entity(uint32_t entityHandle, Scene* scene)
 			: m_EntityHandle(entityHandle), m_Scene(scene) {}
 
 		template<class T, typename... Args>
@@ -44,15 +41,7 @@ namespace Hyperion
 			return m_Scene->GetRegistry().HasComponent<T>(m_EntityHandle);
 		}
 
-		void SetEntityHandle(EnTT entityHandle)
-		{
-			m_EntityHandle = entityHandle;
-		}
-
-		EnTT GetEntityHandle() const
-		{
-			return m_EntityHandle;
-		}
+		uint32_t GetEntityHandle() const { return m_EntityHandle; }
 
 		operator bool() const { return (uint32_t) m_EntityHandle != -1; }
 		operator uint32_t() const { return m_EntityHandle; }

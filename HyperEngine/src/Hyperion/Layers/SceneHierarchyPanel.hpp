@@ -12,7 +12,7 @@ namespace Hyperion
 		bool m_GlobalPopupOpen = false;
 		bool m_AddComponentPopupOpen = false;
 		bool m_RemoveComponentPopupOpen = false;
-		Entity m_SelectedEntity;
+		Entity m_SelectedEntity = { 0, nullptr };
 
 	public:
 		SceneHierarchyPanel();

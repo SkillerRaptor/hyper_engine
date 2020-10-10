@@ -2,11 +2,10 @@
 
 #include <functional>
 #include <type_traits>
-#include <map>
+#include <vector>
 #include <unordered_map>
 
 #include "ComponentBuffer.hpp"
-#include "EnTT.hpp"
 
 #include "Core/Core.hpp"
 #include "Utilities/Hasher.hpp"
@@ -19,56 +18,69 @@ namespace Hyperion
 	class Registry
 	{
 	private:
-		// TODO: Use Poolallocator
-		std::map<EnTT, std::unordered_map<uint32_t, size_t>> m_Entities;
+		struct ComponentIndex
+		{
+			uint32_t Id;
+			size_t Index;
+
+			ComponentIndex(uint32_t componentId, size_t componentIndex)
+				: Id(componentId), Index(componentIndex) {}
+
+			bool operator==(const ComponentIndex& other) const
+			{
+				return Id == other.Id && Index == other.Index;
+			}
+		};
+
+		std::vector<uint32_t> m_Entities;
+		std::unordered_map<uint32_t, std::vector<ComponentIndex>> m_ComponentIndex;
 		std::unordered_map<uint32_t, ComponentBuffer*> m_Components;
 
 	public:
 		Registry();
 		~Registry();
 
-		EnTT ConstructEntity(const std::string& name = std::string());
-		void DeleteEntity(EnTT entity);
+		uint32_t ConstructEntity(const std::string& name = std::string());
+		void DeleteEntity(uint32_t entity);
 
 		template<class T, typename... Args>
-		T& AddComponent(EnTT entity, Args&&... args)
+		T& AddComponent(uint32_t entity, Args&&... args)
 		{
-			HP_CORE_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exist!");
+			HP_CORE_ASSERT(std::find(m_Entities.begin(), m_Entities.end(), entity) != m_Entities.end(), "Entity does not exist!");
 			HP_CORE_ASSERT(!HasComponent<T>(entity), "Entity already has a the Component!");
 			std::pair<size_t, T&> component = AddComponentToBuffer<T>(args...);
-			m_Entities[entity][Hasher::PrimeHasher(typeid(T).name())] = component.first;
+			AddComponentIndex<T>(entity, component.first);
 			return component.second;
 		}
 
 		template<class T>
-		void RemoveComponent(EnTT entity)
+		void RemoveComponent(uint32_t entity)
 		{
-			HP_CORE_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exist!");
+			HP_CORE_ASSERT(std::find(m_Entities.begin(), m_Entities.end(), entity) != m_Entities.end(), "Entity does not exist!");
 			HP_CORE_ASSERT(HasComponent<T>(entity), "Entity has not the Component!");
-			DeleteComponentFromBuffer<T>(m_Entities[entity][Hasher::PrimeHasher(typeid(T).name())]);
-			m_Entities[entity].erase(Hasher::PrimeHasher(typeid(T).name()));
+			DeleteComponentFromBuffer<T>(GetComponentIndex<T>(entity)->Index);
+			RemoveComponentIndex<T>(entity);
 		}
 
 		template<class T>
-		T& GetComponent(EnTT entity)
+		T& GetComponent(uint32_t entity)
 		{
-			HP_CORE_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exist!");
+			HP_CORE_ASSERT(std::find(m_Entities.begin(), m_Entities.end(), entity) != m_Entities.end(), "Entity does not exist!");
 			HP_CORE_ASSERT(HasComponent<T>(entity), "Entity has not the Component!");
-			return GetComponentFromBuffer<T>(m_Entities[entity][Hasher::PrimeHasher(typeid(T).name())]);
+			return GetComponentFromBuffer<T>(GetComponentIndex<T>(entity)->Index);
 		}
 
 		template<class T>
-		bool HasComponent(EnTT entity)
+		bool HasComponent(uint32_t entity)
 		{
-			HP_CORE_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exist!");
-			std::unordered_map<uint32_t, size_t> components = m_Entities[entity];
-			return components.find(Hasher::PrimeHasher(typeid(T).name())) != components.end();
+			HP_CORE_ASSERT(std::find(m_Entities.begin(), m_Entities.end(), entity) != m_Entities.end(), "Entity does not exist!");
+			return HasComponentIndex<T>(entity);
 		}
 
-		void Each(const typename std::common_type<std::function<void(EnTT)>>::type function)
+		void Each(const typename std::common_type<std::function<void(uint32_t)>>::type function)
 		{
 			for (auto& entity : m_Entities)
-				function(entity.first);
+				function(entity);
 		}
 
 		template<class... T>
@@ -80,46 +92,38 @@ namespace Hyperion
 				auto lambda = [&]<typename C>() mutable {
 					if (shouldSkip)
 						return;
-					if (!HasComponent<C>(entity.first))
+					if (!HasComponent<C>(entity))
 						shouldSkip = true;
 				};
 				(lambda.template operator() < T > (), ...);
 				if (shouldSkip)
 					continue;
-				function(GetComponent<T>(entity.first)...);
+				function(GetComponent<T>(entity)...);
 			}
 		}
 
-		std::vector<EnTT> GetEntities()
-		{
-			std::vector<EnTT> entities;
-			for (auto& entity : m_Entities)
-				entities.push_back(entity.first);
-			return entities;
-		}
-
-		std::map<EnTT, std::unordered_map<uint32_t, size_t>>& GetEntitiesMap()
+		std::vector<uint32_t> GetEntities()
 		{
 			return m_Entities;
 		}
 
 		template<class... T>
-		std::vector<EnTT> GetEntities()
+		std::vector<uint32_t> GetEntities()
 		{
-			std::vector<EnTT> entities;
+			std::vector<uint32_t> entities;
 			for (auto& entity : m_Entities)
 			{
 				bool shouldSkip = false;
 				auto lambda = [&]<typename C>() mutable {
 					if (shouldSkip)
 						return;
-					if (!HasComponent<C>(entity.first))
+					if (!HasComponent<C>(entity))
 						shouldSkip = true;
 				};
 				(lambda.template operator() < T > (), ...);
 				if (shouldSkip)
 					continue;
-				entites.push_back(entity.first);
+				entites.push_back(entity);
 			}
 			return entities;
 		}
@@ -130,7 +134,7 @@ namespace Hyperion
 		{
 			uint32_t componentId = Hasher::PrimeHasher(typeid(T).name());
 			if (m_Components.find(componentId) == m_Components.end())
-				m_Components[componentId] = new ComponentBuffer(sizeof(T) * 500);
+				m_Components[componentId] = new ComponentBuffer(sizeof(T) * 1024);
 
 			std::pair <size_t, void*> componentPair = m_Components[componentId]->Allocate(sizeof(T));
 			T* component = static_cast<T*>(componentPair.second);
@@ -155,6 +159,41 @@ namespace Hyperion
 			void* componentPtr = m_Components[componentId]->Get(offset);
 			T* component = static_cast<T*>(componentPtr);
 			return *component;
+		}
+
+		template <typename T>
+		void AddComponentIndex(uint32_t entity, size_t index)
+		{
+			std::vector<ComponentIndex>& vector = m_ComponentIndex[entity];
+			vector.push_back(ComponentIndex(Hasher::PrimeHasher(typeid(T).name()), index));
+		}
+
+		template <typename T>
+		void RemoveComponentIndex(uint32_t entity)
+		{
+			std::vector<ComponentIndex>& vector = m_ComponentIndex[entity];
+			vector.erase(std::find(vector.begin(), vector.end(), *GetComponentIndex<T>(entity)));
+		}
+
+		template <typename T>
+		ComponentIndex* GetComponentIndex(uint32_t entity)
+		{
+			std::vector<ComponentIndex>& vector = m_ComponentIndex[entity];
+			uint32_t componentId = Hasher::PrimeHasher(typeid(T).name());
+			for (ComponentIndex& index : vector)
+			{
+				if (index.Id != componentId)
+					continue;
+				return &index;
+			}
+			return nullptr;
+		}
+
+		template <typename T>
+		bool HasComponentIndex(uint32_t entity)
+		{
+			std::vector<ComponentIndex>& vector = m_ComponentIndex[entity];
+			return GetComponentIndex<T>(entity) != nullptr;
 		}
 	};
 }
