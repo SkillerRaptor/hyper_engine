@@ -100,15 +100,6 @@ namespace Hyperion
 
 		if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
 		{
-			//std::vector<uint32_t>::iterator it = std::find(m_Context->GetRegistry().GetEntities().begin(), m_Context->GetRegistry().GetEntities().end(), entity.GetEntityHandle());
-			//std::vector<uint32_t>::iterator itCopy = it;
-			//
-			//ImGui::GetMouseDragDelta(0).y < 0.f ? ++itCopy : --itCopy;
-			//if (itCopy != m_Context->GetRegistry().GetEntities().end())
-			//{
-			//	std::iter_swap(m_Context->GetRegistry().GetEntities().begin() + (it - m_Context->GetRegistry().GetEntities().begin()), m_Context->GetRegistry().GetEntities().begin() + (itCopy - m_Context->GetRegistry().GetEntities().begin()));
-			//	ImGui::ResetMouseDragDelta();
-			//}
 		}
 
 		if (opened)
@@ -123,13 +114,6 @@ namespace Hyperion
 				ImGui::BulletText("Camera Controller Component");
 			if (entity.HasComponent<CharacterControllerComponent>())
 				ImGui::BulletText("Character Controller Component");
-			/*
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
-			bool opened = ImGui::TreeNodeEx((void*)(uint64_t)entity, flags, tag.c_str());
-
-			if (opened)
-				ImGui::TreePop();
-			*/
 			ImGui::TreePop();
 		}
 	}

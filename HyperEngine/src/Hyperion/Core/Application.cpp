@@ -90,8 +90,6 @@ namespace Hyperion
 			OpenGLTextureData* textureData = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(bufferTexture));
 			textureData->Width = m_Window->GetWindowData().Width;
 			textureData->Height = m_Window->GetWindowData().Height;
-			//textureData->Width = m_SizeX;
-			//textureData->Height = m_SizeY;
 			textureManager->DeleteTextureData(bufferTexture);
 			textureManager->GenerateTexture(textureData, true);
 
