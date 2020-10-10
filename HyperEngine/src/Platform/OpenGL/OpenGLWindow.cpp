@@ -56,8 +56,6 @@ namespace Hyperion
 				data.Width = width;
 				data.Height = height;
 
-				HP_CORE_DEBUG("Width: %, Height: %", width, height);
-
 				glViewport(0, 0, width, height);
 				data.EventBus->push(std::make_shared<WindowResizeEvent>(width, height));
 			});
