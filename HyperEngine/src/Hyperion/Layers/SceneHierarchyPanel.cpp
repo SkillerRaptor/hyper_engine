@@ -136,7 +136,7 @@ namespace Hyperion
 			ImGui::SameLine();
 			ImGuiStyle& style = ImGui::GetStyle();
 			style.Colors[ImGuiCol_Text] = ImVec4(0.502f, 0.502f, 0.502f, 1.00f);
-			ImGui::Text("%u", entity);
+			ImGui::Text("%u", entity.GetEntityHandle());
 			style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 		}
 
