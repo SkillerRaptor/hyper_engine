@@ -1,36 +1,52 @@
 #include "PoolAllocator.hpp"
 
+#include "Core/Core.hpp"
+
 namespace Hyperion
 {
-	PoolAllocator::PoolAllocator(size_t size)
-		: m_Size(size)
-	{}
-
-	void* PoolAllocator::Allocate(size_t size)
+	PoolAllocator::PoolAllocator(size_t totalSize, size_t chunkSize)
+		: m_TotalSize(totalSize), m_ChunkSize(chunkSize)
 	{
-		if (m_Head == nullptr)
-		{
-			size_t poolBlockSize = m_Size * size;
-			PoolChunk* poolBlockBegin = reinterpret_cast<PoolChunk*>(malloc(poolBlockSize));
-			PoolChunk* poolChunk = poolBlockBegin;
-			for (int i = 0; i < m_Size - 1; ++i)
-			{
-				poolChunk->NextPoolChunk = reinterpret_cast<PoolChunk*>(reinterpret_cast<char*>(poolChunk) + size);
-				poolChunk = poolChunk->NextPoolChunk;
-			}
-			poolChunk->NextPoolChunk = nullptr;
-			return poolBlockBegin;
-		}
-
-		PoolChunk* freePoolChunk = m_Head;
-		m_Head = m_Head->NextPoolChunk;
-		return freePoolChunk;
+		m_StartPtr = malloc(m_Size);
 	}
 
-	void PoolAllocator::Deallocate(void* chunk, size_t size)
+	PoolAllocator::~PoolAllocator()
 	{
-		PoolChunk* poolChunk = reinterpret_cast<PoolChunk*>(chunk);
-		poolChunk->NextPoolChunk = m_Head;
-		m_Head = poolChunk;
+		free(m_StartPtr);
+	}
+
+	void* PoolAllocator::Allocate(const size_t allocationSize, const size_t alignment)
+	{
+		HP_CORE_ASSERT(allocationSize == m_ChunkSize, "Allocation size must be equal to chunk size");
+		
+		Node* freePosition = m_FreeList.Pop();
+
+		HP_CORE_ASSERT(freePosition != nullptr, "The pool alocator is full");
+
+		m_Size++;
+		m_Capacity += m_ChunkSize;
+
+		return (void*) freePosition;
+	}
+
+	void PoolAllocator::Free(void* ptr)
+	{
+		m_Size -= 1;
+		m_Capacity -= m_ChunkSize;
+
+		m_FreeList.Push((Node*) ptr);
+	}
+
+	void PoolAllocator::Reset()
+	{
+		m_Size = 0;
+		m_Capacity = 0;
+
+		const size_t chunks = m_TotalSize / m_ChunkSize;
+		for (size_t i = 0; i < chunks; i++)
+		{
+			size_t address = (size_t)m_StartPtr + i * m_ChunkSize;
+			m_FreeList.Push((Node*) address);
+		}
 	}
 }

@@ -1,27 +1,34 @@
 #pragma once
 
 #include <memory>
+#include <queue>
 
 #include "Utilities/NonCopyable.hpp"
 #include "Utilities/NonMoveable.hpp"
+#include "Utilities/Structures/StackLinkedList.hpp"
 
 namespace Hyperion
 {
-	struct PoolChunk {
-		PoolChunk* NextPoolChunk;
-	};
-
 	class PoolAllocator : public NonCopyable, NonMoveable
 	{
 	private:
-		size_t m_Size;
+		struct FreeHeader {};
 
-		PoolChunk* m_Head = nullptr;
+		StackLinkedList<FreeHeader> m_FreeList;
+		using Node = StackLinkedList<FreeHeader>::Node;
+
+		void* m_StartPtr = nullptr;
+		size_t m_TotalSize = 0;
+		size_t m_ChunkSize = 0;
+		size_t m_Size = 0;
+		size_t m_Capacity = 0;
 
 	public:
-		explicit PoolAllocator(size_t size = 1024);
+		explicit PoolAllocator(size_t totalSize = 100, size_t chunkSize = 1024);
+		~PoolAllocator();
 
-		void* Allocate(size_t size);
-		void Deallocate(void* chunk, size_t size = 0);
+		void* Allocate(const size_t allocationSize, const size_t alignment = 0);
+		void Free(void* ptr);
+		void Reset();
 	};
 }
