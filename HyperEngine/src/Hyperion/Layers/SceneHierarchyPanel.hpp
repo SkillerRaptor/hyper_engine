@@ -21,15 +21,24 @@ namespace Hyperion
 		void OnRender();
 
 		void SetContext(const Ref<Scene>& context);
+		const Ref<Scene>& GetContext() const;
 
 	private:
 		void DrawEntityNode(Entity entity);
 		void DrawComponents();
 
-		void DrawSelection();
-
 		void DrawGlobalPopup();
 		void DrawAddComponentPopup();
 		void DrawRemoveComponentPopup();
+
+		template <class T, typename... Args>
+		void DrawAddComponentMenu(Args&&... args);
+
+		template <class T>
+		void DrawRemoveComponentMenu();
+
+		std::string SplitComponentName(const std::string& componentName);
+
+		void DrawSelection();
 	};
 }

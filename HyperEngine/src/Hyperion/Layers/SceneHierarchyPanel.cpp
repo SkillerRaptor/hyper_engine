@@ -4,6 +4,8 @@
 #include <imgui_internal.h>
 
 #include <limits>
+#include <regex>
+#include <sstream>
 
 #include "ECS/Components.hpp"
 
@@ -59,11 +61,6 @@ namespace Hyperion
 		if (m_SelectedEntity.GetEntityHandle() != 0)
 			DrawComponents();
 		ImGui::End();
-	}
-
-	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
-	{
-		m_Context = context;
 	}
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
@@ -260,6 +257,12 @@ namespace Hyperion
 				ImGui::NextColumn();
 				ImGui::SetNextItemWidth(-1);
 				ImGui::DragFloat("##FarPlane", &cameraComponent.FarPlane);
+				ImGui::NextColumn();
+
+				ImGui::Text("Primary");
+				ImGui::NextColumn();
+				ImGui::SetNextItemWidth(-1);
+				ImGui::Checkbox("##Primary", &cameraComponent.Primary);
 				ImGui::NextColumn();
 
 				ImGui::TreePop();
@@ -515,53 +518,12 @@ namespace Hyperion
 		if (ImGui::BeginPopup("ComponentAddPopup"))
 		{
 			Registry& registry = m_Context->GetRegistry();
-			if (!m_SelectedEntity.HasComponent<SpriteRendererComponent>())
-			{
-				if (ImGui::MenuItem("Sprite Renderer Component"))
-				{
-					m_SelectedEntity.AddComponent<SpriteRendererComponent>(Vec4(1.0f));
-					m_AddComponentPopupOpen = false;
-					ImGui::CloseCurrentPopup();
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-			}
 
-			if (!m_SelectedEntity.HasComponent<CameraComponent>())
-			{
-				if (ImGui::MenuItem("Camera Component"))
-				{
-					m_SelectedEntity.AddComponent<CameraComponent>(1280, 720, 1.0f, 0.1f, 1.0f);
-					m_AddComponentPopupOpen = false;
-					ImGui::CloseCurrentPopup();
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-			}
+			DrawAddComponentMenu<SpriteRendererComponent>(Vec4(1.0f));
+			DrawAddComponentMenu<CameraComponent>(1280, 720, 1.0f, 0.1f, 1.0f, false);
+			DrawAddComponentMenu<CameraControllerComponent>(0.1f, 1.0f);
+			DrawAddComponentMenu<CharacterControllerComponent>(1.0f);
 
-			if (!m_SelectedEntity.HasComponent<CameraControllerComponent>())
-			{
-				if (ImGui::MenuItem("Camera Controller Component"))
-				{
-					m_SelectedEntity.AddComponent<CameraControllerComponent>(0.01f, 1.0f);
-					m_AddComponentPopupOpen = false;
-					ImGui::CloseCurrentPopup();
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-			}
-
-			if (!m_SelectedEntity.HasComponent<CharacterControllerComponent>())
-			{
-				if (ImGui::MenuItem("Character Controller Component"))
-				{
-					m_SelectedEntity.AddComponent<CharacterControllerComponent>(1.0f);
-					m_AddComponentPopupOpen = false;
-					ImGui::CloseCurrentPopup();
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-			}
 			ImGui::EndPopup();
 		}
 	}
@@ -571,55 +533,61 @@ namespace Hyperion
 		if (ImGui::BeginPopup("ComponentRemovePopup"))
 		{
 			Registry& registry = m_Context->GetRegistry();
-			if (m_SelectedEntity.HasComponent<SpriteRendererComponent>())
-			{
-				if (ImGui::MenuItem("Sprite Renderer Component"))
-				{
-					m_SelectedEntity.RemoveComponent<SpriteRendererComponent>();
-					m_RemoveComponentPopupOpen = false;
-					ImGui::CloseCurrentPopup();
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-			}
 
-			if (m_SelectedEntity.HasComponent<CameraComponent>())
-			{
-				if (ImGui::MenuItem("Camera Component"))
-				{
-					m_SelectedEntity.RemoveComponent<CameraComponent>();
-					m_RemoveComponentPopupOpen = false;
-					ImGui::CloseCurrentPopup();
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-			}
+			DrawRemoveComponentMenu<SpriteRendererComponent>();
+			DrawRemoveComponentMenu<CameraComponent>();
+			DrawRemoveComponentMenu<CameraControllerComponent>();
+			DrawRemoveComponentMenu<CharacterControllerComponent>();
 
-			if (m_SelectedEntity.HasComponent<CameraControllerComponent>())
-			{
-				if (ImGui::MenuItem("Camera Controller Component"))
-				{
-					m_SelectedEntity.RemoveComponent<CameraControllerComponent>();
-					m_RemoveComponentPopupOpen = false;
-					ImGui::CloseCurrentPopup();
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-			}
-
-			if (m_SelectedEntity.HasComponent<CharacterControllerComponent>())
-			{
-				if (ImGui::MenuItem("Character Controller Component"))
-				{
-					m_SelectedEntity.RemoveComponent<CharacterControllerComponent>();
-					m_RemoveComponentPopupOpen = false;
-					ImGui::CloseCurrentPopup();
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-			}
 			ImGui::EndPopup();
 		}
+	}
+
+	template <class T, typename... Args>
+	void SceneHierarchyPanel::DrawAddComponentMenu(Args&&... args)
+	{
+		if (!m_SelectedEntity.HasComponent<T>())
+		{
+			if (ImGui::MenuItem(SplitComponentName(typeid(T).name()).c_str()))
+			{
+				m_SelectedEntity.AddComponent<T>(std::forward<Args>(args)...);
+				m_AddComponentPopupOpen = false;
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::IsItemHovered())
+				DrawSelection();
+		}
+	}
+
+	template <class T>
+	void SceneHierarchyPanel::DrawRemoveComponentMenu()
+	{
+		if (m_SelectedEntity.HasComponent<T>())
+		{
+			if (ImGui::MenuItem(SplitComponentName(typeid(T).name()).c_str()))
+			{
+				m_SelectedEntity.RemoveComponent<T>();
+				m_RemoveComponentPopupOpen = false;
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::IsItemHovered())
+				DrawSelection();
+		}
+	}
+
+	std::string Hyperion::SceneHierarchyPanel::SplitComponentName(const std::string& componentName)
+	{
+		std::string shortName = componentName.substr(componentName.find("::") + 2, componentName.length());
+		std::regex regex("[A-Z][^A-Z]*");
+		std::stringstream ss;
+
+		auto regexBegin = std::sregex_iterator(shortName.begin(), shortName.end(), regex);
+		auto regexEnd = std::sregex_iterator();
+
+		for (std::sregex_iterator it = regexBegin; it != regexEnd; ++it)
+			ss << it->str();
+
+		return ss.str();
 	}
 
 	void SceneHierarchyPanel::DrawSelection()
@@ -629,5 +597,15 @@ namespace Hyperion
 		pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
 		ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
 		ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false, 5.0f);
+	}
+
+	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
+	{
+		m_Context = context;
+	}
+
+	const Ref<Scene>& SceneHierarchyPanel::GetContext() const
+	{
+		return m_Context;
 	}
 }
