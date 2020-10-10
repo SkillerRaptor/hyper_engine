@@ -77,6 +77,12 @@ namespace Hyperion
 			return HasComponentIndex<T>(entity);
 		}
 
+		void RemoveAllComponents(uint32_t entity)
+		{
+			for (ComponentIndex index : m_ComponentIndex[entity])
+				DeleteComponentFromBuffer(index.Id, index.Index);
+		}
+
 		void Each(const typename std::common_type<std::function<void(uint32_t)>>::type function)
 		{
 			for (auto& entity : m_Entities)
@@ -102,7 +108,7 @@ namespace Hyperion
 			}
 		}
 
-		std::vector<uint32_t> GetEntities()
+		std::vector<uint32_t>& GetEntities()
 		{
 			return m_Entities;
 		}
@@ -146,10 +152,15 @@ namespace Hyperion
 		void DeleteComponentFromBuffer(size_t offset)
 		{
 			uint32_t componentId = Hasher::PrimeHasher(typeid(T).name());
-			void* componentPair = m_Components[componentId]->Get(offset);
-			T* component = static_cast<T*>(componentPair);
+			void* c = m_Components[componentId]->Get(offset);
+			T* component = static_cast<T*>(c);
 			component->~T();
 			m_Components[componentId]->Free(std::pair<size_t, void*>(offset, component));
+		}
+
+		void DeleteComponentFromBuffer(uint32_t componentId, size_t offset)
+		{
+			m_Components[componentId]->Free(std::pair<size_t, void*>(offset, m_Components[componentId]->Get(offset)));
 		}
 
 		template <typename T>

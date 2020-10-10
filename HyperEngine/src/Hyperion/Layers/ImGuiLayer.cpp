@@ -72,8 +72,6 @@ namespace Hyperion
 
 		m_SceneHierarchyPanel->OnRender();
 
-		ImGui::ShowDemoWindow();
-
 		ImGuiStyle& style = ImGui::GetStyle();
 		style.WindowPadding = ImVec2(2, 2);
 

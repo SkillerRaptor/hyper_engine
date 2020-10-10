@@ -82,18 +82,6 @@ namespace Hyperion
 		if (ImGui::IsItemClicked())
 			m_SelectedEntity = entity;
 
-		if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
-		{
-			/*
-			std::map<EnTT, std::unordered_map<uint32_t, size_t>>::iterator it = m_Context->GetRegistry().GetEntitiesMap().find(entity.GetEntityHandle());
-			ImGui::GetMouseDragDelta(0).y < 0.f ? it-- : it++;
-			if (it != m_Context->GetRegistry().GetEntitiesMap().end())
-			{
-				// TODO: Swap Items
-			}
-			*/
-		}
-
 		if (ImGui::BeginDragDropSource()) {
 			ImGui::SetDragDropPayload("_ENTITY", &entity, sizeof(Entity));
 			ImGui::Text("This is a drag and drop source");
@@ -108,6 +96,19 @@ namespace Hyperion
 				std::cout << entity.GetComponent<TagComponent>().Tag << std::endl;
 			}
 			ImGui::EndDragDropTarget();
+		}
+
+		if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
+		{
+			//std::vector<uint32_t>::iterator it = std::find(m_Context->GetRegistry().GetEntities().begin(), m_Context->GetRegistry().GetEntities().end(), entity.GetEntityHandle());
+			//std::vector<uint32_t>::iterator itCopy = it;
+			//
+			//ImGui::GetMouseDragDelta(0).y < 0.f ? ++itCopy : --itCopy;
+			//if (itCopy != m_Context->GetRegistry().GetEntities().end())
+			//{
+			//	std::iter_swap(m_Context->GetRegistry().GetEntities().begin() + (it - m_Context->GetRegistry().GetEntities().begin()), m_Context->GetRegistry().GetEntities().begin() + (itCopy - m_Context->GetRegistry().GetEntities().begin()));
+			//	ImGui::ResetMouseDragDelta();
+			//}
 		}
 
 		if (opened)

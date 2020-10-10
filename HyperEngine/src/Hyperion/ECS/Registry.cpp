@@ -33,7 +33,7 @@ namespace Hyperion
 		if (it == m_Entities.end())
 			return;
 
-		// TODO: Remove All Components from Buffer
+		RemoveAllComponents(entity);
 
 		m_Entities.erase(it);
 		m_ComponentIndex.erase(entity);
