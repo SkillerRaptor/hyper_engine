@@ -177,6 +177,13 @@ namespace Hyperion
 				ImGui::DragFloat("##YZ", &transformComponent.Rotation.z, 1.0f, 0.0f, 360.0f, "Z: %.2f", 1.0f);
 				ImGui::NextColumn();
 
+				if (transformComponent.Rotation.x < 0.0f) transformComponent.Rotation.x = 0.0f;
+				if (transformComponent.Rotation.x > 360.0f) transformComponent.Rotation.x = 360.0f;
+				if (transformComponent.Rotation.y < 0.0f) transformComponent.Rotation.y = 0.0f;
+				if (transformComponent.Rotation.y > 360.0f) transformComponent.Rotation.y = 360.0f;
+				if (transformComponent.Rotation.z < 0.0f) transformComponent.Rotation.z = 0.0f;
+				if (transformComponent.Rotation.z > 360.0f) transformComponent.Rotation.z = 360.0f;
+
 				ImGui::Text("Scale");
 				ImGui::NextColumn();
 				ImGui::SetNextItemWidth(width);
@@ -188,6 +195,10 @@ namespace Hyperion
 				ImGui::SetNextItemWidth(width);
 				ImGui::DragFloat("##ZZ", &transformComponent.Scale.z, 0.1f, 0.1f, (std::numeric_limits<float>::max)(), "Z: %.2f", 1.0f);
 				ImGui::NextColumn();
+
+				if (transformComponent.Scale.x <= 0.0f) transformComponent.Scale.x = 0.1f;
+				if (transformComponent.Scale.y <= 0.0f) transformComponent.Scale.y = 0.1f;
+				if (transformComponent.Scale.z <= 0.0f) transformComponent.Scale.z = 0.1f;
 
 				ImGui::TreePop();
 			}
@@ -247,6 +258,8 @@ namespace Hyperion
 				ImGui::DragFloat("##Zoom", &cameraComponent.Zoom, 0.1f, 0.1f, (std::numeric_limits<float>::max)());
 				ImGui::NextColumn();
 
+				if (cameraComponent.Zoom <= 0.0f) cameraComponent.Zoom = 0.1f;
+
 				ImGui::Text("Near Plane");
 				ImGui::NextColumn();
 				ImGui::SetNextItemWidth(-1);
@@ -288,11 +301,15 @@ namespace Hyperion
 				ImGui::DragFloat("##MoveSpeedCamera", &cameraControllerComponent.MoveSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
 				ImGui::NextColumn();
 
+				if (cameraControllerComponent.MoveSpeed < 0.0f) cameraControllerComponent.MoveSpeed = 0.0f;
+
 				ImGui::Text("Zoom Speed");
 				ImGui::NextColumn();
 				ImGui::SetNextItemWidth(-1);
 				ImGui::DragFloat("##ZoomSpeedCamera", &cameraControllerComponent.ZoomSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
 				ImGui::NextColumn();
+
+				if (cameraControllerComponent.ZoomSpeed < 0.0f) cameraControllerComponent.ZoomSpeed = 0.0f;
 
 				ImGui::TreePop();
 			}
@@ -316,6 +333,8 @@ namespace Hyperion
 				ImGui::SetNextItemWidth(-1);
 				ImGui::DragFloat("##SpeedCharacter", &characterControllerComponent.Speed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
 				ImGui::NextColumn();
+
+				if (characterControllerComponent.Speed < 0.0f) characterControllerComponent.Speed = 0.0f;
 
 				ImGui::TreePop();
 			}
