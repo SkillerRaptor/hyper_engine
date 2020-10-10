@@ -82,17 +82,6 @@ namespace Hyperion
 		ImVec2 pos = ImGui::GetWindowSize();
 
 		CameraComponent& cameraComponent = m_CameraEntity.GetComponent<CameraComponent>();
-		//TransformComponent& transformComponent = m_Scene->GetRegistry().GetComponent<TransformComponent>(2570868010);
-
-		//Mat4 transform = Mat4(1.0f);
-		//transform = Matrix::Translate(Mat4(1.0f), transformComponent.Position);
-
-		//ImGuizmo::Enable(true);
-		//ImGuizmo::SetRect(startPos.x, startPos.y, pos.x, pos.y);
-		//ImGuizmo::Manipulate(cameraComponent.TransformationMatrix, cameraComponent.ProjectionMatrix, ImGuizmo::TRANSLATE, ImGuizmo::WORLD, transform, nullptr, nullptr);
-
-		//transformComponent.Position = Vec3(transform[3][0], transform[3][1], transform[3][2]);
-
 		*m_StartX = (uint32_t)startPos.x;
 		*m_StartY = (uint32_t)startPos.y;
 		*m_SizeX = (uint32_t)pos.x;
