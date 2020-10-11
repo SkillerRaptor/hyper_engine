@@ -96,6 +96,14 @@ namespace Hyperion
 		ImGui::EndChild();
 		ImGui::End();
 
+		ImGui::Begin("Game");
+		ImGui::BeginChild("GameRenderer");
+
+		ImGui::Image((ImTextureID)(intptr_t)m_FrameTextureId, pos, ImVec2(0, 1), ImVec2(1, 0));
+
+		ImGui::EndChild();
+		ImGui::End();
+
 		style.WindowPadding = ImVec2(15, 15);
 
 		ImGui::Begin("Console");
@@ -218,6 +226,7 @@ namespace Hyperion
 			ImGui::DockBuilderDockWindow("Inspector", dockRightId);
 			ImGui::DockBuilderDockWindow("Console", dockDownId);
 			ImGui::DockBuilderDockWindow("Editor", dockMainId);
+			ImGui::DockBuilderDockWindow("Game", dockMainId);
 
 			ImGui::DockBuilderFinish(dockMainId);
 		}
