@@ -7,28 +7,7 @@
 
 namespace Hyperion
 {
-	OpenGLShaderManager* OpenGLRenderer2D::m_ShaderManager;
-	OpenGLTextureManager* OpenGLRenderer2D::m_TextureManager;
-
-	const uint32_t OpenGLRenderer2D::MaxQuads = 20000;
-	const uint32_t OpenGLRenderer2D::MaxVertices = MaxQuads * 4;
-	const uint32_t OpenGLRenderer2D::MaxIndices = MaxQuads * 6;
-
-	Vec4 OpenGLRenderer2D::m_QuadVertexPositions[4];
-
-	Ref<OpenGLVertexArray> OpenGLRenderer2D::m_QuadVertexArray;
-	Ref<OpenGLVertexBuffer> OpenGLRenderer2D::m_QuadVertexBuffer;
-	Ref<OpenGLIndexBuffer> OpenGLRenderer2D::m_QuadIndexBuffer;
-	uint32_t OpenGLRenderer2D::m_QuadShader;
-
-	Vertex2D* OpenGLRenderer2D::m_QuadVertexBufferBase;
-	Vertex2D* OpenGLRenderer2D::m_QuadVertexBufferPtr;
-
-	uint32_t OpenGLRenderer2D::m_QuadCount;
-	uint32_t OpenGLRenderer2D::m_QuadIndexCount;
-	uint32_t OpenGLRenderer2D::m_DrawCalls;
-
-	void OpenGLRenderer2D::Init()
+	OpenGLRenderer2D::OpenGLRenderer2D()
 	{
 		m_QuadVertexArray = CreateRef<OpenGLVertexArray>(VertexLayout::Vertex2D);
 		m_QuadVertexArray->Bind();
@@ -58,12 +37,16 @@ namespace Hyperion
 		m_QuadIndexBuffer->Bind();
 		delete[] quadIndices;
 
-		m_QuadVertexPositions[0] = {  0.5f,  0.5f, 0.0f, 1.0f };
-		m_QuadVertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
+		m_QuadVertexPositions[0] = { 0.5f,  0.5f, 0.0f, 1.0f };
+		m_QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
 		m_QuadVertexPositions[2] = { -0.5f, -0.5f, 0.0f, 1.0f };
 		m_QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 
 		m_QuadVertexArray->Init();
+	}
+
+	OpenGLRenderer2D::~OpenGLRenderer2D()
+	{
 	}
 
 	void OpenGLRenderer2D::BeginScene(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, const Vec3& position)
@@ -146,12 +129,12 @@ namespace Hyperion
 		m_QuadCount++;
 	}
 
-	void OpenGLRenderer2D::SetShaderManager(OpenGLShaderManager* shaderManager)
+	void OpenGLRenderer2D::SetShaderManager(ShaderManager* shaderManager)
 	{
 		m_ShaderManager = shaderManager;
 	}
 
-	void OpenGLRenderer2D::SetTextureManager(OpenGLTextureManager* textureManager)
+	void OpenGLRenderer2D::SetTextureManager(TextureManager* textureManager)
 	{
 		m_TextureManager = textureManager;
 	}

@@ -3,12 +3,17 @@
 namespace Hyperion
 {
 	OpenGLContext::OpenGLContext()
-		: m_ShaderManager(), m_TextureManager()
+		: m_Renderer2D(), m_ShaderManager(), m_TextureManager()
 	{
 	}
 
 	OpenGLContext::~OpenGLContext()
 	{
+	}
+
+	Renderer2D* OpenGLContext::GetRenderer2D()
+	{
+		return static_cast<Renderer2D*>(&m_Renderer2D);
 	}
 
 	ShaderManager* OpenGLContext::GetShaderManager()

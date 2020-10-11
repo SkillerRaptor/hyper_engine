@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Renderer2D.hpp"
 #include "ShaderManager.hpp"
 #include "TextureManager.hpp"
 
@@ -26,6 +27,7 @@ namespace Hyperion
 
 		virtual FrameSize& GetFrameSize() { return m_FrameSize; }
 
+		virtual Renderer2D* GetRenderer2D() = 0;
 		virtual ShaderManager* GetShaderManager() = 0;
 		virtual TextureManager* GetTextureManager() = 0;
 	};
