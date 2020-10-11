@@ -3,11 +3,11 @@
 #include <chrono>
 
 #include "Events/WindowEvents.hpp"
-#include "Rendering/Renderer2D.hpp"
 #include "Utilities/Random.hpp"
 #include "Utilities/Timestep.hpp"
 
 #include "Platform/OpenGL/OpenGLWindow.hpp"
+#include "Platform/OpenGL/OpenGLRenderer2D.hpp"
 #include "Platform/OpenGL/Buffers/OpenGLFrameBuffer.hpp"
 
 namespace Hyperion 
@@ -26,9 +26,9 @@ namespace Hyperion
 		m_LayerStack = new LayerStack(m_Scene);
 		m_LayerStack->GetImGuiLayer()->SetRenderContext(m_Window->GetContext());
 
-		Renderer2D::SetShaderManager(m_Window->GetContext()->GetShaderManager());
-		Renderer2D::SetTextureManager(m_Window->GetContext()->GetTextureManager());
-		Renderer2D::Init();
+		OpenGLRenderer2D::SetShaderManager(static_cast<OpenGLShaderManager*>(m_Window->GetContext()->GetShaderManager()));
+		OpenGLRenderer2D::SetTextureManager(static_cast<OpenGLTextureManager*>(m_Window->GetContext()->GetTextureManager()));
+		OpenGLRenderer2D::Init();
 
 		Random::Init();
 	}

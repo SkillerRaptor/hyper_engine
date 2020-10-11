@@ -1,4 +1,4 @@
-#include "Renderer2D.hpp"
+#include "OpenGLRenderer2D.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -7,28 +7,28 @@
 
 namespace Hyperion
 {
-	ShaderManager* Renderer2D::m_ShaderManager;
-	TextureManager* Renderer2D::m_TextureManager;
+	OpenGLShaderManager* OpenGLRenderer2D::m_ShaderManager;
+	OpenGLTextureManager* OpenGLRenderer2D::m_TextureManager;
 
-	const uint32_t Renderer2D::MaxQuads = 20000;
-	const uint32_t Renderer2D::MaxVertices = MaxQuads * 4;
-	const uint32_t Renderer2D::MaxIndices = MaxQuads * 6;
+	const uint32_t OpenGLRenderer2D::MaxQuads = 20000;
+	const uint32_t OpenGLRenderer2D::MaxVertices = MaxQuads * 4;
+	const uint32_t OpenGLRenderer2D::MaxIndices = MaxQuads * 6;
 
-	Vec4 Renderer2D::m_QuadVertexPositions[4];
+	Vec4 OpenGLRenderer2D::m_QuadVertexPositions[4];
 
-	Ref<OpenGLVertexArray> Renderer2D::m_QuadVertexArray;
-	Ref<OpenGLVertexBuffer> Renderer2D::m_QuadVertexBuffer;
-	Ref<OpenGLIndexBuffer> Renderer2D::m_QuadIndexBuffer;
-	uint32_t Renderer2D::m_QuadShader;
+	Ref<OpenGLVertexArray> OpenGLRenderer2D::m_QuadVertexArray;
+	Ref<OpenGLVertexBuffer> OpenGLRenderer2D::m_QuadVertexBuffer;
+	Ref<OpenGLIndexBuffer> OpenGLRenderer2D::m_QuadIndexBuffer;
+	uint32_t OpenGLRenderer2D::m_QuadShader;
 
-	Vertex2D* Renderer2D::m_QuadVertexBufferBase;
-	Vertex2D* Renderer2D::m_QuadVertexBufferPtr;
+	Vertex2D* OpenGLRenderer2D::m_QuadVertexBufferBase;
+	Vertex2D* OpenGLRenderer2D::m_QuadVertexBufferPtr;
 
-	uint32_t Renderer2D::m_QuadCount;
-	uint32_t Renderer2D::m_QuadIndexCount;
-	uint32_t Renderer2D::m_DrawCalls;
+	uint32_t OpenGLRenderer2D::m_QuadCount;
+	uint32_t OpenGLRenderer2D::m_QuadIndexCount;
+	uint32_t OpenGLRenderer2D::m_DrawCalls;
 
-	void Renderer2D::Init()
+	void OpenGLRenderer2D::Init()
 	{
 		m_QuadVertexArray = CreateRef<OpenGLVertexArray>(VertexLayout::Vertex2D);
 		m_QuadVertexArray->Bind();
@@ -66,7 +66,7 @@ namespace Hyperion
 		m_QuadVertexArray->Init();
 	}
 
-	void Renderer2D::BeginScene(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, const Vec3& position)
+	void OpenGLRenderer2D::BeginScene(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, const Vec3& position)
 	{
 		float aspectRatio = (float) width / height;
 
@@ -79,7 +79,7 @@ namespace Hyperion
 		m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
 	}
 
-	void Renderer2D::EndScene()
+	void OpenGLRenderer2D::EndScene()
 	{
 		uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
 		m_QuadVertexBuffer->Bind();
@@ -88,7 +88,7 @@ namespace Hyperion
 		Flush();
 	}
 
-	void Renderer2D::Flush()
+	void OpenGLRenderer2D::Flush()
 	{
 		if (m_QuadIndexCount == 0)
 			return;
@@ -101,7 +101,7 @@ namespace Hyperion
 		m_DrawCalls++;
 	}
 
-	void Renderer2D::FlushAndReset()
+	void OpenGLRenderer2D::FlushAndReset()
 	{
 		EndScene();
 
@@ -110,7 +110,7 @@ namespace Hyperion
 		m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
 	}
 
-	void Renderer2D::DrawQuad(const Vec3& position, const Vec3& rotation, const Vec3& scale, const Vec4& color)
+	void OpenGLRenderer2D::DrawQuad(const Vec3& position, const Vec3& rotation, const Vec3& scale, const Vec4& color)
 	{
 		constexpr size_t quadVertexCount = 4;
 		const float tilingFactor = 1.0f;
@@ -146,12 +146,12 @@ namespace Hyperion
 		m_QuadCount++;
 	}
 
-	void Renderer2D::SetShaderManager(ShaderManager* shaderManager)
+	void OpenGLRenderer2D::SetShaderManager(OpenGLShaderManager* shaderManager)
 	{
 		m_ShaderManager = shaderManager;
 	}
 
-	void Renderer2D::SetTextureManager(TextureManager* textureManager)
+	void OpenGLRenderer2D::SetTextureManager(OpenGLTextureManager* textureManager)
 	{
 		m_TextureManager = textureManager;
 	}
