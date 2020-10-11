@@ -5,12 +5,26 @@
 
 namespace Hyperion
 {
+	struct FrameSize
+	{
+		uint32_t XPos;
+		uint32_t YPos;
+
+		uint32_t Width;
+		uint32_t Height;
+	};
+
 	class RenderContext
 	{
 	protected:
+		FrameSize m_FrameSize;
+
 	public:
-		RenderContext() = default;
-		~RenderContext() = default;
+		RenderContext()
+			: m_FrameSize({ 0, 0, 0, 0 }) {}
+		virtual ~RenderContext() = default;
+
+		virtual FrameSize& GetFrameSize() { return m_FrameSize; }
 
 		virtual ShaderManager* GetShaderManager() = 0;
 		virtual TextureManager* GetTextureManager() = 0;

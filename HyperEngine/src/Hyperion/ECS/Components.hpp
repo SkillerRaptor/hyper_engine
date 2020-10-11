@@ -51,10 +51,12 @@ namespace Hyperion
 		Mat4 ProjectionMatrix = Mat4(1.0f);
 		Mat4 TransformationMatrix = Mat4(1.0f);
 
+		bool Primary;
+
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
-		CameraComponent(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane)
-			: Width(width), Height(height), Zoom(zoom), NearPlane(nearPlane), FarPlane(farPlane) {}
+		CameraComponent(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, bool primary)
+			: Width(width), Height(height), Zoom(zoom), NearPlane(nearPlane), FarPlane(farPlane), Primary(primary) {}
 	};
 
 	struct CameraControllerComponent

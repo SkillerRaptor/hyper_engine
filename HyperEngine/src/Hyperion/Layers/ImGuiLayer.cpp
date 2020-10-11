@@ -22,9 +22,7 @@ namespace Hyperion
 
 	void ImGuiLayer::OnAttach()
 	{
-		m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>();
-
-		m_SceneHierarchyPanel->SetContext(m_Scene);
+		m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>(m_Scene);
 
 		Entity squareOne = m_Scene->CreateEntity("Square One");
 		Entity squareTwo = m_Scene->CreateEntity("Square Two");
@@ -34,8 +32,8 @@ namespace Hyperion
 		squareOne.AddComponent<SpriteRendererComponent>(Vec4(1.0f, 0.0f, 0.0f, 1.0f));
 		squareTwo.AddComponent<SpriteRendererComponent>(Vec4(0.0f, 1.0f, 0.0f, 1.0f));
 		squareThree.AddComponent<SpriteRendererComponent>(Vec4(0.0f, 0.0f, 1.0f, 1.0f));
-		m_CameraEntity.AddComponent<CameraComponent>(1280, 720, 1.0f, 0.1f, 1.0f);
-		m_CameraEntity.AddComponent<CameraControllerComponent>(0.01f, 1.0f);
+		m_CameraEntity.AddComponent<CameraComponent>(1280, 720, 5.0f, 0.1f, 1.0f, true);
+		m_CameraEntity.AddComponent<CameraControllerComponent>(0.1f, 1.0f);
 
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
@@ -81,16 +79,16 @@ namespace Hyperion
 		ImVec2 startPos = ImGui::GetWindowPos();
 		ImVec2 pos = ImGui::GetWindowSize();
 
-		CameraComponent& cameraComponent = m_CameraEntity.GetComponent<CameraComponent>();
-		*m_StartX = (uint32_t)startPos.x;
-		*m_StartY = (uint32_t)startPos.y;
-		*m_SizeX = (uint32_t)pos.x;
-		*m_SizeY = (uint32_t)pos.y;
+		FrameSize& frameSize = m_RenderContext->GetFrameSize();
+		frameSize.XPos = (uint32_t) startPos.x;
+		frameSize.YPos = (uint32_t) startPos.y;
+		frameSize.Width = (uint32_t) pos.x;
+		frameSize.Height = (uint32_t) pos.y;
 
 		m_Scene->GetRegistry().Each<CameraComponent>([&](CameraComponent& cameraComponent)
 			{
-				cameraComponent.Width = (uint32_t)pos.x;
-				cameraComponent.Height = (uint32_t)pos.y;
+				cameraComponent.Width = frameSize.Width;
+				cameraComponent.Height = frameSize.Height;
 			});
 
 		ImGui::Image((ImTextureID)(intptr_t)m_FrameTextureId, pos, ImVec2(0, 1), ImVec2(1, 0));

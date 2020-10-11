@@ -24,10 +24,7 @@ namespace Hyperion
 		m_Scene = CreateRef<Scene>("Main Scene");
 
 		m_LayerStack = new LayerStack(m_Scene);
-		m_LayerStack->GetImGuiLayer()->SetStartX(&m_StartX);
-		m_LayerStack->GetImGuiLayer()->SetStartY(&m_StartY);
-		m_LayerStack->GetImGuiLayer()->SetSizeX(&m_SizeX);
-		m_LayerStack->GetImGuiLayer()->SetSizeY(&m_SizeY);
+		m_LayerStack->GetImGuiLayer()->SetRenderContext(m_Window->GetContext());
 
 		Renderer2D::SetShaderManager(m_Window->GetContext()->GetShaderManager());
 		Renderer2D::SetTextureManager(m_Window->GetContext()->GetTextureManager());

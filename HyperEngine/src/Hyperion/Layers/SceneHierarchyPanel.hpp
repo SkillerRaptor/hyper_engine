@@ -15,7 +15,6 @@ namespace Hyperion
 		Entity m_SelectedEntity = { 0, nullptr };
 
 	public:
-		SceneHierarchyPanel();
 		SceneHierarchyPanel(const Ref<Scene>& context);
 
 		void OnRender();
