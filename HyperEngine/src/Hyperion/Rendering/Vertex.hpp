@@ -4,15 +4,14 @@
 
 namespace Hyperion 
 {
-	struct Vertex
-	{};
+	struct Vertex {};
 
 	struct Vertex2D : public Vertex
 	{
 		Vec3 Position;
 		Vec4 Color;
-		Vec2 TexCoords;
-		unsigned int TexId;
+		Vec2 TextureCoords;
+		unsigned int TextureId;
 	};
 
 	struct Vertex3D : public Vertex
@@ -20,10 +19,10 @@ namespace Hyperion
 		Vec3 Position;
 		Vec4 Color;
 		Vec3 Normals;
-		Vec2 TexCoords;
+		Vec2 TextureCoords;
 		Vec3 Tangent;
 		Vec3 Bitangent;
-		unsigned int TexId;
+		unsigned int TextureId;
 	};
 
 	enum struct VertexLayout 
