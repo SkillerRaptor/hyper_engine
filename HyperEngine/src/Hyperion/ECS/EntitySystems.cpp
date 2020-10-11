@@ -2,8 +2,8 @@
 
 namespace Hyperion
 {
-	EntitySystems::EntitySystems(Registry& registry)
-		: m_Registry(registry)
+	EntitySystems::EntitySystems(Registry& registry, Renderer2D* renderer2D)
+		: m_Registry(registry), m_Renderer2D(renderer2D)
 	{
 	}
 

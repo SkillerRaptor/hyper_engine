@@ -6,6 +6,7 @@
 #include "EntitySystems.hpp"
 #include "Core/Core.hpp"
 #include "Events/Event.hpp"
+#include "Rendering/Renderer2D.hpp"
 #include "Utilities/Timestep.hpp"
 
 namespace Hyperion
@@ -16,11 +17,12 @@ namespace Hyperion
 	{
 	private:
 		std::string m_Name;
+		Renderer2D* m_Renderer2D;
 		Ref<Registry> m_Registry;
 		Ref<EntitySystems> m_Systems;
 
 	public:
-		Scene(const std::string& name);
+		Scene(const std::string& name, Renderer2D* renderer2D);
 		~Scene();
 		
 		void Init();

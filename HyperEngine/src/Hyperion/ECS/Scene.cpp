@@ -7,8 +7,8 @@
 
 namespace Hyperion
 {
-	Scene::Scene(const std::string& name)
-		: m_Name(name)
+	Scene::Scene(const std::string& name, Renderer2D* renderer2D)
+		: m_Name(name), m_Renderer2D(renderer2D)
 	{
 		Init();
 	}
@@ -20,7 +20,7 @@ namespace Hyperion
 	void Scene::Init()
 	{
 		m_Registry = CreateRef<Registry>();
-		m_Systems = CreateRef<EntitySystems>(*m_Registry);
+		m_Systems = CreateRef<EntitySystems>(*m_Registry, m_Renderer2D);
 
 		m_Systems->AddSystem<CameraControllerSystem>();
 		m_Systems->AddSystem<CharacterControllerSystem>();

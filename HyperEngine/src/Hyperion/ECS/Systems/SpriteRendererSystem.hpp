@@ -18,14 +18,14 @@ namespace Hyperion
 		{
 			registry.Each<CameraComponent, TransformComponent>([&](CameraComponent& cameraComponent, TransformComponent& transform)
 				{
-					OpenGLRenderer2D::BeginScene(cameraComponent.Width, cameraComponent.Height, cameraComponent.Zoom, cameraComponent.NearPlane, cameraComponent.FarPlane, transform.Position);
+					m_Renderer2D->BeginScene(cameraComponent.Width, cameraComponent.Height, cameraComponent.Zoom, cameraComponent.NearPlane, cameraComponent.FarPlane, transform.Position);
 				});
 
 			registry.Each<TagComponent, SpriteRendererComponent, TransformComponent>([&](TagComponent& tagComponent, SpriteRendererComponent& spriteRenderer, TransformComponent& transform)
 				{
-					OpenGLRenderer2D::DrawQuad(transform.Position, transform.Rotation, transform.Scale, spriteRenderer.Color);
+					m_Renderer2D->DrawQuad(transform.Position, transform.Rotation, transform.Scale, spriteRenderer.Color);
 				});
-			OpenGLRenderer2D::EndScene();
+			m_Renderer2D->EndScene();
 		}
 	};
 }

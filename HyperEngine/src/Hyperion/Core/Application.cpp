@@ -21,14 +21,13 @@ namespace Hyperion
 		m_Window = new OpenGLWindow("HyperEngine", 1920, 1080, false, &m_EventBus);
 		m_Window->InitWindow();
 
-		m_Scene = CreateRef<Scene>("Main Scene");
+		m_Scene = CreateRef<Scene>("Main Scene", m_Window->GetContext()->GetRenderer2D());
 
 		m_LayerStack = new LayerStack(m_Scene);
 		m_LayerStack->GetImGuiLayer()->SetRenderContext(m_Window->GetContext());
 
-		OpenGLRenderer2D::SetShaderManager(static_cast<OpenGLShaderManager*>(m_Window->GetContext()->GetShaderManager()));
-		OpenGLRenderer2D::SetTextureManager(static_cast<OpenGLTextureManager*>(m_Window->GetContext()->GetTextureManager()));
-		OpenGLRenderer2D::Init();
+		m_Window->GetContext()->GetRenderer2D()->SetShaderManager(static_cast<OpenGLShaderManager*>(m_Window->GetContext()->GetShaderManager()));
+		m_Window->GetContext()->GetRenderer2D()->SetTextureManager(static_cast<OpenGLTextureManager*>(m_Window->GetContext()->GetTextureManager()));
 
 		Random::Init();
 	}

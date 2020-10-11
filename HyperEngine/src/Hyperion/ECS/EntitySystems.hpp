@@ -6,6 +6,7 @@
 #include "EntitySystem.hpp"
 #include "Core/Core.hpp"
 #include "Events/Event.hpp"
+#include "Rendering/Renderer2D.hpp"
 #include "Utilities/Hasher.hpp"
 #include "Utilities/Timestep.hpp"
 
@@ -17,10 +18,11 @@ namespace Hyperion
 	{
 	private:
 		Registry& m_Registry;
+		Renderer2D* m_Renderer2D;
 		std::unordered_map<uint32_t, EntitySystem*> m_Systems;
 
 	public:
-		EntitySystems(Registry& registry);
+		EntitySystems(Registry& registry, Renderer2D* renderer2D);
 
 		void OnTick(int currentTick);
 		void OnRender();
@@ -32,7 +34,9 @@ namespace Hyperion
 		void AddSystem()
 		{
 			HP_CORE_ASSERT(!HasSystem<T>(), "System is already registered!");
-			m_Systems.emplace(Hasher::PrimeHasher(typeid(T).name()), std::move(new T()));
+			T* system = new T();
+			static_cast<EntitySystem*>(system)->SetRenderer2D(m_Renderer2D);
+			m_Systems.emplace(Hasher::PrimeHasher(typeid(T).name()), std::move(system));
 		}
 
 		template <typename T, typename = typename std::enable_if<std::is_base_of<EntitySystem, T>::value, T>::type>
