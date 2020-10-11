@@ -16,9 +16,9 @@ namespace Hyperion
 
 	Vec4 Renderer2D::m_QuadVertexPositions[4];
 
-	Ref<VertexArray> Renderer2D::m_QuadVertexArray;
-	Ref<VertexBuffer> Renderer2D::m_QuadVertexBuffer;
-	Ref<IndexBuffer> Renderer2D::m_QuadIndexBuffer;
+	Ref<OpenGLVertexArray> Renderer2D::m_QuadVertexArray;
+	Ref<OpenGLVertexBuffer> Renderer2D::m_QuadVertexBuffer;
+	Ref<OpenGLIndexBuffer> Renderer2D::m_QuadIndexBuffer;
 	uint32_t Renderer2D::m_QuadShader;
 
 	Vertex2D* Renderer2D::m_QuadVertexBufferBase;
@@ -30,10 +30,10 @@ namespace Hyperion
 
 	void Renderer2D::Init()
 	{
-		m_QuadVertexArray = CreateRef<VertexArray>(VertexLayout::Vertex2D);
+		m_QuadVertexArray = CreateRef<OpenGLVertexArray>(VertexLayout::Vertex2D);
 		m_QuadVertexArray->Bind();
 
-		m_QuadVertexBuffer = CreateRef<VertexBuffer>(VertexLayout::Vertex2D, MaxVertices);
+		m_QuadVertexBuffer = CreateRef<OpenGLVertexBuffer>(VertexLayout::Vertex2D, MaxVertices);
 		m_QuadVertexBuffer->Bind();
 
 		m_QuadVertexBufferBase = new Vertex2D[MaxVertices];
@@ -54,7 +54,7 @@ namespace Hyperion
 			offset += 4;
 		}
 
-		m_QuadIndexBuffer = CreateRef<IndexBuffer>(quadIndices, MaxIndices);
+		m_QuadIndexBuffer = CreateRef<OpenGLIndexBuffer>(quadIndices, MaxIndices);
 		m_QuadIndexBuffer->Bind();
 		delete[] quadIndices;
 
@@ -137,8 +137,8 @@ namespace Hyperion
 
 			m_QuadVertexBufferPtr->Position = Vec3(translatedVector.x, translatedVector.y, translatedVector.z);
 			m_QuadVertexBufferPtr->Color = color;
-			m_QuadVertexBufferPtr->TexCoords = {};
-			m_QuadVertexBufferPtr->TexId = -1;
+			m_QuadVertexBufferPtr->TextureCoords = {};
+			m_QuadVertexBufferPtr->TextureId = -1;
 			m_QuadVertexBufferPtr++;
 		}
 		

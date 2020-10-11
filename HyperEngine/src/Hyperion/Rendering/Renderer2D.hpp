@@ -3,12 +3,13 @@
 #include "ShaderManager.hpp"
 #include "TextureManager.hpp"
 #include "Core/Core.hpp"
-#include "Buffers/Vertex.hpp"
-#include "Buffers/IndexBuffer.hpp"
-#include "Buffers/VertexArray.hpp"
-#include "Buffers/VertexBuffer.hpp"
+#include "Vertex.hpp"
 #include "Maths/Matrix.hpp"
 #include "Maths/Vector.hpp"
+
+#include "Platform/OpenGL/Buffers/OpenGLIndexBuffer.hpp"
+#include "Platform/OpenGL/Buffers/OpenGLVertexArray.hpp"
+#include "Platform/OpenGL/Buffers/OpenGLVertexBuffer.hpp"
 
 namespace Hyperion
 {
@@ -24,9 +25,9 @@ namespace Hyperion
 
 		static Vec4 m_QuadVertexPositions[4];
 
-		static Ref<VertexArray> m_QuadVertexArray;
-		static Ref<VertexBuffer> m_QuadVertexBuffer;
-		static Ref<IndexBuffer> m_QuadIndexBuffer;
+		static Ref<OpenGLVertexArray> m_QuadVertexArray;
+		static Ref<OpenGLVertexBuffer> m_QuadVertexBuffer;
+		static Ref<OpenGLIndexBuffer> m_QuadIndexBuffer;
 		static uint32_t m_QuadShader;
 
 		static Vertex2D* m_QuadVertexBufferBase;

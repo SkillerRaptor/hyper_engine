@@ -4,11 +4,11 @@
 
 #include "Events/WindowEvents.hpp"
 #include "Rendering/Renderer2D.hpp"
-#include "Rendering/Buffers/FrameBuffer.hpp"
 #include "Utilities/Random.hpp"
 #include "Utilities/Timestep.hpp"
 
 #include "Platform/OpenGL/OpenGLWindow.hpp"
+#include "Platform/OpenGL/Buffers/OpenGLFrameBuffer.hpp"
 
 namespace Hyperion 
 {
@@ -78,7 +78,7 @@ namespace Hyperion
 
 		m_LayerStack->GetImGuiLayer()->SetFrameTextureId(bufferTextureId);
 
-		FrameBuffer frameBuffer;
+		OpenGLFrameBuffer frameBuffer;
 
 		while (m_Running)
 		{
