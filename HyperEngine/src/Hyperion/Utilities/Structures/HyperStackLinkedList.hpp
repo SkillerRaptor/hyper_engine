@@ -3,7 +3,7 @@
 namespace Hyperion
 {
 	template <typename T>
-	class StackLinkedList
+	class HyperStackLinkedList
 	{
 	public:
 		struct Node
@@ -16,8 +16,8 @@ namespace Hyperion
 		Node* m_Head;
 
 	public:
-		StackLinkedList() = default;
-		StackLinkedList(const StackLinkedList& other) = default;
+		HyperStackLinkedList() = default;
+		HyperStackLinkedList(const HyperStackLinkedList& other) = default;
 
 		void Push(Node* node)
 		{
