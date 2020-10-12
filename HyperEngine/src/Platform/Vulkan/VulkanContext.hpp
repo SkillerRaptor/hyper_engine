@@ -2,12 +2,12 @@
 
 namespace Hyperion
 {
-	class VulkanRenderer
+	class VulkanContext
 	{
 	private:
 
 	public:
-		VulkanRenderer();
-		~VulkanRenderer();
+		VulkanContext();
+		~VulkanContext();
 	};
 }
