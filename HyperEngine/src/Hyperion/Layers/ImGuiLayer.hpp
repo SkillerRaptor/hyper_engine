@@ -19,11 +19,6 @@ namespace Hyperion
 		Entity m_CameraEntity = { -1, nullptr };
 		uint32_t m_FrameTextureId;
 
-		uint32_t* m_StartX;
-		uint32_t* m_StartY;
-		uint32_t* m_SizeX;
-		uint32_t* m_SizeY;
-
 	public:
 		ImGuiLayer(Ref<Scene> scene);
 		virtual ~ImGuiLayer();
@@ -36,11 +31,6 @@ namespace Hyperion
 
 		void SetFrameTextureId(uint32_t frameTextureId);
 		uint32_t GetFrameTextureId() const;
-
-		void SetStartX(uint32_t* startX);
-		void SetStartY(uint32_t* startY);
-		void SetSizeX(uint32_t* sizeX);
-		void SetSizeY(uint32_t* sizeY);
 
 	private:
 		void SetupStyle();

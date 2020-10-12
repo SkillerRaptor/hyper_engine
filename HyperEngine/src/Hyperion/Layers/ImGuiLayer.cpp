@@ -317,24 +317,4 @@ namespace Hyperion
 	{
 		return m_FrameTextureId;
 	}
-
-	void ImGuiLayer::SetStartX(uint32_t* startX)
-	{
-		m_StartX = startX;
-	}
-
-	void ImGuiLayer::SetStartY(uint32_t* startY)
-	{
-		m_StartY = startY;
-	}
-
-	void ImGuiLayer::SetSizeX(uint32_t* sizeX)
-	{
-		m_SizeX = sizeX;
-	}
-
-	void ImGuiLayer::SetSizeY(uint32_t* sizeY)
-	{
-		m_SizeY = sizeY;
-	}
 }
