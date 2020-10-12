@@ -43,6 +43,8 @@ namespace Hyperion
 			std::exit(-1);
 		}
 
+		glViewport(0, 0, m_Data.Width, m_Data.Height);
+
 		HP_CORE_INFO("");
 		HP_CORE_INFO("OpenGL Info:");
 		HP_CORE_INFO("  Vendor: %", glGetString(GL_VENDOR));
