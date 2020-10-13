@@ -6,6 +6,8 @@ The HyperEngine is the official Game Engine from the Hyperion Team.<br>
 In the moment the HyperEngine only support OpenGL, but will in future also support Vulkan and DirectX12.<br>
 The Engine is layed out to work only on Windows x64, but it is planned to work also on Mac and Linux in the Future.
 
+![alt-text](https://i.ibb.co/ChD2T8j/Hyper-Engine-Showcase.png")
+
 ## Dependencies & License
 - [Assimp](https://github.com/assimp/assimp/blob/master/LICENSE) Copyright (c) assimp, assimp team 2006-2020
 - [GLAD](https://github.com/Dav1dde/glad/blob/master/LICENSE) Copyright (c) MIT, David Herberth 2013-2020
