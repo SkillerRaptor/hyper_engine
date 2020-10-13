@@ -7,6 +7,7 @@ In the moment the HyperEngine only support OpenGL, but will in future also suppo
 The Engine is layed out to work only on Windows x64, but it is planned to work also on Mac and Linux in the Future.
 
 ## Dependencies & License
+- [Assimp](https://github.com/assimp/assimp/blob/master/LICENSE) Copyright (c) assimp, assimp team 2006-2020
 - [GLAD](https://github.com/Dav1dde/glad/blob/master/LICENSE) Copyright (c) MIT, David Herberth 2013-2020
 - [glfw](https://github.com/glfw/glfw/blob/master/LICENSE.md) Copyright (c) zlib, Camilla Löwy 2006-2019
 - [imgui](https://github.com/ocornut/imgui/blob/master/LICENSE.txt) Copyright (c) MIT, Omar Cornut 2014-2020
