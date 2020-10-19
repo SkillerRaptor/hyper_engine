@@ -2,7 +2,11 @@
 
 /* Include File for HyperEngine Application / Projects */
 
+/* Core */
+#include "Hyperion/Core/Core.hpp"
+
 /* Entity Component System */
+#include "Hyperion/HyperECS/HyperECS.hpp"
 
 /* Events */
 #include "Hyperion/Events/Event.hpp"
@@ -14,11 +18,12 @@
 #include "Hyperion/Layers/Layer.hpp"
 
 /* Maths */
-#include "Hyperion/Maths/Matrix.hpp"
-#include "Hyperion/Maths/Vector.hpp"
+#include "Hyperion/HyperMath/HyperMath.hpp"
 
 /* Memory */
 #include "Hyperion/Memory/PoolAllocator.hpp"
+
+/* Physics */
 
 /* Rendering */
 #include "Hyperion/Rendering/RenderContext.hpp"
@@ -26,9 +31,11 @@
 #include "Hyperion/Rendering/TextureManager.hpp"
 
 /* Utilities */
+#include "Hyperion/Utilities/Hasher.hpp"
 #include "Hyperion/Utilities/Input.hpp"
 #include "Hyperion/Utilities/KeyCodes.hpp"
 #include "Hyperion/Utilities/Log.hpp"
+#include "Hyperion/Utilities/Logger.hpp"
 #include "Hyperion/Utilities/MouseCodes.hpp"
 #include "Hyperion/Utilities/NonCopyable.hpp"
 #include "Hyperion/Utilities/NonMoveable.hpp"
