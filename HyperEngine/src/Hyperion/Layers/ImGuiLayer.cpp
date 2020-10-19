@@ -4,7 +4,7 @@
 #include <ImGuizmo.h>
 
 #include "Core/Application.hpp"
-#include "ECS/ECS.hpp"
+#include "HyperECS/HyperECS.hpp"
 #include "Events/WindowEvents.hpp"
 #include "Platform/Rendering/OpenGL/ImGuiGLFWRenderer.hpp"
 #include "Platform/Rendering/OpenGL/ImGuiOpenGLRenderer.hpp"

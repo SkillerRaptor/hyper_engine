@@ -7,7 +7,7 @@
 #include <regex>
 #include <sstream>
 
-#include "ECS/Components.hpp"
+#include "HyperECS/HyperECS.hpp"
 
 namespace Hyperion
 {

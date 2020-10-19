@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ECS/EntitySystem.hpp"
-#include "ECS/Components.hpp"
-#include "ECS/Registry.hpp"
+#include "HyperECS/EntitySystem.hpp"
+#include "HyperECS/Components.hpp"
+#include "HyperECS/Registry.hpp"
 #include "Utilities/Input.hpp"
 
 namespace Hyperion

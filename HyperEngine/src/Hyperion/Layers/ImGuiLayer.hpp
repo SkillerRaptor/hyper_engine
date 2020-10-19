@@ -5,7 +5,7 @@
 #include "Layer.hpp"
 #include "SceneHierarchyPanel.hpp"
 #include "Core/Core.hpp"
-#include "ECS/Scene.hpp"
+#include "HyperECS/HyperECS.hpp"
 #include "Utilities/Timestep.hpp"
 
 namespace Hyperion

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ECS/Registry.hpp"
+#include "Registry.hpp"
 #include "Events/Event.hpp"
 #include "Rendering/Renderer2D.hpp"
 #include "Utilities/Timestep.hpp"
