@@ -4,7 +4,7 @@
 #include "ECS/Components.hpp"
 #include "ECS/Registry.hpp"
 
-#include "Platform/OpenGL/OpenGLRenderer2D.hpp"
+#include "Platform/Rendering/OpenGL/OpenGLRenderer2D.hpp"
 
 namespace Hyperion
 {

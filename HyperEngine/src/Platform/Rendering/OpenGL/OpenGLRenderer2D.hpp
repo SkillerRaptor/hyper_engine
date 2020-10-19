@@ -5,9 +5,9 @@
 #include "Rendering/Renderer2D.hpp"
 #include "Rendering/Vertex.hpp"
 
-#include "Platform/OpenGL/Buffers/OpenGLIndexBuffer.hpp"
-#include "Platform/OpenGL/Buffers/OpenGLVertexArray.hpp"
-#include "Platform/OpenGL/Buffers/OpenGLVertexBuffer.hpp"
+#include "Platform/Rendering/OpenGL/Buffers/OpenGLIndexBuffer.hpp"
+#include "Platform/Rendering/OpenGL/Buffers/OpenGLVertexArray.hpp"
+#include "Platform/Rendering/OpenGL/Buffers/OpenGLVertexBuffer.hpp"
 
 namespace Hyperion
 {

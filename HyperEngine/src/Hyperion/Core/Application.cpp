@@ -6,9 +6,9 @@
 #include "Utilities/Random.hpp"
 #include "Utilities/Timestep.hpp"
 
-#include "Platform/OpenGL/OpenGLWindow.hpp"
-#include "Platform/OpenGL/OpenGLRenderer2D.hpp"
-#include "Platform/OpenGL/Buffers/OpenGLFrameBuffer.hpp"
+#include "Platform/Rendering/OpenGL/OpenGLWindow.hpp"
+#include "Platform/Rendering/OpenGL/OpenGLRenderer2D.hpp"
+#include "Platform/Rendering/OpenGL/Buffers/OpenGLFrameBuffer.hpp"
 
 namespace Hyperion 
 {
