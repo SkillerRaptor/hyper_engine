@@ -2,8 +2,7 @@
 
 #include <string>
 
-#include "Maths/Matrix.hpp"
-#include "Maths/Vector.hpp"
+#include "HyperMath/HyperMath.hpp"
 
 namespace Hyperion
 {

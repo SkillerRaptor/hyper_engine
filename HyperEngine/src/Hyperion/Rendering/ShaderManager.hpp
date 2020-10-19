@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Maths/Matrix.hpp"
-#include "Maths/Vector.hpp"
+#include "HyperMath/HyperMath.hpp"
 #include "Utilities/NonCopyable.hpp"
 #include "Utilities/NonMoveable.hpp"
 

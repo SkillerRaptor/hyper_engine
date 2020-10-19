@@ -1,10 +1,9 @@
 #pragma once
 
 #include "Core/Core.hpp"
+#include "HyperMath/HyperMath.hpp"
 #include "Rendering/Renderer2D.hpp"
 #include "Rendering/Vertex.hpp"
-#include "Maths/Matrix.hpp"
-#include "Maths/Vector.hpp"
 
 #include "Platform/OpenGL/Buffers/OpenGLIndexBuffer.hpp"
 #include "Platform/OpenGL/Buffers/OpenGLVertexArray.hpp"

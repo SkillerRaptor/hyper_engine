@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "Maths/Quaternion.hpp"
+#include "HyperMath/HyperMath.hpp"
 
 namespace Hyperion
 {
