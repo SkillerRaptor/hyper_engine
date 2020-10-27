@@ -3,7 +3,7 @@
 #include <queue>
 
 #include "Core.hpp"
-#include "Events/Event.hpp"
+#include "HyperEvents/HyperEvents.hpp"
 #include "HyperLayer/HyperLayer.hpp"
 #include "Rendering/Window.hpp"
 

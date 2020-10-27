@@ -2,7 +2,6 @@
 
 #include <chrono>
 
-#include "Events/WindowEvents.hpp"
 #include "Utilities/Random.hpp"
 #include "Utilities/Timestep.hpp"
 

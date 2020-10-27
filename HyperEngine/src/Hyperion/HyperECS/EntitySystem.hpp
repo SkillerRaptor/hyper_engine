@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Registry.hpp"
-#include "Events/Event.hpp"
+#include "HyperEvents/HyperEvents.hpp"
 #include "Rendering/Renderer2D.hpp"
 #include "Utilities/Timestep.hpp"
 

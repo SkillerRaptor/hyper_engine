@@ -3,7 +3,7 @@
 #include "HyperECS/EntitySystem.hpp"
 #include "HyperECS/Components.hpp"
 #include "HyperECS/Registry.hpp"
-#include "Events/MouseEvents.hpp"
+#include "HyperEvents/HyperEvents.hpp"
 #include "Utilities/Input.hpp"
 
 namespace Hyperion
