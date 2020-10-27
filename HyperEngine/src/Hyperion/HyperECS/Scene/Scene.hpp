@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include "Registry.hpp"
-#include "EntitySystems.hpp"
 #include "Core/Core.hpp"
+#include "HyperECS/Registry.hpp"
+#include "HyperECS/EntitySystems.hpp"
 #include "Events/Event.hpp"
 #include "Rendering/Renderer2D.hpp"
 #include "Utilities/Timestep.hpp"

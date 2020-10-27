@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "Scene.hpp"
+#include "Scene/Scene.hpp"
 
 namespace Hyperion
 {

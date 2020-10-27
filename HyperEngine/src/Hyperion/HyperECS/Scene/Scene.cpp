@@ -1,9 +1,9 @@
 #include "Scene.hpp"
 
-#include "Entity.hpp"
-#include "Systems/CameraControllerSystem.hpp"
-#include "Systems/CharacterControllerSystem.hpp"
-#include "Systems/SpriteRendererSystem.hpp"
+#include "HyperECS/Entity.hpp"
+#include "HyperECS/Systems/CameraControllerSystem.hpp"
+#include "HyperECS/Systems/CharacterControllerSystem.hpp"
+#include "HyperECS/Systems/SpriteRendererSystem.hpp"
 
 namespace Hyperion
 {

@@ -4,7 +4,7 @@
 
 #include "Core.hpp"
 #include "Events/Event.hpp"
-#include "Layers/LayerStack.hpp"
+#include "HyperLayer/HyperLayer.hpp"
 #include "Rendering/Window.hpp"
 
 namespace Hyperion 
