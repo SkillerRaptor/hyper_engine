@@ -29,7 +29,7 @@ namespace Hyperion
 
 	void Registry::DeleteEntity(uint32_t entity)
 	{
-		auto& it = std::find(m_Entities.begin(), m_Entities.end(), entity);
+		auto it = std::find(m_Entities.begin(), m_Entities.end(), entity);
 		if (it == m_Entities.end())
 			return;
 
