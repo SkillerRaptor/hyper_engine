@@ -8,7 +8,7 @@
 
 #include "RenderContext.hpp"
 #include "Core/Core.hpp"
-#include "Events/Event.hpp"
+#include "HyperEvents/HyperEvents.hpp"
 #include "Utilities/Timestep.hpp"
 
 namespace Hyperion
