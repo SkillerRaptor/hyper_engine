@@ -3,7 +3,6 @@
 #include <imgui.h>
 
 #include "Layer.hpp"
-#include "SceneHierarchyPanel.hpp"
 #include "Core/Core.hpp"
 #include "HyperECS/HyperECS.hpp"
 #include "Utilities/Timestep.hpp"
