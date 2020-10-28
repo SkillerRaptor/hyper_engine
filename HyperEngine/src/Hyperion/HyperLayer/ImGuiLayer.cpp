@@ -5,6 +5,7 @@
 
 #include "Core/Application.hpp"
 #include "HyperEvents/HyperEvents.hpp"
+#include "Platform/OS/Windows/WindowsFileDialogs.hpp"
 #include "Platform/Rendering/OpenGL/ImGuiGLFWRenderer.hpp"
 #include "Platform/Rendering/OpenGL/ImGuiOpenGLRenderer.hpp"
 
@@ -251,7 +252,18 @@ namespace Hyperion
 		if (ImGui::IsItemHovered())
 			DrawSelection();
 
-		if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+		if (ImGui::MenuItem("Open", "Ctrl+O")) 
+		{
+			std::string filePath = WindowsFileDialogs::OpenFile("Hyper Scene (*.hyper)\0*.hyper\0");
+			if (!filePath.empty())
+			{
+				m_Scene = CreateRef<Scene>("Example Scene", m_RenderContext->GetRenderer2D());
+				m_SceneHierarchyPanel->SetContext(m_Scene);
+
+				SceneSerializer sceneSerializer(m_Scene);
+				sceneSerializer.Deserialize(filePath);
+			}
+		}
 		if (ImGui::IsItemHovered())
 			DrawSelection();
 
@@ -259,11 +271,27 @@ namespace Hyperion
 		if (ImGui::IsItemHovered())
 			DrawSelection();
 
-		if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+		if (ImGui::MenuItem("Save", "Ctrl+S"))
+		{
+			SceneSerializer sceneSerializer(m_Scene);
+			std::string scenePath("assets/scenes/" + m_Scene->GetName() + ".hyper");
+			for (std::string::iterator it = scenePath.begin(); it != scenePath.end(); ++it)
+				if (*it == ' ')
+					*it = '_';
+			sceneSerializer.Serialize(scenePath);
+		}
 		if (ImGui::IsItemHovered())
 			DrawSelection();
 
-		if (ImGui::MenuItem("Save As..", "")) {}
+		if (ImGui::MenuItem("Save As..", "Ctrl+Shift+S"))
+		{
+			std::string filePath = WindowsFileDialogs::SaveFile("Hyper Scene (*.hyper)\0*.hyper\0");
+			if (!filePath.empty())
+			{
+				SceneSerializer sceneSerializer(m_Scene);
+				sceneSerializer.Serialize(filePath + ".hyper");
+			}
+		}
 		if (ImGui::IsItemHovered())
 			DrawSelection();
 
