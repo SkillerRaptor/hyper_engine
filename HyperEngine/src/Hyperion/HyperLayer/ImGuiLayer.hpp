@@ -25,6 +25,7 @@ namespace Hyperion
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
 
+		virtual void OnEvent(Event& event) override;
 		virtual void OnUpdate(Timestep timeStep) override;
 		virtual void OnRender() override;
 
@@ -39,5 +40,10 @@ namespace Hyperion
 		void ShowDockingMenu();
 		void ShowMenuFile();
 		void ShowMenuEdit();
+
+		void NewScene();
+		void OpenScene();
+		void SaveScene();
+		void SaveAsScene();
 	};
 }

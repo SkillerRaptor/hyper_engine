@@ -248,22 +248,13 @@ namespace Hyperion
 
 	void ImGuiLayer::ShowMenuFile()
 	{
-		if (ImGui::MenuItem("New", "Ctrl+N")) {}
+		if (ImGui::MenuItem("New", "Ctrl+N"))
+			NewScene();
 		if (ImGui::IsItemHovered())
 			DrawSelection();
 
 		if (ImGui::MenuItem("Open", "Ctrl+O")) 
-		{
-			std::string filePath = WindowsFileDialogs::OpenFile("Hyper Scene (*.hyper)\0*.hyper\0");
-			if (!filePath.empty())
-			{
-				m_Scene = CreateRef<Scene>("Example Scene", m_RenderContext->GetRenderer2D());
-				m_SceneHierarchyPanel->SetContext(m_Scene);
-
-				SceneSerializer sceneSerializer(m_Scene);
-				sceneSerializer.Deserialize(filePath);
-			}
-		}
+			OpenScene();
 		if (ImGui::IsItemHovered())
 			DrawSelection();
 
@@ -272,26 +263,12 @@ namespace Hyperion
 			DrawSelection();
 
 		if (ImGui::MenuItem("Save", "Ctrl+S"))
-		{
-			SceneSerializer sceneSerializer(m_Scene);
-			std::string scenePath("assets/scenes/" + m_Scene->GetName() + ".hyper");
-			for (std::string::iterator it = scenePath.begin(); it != scenePath.end(); ++it)
-				if (*it == ' ')
-					*it = '_';
-			sceneSerializer.Serialize(scenePath);
-		}
+			SaveScene();
 		if (ImGui::IsItemHovered())
 			DrawSelection();
 
 		if (ImGui::MenuItem("Save As..", "Ctrl+Shift+S"))
-		{
-			std::string filePath = WindowsFileDialogs::SaveFile("Hyper Scene (*.hyper)\0*.hyper\0");
-			if (!filePath.empty())
-			{
-				SceneSerializer sceneSerializer(m_Scene);
-				sceneSerializer.Serialize(filePath + ".hyper");
-			}
-		}
+			SaveAsScene();
 		if (ImGui::IsItemHovered())
 			DrawSelection();
 
@@ -333,6 +310,88 @@ namespace Hyperion
 		if (ImGui::IsItemHovered())
 			DrawSelection();
 		ImGui::EndMenu();
+	}
+
+	void ImGuiLayer::NewScene()
+	{
+	}
+
+	void ImGuiLayer::OpenScene()
+	{
+		std::string filePath = WindowsFileDialogs::OpenFile("Hyper Scene (*.hyper)\0*.hyper\0");
+		if (!filePath.empty())
+		{
+			m_Scene = CreateRef<Scene>("Example Scene", m_RenderContext->GetRenderer2D());
+			m_SceneHierarchyPanel->SetContext(m_Scene);
+
+			SceneSerializer sceneSerializer(m_Scene);
+			sceneSerializer.Deserialize(filePath);
+		}
+	}
+
+	void ImGuiLayer::SaveScene()
+	{
+		SceneSerializer sceneSerializer(m_Scene);
+		std::string scenePath("assets/scenes/" + m_Scene->GetName() + ".hyper");
+		for (std::string::iterator it = scenePath.begin(); it != scenePath.end(); ++it)
+			if (*it == ' ')
+				*it = '_';
+		sceneSerializer.Serialize(scenePath);
+	}
+
+	void ImGuiLayer::SaveAsScene()
+	{
+		std::string filePath = WindowsFileDialogs::SaveFile("Hyper Scene (*.hyper)\0*.hyper\0");
+		if (!filePath.empty())
+		{
+			SceneSerializer sceneSerializer(m_Scene);
+			sceneSerializer.Serialize(filePath + ".hyper");
+		}
+	}
+
+	void ImGuiLayer::OnEvent(Event& event)
+	{
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<KeyPressedEvent>([&](KeyPressedEvent& event)
+			{
+				if (event.GetRepeatCount() > 0)
+					return false;
+
+				bool controlPressed = Input::IsKeyPressed(KeyCode::LeftControl) || Input::IsKeyPressed(KeyCode::RightControl);
+				bool shiftPressed = Input::IsKeyPressed(KeyCode::LeftShift) || Input::IsKeyPressed(KeyCode::RightShift);
+
+				switch(event.GetKeyCode())
+				{
+					case KeyCode::N:
+					{
+						if (controlPressed)
+							NewScene();
+						break;
+					}
+					case KeyCode::O:
+					{
+						if (controlPressed)
+							OpenScene();
+						break;
+					}
+					case KeyCode::S:
+					{
+						if (controlPressed)
+						{
+							if (shiftPressed)
+							{
+								SaveAsScene();
+								break;
+							}
+							SaveScene();
+						}
+						break;
+				}
+				default:
+					break;
+				}
+				return true;
+			});
 	}
 
 	void ImGuiLayer::SetFrameTextureId(uint32_t frameTextureId)

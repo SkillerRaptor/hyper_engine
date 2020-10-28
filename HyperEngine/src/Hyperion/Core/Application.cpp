@@ -160,6 +160,8 @@ namespace Hyperion
 
 		for (Layer* layer : m_LayerStack->GetLayers())
 			layer->OnEvent(event);
+		if(m_LayerStack->GetImGuiLayer() != nullptr) 
+			m_LayerStack->GetImGuiLayer()->OnEvent(event);
 
 		m_Scene->OnEvent(event);
 	}
