@@ -8,7 +8,7 @@
 #include "Registry.hpp"
 #include "Scene/Scene.hpp"
 #include "Scene/SceneHierarchyPanel.hpp"
-#include "Scene/SceneSerialization.hpp"
+#include "Scene/SceneSerializer.hpp"
 #include "Systems/CameraControllerSystem.hpp"
 #include "Systems/CharacterControllerSystem.hpp"
 #include "Systems/SpriteRendererSystem.hpp"
