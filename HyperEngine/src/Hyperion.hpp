@@ -9,13 +9,10 @@
 #include "Hyperion/HyperECS/HyperECS.hpp"
 
 /* Events */
-#include "Hyperion/Events/Event.hpp"
-#include "Hyperion/Events/KeyEvents.hpp"
-#include "Hyperion/Events/MouseEvents.hpp"
-#include "Hyperion/Events/WindowEvents.hpp"
+#include "Hyperion/HyperEvents/HyperEvents.hpp"
 
 /* Layers */
-#include "Hyperion/Layers/Layer.hpp"
+#include "Hyperion/HyperLayer/HyperLayer.hpp"
 
 /* Maths */
 #include "Hyperion/HyperMath/HyperMath.hpp"
