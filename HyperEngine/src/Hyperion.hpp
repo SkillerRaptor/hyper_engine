@@ -23,9 +23,9 @@
 /* Physics */
 
 /* Rendering */
-#include "Hyperion/Rendering/RenderContext.hpp"
-#include "Hyperion/Rendering/ShaderManager.hpp"
-#include "Hyperion/Rendering/TextureManager.hpp"
+#include "Hyperion/HyperRendering/RenderContext.hpp"
+#include "Hyperion/HyperRendering/ShaderManager.hpp"
+#include "Hyperion/HyperRendering/TextureManager.hpp"
 
 /* Utilities */
 #include "Hyperion/Utilities/Hasher.hpp"

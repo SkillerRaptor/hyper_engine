@@ -1,16 +1,12 @@
 #pragma once
 
-#include "ShaderManager.hpp"
-#include "TextureManager.hpp"
+#include "Renderer.hpp"
 
 namespace Hyperion
 {
-	class Renderer2D
+	class Renderer2D : public Renderer
 	{
 	protected:
-		ShaderManager* m_ShaderManager;
-		TextureManager* m_TextureManager;
-
 		Vec4 m_QuadVertexPositions[4];
 
 		const uint32_t MaxQuads = 20000;

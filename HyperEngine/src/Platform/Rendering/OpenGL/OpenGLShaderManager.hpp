@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <queue>
 
-#include "Rendering/ShaderManager.hpp"
+#include "HyperRendering/ShaderManager.hpp"
 
 namespace Hyperion
 {

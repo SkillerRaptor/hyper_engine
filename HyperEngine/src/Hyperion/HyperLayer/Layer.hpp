@@ -3,7 +3,7 @@
 #include <string>
 
 #include "HyperEvents/HyperEvents.hpp"
-#include "Rendering/RenderContext.hpp"
+#include "HyperRendering/RenderContext.hpp"
 #include "Utilities/Timestep.hpp"
 
 namespace Hyperion 

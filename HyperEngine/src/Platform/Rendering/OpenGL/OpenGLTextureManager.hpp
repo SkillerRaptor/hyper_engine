@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <queue>
 
-#include "Rendering/TextureManager.hpp"
+#include "HyperRendering/TextureManager.hpp"
 
 namespace Hyperion
 {

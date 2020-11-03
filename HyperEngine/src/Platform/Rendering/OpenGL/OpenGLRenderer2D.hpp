@@ -2,8 +2,8 @@
 
 #include "Core/Core.hpp"
 #include "HyperMath/HyperMath.hpp"
-#include "Rendering/Renderer2D.hpp"
-#include "Rendering/Vertex.hpp"
+#include "HyperRendering/Renderer2D.hpp"
+#include "HyperRendering/Buffers/Vertex.hpp"
 
 #include "Platform/Rendering/OpenGL/Buffers/OpenGLIndexBuffer.hpp"
 #include "Platform/Rendering/OpenGL/Buffers/OpenGLVertexArray.hpp"

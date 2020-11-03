@@ -3,7 +3,7 @@
 #include "OpenGLRenderer2D.hpp"
 #include "OpenGLShaderManager.hpp"
 #include "OpenGLTextureManager.hpp"
-#include "Rendering/RenderContext.hpp"
+#include "HyperRendering/RenderContext.hpp"
 
 namespace Hyperion
 {

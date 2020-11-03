@@ -5,7 +5,7 @@
 #include "Core.hpp"
 #include "HyperEvents/HyperEvents.hpp"
 #include "HyperLayer/HyperLayer.hpp"
-#include "Rendering/Window.hpp"
+#include "HyperRendering/Window.hpp"
 
 namespace Hyperion 
 {

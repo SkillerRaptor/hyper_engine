@@ -6,7 +6,7 @@
 #include "HyperECS/Registry.hpp"
 #include "HyperECS/EntitySystems.hpp"
 #include "HyperEvents/HyperEvents.hpp"
-#include "Rendering/Renderer2D.hpp"
+#include "HyperRendering/Renderer2D.hpp"
 #include "Utilities/Timestep.hpp"
 
 namespace Hyperion

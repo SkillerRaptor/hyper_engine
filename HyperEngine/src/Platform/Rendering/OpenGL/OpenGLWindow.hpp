@@ -5,7 +5,7 @@
 
 #include "OpenGLContext.hpp"
 #include "Core/Core.hpp"
-#include "Rendering/Window.hpp"
+#include "HyperRendering/Window.hpp"
 
 namespace Hyperion
 {
