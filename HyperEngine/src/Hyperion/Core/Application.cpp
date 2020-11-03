@@ -16,6 +16,18 @@ namespace Hyperion
 	Application::Application()
 	{
 		m_Instance = this;
+		Init();
+	}
+
+	void Application::Init()
+	{
+		HP_CORE_INFO("");
+		HP_CORE_INFO("_     _ __   __  _____  _______  ______ _______ __   _  ______ _____ __   _ _______");
+		HP_CORE_INFO("|_____|   \\_/   |_____] |______ |_____/ |______ | \\  | |  ____   |   | \\  | |______");
+		HP_CORE_INFO("|     |    |    |       |______ |    \\_ |______ |  \\_| |_____| __|__ |  \\_| |______");
+		HP_CORE_INFO("");
+
+		Random::Init();
 
 		WindowData data;
 		data.Title = "HyperEngine";
@@ -35,8 +47,6 @@ namespace Hyperion
 
 		m_Window->GetContext()->GetRenderer2D()->SetShaderManager(static_cast<OpenGLShaderManager*>(m_Window->GetContext()->GetShaderManager()));
 		m_Window->GetContext()->GetRenderer2D()->SetTextureManager(static_cast<OpenGLTextureManager*>(m_Window->GetContext()->GetTextureManager()));
-
-		Random::Init();
 	}
 
 	void Application::Shutdown()

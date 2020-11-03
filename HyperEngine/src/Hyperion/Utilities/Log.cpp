@@ -76,7 +76,7 @@ namespace Hyperion
 				struct tm localTime;
 				localtime_s(&localTime, &time);
 
-				std::cout << "[" << localTime.tm_hour << ":" << localTime.tm_min << ":" << localTime.tm_sec << "] " << message.second.c_str();
+				std::cout << "[" << (localTime.tm_hour < 10 ? "0" : "") << localTime.tm_hour << ":" << (localTime.tm_min < 10 ? "0" : "") << localTime.tm_min << ":" << (localTime.tm_sec < 10 ? "0" : "") << localTime.tm_sec << "] " << message.second.c_str();
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 				m_MessageQueue.pop();
 			}

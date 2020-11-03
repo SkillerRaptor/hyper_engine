@@ -34,8 +34,9 @@ namespace Hyperion
 		static Application* Get();
 
 	private:
-		void OnEvent(Event& event);
+		void Init();
 		void Shutdown();
+		void OnEvent(Event& event);
 	};
 
 	Application* CreateApplication();
