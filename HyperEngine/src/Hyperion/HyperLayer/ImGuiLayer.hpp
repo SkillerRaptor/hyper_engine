@@ -2,14 +2,14 @@
 
 #include <imgui.h>
 
-#include "Layer.hpp"
+#include "OverlayLayer.hpp"
 #include "Core/Core.hpp"
 #include "HyperECS/HyperECS.hpp"
 #include "Utilities/Timestep.hpp"
 
 namespace Hyperion
 {
-	class ImGuiLayer : public Layer
+	class ImGuiLayer : public OverlayLayer
 	{
 	private:
 		Ref<Scene> m_Scene;

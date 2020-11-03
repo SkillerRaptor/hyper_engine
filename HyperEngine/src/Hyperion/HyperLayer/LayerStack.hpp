@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Layer.hpp"
+#include "OverlayLayer.hpp"
 #include "ImGuiLayer.hpp"
 
 namespace Hyperion 
@@ -12,20 +13,25 @@ namespace Hyperion
 	{
 	private:
 		std::vector<Layer*> m_Layers;
-		ImGuiLayer* m_ImGuiLayer;
+		std::vector<OverlayLayer*> m_OverlayLayers;
 
 	public:
-		LayerStack(Ref<Scene> scene);
 		~LayerStack();
 
 		void PushLayer(Layer* layer);
-
 		void PopLayer(Layer* layer);
-		void PopLayer(std::string layerName);
+		void PopLayer(const std::string& layerName);
 		void PopLayer();
+		Layer* GetLayer(const std::string& layerName);
 
-		ImGuiLayer* GetImGuiLayer() const;
-		const std::vector<Layer*> GetLayers() const;
+		void PushOverlayLayer(OverlayLayer* overlayLayer);
+		void PopOverlayLayer(OverlayLayer* overlayLayer);
+		void PopOverlayLayer(const std::string& layerName);
+		void PopOverlayLayer();
+		OverlayLayer* GetOverlayLayer(const std::string& layerName);
+
+		const std::vector<Layer*>& GetLayers() const;
+		const std::vector<OverlayLayer*>& GetOverlayLayers() const;
 	};
 }
 

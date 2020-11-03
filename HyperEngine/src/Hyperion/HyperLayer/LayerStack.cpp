@@ -2,16 +2,9 @@
 
 namespace Hyperion 
 {
-	LayerStack::LayerStack(Ref<Scene> scene)
-	{
-		m_ImGuiLayer = new ImGuiLayer(scene);
-		m_ImGuiLayer->OnAttach();
-	}
-
 	LayerStack::~LayerStack()
 	{
-		m_ImGuiLayer->OnDetach();
-		delete m_ImGuiLayer;
+
 	}
 
 	void LayerStack::PushLayer(Layer* layer)
@@ -27,7 +20,7 @@ namespace Hyperion
 			m_Layers.erase(elementPosition);
 	}
 
-	void LayerStack::PopLayer(std::string layerName)
+	void LayerStack::PopLayer(const std::string& layerName)
 	{
 		for (Layer* layer : m_Layers)
 			if (layer->GetName() == layerName)
@@ -39,13 +32,54 @@ namespace Hyperion
 		m_Layers.pop_back();
 	}
 
-	ImGuiLayer* LayerStack::GetImGuiLayer() const
+	Layer* LayerStack::GetLayer(const std::string& layerName)
 	{
-		return m_ImGuiLayer;
+		for (Layer* layer : m_Layers)
+			if (layer->GetName() == layerName)
+				return layer;
+		return nullptr;
 	}
 
-	const std::vector<Layer*> LayerStack::GetLayers() const
+	void LayerStack::PushOverlayLayer(OverlayLayer* overlayLayer)
+	{
+		overlayLayer->OnAttach();
+		m_OverlayLayers.push_back(overlayLayer);
+	}
+
+	void LayerStack::PopOverlayLayer(OverlayLayer* overlayLayer)
+	{
+		auto elementPosition = std::find(m_OverlayLayers.begin(), m_OverlayLayers.end(), overlayLayer);
+		if (elementPosition != m_OverlayLayers.end())
+			m_OverlayLayers.erase(elementPosition);
+	}
+
+	void LayerStack::PopOverlayLayer(const std::string& layerName)
+	{
+		for (OverlayLayer* overlayLayer : m_OverlayLayers)
+			if (overlayLayer->GetName() == layerName)
+				m_OverlayLayers.erase(std::find(m_OverlayLayers.begin(), m_OverlayLayers.end(), overlayLayer));
+	}
+
+	void LayerStack::PopOverlayLayer()
+	{
+		m_OverlayLayers.pop_back();
+	}
+
+	OverlayLayer* LayerStack::GetOverlayLayer(const std::string& layerName)
+	{
+		for (OverlayLayer* overlayLayer : m_OverlayLayers)
+			if (overlayLayer->GetName() == layerName)
+				return overlayLayer;
+		return nullptr;
+	}
+
+	const std::vector<Layer*>& LayerStack::GetLayers() const
 	{
 		return m_Layers;
+	}
+
+	const std::vector<OverlayLayer*>& LayerStack::GetOverlayLayers() const
+	{
+		return m_OverlayLayers;
 	}
 }

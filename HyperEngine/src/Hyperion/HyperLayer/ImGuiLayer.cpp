@@ -12,7 +12,7 @@
 namespace Hyperion
 {
 	ImGuiLayer::ImGuiLayer(Ref<Scene> scene)
-		: Layer("ImGui Layer"), m_Scene(scene)
+		: OverlayLayer("ImGui Layer"), m_Scene(scene)
 	{
 	}
 

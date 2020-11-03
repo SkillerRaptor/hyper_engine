@@ -42,8 +42,8 @@ namespace Hyperion
 
 		m_Scene = CreateRef<Scene>("Main Scene", m_Window->GetContext()->GetRenderer2D());
 
-		m_LayerStack = new LayerStack(m_Scene);
-		m_LayerStack->GetImGuiLayer()->SetRenderContext(m_Window->GetContext());
+		m_LayerStack = new LayerStack();
+		PushOverlayLayer(new ImGuiLayer(m_Scene));
 
 		m_Window->GetContext()->GetRenderer2D()->SetShaderManager(static_cast<OpenGLShaderManager*>(m_Window->GetContext()->GetShaderManager()));
 		m_Window->GetContext()->GetRenderer2D()->SetTextureManager(static_cast<OpenGLTextureManager*>(m_Window->GetContext()->GetTextureManager()));
@@ -56,21 +56,16 @@ namespace Hyperion
 		for (Layer* layer : m_LayerStack->GetLayers())
 		{
 			layer->OnDetach();
-			m_LayerStack->PopLayer();
+			m_LayerStack->PopLayer(layer);
+		}
+
+		for (OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
+		{
+			overlayLayer->OnDetach();
+			m_LayerStack->PopOverlayLayer(overlayLayer);
 		}
 
 		delete m_LayerStack;
-	}
-
-	void Application::PushLayer(Layer* layer)
-	{
-		layer->SetRenderContext(m_Window->GetContext());
-		m_LayerStack->PushLayer(layer);
-	}
-
-	void Application::PopLayer(Layer* layer)
-	{
-		m_LayerStack->PopLayer(layer);
 	}
 
 	void Application::Run()
@@ -89,7 +84,7 @@ namespace Hyperion
 		uint32_t bufferTexture = textureManager->CreateTexture(m_Window->GetWindowData().Width, m_Window->GetWindowData().Height, TextureType::FRAMEBUFFER);
 		uint32_t bufferTextureId = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(bufferTexture))->TextureId;
 
-		m_LayerStack->GetImGuiLayer()->SetFrameTextureId(bufferTextureId);
+		static_cast<ImGuiLayer*>(m_LayerStack->GetOverlayLayer("ImGui Layer"))->SetFrameTextureId(bufferTextureId);
 
 		OpenGLFrameBuffer frameBuffer;
 
@@ -114,6 +109,9 @@ namespace Hyperion
 				for (Layer* layer : m_LayerStack->GetLayers())
 					layer->OnTick(currentTick);
 
+				for (OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
+					overlayLayer->OnTick(currentTick);
+
 				m_Scene->OnTick(currentTick);
 
 				currentTick++;
@@ -129,8 +127,6 @@ namespace Hyperion
 
 			const Timestep timeStep = static_cast<double>(timeSinceEpoch + skipTicks - currentTimeNow) / static_cast<double>(skipTicks);
 
-			if (!m_Running) break;
-
 			while (m_EventBus.size() > 0)
 			{
 				Ref<Event> e = m_EventBus.front();
@@ -138,8 +134,6 @@ namespace Hyperion
 				OnEvent(*e);
 				m_EventBus.pop();
 			}
-
-			if (!m_Running) break;
 
 			frameBuffer.Bind();
 
@@ -154,10 +148,11 @@ namespace Hyperion
 
 			frameBuffer.Unbind();
 
-			if (!m_Running) break;
-
-			m_LayerStack->GetImGuiLayer()->OnUpdate(timeStep);
-			m_LayerStack->GetImGuiLayer()->OnRender();
+			for (OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
+			{
+				overlayLayer->OnUpdate(timeStep);
+				overlayLayer->OnRender();
+			}
 
 			m_Window->OnUpdate(timeStep);
 		}
@@ -175,10 +170,63 @@ namespace Hyperion
 
 		for (Layer* layer : m_LayerStack->GetLayers())
 			layer->OnEvent(event);
-		if(m_LayerStack->GetImGuiLayer() != nullptr) 
-			m_LayerStack->GetImGuiLayer()->OnEvent(event);
+
+		for (OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
+			overlayLayer->OnEvent(event);
 
 		m_Scene->OnEvent(event);
+	}
+
+	void Application::PushLayer(Layer* layer)
+	{
+		layer->SetRenderContext(m_Window->GetContext());
+		m_LayerStack->PushLayer(layer);
+	}
+
+	void Application::PopLayer(Layer* layer)
+	{
+		m_LayerStack->PopLayer(layer);
+	}
+
+	void Application::PopLayer(const std::string& layerName)
+	{
+		m_LayerStack->PopLayer(layerName);
+	}
+
+	void Application::PopLayer()
+	{
+		m_LayerStack->PopLayer();
+	}
+
+	Layer* Application::GetLayer(const std::string& layerName)
+	{
+		return m_LayerStack->GetLayer(layerName);
+	}
+
+	void Application::PushOverlayLayer(OverlayLayer* overlayLayer)
+	{
+		overlayLayer->SetRenderContext(m_Window->GetContext());
+		m_LayerStack->PushOverlayLayer(overlayLayer);
+	}
+
+	void Application::PopOverlayLayer(OverlayLayer* overlayLayer)
+	{
+		m_LayerStack->PopOverlayLayer(overlayLayer);
+	}
+
+	void Application::PopOverlayLayer(const std::string& layerName)
+	{
+		m_LayerStack->PopOverlayLayer(layerName);
+	}
+
+	void Application::PopOverlayLayer()
+	{
+		m_LayerStack->PopOverlayLayer();
+	}
+
+	OverlayLayer* Application::GetOverlayLayer(const std::string& layerName)
+	{
+		return m_LayerStack->GetOverlayLayer(layerName);
 	}
 
 	Ref<Window> Application::GetNativeWindow() const
