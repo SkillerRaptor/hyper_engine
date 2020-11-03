@@ -18,8 +18,8 @@ namespace Hyperion
 		{
 			registry.Each<CameraControllerComponent, CameraComponent, TransformComponent>([&](CameraControllerComponent& cameraController, CameraComponent& cameraComponent, TransformComponent& transform)
 				{
-					transform.Position.x += (float)(cameraController.MoveSpeed * timeStep * Input::GetAxis(InputAxis::HORIZONTAL));
-					transform.Position.y -= (float)(cameraController.MoveSpeed * timeStep * Input::GetAxis(InputAxis::VERTICAL));
+					transform.Position.x -= (float)(cameraController.MoveSpeed * timeStep * Input::GetAxis(InputAxis::HORIZONTAL));
+					transform.Position.y += (float)(cameraController.MoveSpeed * timeStep * Input::GetAxis(InputAxis::VERTICAL));
 				});
 		}
 

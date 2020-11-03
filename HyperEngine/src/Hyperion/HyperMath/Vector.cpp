@@ -111,5 +111,34 @@ namespace Hyperion
 			vec.z = vectorOne.x * vectorTwo.y - vectorOne.y * vectorTwo.x;
 			return vec;
 		}
+		Vec2 Inverse(Vec2& vector)
+		{
+			return Vec2(-vector.x, -vector.y);
+		}
+
+		Vec2 Inverse(const Vec2& vector)
+		{
+			return Vec2(-vector.x, -vector.y);
+		}
+
+		Vec3 Inverse(const Vec3& vector)
+		{
+			return Vec3(-vector.x, -vector.y, -vector.z);
+		}
+
+		Vec3 Inverse(Vec3& vector)
+		{
+			return Vec3(-vector.x, -vector.y, -vector.z);
+		}
+
+		Vec4 Inverse(Vec4& vector)
+		{
+			return Vec4(-vector.x, -vector.y, -vector.z, -vector.w);
+		}
+
+		Vec4 Inverse(const Vec4& vector)
+		{
+			return Vec4(-vector.x, -vector.y, -vector.z, -vector.w);
+		}
 	}
 }

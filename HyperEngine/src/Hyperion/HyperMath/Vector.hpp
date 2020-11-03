@@ -58,5 +58,12 @@ namespace Hyperion
 
 		Vec3 Cross(Vec3& vectorOne, Vec3& vectorTwo);
 		Vec3 Cross(const Vec3& vectorOne, const Vec3& vectorTwo);
+
+		Vec2 Inverse(Vec2& vector);
+		Vec2 Inverse(const Vec2& vector);
+		Vec3 Inverse(Vec3& vector);
+		Vec3 Inverse(const Vec3& vector);
+		Vec4 Inverse(Vec4& vector);
+		Vec4 Inverse(const Vec4& vector);
 	};
 }
