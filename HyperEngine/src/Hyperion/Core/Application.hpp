@@ -12,7 +12,7 @@ namespace Hyperion
 	class Application
 	{
 	private:
-		Window* m_Window;
+		Ref<Window> m_Window;
 		LayerStack* m_LayerStack;
 		bool m_Running = true;
 
@@ -30,7 +30,7 @@ namespace Hyperion
 
 		void Run();
 
-		Window* GetNativeWindow() const;
+		Ref<Window> GetNativeWindow() const;
 		static Application* Get();
 
 	private:

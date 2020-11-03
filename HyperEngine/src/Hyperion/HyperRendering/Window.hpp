@@ -24,6 +24,8 @@ namespace Hyperion
 
 		bool VSync;
 		std::queue<Ref<Event>>* EventBus;
+
+		WindowData() = default;
 	};
 
 	class Window
@@ -33,8 +35,8 @@ namespace Hyperion
 		WindowData m_Data;
 
 	public:
-		Window(std::string title, uint32_t width, uint32_t height, bool vSync, std::queue<Ref<Event>>* eventBus)
-			: m_Context(nullptr), m_Data({ title, width, height, 0, 0, vSync, eventBus }) {}
+		Window(const WindowData& windowData)
+			: m_Context(nullptr), m_Data(windowData) {}
 		virtual ~Window() = default;
 
 		virtual void InitWindow() = 0;
@@ -65,5 +67,7 @@ namespace Hyperion
 		virtual void* GetWindow() const = 0;
 		virtual RenderContext* GetContext() const = 0;
 		virtual const WindowData& GetWindowData() const = 0;
+
+		static Ref<Window> Construct(const WindowData& windowData);
 	};
 }

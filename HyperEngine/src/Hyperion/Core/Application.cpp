@@ -17,8 +17,16 @@ namespace Hyperion
 	{
 		m_Instance = this;
 
-		m_Window = new OpenGLWindow("HyperEngine", 1920, 1080, false, &m_EventBus);
-		m_Window->InitWindow();
+		WindowData data;
+		data.Title = "HyperEngine";
+		data.Width = 1920;
+		data.Height = 1080;
+		data.XPos = -1;
+		data.YPos = -1;
+		data.VSync = false;
+		data.EventBus = &m_EventBus;
+
+		m_Window = OpenGLWindow::Construct(data);
 
 		m_Scene = CreateRef<Scene>("Main Scene", m_Window->GetContext()->GetRenderer2D());
 
@@ -41,10 +49,7 @@ namespace Hyperion
 			m_LayerStack->PopLayer();
 		}
 
-		m_Window->ShutdownWindow();
-
 		delete m_LayerStack;
-		delete m_Window;
 	}
 
 	void Application::PushLayer(Layer* layer)
@@ -166,7 +171,7 @@ namespace Hyperion
 		m_Scene->OnEvent(event);
 	}
 
-	Window* Application::GetNativeWindow() const
+	Ref<Window> Application::GetNativeWindow() const
 	{
 		return m_Window;
 	}

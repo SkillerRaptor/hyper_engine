@@ -5,13 +5,15 @@
 
 namespace Hyperion
 {
-	OpenGLWindow::OpenGLWindow(std::string title, uint32_t width, uint32_t height, bool vSync, std::queue<Ref<Event>>* eventBus)
-		: Window(title, width, height, vSync, eventBus)
+	OpenGLWindow::OpenGLWindow(const WindowData& windowData)
+		: Window(windowData)
 	{
+		InitWindow();
 	}
 
 	OpenGLWindow::~OpenGLWindow()
 	{
+		ShutdownWindow();
 	}
 
 	void OpenGLWindow::InitWindow()
@@ -29,6 +31,8 @@ namespace Hyperion
 			glfwTerminate();
 			std::exit(-1);
 		}
+
+		HP_CORE_DEBUG("Initializing OpenGL Window");
 
 		glfwMakeContextCurrent(m_Window);
 		glfwSetWindowUserPointer(m_Window, &m_Data);
@@ -57,13 +61,13 @@ namespace Hyperion
 				data.Height = height;
 
 				glViewport(0, 0, width, height);
-				data.EventBus->push(std::make_shared<WindowResizeEvent>(width, height));
+				if(data.EventBus) data.EventBus->push(std::make_shared<WindowResizeEvent>(width, height));
 			});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				data.EventBus->push(std::make_shared<WindowCloseEvent>());
+				if(data.EventBus) data.EventBus->push(std::make_shared<WindowCloseEvent>());
 			});
 
 		glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, int x, int y)
@@ -72,7 +76,7 @@ namespace Hyperion
 				data.XPos = x;
 				data.YPos = y;
 
-				data.EventBus->push(std::make_shared<WindowMovedEvent>(x, y));
+				if(data.EventBus) data.EventBus->push(std::make_shared<WindowMovedEvent>(x, y));
 			});
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -82,19 +86,19 @@ namespace Hyperion
 				case GLFW_PRESS:
 				{
 					WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-					data.EventBus->push(std::make_shared<KeyPressedEvent>(key, 0));
+					if(data.EventBus) data.EventBus->push(std::make_shared<KeyPressedEvent>(key, 0));
 					break;
 				}
 				case GLFW_RELEASE:
 				{
 					WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-					data.EventBus->push(std::make_shared<KeyReleasedEvent>(key));
+					if(data.EventBus) data.EventBus->push(std::make_shared<KeyReleasedEvent>(key));
 					break;
 				}
 				case GLFW_REPEAT:
 				{
 					WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-					data.EventBus->push(std::make_shared<KeyPressedEvent>(key, 1));
+					if(data.EventBus) data.EventBus->push(std::make_shared<KeyPressedEvent>(key, 1));
 					break;
 				}
 				}
@@ -107,13 +111,13 @@ namespace Hyperion
 				case GLFW_PRESS:
 				{
 					WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-					data.EventBus->push(std::make_shared<MouseButtonPressedEvent>(button));
+					if(data.EventBus) data.EventBus->push(std::make_shared<MouseButtonPressedEvent>(button));
 					break;
 				}
 				case GLFW_RELEASE:
 				{
 					WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-					data.EventBus->push(std::make_shared<MouseButtonReleasedEvent>(button));
+					if(data.EventBus) data.EventBus->push(std::make_shared<MouseButtonReleasedEvent>(button));
 					break;
 				}
 				}
@@ -122,13 +126,13 @@ namespace Hyperion
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				data.EventBus->push(std::make_shared<MouseScrolledEvent>((float)xOffset, (float)yOffset));
+				if(data.EventBus) data.EventBus->push(std::make_shared<MouseScrolledEvent>((float)xOffset, (float)yOffset));
 			});
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-				data.EventBus->push(std::make_shared<MouseMovedEvent>((float)xPos, (float)yPos));
+				if(data.EventBus) data.EventBus->push(std::make_shared<MouseMovedEvent>((float)xPos, (float)yPos));
 			});
 
 		m_Context = new OpenGLContext();
@@ -136,6 +140,7 @@ namespace Hyperion
 
 	void OpenGLWindow::ShutdownWindow()
 	{
+		HP_CORE_DEBUG("Shutdown OpenGL Window");
 		delete m_Context;
 
 		glfwDestroyWindow(m_Window);
@@ -235,5 +240,11 @@ namespace Hyperion
 	const WindowData& OpenGLWindow::GetWindowData() const
 	{
 		return m_Data;
+	}
+
+	Ref<Window> Window::Construct(const WindowData& windowData)
+	{
+		HP_CORE_DEBUG("Creating OpenGL Window");
+		return CreateRef<OpenGLWindow>(windowData);
 	}
 }
