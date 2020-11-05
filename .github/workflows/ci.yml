@@ -19,8 +19,7 @@ jobs:
       run: ./scripts/Win-GenProjects.bat
 
     - name: Setup MSBuild
-      id: setup_msbuild_path
-      uses: ./
+      uses: microsoft/setup-msbuild@v1.0.2
 
     - name: Build Solution
       run: msbuild -property:Configuration=Release -maxCpuCount -verbosity:minimal -noLogo HyperEngine.sln
