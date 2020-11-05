@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Core.hpp"
-#include "HyperECS/HyperECS.hpp"
+#include "HyperECS/Scene/Scene.hpp"
 
 namespace Hyperion
 {

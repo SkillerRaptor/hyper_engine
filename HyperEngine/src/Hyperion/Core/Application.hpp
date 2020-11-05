@@ -3,8 +3,10 @@
 #include <queue>
 
 #include "Core.hpp"
-#include "HyperEvents/HyperEvents.hpp"
-#include "HyperLayer/HyperLayer.hpp"
+#include "HyperEvents/Event.hpp"
+#include "HyperLayer/Layer.hpp"
+#include "HyperLayer/LayerStack.hpp"
+#include "HyperLayer/OverlayLayer.hpp"
 #include "HyperRendering/Window.hpp"
 
 namespace Hyperion 

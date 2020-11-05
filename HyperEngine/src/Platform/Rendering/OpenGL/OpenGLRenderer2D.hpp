@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Core.hpp"
-#include "HyperMath/HyperMath.hpp"
+#include "HyperMath/Vector.hpp"
 #include "HyperRendering/Renderer2D.hpp"
 #include "HyperRendering/Buffers/Vertex.hpp"
 

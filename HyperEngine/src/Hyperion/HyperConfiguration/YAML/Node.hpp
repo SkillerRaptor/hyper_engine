@@ -5,7 +5,7 @@
 #include <variant>
 
 #include "Core/Core.hpp"
-#include "HyperMath/HyperMath.hpp"
+#include "HyperMath/Vector.hpp"
 
 namespace Hyperion { namespace YAML
 {

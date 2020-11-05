@@ -6,16 +6,25 @@
 #include "Hyperion/Core/Core.hpp"
 
 /* Entity Component System */
-#include "Hyperion/HyperECS/HyperECS.hpp"
+#include "Hyperion/HyperECS/Components.hpp"
+#include "Hyperion/HyperECS/Entity.hpp"
+#include "Hyperion/HyperECS/EntitySystem.hpp"
+#include "Hyperion/HyperECS/Registry.hpp"
 
 /* Events */
-#include "Hyperion/HyperEvents/HyperEvents.hpp"
+#include "Hyperion/HyperEvents/Event.hpp"
+#include "Hyperion/HyperEvents/KeyEvents.hpp"
+#include "Hyperion/HyperEvents/MouseEvents.hpp"
+#include "Hyperion/HyperEvents/WindowEvents.hpp"
 
 /* Layers */
-#include "Hyperion/HyperLayer/HyperLayer.hpp"
+#include "Hyperion/HyperLayer/Layer.hpp"
+#include "Hyperion/HyperLayer/OverlayLayer.hpp"
 
 /* Maths */
-#include "Hyperion/HyperMath/HyperMath.hpp"
+#include "Hyperion/HyperMath/Matrix.hpp"
+#include "Hyperion/HyperMath/Vector.hpp"
+#include "Hyperion/HyperMath/Quaternion.hpp"
 
 /* Memory */
 #include "Hyperion/Memory/PoolAllocator.hpp"

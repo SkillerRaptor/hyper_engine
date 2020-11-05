@@ -5,7 +5,7 @@
 #include "Core/Core.hpp"
 #include "HyperECS/Registry.hpp"
 #include "HyperECS/EntitySystems.hpp"
-#include "HyperEvents/HyperEvents.hpp"
+#include "HyperEvents/Event.hpp"
 #include "HyperRendering/Renderer2D.hpp"
 #include "Utilities/Timestep.hpp"
 

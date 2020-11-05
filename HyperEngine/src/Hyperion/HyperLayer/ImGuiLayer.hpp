@@ -4,7 +4,9 @@
 
 #include "OverlayLayer.hpp"
 #include "Core/Core.hpp"
-#include "HyperECS/HyperECS.hpp"
+#include "HyperECS/Entity.hpp"
+#include "HyperECS/Scene/Scene.hpp"
+#include "HyperECS/Scene/SceneHierarchyPanel.hpp"
 #include "Utilities/Timestep.hpp"
 
 namespace Hyperion

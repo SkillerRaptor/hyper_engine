@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "HyperEvents/HyperEvents.hpp"
+#include "HyperEvents/Event.hpp"
 #include "HyperRendering/RenderContext.hpp"
 #include "Utilities/Timestep.hpp"
 

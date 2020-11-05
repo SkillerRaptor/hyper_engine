@@ -4,7 +4,11 @@
 #include <ImGuizmo.h>
 
 #include "Core/Application.hpp"
-#include "HyperEvents/HyperEvents.hpp"
+#include "HyperECS/Components.hpp"
+#include "HyperECS/Scene/SceneSerializer.hpp"
+#include "HyperEvents/KeyEvents.hpp"
+#include "Utilities/Input.hpp"
+
 #include "Platform/OS/Windows/WindowsFileDialogs.hpp"
 #include "Platform/Rendering/OpenGL/ImGuiGLFWRenderer.hpp"
 #include "Platform/Rendering/OpenGL/ImGuiOpenGLRenderer.hpp"

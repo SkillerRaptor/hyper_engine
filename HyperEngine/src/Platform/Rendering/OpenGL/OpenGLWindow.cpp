@@ -1,6 +1,8 @@
 #include "OpenGLWindow.hpp"
 
-#include "HyperEvents/HyperEvents.hpp"
+#include "HyperEvents/KeyEvents.hpp"
+#include "HyperEvents/MouseEvents.hpp"
+#include "HyperEvents/WindowEvents.hpp"
 #include "Utilities/Log.hpp"
 
 namespace Hyperion
