@@ -7,7 +7,7 @@
 #include <queue>
 
 #include "RenderContext.hpp"
-#include "Core/Core.hpp"
+#include "HyperCore/Core.hpp"
 #include "HyperEvents/Event.hpp"
 #include "HyperUtilities/Timestep.hpp"
 

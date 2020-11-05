@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include "OverlayLayer.hpp"
-#include "Core/Core.hpp"
+#include "HyperCore/Core.hpp"
 #include "HyperECS/Entity.hpp"
 #include "HyperECS/Scene/Scene.hpp"
 #include "HyperECS/Scene/SceneHierarchyPanel.hpp"

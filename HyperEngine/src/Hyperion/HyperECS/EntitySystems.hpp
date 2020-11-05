@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "EntitySystem.hpp"
-#include "Core/Core.hpp"
+#include "HyperCore/Core.hpp"
 #include "HyperEvents/Event.hpp"
 #include "HyperRendering/Renderer2D.hpp"
 #include "HyperUtilities/Hasher.hpp"

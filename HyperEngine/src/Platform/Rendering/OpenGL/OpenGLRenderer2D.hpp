@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Core.hpp"
+#include "HyperCore/Core.hpp"
 #include "HyperMath/Vector.hpp"
 #include "HyperRendering/Renderer2D.hpp"
 #include "HyperRendering/Buffers/Vertex.hpp"

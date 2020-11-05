@@ -1,9 +1,9 @@
 #include "SceneSerializer.hpp"
 
-#include "HyperConfiguration/YAML/Configuration.hpp"
-#include "HyperConfiguration/YAML/Node.hpp"
 #include "HyperECS/Components.hpp"
 #include "HyperECS/Entity.hpp"
+#include "HyperUtilities/HyperConfiguration/YAML/Configuration.hpp"
+#include "HyperUtilities/HyperConfiguration/YAML/Node.hpp"
 
 namespace Hyperion
 {

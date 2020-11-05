@@ -3,7 +3,7 @@
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
 
-#include "Core/Application.hpp"
+#include "HyperCore/Application.hpp"
 #include "HyperECS/Components.hpp"
 #include "HyperECS/Scene/SceneSerializer.hpp"
 #include "HyperEvents/KeyEvents.hpp"

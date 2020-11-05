@@ -4,7 +4,7 @@
 #include <glfw/glfw3.h>
 
 #include "OpenGLContext.hpp"
-#include "Core/Core.hpp"
+#include "HyperCore/Core.hpp"
 #include "HyperRendering/Window.hpp"
 
 namespace Hyperion

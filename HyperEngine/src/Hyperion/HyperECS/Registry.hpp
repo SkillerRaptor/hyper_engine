@@ -7,7 +7,7 @@
 
 #include "ComponentBuffer.hpp"
 
-#include "Core/Core.hpp"
+#include "HyperCore/Core.hpp"
 #include "HyperUtilities/Hasher.hpp"
 #include "HyperUtilities/Timestep.hpp"
 

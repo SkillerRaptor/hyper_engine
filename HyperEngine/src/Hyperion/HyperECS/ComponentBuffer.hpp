@@ -2,7 +2,7 @@
 
 #include <queue>
 
-#include "Core/Core.hpp"
+#include "HyperCore/Core.hpp"
 
 namespace Hyperion
 {

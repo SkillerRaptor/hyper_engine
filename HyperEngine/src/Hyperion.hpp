@@ -3,7 +3,7 @@
 /* Include File for HyperEngine Application / Projects */
 
 /* Core */
-#include "Hyperion/Core/Core.hpp"
+#include "Hyperion/HyperCore/Core.hpp"
 
 /* Entity Component System */
 #include "Hyperion/HyperECS/Components.hpp"

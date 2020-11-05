@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Core/Core.hpp"
+#include "HyperCore/Core.hpp"
 #include "HyperECS/Registry.hpp"
 #include "HyperECS/EntitySystems.hpp"
 #include "HyperEvents/Event.hpp"

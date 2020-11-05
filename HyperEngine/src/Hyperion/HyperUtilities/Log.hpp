@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 #include "Logger.hpp"
-#include "Core/Core.hpp"
+#include "HyperCore/Core.hpp"
 
 namespace Hyperion 
 {

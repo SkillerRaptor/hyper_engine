@@ -6,7 +6,7 @@
 
 #include <Windows.h>
 
-#include "Core/Application.hpp"
+#include "HyperCore/Application.hpp"
 
 namespace Hyperion
 {

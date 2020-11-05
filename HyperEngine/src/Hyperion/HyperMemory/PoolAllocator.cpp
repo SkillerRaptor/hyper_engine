@@ -1,6 +1,6 @@
 #include "PoolAllocator.hpp"
 
-#include "Core/Core.hpp"
+#include "HyperCore/Core.hpp"
 
 namespace Hyperion
 {

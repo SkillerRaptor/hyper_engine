@@ -4,7 +4,7 @@
 #include <fstream>
 #include <variant>
 
-#include "Core/Core.hpp"
+#include "HyperCore/Core.hpp"
 #include "HyperMath/Vector.hpp"
 
 namespace Hyperion { namespace YAML

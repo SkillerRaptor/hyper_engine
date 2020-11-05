@@ -5,7 +5,7 @@
 
 #include "HyperUtilities/NonCopyable.hpp"
 #include "HyperUtilities/NonMoveable.hpp"
-#include "HyperUtilities/Structures/HyperStackLinkedList.hpp"
+#include "HyperUtilities/HyperStructures/HyperStackLinkedList.hpp"
 
 namespace Hyperion
 {
