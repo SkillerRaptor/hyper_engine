@@ -1,5 +1,5 @@
-#include <Hyperion/Core/Application.hpp>
-#include <Hyperion/Core/EntryPoint.hpp>
+#include <Hyperion/HyperCore/Application.hpp>
+#include <Hyperion/HyperCore/EntryPoint.hpp>
 
 #include "SandboxLayer.hpp"
 
