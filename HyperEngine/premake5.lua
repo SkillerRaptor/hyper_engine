@@ -25,8 +25,8 @@ project "HyperEngine"
 	{
 		"src",
 		"src/Hyperion",
-		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
+		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.stb_image}"
@@ -34,8 +34,8 @@ project "HyperEngine"
 
 	links
 	{
-		"GLFW",
 		"Glad",
+		"GLFW",
 		"ImGui",
 		"ImGuizmo",
 		"opengl32.lib"
