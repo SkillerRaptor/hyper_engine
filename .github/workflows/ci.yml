@@ -18,5 +18,9 @@ jobs:
     - name: Generate Project Files
       run: ./scripts/Win-GenProjects.bat
 
+    - name: Setup MSBuild
+      id: setup_msbuild_path
+      uses: ./
+
     - name: Build Solution
-      run: C:/"Program Files (x86)"/"Microsoft Visual Studio"/2019/BuildTools/MSBuild/Current/Bin/MSBuild.exe -property:Configuration=Release -maxCpuCount -verbosity:minimal -noLogo HyperEngine.sln
+      run: msbuild -property:Configuration=Release -maxCpuCount -verbosity:minimal -noLogo HyperEngine.sln
