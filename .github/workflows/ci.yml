@@ -8,14 +8,13 @@ on:
 
 jobs:
   build:
-    runs-on: [ self-hosted, windows, x64 ]
+    runs-on: self-hosted
     defaults:
       run:
         shell: cmd
     steps:
     - uses: actions/checkout@v2
-      with:
-        submodules: true
+
     - name: Generate Project Files
       run: premake5.exe vs2019
 
