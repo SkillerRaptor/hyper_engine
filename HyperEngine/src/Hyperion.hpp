@@ -27,7 +27,7 @@
 #include "Hyperion/HyperMath/Quaternion.hpp"
 
 /* Memory */
-#include "Hyperion/Memory/PoolAllocator.hpp"
+#include "Hyperion/HyperMemory/PoolAllocator.hpp"
 
 /* Physics */
 
@@ -37,14 +37,14 @@
 #include "Hyperion/HyperRendering/TextureManager.hpp"
 
 /* Utilities */
-#include "Hyperion/Utilities/Hasher.hpp"
-#include "Hyperion/Utilities/Input.hpp"
-#include "Hyperion/Utilities/KeyCodes.hpp"
-#include "Hyperion/Utilities/Log.hpp"
-#include "Hyperion/Utilities/Logger.hpp"
-#include "Hyperion/Utilities/MouseCodes.hpp"
-#include "Hyperion/Utilities/NonCopyable.hpp"
-#include "Hyperion/Utilities/NonMoveable.hpp"
-#include "Hyperion/Utilities/Random.hpp"
-#include "Hyperion/Utilities/Timer.hpp"
-#include "Hyperion/Utilities/Timestep.hpp"
+#include "Hyperion/HyperUtilities/Hasher.hpp"
+#include "Hyperion/HyperUtilities/Input.hpp"
+#include "Hyperion/HyperUtilities/KeyCodes.hpp"
+#include "Hyperion/HyperUtilities/Log.hpp"
+#include "Hyperion/HyperUtilities/Logger.hpp"
+#include "Hyperion/HyperUtilities/MouseCodes.hpp"
+#include "Hyperion/HyperUtilities/NonCopyable.hpp"
+#include "Hyperion/HyperUtilities/NonMoveable.hpp"
+#include "Hyperion/HyperUtilities/Random.hpp"
+#include "Hyperion/HyperUtilities/Timer.hpp"
+#include "Hyperion/HyperUtilities/Timestep.hpp"

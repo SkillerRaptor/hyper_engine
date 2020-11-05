@@ -9,7 +9,7 @@
 #include "RenderContext.hpp"
 #include "Core/Core.hpp"
 #include "HyperEvents/Event.hpp"
-#include "Utilities/Timestep.hpp"
+#include "HyperUtilities/Timestep.hpp"
 
 namespace Hyperion
 {

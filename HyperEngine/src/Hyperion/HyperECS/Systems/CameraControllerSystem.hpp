@@ -4,7 +4,7 @@
 #include "HyperECS/Components.hpp"
 #include "HyperECS/Registry.hpp"
 #include "HyperEvents/MouseEvents.hpp"
-#include "Utilities/Input.hpp"
+#include "HyperUtilities/Input.hpp"
 
 namespace Hyperion
 {

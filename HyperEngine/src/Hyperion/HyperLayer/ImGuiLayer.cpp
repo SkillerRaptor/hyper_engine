@@ -7,7 +7,7 @@
 #include "HyperECS/Components.hpp"
 #include "HyperECS/Scene/SceneSerializer.hpp"
 #include "HyperEvents/KeyEvents.hpp"
-#include "Utilities/Input.hpp"
+#include "HyperUtilities/Input.hpp"
 
 #include "Platform/OS/Windows/WindowsFileDialogs.hpp"
 #include "Platform/Rendering/OpenGL/ImGuiGLFWRenderer.hpp"

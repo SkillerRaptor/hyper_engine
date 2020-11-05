@@ -3,7 +3,7 @@
 #include "Registry.hpp"
 #include "HyperEvents/Event.hpp"
 #include "HyperRendering/Renderer2D.hpp"
-#include "Utilities/Timestep.hpp"
+#include "HyperUtilities/Timestep.hpp"
 
 namespace Hyperion
 {

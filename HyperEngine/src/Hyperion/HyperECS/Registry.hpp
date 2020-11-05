@@ -8,8 +8,8 @@
 #include "ComponentBuffer.hpp"
 
 #include "Core/Core.hpp"
-#include "Utilities/Hasher.hpp"
-#include "Utilities/Timestep.hpp"
+#include "HyperUtilities/Hasher.hpp"
+#include "HyperUtilities/Timestep.hpp"
 
 namespace Hyperion
 {

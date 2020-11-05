@@ -3,9 +3,9 @@
 #include <memory>
 #include <queue>
 
-#include "Utilities/NonCopyable.hpp"
-#include "Utilities/NonMoveable.hpp"
-#include "Utilities/Structures/HyperStackLinkedList.hpp"
+#include "HyperUtilities/NonCopyable.hpp"
+#include "HyperUtilities/NonMoveable.hpp"
+#include "HyperUtilities/Structures/HyperStackLinkedList.hpp"
 
 namespace Hyperion
 {

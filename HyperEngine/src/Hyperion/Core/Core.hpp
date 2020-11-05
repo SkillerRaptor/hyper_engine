@@ -23,7 +23,7 @@ namespace Hyperion
 	}
 }
 
-#include "Utilities/Log.hpp"
+#include "HyperUtilities/Log.hpp"
 
 #define HP_CORE_ASSERT(x, ...) { if(!(x)) { HP_CORE_ERROR("Assertion Failed: %", __VA_ARGS__); __debugbreak(); } }
 #define HP_CLIENT_ASSERT(x, ...) { if(!(x)) { HP_CLIENT_ERROR("Assertion Failed: %", __VA_ARGS__); __debugbreak(); } }

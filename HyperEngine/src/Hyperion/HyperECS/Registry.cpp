@@ -4,7 +4,7 @@
 
 #include "Components.hpp"
 #include "Entity.hpp"
-#include "Utilities/Random.hpp"
+#include "HyperUtilities/Random.hpp"
 
 namespace Hyperion
 {

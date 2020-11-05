@@ -7,7 +7,7 @@
 #include "HyperECS/Entity.hpp"
 #include "HyperECS/Scene/Scene.hpp"
 #include "HyperECS/Scene/SceneHierarchyPanel.hpp"
-#include "Utilities/Timestep.hpp"
+#include "HyperUtilities/Timestep.hpp"
 
 namespace Hyperion
 {

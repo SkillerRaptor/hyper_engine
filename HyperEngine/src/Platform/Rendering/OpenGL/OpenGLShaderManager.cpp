@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-#include "Utilities/Log.hpp"
+#include "HyperUtilities/Log.hpp"
 
 namespace Hyperion
 {

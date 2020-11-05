@@ -2,7 +2,7 @@
 
 #include <stb_image.h>
 
-#include "Utilities/Log.hpp"
+#include "HyperUtilities/Log.hpp"
 
 namespace Hyperion
 {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Utilities/NonCopyable.hpp"
-#include "Utilities/NonMoveable.hpp"
+#include "HyperUtilities/NonCopyable.hpp"
+#include "HyperUtilities/NonMoveable.hpp"
 
 namespace Hyperion
 {

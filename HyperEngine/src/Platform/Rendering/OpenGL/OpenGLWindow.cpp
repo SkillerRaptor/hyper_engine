@@ -3,7 +3,7 @@
 #include "HyperEvents/KeyEvents.hpp"
 #include "HyperEvents/MouseEvents.hpp"
 #include "HyperEvents/WindowEvents.hpp"
-#include "Utilities/Log.hpp"
+#include "HyperUtilities/Log.hpp"
 
 namespace Hyperion
 {

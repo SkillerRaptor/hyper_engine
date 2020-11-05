@@ -3,8 +3,8 @@
 #include <chrono>
 
 #include "HyperEvents/WindowEvents.hpp"
-#include "Utilities/Random.hpp"
-#include "Utilities/Timestep.hpp"
+#include "HyperUtilities/Random.hpp"
+#include "HyperUtilities/Timestep.hpp"
 
 #include "Platform/Rendering/OpenGL/OpenGLWindow.hpp"
 #include "Platform/Rendering/OpenGL/OpenGLRenderer2D.hpp"

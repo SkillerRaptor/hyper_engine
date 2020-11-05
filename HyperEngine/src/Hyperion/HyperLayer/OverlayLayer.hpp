@@ -4,7 +4,7 @@
 
 #include "HyperEvents/Event.hpp"
 #include "HyperRendering/RenderContext.hpp"
-#include "Utilities/Timestep.hpp"
+#include "HyperUtilities/Timestep.hpp"
 
 namespace Hyperion 
 {
