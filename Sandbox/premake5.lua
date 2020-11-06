@@ -23,7 +23,8 @@ project "Sandbox"
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
-		"%{IncludeDir.stb_image}"
+		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.vulkan}"
 	}
 
 	links

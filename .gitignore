@@ -33,13 +33,9 @@
 # Visual Studio
 .vs/
 *.sln
-*/*.vcxproj
-*/*/*.vcxproj
-*/*/*/*.vcxproj
-*/*.filters
-*/*/*.filters
-*/*/*/*.filters
-*/*.user
+**/*.vcxproj
+**/*.filters
+**/*.user
 /bin/
 /bin-int/
 */*/*/bin/
