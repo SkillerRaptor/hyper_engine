@@ -48,23 +48,23 @@ namespace Hyperion
 			glVertexArrayAttribBinding(m_RendererId, 1, 0);
 
 			glEnableVertexArrayAttrib(m_RendererId, 2);
-			glVertexArrayAttribFormat(m_RendererId, 2, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, Normals));
+			glVertexArrayAttribFormat(m_RendererId, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, TextureCoords));
 			glVertexArrayAttribBinding(m_RendererId, 2, 0);
 
 			glEnableVertexArrayAttrib(m_RendererId, 3);
-			glVertexArrayAttribFormat(m_RendererId, 3, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, TextureCoords));
+			glVertexArrayAttribFormat(m_RendererId, 3, 1, GL_UNSIGNED_INT, GL_FALSE, offsetof(Vertex3D, TextureId));
 			glVertexArrayAttribBinding(m_RendererId, 3, 0);
 
 			glEnableVertexArrayAttrib(m_RendererId, 4);
-			glVertexArrayAttribFormat(m_RendererId, 4, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, Tangent));
+			glVertexArrayAttribFormat(m_RendererId, 4, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, Normals));
 			glVertexArrayAttribBinding(m_RendererId, 4, 0);
 
 			glEnableVertexArrayAttrib(m_RendererId, 5);
-			glVertexArrayAttribFormat(m_RendererId, 5, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, Bitangent));
+			glVertexArrayAttribFormat(m_RendererId, 5, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, Tangent));
 			glVertexArrayAttribBinding(m_RendererId, 5, 0);
 
 			glEnableVertexArrayAttrib(m_RendererId, 6);
-			glVertexArrayAttribFormat(m_RendererId, 6, 1, GL_UNSIGNED_INT, GL_FALSE, offsetof(Vertex3D, TextureId));
+			glVertexArrayAttribFormat(m_RendererId, 6, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, Bitangent));
 			glVertexArrayAttribBinding(m_RendererId, 6, 0);
 			break;
 		}

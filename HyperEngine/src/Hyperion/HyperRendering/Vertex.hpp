@@ -18,11 +18,11 @@ namespace Hyperion
 	{
 		Vec3 Position;
 		Vec4 Color;
-		Vec3 Normals;
+		unsigned int TextureId;
 		Vec2 TextureCoords;
+		Vec3 Normals;
 		Vec3 Tangent;
 		Vec3 Bitangent;
-		unsigned int TextureId;
 	};
 
 	enum struct VertexLayout 

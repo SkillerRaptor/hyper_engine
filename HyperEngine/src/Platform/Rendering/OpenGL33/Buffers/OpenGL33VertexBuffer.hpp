@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HyperRendering/Buffers/Vertex.hpp"
+#include "HyperRendering/Vertex.hpp"
 
 namespace Hyperion
 {
