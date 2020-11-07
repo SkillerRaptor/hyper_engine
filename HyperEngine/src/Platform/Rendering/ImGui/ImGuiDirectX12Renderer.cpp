@@ -32,7 +32,7 @@
 //  2018-02-22: Merged into master with all Win32 code synchronized to other examples.
 
 #include "imgui.h"
-#include "imgui_impl_dx12.h"
+#include "ImGuiDirectX12Renderer.h"
 
 // DirectX
 #include <d3d12.h>

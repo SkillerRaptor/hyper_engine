@@ -28,7 +28,7 @@
 //  2016-05-07: DirectX11: Disabling depth-write.
 
 #include "imgui.h"
-#include "imgui_impl_dx11.h"
+#include "ImGuiDirectX11Renderer.h"
 
 // DirectX
 #include <stdio.h>
