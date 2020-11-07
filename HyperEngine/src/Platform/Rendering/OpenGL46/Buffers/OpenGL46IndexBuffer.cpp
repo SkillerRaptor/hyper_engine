@@ -13,10 +13,8 @@ namespace Hyperion
 	OpenGL46IndexBuffer::OpenGL46IndexBuffer(const uint32_t* indices, size_t indexCount)
 		: m_RendererId(0)
 	{
-		glGenBuffers(1, &m_RendererId);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * indexCount, indices, (indices == nullptr ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glCreateBuffers(1, &m_RendererId);
+		glNamedBufferStorage(m_RendererId, sizeof(uint32_t) * indexCount, indices, GL_DYNAMIC_STORAGE_BIT);
 	}
 
 	OpenGL46IndexBuffer::~OpenGL46IndexBuffer()
@@ -24,19 +22,14 @@ namespace Hyperion
 		glDeleteBuffers(1, &m_RendererId);
 	}
 
-	void OpenGL46IndexBuffer::Bind()
+	void OpenGL46IndexBuffer::Bind(unsigned int vertexArray)
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
-	}
-
-	void OpenGL46IndexBuffer::Unbind()
-	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glVertexArrayElementBuffer(vertexArray, m_RendererId);
 	}
 
 	void OpenGL46IndexBuffer::SetData(const uint32_t* indices, size_t indexCount)
 	{
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(uint32_t) * indexCount, indices);
+		glNamedBufferSubData(m_RendererId, 0, sizeof(uint32_t) * indexCount, indices);
 	}
 
 	unsigned int OpenGL46IndexBuffer::GetRendererId() const

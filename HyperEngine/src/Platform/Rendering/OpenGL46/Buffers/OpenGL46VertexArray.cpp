@@ -8,9 +8,7 @@ namespace Hyperion
 	OpenGL46VertexArray::OpenGL46VertexArray(VertexLayout vertexLayout)
 		: m_RendererId(0), m_VertexLayout(vertexLayout)
 	{
-		glGenVertexArrays(1, &m_RendererId);
-		glBindVertexArray(m_RendererId);
-		glBindVertexArray(0);
+		glCreateVertexArrays(1, &m_RendererId);
 	}
 
 	OpenGL46VertexArray::~OpenGL46VertexArray()
@@ -23,40 +21,51 @@ namespace Hyperion
 		switch (m_VertexLayout)
 		{
 		case VertexLayout::Vertex2D:
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (const void*)offsetof(Vertex2D, Position));
-			glEnableVertexAttribArray(0);
+			glEnableVertexArrayAttrib(m_RendererId, 0);
+			glVertexArrayAttribFormat(m_RendererId, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex2D, Position));
+			glVertexArrayAttribBinding(m_RendererId, 0, 0);
 
-			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (const void*)offsetof(Vertex2D, Color));
-			glEnableVertexAttribArray(1);
+			glEnableVertexArrayAttrib(m_RendererId, 1);
+			glVertexArrayAttribFormat(m_RendererId, 1, 4, GL_FLOAT, GL_FALSE, offsetof(Vertex2D, Color));
+			glVertexArrayAttribBinding(m_RendererId, 1, 0);
 
-			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (const void*)offsetof(Vertex2D, TextureCoords));
-			glEnableVertexAttribArray(2);
+			glEnableVertexArrayAttrib(m_RendererId, 2);
+			glVertexArrayAttribFormat(m_RendererId, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex2D, TextureCoords));
+			glVertexArrayAttribBinding(m_RendererId, 2, 0);
 
-			glVertexAttribPointer(3, 1, GL_UNSIGNED_INT, GL_FALSE, sizeof(Vertex2D), (const void*)offsetof(Vertex2D, TextureId));
-			glEnableVertexAttribArray(3);
+			glEnableVertexArrayAttrib(m_RendererId, 3);
+			glVertexArrayAttribFormat(m_RendererId, 3, 1, GL_UNSIGNED_INT, GL_FALSE, offsetof(Vertex2D, TextureId));
+			glVertexArrayAttribBinding(m_RendererId, 3, 0);
 			break;
 
 		case VertexLayout::Vertex3D:
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (const void*)offsetof(Vertex3D, Position));
-			glEnableVertexAttribArray(0);
+			glEnableVertexArrayAttrib(m_RendererId, 0);
+			glVertexArrayAttribFormat(m_RendererId, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, Position));
+			glVertexArrayAttribBinding(m_RendererId, 0, 0);
 
-			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (const void*)offsetof(Vertex3D, Color));
-			glEnableVertexAttribArray(1);
+			glEnableVertexArrayAttrib(m_RendererId, 1);
+			glVertexArrayAttribFormat(m_RendererId, 1, 4, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, Color));
+			glVertexArrayAttribBinding(m_RendererId, 1, 0);
 
-			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (const void*)offsetof(Vertex3D, Normals));
-			glEnableVertexAttribArray(2);
+			glEnableVertexArrayAttrib(m_RendererId, 2);
+			glVertexArrayAttribFormat(m_RendererId, 2, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, Normals));
+			glVertexArrayAttribBinding(m_RendererId, 2, 0);
 
-			glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (const void*)offsetof(Vertex3D, TextureCoords));
-			glEnableVertexAttribArray(3);
+			glEnableVertexArrayAttrib(m_RendererId, 3);
+			glVertexArrayAttribFormat(m_RendererId, 3, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, TextureCoords));
+			glVertexArrayAttribBinding(m_RendererId, 3, 0);
 
-			glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (const void*)offsetof(Vertex3D, Tangent));
-			glEnableVertexAttribArray(4);
+			glEnableVertexArrayAttrib(m_RendererId, 4);
+			glVertexArrayAttribFormat(m_RendererId, 4, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, Tangent));
+			glVertexArrayAttribBinding(m_RendererId, 4, 0);
 
-			glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (const void*)offsetof(Vertex3D, Bitangent));
-			glEnableVertexAttribArray(5);
+			glEnableVertexArrayAttrib(m_RendererId, 5);
+			glVertexArrayAttribFormat(m_RendererId, 5, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex3D, Bitangent));
+			glVertexArrayAttribBinding(m_RendererId, 5, 0);
 
-			glVertexAttribPointer(6, 1, GL_UNSIGNED_INT, GL_FALSE, sizeof(Vertex3D), (const void*)offsetof(Vertex3D, TextureId));
-			glEnableVertexAttribArray(6);
+			glEnableVertexArrayAttrib(m_RendererId, 6);
+			glVertexArrayAttribFormat(m_RendererId, 6, 1, GL_UNSIGNED_INT, GL_FALSE, offsetof(Vertex3D, TextureId));
+			glVertexArrayAttribBinding(m_RendererId, 6, 0);
 			break;
 		}
 	}

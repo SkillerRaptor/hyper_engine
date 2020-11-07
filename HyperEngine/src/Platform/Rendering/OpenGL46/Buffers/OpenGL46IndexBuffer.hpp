@@ -14,8 +14,8 @@ namespace Hyperion
 		OpenGL46IndexBuffer(const uint32_t* indices, size_t indexCount);
 		~OpenGL46IndexBuffer();
 
-		void Bind();
-		void Unbind();
+		void Bind(unsigned int vertexArray);
+
 		void SetData(const uint32_t* indices, size_t indexCount);
 
 		unsigned int GetRendererId() const;

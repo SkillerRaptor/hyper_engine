@@ -15,8 +15,7 @@ namespace Hyperion
 		OpenGL46VertexBuffer(VertexLayout vertexLayout, const Vertex* vertices, size_t vertexCount);
 		~OpenGL46VertexBuffer();
 
-		void Bind();
-		void Unbind();
+		void Bind(unsigned int vertexArray);
 
 		void SetData(const Vertex* vertices, size_t vertexCount);
 

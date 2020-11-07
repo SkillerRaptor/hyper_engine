@@ -79,23 +79,22 @@ namespace Hyperion
 	void OpenGL46TextureManager::GenerateTexture(TextureData* textureData, bool alpha)
 	{
 		OpenGLTextureData* data = static_cast<OpenGLTextureData*>(textureData);
-		glGenTextures(1, &data->TextureId);
-		glBindTexture(GL_TEXTURE_2D, data->TextureId);
+		glCreateTextures(GL_TEXTURE_2D, 1, &data->TextureId);
 		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTextureParameteri(data->TextureId, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(data->TextureId, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTextureParameteri(data->TextureId, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTextureParameteri(data->TextureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, alpha ? GL_RGBA : GL_RGB, data->Width, data->Height, 0, alpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data->Data);
+		glTextureStorage2D(data->TextureId, 1, alpha ? GL_RGBA8 : GL_RGB8, data->Width, data->Height);
+		glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, alpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data->Data);
 	}
 
 	bool OpenGL46TextureManager::BindTexture(uint32_t handle, uint32_t textureSlot)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return false;
-		glActiveTexture(GL_TEXTURE0 + textureSlot);
-		glBindTexture(GL_TEXTURE_2D, m_Textures[handle].TextureId);
+		glBindTextureUnit(textureSlot, m_Textures[handle].TextureId);
 		return true;
 	}
 

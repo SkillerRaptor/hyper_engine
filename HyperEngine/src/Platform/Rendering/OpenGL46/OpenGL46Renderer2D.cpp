@@ -13,7 +13,7 @@ namespace Hyperion
 		m_QuadVertexArray->Bind();
 
 		m_QuadVertexBuffer = CreateRef<OpenGL46VertexBuffer>(VertexLayout::Vertex2D, MaxVertices);
-		m_QuadVertexBuffer->Bind();
+		m_QuadVertexBuffer->Bind(m_QuadVertexArray->GetRendererId());
 
 		m_QuadVertexBufferBase = new Vertex2D[MaxVertices];
 
@@ -34,7 +34,7 @@ namespace Hyperion
 		}
 
 		m_QuadIndexBuffer = CreateRef<OpenGL46IndexBuffer>(quadIndices, MaxIndices);
-		m_QuadIndexBuffer->Bind();
+		m_QuadIndexBuffer->Bind(m_QuadVertexArray->GetRendererId());
 		delete[] quadIndices;
 
 		m_QuadVertexPositions[0] = { 0.5f,  0.5f, 0.0f, 1.0f };
@@ -65,7 +65,7 @@ namespace Hyperion
 	void OpenGL46Renderer2D::EndScene()
 	{
 		uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
-		m_QuadVertexBuffer->Bind();
+		m_QuadVertexBuffer->Bind(m_QuadVertexArray->GetRendererId());
 		m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
 		Flush();
