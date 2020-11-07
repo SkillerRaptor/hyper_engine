@@ -22,10 +22,6 @@ void SandboxLayer::OnEvent(Hyperion::Event& event)
 {
 }
 
-void SandboxLayer::OnTick(int currentTick)
-{
-}
-
 void SandboxLayer::OnUpdate(Hyperion::Timestep timeStep)
 {
 }

@@ -37,11 +37,6 @@ namespace Hyperion
 		m_Registry->DeleteEntity(entity.GetEntityHandle());
 	}
 
-	void Scene::OnTick(int currentTick)
-	{
-		m_Systems->OnTick(currentTick);
-	}
-
 	void Scene::OnRender()
 	{
 		m_Systems->OnRender();

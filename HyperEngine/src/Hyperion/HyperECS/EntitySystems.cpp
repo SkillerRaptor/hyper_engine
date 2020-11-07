@@ -7,12 +7,6 @@ namespace Hyperion
 	{
 	}
 
-	void EntitySystems::OnTick(int currentTick)
-	{
-		for (const auto& entitySystem : m_Systems)
-			entitySystem.second->Tick(m_Registry, currentTick);
-	}
-
 	void EntitySystems::OnRender()
 	{
 		for (const auto& entitySystem : m_Systems)

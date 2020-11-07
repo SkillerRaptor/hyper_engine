@@ -77,10 +77,6 @@ namespace Hyperion
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
-	void VulkanContext::OnTick(int currentTick)
-	{
-	}
-
 	void VulkanContext::OnUpdate(Timestep timeStep)
 	{
 	}

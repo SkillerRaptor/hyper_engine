@@ -21,8 +21,7 @@ namespace Hyperion
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
 
-		virtual void OnEvent(Event& event) { }
-		virtual void OnTick(int currentTick) {}
+		virtual void OnEvent(Event& event) {}
 		virtual void OnUpdate(Timestep timeStep) {}
 		virtual void OnRender() {}
 

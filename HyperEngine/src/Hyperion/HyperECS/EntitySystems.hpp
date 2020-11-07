@@ -24,7 +24,6 @@ namespace Hyperion
 	public:
 		EntitySystems(Registry& registry, Ref<Renderer2D> renderer2D);
 
-		void OnTick(int currentTick);
 		void OnRender();
 		void OnUpdate(Timestep timeStep);
 

@@ -68,13 +68,7 @@ namespace Hyperion
 
 	void Application::Run()
 	{
-		const int ticksPerSecond = 60;
-		const int ticksPerFrame = 5;
-		const int skipTicks = 1000 / ticksPerSecond;
-		int loops = 0;
-		int currentTick = 0;
-
-		std::chrono::time_point currentTime = std::chrono::system_clock::now();
+		double lastFrame = 0.0;
 
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 
@@ -88,6 +82,10 @@ namespace Hyperion
 
 		while (m_Running)
 		{
+			double currentFrame = glfwGetTime();
+			const Timestep timeStep = currentFrame - lastFrame;
+			lastFrame = currentFrame;
+
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			OpenGLTextureData* textureData = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(bufferTexture));
@@ -100,30 +98,6 @@ namespace Hyperion
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, bufferTextureId, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			frameBuffer.Unbind();
-
-			loops = 0;
-			while (std::chrono::system_clock::now() > currentTime && loops < ticksPerFrame)
-			{
-				for (Layer* layer : m_LayerStack->GetLayers())
-					layer->OnTick(currentTick);
-
-				for (OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
-					overlayLayer->OnTick(currentTick);
-
-				m_Scene->OnTick(currentTick);
-
-				currentTick++;
-				if (currentTick >= ticksPerSecond)
-					currentTick = 0;
-
-				currentTime += std::chrono::milliseconds(skipTicks);
-				loops++;
-			}
-
-			const long long currentTimeNow = std::chrono::time_point_cast<std::chrono::milliseconds>(currentTime).time_since_epoch().count();
-			const long long timeSinceEpoch = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();
-
-			const Timestep timeStep = static_cast<double>(timeSinceEpoch + skipTicks - currentTimeNow) / static_cast<double>(skipTicks);
 
 			while (m_EventBus.size() > 0)
 			{

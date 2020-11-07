@@ -30,7 +30,6 @@ namespace Hyperion
 		Entity CreateEntity(const std::string& name = std::string());
 		void DeleteEntity(Entity& entity);
 
-		void OnTick(int currentTick);
 		void OnRender();
 		void OnUpdate(Timestep timeStep);
 

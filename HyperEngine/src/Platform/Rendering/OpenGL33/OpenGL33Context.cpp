@@ -47,10 +47,6 @@ namespace Hyperion
 	{
 	}
 
-	void OpenGL33Context::OnTick(int currentTick)
-	{
-	}
-
 	void OpenGL33Context::OnUpdate(Timestep timeStep)
 	{
 		glfwSwapBuffers(m_Window);

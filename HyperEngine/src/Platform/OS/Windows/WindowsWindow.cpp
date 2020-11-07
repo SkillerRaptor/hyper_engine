@@ -129,11 +129,6 @@ namespace Hyperion
 		glfwTerminate();
 	}
 
-	void WindowsWindow::OnTick(int currentTick)
-	{
-		m_RenderContext->OnTick(currentTick);
-	}
-
 	void WindowsWindow::OnUpdate(Timestep timeStep)
 	{
 		m_RenderContext->OnUpdate(timeStep);

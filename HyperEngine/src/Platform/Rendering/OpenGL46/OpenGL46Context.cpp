@@ -48,10 +48,6 @@ namespace Hyperion
 	{
 	}
 
-	void OpenGL46Context::OnTick(int currentTick)
-	{
-	}
-
 	void OpenGL46Context::OnUpdate(Timestep timeStep)
 	{
 		glfwSwapBuffers(m_Window);

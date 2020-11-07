@@ -29,10 +29,6 @@ namespace Hyperion
 	{
 	}
 
-	void DirectX11Context::OnTick(int currentTick)
-	{
-	}
-
 	void DirectX11Context::OnUpdate(Timestep timeStep)
 	{
 	}

@@ -13,7 +13,6 @@ public:
 	virtual void OnDetach() override;
 
 	virtual void OnEvent(Hyperion::Event& event) override;
-	virtual void OnTick(int currentTick) override;
 	virtual void OnUpdate(Hyperion::Timestep timeStep) override;
 	virtual void OnRender() override;
 };
