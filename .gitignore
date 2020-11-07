@@ -54,3 +54,6 @@ ipch/
 *.ini
 *.cfg
 *.json
+
+# Dependencies Libs
+!/HyperEngine/vendor/**/lib/*.lib

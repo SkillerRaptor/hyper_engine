@@ -33,13 +33,20 @@ project "HyperEngine"
 		"%{IncludeDir.vulkan}"
 	}
 
+	libdirs
+	{
+		"%{LibDir.vulkan}"
+	}
+
 	links
 	{
 		"Glad",
 		"GLFW",
 		"ImGui",
 		"ImGuizmo",
-		"opengl32.lib"
+		"vulkan",
+		"opengl32.lib",
+		"vulkan-1.lib"
 	}
 
 	filter "system:windows"

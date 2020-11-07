@@ -7,6 +7,7 @@ project "vulkan"
 
 	files
 	{
+		"src/vulkan.c",
 		"include/vulkan/vk_icd.h",
 		"include/vulkan/vk_layer.h",
 		"include/vulkan/vk_platform.h",
