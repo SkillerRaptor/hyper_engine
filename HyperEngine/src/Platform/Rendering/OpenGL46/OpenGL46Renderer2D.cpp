@@ -65,7 +65,6 @@ namespace Hyperion
 	void OpenGL46Renderer2D::EndScene()
 	{
 		uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
-		m_QuadVertexBuffer->Bind(m_QuadVertexArray->GetRendererId());
 		m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
 
 		Flush();

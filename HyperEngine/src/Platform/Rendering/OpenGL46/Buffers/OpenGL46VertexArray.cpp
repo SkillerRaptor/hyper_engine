@@ -34,7 +34,7 @@ namespace Hyperion
 			glVertexArrayAttribBinding(m_RendererId, 2, 0);
 
 			glEnableVertexArrayAttrib(m_RendererId, 3);
-			glVertexArrayAttribFormat(m_RendererId, 3, 1, GL_UNSIGNED_INT, GL_FALSE, offsetof(Vertex2D, TextureId));
+			glVertexArrayAttribFormat(m_RendererId, 3, 1, GL_FLOAT, GL_FALSE, offsetof(Vertex2D, TextureId));
 			glVertexArrayAttribBinding(m_RendererId, 3, 0);
 			break;
 
