@@ -140,6 +140,7 @@ namespace Hyperion
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, 150.0f);
 			ImGui::Separator();
 			if (ImGui::TreeNodeEx((void*) typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
 			{
@@ -147,7 +148,7 @@ namespace Hyperion
 				ImGui::NextColumn();
 				ImGui::NextColumn();
 
-				float width = ImGui::GetContentRegionAvailWidth() / 3;
+				float width = ImGui::GetContentRegionAvailWidth() / 1.4f;
 
 				ImGui::Text("Position");
 				ImGui::NextColumn();
@@ -206,6 +207,7 @@ namespace Hyperion
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, 150.0f);
 			ImGui::Separator();
 			if (ImGui::TreeNodeEx((void*) typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
 			{
@@ -229,6 +231,7 @@ namespace Hyperion
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, 150.0f);
 			ImGui::Separator();
 			if (ImGui::TreeNodeEx((void*) typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
 			{
@@ -284,6 +287,7 @@ namespace Hyperion
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, 150.0f);
 			ImGui::Separator();
 			if (ImGui::TreeNodeEx((void*) typeid(CameraControllerComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera Controller"))
 			{
@@ -317,6 +321,7 @@ namespace Hyperion
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 			ImGui::Columns(2);
+			ImGui::SetColumnWidth(0, 150.0f);
 			ImGui::Separator();
 			if (ImGui::TreeNodeEx((void*) typeid(CharacterControllerComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Character Controller"))
 			{
