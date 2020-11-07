@@ -3,6 +3,10 @@
 #include "Renderer2D.hpp"
 #include "ShaderManager.hpp"
 #include "TextureManager.hpp"
+#include "HyperCore/Core.hpp"
+#include "HyperUtilities/Timestep.hpp"
+
+struct GLFWwindow;
 
 namespace Hyperion
 {
@@ -15,20 +19,46 @@ namespace Hyperion
 		uint32_t Height;
 	};
 
+	enum class GraphicsAPI
+	{
+		DIRECTX_11,
+		DIRECTX_12,
+		OPENGL_33,
+		OPENGL_46,
+		VULKAN_12
+	};
+
 	class RenderContext
 	{
 	protected:
+		GLFWwindow* m_Window;
+
 		FrameSize m_FrameSize;
+		Ref<Renderer2D> m_Renderer2D;
+		Ref<ShaderManager> m_ShaderManager;
+		Ref<TextureManager> m_TextureManager;
 
 	public:
 		RenderContext()
-			: m_FrameSize({ 0, 0, 0, 0 }) {}
+			: m_Window(nullptr), m_FrameSize({ 0, 0, 0, 0 }) {}
 		virtual ~RenderContext() = default;
 
-		virtual FrameSize& GetFrameSize() { return m_FrameSize; }
+		virtual void PreInit() = 0;
+		virtual void Init() = 0;
+		virtual void Shutdown() = 0;
 
-		virtual Renderer2D* GetRenderer2D() = 0;
-		virtual ShaderManager* GetShaderManager() = 0;
-		virtual TextureManager* GetTextureManager() = 0;
+		virtual void OnTick(int currentTick) = 0;
+		virtual void OnUpdate(Timestep timeStep) = 0;
+		virtual void OnRender() = 0;
+
+		void SetWindow(GLFWwindow* window) { m_Window = window; };
+
+		FrameSize& GetFrameSize() { return m_FrameSize; }
+
+		Ref<Renderer2D> GetRenderer2D() { return m_Renderer2D; };
+		Ref<ShaderManager> GetShaderManager() { return m_ShaderManager; };
+		Ref<TextureManager> GetTextureManager() { return m_TextureManager; };
+
+		static Ref<RenderContext> Construct(GraphicsAPI graphicsAPI);
 	};
 }

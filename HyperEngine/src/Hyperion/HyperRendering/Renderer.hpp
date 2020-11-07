@@ -2,13 +2,14 @@
 
 #include "ShaderManager.hpp"
 #include "TextureManager.hpp"
+#include "HyperCore/Core.hpp"
 
 namespace Hyperion
 {
 	class Renderer
 	{
 	protected:
-		ShaderManager* m_ShaderManager;
-		TextureManager* m_TextureManager;
+		Ref<ShaderManager> m_ShaderManager;
+		Ref<TextureManager> m_TextureManager;
 	};
 }

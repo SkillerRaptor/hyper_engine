@@ -7,12 +7,12 @@ namespace Hyperion
 	{
 	}
 
-	void Layer::SetRenderContext(RenderContext* renderContext)
+	void Layer::SetRenderContext(Ref<RenderContext> renderContext)
 	{
 		m_RenderContext = renderContext;
 	}
 
-	const RenderContext* Layer::GetRenderContext() const
+	const Ref<RenderContext> Layer::GetRenderContext() const
 	{
 		return m_RenderContext;
 	}

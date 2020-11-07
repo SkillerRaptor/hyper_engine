@@ -7,7 +7,7 @@
 
 namespace Hyperion
 {
-	Scene::Scene(const std::string& name, Renderer2D* renderer2D)
+	Scene::Scene(const std::string& name, Ref<Renderer2D> renderer2D)
 		: m_Name(name), m_Renderer2D(renderer2D)
 	{
 		Init();

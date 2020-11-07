@@ -18,11 +18,11 @@ namespace Hyperion
 	{
 	private:
 		Registry& m_Registry;
-		Renderer2D* m_Renderer2D;
+		Ref<Renderer2D> m_Renderer2D;
 		std::unordered_map<uint32_t, EntitySystem*> m_Systems;
 
 	public:
-		EntitySystems(Registry& registry, Renderer2D* renderer2D);
+		EntitySystems(Registry& registry, Ref<Renderer2D> renderer2D);
 
 		void OnTick(int currentTick);
 		void OnRender();

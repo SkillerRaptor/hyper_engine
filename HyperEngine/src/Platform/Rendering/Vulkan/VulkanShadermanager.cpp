@@ -1,13 +1,13 @@
-#include "VulkanShadermanager.hpp"
+#include "VulkanShaderManager.hpp"
 
 namespace Hyperion
 {
-	VulkanShadermanager::VulkanShadermanager()
+	VulkanShaderManager::VulkanShaderManager()
 	{
 
 	}
 
-	VulkanShadermanager::~VulkanShadermanager()
+	VulkanShaderManager::~VulkanShaderManager()
 	{
 
 	}

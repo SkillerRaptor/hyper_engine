@@ -1,5 +1,7 @@
 #include "Input.hpp"
 
+#include <GLFW/glfw3.h>
+
 #include "HyperCore/Application.hpp"
 
 namespace Hyperion

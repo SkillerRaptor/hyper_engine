@@ -1,13 +1,20 @@
 #pragma once
 
+#include "HyperRendering/RenderContext.hpp"
+
 namespace Hyperion
 {
-	class DirectX11Context
+	class DirectX11Context : public RenderContext
 	{
-	private:
-
 	public:
 		DirectX11Context();
-		~DirectX11Context();
+
+		virtual void PreInit() override;
+		virtual void Init() override;
+		virtual void Shutdown() override;
+
+		virtual void OnTick(int currentTick) override;
+		virtual void OnUpdate(Timestep timeStep) override;
+		virtual void OnRender() override;
 	};
 }

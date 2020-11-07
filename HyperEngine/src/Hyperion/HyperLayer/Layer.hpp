@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "HyperCore/Core.hpp"
 #include "HyperEvents/Event.hpp"
 #include "HyperRendering/RenderContext.hpp"
 #include "HyperUtilities/Timestep.hpp"
@@ -12,7 +13,7 @@ namespace Hyperion
 	{
 	protected:
 		std::string m_LayerName;
-		RenderContext* m_RenderContext;
+		Ref<RenderContext> m_RenderContext;
 
 	public:
 		Layer(const std::string& name = "Default Layer");
@@ -26,8 +27,8 @@ namespace Hyperion
 		virtual void OnUpdate(Timestep timeStep) {}
 		virtual void OnRender() {}
 
-		void SetRenderContext(RenderContext* renderContext);
-		const RenderContext* GetRenderContext() const;
+		void SetRenderContext(Ref<RenderContext> renderContext);
+		const Ref<RenderContext> GetRenderContext() const;
 
 		void SetName(const std::string& layerName);
 		const std::string& GetName() const;

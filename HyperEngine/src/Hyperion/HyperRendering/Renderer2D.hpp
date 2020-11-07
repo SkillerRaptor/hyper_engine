@@ -29,7 +29,7 @@ namespace Hyperion
 
 		virtual void DrawQuad(const Vec3& position, const Vec3& rotation, const Vec3& scale, const Vec4& color) = 0;
 
-		virtual void SetShaderManager(ShaderManager* shaderManager) = 0;
-		virtual void SetTextureManager(TextureManager* textureManager) = 0;
+		virtual void SetShaderManager(Ref<ShaderManager> shaderManager) = 0;
+		virtual void SetTextureManager(Ref<TextureManager> textureManager) = 0;
 	};
 }

@@ -17,12 +17,12 @@ namespace Hyperion
 	{
 	private:
 		std::string m_Name;
-		Renderer2D* m_Renderer2D;
+		Ref<Renderer2D> m_Renderer2D;
 		Ref<Registry> m_Registry;
 		Ref<EntitySystems> m_Systems;
 
 	public:
-		Scene(const std::string& name, Renderer2D* renderer2D);
+		Scene(const std::string& name, Ref<Renderer2D> renderer2D);
 		~Scene();
 		
 		void Init();

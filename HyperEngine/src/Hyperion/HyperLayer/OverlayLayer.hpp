@@ -12,7 +12,7 @@ namespace Hyperion
 	{
 	protected:
 		std::string m_LayerName;
-		RenderContext* m_RenderContext;
+		Ref<RenderContext> m_RenderContext;
 
 	public:
 		OverlayLayer(const std::string& name = "Default OverlayLayer");
@@ -26,8 +26,8 @@ namespace Hyperion
 		virtual void OnUpdate(Timestep timeStep) {}
 		virtual void OnRender() {}
 
-		void SetRenderContext(RenderContext* renderContext);
-		const RenderContext* GetRenderContext() const;
+		void SetRenderContext(Ref<RenderContext> renderContext);
+		const Ref<RenderContext> GetRenderContext() const;
 
 		void SetName(const std::string& layerName);
 		const std::string& GetName() const;

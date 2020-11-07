@@ -2,12 +2,12 @@
 
 namespace Hyperion
 {
-	class VulkanShadermanager
+	class VulkanShaderManager
 	{
 	private:
 
 	public:
-		VulkanShadermanager();
-		~VulkanShadermanager();
+		VulkanShaderManager();
+		~VulkanShaderManager();
 	};
 }

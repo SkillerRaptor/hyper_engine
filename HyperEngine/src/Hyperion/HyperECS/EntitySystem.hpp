@@ -10,7 +10,7 @@ namespace Hyperion
 	class EntitySystem
 	{
 	protected:
-		Renderer2D* m_Renderer2D;
+		Ref<Renderer2D> m_Renderer2D;
 
 	public:
 		virtual void Tick(Registry& registry, int currentTick) {};
@@ -19,6 +19,6 @@ namespace Hyperion
 
 		virtual void OnEvent(Registry& registry, Event& event) {};
 
-		virtual void SetRenderer2D(Renderer2D* renderer) { m_Renderer2D = renderer; }
+		virtual void SetRenderer2D(Ref<Renderer2D> renderer) { m_Renderer2D = renderer; }
 	};
 }
