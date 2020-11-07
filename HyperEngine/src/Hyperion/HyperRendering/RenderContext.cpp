@@ -1,7 +1,5 @@
 #include "RenderContext.hpp"
 
-#include <GLFW/glfw3.h>
-
 #include "HyperCore/Core.hpp"
 
 #include "Platform/Rendering/DirectX11/DirectX11Context.hpp"
