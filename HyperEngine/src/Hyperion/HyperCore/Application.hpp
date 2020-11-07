@@ -27,6 +27,8 @@ namespace Hyperion
 	public:
 		Application();
 
+		void Run();
+
 		void PushLayer(Layer* layer);
 		void PopLayer(Layer* layer);
 		void PopLayer(const std::string& layerName);
@@ -38,8 +40,6 @@ namespace Hyperion
 		void PopOverlayLayer(const std::string& layerName);
 		void PopOverlayLayer();
 		OverlayLayer* GetOverlayLayer(const std::string& layerName);
-
-		void Run();
 
 		Ref<Window> GetNativeWindow() const;
 		static Application* Get();
