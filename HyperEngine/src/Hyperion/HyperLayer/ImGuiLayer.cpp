@@ -10,8 +10,8 @@
 #include "HyperUtilities/Input.hpp"
 
 #include "Platform/OS/Windows/WindowsFileDialogs.hpp"
-#include "Platform/Rendering/OpenGL33/ImGuiGLFWRenderer.hpp"
-#include "Platform/Rendering/OpenGL33/ImGuiOpenGLRenderer.hpp"
+#include "Platform/Rendering/ImGui/ImGuiGLFWRenderer.hpp"
+#include "Platform/Rendering/ImGui/ImGuiOpenGLRenderer.hpp"
 
 namespace Hyperion
 {
