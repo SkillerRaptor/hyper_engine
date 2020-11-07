@@ -21,7 +21,7 @@ namespace Hyperion
 
 	void WindowsWindow::Init()
 	{
-		m_RenderContext = RenderContext::Construct(m_GraphicsAPI);
+		m_RenderContext = RenderContext::Construct(m_GraphicsAPI, m_WindowDataInfo.Title);
 
 		glfwInit();
 		m_RenderContext->PreInit();

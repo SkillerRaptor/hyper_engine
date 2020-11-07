@@ -58,6 +58,6 @@ namespace Hyperion
 		Ref<ShaderManager> GetShaderManager() { return m_ShaderManager; };
 		Ref<TextureManager> GetTextureManager() { return m_TextureManager; };
 
-		static Ref<RenderContext> Construct(GraphicsAPI graphicsAPI);
+		static Ref<RenderContext> Construct(GraphicsAPI graphicsAPI, std::string& title);
 	};
 }

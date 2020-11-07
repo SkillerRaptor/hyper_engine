@@ -34,7 +34,7 @@ namespace Hyperion
 		Random::Init();
 
 		WindowPropsInfo windowPropsInfo{};
-		windowPropsInfo.Title = "HyperEngine";
+		windowPropsInfo.Title = "HyperEngine (x64 - $api $version)";
 		windowPropsInfo.Width = 1920;
 		windowPropsInfo.Height = 1080;
 		windowPropsInfo.EventBus = &m_EventBus;
