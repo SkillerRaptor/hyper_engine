@@ -13,6 +13,7 @@ namespace Hyperion
 		virtual void Init() override;
 		virtual void Shutdown() override;
 
+		virtual void OnPreUpdate() override;
 		virtual void OnUpdate(Timestep timeStep) override;
 		virtual void OnRender() override;
 	};

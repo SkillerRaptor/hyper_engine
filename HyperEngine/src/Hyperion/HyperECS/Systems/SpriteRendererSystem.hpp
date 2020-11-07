@@ -4,8 +4,6 @@
 #include "HyperECS/Components.hpp"
 #include "HyperECS/Registry.hpp"
 
-#include "Platform/Rendering/OpenGL33/OpenGL33Renderer2D.hpp"
-
 namespace Hyperion
 {
 	class SpriteRendererSystem : public EntitySystem

@@ -41,10 +41,17 @@ namespace Hyperion
 		m_TextureManager = CreateRef<OpenGL33TextureManager>();
 		m_Renderer2D->SetShaderManager(m_ShaderManager);
 		m_Renderer2D->SetTextureManager(m_TextureManager);
+
+		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 	}
 
 	void OpenGL33Context::Shutdown()
 	{
+	}
+
+	void OpenGL33Context::OnPreUpdate()
+	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 
 	void OpenGL33Context::OnUpdate(Timestep timeStep)

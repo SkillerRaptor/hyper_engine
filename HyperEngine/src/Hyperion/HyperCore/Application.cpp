@@ -8,11 +8,6 @@
 #include "HyperUtilities/Random.hpp"
 #include "HyperUtilities/Timestep.hpp"
 
-#include "Platform/Rendering/OpenGL33/OpenGL33Renderer2D.hpp"
-#include "Platform/Rendering/OpenGL33/OpenGL33ShaderManager.hpp"
-#include "Platform/Rendering/OpenGL33/OpenGL33TextureManager.hpp"
-#include "Platform/Rendering/OpenGL33/Buffers/OpenGL33FrameBuffer.hpp"
-
 namespace Hyperion 
 {
 	Application* Application::m_Instance;
@@ -70,15 +65,13 @@ namespace Hyperion
 	{
 		double lastFrame = 0.0;
 
-		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
+		//Ref<TextureManager> textureManager = m_Window->GetContext()->GetTextureManager();
+		//uint32_t bufferTexture = textureManager->CreateTexture(m_Window->GetWindowDataInfo().Width, m_Window->GetWindowDataInfo().Height, TextureType::FRAMEBUFFER);
+		//uint32_t bufferTextureId = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(bufferTexture))->TextureId;
 
-		Ref<TextureManager> textureManager = m_Window->GetContext()->GetTextureManager();
-		uint32_t bufferTexture = textureManager->CreateTexture(m_Window->GetWindowDataInfo().Width, m_Window->GetWindowDataInfo().Height, TextureType::FRAMEBUFFER);
-		uint32_t bufferTextureId = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(bufferTexture))->TextureId;
+		static_cast<ImGuiLayer*>(m_LayerStack->GetOverlayLayer("ImGui Layer"))->SetFrameTextureId(-1);
 
-		static_cast<ImGuiLayer*>(m_LayerStack->GetOverlayLayer("ImGui Layer"))->SetFrameTextureId(bufferTextureId);
-
-		OpenGL33FrameBuffer frameBuffer;
+		//OpenGL33FrameBuffer frameBuffer;
 
 		while (m_Running)
 		{
@@ -86,18 +79,17 @@ namespace Hyperion
 			const Timestep timeStep = currentFrame - lastFrame;
 			lastFrame = currentFrame;
 
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+			m_Window->OnPreUpdate();
 
-			OpenGLTextureData* textureData = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(bufferTexture));
-			textureData->Width = m_Window->GetWindowDataInfo().Width;
-			textureData->Height = m_Window->GetWindowDataInfo().Height;
-			textureManager->DeleteTextureData(bufferTexture);
-			textureManager->GenerateTexture(textureData, true);
+			//OpenGLTextureData* textureData = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(bufferTexture));
+			//textureData->Width = m_Window->GetWindowDataInfo().Width;
+			//textureData->Height = m_Window->GetWindowDataInfo().Height;
+			//textureManager->DeleteTextureData(bufferTexture);
+			//textureManager->GenerateTexture(textureData, true);
 
-			frameBuffer.Bind();
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, bufferTextureId, 0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-			frameBuffer.Unbind();
+			//frameBuffer.Bind();
+			//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, bufferTextureId, 0);
+			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			while (m_EventBus.size() > 0)
 			{
@@ -106,8 +98,6 @@ namespace Hyperion
 				OnEvent(*e);
 				m_EventBus.pop();
 			}
-
-			frameBuffer.Bind();
 
 			for (Layer* layer : m_LayerStack->GetLayers())
 			{
@@ -118,7 +108,7 @@ namespace Hyperion
 			m_Scene->OnUpdate(timeStep);
 			m_Scene->OnRender();
 
-			frameBuffer.Unbind();
+			//frameBuffer.Unbind();
 
 			for (OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
 			{

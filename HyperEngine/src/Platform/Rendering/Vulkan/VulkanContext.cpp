@@ -77,6 +77,10 @@ namespace Hyperion
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
+	void VulkanContext::OnPreUpdate()
+	{
+	}
+
 	void VulkanContext::OnUpdate(Timestep timeStep)
 	{
 	}

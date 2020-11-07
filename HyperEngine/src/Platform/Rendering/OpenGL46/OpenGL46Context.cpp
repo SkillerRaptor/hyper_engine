@@ -48,6 +48,11 @@ namespace Hyperion
 	{
 	}
 
+	void OpenGL46Context::OnPreUpdate()
+	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	}
+
 	void OpenGL46Context::OnUpdate(Timestep timeStep)
 	{
 		glfwSwapBuffers(m_Window);

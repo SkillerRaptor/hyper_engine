@@ -29,6 +29,10 @@ namespace Hyperion
 	{
 	}
 
+	void DirectX11Context::OnPreUpdate()
+	{
+	}
+
 	void DirectX11Context::OnUpdate(Timestep timeStep)
 	{
 	}

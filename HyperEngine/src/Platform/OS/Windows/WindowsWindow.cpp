@@ -129,6 +129,11 @@ namespace Hyperion
 		glfwTerminate();
 	}
 
+	void WindowsWindow::OnPreUpdate()
+	{
+		m_RenderContext->OnPreUpdate();
+	}
+
 	void WindowsWindow::OnUpdate(Timestep timeStep)
 	{
 		m_RenderContext->OnUpdate(timeStep);
