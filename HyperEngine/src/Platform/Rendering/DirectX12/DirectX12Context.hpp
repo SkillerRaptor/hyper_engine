@@ -7,7 +7,7 @@ namespace Hyperion
 	class DirectX12Context : public RenderContext
 	{
 	public:
-		DirectX12Context();
+		DirectX12Context(GraphicsAPI graphicsAPI);
 
 		virtual void PreInit() override;
 		virtual void Init() override;

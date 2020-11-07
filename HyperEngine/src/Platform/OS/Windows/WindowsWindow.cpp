@@ -34,7 +34,7 @@ namespace Hyperion
 			std::exit(-1);
 		}
 
-		m_RenderContext->SetWindow(m_Window);
+		m_RenderContext->m_Window = m_Window;
 		m_RenderContext->Init();
 
 		glfwSetWindowUserPointer(m_Window, &m_WindowDataInfo);
@@ -43,7 +43,7 @@ namespace Hyperion
 
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 			{
-				WindowDataInfo& data = *(WindowDataInfo*)glfwGetWindowUserPointer(window);
+				WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(window));
 				data.Width = width;
 				data.Height = height;
 
@@ -52,13 +52,13 @@ namespace Hyperion
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 			{
-				WindowDataInfo& data = *(WindowDataInfo*)glfwGetWindowUserPointer(window);
+				WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(window));
 				if (data.EventBus) data.EventBus->push(std::make_shared<WindowCloseEvent>());
 			});
 
 		glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, int x, int y)
 			{
-				WindowDataInfo& data = *(WindowDataInfo*)glfwGetWindowUserPointer(window);
+				WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(window));
 				data.XPos = x;
 				data.YPos = y;
 
@@ -71,19 +71,19 @@ namespace Hyperion
 				{
 				case GLFW_PRESS:
 				{
-					WindowDataInfo& data = *(WindowDataInfo*)glfwGetWindowUserPointer(window);
+					WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(window));
 					if (data.EventBus) data.EventBus->push(std::make_shared<KeyPressedEvent>(key, 0));
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					WindowDataInfo& data = *(WindowDataInfo*)glfwGetWindowUserPointer(window);
+					WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(window));
 					if (data.EventBus) data.EventBus->push(std::make_shared<KeyReleasedEvent>(key));
 					break;
 				}
 				case GLFW_REPEAT:
 				{
-					WindowDataInfo& data = *(WindowDataInfo*)glfwGetWindowUserPointer(window);
+					WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(window));
 					if (data.EventBus) data.EventBus->push(std::make_shared<KeyPressedEvent>(key, 1));
 					break;
 				}
@@ -96,13 +96,13 @@ namespace Hyperion
 				{
 				case GLFW_PRESS:
 				{
-					WindowDataInfo& data = *(WindowDataInfo*)glfwGetWindowUserPointer(window);
+					WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(window));
 					if (data.EventBus) data.EventBus->push(std::make_shared<MouseButtonPressedEvent>(button));
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					WindowDataInfo& data = *(WindowDataInfo*)glfwGetWindowUserPointer(window);
+					WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(window));
 					if (data.EventBus) data.EventBus->push(std::make_shared<MouseButtonReleasedEvent>(button));
 					break;
 				}
@@ -111,13 +111,13 @@ namespace Hyperion
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 			{
-				WindowDataInfo& data = *(WindowDataInfo*)glfwGetWindowUserPointer(window);
+				WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(window));
 				if (data.EventBus) data.EventBus->push(std::make_shared<MouseScrolledEvent>((float)xOffset, (float)yOffset));
 			});
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
 			{
-				WindowDataInfo& data = *(WindowDataInfo*)glfwGetWindowUserPointer(window);
+				WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(window));
 				if (data.EventBus) data.EventBus->push(std::make_shared<MouseMovedEvent>((float)xPos, (float)yPos));
 			});
 	}

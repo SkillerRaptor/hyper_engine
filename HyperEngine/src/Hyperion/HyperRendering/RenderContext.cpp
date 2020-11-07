@@ -19,23 +19,23 @@ namespace Hyperion
 		case GraphicsAPI::DIRECTX_11:
 			title = std::regex_replace(title, std::regex("\\$api"), "DirectX");
 			title = std::regex_replace(title, std::regex("\\$version"), "11");
-			return CreateRef<DirectX11Context>();
+			return CreateRef<DirectX11Context>(graphicsAPI);
 		case GraphicsAPI::DIRECTX_12:
 			title = std::regex_replace(title, std::regex("\\$api"), "DirectX");
 			title = std::regex_replace(title, std::regex("\\$version"), "12");
-			return CreateRef<DirectX12Context>();
+			return CreateRef<DirectX12Context>(graphicsAPI);
 		case GraphicsAPI::OPENGL_33:
 			title = std::regex_replace(title, std::regex("\\$api"), "OpenGL");
 			title = std::regex_replace(title, std::regex("\\$version"), "3.3");
-			return CreateRef<OpenGL33Context>();
+			return CreateRef<OpenGL33Context>(graphicsAPI);
 		case GraphicsAPI::OPENGL_46:
 			title = std::regex_replace(title, std::regex("\\$api"), "OpenGL");
 			title = std::regex_replace(title, std::regex("\\$version"), "4.6");
-			return CreateRef<OpenGL46Context>();
+			return CreateRef<OpenGL46Context>(graphicsAPI);
 		case GraphicsAPI::VULKAN_12:
 			title = std::regex_replace(title, std::regex("\\$api"), "Vulkan");
 			title = std::regex_replace(title, std::regex("\\$version"), "1.2");
-			return CreateRef<VulkanContext>();
+			return CreateRef<VulkanContext>(graphicsAPI);
 		}
 
 		HP_CORE_ASSERT(false, "Unknown Graphics API!");

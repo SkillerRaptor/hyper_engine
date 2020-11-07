@@ -5,7 +5,8 @@
 
 #include "Layer.hpp"
 #include "OverlayLayer.hpp"
-#include "ImGuiLayer.hpp"
+
+#include "Platform/Rendering/ImGui/ImGuiLayer.hpp"
 
 namespace Hyperion 
 {

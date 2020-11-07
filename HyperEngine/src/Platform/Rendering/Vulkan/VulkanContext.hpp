@@ -19,7 +19,7 @@ namespace Hyperion
 		VulkanValidationLayerInfo m_ValidationLayerInfo;
 
 	public:
-		VulkanContext();
+		VulkanContext(GraphicsAPI graphicsAPI);
 
 		virtual void PreInit() override;
 		virtual void Init() override;

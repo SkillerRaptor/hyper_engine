@@ -3,6 +3,7 @@
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
 
+#include "ImGuiGLFWRenderer.hpp"
 #include "HyperCore/Application.hpp"
 #include "HyperECS/Components.hpp"
 #include "HyperECS/Scene/SceneSerializer.hpp"
@@ -10,22 +11,17 @@
 #include "HyperUtilities/Input.hpp"
 
 #include "Platform/OS/Windows/WindowsFileDialogs.hpp"
-#include "Platform/Rendering/ImGui/ImGuiGLFWRenderer.hpp"
-#include "Platform/Rendering/ImGui/ImGuiOpenGLRenderer.hpp"
 
 namespace Hyperion
 {
 	ImGuiLayer::ImGuiLayer(Ref<Scene> scene)
-		: OverlayLayer("ImGui Layer"), m_Scene(scene)
-	{
-	}
-
-	ImGuiLayer::~ImGuiLayer()
+		: OverlayLayer("ImGui Editor Layer"), m_Scene(scene)
 	{
 	}
 
 	void ImGuiLayer::OnAttach()
 	{
+		m_ImGuiRenderer = ImGuiRenderer::Construct(m_RenderContext);
 		m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>(m_Scene);
 
 		Entity squareOne = m_Scene->CreateEntity("Square One");
@@ -45,21 +41,21 @@ namespace Hyperion
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow()), true);
-		ImGui_ImplOpenGL3_Init("#version 330");
+		m_ImGuiRenderer->OnAttach();
 
 		SetupStyle();
 	}
 
 	void ImGuiLayer::OnDetach()
 	{
-		ImGui_ImplOpenGL3_Shutdown();
+		m_ImGuiRenderer->OnDetach();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 	}
 
 	void ImGuiLayer::OnUpdate(Timestep timeStep)
 	{
-		ImGui_ImplOpenGL3_NewFrame();
+		m_ImGuiRenderer->OnUpdate(timeStep);
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGuizmo::SetOrthographic(true);
@@ -80,22 +76,20 @@ namespace Hyperion
 		ImGui::Begin("Editor");
 		ImGui::BeginChild("EditorRenderer");
 
-		ImVec2 startPos = ImGui::GetWindowPos();
-		ImVec2 pos = ImGui::GetWindowSize();
+		ImGuiFrameSizeInfo& imGuiEditorSizeInfo = m_RenderContext->GetImGuiEditorSizeInfo();
+		imGuiEditorSizeInfo.XPos = static_cast<uint32_t>(ImGui::GetWindowPos().x);
+		imGuiEditorSizeInfo.YPos = static_cast<uint32_t>(ImGui::GetWindowPos().y);
+		imGuiEditorSizeInfo.Width = static_cast<uint32_t>(ImGui::GetWindowSize().x);
+		imGuiEditorSizeInfo.Height = static_cast<uint32_t>(ImGui::GetWindowSize().y);
 
-		FrameSize& frameSize = m_RenderContext->GetFrameSize();
-		frameSize.XPos = (uint32_t) startPos.x;
-		frameSize.YPos = (uint32_t) startPos.y;
-		frameSize.Width = (uint32_t) pos.x;
-		frameSize.Height = (uint32_t) pos.y;
-
+		// TODO: Adding second Camera for Edtior
 		m_Scene->GetRegistry().Each<CameraComponent>([&](CameraComponent& cameraComponent)
 			{
-				cameraComponent.Width = frameSize.Width;
-				cameraComponent.Height = frameSize.Height;
+				cameraComponent.Width = static_cast<uint32_t>(ImGui::GetWindowSize().x);
+				cameraComponent.Height = static_cast<uint32_t>(ImGui::GetWindowSize().y);
 			});
 
-		ImGui::Image((ImTextureID)(intptr_t)m_FrameTextureId, pos, ImVec2(0, 1), ImVec2(1, 0));
+		m_ImGuiRenderer->RenderImage();
 
 		ImGui::EndChild();
 		ImGui::End();
@@ -103,7 +97,15 @@ namespace Hyperion
 		ImGui::Begin("Game");
 		ImGui::BeginChild("GameRenderer");
 
-		ImGui::Image((ImTextureID)(intptr_t)m_FrameTextureId, pos, ImVec2(0, 1), ImVec2(1, 0));
+		ImGuiFrameSizeInfo& imGuiGameSizeInfo = m_RenderContext->GetImGuiGameSizeInfo();
+		imGuiGameSizeInfo.XPos = static_cast<uint32_t>(ImGui::GetWindowPos().x);
+		imGuiGameSizeInfo.YPos = static_cast<uint32_t>(ImGui::GetWindowPos().y);
+		imGuiGameSizeInfo.Width = static_cast<uint32_t>(ImGui::GetWindowSize().x);
+		imGuiGameSizeInfo.Height = static_cast<uint32_t>(ImGui::GetWindowSize().y);
+
+		// TODO: Adding Game Camera
+
+		m_ImGuiRenderer->RenderImage();
 
 		ImGui::EndChild();
 		ImGui::End();
@@ -119,7 +121,22 @@ namespace Hyperion
 		ImGui::PopFont();
 
 		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		m_ImGuiRenderer->OnRender();
+	}
+
+	void ImGuiLayer::InitCapture()
+	{
+		m_ImGuiRenderer->InitCapture();
+	}
+
+	void ImGuiLayer::StartCapture()
+	{
+		m_ImGuiRenderer->StartCapture();
+	}
+
+	void ImGuiLayer::EndCapture()
+	{
+		m_ImGuiRenderer->EndCapture();
 	}
 
 	void ImGuiLayer::SetupStyle()
@@ -396,15 +413,5 @@ namespace Hyperion
 				}
 				return true;
 			});
-	}
-
-	void ImGuiLayer::SetFrameTextureId(uint32_t frameTextureId)
-	{
-		m_FrameTextureId = frameTextureId;
-	}
-
-	uint32_t ImGuiLayer::GetFrameTextureId() const
-	{
-		return m_FrameTextureId;
 	}
 }

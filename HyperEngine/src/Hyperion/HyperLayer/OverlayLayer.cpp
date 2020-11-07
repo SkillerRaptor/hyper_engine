@@ -7,16 +7,6 @@ namespace Hyperion
 	{
 	}
 
-	void OverlayLayer::SetRenderContext(Ref<RenderContext> renderContext)
-	{
-		m_RenderContext = renderContext;
-	}
-
-	const Ref<RenderContext> OverlayLayer::GetRenderContext() const
-	{
-		return m_RenderContext;
-	}
-
 	void OverlayLayer::SetName(const std::string& layerName)
 	{
 		m_LayerName = layerName;

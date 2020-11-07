@@ -8,7 +8,8 @@
 
 namespace Hyperion
 {
-	DirectX11Context::DirectX11Context()
+	DirectX11Context::DirectX11Context(GraphicsAPI graphicsAPI)
+		: RenderContext(graphicsAPI)
 	{
 	}
 

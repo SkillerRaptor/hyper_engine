@@ -9,7 +9,8 @@
 
 namespace Hyperion
 {
-	OpenGL46Context::OpenGL46Context()
+	OpenGL46Context::OpenGL46Context(GraphicsAPI graphicsAPI)
+		: RenderContext(graphicsAPI)
 	{
 	}
 

@@ -7,7 +7,7 @@ namespace Hyperion
 	class OpenGL33Context : public RenderContext
 	{
 	public:
-		OpenGL33Context();
+		OpenGL33Context(GraphicsAPI graphicsAPI);
 
 		virtual void PreInit() override;
 		virtual void Init() override;

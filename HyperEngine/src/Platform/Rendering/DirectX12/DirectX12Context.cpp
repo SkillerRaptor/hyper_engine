@@ -8,7 +8,8 @@
 
 namespace Hyperion
 {
-	DirectX12Context::DirectX12Context()
+	DirectX12Context::DirectX12Context(GraphicsAPI graphicsAPI)
+		: RenderContext(graphicsAPI)
 	{
 	}
 

@@ -9,8 +9,8 @@
 
 namespace Hyperion
 {
-	VulkanContext::VulkanContext()
-		: m_ValidationLayer(m_Instance, m_ValidationLayerInfo)
+	VulkanContext::VulkanContext(GraphicsAPI graphicsAPI)
+		: RenderContext(graphicsAPI), m_ValidationLayer(m_Instance, m_ValidationLayerInfo)
 	{
 	}
 

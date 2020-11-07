@@ -2,11 +2,12 @@
 
 #include <imgui.h>
 
-#include "OverlayLayer.hpp"
+#include "ImGuiRenderer.hpp"
 #include "HyperCore/Core.hpp"
 #include "HyperECS/Entity.hpp"
 #include "HyperECS/Scene/Scene.hpp"
 #include "HyperECS/Scene/SceneHierarchyPanel.hpp"
+#include "HyperLayer/OverlayLayer.hpp"
 #include "HyperUtilities/Timestep.hpp"
 
 namespace Hyperion
@@ -14,15 +15,15 @@ namespace Hyperion
 	class ImGuiLayer : public OverlayLayer
 	{
 	private:
+		Ref<ImGuiRenderer> m_ImGuiRenderer;
+
 		Ref<Scene> m_Scene;
 		Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
 		ImFont* m_Font;
 		Entity m_CameraEntity = { 0, nullptr };
-		uint32_t m_FrameTextureId;
 
 	public:
 		ImGuiLayer(Ref<Scene> scene);
-		virtual ~ImGuiLayer();
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
@@ -31,8 +32,9 @@ namespace Hyperion
 		virtual void OnUpdate(Timestep timeStep) override;
 		virtual void OnRender() override;
 
-		void SetFrameTextureId(uint32_t frameTextureId);
-		uint32_t GetFrameTextureId() const;
+		void InitCapture();
+		void StartCapture();
+		void EndCapture();
 
 	private:
 		void SetupStyle();

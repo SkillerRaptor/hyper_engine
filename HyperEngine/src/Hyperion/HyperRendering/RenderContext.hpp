@@ -1,16 +1,19 @@
 #pragma once
 
+#include <queue>
+
 #include "Renderer2D.hpp"
 #include "ShaderManager.hpp"
 #include "TextureManager.hpp"
 #include "HyperCore/Core.hpp"
+#include "HyperEvents/Event.hpp"
 #include "HyperUtilities/Timestep.hpp"
 
 struct GLFWwindow;
 
 namespace Hyperion
 {
-	struct FrameSize
+	struct ImGuiFrameSizeInfo
 	{
 		uint32_t XPos;
 		uint32_t YPos;
@@ -28,19 +31,37 @@ namespace Hyperion
 		VULKAN_12
 	};
 
+	struct WindowDataInfo
+	{
+		std::string Title;
+		uint32_t Width;
+		uint32_t Height;
+
+		uint32_t XPos;
+		uint32_t YPos;
+
+		bool VSync;
+		std::queue<Ref<Event>>* EventBus;
+	};
+
 	class RenderContext
 	{
 	protected:
 		GLFWwindow* m_Window;
+		GraphicsAPI m_GraphicsAPI;
 
-		FrameSize m_FrameSize;
+		ImGuiFrameSizeInfo m_ImGuiEditorSizeInfo;
+		ImGuiFrameSizeInfo m_ImGuiGameSizeInfo;
+
 		Ref<Renderer2D> m_Renderer2D;
 		Ref<ShaderManager> m_ShaderManager;
 		Ref<TextureManager> m_TextureManager;
 
+		friend class WindowsWindow;
+
 	public:
-		RenderContext()
-			: m_Window(nullptr), m_FrameSize({ 0, 0, 0, 0 }) {}
+		RenderContext(GraphicsAPI graphicsAPI)
+			: m_Window(nullptr), m_GraphicsAPI(graphicsAPI), m_ImGuiEditorSizeInfo({}), m_ImGuiGameSizeInfo({}) {}
 		virtual ~RenderContext() = default;
 
 		virtual void PreInit() = 0;
@@ -51,9 +72,11 @@ namespace Hyperion
 		virtual void OnUpdate(Timestep timeStep) = 0;
 		virtual void OnRender() = 0;
 
-		void SetWindow(GLFWwindow* window) { m_Window = window; };
+		GLFWwindow* GetWindow() const { return m_Window; };
+		GraphicsAPI GetGraphicsAPI() const { return m_GraphicsAPI; };
 
-		FrameSize& GetFrameSize() { return m_FrameSize; }
+		ImGuiFrameSizeInfo& GetImGuiEditorSizeInfo() { return m_ImGuiEditorSizeInfo; }
+		ImGuiFrameSizeInfo& GetImGuiGameSizeInfo() { return m_ImGuiGameSizeInfo; }
 
 		Ref<Renderer2D> GetRenderer2D() { return m_Renderer2D; };
 		Ref<ShaderManager> GetShaderManager() { return m_ShaderManager; };

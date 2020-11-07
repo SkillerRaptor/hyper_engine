@@ -7,7 +7,7 @@ namespace Hyperion
 	class DirectX11Context : public RenderContext
 	{
 	public:
-		DirectX11Context();
+		DirectX11Context(GraphicsAPI graphicsAPI);
 
 		virtual void PreInit() override;
 		virtual void Init() override;

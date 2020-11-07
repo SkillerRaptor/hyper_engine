@@ -8,7 +8,8 @@
 
 namespace Hyperion
 {
-	OpenGL33Context::OpenGL33Context()
+	OpenGL33Context::OpenGL33Context(GraphicsAPI graphicsAPI)
+		: RenderContext(graphicsAPI)
 	{
 	}
 

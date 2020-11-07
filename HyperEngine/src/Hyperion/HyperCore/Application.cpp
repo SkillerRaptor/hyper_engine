@@ -8,7 +8,9 @@
 #include "HyperUtilities/Random.hpp"
 #include "HyperUtilities/Timestep.hpp"
 
-namespace Hyperion 
+#include "Platform/Rendering/ImGui/ImGuiLayer.hpp"
+
+namespace Hyperion
 {
 	Application* Application::m_Instance;
 
@@ -65,14 +67,8 @@ namespace Hyperion
 	{
 		double lastFrame = 0.0;
 
-		//Ref<TextureManager> textureManager = m_Window->GetContext()->GetTextureManager();
-		//uint32_t bufferTexture = textureManager->CreateTexture(m_Window->GetWindowDataInfo().Width, m_Window->GetWindowDataInfo().Height, TextureType::FRAMEBUFFER);
-		//uint32_t bufferTextureId = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(bufferTexture))->TextureId;
-
-		static_cast<ImGuiLayer*>(m_LayerStack->GetOverlayLayer("ImGui Layer"))->SetFrameTextureId(-1);
-
-		//OpenGL33FrameBuffer frameBuffer;
-
+		ImGuiLayer* editorLayer = static_cast<ImGuiLayer*>(m_LayerStack->GetOverlayLayer("ImGui Editor Layer"));
+		editorLayer->InitCapture();
 		while (m_Running)
 		{
 			double currentFrame = glfwGetTime();
@@ -81,15 +77,7 @@ namespace Hyperion
 
 			m_Window->OnPreUpdate();
 
-			//OpenGLTextureData* textureData = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(bufferTexture));
-			//textureData->Width = m_Window->GetWindowDataInfo().Width;
-			//textureData->Height = m_Window->GetWindowDataInfo().Height;
-			//textureManager->DeleteTextureData(bufferTexture);
-			//textureManager->GenerateTexture(textureData, true);
-
-			//frameBuffer.Bind();
-			//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, bufferTextureId, 0);
-			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+			editorLayer->StartCapture();
 
 			while (m_EventBus.size() > 0)
 			{
@@ -108,7 +96,7 @@ namespace Hyperion
 			m_Scene->OnUpdate(timeStep);
 			m_Scene->OnRender();
 
-			//frameBuffer.Unbind();
+			editorLayer->EndCapture();
 
 			for (OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
 			{
@@ -141,7 +129,7 @@ namespace Hyperion
 
 	void Application::PushLayer(Layer* layer)
 	{
-		layer->SetRenderContext(m_Window->GetContext());
+		layer->m_RenderContext = m_Window->GetContext();
 		m_LayerStack->PushLayer(layer);
 	}
 
@@ -167,7 +155,7 @@ namespace Hyperion
 
 	void Application::PushOverlayLayer(OverlayLayer* overlayLayer)
 	{
-		overlayLayer->SetRenderContext(m_Window->GetContext());
+		overlayLayer->m_RenderContext = m_Window->GetContext();
 		m_LayerStack->PushOverlayLayer(overlayLayer);
 	}
 

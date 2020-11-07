@@ -22,29 +22,13 @@ namespace Hyperion
 	class Window
 	{
 	protected:
-		struct WindowDataInfo
-		{
-			std::string Title;
-			uint32_t Width;
-			uint32_t Height;
-
-			uint32_t XPos;
-			uint32_t YPos;
-
-			bool VSync;
-			std::queue<Ref<Event>>* EventBus;
-
-			WindowDataInfo(const WindowPropsInfo& windowPropsInfo)
-				: Title(windowPropsInfo.Title), Width(windowPropsInfo.Width), Height(windowPropsInfo.Height), XPos(-1), YPos(-1), VSync(false), EventBus(windowPropsInfo.EventBus) {}
-		};
-
 		Ref<RenderContext> m_RenderContext;
 		GraphicsAPI m_GraphicsAPI;
 		WindowDataInfo m_WindowDataInfo;
 
 	public:
 		Window(const WindowPropsInfo& windowProps)
-			: m_RenderContext(nullptr), m_GraphicsAPI(GraphicsAPI::OPENGL_33), m_WindowDataInfo(windowProps) {}
+			: m_RenderContext(nullptr), m_GraphicsAPI(GraphicsAPI::OPENGL_33), m_WindowDataInfo({ windowProps.Title, windowProps.Width, windowProps.Height, 0, 0, false, windowProps.EventBus }) {}
 		virtual ~Window() = default;
 
 		virtual void Init() = 0;

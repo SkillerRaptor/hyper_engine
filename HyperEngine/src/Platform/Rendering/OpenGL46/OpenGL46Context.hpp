@@ -7,7 +7,7 @@ namespace Hyperion
 	class OpenGL46Context : public RenderContext
 	{
 	public:
-		OpenGL46Context();
+		OpenGL46Context(GraphicsAPI graphicsAPI);
 
 		virtual void PreInit() override;
 		virtual void Init() override;
