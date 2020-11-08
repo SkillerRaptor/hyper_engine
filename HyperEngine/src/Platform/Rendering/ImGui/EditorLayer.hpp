@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "ImGuiRenderer.hpp"
+#include "EditorRenderer.hpp"
 #include "HyperCore/Core.hpp"
 #include "HyperECS/Entity.hpp"
 #include "HyperECS/Scene/Scene.hpp"
@@ -12,10 +12,10 @@
 
 namespace Hyperion
 {
-	class ImGuiLayer : public OverlayLayer
+	class EditorLayer : public OverlayLayer
 	{
 	private:
-		Ref<ImGuiRenderer> m_ImGuiRenderer;
+		Ref<EditorRenderer> m_EditorRenderer;
 
 		Ref<Scene> m_Scene;
 		Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
@@ -23,7 +23,7 @@ namespace Hyperion
 		Entity m_CameraEntity = { 0, nullptr };
 
 	public:
-		ImGuiLayer(Ref<Scene> scene);
+		EditorLayer(Ref<Scene> scene);
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;

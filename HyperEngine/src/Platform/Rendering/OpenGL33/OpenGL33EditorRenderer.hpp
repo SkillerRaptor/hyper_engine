@@ -3,12 +3,12 @@
 #include "HyperCore/Core.hpp"
 #include "HyperRendering/RenderContext.hpp"
 
-#include "Platform/Rendering/ImGui/ImGuiRenderer.hpp"
+#include "Platform/Rendering/ImGui/EditorRenderer.hpp"
 #include "Platform/Rendering/OpenGL33/Buffers/OpenGL33FrameBuffer.hpp"
 
 namespace Hyperion
 {
-	class OpenGL33ImGuiRenderer : public ImGuiRenderer
+	class OpenGL33EditorRenderer : public EditorRenderer
 	{
 	private:
 		uint32_t m_BufferTexture;
@@ -16,7 +16,7 @@ namespace Hyperion
 		Scope<OpenGL33FrameBuffer> m_FrameBuffer;
 
 	public:
-		OpenGL33ImGuiRenderer(Ref<RenderContext> renderContext);
+		OpenGL33EditorRenderer(Ref<RenderContext> renderContext);
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;

@@ -6,13 +6,13 @@
 
 namespace Hyperion
 {
-	class ImGuiRenderer
+	class EditorRenderer
 	{
 	protected:
 		Ref<RenderContext> m_RenderContext;
 
 	public:
-		ImGuiRenderer(Ref<RenderContext> renderContext)
+		EditorRenderer(Ref<RenderContext> renderContext)
 			: m_RenderContext(renderContext) {}
 
 		virtual void OnAttach() = 0;
@@ -27,6 +27,6 @@ namespace Hyperion
 		virtual void StartCapture() = 0;
 		virtual void EndCapture() = 0;
 
-		static Ref<ImGuiRenderer> Construct(Ref<RenderContext> renderContext);
+		static Ref<EditorRenderer> Construct(Ref<RenderContext> renderContext);
 	};
 }

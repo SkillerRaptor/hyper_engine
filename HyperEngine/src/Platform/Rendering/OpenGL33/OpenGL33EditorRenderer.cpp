@@ -1,41 +1,41 @@
-#include "OpenGL33ImGuiRenderer.hpp"
+#include "OpenGL33EditorRenderer.hpp"
 
 #include "Platform/Rendering/ImGui/ImGuiOpenGLRenderer.hpp"
 #include "Platform/Rendering/OpenGL33/OpenGL33TextureManager.hpp"
 
 namespace Hyperion
 {
-	OpenGL33ImGuiRenderer::OpenGL33ImGuiRenderer(Ref<RenderContext> renderContext)
-		: ImGuiRenderer(renderContext)
+	OpenGL33EditorRenderer::OpenGL33EditorRenderer(Ref<RenderContext> renderContext)
+		: EditorRenderer(renderContext)
 	{
 	}
 
-	void OpenGL33ImGuiRenderer::OnAttach()
+	void OpenGL33EditorRenderer::OnAttach()
 	{
 		ImGui_ImplOpenGL3_Init("#version 330 core");
 	}
 
-	void OpenGL33ImGuiRenderer::OnDetach()
+	void OpenGL33EditorRenderer::OnDetach()
 	{
 		ImGui_ImplOpenGL3_Shutdown();
 	}
 
-	void OpenGL33ImGuiRenderer::OnUpdate(Timestep timeStep)
+	void OpenGL33EditorRenderer::OnUpdate(Timestep timeStep)
 	{
 		ImGui_ImplOpenGL3_NewFrame();
 	}
 
-	void OpenGL33ImGuiRenderer::OnRender()
+	void OpenGL33EditorRenderer::OnRender()
 	{
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 
-	void OpenGL33ImGuiRenderer::RenderImage()
+	void OpenGL33EditorRenderer::RenderImage()
 	{
 		ImGui::Image((ImTextureID)(intptr_t)m_BufferTextureId, ImGui::GetWindowSize(), ImVec2(0, 1), ImVec2(1, 0));
 	}
 
-	void OpenGL33ImGuiRenderer::InitCapture()
+	void OpenGL33EditorRenderer::InitCapture()
 	{
 		WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(m_RenderContext->GetWindow()));
 
@@ -46,7 +46,7 @@ namespace Hyperion
 		m_FrameBuffer = CreateScope<OpenGL33FrameBuffer>();
 	}
 
-	void OpenGL33ImGuiRenderer::StartCapture()
+	void OpenGL33EditorRenderer::StartCapture()
 	{
 		WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(m_RenderContext->GetWindow()));
 
@@ -62,7 +62,7 @@ namespace Hyperion
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 
-	void OpenGL33ImGuiRenderer::EndCapture()
+	void OpenGL33EditorRenderer::EndCapture()
 	{
 		m_FrameBuffer->Unbind();
 	}

@@ -6,8 +6,6 @@
 #include "Layer.hpp"
 #include "OverlayLayer.hpp"
 
-#include "Platform/Rendering/ImGui/ImGuiLayer.hpp"
-
 namespace Hyperion 
 {
 	class LayerStack

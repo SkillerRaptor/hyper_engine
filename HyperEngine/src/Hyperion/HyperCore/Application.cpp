@@ -8,7 +8,7 @@
 #include "HyperUtilities/Random.hpp"
 #include "HyperUtilities/Timestep.hpp"
 
-#include "Platform/Rendering/ImGui/ImGuiLayer.hpp"
+#include "Platform/Rendering/ImGui/EditorLayer.hpp"
 
 namespace Hyperion
 {
@@ -41,7 +41,7 @@ namespace Hyperion
 		m_Scene = CreateRef<Scene>("Main Scene", m_Window->GetContext()->GetRenderer2D());
 
 		m_LayerStack = new LayerStack();
-		PushOverlayLayer(new ImGuiLayer(m_Scene));
+		PushOverlayLayer(new EditorLayer(m_Scene));
 	}
 
 	void Application::Shutdown()
@@ -67,7 +67,7 @@ namespace Hyperion
 	{
 		double lastFrame = 0.0;
 
-		ImGuiLayer* editorLayer = static_cast<ImGuiLayer*>(m_LayerStack->GetOverlayLayer("ImGui Editor Layer"));
+		EditorLayer* editorLayer = static_cast<EditorLayer*>(m_LayerStack->GetOverlayLayer("Editor Layer"));
 		editorLayer->InitCapture();
 		while (m_Running)
 		{

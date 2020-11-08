@@ -1,4 +1,4 @@
-#include "ImGuiLayer.hpp"
+#include "EditorLayer.hpp"
 
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
@@ -14,14 +14,14 @@
 
 namespace Hyperion
 {
-	ImGuiLayer::ImGuiLayer(Ref<Scene> scene)
-		: OverlayLayer("ImGui Editor Layer"), m_Scene(scene)
+	EditorLayer::EditorLayer(Ref<Scene> scene)
+		: OverlayLayer("Editor Layer"), m_Scene(scene)
 	{
 	}
 
-	void ImGuiLayer::OnAttach()
+	void EditorLayer::OnAttach()
 	{
-		m_ImGuiRenderer = ImGuiRenderer::Construct(m_RenderContext);
+		m_EditorRenderer = EditorRenderer::Construct(m_RenderContext);
 		m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>(m_Scene);
 
 		Entity squareOne = m_Scene->CreateEntity("Square One");
@@ -41,21 +41,21 @@ namespace Hyperion
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow()), true);
-		m_ImGuiRenderer->OnAttach();
+		m_EditorRenderer->OnAttach();
 
 		SetupStyle();
 	}
 
-	void ImGuiLayer::OnDetach()
+	void EditorLayer::OnDetach()
 	{
-		m_ImGuiRenderer->OnDetach();
+		m_EditorRenderer->OnDetach();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 	}
 
-	void ImGuiLayer::OnUpdate(Timestep timeStep)
+	void EditorLayer::OnUpdate(Timestep timeStep)
 	{
-		m_ImGuiRenderer->OnUpdate(timeStep);
+		m_EditorRenderer->OnUpdate(timeStep);
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGuizmo::SetOrthographic(true);
@@ -64,7 +64,7 @@ namespace Hyperion
 		ImGui::PushFont(m_Font);
 	}
 
-	void ImGuiLayer::OnRender()
+	void EditorLayer::OnRender()
 	{
 		ShowDockingMenu();
 
@@ -89,7 +89,7 @@ namespace Hyperion
 				cameraComponent.Height = static_cast<uint32_t>(ImGui::GetWindowSize().y);
 			});
 
-		m_ImGuiRenderer->RenderImage();
+		m_EditorRenderer->RenderImage();
 
 		ImGui::EndChild();
 		ImGui::End();
@@ -105,7 +105,7 @@ namespace Hyperion
 
 		// TODO: Adding Game Camera
 
-		m_ImGuiRenderer->RenderImage();
+		m_EditorRenderer->RenderImage();
 
 		ImGui::EndChild();
 		ImGui::End();
@@ -121,25 +121,25 @@ namespace Hyperion
 		ImGui::PopFont();
 
 		ImGui::Render();
-		m_ImGuiRenderer->OnRender();
+		m_EditorRenderer->OnRender();
 	}
 
-	void ImGuiLayer::InitCapture()
+	void EditorLayer::InitCapture()
 	{
-		m_ImGuiRenderer->InitCapture();
+		m_EditorRenderer->InitCapture();
 	}
 
-	void ImGuiLayer::StartCapture()
+	void EditorLayer::StartCapture()
 	{
-		m_ImGuiRenderer->StartCapture();
+		m_EditorRenderer->StartCapture();
 	}
 
-	void ImGuiLayer::EndCapture()
+	void EditorLayer::EndCapture()
 	{
-		m_ImGuiRenderer->EndCapture();
+		m_EditorRenderer->EndCapture();
 	}
 
-	void ImGuiLayer::SetupStyle()
+	void EditorLayer::SetupStyle()
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
 
@@ -201,7 +201,7 @@ namespace Hyperion
 		style.Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
 	}
 
-	void ImGuiLayer::DrawSelection()
+	void EditorLayer::DrawSelection()
 	{
 		ImVec2 pos = ImGui::GetCursorScreenPos();
 		pos.x -= 5.0f;
@@ -210,7 +210,7 @@ namespace Hyperion
 		ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false, 5.0f);
 	}
 
-	void ImGuiLayer::ShowDockingMenu()
+	void EditorLayer::ShowDockingMenu()
 	{
 		ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_NoDockingInCentralNode | ImGuiDockNodeFlags_PassthruCentralNode;
 
@@ -267,7 +267,7 @@ namespace Hyperion
 		ImGui::End();
 	}
 
-	void ImGuiLayer::ShowMenuFile()
+	void EditorLayer::ShowMenuFile()
 	{
 		if (ImGui::MenuItem("New", "Ctrl+N"))
 			NewScene();
@@ -303,7 +303,7 @@ namespace Hyperion
 		ImGui::EndMenu();
 	}
 
-	void ImGuiLayer::ShowMenuEdit()
+	void EditorLayer::ShowMenuEdit()
 	{
 		if (ImGui::MenuItem("Undo", "Ctrl+Z")) {}
 		if (ImGui::IsItemHovered())
@@ -333,11 +333,11 @@ namespace Hyperion
 		ImGui::EndMenu();
 	}
 
-	void ImGuiLayer::NewScene()
+	void EditorLayer::NewScene()
 	{
 	}
 
-	void ImGuiLayer::OpenScene()
+	void EditorLayer::OpenScene()
 	{
 		std::string filePath = WindowsFileDialogs::OpenFile("Hyper Scene (*.hyper)\0*.hyper\0");
 		if (!filePath.empty())
@@ -350,7 +350,7 @@ namespace Hyperion
 		}
 	}
 
-	void ImGuiLayer::SaveScene()
+	void EditorLayer::SaveScene()
 	{
 		SceneSerializer sceneSerializer(m_Scene);
 		std::string scenePath("assets/scenes/" + m_Scene->GetName() + ".hyper");
@@ -360,7 +360,7 @@ namespace Hyperion
 		sceneSerializer.Serialize(scenePath);
 	}
 
-	void ImGuiLayer::SaveAsScene()
+	void EditorLayer::SaveAsScene()
 	{
 		std::string filePath = WindowsFileDialogs::SaveFile("Hyper Scene (*.hyper)\0*.hyper\0");
 		if (!filePath.empty())
@@ -370,7 +370,7 @@ namespace Hyperion
 		}
 	}
 
-	void ImGuiLayer::OnEvent(Event& event)
+	void EditorLayer::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<KeyPressedEvent>([&](KeyPressedEvent& event)

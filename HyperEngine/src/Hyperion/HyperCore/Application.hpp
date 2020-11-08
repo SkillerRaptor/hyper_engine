@@ -3,6 +3,7 @@
 #include <queue>
 
 #include "Core.hpp"
+#include "HyperECS/Scene/Scene.hpp"
 #include "HyperEvents/Event.hpp"
 #include "HyperLayer/Layer.hpp"
 #include "HyperLayer/LayerStack.hpp"
