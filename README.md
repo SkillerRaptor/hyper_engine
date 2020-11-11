@@ -1,6 +1,6 @@
 ﻿# HyperEngine
 ![](https://img.shields.io/badge/license-MIT-yellow)
-![](https://img.shields.io/badge/build-passing-green)
+![](https://github.com/SkillerRaptor/HyperEngine/workflows/build/badge.svg)
 [![Trello](https://img.shields.io/badge/board-trello-blue.svg)](https://trello.com/b/xiuhLb05/hyperengine)
 
 The HyperEngine is the official Game Engine from the Hyperion Team.<br>
