@@ -1,5 +1,6 @@
 #include "OpenGL33Context.hpp"
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "OpenGL33Renderer2D.hpp"

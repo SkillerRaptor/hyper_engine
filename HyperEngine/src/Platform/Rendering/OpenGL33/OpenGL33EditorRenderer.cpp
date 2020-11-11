@@ -1,5 +1,8 @@
 #include "OpenGL33EditorRenderer.hpp"
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include "Platform/Rendering/ImGui/ImGuiOpenGLRenderer.hpp"
 #include "Platform/Rendering/OpenGL33/OpenGL33TextureManager.hpp"
 

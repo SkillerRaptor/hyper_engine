@@ -1,5 +1,6 @@
 #include "Input.hpp"
 
+#include <Windows.h>
 #include <GLFW/glfw3.h>
 
 #include "HyperCore/Application.hpp"

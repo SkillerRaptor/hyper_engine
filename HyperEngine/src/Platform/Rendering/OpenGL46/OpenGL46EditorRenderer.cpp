@@ -1,5 +1,8 @@
 #include "OpenGL46EditorRenderer.hpp"
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include "Platform/Rendering/ImGui/ImGuiOpenGLRenderer.hpp"
 #include "Platform/Rendering/OpenGL46/OpenGL46TextureManager.hpp"
 
