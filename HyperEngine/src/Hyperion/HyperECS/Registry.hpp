@@ -129,7 +129,7 @@ namespace Hyperion
 				(lambda.template operator() < T > (), ...);
 				if (shouldSkip)
 					continue;
-				entites.push_back(entity);
+				entities.push_back(entity);
 			}
 			return entities;
 		}

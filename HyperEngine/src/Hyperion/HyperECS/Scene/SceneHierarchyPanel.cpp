@@ -144,7 +144,7 @@ namespace Hyperion
 		ImGui::NextColumn();
 
 		ImGui::SetNextItemWidth(-1);
-		ImGui::DragInt(ss.str().c_str(), (int*)&value, speed, min, max, "%.2f", 1.0f);
+		ImGui::DragInt(ss.str().c_str(), (int*)&value, static_cast<float>(speed), min, max, "%.2f", 0);
 
 		ImGui::Columns(1);
 
