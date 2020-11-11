@@ -45,7 +45,6 @@ project "HyperEngine"
 		"ImGui",
 		"ImGuizmo",
 		"vulkan",
-		"opengl32.lib",
 		"vulkan-1.lib"
 	}
 
