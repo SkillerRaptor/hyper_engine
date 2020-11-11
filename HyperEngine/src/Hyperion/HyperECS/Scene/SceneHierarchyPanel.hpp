@@ -27,7 +27,9 @@ namespace Hyperion
 		void DrawEntityNode(Entity entity);
 		void DrawComponents();
 
-		void DrawGlobalPopup();
+		template<class T>
+		void DrawComponent(const std::string& componentName, const typename std::common_type<std::function<void(T&)>>::type function);
+
 		void DrawAddComponentPopup();
 		void DrawRemoveComponentPopup();
 
@@ -37,8 +39,14 @@ namespace Hyperion
 		template <class T>
 		void DrawRemoveComponentMenu();
 
-		std::string SplitComponentName(const std::string& componentName);
+		void DrawCheckbox(const std::string& title, bool& value);
+		void DrawColorEdit4(const std::string& title, Vec4& value);
+		void DrawDragInt(const std::string& title, uint32_t& value, int speed = 1, int min = 0, int max = 0);
+		void DrawDragFloat(const std::string& title, float& value, float speed = 0.1f, float min = 0.0f, float max = 0.0f);
+		void DrawDragVec3(const std::string& title, Vec3& vector, float speed = 0.1f, float min = 0.0f, float max = 0.0f);
 
 		void DrawSelection();
+
+		std::string SplitComponentName(const std::string& componentName);
 	};
 }

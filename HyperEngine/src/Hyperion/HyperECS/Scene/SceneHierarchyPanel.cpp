@@ -30,24 +30,7 @@ namespace Hyperion
 				});
 
 			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-			{
 				m_SelectedEntity = { 0, nullptr };
-				m_GlobalPopupOpen = false;
-			}
-
-			if (ImGui::IsMouseDown(1) && ImGui::IsWindowHovered())
-				m_GlobalPopupOpen = true;
-
-			if (m_GlobalPopupOpen)
-				if (ImGui::IsWindowHovered())
-					ImGui::OpenPopup("GlobalPopup");
-				else
-				{
-					m_GlobalPopupOpen = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-			DrawGlobalPopup();
 
 			ImGui::TreePop();
 		}
@@ -91,116 +74,6 @@ namespace Hyperion
 		}
 	}
 
-	static void DrawCheckbox(const std::string& title, bool& value)
-	{
-		std::stringstream ss;
-		ss << "##" << title;
-
-		ImGui::PushID(title.c_str());
-
-		ImGui::Columns(2);
-		ImGui::SetColumnWidth(0, 150.0f);
-		ImGui::Text(title.c_str());
-		ImGui::NextColumn();
-
-		ImGui::SetNextItemWidth(-1);
-		ImGui::Checkbox(ss.str().c_str(), &value);
-
-		ImGui::Columns(1);
-
-		ImGui::PopID();
-	}
-
-	static void DrawDragColorEdit4(const std::string& title, Vec4& value)
-	{
-		std::stringstream ss;
-		ss << "##" << title;
-
-		ImGui::PushID(title.c_str());
-
-		ImGui::Columns(2);
-		ImGui::SetColumnWidth(0, 150.0f);
-		ImGui::Text(title.c_str());
-		ImGui::NextColumn();
-
-		ImGui::SetNextItemWidth(-1);
-		ImGui::ColorEdit4(ss.str().c_str(), value);
-
-		ImGui::Columns(1);
-
-		ImGui::PopID();
-	}
-
-	static void DrawDragInt(const std::string& title, uint32_t& value, int speed = 1, int min = 0, int max = 0)
-	{
-		std::stringstream ss;
-		ss << "##" << title;
-
-		ImGui::PushID(title.c_str());
-
-		ImGui::Columns(2);
-		ImGui::SetColumnWidth(0, 150.0f);
-		ImGui::Text(title.c_str());
-		ImGui::NextColumn();
-
-		ImGui::SetNextItemWidth(-1);
-		ImGui::DragInt(ss.str().c_str(), (int*)&value, static_cast<float>(speed), min, max, "%.2f", 0);
-
-		ImGui::Columns(1);
-
-		ImGui::PopID();
-	}
-
-	static void DrawDragFloat(const std::string& title, float& value, float speed = 0.1f, float min = 0.0f, float max = 0.0f)
-	{
-		std::stringstream ss;
-		ss << "##" << title;
-
-		ImGui::PushID(title.c_str());
-
-		ImGui::Columns(2);
-		ImGui::SetColumnWidth(0, 150.0f);
-		ImGui::Text(title.c_str());
-		ImGui::NextColumn();
-
-		ImGui::SetNextItemWidth(-1);
-		ImGui::DragFloat(ss.str().c_str(), &value, speed, min, max, "%.2f", 1.0f);
-
-		ImGui::Columns(1);
-
-		ImGui::PopID();
-	}
-
-	static void DrawDragVec3(const std::string& title, Vec3& vector, float speed = 0.1f, float min = 0.0f, float max = 0.0f)
-	{
-		ImGui::PushID(title.c_str());
-
-		ImGui::Columns(2);
-		ImGui::SetColumnWidth(0, 150.0f);
-		ImGui::Text(title.c_str());
-		ImGui::NextColumn();
-
-		ImGui::SetNextItemWidth(-1);
-		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-
-		ImGui::DragFloat("##PositionX", &vector.x, speed, min, max, "X: %.2f", 1.0f);
-		ImGui::PopItemWidth();
-
-		ImGui::SameLine();
-
-		ImGui::DragFloat("##PositionY", &vector.y, speed, min, max, "Y: %.2f", 1.0f);
-		ImGui::PopItemWidth();
-
-		ImGui::SameLine();
-
-		ImGui::DragFloat("##PositionZ", &vector.z, speed, min, max, "Z: %.2f", 1.0f);
-		ImGui::PopItemWidth();
-
-		ImGui::Columns(1);
-
-		ImGui::PopID();
-	}
-
 	void SceneHierarchyPanel::DrawComponents()
 	{
 		Registry& registry = m_Context->GetRegistry();
@@ -226,104 +99,59 @@ namespace Hyperion
 			style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 		}
 
-		if (entity.HasComponent<TransformComponent>())
-		{
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
-			if (ImGui::TreeNodeEx((void*) typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
+		DrawComponent<TransformComponent>("Transform", [&](TransformComponent& component)
 			{
-				TransformComponent& transformComponent = entity.GetComponent<TransformComponent>();
+				DrawDragVec3("Position", component.Position);
+				DrawDragVec3("Rotation", component.Rotation, 0.1f, 0.0f, 360.0f);
+				DrawDragVec3("Scale", component.Scale, 0.1f, 0.0f, (std::numeric_limits<float>::max)());
 
-				DrawDragVec3("Position", transformComponent.Position);
-				DrawDragVec3("Rotation", transformComponent.Rotation, 0.1f, 0.0f, 360.0f);
-				DrawDragVec3("Scale", transformComponent.Scale, 0.1f, 0.0f, (std::numeric_limits<float>::max)());
+				if (component.Rotation.x < 0.0f) component.Rotation.x = 0.0f;
+				if (component.Rotation.x > 360.0f) component.Rotation.x = 360.0f;
+				if (component.Rotation.y < 0.0f) component.Rotation.y = 0.0f;
+				if (component.Rotation.y > 360.0f) component.Rotation.y = 360.0f;
+				if (component.Rotation.z < 0.0f) component.Rotation.z = 0.0f;
+				if (component.Rotation.z > 360.0f) component.Rotation.z = 360.0f;
 
-				if (transformComponent.Rotation.x < 0.0f) transformComponent.Rotation.x = 0.0f;
-				if (transformComponent.Rotation.x > 360.0f) transformComponent.Rotation.x = 360.0f;
-				if (transformComponent.Rotation.y < 0.0f) transformComponent.Rotation.y = 0.0f;
-				if (transformComponent.Rotation.y > 360.0f) transformComponent.Rotation.y = 360.0f;
-				if (transformComponent.Rotation.z < 0.0f) transformComponent.Rotation.z = 0.0f;
-				if (transformComponent.Rotation.z > 360.0f) transformComponent.Rotation.z = 360.0f;
+				if (component.Scale.x <= 0.0f) component.Scale.x = 0.1f;
+				if (component.Scale.y <= 0.0f) component.Scale.y = 0.1f;
+				if (component.Scale.z <= 0.0f) component.Scale.z = 0.1f;
+			});
 
-				if (transformComponent.Scale.x <= 0.0f) transformComponent.Scale.x = 0.1f;
-				if (transformComponent.Scale.y <= 0.0f) transformComponent.Scale.y = 0.1f;
-				if (transformComponent.Scale.z <= 0.0f) transformComponent.Scale.z = 0.1f;
-
-				ImGui::TreePop();
-			}
-			ImGui::PopStyleVar();
-		}
-
-		if (entity.HasComponent<SpriteRendererComponent>())
-		{
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
-			if (ImGui::TreeNodeEx((void*) typeid(SpriteRendererComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
+		DrawComponent<SpriteRendererComponent>("Sprite Renderer", [&](SpriteRendererComponent& component)
 			{
-				SpriteRendererComponent& spriteRendererComponent = entity.GetComponent<SpriteRendererComponent>();
+				DrawColorEdit4("Sprite Color", component.Color);
+			});
 
-				DrawDragColorEdit4("Sprite Color", spriteRendererComponent.Color);
-
-				ImGui::TreePop();
-			}
-			ImGui::PopStyleVar();
-		}
-
-		if (entity.HasComponent<CameraComponent>())
-		{
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
-			if (ImGui::TreeNodeEx((void*) typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
+		DrawComponent<CameraComponent>("Camera", [&](CameraComponent& component)
 			{
-				CameraComponent& cameraComponent = entity.GetComponent<CameraComponent>();
+				DrawDragInt("Width", component.Width, 1);
 
-				DrawDragInt("Width", cameraComponent.Width, 1);
+				DrawDragInt("Height", component.Height, 1);
 
-				DrawDragInt("Height", cameraComponent.Height, 1);
+				DrawDragFloat("Zoom", component.Zoom, 0.1f, 0.1f, (std::numeric_limits<float>::max)());
+				if (component.Zoom <= 0.0f) component.Zoom = 0.1f;
 
-				DrawDragFloat("Zoom", cameraComponent.Zoom, 0.1f, 0.1f, (std::numeric_limits<float>::max)());
-				if (cameraComponent.Zoom <= 0.0f) cameraComponent.Zoom = 0.1f;
+				DrawDragFloat("Near Plane", component.NearPlane);
 
-				DrawDragFloat("Near Plane", cameraComponent.NearPlane);
+				DrawDragFloat("Far Plane", component.FarPlane);
 
-				DrawDragFloat("Far Plane", cameraComponent.FarPlane);
+				DrawCheckbox("Primary", component.Primary);
+			});
 
-				DrawCheckbox("Primary", cameraComponent.Primary);
-
-				ImGui::TreePop();
-			}
-			ImGui::PopStyleVar();
-		}
-
-		if (entity.HasComponent<CameraControllerComponent>())
-		{
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
-			if (ImGui::TreeNodeEx((void*) typeid(CameraControllerComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera Controller"))
+		DrawComponent<CameraControllerComponent>("Camera Controller", [&](CameraControllerComponent& component)
 			{
-				CameraControllerComponent& cameraControllerComponent = entity.GetComponent<CameraControllerComponent>();
+				DrawDragFloat("Move Speed", component.MoveSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
+				if (component.MoveSpeed < 0.0f) component.MoveSpeed = 0.0f;
 
-				DrawDragFloat("Move Speed", cameraControllerComponent.MoveSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
-				if (cameraControllerComponent.MoveSpeed < 0.0f) cameraControllerComponent.MoveSpeed = 0.0f;
+				DrawDragFloat("Zoom Speed", component.ZoomSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
+				if (component.ZoomSpeed < 0.0f) component.ZoomSpeed = 0.0f;
+			});
 
-				DrawDragFloat("Zoom Speed", cameraControllerComponent.ZoomSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
-				if (cameraControllerComponent.ZoomSpeed < 0.0f) cameraControllerComponent.ZoomSpeed = 0.0f;
-
-				ImGui::TreePop();
-			}
-			ImGui::PopStyleVar();
-		}
-
-		if (entity.HasComponent<CharacterControllerComponent>())
-		{
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
-			if (ImGui::TreeNodeEx((void*) typeid(CharacterControllerComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Character Controller"))
+		DrawComponent<CharacterControllerComponent>("Character Controller", [&](CharacterControllerComponent& component)
 			{
-				CharacterControllerComponent& characterControllerComponent = entity.GetComponent<CharacterControllerComponent>();
-
-				DrawDragFloat("Speed", characterControllerComponent.Speed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
-				if (characterControllerComponent.Speed < 0.0f) characterControllerComponent.Speed = 0.0f;
-
-				ImGui::TreePop();
-			}
-			ImGui::PopStyleVar();
-		}
+				DrawDragFloat("Speed", component.Speed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
+				if (component.Speed < 0.0f) component.Speed = 0.0f;
+			});
 
 		ImGui::Columns(1);
 		ImGui::Separator();
@@ -386,10 +214,10 @@ namespace Hyperion
 		std::vector<uint32_t>::iterator position = std::find(entities.begin(), entities.end(), entity.GetEntityHandle());
 		uint64_t distance = std::abs(std::distance(entities.begin(), position));
 
-		if (distance > 0 && distance < (uint64_t) entities.size())
+		if (distance > 0 && distance < (uint64_t)entities.size())
 			upComponent = true;
 
-		if (distance >= 0 && distance < (uint64_t) (entities.size() - 1))
+		if (distance >= 0 && distance < (uint64_t)(entities.size() - 1))
 			downComponent = true;
 
 		if (upComponent)
@@ -404,114 +232,19 @@ namespace Hyperion
 				std::iter_swap(position, position + 1);
 	}
 
-	void SceneHierarchyPanel::DrawGlobalPopup()
+	template<class T>
+	void SceneHierarchyPanel::DrawComponent(const std::string& componentName, typename std::common_type<std::function<void(T&)>>::type function)
 	{
-		if (ImGui::BeginPopup("GlobalPopup"))
+		if (m_SelectedEntity.HasComponent<T>())
 		{
-			if (ImGui::BeginMenu("2D Objects"))
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
+			if (ImGui::TreeNodeEx((void*) typeid(T).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, componentName.c_str()))
 			{
-				if (ImGui::IsItemHovered())
-					DrawSelection();
+				function(m_SelectedEntity.GetComponent<T>());
 
-				if (ImGui::MenuItem("Quad"))
-				{
-					m_Context->CreateEntity();
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-
-				if (ImGui::MenuItem("Triangle"))
-				{
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-
-				if (ImGui::MenuItem("Circle"))
-				{
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-
-				if (ImGui::MenuItem("Light"))
-				{
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-
-				ImGui::EndMenu();
+				ImGui::TreePop();
 			}
-			if (ImGui::IsItemHovered())
-				DrawSelection();
-			if (ImGui::BeginMenu("3D Objects"))
-			{
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-
-				if (ImGui::MenuItem("Cube"))
-				{
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-
-				if (ImGui::MenuItem("Sphere"))
-				{
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-
-				if (ImGui::BeginMenu("Lights"))
-				{
-					if (ImGui::MenuItem("Spot Light"))
-					{
-					}
-					if (ImGui::IsItemHovered())
-						DrawSelection();
-
-					if (ImGui::MenuItem("Directional Light"))
-					{
-					}
-					if (ImGui::IsItemHovered())
-						DrawSelection();
-
-					if (ImGui::MenuItem("Point Light"))
-					{
-					}
-					if (ImGui::IsItemHovered())
-						DrawSelection();
-
-					ImGui::EndMenu();
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-
-				ImGui::EndMenu();
-			}
-			if (ImGui::IsItemHovered())
-				DrawSelection();
-
-			if (ImGui::BeginMenu("Cameras"))
-			{
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-
-				if (ImGui::MenuItem("Orthographic Camera"))
-				{
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-
-				if (ImGui::MenuItem("Projection Camera"))
-				{
-				}
-				if (ImGui::IsItemHovered())
-					DrawSelection();
-
-				ImGui::EndMenu();
-			}
-			if (ImGui::IsItemHovered())
-				DrawSelection();
-
-			ImGui::EndPopup();
+			ImGui::PopStyleVar();
 		}
 	}
 
@@ -577,6 +310,113 @@ namespace Hyperion
 		}
 	}
 
+	void SceneHierarchyPanel::DrawSelection()
+	{
+		ImVec2 pos = ImGui::GetCursorScreenPos();
+		pos.x -= 5.0f;
+		pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
+		ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
+		ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false, 5.0f);
+	}
+
+	void SceneHierarchyPanel::DrawCheckbox(const std::string& title, bool& value)
+	{
+		ImGui::PushID(title.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, 150.0f);
+		ImGui::Text(title.c_str());
+		ImGui::NextColumn();
+
+		ImGui::SetNextItemWidth(-1);
+		ImGui::Checkbox(std::string("##" + title).c_str(), &value);
+
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+	}
+
+	void SceneHierarchyPanel::DrawColorEdit4(const std::string& title, Vec4& value)
+	{
+		ImGui::PushID(title.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, 150.0f);
+		ImGui::Text(title.c_str());
+		ImGui::NextColumn();
+
+		ImGui::SetNextItemWidth(-1);
+		ImGui::ColorEdit4(std::string("##" + title).c_str(), value);
+
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+	}
+
+	void SceneHierarchyPanel::DrawDragInt(const std::string& title, uint32_t& value, int speed, int min, int max)
+	{
+		ImGui::PushID(title.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, 150.0f);
+		ImGui::Text(title.c_str());
+		ImGui::NextColumn();
+
+		ImGui::SetNextItemWidth(-1);
+		ImGui::DragInt(std::string("##" + title).c_str(), (int*)&value, static_cast<float>(speed), min, max, "%.2f", 0);
+
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+	}
+
+	void SceneHierarchyPanel::DrawDragFloat(const std::string& title, float& value, float speed, float min, float max)
+	{
+		ImGui::PushID(title.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, 150.0f);
+		ImGui::Text(title.c_str());
+		ImGui::NextColumn();
+
+		ImGui::SetNextItemWidth(-1);
+		ImGui::DragFloat(std::string("##" + title).c_str(), &value, speed, min, max, "%.2f", 1.0f);
+
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+	}
+
+	void SceneHierarchyPanel::DrawDragVec3(const std::string& title, Vec3& vector, float speed, float min, float max)
+	{
+		ImGui::PushID(title.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, 150.0f);
+		ImGui::Text(title.c_str());
+		ImGui::NextColumn();
+
+		ImGui::SetNextItemWidth(-1);
+		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+
+		ImGui::DragFloat(std::string("##" + title + "X").c_str(), &vector.x, speed, min, max, "X: %.2f", 1.0f);
+		ImGui::PopItemWidth();
+
+		ImGui::SameLine();
+
+		ImGui::DragFloat(std::string("##" + title + "Y").c_str(), &vector.y, speed, min, max, "Y: %.2f", 1.0f);
+		ImGui::PopItemWidth();
+
+		ImGui::SameLine();
+
+		ImGui::DragFloat(std::string("##" + title + "Z").c_str(), &vector.z, speed, min, max, "Z: %.2f", 1.0f);
+		ImGui::PopItemWidth();
+
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+	}
+
 	std::string Hyperion::SceneHierarchyPanel::SplitComponentName(const std::string& componentName)
 	{
 		std::string shortName = componentName.substr(componentName.find("::") + 2, componentName.length());
@@ -590,15 +430,6 @@ namespace Hyperion
 			ss << it->str();
 
 		return ss.str();
-	}
-
-	void SceneHierarchyPanel::DrawSelection()
-	{
-		ImVec2 pos = ImGui::GetCursorScreenPos();
-		pos.x -= 5.0f;
-		pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
-		ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
-		ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false, 5.0f);
 	}
 
 	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
