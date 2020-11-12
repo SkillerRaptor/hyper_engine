@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+
 #include "HyperUtilities/NonCopyable.hpp"
 #include "HyperUtilities/NonMoveable.hpp"
 
@@ -28,6 +30,9 @@ namespace Hyperion
 
 	class TextureManager : public NonCopyable, NonMoveable
 	{
+	protected:
+		std::queue<uint32_t> m_TextureIds;
+
 	public:
 		TextureManager() = default;
 		virtual ~TextureManager() = default;

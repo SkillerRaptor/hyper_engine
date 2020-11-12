@@ -17,7 +17,6 @@ namespace Hyperion
 	{
 	private:
 		std::unordered_map<uint32_t, OpenGLShaderData> m_Shaders;
-		std::queue<uint32_t> m_ShaderIds;
 
 	public:
 		OpenGL46ShaderManager();

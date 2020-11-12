@@ -45,7 +45,7 @@ namespace Hyperion
 		
 		stbi_image_free(textureData.Data);
 
-		uint32_t textureId = 0;
+		uint32_t textureId = 1;
 		if (!m_TextureIds.empty())
 		{
 			textureId = m_TextureIds.front();
@@ -67,7 +67,7 @@ namespace Hyperion
 
 		GenerateTexture(&textureData, true);
 
-		uint32_t textureId = 0;
+		uint32_t textureId = 1;
 		if (!m_TextureIds.empty())
 		{
 			textureId = m_TextureIds.front();

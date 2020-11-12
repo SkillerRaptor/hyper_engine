@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+
 #include "HyperMath/Matrix.hpp"
 #include "HyperMath/Vector.hpp"
 #include "HyperUtilities/NonCopyable.hpp"
@@ -16,6 +18,9 @@ namespace Hyperion
 
 	class ShaderManager : public NonCopyable, NonMoveable
 	{
+	protected:
+		std::queue<uint32_t> m_ShaderIds;
+
 	public:
 		ShaderManager() = default;
 		virtual ~ShaderManager() = default;

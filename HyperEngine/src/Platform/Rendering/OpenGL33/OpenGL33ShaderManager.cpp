@@ -72,7 +72,7 @@ namespace Hyperion
 			return -1;
 		}
 
-		uint32_t shaderId = 0;
+		uint32_t shaderId = 1;
 		if (!m_ShaderIds.empty())
 		{
 			shaderId = m_ShaderIds.front();

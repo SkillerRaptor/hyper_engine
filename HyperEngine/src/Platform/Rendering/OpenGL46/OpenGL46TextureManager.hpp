@@ -1,7 +1,6 @@
 #pragma once
 
 #include <unordered_map>
-#include <queue>
 
 #include "HyperRendering/TextureManager.hpp"
 
@@ -16,7 +15,6 @@ namespace Hyperion
 	{
 	private:
 		std::unordered_map<uint32_t, OpenGLTextureData> m_Textures;
-		std::queue<uint32_t> m_TextureIds;
 
 	public:
 		OpenGL46TextureManager();
