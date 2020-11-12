@@ -417,7 +417,7 @@ namespace Hyperion
 		ImGui::PopID();
 	}
 
-	std::string Hyperion::SceneHierarchyPanel::SplitComponentName(const std::string& componentName)
+	std::string SceneHierarchyPanel::SplitComponentName(const std::string& componentName)
 	{
 		std::string shortName = componentName.substr(componentName.find("::") + 2, componentName.length());
 		std::regex regex("[A-Z][^A-Z]*");
