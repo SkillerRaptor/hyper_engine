@@ -94,9 +94,9 @@ namespace Hyperion
 				tag = std::string(buffer) == std::string() ? "Empty!" : std::string(buffer);
 			ImGui::SameLine();
 			ImGuiStyle& style = ImGui::GetStyle();
-			style.Colors[ImGuiCol_Text] = ImVec4(0.502f, 0.502f, 0.502f, 1.00f);
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.502f, 0.502f, 0.502f, 1.00f));
 			ImGui::Text("%u", entity.GetEntityHandle());
-			style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+			ImGui::PopStyleColor();
 		}
 
 		DrawComponent<TransformComponent>("Transform", [&](TransformComponent& component)

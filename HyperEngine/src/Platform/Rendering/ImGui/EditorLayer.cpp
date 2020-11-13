@@ -71,7 +71,7 @@ namespace Hyperion
 		m_SceneHierarchyPanel->OnRender();
 
 		ImGuiStyle& style = ImGui::GetStyle();
-		style.WindowPadding = ImVec2(2, 2);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
 
 		ImGui::Begin("Editor");
 		ImGui::BeginChild("EditorRenderer");
@@ -110,7 +110,13 @@ namespace Hyperion
 		ImGui::EndChild();
 		ImGui::End();
 
-		style.WindowPadding = ImVec2(15, 15);
+		ImGui::PopStyleVar();
+
+		ImGui::Begin("Assets");
+		ImGui::PushTextWrapPos();
+		ImGui::Text("Assets Browser");
+		ImGui::PopTextWrapPos();
+		ImGui::End();
 
 		ImGui::Begin("Console");
 		ImGui::PushTextWrapPos();
@@ -246,8 +252,9 @@ namespace Hyperion
 			ImGui::DockBuilderDockWindow("Hierarchy", dockLeftId);
 			ImGui::DockBuilderDockWindow("Inspector", dockRightId);
 			ImGui::DockBuilderDockWindow("Console", dockDownId);
-			ImGui::DockBuilderDockWindow("Editor", dockMainId);
+			ImGui::DockBuilderDockWindow("Assets", dockDownId);
 			ImGui::DockBuilderDockWindow("Game", dockMainId);
+			ImGui::DockBuilderDockWindow("Editor", dockMainId);
 
 			ImGui::DockBuilderFinish(dockMainId);
 		}
