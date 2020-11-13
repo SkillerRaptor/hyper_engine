@@ -26,10 +26,10 @@ namespace Hyperion
 		std::string m_Name;
 		Level m_Level;
 
-		std::queue<std::pair<Level, std::string>>* m_MessageQueue;
+		std::queue<std::pair<Level, std::string>>& m_MessageQueue;
 
 	public:
-		Logger(std::queue<std::pair<Level, std::string>>*);
+		Logger(std::queue<std::pair<Level, std::string>>& messageQueue);
 		~Logger();
 
 		void PrintInfo(const char* format);
@@ -85,7 +85,7 @@ namespace Hyperion
 
 			ss << std::endl;
 
-			m_MessageQueue->push(std::make_pair(level, ss.str()));
+			m_MessageQueue.push(std::make_pair(level, ss.str()));
 		}
 
 		void FormatString(std::stringstream& ss, const char* format)

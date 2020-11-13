@@ -16,6 +16,7 @@ namespace Hyperion
 		Ref<Logger> m_CoreLogger;
 		Ref<Logger> m_ClientLogger;
 
+		bool m_Blocked = false;
 		bool m_Running;
 
 		static Ref<Log> m_Instance;
@@ -24,12 +25,13 @@ namespace Hyperion
 		Log();
 		~Log();
 
+		bool IsBlocked() const;
+		void Shutdown();
+		
 		static const Ref<Log> GetInstace();
 
 		const Ref<Logger> GetCoreLogger() const { return m_CoreLogger; }
 		const Ref<Logger> GetClientLogger() const { return m_ClientLogger; }
-
-		void Shutdown();
 
 	private:
 		void Init();

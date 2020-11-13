@@ -1,6 +1,6 @@
 #include "Log.hpp"
 
-namespace Hyperion 
+namespace Hyperion
 {
 	Ref<Log> Log::m_Instance;
 
@@ -12,6 +12,11 @@ namespace Hyperion
 	Log::~Log()
 	{
 		Shutdown();
+	}
+
+	bool Log::IsBlocked() const
+	{
+		return m_Blocked;
 	}
 
 	const Ref<Log> Log::GetInstace()
@@ -27,11 +32,11 @@ namespace Hyperion
 
 		m_MessageQueue = std::queue<std::pair<Level, std::string>>();
 
-		m_CoreLogger = CreateRef<Logger>(&m_MessageQueue);
+		m_CoreLogger = CreateRef<Logger>(m_MessageQueue);
 		m_CoreLogger->SetName("Core");
 		m_CoreLogger->SetLevel(Level::HP_LEVEL_ALL);
 
-		m_ClientLogger = CreateRef<Logger>(&m_MessageQueue);
+		m_ClientLogger = CreateRef<Logger>(m_MessageQueue);
 		m_ClientLogger->SetName("Client");
 		m_ClientLogger->SetLevel(Level::HP_LEVEL_ALL);
 
@@ -49,6 +54,7 @@ namespace Hyperion
 		while (m_Running)
 			while (m_MessageQueue.size() > 0)
 			{
+				m_Blocked = true;
 				std::pair<Level, std::string> message = m_MessageQueue.front();
 				switch (message.first)
 				{
@@ -76,9 +82,10 @@ namespace Hyperion
 				struct tm localTime;
 				localtime_s(&localTime, &time);
 
-				std::cout << "[" << (localTime.tm_hour < 10 ? "0" : "") << localTime.tm_hour << ":" << (localTime.tm_min < 10 ? "0" : "") << localTime.tm_min << ":" << (localTime.tm_sec < 10 ? "0" : "") << localTime.tm_sec << "] " << message.second.c_str();
+				printf("[%c%i:%c%i:%c%i] %s", (localTime.tm_hour < 10 ? '0' : '\0'), localTime.tm_hour,(localTime.tm_min < 10 ? '0' : '\0'), localTime.tm_min, (localTime.tm_sec < 10 ? '0' : '\0'), localTime.tm_sec, message.second.c_str());
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 				m_MessageQueue.pop();
+				m_Blocked = false;
 			}
 	}
 }

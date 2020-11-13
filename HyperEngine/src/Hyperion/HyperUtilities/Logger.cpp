@@ -4,7 +4,7 @@
 
 namespace Hyperion {
 
-	Logger::Logger(std::queue<std::pair<Level, std::string>>* messageQueue)
+	Logger::Logger(std::queue<std::pair<Level, std::string>>& messageQueue)
 		: m_Name("Example Logger Name"), m_Level(Level::HP_LEVEL_ALL), m_MessageQueue(messageQueue)
 	{
 	}
@@ -48,7 +48,7 @@ namespace Hyperion {
 		std::stringstream ss;
 		ss << m_Name << " " << ConvertLevelToString(level) << ": " << format << std::endl;
 
-		m_MessageQueue->push(std::make_pair(level, ss.str()));
+		m_MessageQueue.push(std::make_pair(level, ss.str()));
 	}
 
 	std::string Logger::ConvertLevelToString(Level level)
