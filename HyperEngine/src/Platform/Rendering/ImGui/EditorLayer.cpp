@@ -68,8 +68,6 @@ namespace Hyperion
 	{
 		ShowDockingMenu();
 
-		ImGui::ShowDemoWindow();
-
 		m_SceneHierarchyPanel->OnRender();
 
 		ImGuiStyle& style = ImGui::GetStyle();
