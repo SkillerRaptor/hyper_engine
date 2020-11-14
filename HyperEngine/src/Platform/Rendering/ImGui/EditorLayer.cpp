@@ -68,6 +68,8 @@ namespace Hyperion
 	{
 		ShowDockingMenu();
 
+		ImGui::ShowDemoWindow();
+
 		m_SceneHierarchyPanel->OnRender();
 
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -113,9 +115,7 @@ namespace Hyperion
 		ImGui::PopStyleVar();
 
 		ImGui::Begin("Assets");
-		ImGui::PushTextWrapPos();
-		ImGui::Text("Assets Browser");
-		ImGui::PopTextWrapPos();
+		ShowAssetsMenu();
 		ImGui::End();
 
 		ImGui::Begin("Console");
@@ -166,7 +166,7 @@ namespace Hyperion
 		style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 		style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 		style.Colors[ImGuiCol_WindowBg] = ImVec4(0.06f, 0.06f, 0.06f, 0.94f);
-		style.Colors[ImGuiCol_ChildBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.00f);
+		style.Colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
 		style.Colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
 		style.Colors[ImGuiCol_Border] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
 		style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
@@ -189,7 +189,7 @@ namespace Hyperion
 		style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.42f, 0.42f, 0.42f, 1.00f);
 		style.Colors[ImGuiCol_Header] = ImVec4(0.70f, 0.70f, 0.70f, 0.31f);
 		style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-		style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.48f, 0.50f, 0.52f, 1.00f);
+		style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 		style.Colors[ImGuiCol_Separator] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
 		style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.72f, 0.72f, 0.72f, 0.78f);
 		style.Colors[ImGuiCol_SeparatorActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
@@ -214,6 +214,11 @@ namespace Hyperion
 		pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
 		ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
 		ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false, 5.0f);
+	}
+
+	void EditorLayer::ShowAssetsMenu()
+	{
+
 	}
 
 	void EditorLayer::ShowDockingMenu()
@@ -281,7 +286,7 @@ namespace Hyperion
 		if (ImGui::IsItemHovered())
 			DrawSelection();
 
-		if (ImGui::MenuItem("Open", "Ctrl+O")) 
+		if (ImGui::MenuItem("Open", "Ctrl+O"))
 			OpenScene();
 		if (ImGui::IsItemHovered())
 			DrawSelection();
@@ -388,32 +393,32 @@ namespace Hyperion
 				bool controlPressed = Input::IsKeyPressed(KeyCode::LeftControl) || Input::IsKeyPressed(KeyCode::RightControl);
 				bool shiftPressed = Input::IsKeyPressed(KeyCode::LeftShift) || Input::IsKeyPressed(KeyCode::RightShift);
 
-				switch(event.GetKeyCode())
+				switch (event.GetKeyCode())
 				{
-					case KeyCode::N:
+				case KeyCode::N:
+				{
+					if (controlPressed)
+						NewScene();
+					break;
+				}
+				case KeyCode::O:
+				{
+					if (controlPressed)
+						OpenScene();
+					break;
+				}
+				case KeyCode::S:
+				{
+					if (controlPressed)
 					{
-						if (controlPressed)
-							NewScene();
-						break;
-					}
-					case KeyCode::O:
-					{
-						if (controlPressed)
-							OpenScene();
-						break;
-					}
-					case KeyCode::S:
-					{
-						if (controlPressed)
+						if (shiftPressed)
 						{
-							if (shiftPressed)
-							{
-								SaveAsScene();
-								break;
-							}
-							SaveScene();
+							SaveAsScene();
+							break;
 						}
-						break;
+						SaveScene();
+					}
+					break;
 				}
 				default:
 					break;

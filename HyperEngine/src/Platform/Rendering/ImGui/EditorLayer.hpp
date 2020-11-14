@@ -3,10 +3,10 @@
 #include <imgui.h>
 
 #include "EditorRenderer.hpp"
+#include "SceneHierarchyPanel.hpp"
 #include "HyperCore/Core.hpp"
 #include "HyperECS/Entity.hpp"
 #include "HyperECS/Scene/Scene.hpp"
-#include "HyperECS/Scene/SceneHierarchyPanel.hpp"
 #include "HyperLayer/OverlayLayer.hpp"
 #include "HyperUtilities/Timestep.hpp"
 
@@ -40,6 +40,8 @@ namespace Hyperion
 		void SetupStyle();
 
 		void DrawSelection();
+
+		void ShowAssetsMenu();
 
 		void ShowDockingMenu();
 		void ShowMenuFile();

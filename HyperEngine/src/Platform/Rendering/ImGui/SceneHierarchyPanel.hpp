@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Scene.hpp"
 #include "HyperCore/Core.hpp"
 #include "HyperECS/Entity.hpp"
+#include "HyperECS/Scene/Scene.hpp"
 
 namespace Hyperion
 {
@@ -10,7 +10,6 @@ namespace Hyperion
 	{
 	private:
 		Ref<Scene> m_Context;
-		bool m_GlobalPopupOpen = false;
 		bool m_AddComponentPopupOpen = false;
 		bool m_RemoveComponentPopupOpen = false;
 		Entity m_SelectedEntity = { 0, nullptr };
