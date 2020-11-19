@@ -52,11 +52,16 @@ namespace Hyperion
 		Mat4 TransformationMatrix = Mat4(1.0f);
 
 		bool Primary;
+		enum class CameraTypeInfo
+		{
+			ORTHOGRAPHIC,
+			PROJECTION
+		} CameraType;
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
-		CameraComponent(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, bool primary)
-			: Width(width), Height(height), Zoom(zoom), NearPlane(nearPlane), FarPlane(farPlane), Primary(primary) {}
+		CameraComponent(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, bool primary, CameraTypeInfo cameraType)
+			: Width(width), Height(height), Zoom(zoom), NearPlane(nearPlane), FarPlane(farPlane), Primary(primary), CameraType(cameraType) {}
 	};
 
 	struct CameraControllerComponent
