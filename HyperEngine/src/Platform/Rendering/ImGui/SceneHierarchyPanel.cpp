@@ -255,7 +255,7 @@ namespace Hyperion
 			Registry& registry = m_Context->GetRegistry();
 
 			DrawAddComponentMenu<SpriteRendererComponent>(Vec4(1.0f));
-			DrawAddComponentMenu<CameraComponent>(1280, 720, 5.0f, 0.1f, 1.0f, false);
+			DrawAddComponentMenu<CameraComponent>(1280, 720, 5.0f, 0.1f, 1.0f, false, CameraComponent::CameraTypeInfo::ORTHOGRAPHIC);
 			DrawAddComponentMenu<CameraControllerComponent>(0.1f, 1.0f);
 			DrawAddComponentMenu<CharacterControllerComponent>(1.0f);
 

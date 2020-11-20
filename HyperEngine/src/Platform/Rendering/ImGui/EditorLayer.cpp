@@ -32,7 +32,7 @@ namespace Hyperion
 		squareOne.AddComponent<SpriteRendererComponent>(Vec4(1.0f, 0.0f, 0.0f, 1.0f));
 		squareTwo.AddComponent<SpriteRendererComponent>(Vec4(0.0f, 1.0f, 0.0f, 1.0f));
 		squareThree.AddComponent<SpriteRendererComponent>(Vec4(0.0f, 0.0f, 1.0f, 1.0f));
-		m_CameraEntity.AddComponent<CameraComponent>(1280, 720, 5.0f, 0.1f, 1.0f, true);
+		m_CameraEntity.AddComponent<CameraComponent>(1280, 720, 5.0f, 0.1f, 1.0f, true, CameraComponent::CameraTypeInfo::ORTHOGRAPHIC);
 		m_CameraEntity.AddComponent<CameraControllerComponent>(10.0f, 1.0f);
 
 		ImGui::CreateContext();
