@@ -5,7 +5,7 @@
 
 #include "HyperUtilities/NonCopyable.hpp"
 #include "HyperUtilities/NonMoveable.hpp"
-#include "HyperUtilities/HyperStructures/HyperStackLinkedList.hpp"
+#include "HyperUtilities/StackLinkedList.hpp"
 
 namespace Hyperion
 {
@@ -14,8 +14,8 @@ namespace Hyperion
 	private:
 		struct FreeHeader {};
 
-		HyperStackLinkedList<FreeHeader> m_FreeList;
-		using Node = HyperStackLinkedList<FreeHeader>::Node;
+		StackLinkedList<FreeHeader> m_FreeList;
+		using Node = StackLinkedList<FreeHeader>::Node;
 
 		void* m_StartPtr = nullptr;
 		size_t m_TotalSize = 0;

@@ -4,7 +4,7 @@
 
 namespace Hyperion
 {
-	class HyperMaterial
+	class Material
 	{
 	private:
 		uint32_t m_Shader;
@@ -16,7 +16,7 @@ namespace Hyperion
 		float m_Shininess;
 
 	public:
-		HyperMaterial(uint32_t shader);
+		Material(uint32_t shader);
 
 		void Bind();
 

@@ -3,7 +3,7 @@
 namespace Hyperion
 {
 	template <typename T>
-	class HyperSinglyLinkedList
+	class SinglyLinkedList
 	{
 	public:
 		struct Node
@@ -16,8 +16,8 @@ namespace Hyperion
 		Node* m_Head;
 
 	public:
-		HyperSinglyLinkedList() = default;
-		HyperSinglyLinkedList(const HyperSinglyLinkedList& other) = default;
+		SinglyLinkedList() = default;
+		SinglyLinkedList(const SinglyLinkedList& other) = default;
 
 		void Insert(Node* previousNode, Node* newNode)
 		{

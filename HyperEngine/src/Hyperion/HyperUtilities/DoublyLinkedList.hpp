@@ -3,7 +3,7 @@
 namespace Hyperion
 {
 	template <typename T>
-	class HyperDoublyLinkedList
+	class DoublyLinkedList
 	{
 	public:
 		struct Node
@@ -17,8 +17,8 @@ namespace Hyperion
 		Node* m_Head;
 
 	public:
-		HyperDoublyLinkedList() = default;
-		HyperDoublyLinkedList(const HyperDoublyLinkedList& other) = default;
+		DoublyLinkedList() = default;
+		DoublyLinkedList(const DoublyLinkedList& other) = default;
 
 		void Insert(Node* previousNode, Node* newNode)
 		{
