@@ -49,8 +49,8 @@ namespace Hyperion
 		virtual void SetMatrix3(uint32_t handle, const std::string& name, const Mat3& matrix) = 0;
 		virtual void SetMatrix4(uint32_t handle, const std::string& name, const Mat4& matrix) = 0;
 
-		virtual std::string GetVertexShaderPath(uint32_t handle) = 0;
-		virtual std::string GetFragmentShaderPath(uint32_t handle) = 0;
-		virtual std::string GetGeometryShaderPath(uint32_t handle) = 0;
+		virtual const std::string GetVertexShaderPath(uint32_t handle) = 0;
+		virtual const std::string GetFragmentShaderPath(uint32_t handle) = 0;
+		virtual const std::string GetGeometryShaderPath(uint32_t handle) = 0;
 	};
 }

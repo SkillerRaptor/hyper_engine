@@ -148,6 +148,20 @@ namespace Hyperion
 		return m_Textures[handle].Height;
 	}
 
+	void OpenGL46TextureManager::SetTextureType(uint32_t handle, TextureType textureType)
+	{
+		if (m_Textures.find(handle) == m_Textures.end())
+			return;
+		m_Textures[handle].TextureType = textureType;
+	}
+
+	TextureType OpenGL46TextureManager::GetTextureType(uint32_t handle)
+	{
+		if (m_Textures.find(handle) == m_Textures.end())
+			return TextureType::DEFAULT;
+		return m_Textures[handle].TextureType;
+	}
+
 	uint8_t OpenGL46TextureManager::GetChannels(uint32_t handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
@@ -162,25 +176,11 @@ namespace Hyperion
 		return m_Textures[handle].Data;
 	}
 
-	const std::string OpenGL46TextureManager::GetPath(uint32_t handle)
+	const std::string& OpenGL46TextureManager::GetPath(uint32_t handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return std::string();
 		return m_Textures[handle].Path;
-	}
-
-	void OpenGL46TextureManager::SetTextureType(uint32_t handle, TextureType textureType)
-	{
-		if (m_Textures.find(handle) == m_Textures.end())
-			return;
-		m_Textures[handle].TextureType = textureType;
-	}
-
-	TextureType OpenGL46TextureManager::GetTextureType(uint32_t handle)
-	{
-		if (m_Textures.find(handle) == m_Textures.end())
-			return TextureType::DEFAULT;
-		return m_Textures[handle].TextureType;
 	}
 
 	TextureData* OpenGL46TextureManager::GetTextureData(uint32_t handle)

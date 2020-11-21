@@ -27,8 +27,6 @@ namespace Hyperion
 		WindowDataInfo m_WindowDataInfo;
 
 	public:
-		Window(const WindowPropsInfo& windowProps)
-			: m_RenderContext(nullptr), m_GraphicsAPI(GraphicsAPI::OPENGL_33), m_WindowDataInfo({ windowProps.Title, windowProps.Width, windowProps.Height, 0, 0, false, windowProps.EventBus }) {}
 		virtual ~Window() = default;
 
 		virtual void Init() = 0;
@@ -57,9 +55,14 @@ namespace Hyperion
 		virtual bool IsVSync() const = 0;
 
 		virtual void* GetWindow() = 0;
+
 		Ref<RenderContext> GetContext() const { return m_RenderContext; };
 		const WindowDataInfo& GetWindowDataInfo() const { return m_WindowDataInfo; };
 
 		static Ref<Window> Construct(const WindowPropsInfo& windowPropsInfo);
+
+	protected:
+		Window(const WindowPropsInfo& windowProps)
+			: m_RenderContext(nullptr), m_GraphicsAPI(GraphicsAPI::OPENGL_33), m_WindowDataInfo({ windowProps.Title, windowProps.Width, windowProps.Height, 0, 0, false, windowProps.EventBus }) {}
 	};
 }

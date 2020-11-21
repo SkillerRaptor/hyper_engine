@@ -242,21 +242,21 @@ namespace Hyperion
 		glProgramUniformMatrix4fv(m_Shaders[handle].ShaderId, GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
 	}
 
-	std::string OpenGL46ShaderManager::GetVertexShaderPath(uint32_t handle)
+	const std::string OpenGL46ShaderManager::GetVertexShaderPath(uint32_t handle)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return "";
 		return m_Shaders[handle].VertexShaderPath;
 	}
 
-	std::string OpenGL46ShaderManager::GetFragmentShaderPath(uint32_t handle)
+	const std::string OpenGL46ShaderManager::GetFragmentShaderPath(uint32_t handle)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return "";
 		return m_Shaders[handle].FragmentShaderPath;
 	}
 
-	std::string OpenGL46ShaderManager::GetGeometryShaderPath(uint32_t handle)
+	const std::string OpenGL46ShaderManager::GetGeometryShaderPath(uint32_t handle)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return "";
@@ -315,7 +315,7 @@ namespace Hyperion
 		return false;
 	}
 
-	uint32_t OpenGL46ShaderManager::GetUniformLocation(OpenGLShaderData& shaderData, std::string name)
+	uint32_t OpenGL46ShaderManager::GetUniformLocation(OpenGLShaderData& shaderData, const std::string& name)
 	{
 		if (shaderData.UniformCache.find(name) == shaderData.UniformCache.end())
 			shaderData.UniformCache[name] = glGetUniformLocation(shaderData.ShaderId, name.c_str());

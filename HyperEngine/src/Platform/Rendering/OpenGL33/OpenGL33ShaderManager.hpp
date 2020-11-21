@@ -46,14 +46,14 @@ namespace Hyperion
 		virtual void SetMatrix3(uint32_t handle, const std::string& name, const Mat3& matrix) override;
 		virtual void SetMatrix4(uint32_t handle, const std::string& name, const Mat4& matrix) override;
 
-		virtual std::string GetVertexShaderPath(uint32_t handle) override;
-		virtual std::string GetFragmentShaderPath(uint32_t handle) override;
-		virtual std::string GetGeometryShaderPath(uint32_t handle) override;
+		virtual const std::string GetVertexShaderPath(uint32_t handle) override;
+		virtual const std::string GetFragmentShaderPath(uint32_t handle) override;
+		virtual const std::string GetGeometryShaderPath(uint32_t handle) override;
 
 	private:
 		bool GenerateShader(OpenGLShaderData& shaderData, const char* vertexCode, const char* fragmentCode, const char* geometryCode);
 		bool CheckShaderErrors(uint32_t id, uint32_t shader);
 		bool CheckProgramErrors(OpenGLShaderData& shaderData);
-		uint32_t GetUniformLocation(OpenGLShaderData& shaderData, std::string name);
+		uint32_t GetUniformLocation(OpenGLShaderData& shaderData, const std::string& name);
 	};
 }

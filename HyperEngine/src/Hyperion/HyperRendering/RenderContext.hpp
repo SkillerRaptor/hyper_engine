@@ -60,8 +60,6 @@ namespace Hyperion
 		friend class WindowsWindow;
 
 	public:
-		RenderContext(GraphicsAPI graphicsAPI)
-			: m_Window(nullptr), m_GraphicsAPI(graphicsAPI), m_ImGuiEditorSizeInfo({}), m_ImGuiGameSizeInfo({}) {}
 		virtual ~RenderContext() = default;
 
 		virtual void PreInit() = 0;
@@ -83,5 +81,9 @@ namespace Hyperion
 		Ref<TextureManager> GetTextureManager() { return m_TextureManager; };
 
 		static Ref<RenderContext> Construct(GraphicsAPI graphicsAPI, std::string& title);
+
+	protected:
+		RenderContext(GraphicsAPI graphicsAPI)
+			: m_Window(nullptr), m_GraphicsAPI(graphicsAPI), m_ImGuiEditorSizeInfo({}), m_ImGuiGameSizeInfo({}) {}
 	};
 }
