@@ -116,12 +116,6 @@ namespace Hyperion
 		ShowAssetsMenu();
 		ImGui::End();
 
-		ImGui::Begin("Console");
-		ImGui::PushTextWrapPos();
-		ImGui::Text("Here you can see your Console log.");
-		ImGui::PopTextWrapPos();
-		ImGui::End();
-
 		ImGui::PopFont();
 
 		ImGui::Render();
@@ -249,13 +243,16 @@ namespace Hyperion
 			ImGuiID dockMainId = dockspaceId;
 
 			ImGuiID dockLeftId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Left, 0.15f, nullptr, &dockMainId);
+
+			ImGuiID dockLeftTopId = ImGui::DockBuilderSplitNode(dockLeftId, ImGuiDir_Up, 0.5f, nullptr, &dockLeftId);
+			ImGuiID dockLeftDownId = ImGui::DockBuilderSplitNode(dockLeftId, ImGuiDir_Down, 0.5f, nullptr, &dockLeftId);
+
 			ImGuiID dockRightId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Right, 0.275f, nullptr, &dockMainId);
 			ImGuiID dockDownId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.2f, nullptr, &dockMainId);
 
-			ImGui::DockBuilderDockWindow("Hierarchy", dockLeftId);
+			ImGui::DockBuilderDockWindow("Hierarchy", dockLeftTopId);
 			ImGui::DockBuilderDockWindow("Inspector", dockRightId);
-			ImGui::DockBuilderDockWindow("Console", dockDownId);
-			ImGui::DockBuilderDockWindow("Assets", dockDownId);
+			ImGui::DockBuilderDockWindow("Assets", dockLeftDownId);
 			ImGui::DockBuilderDockWindow("Game", dockMainId);
 			ImGui::DockBuilderDockWindow("Editor", dockMainId);
 
