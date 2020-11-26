@@ -1,10 +1,6 @@
 name: build
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [ push, pull_request ]
 
 jobs:
   build:
@@ -14,6 +10,8 @@ jobs:
         shell: cmd
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: recursive
 
     - name: Generate Project Files
       run: ./scripts/Win-GenProjects.bat
