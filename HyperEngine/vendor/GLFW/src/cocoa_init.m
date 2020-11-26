@@ -251,7 +251,7 @@ static void createKeyTables(void)
     _glfw.ns.keycodes[0x6D] = GLFW_KEY_F10;
     _glfw.ns.keycodes[0x67] = GLFW_KEY_F11;
     _glfw.ns.keycodes[0x6F] = GLFW_KEY_F12;
-    _glfw.ns.keycodes[0x69] = GLFW_KEY_F13;
+    _glfw.ns.keycodes[0x69] = GLFW_KEY_PRINT_SCREEN;
     _glfw.ns.keycodes[0x6B] = GLFW_KEY_F14;
     _glfw.ns.keycodes[0x71] = GLFW_KEY_F15;
     _glfw.ns.keycodes[0x6A] = GLFW_KEY_F16;
@@ -431,9 +431,8 @@ static GLFWbool initializeTIS(void)
         // In case we are unbundled, make us a proper UI application
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 
-        // Menu bar setup must go between sharedApplication above and
-        // finishLaunching below, in order to properly emulate the behavior
-        // of NSApplicationMain
+        // Menu bar setup must go between sharedApplication and finishLaunching
+        // in order to properly emulate the behavior of NSApplicationMain
 
         if ([[NSBundle mainBundle] pathForResource:@"MainMenu" ofType:@"nib"])
         {
@@ -448,9 +447,8 @@ static GLFWbool initializeTIS(void)
 
 - (void)applicationDidFinishLaunching:(NSNotification *)notification
 {
-    [NSApp stop:nil];
-
     _glfwPlatformPostEmptyEvent();
+    [NSApp stop:nil];
 }
 
 - (void)applicationDidHide:(NSNotification *)notification
@@ -462,6 +460,32 @@ static GLFWbool initializeTIS(void)
 }
 
 @end // GLFWApplicationDelegate
+
+
+//////////////////////////////////////////////////////////////////////////
+//////                       GLFW internal API                      //////
+//////////////////////////////////////////////////////////////////////////
+
+void* _glfwLoadLocalVulkanLoaderNS(void)
+{
+    CFBundleRef bundle = CFBundleGetMainBundle();
+    if (!bundle)
+        return NULL;
+
+    CFURLRef url =
+        CFBundleCopyAuxiliaryExecutableURL(bundle, CFSTR("libvulkan.1.dylib"));
+    if (!url)
+        return NULL;
+
+    char path[PATH_MAX];
+    void* handle = NULL;
+
+    if (CFURLGetFileSystemRepresentation(url, true, (UInt8*) path, sizeof(path) - 1))
+        handle = _glfw_dlopen(path);
+
+    CFRelease(url);
+    return handle;
+}
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -477,9 +501,6 @@ int _glfwPlatformInit(void)
     [NSThread detachNewThreadSelector:@selector(doNothing:)
                              toTarget:_glfw.ns.helper
                            withObject:nil];
-
-    if (NSApp)
-        _glfw.ns.finishedLaunching = GLFW_TRUE;
 
     [NSApplication sharedApplication];
 
@@ -530,9 +551,12 @@ int _glfwPlatformInit(void)
         return GLFW_FALSE;
 
     _glfwInitTimerNS();
-    _glfwInitJoysticksNS();
 
     _glfwPollMonitorsNS();
+
+    if (![[NSRunningApplication currentApplication] isFinishedLaunching])
+        [NSApp run];
+
     return GLFW_TRUE;
 
     } // autoreleasepool
@@ -580,7 +604,6 @@ void _glfwPlatformTerminate(void)
     free(_glfw.ns.clipboardString);
 
     _glfwTerminateNSGL();
-    _glfwTerminateJoysticksNS();
 
     } // autoreleasepool
 }

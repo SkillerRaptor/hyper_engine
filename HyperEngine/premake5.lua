@@ -26,7 +26,7 @@ project "HyperEngine"
 		"src",
 		"src/Hyperion",
 		"%{IncludeDir.Glad}",
-		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.glfw}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.stb_image}",
@@ -41,7 +41,7 @@ project "HyperEngine"
 	links
 	{
 		"Glad",
-		"GLFW",
+		"glfw",
 		"ImGui",
 		"ImGuizmo",
 		"vulkan",

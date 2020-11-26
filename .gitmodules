@@ -1,0 +1,9 @@
+[submodule "HyperEngine/vendor/glfw"]
+	path = HyperEngine/vendor/glfw
+	url = https://github.com/SkillerRaptor/glfw
+[submodule "HyperEngine/vendor/ImGui"]
+	path = HyperEngine/vendor/ImGui
+	url = https://github.com/SkillerRaptor/ImGui
+[submodule "HyperEngine/vendor/ImGuizmo"]
+	path = HyperEngine/vendor/ImGuizmo
+	url = https://github.com/SkillerRaptor/ImGuizmo
