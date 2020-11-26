@@ -4,6 +4,7 @@
 [submodule "HyperEngine/vendor/ImGui"]
 	path = HyperEngine/vendor/ImGui
 	url = https://github.com/SkillerRaptor/ImGui
+	branch = docking
 [submodule "HyperEngine/vendor/glfw"]
 	path = HyperEngine/vendor/glfw
 	url = https://github.com/SkillerRaptor/glfw
