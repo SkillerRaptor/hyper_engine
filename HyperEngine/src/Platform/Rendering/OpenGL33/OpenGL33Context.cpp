@@ -44,7 +44,7 @@ namespace Hyperion
 		m_Renderer2D->SetShaderManager(m_ShaderManager);
 		m_Renderer2D->SetTextureManager(m_TextureManager);
 
-		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
+		glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 	}
 
 	void OpenGL33Context::Shutdown()
