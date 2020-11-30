@@ -340,6 +340,7 @@ namespace Hyperion
 			for (ComponentIndex component : components)
 				if (component.Handle == componentId)
 					return *static_cast<T*>(m_Components[componentId][component.Index]);
+			return *static_cast<T*>(m_Components[componentId][0]);
 		}
 
 		/**
