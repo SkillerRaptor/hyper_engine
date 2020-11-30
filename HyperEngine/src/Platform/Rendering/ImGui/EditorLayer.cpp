@@ -15,25 +15,26 @@
 namespace Hyperion
 {
 	EditorLayer::EditorLayer(Ref<Scene> scene)
-		: OverlayLayer("Editor Layer"), m_Scene(scene)
+		: OverlayLayer("Editor Layer"), m_Scene(scene), m_EditorCamera(Vec3(0.0f), Vec2(1280.0f, 720.0f), 10.0f, 1.0f, 1.0f, -1.0f, 1000.0f, true)
 	{
 	}
 
 	void EditorLayer::OnAttach()
 	{
+		m_EditorCamera.m_ShaderManager = m_RenderContext->GetShaderManager();
+		m_EditorCamera.UpdateProjectionMatrix();
+		m_EditorCamera.UpdateViewMatrix();
+
 		m_EditorRenderer = EditorRenderer::Construct(m_RenderContext);
 		m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>(m_Scene);
 
 		HyperEntity squareOne = m_Scene->CreateEntity("Square One");
 		HyperEntity squareTwo = m_Scene->CreateEntity("Square Two");
 		HyperEntity squareThree = m_Scene->CreateEntity("Square Three");
-		m_CameraEntity = m_Scene->CreateEntity("Camera");
 
 		squareOne.AddComponent<SpriteRendererComponent>(Vec4(1.0f, 0.0f, 0.0f, 1.0f));
 		squareTwo.AddComponent<SpriteRendererComponent>(Vec4(0.0f, 1.0f, 0.0f, 1.0f));
 		squareThree.AddComponent<SpriteRendererComponent>(Vec4(0.0f, 0.0f, 1.0f, 1.0f));
-		m_CameraEntity.AddComponent<CameraComponent>(1280, 720, 5.0f, 0.1f, 1.0f, true, CameraComponent::CameraTypeInfo::ORTHOGRAPHIC);
-		m_CameraEntity.AddComponent<CameraControllerComponent>(10.0f, 1.0f);
 
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
@@ -55,7 +56,9 @@ namespace Hyperion
 
 	void EditorLayer::OnUpdate(Timestep timeStep)
 	{
+		m_EditorCamera.OnUpdate(timeStep);
 		m_EditorRenderer->OnUpdate(timeStep);
+
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGuizmo::SetOrthographic(true);
@@ -82,13 +85,7 @@ namespace Hyperion
 		imGuiEditorSizeInfo.Width = static_cast<uint32_t>(ImGui::GetWindowSize().x);
 		imGuiEditorSizeInfo.Height = static_cast<uint32_t>(ImGui::GetWindowSize().y);
 
-		// TODO: Adding second Camera for Editor
-
-		m_Scene->GetWorld().Each<CameraComponent>([&](Entity entity, CameraComponent& cameraComponent)
-			{
-				cameraComponent.Width = static_cast<uint32_t>(ImGui::GetWindowSize().x);
-				cameraComponent.Height = static_cast<uint32_t>(ImGui::GetWindowSize().y);
-			});
+		m_EditorCamera.SetViewportSize(Vec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y));
 
 		m_EditorRenderer->RenderImage();
 
@@ -103,8 +100,6 @@ namespace Hyperion
 		imGuiGameSizeInfo.YPos = static_cast<uint32_t>(ImGui::GetWindowPos().y);
 		imGuiGameSizeInfo.Width = static_cast<uint32_t>(ImGui::GetWindowSize().x);
 		imGuiGameSizeInfo.Height = static_cast<uint32_t>(ImGui::GetWindowSize().y);
-
-		// TODO: Adding Game Camera
 
 		m_EditorRenderer->RenderImage();
 
@@ -381,6 +376,7 @@ namespace Hyperion
 	void EditorLayer::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
+
 		dispatcher.Dispatch<KeyPressedEvent>([&](KeyPressedEvent& event)
 			{
 				if (event.GetRepeatCount() > 0)
@@ -421,5 +417,7 @@ namespace Hyperion
 				}
 				return true;
 			});
+
+		m_EditorCamera.OnEvent(event);
 	}
 }

@@ -13,20 +13,8 @@ namespace Hyperion
 
 		virtual void OnUpdate(Registry& registry, Timestep timeStep) override
 		{
-			CameraInfo cameraInfo{};
-			registry.Each<CameraComponent, TransformComponent>([&](Entity entity, CameraComponent& cameraComponent, TransformComponent& transform)
-				{
-					cameraInfo.Position = transform.Position;
-					cameraInfo.Width = cameraComponent.Width;
-					cameraInfo.Height = cameraComponent.Height;
-					cameraInfo.Zoom = cameraComponent.Zoom;
-					cameraInfo.NearPlane = cameraComponent.NearPlane;
-					cameraInfo.FarPlane = cameraComponent.FarPlane;
-				});
-
-			m_Renderer2D->BeginScene(cameraInfo);
-
-			registry.Each<TagComponent, SpriteRendererComponent, TransformComponent>([&](Entity entity, TagComponent& tagComponent, SpriteRendererComponent& spriteRenderer, TransformComponent& transform)
+			m_Renderer2D->BeginScene();
+			registry.Each<SpriteRendererComponent, TransformComponent>([&](Entity entity, SpriteRendererComponent& spriteRenderer, TransformComponent& transform)
 				{
 					m_Renderer2D->DrawQuad(transform.Position, transform.Rotation, transform.Scale, spriteRenderer.Color);
 				});

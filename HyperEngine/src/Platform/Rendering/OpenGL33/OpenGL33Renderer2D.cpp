@@ -51,14 +51,8 @@ namespace Hyperion
 		delete[] m_QuadVertexBufferBase;
 	}
 
-	void OpenGL33Renderer2D::BeginScene(CameraInfo cameraInfo)
+	void OpenGL33Renderer2D::BeginScene()
 	{
-		float aspectRatio = (float)cameraInfo.Width / cameraInfo.Height;
-
-		m_ShaderManager->UseShader(0);
-		m_ShaderManager->SetMatrix4(0, "u_ProjectionMatrix", Matrix::Ortho(-aspectRatio * cameraInfo.Zoom, aspectRatio * cameraInfo.Zoom, -cameraInfo.Zoom, cameraInfo.Zoom, cameraInfo.NearPlane, cameraInfo.FarPlane));
-		m_ShaderManager->SetMatrix4(0, "u_TransformationMatrix", Matrix::Translate(Mat4(1.0f), Vector::Inverse(cameraInfo.Position)));
-
 		StartBatch();
 	}
 

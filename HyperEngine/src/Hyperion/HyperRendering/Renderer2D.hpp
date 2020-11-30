@@ -33,7 +33,7 @@ namespace Hyperion
 		Renderer2D() = default;
 		virtual ~Renderer2D() = default;
 
-		virtual void BeginScene(CameraInfo cameraInfo) = 0;
+		virtual void BeginScene() = 0;
 		virtual void EndScene() = 0;
 
 		virtual void Flush() = 0;

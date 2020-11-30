@@ -2,6 +2,7 @@
 
 #include <imgui.h>
 
+#include "EditorCamera.hpp"
 #include "EditorRenderer.hpp"
 #include "SceneHierarchyPanel.hpp"
 #include "HyperCore/Core.hpp"
@@ -20,7 +21,8 @@ namespace Hyperion
 		Ref<Scene> m_Scene;
 		Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
 		ImFont* m_Font;
-		HyperEntity m_CameraEntity = { Entity(), nullptr };
+
+		EditorCamera m_EditorCamera;
 
 	public:
 		EditorLayer(Ref<Scene> scene);

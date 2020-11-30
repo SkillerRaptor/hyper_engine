@@ -25,7 +25,7 @@ namespace Hyperion
 		OpenGL46Renderer2D();
 		~OpenGL46Renderer2D();
 
-		virtual void BeginScene(CameraInfo cameraInfo) override;
+		virtual void BeginScene() override;
 		virtual void EndScene() override;
 
 		virtual void Flush() override;
