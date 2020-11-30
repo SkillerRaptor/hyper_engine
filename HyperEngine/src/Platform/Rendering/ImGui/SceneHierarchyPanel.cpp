@@ -24,32 +24,32 @@ namespace Hyperion
 		ImGui::SetNextItemOpen(true);
 		if (ImGui::TreeNodeEx(m_Context->GetName().c_str(), flags))
 		{
-			m_Context->Each([&](Entity entity)
+			m_Context->Each([&](HyperEntity entity)
 				{
 					DrawEntityNode(entity);
 				});
 
 			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-				m_SelectedEntity = { 0, nullptr };
+				m_SelectedEntity = { Entity(), nullptr };
 
 			ImGui::TreePop();
 		}
 		ImGui::End();
 
 		ImGui::Begin("Inspector");
-		if (m_SelectedEntity.GetEntityHandle() != 0)
+		if (m_SelectedEntity.GetEntityHandle().IsHandleValid())
 			DrawComponents();
 		ImGui::End();
 	}
 
-	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
+	void SceneHierarchyPanel::DrawEntityNode(HyperEntity entity)
 	{
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
+		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(size_t)entity, flags, tag.c_str());
 
-		if ((uint32_t)m_SelectedEntity == (uint32_t)entity)
+		if ((size_t)m_SelectedEntity == (size_t)entity)
 			DrawSelection();
 
 		if (ImGui::IsItemHovered())
@@ -76,9 +76,9 @@ namespace Hyperion
 
 	void SceneHierarchyPanel::DrawComponents()
 	{
-		Registry& registry = m_Context->GetRegistry();
+		World& registry = m_Context->GetWorld();
 
-		Entity& entity = m_SelectedEntity;
+		HyperEntity& entity = m_SelectedEntity;
 
 		ImGui::PushItemWidth(-1.0f);
 		if (entity.HasComponent<TagComponent>())
@@ -206,30 +206,6 @@ namespace Hyperion
 
 			DrawRemoveComponentPopup();
 		}
-
-		bool upComponent = false;
-		bool downComponent = false;
-
-		std::vector<uint32_t>& entities = m_Context->GetRegistry().GetEntities();
-		std::vector<uint32_t>::iterator position = std::find(entities.begin(), entities.end(), entity.GetEntityHandle());
-		uint64_t distance = std::abs(std::distance(entities.begin(), position));
-
-		if (distance > 0 && distance < (uint64_t)entities.size())
-			upComponent = true;
-
-		if (distance >= 0 && distance < (uint64_t)(entities.size() - 1))
-			downComponent = true;
-
-		if (upComponent)
-		{
-			if (ImGui::Button("Move Entity Up", ImVec2(downComponent ? ImGui::GetContentRegionAvailWidth() * 0.5f : ImGui::GetContentRegionAvailWidth(), 0.0f)))
-				std::iter_swap(position, position - 1);
-			if (downComponent) ImGui::SameLine();
-		}
-
-		if (downComponent)
-			if (ImGui::Button("Move Entity Down", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f)))
-				std::iter_swap(position, position + 1);
 	}
 
 	template<class T>
@@ -252,7 +228,7 @@ namespace Hyperion
 	{
 		if (ImGui::BeginPopup("ComponentAddPopup"))
 		{
-			Registry& registry = m_Context->GetRegistry();
+			World& world = m_Context->GetWorld();
 
 			DrawAddComponentMenu<SpriteRendererComponent>(Vec4(1.0f));
 			DrawAddComponentMenu<CameraComponent>(1280, 720, 5.0f, 0.1f, 1.0f, false, CameraComponent::CameraTypeInfo::ORTHOGRAPHIC);
@@ -267,7 +243,7 @@ namespace Hyperion
 	{
 		if (ImGui::BeginPopup("ComponentRemovePopup"))
 		{
-			Registry& registry = m_Context->GetRegistry();
+			World& registry = m_Context->GetWorld();
 
 			DrawRemoveComponentMenu<SpriteRendererComponent>();
 			DrawRemoveComponentMenu<CameraComponent>();

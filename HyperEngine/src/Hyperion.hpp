@@ -7,9 +7,8 @@
 
 /* Entity Component System */
 #include "Hyperion/HyperECS/Components.hpp"
-#include "Hyperion/HyperECS/Entity.hpp"
-#include "Hyperion/HyperECS/EntitySystem.hpp"
-#include "Hyperion/HyperECS/Registry.hpp"
+#include "Hyperion/HyperECS/HyperEntity.hpp"
+#include "Hyperion/HyperECS/HyperECS.hpp"
 
 /* Events */
 #include "Hyperion/HyperEvents/Event.hpp"

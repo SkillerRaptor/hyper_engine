@@ -24,9 +24,9 @@ namespace Hyperion
 		m_EditorRenderer = EditorRenderer::Construct(m_RenderContext);
 		m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>(m_Scene);
 
-		Entity squareOne = m_Scene->CreateEntity("Square One");
-		Entity squareTwo = m_Scene->CreateEntity("Square Two");
-		Entity squareThree = m_Scene->CreateEntity("Square Three");
+		HyperEntity squareOne = m_Scene->CreateEntity("Square One");
+		HyperEntity squareTwo = m_Scene->CreateEntity("Square Two");
+		HyperEntity squareThree = m_Scene->CreateEntity("Square Three");
 		m_CameraEntity = m_Scene->CreateEntity("Camera");
 
 		squareOne.AddComponent<SpriteRendererComponent>(Vec4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -82,8 +82,9 @@ namespace Hyperion
 		imGuiEditorSizeInfo.Width = static_cast<uint32_t>(ImGui::GetWindowSize().x);
 		imGuiEditorSizeInfo.Height = static_cast<uint32_t>(ImGui::GetWindowSize().y);
 
-		// TODO: Adding second Camera for Edtior
-		m_Scene->GetRegistry().Each<CameraComponent>([&](CameraComponent& cameraComponent)
+		// TODO: Adding second Camera for Editor
+
+		m_Scene->GetWorld().Each<CameraComponent>([&](Entity entity, CameraComponent& cameraComponent)
 			{
 				cameraComponent.Width = static_cast<uint32_t>(ImGui::GetWindowSize().x);
 				cameraComponent.Height = static_cast<uint32_t>(ImGui::GetWindowSize().y);

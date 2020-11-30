@@ -1,8 +1,8 @@
 #pragma once
 
 #include "HyperCore/Core.hpp"
-#include "HyperECS/Entity.hpp"
-#include "HyperECS/Scene/Scene.hpp"
+#include "HyperECS/HyperECS.hpp"
+#include "HyperECS/HyperEntity.hpp"
 
 namespace Hyperion
 {
@@ -12,7 +12,7 @@ namespace Hyperion
 		Ref<Scene> m_Context;
 		bool m_AddComponentPopupOpen = false;
 		bool m_RemoveComponentPopupOpen = false;
-		Entity m_SelectedEntity = { 0, nullptr };
+		HyperEntity m_SelectedEntity = { Entity(), nullptr };
 
 	public:
 		SceneHierarchyPanel(const Ref<Scene>& context);
@@ -23,7 +23,7 @@ namespace Hyperion
 		const Ref<Scene>& GetContext() const;
 
 	private:
-		void DrawEntityNode(Entity entity);
+		void DrawEntityNode(HyperEntity entity);
 		void DrawComponents();
 
 		template<class T>

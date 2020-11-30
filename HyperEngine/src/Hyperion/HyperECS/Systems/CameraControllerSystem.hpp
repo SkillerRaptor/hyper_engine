@@ -1,22 +1,21 @@
 #pragma once
 
-#include "HyperECS/EntitySystem.hpp"
 #include "HyperECS/Components.hpp"
-#include "HyperECS/Registry.hpp"
+#include "HyperECS/HyperECS.hpp"
 #include "HyperEvents/MouseEvents.hpp"
 #include "HyperUtilities/Input.hpp"
 
 namespace Hyperion
 {
-	class CameraControllerSystem : public EntitySystem
+	class CameraControllerSystem : public System
 	{
 	public:
 		CameraControllerSystem() {};
 		virtual ~CameraControllerSystem() {};
 
-		virtual void Update(Registry& registry, Timestep timeStep) override
+		virtual void OnUpdate(Registry& registry, Timestep timeStep) override
 		{
-			registry.Each<CameraControllerComponent, CameraComponent, TransformComponent>([&](CameraControllerComponent& cameraController, CameraComponent& cameraComponent, TransformComponent& transform)
+			registry.Each<CameraControllerComponent, CameraComponent, TransformComponent>([&](Entity entity, CameraControllerComponent& cameraController, CameraComponent& cameraComponent, TransformComponent& transform)
 				{
 					transform.Position.x -= (float)(cameraController.MoveSpeed * timeStep * Input::GetAxis(InputAxis::HORIZONTAL));
 					transform.Position.y += (float)(cameraController.MoveSpeed * timeStep * Input::GetAxis(InputAxis::VERTICAL));
@@ -29,7 +28,7 @@ namespace Hyperion
 			
 			dispatcher.Dispatch<MouseScrolledEvent>([&](MouseScrolledEvent& e)
 				{
-					registry.Each<CameraControllerComponent, CameraComponent, TransformComponent>([&](CameraControllerComponent& cameraController, CameraComponent& cameraComponent, TransformComponent& transform)
+					registry.Each<CameraControllerComponent, CameraComponent, TransformComponent>([&](Entity entity, CameraControllerComponent& cameraController, CameraComponent& cameraComponent, TransformComponent& transform)
 						{
 							float& zoom = cameraComponent.Zoom;
 							zoom -= e.GetYOffset() * cameraController.ZoomSpeed;

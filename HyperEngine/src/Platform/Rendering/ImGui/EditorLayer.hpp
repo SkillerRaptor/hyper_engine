@@ -5,7 +5,7 @@
 #include "EditorRenderer.hpp"
 #include "SceneHierarchyPanel.hpp"
 #include "HyperCore/Core.hpp"
-#include "HyperECS/Entity.hpp"
+#include "HyperECS/HyperEntity.hpp"
 #include "HyperECS/Scene/Scene.hpp"
 #include "HyperLayer/OverlayLayer.hpp"
 #include "HyperUtilities/Timestep.hpp"
@@ -20,7 +20,7 @@ namespace Hyperion
 		Ref<Scene> m_Scene;
 		Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
 		ImFont* m_Font;
-		Entity m_CameraEntity = { 0, nullptr };
+		HyperEntity m_CameraEntity = { Entity(), nullptr };
 
 	public:
 		EditorLayer(Ref<Scene> scene);

@@ -1,6 +1,6 @@
 #include "Scene.hpp"
 
-#include "HyperECS/Entity.hpp"
+#include "HyperECS/HyperEntity.hpp"
 #include "HyperECS/Systems/CameraControllerSystem.hpp"
 #include "HyperECS/Systems/CharacterControllerSystem.hpp"
 #include "HyperECS/Systems/SpriteRendererSystem.hpp"
@@ -19,50 +19,52 @@ namespace Hyperion
 
 	void Scene::Init()
 	{
-		m_Registry = CreateRef<Registry>();
-		m_Systems = CreateRef<EntitySystems>(*m_Registry, m_Renderer2D);
+		m_World = CreateRef<World>(m_Renderer2D);
 
-		m_Systems->AddSystem<CameraControllerSystem>();
-		m_Systems->AddSystem<CharacterControllerSystem>();
-		m_Systems->AddSystem<SpriteRendererSystem>();
+		m_World->AddSystem<CameraControllerSystem>();
+		m_World->AddSystem<CharacterControllerSystem>();
+		m_World->AddSystem<SpriteRendererSystem>();
 	}
 
-	Entity Scene::CreateEntity(const std::string& name)
+	HyperEntity Scene::CreateEntity(const std::string& name)
 	{
-		return Entity(m_Registry->ConstructEntity(name), this);
+		Entity entity = m_World->Construct();
+		m_World->AddComponent<TransformComponent>(entity, Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(10.0f, 10.0f, 10.0f));
+		m_World->AddComponent<TagComponent>(entity, name.empty() ? "Entity" : name);
+		return HyperEntity(entity, this);
 	}
 
-	void Scene::DeleteEntity(Entity& entity)
+	void Scene::DeleteEntity(HyperEntity& entity)
 	{
-		m_Registry->DeleteEntity(entity.GetEntityHandle());
+		//m_World->DeleteEntity(entity.GetEntityHandle());
 	}
 
 	void Scene::OnRender()
 	{
-		m_Systems->OnRender();
+		m_World->OnRender();
 	}
 
 	void Scene::OnUpdate(Timestep timeStep)
 	{
-		m_Systems->OnUpdate(timeStep);
+		m_World->OnUpdate(timeStep);
 	}
 
 	void Scene::OnEvent(Event& event)
 	{
-		m_Systems->OnEvent(event);
+		m_World->OnEvent(event);
 	}
 
-	void Scene::Each(const typename std::common_type<std::function<void(Entity)>>::type function)
+	void Scene::Each(const typename std::common_type<std::function<void(HyperEntity)>>::type function)
 	{
-		m_Registry->Each([&](uint32_t entity)
+		m_World->Each([&](Entity entity)
 			{
-				function(Entity(entity, this));
+				function(HyperEntity(entity, this));
 			});
 	}
 
-	Registry& Scene::GetRegistry()
+	World& Scene::GetWorld()
 	{
-		return *m_Registry;
+		return *m_World;
 	}
 
 	void Scene::SetName(const std::string& name)

@@ -1,7 +1,7 @@
 #include "SceneSerializer.hpp"
 
 #include "HyperECS/Components.hpp"
-#include "HyperECS/Entity.hpp"
+#include "HyperECS/HyperEntity.hpp"
 #include "HyperUtilities/HyperConfiguration/YAML/Configuration.hpp"
 #include "HyperUtilities/HyperConfiguration/YAML/Node.hpp"
 
@@ -17,7 +17,7 @@ namespace Hyperion
 		YAML::Configuration configuration(filePath);
 		std::vector<YAML::Node> entities;
 
-		m_Scene->Each([&](Entity entity)
+		m_Scene->Each([&](HyperEntity entity)
 			{
 				if (!entity)
 					return;

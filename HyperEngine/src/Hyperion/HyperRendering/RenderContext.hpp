@@ -66,6 +66,8 @@ namespace Hyperion
 		virtual void Init() = 0;
 		virtual void Shutdown() = 0;
 
+		virtual void OnResize(size_t width, size_t height) = 0;
+
 		virtual void OnPreUpdate() = 0;
 		virtual void OnUpdate(Timestep timeStep) = 0;
 		virtual void OnRender() = 0;
