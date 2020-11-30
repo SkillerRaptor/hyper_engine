@@ -36,7 +36,7 @@ namespace Hyperion
 
 	void Scene::DeleteEntity(HyperEntity& entity)
 	{
-		//m_World->DeleteEntity(entity.GetEntityHandle());
+		m_World->Destroy(entity.GetEntityHandle());
 	}
 
 	void Scene::OnRender()

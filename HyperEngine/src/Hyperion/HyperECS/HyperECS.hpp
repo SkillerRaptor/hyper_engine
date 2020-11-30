@@ -119,6 +119,25 @@ namespace Hyperion
 		}
 
 		/**
+		 * @brief Destroying an entity in the registry
+		 *
+		 * @param entity Entity that is getting destroyed
+		 */
+		void Destroy(Entity entity)
+		{
+		#ifdef HYPERECS_MUTEX
+			std::unique_lock<std::mutex> entityLock(m_EntityLock);
+		#endif /* HYPERECS_MUTEX */
+			if (m_Entities.find(entity) != m_Entities.end())
+			{
+				std::cerr << "[HyperECS] Entity does not exists!" << std::endl;
+				__debugbreak();
+			}
+
+			m_Entities.erase(entity);
+		}
+
+		/**
 		 * @brief Adding component to an entity
 		 *
 		 * @tparam T The component class that is getting created
@@ -543,6 +562,16 @@ namespace Hyperion
 		Entity Construct()
 		{
 			return m_Registry.Construct();
+		}
+
+		/**
+		 * @brief Destroying an entity in the registry
+		 *
+		 * @param entity Entity that is getting destroyed
+		 */
+		void Destroy(Entity entity)
+		{
+			m_Registry.Destroy(entity);
 		}
 
 		/**
