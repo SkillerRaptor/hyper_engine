@@ -51,6 +51,11 @@ namespace Hyperion
 	{
 	}
 
+	void OpenGL33Context::OnResize(size_t width, size_t height)
+	{
+		glViewport(0, 0, width, height);
+	}
+
 	void OpenGL33Context::OnPreUpdate()
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

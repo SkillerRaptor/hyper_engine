@@ -35,7 +35,7 @@ namespace Hyperion
 
 	void OpenGL33EditorRenderer::RenderImage()
 	{
-		ImGui::Image((ImTextureID)(intptr_t)m_BufferTextureId, ImGui::GetWindowSize(), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image((ImTextureID)(intptr_t)m_BufferTextureId, ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
 	}
 
 	void OpenGL33EditorRenderer::InitCapture()

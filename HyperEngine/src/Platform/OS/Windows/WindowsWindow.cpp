@@ -37,6 +37,8 @@ namespace Hyperion
 		m_RenderContext->m_Window = m_Window;
 		m_RenderContext->Init();
 
+		m_WindowDataInfo.Context = m_RenderContext;
+
 		glfwSetWindowUserPointer(m_Window, &m_WindowDataInfo);
 		glfwGetWindowPos(m_Window, (int*)&m_WindowDataInfo.XPos, (int*)&m_WindowDataInfo.YPos);
 		SetVSync(m_WindowDataInfo.VSync);
@@ -46,6 +48,8 @@ namespace Hyperion
 				WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(window));
 				data.Width = width;
 				data.Height = height;
+
+				data.Context->OnResize(static_cast<size_t>(width), static_cast<size_t>(height));
 
 				if (data.EventBus) data.EventBus->push(std::make_shared<WindowResizeEvent>(width, height));
 			});

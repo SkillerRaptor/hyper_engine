@@ -77,6 +77,11 @@ namespace Hyperion
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
+	void VulkanContext::OnResize(size_t width, size_t height)
+	{
+
+	}
+
 	void VulkanContext::OnPreUpdate()
 	{
 	}

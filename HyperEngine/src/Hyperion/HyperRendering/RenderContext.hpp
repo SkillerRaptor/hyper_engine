@@ -31,6 +31,8 @@ namespace Hyperion
 		VULKAN_12
 	};
 
+	class RenderContext;
+
 	struct WindowDataInfo
 	{
 		std::string Title;
@@ -39,6 +41,8 @@ namespace Hyperion
 
 		uint32_t XPos;
 		uint32_t YPos;
+
+		Ref<RenderContext> Context;
 
 		bool VSync;
 		std::queue<Ref<Event>>* EventBus;

@@ -30,6 +30,11 @@ namespace Hyperion
 	{
 	}
 
+	void DirectX11Context::OnResize(size_t width, size_t height)
+	{
+
+	}
+
 	void DirectX11Context::OnPreUpdate()
 	{
 	}
