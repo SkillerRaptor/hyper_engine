@@ -25,15 +25,18 @@ namespace Hyperion
 		OpenGL46Renderer2D();
 		~OpenGL46Renderer2D();
 
-		virtual void BeginScene(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, const Vec3& position) override;
+		virtual void BeginScene(CameraInfo cameraInfo) override;
 		virtual void EndScene() override;
 
 		virtual void Flush() override;
-		virtual void FlushAndReset() override;
 
 		virtual void DrawQuad(const Vec3& position, const Vec3& rotation, const Vec3& scale, const Vec4& color) override;
 
 		virtual void SetShaderManager(Ref<ShaderManager> shaderManager) override;
 		virtual void SetTextureManager(Ref<TextureManager> textureManager) override;
+
+	protected:
+		virtual void StartBatch() override;
+		virtual void NextBatch() override;
 	};
 }

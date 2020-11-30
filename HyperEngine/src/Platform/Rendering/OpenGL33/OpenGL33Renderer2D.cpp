@@ -16,6 +16,7 @@ namespace Hyperion
 		m_QuadVertexBuffer->Bind();
 
 		m_QuadVertexBufferBase = new Vertex2D[MaxVertices];
+		m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
 
 		uint32_t* quadIndices = new uint32_t[MaxIndices];
 		uint32_t offset = 0;
@@ -47,27 +48,22 @@ namespace Hyperion
 
 	OpenGL33Renderer2D::~OpenGL33Renderer2D()
 	{
+		delete[] m_QuadVertexBufferBase;
 	}
 
-	void OpenGL33Renderer2D::BeginScene(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, const Vec3& position)
+	void OpenGL33Renderer2D::BeginScene(CameraInfo cameraInfo)
 	{
-		float aspectRatio = (float) width / height;
+		float aspectRatio = (float)cameraInfo.Width / cameraInfo.Height;
 
 		m_ShaderManager->UseShader(0);
-		m_ShaderManager->SetMatrix4(0, "u_ProjectionMatrix", Matrix::Ortho(-aspectRatio * zoom, aspectRatio * zoom, -zoom, zoom, nearPlane, farPlane));
-		m_ShaderManager->SetMatrix4(0, "u_TransformationMatrix", Matrix::Translate(Mat4(1.0f), Vector::Inverse(position)));
+		m_ShaderManager->SetMatrix4(0, "u_ProjectionMatrix", Matrix::Ortho(-aspectRatio * cameraInfo.Zoom, aspectRatio * cameraInfo.Zoom, -cameraInfo.Zoom, cameraInfo.Zoom, cameraInfo.NearPlane, cameraInfo.FarPlane));
+		m_ShaderManager->SetMatrix4(0, "u_TransformationMatrix", Matrix::Translate(Mat4(1.0f), Vector::Inverse(cameraInfo.Position)));
 
-		m_QuadCount = 0;
-		m_QuadIndexCount = 0;
-		m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
+		StartBatch();
 	}
 
 	void OpenGL33Renderer2D::EndScene()
 	{
-		uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
-		m_QuadVertexBuffer->Bind();
-		m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize);
-
 		Flush();
 	}
 
@@ -75,6 +71,10 @@ namespace Hyperion
 	{
 		if (m_QuadIndexCount == 0)
 			return;
+
+		uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
+		m_QuadVertexBuffer->Bind();
+		m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize / sizeof(Vertex2D));
 
 		m_ShaderManager->UseShader(0);
 
@@ -84,22 +84,13 @@ namespace Hyperion
 		m_DrawCalls++;
 	}
 
-	void OpenGL33Renderer2D::FlushAndReset()
-	{
-		EndScene();
-
-		m_QuadCount = 0;
-		m_QuadIndexCount = 0;
-		m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
-	}
-
 	void OpenGL33Renderer2D::DrawQuad(const Vec3& position, const Vec3& rotation, const Vec3& scale, const Vec4& color)
 	{
+		if (m_QuadIndexCount >= MaxIndices)
+			NextBatch();
+
 		constexpr size_t quadVertexCount = 4;
 		const float tilingFactor = 1.0f;
-
-		if (m_QuadIndexCount >= MaxIndices)
-			FlushAndReset();
 
 		Mat4 translateMatrix = Mat4(1.0f);
 		translateMatrix = Matrix::Translate(translateMatrix, position);
@@ -127,6 +118,19 @@ namespace Hyperion
 		
 		m_QuadIndexCount += 6;
 		m_QuadCount++;
+	}
+
+	void OpenGL33Renderer2D::StartBatch()
+	{
+		m_QuadCount = 0;
+		m_QuadIndexCount = 0;
+		m_QuadVertexBufferPtr = m_QuadVertexBufferBase;
+	}
+
+	void OpenGL33Renderer2D::NextBatch()
+	{
+		Flush();
+		StartBatch();
 	}
 
 	void OpenGL33Renderer2D::SetShaderManager(Ref<ShaderManager> shaderManager)

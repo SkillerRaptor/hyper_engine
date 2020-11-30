@@ -48,9 +48,6 @@ namespace Hyperion
 		float NearPlane;
 		float FarPlane;
 
-		Mat4 ProjectionMatrix = Mat4(1.0f);
-		Mat4 TransformationMatrix = Mat4(1.0f);
-
 		bool Primary;
 		enum class CameraTypeInfo
 		{

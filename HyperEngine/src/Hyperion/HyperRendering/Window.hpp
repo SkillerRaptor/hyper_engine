@@ -63,6 +63,6 @@ namespace Hyperion
 
 	protected:
 		Window(const WindowPropsInfo& windowProps)
-			: m_RenderContext(nullptr), m_GraphicsAPI(GraphicsAPI::OPENGL_33), m_WindowDataInfo({ windowProps.Title, windowProps.Width, windowProps.Height, 0, 0, nullptr, false, windowProps.EventBus }) {}
+			: m_RenderContext(nullptr), m_GraphicsAPI(GraphicsAPI::OPENGL_46), m_WindowDataInfo({ windowProps.Title, windowProps.Width, windowProps.Height, 0, 0, nullptr, false, windowProps.EventBus }) {}
 	};
 }

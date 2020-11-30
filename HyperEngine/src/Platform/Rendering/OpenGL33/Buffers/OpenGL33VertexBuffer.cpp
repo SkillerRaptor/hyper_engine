@@ -15,7 +15,7 @@ namespace Hyperion
 	{
 		glGenBuffers(1, &m_RendererId);
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererId);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(m_VertexLayout == VertexLayout::Vertex2D ? VertexLayout::Vertex2D : VertexLayout::Vertex3D) * vertexCount, vertices, (vertices == nullptr ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
+		glBufferData(GL_ARRAY_BUFFER, (m_VertexLayout == VertexLayout::Vertex2D ? sizeof(Vertex2D) : sizeof(Vertex3D)) * vertexCount, vertices, (vertices == nullptr ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
@@ -36,7 +36,7 @@ namespace Hyperion
 
 	void OpenGL33VertexBuffer::SetData(const Vertex* vertices, size_t vertexCount)
 	{
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(m_VertexLayout == VertexLayout::Vertex2D ? VertexLayout::Vertex2D : VertexLayout::Vertex3D) * vertexCount, vertices);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, (m_VertexLayout == VertexLayout::Vertex2D ? sizeof(Vertex2D) : sizeof(Vertex3D)) * vertexCount, vertices);
 	}
 
 	unsigned int OpenGL33VertexBuffer::GetRendererId() const
