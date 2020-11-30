@@ -9,24 +9,27 @@ namespace Hyperion
 	{
 	}
 
-	Quaternion::Quaternion(Vec3 vector)
+	Quaternion::Quaternion(Vec3 rotation)
 	{
-		float Roll = (float)vector.x * ((float)M_PI) / 180;
-		float Yaw = (float) vector.y * ((float)M_PI) / 180;
-		float Pitch = (float)vector.z * ((float)M_PI) / 180;
+		float Yaw = (float)rotation.z * ((float)M_PI) / 180;
+		float Pitch = (float)rotation.y * ((float)M_PI) / 180;
+		float Roll = (float)rotation.x * ((float)M_PI) / 180;
 
 		float C1 = cos(Yaw / 2);
-		float C2 = cos(Pitch / 2);
-		float C3 = cos(Roll / 2);
 		float S1 = sin(Yaw / 2);
+
+		float C2 = cos(Pitch / 2);
 		float S2 = sin(Pitch / 2);
+
+		float C3 = cos(Roll / 2);
 		float S3 = sin(Roll / 2);
 
-		m_Scalar = (C1 * C2 * C3) - (S1 * S2 * S3);
+		m_Scalar = (C3 * C2 * C1) - (S3 * S2 * S1);
 		m_Axis = Vec3(
-			(S1 * S2 * C3) + (C1 * C2 * S3), 
-			(S1 * C2 * C3) + (C1 * S2 * S3), 
-			(C1 * S2 * C3) - (S1 * C2 * S3));
+			(S3 * C2 * C1) - (C3 * S2 * S1), 
+			(C3 * S2 * C1) + (S3 * C2 * S1), 
+			(C3 * C2 * S1) - (S3 * S2 * C1)
+		);
 	}
 
 	Quaternion::Quaternion(float scalar, Vec3 axis)
@@ -98,17 +101,18 @@ namespace Hyperion
 
 	float Quaternion::Norm(Quaternion quaternion)
 	{
-		Vec3 axis = quaternion.m_Axis * quaternion.m_Axis;
-		return sqrt(quaternion.m_Scalar * quaternion.m_Scalar + axis.x + axis.y + axis.z);
+		return sqrt(quaternion.m_Scalar * quaternion.m_Scalar + quaternion.m_Axis.x * quaternion.m_Axis.x + quaternion.m_Axis.y + quaternion.m_Axis.y + quaternion.m_Axis.z * quaternion.m_Axis.z);
 	}
 
 	Quaternion Quaternion::Normalize(Quaternion quaternion)
 	{
 		if (Norm(quaternion) == 0)
 			return quaternion;
-		float normValue = 1 / Norm(quaternion);
+		float normValue = 1.0f / Norm(quaternion);
 		quaternion.m_Scalar *= normValue;
-		quaternion.m_Axis *= normValue;
+		quaternion.m_Axis.x *= normValue;
+		quaternion.m_Axis.y *= normValue;
+		quaternion.m_Axis.z *= normValue;
 		return quaternion;
 	}
 
@@ -176,17 +180,20 @@ namespace Hyperion
 	Mat4 Quaternion::ConvertToMatrix(Quaternion quaternion)
 	{
 		Mat4 matrix(1.0f);
-		matrix[0][0] = (quaternion.m_Scalar * quaternion.m_Scalar) + (quaternion.m_Axis.x * quaternion.m_Axis.x) - (quaternion.m_Axis.y * quaternion.m_Axis.y) - (quaternion.m_Axis.z * quaternion.m_Axis.z);
-		matrix[0][1] = (2.0f * quaternion.m_Axis.x * quaternion.m_Axis.y) + (2.0f * quaternion.m_Scalar * quaternion.m_Axis.z);
-		matrix[0][2] = (2.0f * quaternion.m_Axis.x * quaternion.m_Axis.z) - (2.0f * quaternion.m_Scalar * quaternion.m_Axis.y);
+		quaternion = Normalize(quaternion);
 
-		matrix[1][0] = (2.0f * quaternion.m_Axis.x * quaternion.m_Axis.y) - (2.0f * quaternion.m_Scalar * quaternion.m_Axis.z);
-		matrix[1][1] = (quaternion.m_Scalar * quaternion.m_Scalar) - (quaternion.m_Axis.x * quaternion.m_Axis.x) + (quaternion.m_Axis.y * quaternion.m_Axis.y) - (quaternion.m_Axis.z * quaternion.m_Axis.z);
-		matrix[1][2] = (2.0f * quaternion.m_Axis.y * quaternion.m_Axis.z) + (2.0f * quaternion.m_Scalar * quaternion.m_Axis.x);
+		matrix[0][0] = 1.0f - (2.0f * quaternion.m_Axis.y * quaternion.m_Axis.y) - (2.0f * quaternion.m_Axis.z * quaternion.m_Axis.z);
+		matrix[0][1] = (2.0f * quaternion.m_Axis.x * quaternion.m_Axis.y) - (2.0f * quaternion.m_Axis.z * quaternion.m_Scalar);
+		matrix[0][2] = (2.0f * quaternion.m_Axis.x * quaternion.m_Axis.z) + (2.0f * quaternion.m_Axis.y * quaternion.m_Scalar);
 
-		matrix[2][0] = (2.0f * quaternion.m_Axis.x * quaternion.m_Axis.z) + (2.0f * quaternion.m_Scalar * quaternion.m_Axis.y);
-		matrix[2][1] = (2.0f * quaternion.m_Axis.y * quaternion.m_Axis.z) - (2.0f * quaternion.m_Scalar * quaternion.m_Axis.x);
-		matrix[2][2] = (quaternion.m_Scalar * quaternion.m_Scalar) - (quaternion.m_Axis.x * quaternion.m_Axis.x) - (quaternion.m_Axis.y * quaternion.m_Axis.y) + (quaternion.m_Axis.z * quaternion.m_Axis.z);
+		matrix[1][0] = (2.0f * quaternion.m_Axis.x * quaternion.m_Axis.y) + (2.0f * quaternion.m_Axis.z * quaternion.m_Scalar);
+		matrix[1][1] = 1.0f - (2.0f * quaternion.m_Axis.x * quaternion.m_Axis.x) - (2.0f * quaternion.m_Axis.z * quaternion.m_Axis.z);
+		matrix[1][2] = (2.0f * quaternion.m_Axis.y * quaternion.m_Axis.z) - (2.0f * quaternion.m_Axis.x * quaternion.m_Scalar);
+
+		matrix[2][0] = (2.0f * quaternion.m_Axis.x * quaternion.m_Axis.z) - (2.0f * quaternion.m_Axis.y * quaternion.m_Scalar);
+		matrix[2][1] = (2.0f * quaternion.m_Axis.y * quaternion.m_Axis.z) + (2.0f * quaternion.m_Axis.x * quaternion.m_Scalar);
+		matrix[2][2] = 1.0f - (2.0f * quaternion.m_Axis.x * quaternion.m_Axis.x) - (2.0f * quaternion.m_Axis.y * quaternion.m_Axis.y);
+
 		return matrix;
 	}
 }

@@ -86,22 +86,14 @@ namespace Hyperion
 		constexpr size_t quadVertexCount = 4;
 		const float tilingFactor = 1.0f;
 
-		Mat4 translateMatrix = Mat4(1.0f);
-		translateMatrix = Matrix::Translate(translateMatrix, position);
-
-		Mat4 scaleMatrix = Mat4(1.0f);
-		scaleMatrix = Matrix::Scale(scaleMatrix, scale);
-
-		Vec4 relativeTranslation = Vec4(0.5f * scale.x, 0.5f * scale.y, 0.5f * scale.z, 1.0f);
-
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
-			Vec4 translatedVector = scaleMatrix * m_QuadVertexPositions[i];
+			Vec4 translatedVector = Matrix::Scale(Mat4(1.0f), scale) * m_QuadVertexPositions[i];
 
 			Mat4 rotationMatrix = Quaternion::ConvertToMatrix(Quaternion(rotation));
 			translatedVector = rotationMatrix * translatedVector;
 
-			translatedVector = translateMatrix * translatedVector;
+			translatedVector = Matrix::Translate(Mat4(1.0f), position) * translatedVector;
 
 			m_QuadVertexBufferPtr->Position = Vec3(translatedVector.x, translatedVector.y, translatedVector.z);
 			m_QuadVertexBufferPtr->Color = color;
