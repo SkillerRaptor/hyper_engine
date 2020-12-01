@@ -3,13 +3,13 @@
 namespace Hyperion 
 {
 	Layer::Layer(const std::string& name)
-		: m_LayerName(name)
+		: m_Name(name)
 	{
 	}
 
-	void Layer::SetName(const std::string& layerName)
+	void Layer::SetName(const std::string& name)
 	{
-		m_LayerName = layerName;
+		m_Name = name;
 	}
 
 	const std::string& Layer::GetName() const

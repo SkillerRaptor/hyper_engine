@@ -12,7 +12,7 @@ namespace Hyperion
 	class Layer
 	{
 	protected:
-		std::string m_LayerName;
+		std::string m_Name;
 		Ref<RenderContext> m_RenderContext;
 
 		friend class Application;
@@ -24,11 +24,12 @@ namespace Hyperion
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
 
-		virtual void OnEvent(Event& event) { }
+		virtual void OnEvent(Event& event) {}
+
 		virtual void OnUpdate(Timestep timeStep) {}
 		virtual void OnRender() {}
 
-		void SetName(const std::string& layerName);
+		void SetName(const std::string& name);
 		const std::string& GetName() const;
 	};
 }

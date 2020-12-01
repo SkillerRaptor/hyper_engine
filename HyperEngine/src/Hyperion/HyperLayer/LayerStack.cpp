@@ -1,16 +1,40 @@
 #include "LayerStack.hpp"
 
-namespace Hyperion 
+namespace Hyperion
 {
+	LayerStack::LayerStack()
+		: m_Layers({}), m_OverlayLayers({})
+	{
+	}
+
 	LayerStack::~LayerStack()
 	{
+		for (Layer* layer : m_Layers)
+		{
+			layer->OnDetach();
+			delete layer;
+		}
 
+		for (OverlayLayer* overlayLayer : m_OverlayLayers)
+		{
+			overlayLayer->OnDetach();
+			delete overlayLayer;
+		}
+
+		m_Layers.clear();
+		m_OverlayLayers.clear();
 	}
 
 	void LayerStack::PushLayer(Layer* layer)
 	{
 		layer->OnAttach();
 		m_Layers.push_back(layer);
+	}
+
+	void LayerStack::PushOverlayLayer(OverlayLayer* overlayLayer)
+	{
+		overlayLayer->OnAttach();
+		m_OverlayLayers.push_back(overlayLayer);
 	}
 
 	void LayerStack::PopLayer(Layer* layer)
@@ -20,6 +44,13 @@ namespace Hyperion
 			m_Layers.erase(elementPosition);
 	}
 
+	void LayerStack::PopOverlayLayer(OverlayLayer* overlayLayer)
+	{
+		auto elementPosition = std::find(m_OverlayLayers.begin(), m_OverlayLayers.end(), overlayLayer);
+		if (elementPosition != m_OverlayLayers.end())
+			m_OverlayLayers.erase(elementPosition);
+	}
+
 	void LayerStack::PopLayer(const std::string& layerName)
 	{
 		for (Layer* layer : m_Layers)
@@ -27,9 +58,21 @@ namespace Hyperion
 				m_Layers.erase(std::find(m_Layers.begin(), m_Layers.end(), layer));
 	}
 
+	void LayerStack::PopOverlayLayer(const std::string& overlayLayerName)
+	{
+		for (OverlayLayer* overlayLayer : m_OverlayLayers)
+			if (overlayLayer->GetName() == overlayLayerName)
+				m_OverlayLayers.erase(std::find(m_OverlayLayers.begin(), m_OverlayLayers.end(), overlayLayer));
+	}
+
 	void LayerStack::PopLayer()
 	{
 		m_Layers.pop_back();
+	}
+
+	void LayerStack::PopOverlayLayer()
+	{
+		m_OverlayLayers.pop_back();
 	}
 
 	Layer* LayerStack::GetLayer(const std::string& layerName)
@@ -40,35 +83,10 @@ namespace Hyperion
 		return nullptr;
 	}
 
-	void LayerStack::PushOverlayLayer(OverlayLayer* overlayLayer)
-	{
-		overlayLayer->OnAttach();
-		m_OverlayLayers.push_back(overlayLayer);
-	}
-
-	void LayerStack::PopOverlayLayer(OverlayLayer* overlayLayer)
-	{
-		auto elementPosition = std::find(m_OverlayLayers.begin(), m_OverlayLayers.end(), overlayLayer);
-		if (elementPosition != m_OverlayLayers.end())
-			m_OverlayLayers.erase(elementPosition);
-	}
-
-	void LayerStack::PopOverlayLayer(const std::string& layerName)
+	OverlayLayer* LayerStack::GetOverlayLayer(const std::string& overlayLayerName)
 	{
 		for (OverlayLayer* overlayLayer : m_OverlayLayers)
-			if (overlayLayer->GetName() == layerName)
-				m_OverlayLayers.erase(std::find(m_OverlayLayers.begin(), m_OverlayLayers.end(), overlayLayer));
-	}
-
-	void LayerStack::PopOverlayLayer()
-	{
-		m_OverlayLayers.pop_back();
-	}
-
-	OverlayLayer* LayerStack::GetOverlayLayer(const std::string& layerName)
-	{
-		for (OverlayLayer* overlayLayer : m_OverlayLayers)
-			if (overlayLayer->GetName() == layerName)
+			if (overlayLayer->GetName() == overlayLayerName)
 				return overlayLayer;
 		return nullptr;
 	}

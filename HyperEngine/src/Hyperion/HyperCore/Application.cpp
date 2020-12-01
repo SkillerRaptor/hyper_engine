@@ -48,18 +48,6 @@ namespace Hyperion
 	{
 		m_Running = false;
 
-		for (Layer* layer : m_LayerStack->GetLayers())
-		{
-			layer->OnDetach();
-			m_LayerStack->PopLayer(layer);
-		}
-
-		for (OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
-		{
-			overlayLayer->OnDetach();
-			m_LayerStack->PopOverlayLayer(overlayLayer);
-		}
-
 		delete m_LayerStack;
 	}
 
@@ -133,30 +121,15 @@ namespace Hyperion
 		m_LayerStack->PushLayer(layer);
 	}
 
-	void Application::PopLayer(Layer* layer)
-	{
-		m_LayerStack->PopLayer(layer);
-	}
-
-	void Application::PopLayer(const std::string& layerName)
-	{
-		m_LayerStack->PopLayer(layerName);
-	}
-
-	void Application::PopLayer()
-	{
-		m_LayerStack->PopLayer();
-	}
-
-	Layer* Application::GetLayer(const std::string& layerName)
-	{
-		return m_LayerStack->GetLayer(layerName);
-	}
-
 	void Application::PushOverlayLayer(OverlayLayer* overlayLayer)
 	{
 		overlayLayer->m_RenderContext = m_Window->GetContext();
 		m_LayerStack->PushOverlayLayer(overlayLayer);
+	}
+
+	void Application::PopLayer(Layer* layer)
+	{
+		m_LayerStack->PopLayer(layer);
 	}
 
 	void Application::PopOverlayLayer(OverlayLayer* overlayLayer)
@@ -164,9 +137,19 @@ namespace Hyperion
 		m_LayerStack->PopOverlayLayer(overlayLayer);
 	}
 
-	void Application::PopOverlayLayer(const std::string& layerName)
+	void Application::PopLayer(const std::string& layerName)
 	{
-		m_LayerStack->PopOverlayLayer(layerName);
+		m_LayerStack->PopLayer(layerName);
+	}
+
+	void Application::PopOverlayLayer(const std::string& overlayLayerName)
+	{
+		m_LayerStack->PopOverlayLayer(overlayLayerName);
+	}
+
+	void Application::PopLayer()
+	{
+		m_LayerStack->PopLayer();
 	}
 
 	void Application::PopOverlayLayer()
@@ -174,9 +157,14 @@ namespace Hyperion
 		m_LayerStack->PopOverlayLayer();
 	}
 
-	OverlayLayer* Application::GetOverlayLayer(const std::string& layerName)
+	Layer* Application::GetLayer(const std::string& layerName)
 	{
-		return m_LayerStack->GetOverlayLayer(layerName);
+		return m_LayerStack->GetLayer(layerName);
+	}
+
+	OverlayLayer* Application::GetOverlayLayer(const std::string& overlayLayerName)
+	{
+		return m_LayerStack->GetOverlayLayer(overlayLayerName);
 	}
 
 	Ref<Window> Application::GetNativeWindow() const

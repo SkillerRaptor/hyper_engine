@@ -31,16 +31,19 @@ namespace Hyperion
 		void Run();
 
 		void PushLayer(Layer* layer);
-		void PopLayer(Layer* layer);
-		void PopLayer(const std::string& layerName);
-		void PopLayer();
-		Layer* GetLayer(const std::string& layerName);
-
 		void PushOverlayLayer(OverlayLayer* overlayLayer);
+
+		void PopLayer(Layer* layer);
 		void PopOverlayLayer(OverlayLayer* overlayLayer);
-		void PopOverlayLayer(const std::string& layerName);
+
+		void PopLayer(const std::string& layerName);
+		void PopOverlayLayer(const std::string& overlayLayerName);
+
+		void PopLayer();
 		void PopOverlayLayer();
-		OverlayLayer* GetOverlayLayer(const std::string& layerName);
+
+		Layer* GetLayer(const std::string& layerName);
+		OverlayLayer* GetOverlayLayer(const std::string& overlayLayerName);
 
 		Ref<Window> GetNativeWindow() const;
 		static Application* Get();

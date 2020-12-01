@@ -3,17 +3,17 @@
 namespace Hyperion 
 {
 	OverlayLayer::OverlayLayer(const std::string& name)
-		: m_LayerName(name)
+		: m_Name(name)
 	{
 	}
 
-	void OverlayLayer::SetName(const std::string& layerName)
+	void OverlayLayer::SetName(const std::string& name)
 	{
-		m_LayerName = layerName;
+		m_Name = name;
 	}
 
 	const std::string& OverlayLayer::GetName() const
 	{
-		return m_LayerName;
+		return m_Name;
 	}
 }

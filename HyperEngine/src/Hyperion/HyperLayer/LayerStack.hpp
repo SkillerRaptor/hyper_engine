@@ -15,18 +15,22 @@ namespace Hyperion
 		std::vector<OverlayLayer*> m_OverlayLayers;
 
 	public:
+		LayerStack();
 		~LayerStack();
 
 		void PushLayer(Layer* layer);
-		void PopLayer(Layer* layer);
-		void PopLayer(const std::string& layerName);
-		void PopLayer();
-		Layer* GetLayer(const std::string& layerName);
-
 		void PushOverlayLayer(OverlayLayer* overlayLayer);
+
+		void PopLayer(Layer* layer);
 		void PopOverlayLayer(OverlayLayer* overlayLayer);
+
+		void PopLayer(const std::string& layerName);
 		void PopOverlayLayer(const std::string& layerName);
+
+		void PopLayer();
 		void PopOverlayLayer();
+
+		Layer* GetLayer(const std::string& layerName);
 		OverlayLayer* GetOverlayLayer(const std::string& layerName);
 
 		const std::vector<Layer*>& GetLayers() const;
