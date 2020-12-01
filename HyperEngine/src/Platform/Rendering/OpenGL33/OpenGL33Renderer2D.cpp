@@ -70,7 +70,7 @@ namespace Hyperion
 		m_QuadVertexBuffer->Bind();
 		m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize / sizeof(Vertex2D));
 
-		m_ShaderManager->UseShader(0);
+		m_ShaderManager->UseShader({ 0 });
 
 		m_QuadVertexArray->Bind();
 		glDrawElements(GL_TRIANGLES, (unsigned int) m_QuadIndexCount, GL_UNSIGNED_INT, nullptr);

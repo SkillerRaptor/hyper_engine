@@ -66,10 +66,10 @@ namespace Hyperion
 			return;
 
 		uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
-		m_QuadVertexBuffer->Bind(0);
+		m_QuadVertexBuffer->Bind({ 0 });
 		m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize / sizeof(Vertex2D));
 
-		m_ShaderManager->UseShader(0);
+		m_ShaderManager->UseShader({ 0 });
 
 		m_QuadVertexArray->Bind();
 		glDrawElements(GL_TRIANGLES, (unsigned int)m_QuadIndexCount, GL_UNSIGNED_INT, nullptr);

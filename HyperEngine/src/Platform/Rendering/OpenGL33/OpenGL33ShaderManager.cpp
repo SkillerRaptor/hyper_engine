@@ -23,7 +23,7 @@ namespace Hyperion
 		m_Shaders.clear();
 	}
 
-	uint32_t OpenGL33ShaderManager::CreateShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath)
+	ShaderHandle OpenGL33ShaderManager::CreateShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath)
 	{
 		OpenGLShaderData shaderData;
 		shaderData.VertexShaderPath = vertexPath;
@@ -63,25 +63,25 @@ namespace Hyperion
 		catch (std::exception exception)
 		{
 			HP_CORE_ERROR("Shader: Failed to read shader files");
-			return -1;
+			return { static_cast<uint32_t>(-1) };
 		}
 
 		if (!GenerateShader(shaderData, vertexCode.c_str(), fragmentCode.c_str(), geometryCode != "" ? geometryCode.c_str() : nullptr))
 		{
 			HP_CORE_DEBUG("Shader not loaded...");
-			return -1;
+			return { static_cast<uint32_t>(-1) };
 		}
 
-		uint32_t shaderId = 1;
+		ShaderHandle shaderId = { 1 };
 		if (!m_ShaderIds.empty())
 		{
 			shaderId = m_ShaderIds.front();
 			m_ShaderIds.pop();
 		}
 		else
-			shaderId = static_cast<uint32_t>(m_Shaders.size());
+			shaderId = static_cast<ShaderHandle>(ShaderHandle{ static_cast<uint32_t>(m_Shaders.size()) });
 		m_Shaders.emplace(shaderId, std::move(shaderData));
-		HP_CORE_DEBUG("Shader % loaded...", shaderId);
+		HP_CORE_DEBUG("Shader % loaded...", shaderId.Handle);
 		return shaderId;
 	}
 
@@ -125,7 +125,7 @@ namespace Hyperion
 		return true;
 	}
 
-	bool OpenGL33ShaderManager::UseShader(uint32_t handle)
+	bool OpenGL33ShaderManager::UseShader(ShaderHandle handle)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return false;
@@ -133,7 +133,7 @@ namespace Hyperion
 		return true;
 	}
 
-	bool OpenGL33ShaderManager::DeleteShader(uint32_t handle)
+	bool OpenGL33ShaderManager::DeleteShader(ShaderHandle handle)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return false;
@@ -144,119 +144,119 @@ namespace Hyperion
 		return true;
 	}
 
-	void OpenGL33ShaderManager::SetInteger(uint32_t handle, const std::string& name, int value)
+	void OpenGL33ShaderManager::SetInteger(ShaderHandle handle, const std::string& name, int value)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform1i(GetUniformLocation(m_Shaders[handle], name), value);
 	}
 
-	void OpenGL33ShaderManager::SetUnsignedInteger(uint32_t handle, const std::string& name, unsigned int value)
+	void OpenGL33ShaderManager::SetUnsignedInteger(ShaderHandle handle, const std::string& name, unsigned int value)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform1ui(GetUniformLocation(m_Shaders[handle], name), value);
 	}
 
-	void OpenGL33ShaderManager::SetIntegerArray(uint32_t handle, const std::string& name, size_t count, int* values)
+	void OpenGL33ShaderManager::SetIntegerArray(ShaderHandle handle, const std::string& name, size_t count, int* values)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform1iv(GetUniformLocation(m_Shaders[handle], name), static_cast<GLsizei>(count), values);
 	}
 
-	void OpenGL33ShaderManager::SetFloat(uint32_t handle, const std::string& name, float value)
+	void OpenGL33ShaderManager::SetFloat(ShaderHandle handle, const std::string& name, float value)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform1f(GetUniformLocation(m_Shaders[handle], name), value);
 	}
 
-	void OpenGL33ShaderManager::SetFloatArray(uint32_t handle, const std::string& name, size_t count, float* values)
+	void OpenGL33ShaderManager::SetFloatArray(ShaderHandle handle, const std::string& name, size_t count, float* values)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform1fv(GetUniformLocation(m_Shaders[handle], name), static_cast<GLsizei>(count), values);
 	}
 
-	void OpenGL33ShaderManager::SetVector2(uint32_t handle, const std::string& name, float x, float y)
+	void OpenGL33ShaderManager::SetVector2(ShaderHandle handle, const std::string& name, float x, float y)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform2f(GetUniformLocation(m_Shaders[handle], name), x, y);
 	}
 
-	void OpenGL33ShaderManager::SetVector2(uint32_t handle, const std::string& name, const Vec2& vector)
+	void OpenGL33ShaderManager::SetVector2(ShaderHandle handle, const std::string& name, const Vec2& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform2f(GetUniformLocation(m_Shaders[handle], name), vector.x, vector.y);
 	}
 
-	void OpenGL33ShaderManager::SetVector3(uint32_t handle, const std::string& name, float x, float y, float z)
+	void OpenGL33ShaderManager::SetVector3(ShaderHandle handle, const std::string& name, float x, float y, float z)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform3f(GetUniformLocation(m_Shaders[handle], name), x, y, z);
 	}
 
-	void OpenGL33ShaderManager::SetVector3(uint32_t handle, const std::string& name, const Vec3& vector)
+	void OpenGL33ShaderManager::SetVector3(ShaderHandle handle, const std::string& name, const Vec3& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform3f(GetUniformLocation(m_Shaders[handle], name), vector.x, vector.y, vector.z);
 	}
 
-	void OpenGL33ShaderManager::SetVector4(uint32_t handle, const std::string& name, float x, float y, float z, float w)
+	void OpenGL33ShaderManager::SetVector4(ShaderHandle handle, const std::string& name, float x, float y, float z, float w)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform4f(GetUniformLocation(m_Shaders[handle], name), x, y, z, w);
 	}
 
-	void OpenGL33ShaderManager::SetVector4(uint32_t handle, const std::string& name, const Vec4& vector)
+	void OpenGL33ShaderManager::SetVector4(ShaderHandle handle, const std::string& name, const Vec4& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform4f(GetUniformLocation(m_Shaders[handle], name), vector.x, vector.y, vector.z, vector.w);
 	}
 
-	void OpenGL33ShaderManager::SetMatrix2(uint32_t handle, const std::string& name, const Mat2& matrix)
+	void OpenGL33ShaderManager::SetMatrix2(ShaderHandle handle, const std::string& name, const Mat2& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniformMatrix2fv(GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
 	}
 
-	void OpenGL33ShaderManager::SetMatrix3(uint32_t handle, const std::string& name, const Mat3& matrix)
+	void OpenGL33ShaderManager::SetMatrix3(ShaderHandle handle, const std::string& name, const Mat3& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniformMatrix3fv(GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
 	}
 
-	void OpenGL33ShaderManager::SetMatrix4(uint32_t handle, const std::string& name, const Mat4& matrix)
+	void OpenGL33ShaderManager::SetMatrix4(ShaderHandle handle, const std::string& name, const Mat4& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniformMatrix4fv(GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
 	}
 
-	const std::string OpenGL33ShaderManager::GetVertexShaderPath(uint32_t handle)
+	const std::string OpenGL33ShaderManager::GetVertexShaderPath(ShaderHandle handle)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return "";
 		return m_Shaders[handle].VertexShaderPath;
 	}
 
-	const std::string OpenGL33ShaderManager::GetFragmentShaderPath(uint32_t handle)
+	const std::string OpenGL33ShaderManager::GetFragmentShaderPath(ShaderHandle handle)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return "";
 		return m_Shaders[handle].FragmentShaderPath;
 	}
 
-	const std::string OpenGL33ShaderManager::GetGeometryShaderPath(uint32_t handle)
+	const std::string OpenGL33ShaderManager::GetGeometryShaderPath(ShaderHandle handle)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return "";

@@ -169,8 +169,8 @@ namespace Hyperion
 
 	void EditorCamera::UpdateProjectionMatrix()
 	{
-		m_ShaderManager->UseShader(0);
-		m_ShaderManager->SetMatrix4(0, "u_ProjectionMatrix", GetProjectionMatrix());
+		m_ShaderManager->UseShader({ 0 });
+		m_ShaderManager->SetMatrix4({ 0 }, "u_ProjectionMatrix", GetProjectionMatrix());
 	}
 
 	Mat4 EditorCamera::GetProjectionMatrix() const
@@ -183,8 +183,8 @@ namespace Hyperion
 
 	void EditorCamera::UpdateViewMatrix()
 	{
-		m_ShaderManager->UseShader(0);
-		m_ShaderManager->SetMatrix4(0, "u_ViewMatrix", GetViewMatrix());
+		m_ShaderManager->UseShader({ 0 });
+		m_ShaderManager->SetMatrix4({ 0 }, "u_ViewMatrix", GetViewMatrix());
 	}
 
 	Mat4 EditorCamera::GetViewMatrix() const
