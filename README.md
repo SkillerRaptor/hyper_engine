@@ -9,10 +9,9 @@ The Engine is layed out to work only on Windows x64, but it is planned to work a
 ![alt-text](https://i.imgur.com/I3OJPW7.png)
 
 ## Dependencies & License
-- [Assimp](https://github.com/assimp/assimp/blob/master/LICENSE) Copyright (c) assimp, assimp team 2006-2020
 - [GLAD](https://github.com/Dav1dde/glad/blob/master/LICENSE) Copyright (c) MIT, David Herberth 2013-2020
 - [glfw](https://github.com/glfw/glfw/blob/master/LICENSE.md) Copyright (c) zlib, Camilla Löwy 2006-2019
-- [imgui](https://github.com/ocornut/imgui/blob/master/LICENSE.txt) Copyright (c) MIT, Omar Cornut 2014-2020
+- [Dear ImGui](https://github.com/ocornut/imgui/blob/master/LICENSE.txt) Copyright (c) MIT, Omar Cornut 2014-2020
 - [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo/blob/master/LICENSE) Copyright (c) MIT, Cedric Guillemet 2016
 - [stb_image](https://github.com/nothings/stb/blob/master/LICENSE) Copyright (c) MIT, Sean Barrett 2017
 
