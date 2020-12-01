@@ -16,7 +16,7 @@ namespace Hyperion
 	{
 	private:
 		Ref<Window> m_Window;
-		LayerStack* m_LayerStack;
+		Scope<LayerStack> m_LayerStack;
 		bool m_Running = true;
 
 		std::queue<Ref<Event>> m_EventBus;

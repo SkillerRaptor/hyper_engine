@@ -40,15 +40,13 @@ namespace Hyperion
 
 		m_Scene = CreateRef<Scene>("Main Scene", m_Window->GetContext()->GetRenderer2D());
 
-		m_LayerStack = new LayerStack();
+		m_LayerStack = CreateScope<LayerStack>();
 		PushOverlayLayer(new EditorLayer(m_Scene));
 	}
 
 	void Application::Shutdown()
 	{
 		m_Running = false;
-
-		delete m_LayerStack;
 	}
 
 	void Application::Run()
