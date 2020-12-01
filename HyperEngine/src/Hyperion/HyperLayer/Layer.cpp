@@ -14,6 +14,6 @@ namespace Hyperion
 
 	const std::string& Layer::GetName() const
 	{
-		return m_LayerName;
+		return m_Name;
 	}
 }
