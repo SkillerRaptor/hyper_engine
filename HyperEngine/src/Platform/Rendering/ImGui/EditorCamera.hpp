@@ -15,6 +15,19 @@ namespace Hyperion
 		Vec3 m_Position;
 		Vec2 m_ViewportSize;
 
+		/* Perspective */
+		Vec3 m_Front;
+		Vec3 m_Right;
+		Vec3 m_Up;
+
+		Vec3 m_LastMousePosition;
+		bool m_FirstMouse;
+		float m_MouseSenitivity;
+
+		float m_Yaw;
+		float m_Pitch;
+		/* End Perspective */
+
 		float m_Speed;
 		float m_Zoom;
 		float m_ZoomSpeed;
@@ -28,7 +41,7 @@ namespace Hyperion
 		friend class EditorLayer;
 
 	public:
-		EditorCamera(const Vec3& position, const Vec2& viewportSize, float speed, float zoom, float zoomSpeed, float nearPlane, float farPlane, bool orthographic);
+		EditorCamera(const Vec3& position, const Vec2& viewportSize, float speed, float zoom, float zoomSpeed, float nearPlane, float farPlane, float yaw, float pitch, bool orthographic);
 
 		void OnUpdate(Timestep timeStep);
 		void OnEvent(Event& event);

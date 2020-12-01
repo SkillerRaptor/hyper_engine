@@ -15,7 +15,7 @@
 namespace Hyperion
 {
 	EditorLayer::EditorLayer(Ref<Scene> scene)
-		: OverlayLayer("Editor Layer"), m_Scene(scene), m_EditorCamera(Vec3(0.0f), Vec2(1280.0f, 720.0f), 10.0f, 1.0f, 1.0f, -1.0f, 1000.0f, true)
+		: OverlayLayer("Editor Layer"), m_Scene(scene), m_EditorCamera(Vec3(0.0f), Vec2(1280.0f, 720.0f), 10.0f, 1.0f, 1.0f, -100.0f, 1000.0f, 45.0f, 0.0f, true)
 	{
 	}
 

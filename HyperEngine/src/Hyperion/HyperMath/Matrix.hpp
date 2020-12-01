@@ -58,7 +58,8 @@ namespace Hyperion
 		Mat4 Scale(Mat4 matrix, Vec3 vector);
 		Mat4 Translate(Mat4 matrix, Vec3 vector);
 
+		Mat4 LookAt(Vec3 eye, Vec3 center, Vec3 up);
 		Mat4 Ortho(float left, float right, float bottom, float top, float nearPlane, float farPlane);
-		Mat4 Perspective(float degrees, float aspectRatio, float nearPlane, float farPlane);
+		Mat4 Perspective(float fov, float aspectRatio, float nearPlane, float farPlane);
 	};
 }

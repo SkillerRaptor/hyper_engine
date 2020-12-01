@@ -59,6 +59,32 @@ namespace Hyperion::Matrix
 		return mat;
 	}
 
+	Mat4 LookAt(Vec3 eye, Vec3 center, Vec3 up)
+	{
+		Mat4 matrix(1.0f);
+
+		Vec3 forward = Vector::Normalize(center - eye);
+		Vec3 right = Vector::Normalize(Vector::Cross(forward, up));
+		Vec3 upDir = Vector::Cross(right, forward);
+
+		matrix[0][0] = right.x;
+		matrix[0][1] = right.y;
+		matrix[0][2] = right.z;
+		matrix[0][3] = -Vector::Dot(right, eye);
+
+		matrix[1][0] = upDir.x;
+		matrix[1][1] = upDir.y;
+		matrix[1][2] = upDir.z;
+		matrix[1][3] = -Vector::Dot(upDir, eye);
+
+		matrix[2][0] = -forward.x;
+		matrix[2][1] = -forward.y;
+		matrix[2][2] = -forward.z;
+		matrix[2][3] = Vector::Dot(forward, eye);
+
+ 		return matrix;
+	}
+
 	Mat4 Ortho(float left, float right, float bottom, float top, float nearPlane, float farPlane)
 	{
 		Mat4 matrix(1.0f);
@@ -82,16 +108,17 @@ namespace Hyperion::Matrix
 		return matrix;
 	}
 
-	Mat4 Perspective(float degrees, float aspectRatio, float nearPlane, float farPlane)
+	Mat4 Perspective(float fov, float aspectRatio, float nearPlane, float farPlane)
 	{
-		Mat4 matrix(1.0f);
-		float angle = (float)degrees * ((float)M_PI) / 180;
-		float tanAngle = tan(angle / 2);
-		matrix[0][0] = 1 / (aspectRatio * tanAngle);
-		matrix[1][1] = 1 / tanAngle;
-		matrix[2][2] = (-(farPlane + nearPlane)) / (farPlane - nearPlane);
-		matrix[2][3] = (-2 * farPlane * nearPlane) / (farPlane - nearPlane);
-		matrix[3][2] = -1;
+		Mat4 matrix(0.0f);
+		float angle = (float)fov * ((float)M_PI) / 180;
+		float tanAngle = tan(angle / 2.0f);
+		matrix[0][0] = 1.0f / (aspectRatio * tanAngle);
+		matrix[1][1] = 1.0f / tanAngle;
+		matrix[2][2] = -(farPlane + nearPlane) / (farPlane - nearPlane);
+		matrix[2][3] = -(2 * farPlane * nearPlane) / (farPlane - nearPlane);
+		matrix[3][2] = -1.0f;
+
 		return matrix;
 	}
 }

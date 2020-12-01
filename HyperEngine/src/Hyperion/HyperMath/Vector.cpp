@@ -70,7 +70,7 @@ namespace Hyperion::Vector
 
 	float Dot(Vec3& vectorOne, Vec3& vectorTwo)
 	{
-		Vec3 vec = Normalize(vectorOne) * Normalize(vectorTwo);
+		Vec3 vec = vectorOne * vectorTwo;
 		return vec.x + vec.y + vec.z;
 	}
 
@@ -109,6 +109,7 @@ namespace Hyperion::Vector
 		vec.z = vectorOne.x * vectorTwo.y - vectorOne.y * vectorTwo.x;
 		return vec;
 	}
+
 	Vec2 Inverse(Vec2& vector)
 	{
 		return Vec2(-vector.x, -vector.y);
