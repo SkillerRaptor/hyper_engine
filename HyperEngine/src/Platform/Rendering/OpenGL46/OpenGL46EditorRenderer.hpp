@@ -11,7 +11,7 @@ namespace Hyperion
 	class OpenGL46EditorRenderer : public EditorRenderer
 	{
 	private:
-		uint32_t m_BufferTexture;
+		TextureHandle m_BufferTexture;
 		uint32_t m_BufferTextureId;
 		Scope<OpenGL46FrameBuffer> m_FrameBuffer;
 

@@ -23,7 +23,7 @@ namespace Hyperion
 		m_Textures.clear();
 	}
 
-	uint32_t OpenGL33TextureManager::CreateTexture(const std::string& path, TextureType textureType)
+	TextureHandle OpenGL33TextureManager::CreateTexture(const std::string& path, TextureType textureType)
 	{
 		OpenGLTextureData textureData;
 		textureData.Path = path;
@@ -34,7 +34,7 @@ namespace Hyperion
 		if (textureData.Data == nullptr)
 		{
 			HP_CORE_DEBUG("Texture not loaded...");
-			return -1;
+			return { static_cast<uint32_t>(-1) };
 		}
 
 		textureData.Width = width;
@@ -42,23 +42,23 @@ namespace Hyperion
 		textureData.Channels = channels;
 
 		GenerateTexture(&textureData, textureData.Channels >= 4);
-		
+
 		stbi_image_free(textureData.Data);
 
-		uint32_t textureId = 1;
+		TextureHandle textureId = { 1 };
 		if (!m_TextureIds.empty())
 		{
 			textureId = m_TextureIds.front();
 			m_TextureIds.pop();
 		}
 		else
-			textureId = static_cast<uint32_t>(m_Textures.size());
+			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) });
 		m_Textures.emplace(textureId, std::move(textureData));
-		HP_CORE_DEBUG("Texture % loaded...", textureId);
+		HP_CORE_DEBUG("Texture % loaded...", textureId.Handle);
 		return textureId;
 	}
 
-	uint32_t OpenGL33TextureManager::CreateTexture(uint32_t width, uint32_t height, TextureType textureType)
+	TextureHandle OpenGL33TextureManager::CreateTexture(uint32_t width, uint32_t height, TextureType textureType)
 	{
 		OpenGLTextureData textureData;
 		textureData.Width = width;
@@ -67,16 +67,16 @@ namespace Hyperion
 
 		GenerateTexture(&textureData, true);
 
-		uint32_t textureId = 1;
+		TextureHandle textureId = { 1 };
 		if (!m_TextureIds.empty())
 		{
 			textureId = m_TextureIds.front();
 			m_TextureIds.pop();
 		}
 		else
-			textureId = static_cast<uint32_t>(m_Textures.size());
+			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) });
 		m_Textures.emplace(textureId, std::move(textureData));
-		HP_CORE_DEBUG("Texture % created...", textureId);
+		HP_CORE_DEBUG("Texture % created...", textureId.Handle);
 		return textureId;
 	}
 
@@ -85,7 +85,7 @@ namespace Hyperion
 		OpenGLTextureData* data = static_cast<OpenGLTextureData*>(textureData);
 		glGenTextures(1, &data->TextureId);
 		glBindTexture(GL_TEXTURE_2D, data->TextureId);
-		
+
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -94,7 +94,7 @@ namespace Hyperion
 		glTexImage2D(GL_TEXTURE_2D, 0, alpha ? GL_RGBA : GL_RGB, data->Width, data->Height, 0, alpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data->Data);
 	}
 
-	bool OpenGL33TextureManager::BindTexture(uint32_t handle, uint32_t textureSlot)
+	bool OpenGL33TextureManager::BindTexture(TextureHandle handle, uint32_t textureSlot)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return false;
@@ -103,7 +103,7 @@ namespace Hyperion
 		return true;
 	}
 
-	bool OpenGL33TextureManager::DeleteTexture(uint32_t handle)
+	bool OpenGL33TextureManager::DeleteTexture(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return false;
@@ -113,7 +113,7 @@ namespace Hyperion
 		return true;
 	}
 
-	bool OpenGL33TextureManager::DeleteTextureData(uint32_t handle)
+	bool OpenGL33TextureManager::DeleteTextureData(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return false;
@@ -121,70 +121,70 @@ namespace Hyperion
 		return true;
 	}
 
-	void OpenGL33TextureManager::SetWidth(uint32_t handle, uint32_t width)
+	void OpenGL33TextureManager::SetWidth(TextureHandle handle, uint32_t width)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return;
 		m_Textures[handle].Width = width;
 	}
 
-	uint32_t OpenGL33TextureManager::GetWidth(uint32_t handle)
+	uint32_t OpenGL33TextureManager::GetWidth(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return -1;
 		return m_Textures[handle].Width;
 	}
 
-	void OpenGL33TextureManager::SetHeight(uint32_t handle, uint32_t height)
+	void OpenGL33TextureManager::SetHeight(TextureHandle handle, uint32_t height)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return;
 		m_Textures[handle].Height = height;
 	}
 
-	uint32_t OpenGL33TextureManager::GetHeight(uint32_t handle)
+	uint32_t OpenGL33TextureManager::GetHeight(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return -1;
 		return m_Textures[handle].Height;
 	}
 
-	void OpenGL33TextureManager::SetTextureType(uint32_t handle, TextureType textureType)
+	void OpenGL33TextureManager::SetTextureType(TextureHandle handle, TextureType textureType)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return;
 		m_Textures[handle].TextureType = textureType;
 	}
 
-	TextureType OpenGL33TextureManager::GetTextureType(uint32_t handle)
+	TextureType OpenGL33TextureManager::GetTextureType(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return TextureType::DEFAULT;
 		return m_Textures[handle].TextureType;
 	}
 
-	uint8_t OpenGL33TextureManager::GetChannels(uint32_t handle)
+	uint8_t OpenGL33TextureManager::GetChannels(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return -1;
 		return m_Textures[handle].Channels;
 	}
 
-	const unsigned char* OpenGL33TextureManager::GetData(uint32_t handle)
+	const unsigned char* OpenGL33TextureManager::GetData(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return nullptr;
 		return m_Textures[handle].Data;
 	}
 
-	const std::string& OpenGL33TextureManager::GetPath(uint32_t handle)
+	const std::string& OpenGL33TextureManager::GetPath(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return std::string();
 		return m_Textures[handle].Path;
 	}
 
-	TextureData* OpenGL33TextureManager::GetTextureData(uint32_t handle)
+	TextureData* OpenGL33TextureManager::GetTextureData(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return nullptr;

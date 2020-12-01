@@ -28,34 +28,47 @@ namespace Hyperion
 		TextureType TextureType = TextureType::DEFAULT;
 	};
 
+	struct TextureHandle
+	{
+		uint32_t Handle;
+
+		bool IsHandleValid() const { return Handle != 0; }
+		bool operator==(const TextureHandle& textureHandle) const { return Handle == textureHandle.Handle; }
+	};
+
+	struct TextureHandleHasher
+	{
+		size_t operator()(const TextureHandle& textureHandle) const { return (std::hash<uint32_t>()(textureHandle.Handle)); }
+	};
+
 	class TextureManager : public NonCopyable, NonMoveable
 	{
 	protected:
-		std::queue<uint32_t> m_TextureIds;
+		std::queue<TextureHandle> m_TextureIds;
 
 	public:
 		TextureManager() = default;
 		virtual ~TextureManager() = default;
 
-		virtual uint32_t CreateTexture(const std::string& path, TextureType textureType = TextureType::DEFAULT) = 0;
-		virtual uint32_t CreateTexture(uint32_t width, uint32_t height, TextureType textureType = TextureType::DEFAULT) = 0;
+		virtual TextureHandle CreateTexture(const std::string& path, TextureType textureType = TextureType::DEFAULT) = 0;
+		virtual TextureHandle CreateTexture(uint32_t width, uint32_t height, TextureType textureType = TextureType::DEFAULT) = 0;
 		virtual void GenerateTexture(TextureData* textureData, bool alpha) = 0;
-		virtual bool BindTexture(uint32_t handle, uint32_t textureSlot) = 0;
-		virtual bool DeleteTexture(uint32_t handle) = 0;
-		virtual bool DeleteTextureData(uint32_t handle) = 0;
+		virtual bool BindTexture(TextureHandle handle, uint32_t textureSlot) = 0;
+		virtual bool DeleteTexture(TextureHandle handle) = 0;
+		virtual bool DeleteTextureData(TextureHandle handle) = 0;
 
-		virtual void SetWidth(uint32_t handle, uint32_t width) = 0;
-		virtual uint32_t GetWidth(uint32_t handle) = 0;
+		virtual void SetWidth(TextureHandle handle, uint32_t width) = 0;
+		virtual uint32_t GetWidth(TextureHandle handle) = 0;
 
-		virtual void SetHeight(uint32_t handle, uint32_t height) = 0;
-		virtual uint32_t GetHeight(uint32_t handle) = 0;
+		virtual void SetHeight(TextureHandle handle, uint32_t height) = 0;
+		virtual uint32_t GetHeight(TextureHandle handle) = 0;
 
-		virtual void SetTextureType(uint32_t handle, TextureType textureType) = 0;
-		virtual TextureType GetTextureType(uint32_t handle) = 0;
+		virtual void SetTextureType(TextureHandle handle, TextureType textureType) = 0;
+		virtual TextureType GetTextureType(TextureHandle handle) = 0;
 
-		virtual uint8_t GetChannels(uint32_t handle) = 0;
-		virtual const unsigned char* GetData(uint32_t handle) = 0;
-		virtual const std::string& GetPath(uint32_t handle) = 0;
-		virtual TextureData* GetTextureData(uint32_t handle) = 0;
+		virtual uint8_t GetChannels(TextureHandle handle) = 0;
+		virtual const unsigned char* GetData(TextureHandle handle) = 0;
+		virtual const std::string& GetPath(TextureHandle handle) = 0;
+		virtual TextureData* GetTextureData(TextureHandle handle) = 0;
 	};
 }
