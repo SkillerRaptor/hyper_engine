@@ -36,7 +36,6 @@
 #include "Hyperion/HyperRendering/TextureManager.hpp"
 
 /* Utilities */
-#include "Hyperion/HyperUtilities/Hasher.hpp"
 #include "Hyperion/HyperUtilities/Input.hpp"
 #include "Hyperion/HyperUtilities/KeyCodes.hpp"
 #include "Hyperion/HyperUtilities/Log.hpp"
