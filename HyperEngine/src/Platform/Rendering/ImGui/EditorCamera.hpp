@@ -13,6 +13,13 @@ namespace Hyperion
 {
 	class EditorCamera
 	{
+	public:
+		enum class CameraTypeInfo
+		{
+			ORTHOGRAPHIC,
+			PROJECTION
+		};
+
 	private:
 		glm::vec3 m_Position;
 		glm::vec2 m_ViewportSize;
@@ -23,7 +30,7 @@ namespace Hyperion
 		glm::vec3 m_Up;
 
 		glm::vec3 m_LastMousePosition;
-		bool m_FirstMouse;
+		bool m_FirstMouse = true;
 		float m_MouseSenitivity;
 
 		float m_Yaw;
@@ -36,14 +43,16 @@ namespace Hyperion
 		float m_NearPlane;
 		float m_FarPlane;
 
-		bool m_Orthographic;
+		CameraTypeInfo m_CameraType;
 
 		Ref<ShaderManager> m_ShaderManager;
+
+		bool m_Selected;
 
 		friend class EditorLayer;
 
 	public:
-		EditorCamera(const glm::vec3& position, const glm::vec2& viewportSize, float speed, float zoom, float zoomSpeed, float nearPlane, float farPlane, float yaw, float pitch, bool orthographic);
+		EditorCamera(const glm::vec3& position, const glm::vec2& viewportSize, float speed, float zoom, float zoomSpeed, float nearPlane, float farPlane, float yaw, float pitch, CameraTypeInfo cameraTypeInfo);
 
 		void OnUpdate(Timestep timeStep);
 		void OnEvent(Event& event);
@@ -71,5 +80,8 @@ namespace Hyperion
 
 		void UpdateViewMatrix();
 		glm::mat4 GetViewMatrix() const;
+
+	private:
+		void UpdateProjectionVectors();
 	};
 }

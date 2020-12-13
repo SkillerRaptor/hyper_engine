@@ -22,7 +22,7 @@ namespace Hyperion
 		Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
 		ImFont* m_Font;
 
-		EditorCamera m_EditorCamera;
+		Ref<EditorCamera> m_EditorCamera;
 
 	public:
 		EditorLayer(Ref<Scene> scene);

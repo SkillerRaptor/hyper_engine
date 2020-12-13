@@ -14,15 +14,17 @@
 namespace Hyperion
 {
 	EditorLayer::EditorLayer(Ref<Scene> scene)
-		: OverlayLayer("Editor Layer"), m_Scene(scene), m_EditorCamera(glm::vec3(0.0f), glm::vec2(1280.0f, 720.0f), 10.0f, 1.0f, 1.0f, -1000.0f, 1000.0f, 45.0f, 0.0f, true)
+		: OverlayLayer("Editor Layer"), m_Scene(scene)
 	{
 	}
 
 	void EditorLayer::OnAttach()
 	{
-		m_EditorCamera.m_ShaderManager = m_RenderContext->GetShaderManager();
-		m_EditorCamera.UpdateProjectionMatrix();
-		m_EditorCamera.UpdateViewMatrix();
+		m_EditorCamera = CreateRef<EditorCamera>(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec2(1280.0f, 720.0f), 10.0f, 45.0f, 1.0f, 0.0f, 1000.0f, -90.0f, 0.0f, EditorCamera::CameraTypeInfo::PROJECTION);
+
+		m_EditorCamera->m_ShaderManager = m_RenderContext->GetShaderManager();
+		m_EditorCamera->UpdateProjectionMatrix();
+		m_EditorCamera->UpdateViewMatrix();
 
 		m_EditorRenderer = EditorRenderer::Construct(m_RenderContext);
 		m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>(m_Scene);
@@ -55,7 +57,7 @@ namespace Hyperion
 
 	void EditorLayer::OnUpdate(Timestep timeStep)
 	{
-		m_EditorCamera.OnUpdate(timeStep);
+		m_EditorCamera->OnUpdate(timeStep);
 		m_EditorRenderer->OnUpdate(timeStep);
 
 		ImGui_ImplGlfw_NewFrame();
@@ -84,7 +86,8 @@ namespace Hyperion
 		imGuiEditorSizeInfo.Width = static_cast<uint32_t>(ImGui::GetWindowSize().x);
 		imGuiEditorSizeInfo.Height = static_cast<uint32_t>(ImGui::GetWindowSize().y);
 
-		m_EditorCamera.SetViewportSize(glm::vec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y));
+		m_EditorCamera->SetViewportSize(glm::vec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y));
+		m_EditorCamera->m_Selected = ImGui::IsWindowFocused();
 
 		m_EditorRenderer->RenderImage();
 
@@ -417,6 +420,6 @@ namespace Hyperion
 				return true;
 			});
 
-		m_EditorCamera.OnEvent(event);
+		m_EditorCamera->OnEvent(event);
 	}
 }

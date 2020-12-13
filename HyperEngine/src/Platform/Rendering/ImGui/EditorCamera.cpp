@@ -8,98 +8,113 @@
 
 namespace Hyperion
 {
-	EditorCamera::EditorCamera(const glm::vec3& position, const glm::vec2& viewportSize, float speed, float zoom, float zoomSpeed, float nearPlane, float farPlane, float yaw, float pitch, bool orthographic)
-		: m_Position(position), m_ViewportSize(viewportSize), m_Speed(speed), m_Zoom(zoom), m_ZoomSpeed(zoomSpeed), m_NearPlane(nearPlane), m_FarPlane(farPlane), m_Yaw(yaw), m_Pitch(pitch), m_Orthographic(orthographic), m_Front(glm::vec3(0.0f, 0.0f, 1.0f)), m_MouseSenitivity(0.1f)
+	EditorCamera::EditorCamera(const glm::vec3& position, const glm::vec2& viewportSize, float speed, float zoom, float zoomSpeed, float nearPlane, float farPlane, float yaw, float pitch, CameraTypeInfo cameraTypeInfo)
+		: m_Position(position), m_ViewportSize(viewportSize), m_Speed(speed), m_Zoom(zoom), m_ZoomSpeed(zoomSpeed), m_NearPlane(nearPlane), m_FarPlane(farPlane), m_Yaw(yaw), m_Pitch(pitch), m_CameraType(cameraTypeInfo), m_Front(glm::vec3(0.0f, 0.0f, 100.0f)), m_MouseSenitivity(0.1f)
 	{
-		float yawRadians = static_cast<float>(m_Yaw * ((float)M_PI) / 180);
-		float pitchRadians = static_cast<float>(m_Pitch * ((float)M_PI) / 180);
-
-		glm::vec3 front;
-		front.x = cos(yawRadians) * cos(pitchRadians);
-		front.y = sin(pitchRadians);
-		front.z = sin(yawRadians) * cos(pitchRadians);
-		m_Front = glm::normalize(front);
-
-		m_Right = glm::normalize(glm::cross(m_Front, glm::vec3(0.0f, 1.0f, 0.0f)));
-		m_Up = glm::normalize(glm::cross(m_Right, m_Front));
+		UpdateProjectionVectors();
 	}
 
 	void EditorCamera::OnUpdate(Timestep timeStep)
 	{
-		if (m_Orthographic)
+		if (m_Selected)
 		{
-			m_Position.x -= (float)(m_Speed * timeStep * Input::GetAxis(InputAxis::HORIZONTAL));
-			m_Position.y += (float)(m_Speed * timeStep * Input::GetAxis(InputAxis::VERTICAL));
-		}
-		else
-		{
-			float velocity = static_cast<float>(m_Speed * timeStep);
-			if (Input::GetAxis(InputAxis::VERTICAL) == 1)
-				m_Position += m_Front * velocity;
-			if (Input::GetAxis(InputAxis::VERTICAL) == -1)
-				m_Position -= m_Front * velocity;
-			if (Input::GetAxis(InputAxis::HORIZONTAL) == 1)
-				m_Position -= m_Right * velocity;
-			if (Input::GetAxis(InputAxis::HORIZONTAL) == -1)
-				m_Position += m_Right * velocity;
-		}
+			switch (m_CameraType)
+			{
+			case CameraTypeInfo::ORTHOGRAPHIC:
+			{
+				m_Position.x -= (float)(m_Speed * timeStep * Input::GetAxis(InputAxis::HORIZONTAL));
+				m_Position.y += (float)(m_Speed * timeStep * Input::GetAxis(InputAxis::VERTICAL));
+				break;
+			}
+			case CameraTypeInfo::PROJECTION:
+			{
+				float velocity = static_cast<float>(m_Speed * timeStep);
+				if (Input::GetAxis(InputAxis::VERTICAL) == 1)
+					m_Position += m_Front * velocity;
+				if (Input::GetAxis(InputAxis::VERTICAL) == -1)
+					m_Position -= m_Front * velocity;
+				if (Input::GetAxis(InputAxis::HORIZONTAL) == 1)
+					m_Position -= m_Right * velocity;
+				if (Input::GetAxis(InputAxis::HORIZONTAL) == -1)
+					m_Position += m_Right * velocity;
+				break;
+			}
+			default:
+				break;
+			}
 
-		UpdateViewMatrix();
-		UpdateProjectionMatrix();
+			UpdateViewMatrix();
+			UpdateProjectionMatrix();
+		}
 	}
 
 	void EditorCamera::OnEvent(Event& event)
 	{
-		EventDispatcher dispatcher(event);
+		if (m_Selected)
+		{
+			EventDispatcher dispatcher(event);
 
-		dispatcher.Dispatch<MouseScrolledEvent>([&](MouseScrolledEvent& event)
-			{
-				float& zoom = m_Zoom;
-				zoom -= event.GetYOffset() * m_ZoomSpeed;
-				zoom = (zoom < m_ZoomSpeed) ? m_ZoomSpeed : zoom;
-
-				UpdateProjectionMatrix();
-
-				return false;
-			});
-
-		dispatcher.Dispatch<MouseMovedEvent>([&](MouseMovedEvent& event)
-			{
-				if (!m_FirstMouse)
+			dispatcher.Dispatch<MouseScrolledEvent>([&](MouseScrolledEvent& event)
 				{
-					m_LastMousePosition.x = event.GetMouseX();
-					m_LastMousePosition.y = event.GetMouseY();
-					m_FirstMouse = true;
-				}
+					float& zoom = m_Zoom;
+					zoom -= event.GetYOffset() * m_ZoomSpeed;
+					zoom = (zoom < m_ZoomSpeed) ? m_ZoomSpeed : zoom;
 
-				float xOffset = event.GetMouseX() - m_LastMousePosition.x;
-				float yOffset = m_LastMousePosition.y - event.GetMouseY();
+					UpdateProjectionMatrix();
 
-				m_LastMousePosition.x = event.GetMouseX();
-				m_LastMousePosition.y = event.GetMouseY();
+					return false;
+				});
 
-				m_Yaw += (xOffset * m_MouseSenitivity);
-				m_Pitch += (yOffset * m_MouseSenitivity);
+			dispatcher.Dispatch<MouseButtonPressedEvent>([&](MouseButtonPressedEvent& event)
+				{
+					if (event.GetMouseButton() == MouseCode::ButtonLeft)
+					{
+						m_LastMousePosition.x = Input::GetMouseX();
+						m_LastMousePosition.y = Input::GetMouseY();
+					}
 
-				if (m_Pitch > 89.0f)
-					m_Pitch = 89.0f;
-				if (m_Pitch < -89.0f)
-					m_Pitch = -89.0f;
+					return false;
+				});
 
-				float yawRadians = static_cast<float>(m_Yaw * ((float)M_PI) / 180);
-				float pitchRadians = static_cast<float>(m_Pitch * ((float)M_PI) / 180);
+			dispatcher.Dispatch<MouseMovedEvent>([&](MouseMovedEvent& event)
+				{
+					if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft))
+					{
+						float xOffset = event.GetMouseX() - m_LastMousePosition.x;
+						float yOffset = m_LastMousePosition.y - event.GetMouseY();
 
-				glm::vec3 front;
-				front.x = cos(yawRadians) * cos(pitchRadians);
-				front.y = sin(pitchRadians);
-				front.z = sin(yawRadians) * cos(pitchRadians);
-				m_Front = front;
+						xOffset *= m_MouseSenitivity;
+						yOffset *= m_MouseSenitivity;
 
-				m_Right = glm::normalize(glm::cross(m_Front, glm::vec3(0.0f, 1.0f, 0.0f)));
-				m_Up = glm::normalize(glm::cross(m_Right, m_Front));
+						m_Yaw += xOffset;
+						m_Pitch += yOffset;
 
-				return false;
-			});
+						m_LastMousePosition.x = event.GetMouseX();
+						m_LastMousePosition.y = event.GetMouseY();
+
+						if (m_Pitch > 89.0f)
+							m_Pitch = 89.0f;
+						if (m_Pitch < -89.0f)
+							m_Pitch = -89.0f;
+
+						UpdateProjectionVectors();
+					}
+
+					return false;
+				});
+		}
+	}
+
+	void EditorCamera::UpdateProjectionVectors()
+	{
+		glm::vec3 front;
+		front.x = glm::cos(glm::radians(m_Yaw)) * glm::cos(glm::radians(m_Pitch));
+		front.y = glm::sin(glm::radians(m_Pitch));
+		front.z = glm::sin(glm::radians(m_Yaw)) * glm::cos(glm::radians(m_Pitch));
+		m_Front = glm::normalize(front);
+
+		m_Right = glm::normalize(glm::cross(m_Front, glm::vec3(0.0f, 1.0f, 0.0f)));
+		m_Up = glm::normalize(glm::cross(m_Right, m_Front));
 	}
 
 	void EditorCamera::SetPosition(const glm::vec3& position)
@@ -176,9 +191,15 @@ namespace Hyperion
 	glm::mat4 EditorCamera::GetProjectionMatrix() const
 	{
 		float aspectRatio = (float)m_ViewportSize.x / m_ViewportSize.y;
-		if (m_Orthographic)
+		switch (m_CameraType)
+		{
+		case CameraTypeInfo::ORTHOGRAPHIC:
 			return glm::ortho(-aspectRatio * m_Zoom, aspectRatio * m_Zoom, -m_Zoom, m_Zoom, m_NearPlane, m_FarPlane);
-		return glm::perspective(45.0f, aspectRatio, m_NearPlane, m_FarPlane);
+		case CameraTypeInfo::PROJECTION:
+			return glm::perspective(glm::radians(m_Zoom), aspectRatio, m_NearPlane, m_FarPlane);
+		default:
+			return glm::mat4(1.0f);
+		}
 	}
 
 	void EditorCamera::UpdateViewMatrix()
@@ -189,8 +210,14 @@ namespace Hyperion
 
 	glm::mat4 EditorCamera::GetViewMatrix() const
 	{
-		if (m_Orthographic)
+		switch (m_CameraType)
+		{
+		case CameraTypeInfo::ORTHOGRAPHIC:
 			return glm::translate(glm::mat4(1.0f), glm::vec3(m_Position.z, m_Position.y, m_Position.x));
-		return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
+		case CameraTypeInfo::PROJECTION:
+			return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
+		default:
+			return glm::mat4(1.0f);
+		}
 	}
 }

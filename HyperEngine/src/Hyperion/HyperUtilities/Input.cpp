@@ -52,7 +52,7 @@ namespace Hyperion
 	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow());
-		int state = glfwGetKey(window, button);
+		int state = glfwGetMouseButton(window, button);
 		return state == GLFW_PRESS;
 	}
 
