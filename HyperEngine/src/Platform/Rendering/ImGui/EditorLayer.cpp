@@ -14,7 +14,7 @@
 namespace Hyperion
 {
 	EditorLayer::EditorLayer(Ref<Scene> scene)
-		: OverlayLayer("Editor Layer"), m_Scene(scene)
+		: OverlayLayer("Editor Layer"), m_Scene(scene), m_Font(nullptr)
 	{
 	}
 

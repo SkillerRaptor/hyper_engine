@@ -91,7 +91,7 @@ namespace Hyperion
 
 	void EditorCamera::UpdateProjectionVectors()
 	{
-		glm::vec3 front;
+		glm::vec3 front(0.0f);
 		front.x = glm::cos(glm::radians(m_Yaw)) * glm::cos(glm::radians(m_Pitch));
 		front.y = glm::sin(glm::radians(m_Pitch));
 		front.z = glm::sin(glm::radians(m_Yaw)) * glm::cos(glm::radians(m_Pitch));
