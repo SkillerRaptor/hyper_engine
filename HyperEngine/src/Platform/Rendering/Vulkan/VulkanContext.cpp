@@ -52,7 +52,7 @@ namespace Hyperion
 		if (vkCreateInstance(&instanceCreateInfo, nullptr, &m_Instance) != VK_SUCCESS)
 		{
 			std::cerr << " Failed to create Vulkan Instance!" << std::endl;
-			std::exit(-1);
+			std::exit(EXIT_FAILURE);
 		}
 
 		m_ValidationLayer.SetupValidationDebugger();
@@ -60,7 +60,7 @@ namespace Hyperion
 		if (glfwCreateWindowSurface(m_Instance, m_Window, nullptr, &m_Surface) != VK_SUCCESS)
 		{
 			std::cerr << " Failed to create Window Surface!" << std::endl;
-			std::exit(-1);
+			std::exit(EXIT_FAILURE);
 		}
 
 		// TODO: Vulkan Stuff

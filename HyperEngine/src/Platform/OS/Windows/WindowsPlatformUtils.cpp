@@ -1,4 +1,4 @@
-#include "WindowsFileDialogs.hpp"
+#include "WindowsPlatformUtils.hpp"
 
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -10,7 +10,7 @@
 
 namespace Hyperion
 {
-    std::string WindowsFileDialogs::OpenFile(const char* filter)
+    std::string WindowsPlatformUtils::OpenFile(const char* filter)
     {
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
@@ -27,7 +27,7 @@ namespace Hyperion
         return std::string();
     }
 
-	std::string WindowsFileDialogs::SaveFile(const char* filter)
+	std::string WindowsPlatformUtils::SaveFile(const char* filter)
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };

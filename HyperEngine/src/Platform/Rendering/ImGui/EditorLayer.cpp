@@ -9,8 +9,7 @@
 #include "HyperECS/Scene/SceneSerializer.hpp"
 #include "HyperEvents/KeyEvents.hpp"
 #include "HyperUtilities/Input.hpp"
-
-#include "Platform/OS/Windows/WindowsFileDialogs.hpp"
+#include "HyperUtilities/PlatformUtils.hpp"
 
 namespace Hyperion
 {
@@ -342,7 +341,7 @@ namespace Hyperion
 
 	void EditorLayer::OpenScene()
 	{
-		std::string filePath = WindowsFileDialogs::OpenFile("Hyper Scene (*.hyper)\0*.hyper\0");
+		std::string filePath = PlatformUtils::Get()->OpenFile("Hyper Scene (*.hyper)\0*.hyper\0");
 		if (!filePath.empty())
 		{
 			m_Scene = CreateRef<Scene>("Example Scene", m_RenderContext->GetRenderer2D());
@@ -365,7 +364,7 @@ namespace Hyperion
 
 	void EditorLayer::SaveAsScene()
 	{
-		std::string filePath = WindowsFileDialogs::SaveFile("Hyper Scene (*.hyper)\0*.hyper\0");
+		std::string filePath = PlatformUtils::Get()->SaveFile("Hyper Scene (*.hyper)\0*.hyper\0");
 		if (!filePath.empty())
 		{
 			SceneSerializer sceneSerializer(m_Scene);

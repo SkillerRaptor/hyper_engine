@@ -31,7 +31,7 @@ namespace Hyperion
 		{
 			HP_CORE_ASSERT(false, "Failed to create GLFW window");
 			glfwTerminate();
-			std::exit(-1);
+			std::exit(EXIT_FAILURE);
 		}
 
 		m_RenderContext->m_Window = m_Window;

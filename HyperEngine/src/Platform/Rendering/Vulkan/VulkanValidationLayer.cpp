@@ -17,7 +17,7 @@ namespace Hyperion
 		if (m_ValidationLayerInfo.ValidationLayersEnabled && !CheckValidationLayerSupport())
 		{
 			std::cout << " Validation Layers requested, but not available!" << std::endl;
-			std::exit(-1);
+			std::exit(EXIT_FAILURE);
 		}
 	}
 
@@ -49,7 +49,7 @@ namespace Hyperion
 		if (CreateDebugUtilsMessengerEXT(m_Instance, &debugValidationMessengerCreateInfo, nullptr, &m_ValidationLayerInfo.DebugMessenger) != VK_SUCCESS)
 		{
 			std::cout << " Failed to setup the Debug Messenger!" << std::endl;
-			std::exit(-1);
+			std::exit(EXIT_FAILURE);
 		}
 	}
 

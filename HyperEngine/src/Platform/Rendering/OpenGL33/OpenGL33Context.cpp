@@ -28,7 +28,7 @@ namespace Hyperion
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{
 			HP_CORE_FATAL("Failed to initialize GLAD");
-			std::exit(-1);
+			std::exit(EXIT_FAILURE);
 		}
 
 		HP_CORE_INFO("");
