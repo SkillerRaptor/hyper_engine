@@ -22,6 +22,8 @@ namespace Hyperion
 		void SetContext(const Ref<Scene>& context);
 		const Ref<Scene>& GetContext() const;
 
+		const HyperEntity& GetSelectedEntity() const;
+
 	private:
 		void DrawEntityNode(HyperEntity entity);
 		void DrawComponents();

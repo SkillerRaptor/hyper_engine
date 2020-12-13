@@ -417,4 +417,9 @@ namespace Hyperion
 	{
 		return m_Context;
 	}
+
+	const HyperEntity& SceneHierarchyPanel::GetSelectedEntity() const
+	{
+		return m_SelectedEntity;
+	}
 }

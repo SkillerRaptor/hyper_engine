@@ -23,6 +23,7 @@ namespace Hyperion
 		ImFont* m_Font;
 
 		Ref<EditorCamera> m_EditorCamera;
+		int m_GizmoType;
 
 	public:
 		EditorLayer(Ref<Scene> scene);

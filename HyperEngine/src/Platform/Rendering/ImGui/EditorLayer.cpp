@@ -1,5 +1,10 @@
 #include "EditorLayer.hpp"
 
+#undef min
+#undef max
+
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
 
@@ -62,7 +67,6 @@ namespace Hyperion
 
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::BeginFrame();
 
 		ImGui::PushFont(m_Font);
@@ -80,16 +84,65 @@ namespace Hyperion
 		ImGui::Begin("Editor");
 		ImGui::BeginChild("EditorRenderer");
 
+		ImVec2 windowPos = ImGui::GetWindowPos();
+		ImVec2 windowSize = ImGui::GetWindowSize();
+
 		ImGuiFrameSizeInfo& imGuiEditorSizeInfo = m_RenderContext->GetImGuiEditorSizeInfo();
-		imGuiEditorSizeInfo.XPos = static_cast<uint32_t>(ImGui::GetWindowPos().x);
-		imGuiEditorSizeInfo.YPos = static_cast<uint32_t>(ImGui::GetWindowPos().y);
-		imGuiEditorSizeInfo.Width = static_cast<uint32_t>(ImGui::GetWindowSize().x);
-		imGuiEditorSizeInfo.Height = static_cast<uint32_t>(ImGui::GetWindowSize().y);
+		imGuiEditorSizeInfo.XPos = static_cast<uint32_t>(windowPos.x);
+		imGuiEditorSizeInfo.YPos = static_cast<uint32_t>(windowPos.y);
+		imGuiEditorSizeInfo.Width = static_cast<uint32_t>(windowSize.x);
+		imGuiEditorSizeInfo.Height = static_cast<uint32_t>(windowSize.y);
 
 		m_EditorCamera->SetViewportSize(glm::vec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y));
-		m_EditorCamera->m_Selected = ImGui::IsWindowFocused();
 
 		m_EditorRenderer->RenderImage();
+
+		HyperEntity selectedEntity = m_SceneHierarchyPanel->GetSelectedEntity();
+		if (selectedEntity && m_GizmoType != -1)
+		{
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
+			ImGuizmo::SetRect(windowPos.x, windowPos.y, windowSize.x, windowSize.y);
+
+			const glm::mat4& cameraProjection = m_EditorCamera->GetProjectionMatrix();
+			const glm::mat4& cameraView = m_EditorCamera->GetViewMatrix();
+		
+			TransformComponent& transformComponent = selectedEntity.GetComponent<TransformComponent>();
+			glm::mat4 rotation = glm::toMat4(glm::quat(transformComponent.Rotation));
+			glm::mat4 transform = glm::translate(glm::mat4(1.0f), transformComponent.Position) * rotation * glm::scale(glm::mat4(1.0f), transformComponent.Scale);
+
+			bool snap = Input::IsKeyPressed(KeyCode::LeftControl);
+			float snapValue = 0.5f;
+
+			if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+				snapValue = 45.0f;
+
+			float snapValues[3] = { snapValue, snapValue, snapValue };
+
+			ImGuizmo::Manipulate(
+				glm::value_ptr(cameraView),
+				glm::value_ptr(cameraProjection),
+				static_cast<ImGuizmo::OPERATION>(m_GizmoType),
+				ImGuizmo::MODE::LOCAL,
+				glm::value_ptr(transform),
+				nullptr,
+				snap ? snapValues : nullptr);
+		
+			if (ImGuizmo::IsUsing())
+			{
+				glm::vec3 position, rotation, scale;
+				ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), glm::value_ptr(position), glm::value_ptr(rotation), glm::value_ptr(scale));
+
+				HP_CORE_DEBUG("-> %, %, %", glm::to_string(position), glm::to_string(rotation), glm::to_string(scale));
+
+				glm::vec3 deltaRotation = rotation - transformComponent.Rotation;
+				transformComponent.Position = position;
+				transformComponent.Rotation += deltaRotation;
+				transformComponent.Scale = scale;
+			}
+		}
+
+		m_EditorCamera->m_Selected = ImGui::IsWindowFocused() && !ImGuizmo::IsUsing();
 
 		ImGui::EndChild();
 		ImGui::End();
@@ -414,6 +467,18 @@ namespace Hyperion
 					}
 					break;
 				}
+				case KeyCode::Q:
+					m_GizmoType = -1;
+					break;
+				case KeyCode::T:
+					m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+					break;
+				case KeyCode::R:
+					m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+					break;
+				case KeyCode::Z:
+					m_GizmoType = ImGuizmo::OPERATION::SCALE;
+					break;
 				default:
 					break;
 				}
