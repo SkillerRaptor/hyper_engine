@@ -1,9 +1,12 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include <string>
 #include <queue>
 
-#include "HyperMath/Matrix.hpp"
-#include "HyperMath/Vector.hpp"
 #include "HyperUtilities/NonCopyable.hpp"
 #include "HyperUtilities/NonMoveable.hpp"
 
@@ -50,17 +53,17 @@ namespace Hyperion
 		virtual void SetFloatArray(ShaderHandle handle, const std::string& name, size_t count, float* values) = 0;
 
 		virtual void SetVector2(ShaderHandle handle, const std::string& name, float x, float y) = 0;
-		virtual void SetVector2(ShaderHandle handle, const std::string& name, const Vec2& vector) = 0;
+		virtual void SetVector2(ShaderHandle handle, const std::string& name, const glm::vec2& vector) = 0;
 
 		virtual void SetVector3(ShaderHandle handle, const std::string& name, float x, float y, float z) = 0;
-		virtual void SetVector3(ShaderHandle handle, const std::string& name, const Vec3& vector) = 0;
+		virtual void SetVector3(ShaderHandle handle, const std::string& name, const glm::vec3& vector) = 0;
 
 		virtual void SetVector4(ShaderHandle handle, const std::string& name, float x, float y, float z, float w) = 0;
-		virtual void SetVector4(ShaderHandle handle, const std::string& name, const Vec4& vector) = 0;
+		virtual void SetVector4(ShaderHandle handle, const std::string& name, const glm::vec4& vector) = 0;
 
-		virtual void SetMatrix2(ShaderHandle handle, const std::string& name, const Mat2& matrix) = 0;
-		virtual void SetMatrix3(ShaderHandle handle, const std::string& name, const Mat3& matrix) = 0;
-		virtual void SetMatrix4(ShaderHandle handle, const std::string& name, const Mat4& matrix) = 0;
+		virtual void SetMatrix2(ShaderHandle handle, const std::string& name, const glm::mat2& matrix) = 0;
+		virtual void SetMatrix3(ShaderHandle handle, const std::string& name, const glm::mat3& matrix) = 0;
+		virtual void SetMatrix4(ShaderHandle handle, const std::string& name, const glm::mat4& matrix) = 0;
 
 		virtual const std::string GetVertexShaderPath(ShaderHandle handle) = 0;
 		virtual const std::string GetFragmentShaderPath(ShaderHandle handle) = 0;

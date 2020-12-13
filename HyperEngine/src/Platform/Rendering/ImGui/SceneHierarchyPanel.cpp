@@ -230,7 +230,7 @@ namespace Hyperion
 		{
 			World& world = m_Context->GetWorld();
 
-			DrawAddComponentMenu<SpriteRendererComponent>(Vec4(1.0f));
+			DrawAddComponentMenu<SpriteRendererComponent>(glm::vec4(1.0f));
 			DrawAddComponentMenu<CameraComponent>(1280, 720, 5.0f, 0.1f, 1.0f, false, CameraComponent::CameraTypeInfo::ORTHOGRAPHIC);
 			DrawAddComponentMenu<CameraControllerComponent>(0.1f, 1.0f);
 			DrawAddComponentMenu<CharacterControllerComponent>(1.0f);
@@ -312,7 +312,7 @@ namespace Hyperion
 		ImGui::PopID();
 	}
 
-	void SceneHierarchyPanel::DrawColorEdit4(const std::string& title, Vec4& value)
+	void SceneHierarchyPanel::DrawColorEdit4(const std::string& title, glm::vec4& value)
 	{
 		ImGui::PushID(title.c_str());
 
@@ -322,7 +322,7 @@ namespace Hyperion
 		ImGui::NextColumn();
 
 		ImGui::SetNextItemWidth(-1);
-		ImGui::ColorEdit4(std::string("##" + title).c_str(), value);
+		ImGui::ColorEdit4(std::string("##" + title).c_str(), glm::value_ptr(value));
 
 		ImGui::Columns(1);
 
@@ -363,7 +363,7 @@ namespace Hyperion
 		ImGui::PopID();
 	}
 
-	void SceneHierarchyPanel::DrawDragVec3(const std::string& title, Vec3& vector, float speed, float min, float max)
+	void SceneHierarchyPanel::DrawDragVec3(const std::string& title, glm::vec3& vector, float speed, float min, float max)
 	{
 		ImGui::PushID(title.c_str());
 

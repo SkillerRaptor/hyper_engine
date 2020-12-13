@@ -44,11 +44,11 @@ namespace Hyperion { namespace YAML
 			else if (auto value = std::get_if<std::vector<Node>>(&configurationValue.Value))
 				for (auto& node : *value)
 					node.Write(config, true, 2);
-			else if (auto value = std::get_if<Vec2>(&configurationValue.Value))
+			else if (auto value = std::get_if<glm::vec2>(&configurationValue.Value))
 				config << "[" << value->x << ", " << value->y << "]";
-			else if (auto value = std::get_if<Vec3>(&configurationValue.Value))
+			else if (auto value = std::get_if<glm::vec3>(&configurationValue.Value))
 				config << "[" << value->x << ", " << value->y << ", " << value->z << "]";
-			else if (auto value = std::get_if<Vec4>(&configurationValue.Value))
+			else if (auto value = std::get_if<glm::vec4>(&configurationValue.Value))
 				config << "[" << value->x << ", " << value->y << ", " << value->z << ", " << value->w << "]";
 			index++;
 			if (index < m_Data.size()) config << "\n";

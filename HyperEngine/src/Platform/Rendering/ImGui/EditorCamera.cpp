@@ -8,20 +8,20 @@
 
 namespace Hyperion
 {
-	EditorCamera::EditorCamera(const Vec3& position, const Vec2& viewportSize, float speed, float zoom, float zoomSpeed, float nearPlane, float farPlane, float yaw, float pitch, bool orthographic)
-		: m_Position(position), m_ViewportSize(viewportSize), m_Speed(speed), m_Zoom(zoom), m_ZoomSpeed(zoomSpeed), m_NearPlane(nearPlane), m_FarPlane(farPlane), m_Yaw(yaw), m_Pitch(pitch), m_Orthographic(orthographic), m_Front(Vec3(0.0f, 0.0f, 1.0f)), m_MouseSenitivity(0.1f)
+	EditorCamera::EditorCamera(const glm::vec3& position, const glm::vec2& viewportSize, float speed, float zoom, float zoomSpeed, float nearPlane, float farPlane, float yaw, float pitch, bool orthographic)
+		: m_Position(position), m_ViewportSize(viewportSize), m_Speed(speed), m_Zoom(zoom), m_ZoomSpeed(zoomSpeed), m_NearPlane(nearPlane), m_FarPlane(farPlane), m_Yaw(yaw), m_Pitch(pitch), m_Orthographic(orthographic), m_Front(glm::vec3(0.0f, 0.0f, 1.0f)), m_MouseSenitivity(0.1f)
 	{
 		float yawRadians = static_cast<float>(m_Yaw * ((float)M_PI) / 180);
 		float pitchRadians = static_cast<float>(m_Pitch * ((float)M_PI) / 180);
 
-		Vec3 front;
+		glm::vec3 front;
 		front.x = cos(yawRadians) * cos(pitchRadians);
 		front.y = sin(pitchRadians);
 		front.z = sin(yawRadians) * cos(pitchRadians);
-		m_Front = Vector::Normalize(front);
+		m_Front = glm::normalize(front);
 
-		m_Right = Vector::Normalize(Vector::Cross(m_Front, Vec3(0.0f, 1.0f, 0.0f)));
-		m_Up = Vector::Normalize(Vector::Cross(m_Right, m_Front));
+		m_Right = glm::normalize(glm::cross(m_Front, glm::vec3(0.0f, 1.0f, 0.0f)));
+		m_Up = glm::normalize(glm::cross(m_Right, m_Front));
 	}
 
 	void EditorCamera::OnUpdate(Timestep timeStep)
@@ -89,37 +89,37 @@ namespace Hyperion
 				float yawRadians = static_cast<float>(m_Yaw * ((float)M_PI) / 180);
 				float pitchRadians = static_cast<float>(m_Pitch * ((float)M_PI) / 180);
 
-				Vec3 front;
+				glm::vec3 front;
 				front.x = cos(yawRadians) * cos(pitchRadians);
 				front.y = sin(pitchRadians);
 				front.z = sin(yawRadians) * cos(pitchRadians);
 				m_Front = front;
 
-				m_Right = Vector::Normalize(Vector::Cross(m_Front, Vec3(0.0f, 1.0f, 0.0f)));
-				m_Up = Vector::Normalize(Vector::Cross(m_Right, m_Front));
+				m_Right = glm::normalize(glm::cross(m_Front, glm::vec3(0.0f, 1.0f, 0.0f)));
+				m_Up = glm::normalize(glm::cross(m_Right, m_Front));
 
 				return false;
 			});
 	}
 
-	void EditorCamera::SetPosition(const Vec3& position)
+	void EditorCamera::SetPosition(const glm::vec3& position)
 	{
 		m_Position = position;
 		UpdateViewMatrix();
 	}
 
-	const Vec3& EditorCamera::GetPosition() const
+	const glm::vec3& EditorCamera::GetPosition() const
 	{
 		return m_Position;
 	}
 
-	void EditorCamera::SetViewportSize(const Vec2& viewportSize)
+	void EditorCamera::SetViewportSize(const glm::vec2& viewportSize)
 	{
 		m_ViewportSize = viewportSize;
 		UpdateProjectionMatrix();
 	}
 
-	const Vec2& EditorCamera::GetViewportSize() const
+	const glm::vec2& EditorCamera::GetViewportSize() const
 	{
 		return m_ViewportSize;
 	}
@@ -173,12 +173,12 @@ namespace Hyperion
 		m_ShaderManager->SetMatrix4({ 0 }, "u_ProjectionMatrix", GetProjectionMatrix());
 	}
 
-	Mat4 EditorCamera::GetProjectionMatrix() const
+	glm::mat4 EditorCamera::GetProjectionMatrix() const
 	{
 		float aspectRatio = (float)m_ViewportSize.x / m_ViewportSize.y;
 		if (m_Orthographic)
-			return Matrix::Ortho(-aspectRatio * m_Zoom, aspectRatio * m_Zoom, -m_Zoom, m_Zoom, m_NearPlane, m_FarPlane);
-		return Matrix::Perspective(45.0f, aspectRatio, m_NearPlane, m_FarPlane);
+			return glm::ortho(-aspectRatio * m_Zoom, aspectRatio * m_Zoom, -m_Zoom, m_Zoom, m_NearPlane, m_FarPlane);
+		return glm::perspective(45.0f, aspectRatio, m_NearPlane, m_FarPlane);
 	}
 
 	void EditorCamera::UpdateViewMatrix()
@@ -187,10 +187,10 @@ namespace Hyperion
 		m_ShaderManager->SetMatrix4({ 0 }, "u_ViewMatrix", GetViewMatrix());
 	}
 
-	Mat4 EditorCamera::GetViewMatrix() const
+	glm::mat4 EditorCamera::GetViewMatrix() const
 	{
 		if (m_Orthographic)
-			return Matrix::Translate(Mat4(1.0f), Vector::Inverse(m_Position));
-		return Matrix::LookAt(m_Position, m_Position + m_Front, m_Up);
+			return glm::translate(glm::mat4(1.0f), glm::vec3(m_Position.z, m_Position.y, m_Position.x));
+		return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
 	}
 }

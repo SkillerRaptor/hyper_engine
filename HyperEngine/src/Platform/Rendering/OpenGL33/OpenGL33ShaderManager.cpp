@@ -186,7 +186,7 @@ namespace Hyperion
 		glUniform2f(GetUniformLocation(m_Shaders[handle], name), x, y);
 	}
 
-	void OpenGL33ShaderManager::SetVector2(ShaderHandle handle, const std::string& name, const Vec2& vector)
+	void OpenGL33ShaderManager::SetVector2(ShaderHandle handle, const std::string& name, const glm::vec2& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
@@ -200,7 +200,7 @@ namespace Hyperion
 		glUniform3f(GetUniformLocation(m_Shaders[handle], name), x, y, z);
 	}
 
-	void OpenGL33ShaderManager::SetVector3(ShaderHandle handle, const std::string& name, const Vec3& vector)
+	void OpenGL33ShaderManager::SetVector3(ShaderHandle handle, const std::string& name, const glm::vec3& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
@@ -214,32 +214,32 @@ namespace Hyperion
 		glUniform4f(GetUniformLocation(m_Shaders[handle], name), x, y, z, w);
 	}
 
-	void OpenGL33ShaderManager::SetVector4(ShaderHandle handle, const std::string& name, const Vec4& vector)
+	void OpenGL33ShaderManager::SetVector4(ShaderHandle handle, const std::string& name, const glm::vec4& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniform4f(GetUniformLocation(m_Shaders[handle], name), vector.x, vector.y, vector.z, vector.w);
 	}
 
-	void OpenGL33ShaderManager::SetMatrix2(ShaderHandle handle, const std::string& name, const Mat2& matrix)
+	void OpenGL33ShaderManager::SetMatrix2(ShaderHandle handle, const std::string& name, const glm::mat2& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
-		glUniformMatrix2fv(GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
+		glUniformMatrix2fv(GetUniformLocation(m_Shaders[handle], name), 1, false, glm::value_ptr(matrix));
 	}
 
-	void OpenGL33ShaderManager::SetMatrix3(ShaderHandle handle, const std::string& name, const Mat3& matrix)
+	void OpenGL33ShaderManager::SetMatrix3(ShaderHandle handle, const std::string& name, const glm::mat3& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
-		glUniformMatrix3fv(GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
+		glUniformMatrix3fv(GetUniformLocation(m_Shaders[handle], name), 1, false, glm::value_ptr(matrix));
 	}
 
-	void OpenGL33ShaderManager::SetMatrix4(ShaderHandle handle, const std::string& name, const Mat4& matrix)
+	void OpenGL33ShaderManager::SetMatrix4(ShaderHandle handle, const std::string& name, const glm::mat4& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
-		glUniformMatrix4fv(GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
+		glUniformMatrix4fv(GetUniformLocation(m_Shaders[handle], name), 1, false, glm::value_ptr(matrix));
 	}
 
 	const std::string OpenGL33ShaderManager::GetVertexShaderPath(ShaderHandle handle)

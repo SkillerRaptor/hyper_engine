@@ -1,12 +1,16 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Renderer.hpp"
 
 namespace Hyperion
 {
 	struct CameraInfo
 	{
-		Vec3 Position;
+		glm::vec3 Position;
 
 		size_t Width;
 		size_t Height;
@@ -19,7 +23,7 @@ namespace Hyperion
 	class Renderer2D : public Renderer
 	{
 	protected:
-		Vec4 m_QuadVertexPositions[4];
+		glm::vec4 m_QuadVertexPositions[4];
 
 		const uint32_t MaxQuads = 20000;
 		const uint32_t MaxVertices = MaxQuads * 4;
@@ -38,7 +42,7 @@ namespace Hyperion
 
 		virtual void Flush() = 0;
 
-		virtual void DrawQuad(const Vec3 & position, const Vec3 & rotation, const Vec3 & scale, const Vec4 & color) = 0;
+		virtual void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale, const glm::vec4& color) = 0;
 
 		virtual void SetShaderManager(Ref<ShaderManager> shaderManager) = 0;
 		virtual void SetTextureManager(Ref<TextureManager> textureManager) = 0;

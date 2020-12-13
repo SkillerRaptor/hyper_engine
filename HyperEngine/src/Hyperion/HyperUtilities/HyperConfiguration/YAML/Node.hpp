@@ -1,18 +1,21 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <string>
 #include <fstream>
 #include <variant>
 
 #include "HyperCore/Core.hpp"
-#include "HyperMath/Vector.hpp"
 
 namespace Hyperion { namespace YAML
 {
 	class Node
 	{
 	private:
-		using NodeType = std::variant<std::string, int, uint8_t, uint16_t, uint32_t, uint64_t, float, double, Node*, std::vector<Node>, Vec2, Vec3, Vec4>;
+		using NodeType = std::variant<std::string, int, uint8_t, uint16_t, uint32_t, uint64_t, float, double, Node*, std::vector<Node>, glm::vec2, glm::vec3, glm::vec4>;
 
 		struct NodeValue
 		{

@@ -1,9 +1,10 @@
 #pragma once
 
-#include <string>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-#include "HyperMath/Matrix.hpp"
-#include "HyperMath/Vector.hpp"
+#include <string>
 
 namespace Hyperion
 {
@@ -19,23 +20,23 @@ namespace Hyperion
 
 	struct TransformComponent
 	{
-		Vec3 Position;
-		Vec3 Rotation;
-		Vec3 Scale;
+		glm::vec3 Position;
+		glm::vec3 Rotation;
+		glm::vec3 Scale;
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent& transformComponent) = default;
-		TransformComponent(const Vec3& position, const Vec3& rotation, const Vec3& scale)
+		TransformComponent(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 			: Position(position), Rotation(rotation), Scale(scale) {}
 	};
 
 	struct SpriteRendererComponent
 	{
-		Vec4 Color;
+		glm::vec4 Color;
 
 		SpriteRendererComponent() = default;
 		SpriteRendererComponent(const SpriteRendererComponent& spriteRendererComponent) = default;
-		SpriteRendererComponent(const Vec4& color)
+		SpriteRendererComponent(const glm::vec4& color)
 			: Color(color) {}
 	};
 

@@ -186,7 +186,7 @@ namespace Hyperion
 		glProgramUniform2f(m_Shaders[handle].ShaderId, GetUniformLocation(m_Shaders[handle], name), x, y);
 	}
 
-	void OpenGL46ShaderManager::SetVector2(ShaderHandle handle, const std::string& name, const Vec2& vector)
+	void OpenGL46ShaderManager::SetVector2(ShaderHandle handle, const std::string& name, const glm::vec2& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
@@ -200,7 +200,7 @@ namespace Hyperion
 		glProgramUniform3f(m_Shaders[handle].ShaderId, GetUniformLocation(m_Shaders[handle], name), x, y, z);
 	}
 
-	void OpenGL46ShaderManager::SetVector3(ShaderHandle handle, const std::string& name, const Vec3& vector)
+	void OpenGL46ShaderManager::SetVector3(ShaderHandle handle, const std::string& name, const glm::vec3& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
@@ -214,32 +214,32 @@ namespace Hyperion
 		glProgramUniform4f(m_Shaders[handle].ShaderId, GetUniformLocation(m_Shaders[handle], name), x, y, z, w);
 	}
 
-	void OpenGL46ShaderManager::SetVector4(ShaderHandle handle, const std::string& name, const Vec4& vector)
+	void OpenGL46ShaderManager::SetVector4(ShaderHandle handle, const std::string& name, const glm::vec4& vector)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glProgramUniform4f(m_Shaders[handle].ShaderId, GetUniformLocation(m_Shaders[handle], name), vector.x, vector.y, vector.z, vector.w);
 	}
 
-	void OpenGL46ShaderManager::SetMatrix2(ShaderHandle handle, const std::string& name, const Mat2& matrix)
+	void OpenGL46ShaderManager::SetMatrix2(ShaderHandle handle, const std::string& name, const glm::mat2& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
-		glProgramUniformMatrix2fv(m_Shaders[handle].ShaderId, GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
+		glUniformMatrix2fv(GetUniformLocation(m_Shaders[handle], name), 1, false, glm::value_ptr(matrix));
 	}
 
-	void OpenGL46ShaderManager::SetMatrix3(ShaderHandle handle, const std::string& name, const Mat3& matrix)
+	void OpenGL46ShaderManager::SetMatrix3(ShaderHandle handle, const std::string& name, const glm::mat3& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
-		glProgramUniformMatrix3fv(m_Shaders[handle].ShaderId, GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
+		glUniformMatrix3fv(GetUniformLocation(m_Shaders[handle], name), 1, false, glm::value_ptr(matrix));
 	}
 
-	void OpenGL46ShaderManager::SetMatrix4(ShaderHandle handle, const std::string& name, const Mat4& matrix)
+	void OpenGL46ShaderManager::SetMatrix4(ShaderHandle handle, const std::string& name, const glm::mat4& matrix)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
-		glProgramUniformMatrix4fv(m_Shaders[handle].ShaderId, GetUniformLocation(m_Shaders[handle], name), 1, true, &matrix.matrix[0][0]);
+		glUniformMatrix4fv(GetUniformLocation(m_Shaders[handle], name), 1, false, glm::value_ptr(matrix));
 	}
 
 	const std::string OpenGL46ShaderManager::GetVertexShaderPath(ShaderHandle handle)

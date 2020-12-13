@@ -8,3 +8,6 @@
 [submodule "HyperEngine/vendor/glfw"]
 	path = HyperEngine/vendor/glfw
 	url = https://github.com/SkillerRaptor/glfw
+[submodule "HyperEngine/vendor/glm"]
+	path = HyperEngine/vendor/glm
+	url = https://github.com/SkillerRaptor/glm

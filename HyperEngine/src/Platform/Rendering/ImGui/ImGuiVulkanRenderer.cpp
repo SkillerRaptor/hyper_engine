@@ -49,7 +49,7 @@
 //  2016-08-27: Vulkan: Fix Vulkan example for use when a depth buffer is active.
 
 #include "imgui.h"
-#include "ImGuiVulkanRenderer.h"
+#include "ImGuiVulkanRenderer.hpp"
 #include <stdio.h>
 
 // Reusable buffers used for rendering 1 current in-flight frame, for ImGui_ImplVulkan_RenderDrawData()

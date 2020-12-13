@@ -34,17 +34,17 @@ namespace Hyperion
 		virtual void SetFloatArray(ShaderHandle handle, const std::string& name, size_t count, float* values) override;
 
 		virtual void SetVector2(ShaderHandle handle, const std::string& name, float x, float y) override;
-		virtual void SetVector2(ShaderHandle handle, const std::string& name, const Vec2& vector) override;
+		virtual void SetVector2(ShaderHandle handle, const std::string& name, const glm::vec2& vector) override;
 
 		virtual void SetVector3(ShaderHandle handle, const std::string& name, float x, float y, float z) override;
-		virtual void SetVector3(ShaderHandle handle, const std::string& name, const Vec3& vector) override;
+		virtual void SetVector3(ShaderHandle handle, const std::string& name, const glm::vec3& vector) override;
 
 		virtual void SetVector4(ShaderHandle handle, const std::string& name, float x, float y, float z, float w) override;
-		virtual void SetVector4(ShaderHandle handle, const std::string& name, const Vec4& vector) override;
+		virtual void SetVector4(ShaderHandle handle, const std::string& name, const glm::vec4& vector) override;
 
-		virtual void SetMatrix2(ShaderHandle handle, const std::string& name, const Mat2& matrix) override;
-		virtual void SetMatrix3(ShaderHandle handle, const std::string& name, const Mat3& matrix) override;
-		virtual void SetMatrix4(ShaderHandle handle, const std::string& name, const Mat4& matrix) override;
+		virtual void SetMatrix2(ShaderHandle handle, const std::string& name, const glm::mat2& matrix) override;
+		virtual void SetMatrix3(ShaderHandle handle, const std::string& name, const glm::mat3& matrix) override;
+		virtual void SetMatrix4(ShaderHandle handle, const std::string& name, const glm::mat4& matrix) override;
 
 		virtual const std::string GetVertexShaderPath(ShaderHandle handle) override;
 		virtual const std::string GetFragmentShaderPath(ShaderHandle handle) override;

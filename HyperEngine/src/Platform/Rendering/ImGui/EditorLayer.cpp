@@ -14,7 +14,7 @@
 namespace Hyperion
 {
 	EditorLayer::EditorLayer(Ref<Scene> scene)
-		: OverlayLayer("Editor Layer"), m_Scene(scene), m_EditorCamera(Vec3(0.0f), Vec2(1280.0f, 720.0f), 10.0f, 1.0f, 1.0f, -1.0f, 1.0f, 45.0f, 0.0f, true)
+		: OverlayLayer("Editor Layer"), m_Scene(scene), m_EditorCamera(glm::vec3(0.0f), glm::vec2(1280.0f, 720.0f), 10.0f, 1.0f, 1.0f, -1000.0f, 1000.0f, 45.0f, 0.0f, true)
 	{
 	}
 
@@ -31,9 +31,9 @@ namespace Hyperion
 		HyperEntity squareTwo = m_Scene->CreateEntity("Square Two");
 		HyperEntity squareThree = m_Scene->CreateEntity("Square Three");
 
-		squareOne.AddComponent<SpriteRendererComponent>(Vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		squareTwo.AddComponent<SpriteRendererComponent>(Vec4(0.0f, 1.0f, 0.0f, 1.0f));
-		squareThree.AddComponent<SpriteRendererComponent>(Vec4(0.0f, 0.0f, 1.0f, 1.0f));
+		squareOne.AddComponent<SpriteRendererComponent>(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		squareTwo.AddComponent<SpriteRendererComponent>(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+		squareThree.AddComponent<SpriteRendererComponent>(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
@@ -84,7 +84,7 @@ namespace Hyperion
 		imGuiEditorSizeInfo.Width = static_cast<uint32_t>(ImGui::GetWindowSize().x);
 		imGuiEditorSizeInfo.Height = static_cast<uint32_t>(ImGui::GetWindowSize().y);
 
-		m_EditorCamera.SetViewportSize(Vec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y));
+		m_EditorCamera.SetViewportSize(glm::vec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y));
 
 		m_EditorRenderer->RenderImage();
 

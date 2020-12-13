@@ -1,10 +1,13 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Buffers/OpenGL46IndexBuffer.hpp"
 #include "Buffers/OpenGL46VertexArray.hpp"
 #include "Buffers/OpenGL46VertexBuffer.hpp"
 #include "HyperCore/Core.hpp"
-#include "HyperMath/Vector.hpp"
 #include "HyperRendering/Renderer2D.hpp"
 #include "HyperRendering/Vertex.hpp"
 
@@ -30,7 +33,7 @@ namespace Hyperion
 
 		virtual void Flush() override;
 
-		virtual void DrawQuad(const Vec3& position, const Vec3& rotation, const Vec3& scale, const Vec4& color) override;
+		virtual void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale, const glm::vec4& color) override;
 
 		virtual void SetShaderManager(Ref<ShaderManager> shaderManager) override;
 		virtual void SetTextureManager(Ref<TextureManager> textureManager) override;

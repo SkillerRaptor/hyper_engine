@@ -1,9 +1,11 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "HyperCore/Core.hpp"
 #include "HyperEvents/Event.hpp"
-#include "HyperMath/Matrix.hpp"
-#include "HyperMath/Vector.hpp"
 #include "HyperRendering/ShaderManager.hpp"
 #include "HyperUtilities/Timestep.hpp"
 
@@ -12,15 +14,15 @@ namespace Hyperion
 	class EditorCamera
 	{
 	private:
-		Vec3 m_Position;
-		Vec2 m_ViewportSize;
+		glm::vec3 m_Position;
+		glm::vec2 m_ViewportSize;
 
 		/* Perspective */
-		Vec3 m_Front;
-		Vec3 m_Right;
-		Vec3 m_Up;
+		glm::vec3 m_Front;
+		glm::vec3 m_Right;
+		glm::vec3 m_Up;
 
-		Vec3 m_LastMousePosition;
+		glm::vec3 m_LastMousePosition;
 		bool m_FirstMouse;
 		float m_MouseSenitivity;
 
@@ -41,16 +43,16 @@ namespace Hyperion
 		friend class EditorLayer;
 
 	public:
-		EditorCamera(const Vec3& position, const Vec2& viewportSize, float speed, float zoom, float zoomSpeed, float nearPlane, float farPlane, float yaw, float pitch, bool orthographic);
+		EditorCamera(const glm::vec3& position, const glm::vec2& viewportSize, float speed, float zoom, float zoomSpeed, float nearPlane, float farPlane, float yaw, float pitch, bool orthographic);
 
 		void OnUpdate(Timestep timeStep);
 		void OnEvent(Event& event);
 
-		void SetPosition(const Vec3& position);
-		const Vec3& GetPosition() const;
+		void SetPosition(const glm::vec3& position);
+		const glm::vec3& GetPosition() const;
 
-		void SetViewportSize(const Vec2& viewportSize);
-		const Vec2& GetViewportSize() const;
+		void SetViewportSize(const glm::vec2& viewportSize);
+		const glm::vec2& GetViewportSize() const;
 
 		void SetZoom(float zoom);
 		float GetZoom() const;
@@ -65,9 +67,9 @@ namespace Hyperion
 		float GetFarPlane() const;
 
 		void UpdateProjectionMatrix();
-		Mat4 GetProjectionMatrix() const;
+		glm::mat4 GetProjectionMatrix() const;
 
 		void UpdateViewMatrix();
-		Mat4 GetViewMatrix() const;
+		glm::mat4 GetViewMatrix() const;
 	};
 }

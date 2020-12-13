@@ -21,9 +21,9 @@
 #include "Hyperion/HyperLayer/OverlayLayer.hpp"
 
 /* Maths */
-#include "Hyperion/HyperMath/Matrix.hpp"
-#include "Hyperion/HyperMath/Vector.hpp"
-#include "Hyperion/HyperMath/Quaternion.hpp"
+// #include "Hyperion/HyperMath/Matrix.hpp"
+// #include "Hyperion/HyperMath/Vector.hpp"
+// #include "Hyperion/HyperMath/Quaternion.hpp"
 
 /* Memory */
 #include "Hyperion/HyperMemory/PoolAllocator.hpp"

@@ -3,8 +3,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "HyperMath/Quaternion.hpp"
-
 namespace Hyperion
 {
 	OpenGL33Renderer2D::OpenGL33Renderer2D()
@@ -78,24 +76,23 @@ namespace Hyperion
 		m_DrawCalls++;
 	}
 
-	void OpenGL33Renderer2D::DrawQuad(const Vec3& position, const Vec3& rotation, const Vec3& scale, const Vec4& color)
+	void OpenGL33Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale, const glm::vec4& color)
 	{
 		if (m_QuadIndexCount >= MaxIndices)
 			NextBatch();
 
 		constexpr size_t quadVertexCount = 4;
-		const float tilingFactor = 1.0f;
+
+		glm::mat4 rotationMatrix = glm::mat4(1.0f);
+		rotationMatrix = glm::rotate(rotationMatrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+		rotationMatrix = glm::rotate(rotationMatrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		rotationMatrix = glm::rotate(rotationMatrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * rotationMatrix * glm::scale(glm::mat4(1.0f), scale);
 
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
-			Vec4 translatedVector = Matrix::Scale(Mat4(1.0f), scale) * m_QuadVertexPositions[i];
-
-			Mat4 rotationMatrix = Quaternion::ConvertToMatrix(Quaternion(rotation));
-			translatedVector = rotationMatrix * translatedVector;
-
-			translatedVector = Matrix::Translate(Mat4(1.0f), position) * translatedVector;
-
-			m_QuadVertexBufferPtr->Position = Vec3(translatedVector.x, translatedVector.y, translatedVector.z);
+			m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i];
 			m_QuadVertexBufferPtr->Color = color;
 			m_QuadVertexBufferPtr->TextureCoords = {};
 			m_QuadVertexBufferPtr->TextureId = -1;
