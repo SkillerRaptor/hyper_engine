@@ -47,9 +47,6 @@ namespace Hyperion
 					UpdateProjectionVectors();
 				}
 
-				m_LastMousePosition.x = Input::GetMouseX();
-				m_LastMousePosition.y = Input::GetMouseY();
-
 				float velocity = static_cast<float>(m_Speed * timeStep);
 				if (Input::GetAxis(InputAxis::VERTICAL) == 1)
 					m_Position += m_Front * velocity;
@@ -68,6 +65,9 @@ namespace Hyperion
 			UpdateViewMatrix();
 			UpdateProjectionMatrix();
 		}
+
+		m_LastMousePosition.x = Input::GetMouseX();
+		m_LastMousePosition.y = Input::GetMouseY();
 	}
 
 	void EditorCamera::OnEvent(Event& event)
