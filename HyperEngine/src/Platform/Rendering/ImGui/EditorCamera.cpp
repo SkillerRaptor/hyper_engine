@@ -28,6 +28,28 @@ namespace Hyperion
 			}
 			case CameraTypeInfo::PROJECTION:
 			{
+				if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft))
+				{
+					float xOffset = Input::GetMouseX() - m_LastMousePosition.x;
+					float yOffset = m_LastMousePosition.y - Input::GetMouseY();
+
+					xOffset *= m_MouseSenitivity;
+					yOffset *= m_MouseSenitivity;
+
+					m_Yaw += xOffset;
+					m_Pitch += yOffset;
+
+					if (m_Pitch > 89.0f)
+						m_Pitch = 89.0f;
+					if (m_Pitch < -89.0f)
+						m_Pitch = -89.0f;
+
+					UpdateProjectionVectors();
+				}
+
+				m_LastMousePosition.x = Input::GetMouseX();
+				m_LastMousePosition.y = Input::GetMouseY();
+
 				float velocity = static_cast<float>(m_Speed * timeStep);
 				if (Input::GetAxis(InputAxis::VERTICAL) == 1)
 					m_Position += m_Front * velocity;
@@ -61,44 +83,6 @@ namespace Hyperion
 					zoom = (zoom < m_ZoomSpeed) ? m_ZoomSpeed : zoom;
 
 					UpdateProjectionMatrix();
-
-					return false;
-				});
-
-			dispatcher.Dispatch<MouseButtonPressedEvent>([&](MouseButtonPressedEvent& event)
-				{
-					if (event.GetMouseButton() == MouseCode::ButtonLeft)
-					{
-						m_LastMousePosition.x = Input::GetMouseX();
-						m_LastMousePosition.y = Input::GetMouseY();
-					}
-
-					return false;
-				});
-
-			dispatcher.Dispatch<MouseMovedEvent>([&](MouseMovedEvent& event)
-				{
-					if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft))
-					{
-						float xOffset = event.GetMouseX() - m_LastMousePosition.x;
-						float yOffset = m_LastMousePosition.y - event.GetMouseY();
-
-						xOffset *= m_MouseSenitivity;
-						yOffset *= m_MouseSenitivity;
-
-						m_Yaw += xOffset;
-						m_Pitch += yOffset;
-
-						m_LastMousePosition.x = event.GetMouseX();
-						m_LastMousePosition.y = event.GetMouseY();
-
-						if (m_Pitch > 89.0f)
-							m_Pitch = 89.0f;
-						if (m_Pitch < -89.0f)
-							m_Pitch = -89.0f;
-
-						UpdateProjectionVectors();
-					}
 
 					return false;
 				});
