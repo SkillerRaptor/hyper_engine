@@ -38,7 +38,7 @@ namespace Hyperion
 
 		virtual uint8_t GetChannels(TextureHandle handle) override;
 		virtual const unsigned char* GetData(TextureHandle handle) override;
-		virtual const std::string& GetPath(TextureHandle handle) override;
+		virtual const std::string GetPath(TextureHandle handle) override;
 		virtual TextureData* GetTextureData(TextureHandle handle) override;
 	};
 }

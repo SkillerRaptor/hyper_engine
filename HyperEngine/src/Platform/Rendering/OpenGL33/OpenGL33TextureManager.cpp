@@ -177,7 +177,7 @@ namespace Hyperion
 		return m_Textures[handle].Data;
 	}
 
-	const std::string& OpenGL33TextureManager::GetPath(TextureHandle handle)
+	const std::string OpenGL33TextureManager::GetPath(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return std::string();

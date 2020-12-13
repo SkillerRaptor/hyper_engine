@@ -53,7 +53,7 @@ namespace Hyperion
 
 	void OpenGL46Context::OnResize(size_t width, size_t height)
 	{
-		glViewport(0, 0, width, height);
+		glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 	}
 
 	void OpenGL46Context::OnPreUpdate()
