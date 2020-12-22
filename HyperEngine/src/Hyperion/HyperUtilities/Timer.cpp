@@ -34,7 +34,7 @@ namespace Hyperion
 			end = std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch().count();
 		}
 
-		return (end - start) * 0.001;
+		return (end - start) / 1000.0;
 	}
 
 	Timer::operator double() const
