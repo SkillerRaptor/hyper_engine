@@ -12,7 +12,10 @@ namespace Hyperion
 	class PoolAllocator : public NonCopyable, NonMoveable
 	{
 	private:
-		struct FreeHeader {};
+		struct FreeHeader
+		{
+			void* Ptr;
+		};
 
 		StackLinkedList<FreeHeader> m_FreeList;
 		using Node = StackLinkedList<FreeHeader>::Node;
