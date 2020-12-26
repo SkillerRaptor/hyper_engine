@@ -25,5 +25,25 @@ namespace Hyperion
 
 #include "HyperUtilities/Log.hpp"
 
-#define HP_CORE_ASSERT(x, ...) { if(!(x)) { HP_CORE_ERROR("Assertion Failed: %", __VA_ARGS__); while(::Hyperion::Log::GetInstace()->IsBlocked()); __debugbreak(); } }
-#define HP_CLIENT_ASSERT(x, ...) { if(!(x)) { HP_CLIENT_ERROR("Assertion Failed: %", __VA_ARGS__); while(::Hyperion::Log::GetInstace()->IsBlocked()); __debugbreak(); } }
+#ifdef HP_DEBUG
+#define HP_CORE_ASSERT(x, ...) \
+	{ \
+		if(!(x)) \
+		{ \
+			HP_CORE_ERROR("Assertion Failed: %", __VA_ARGS__); \
+			__debugbreak(); \
+		} \
+	}
+
+#define HP_CLIENT_ASSERT(x, ...) \
+	{ \
+		if (!(x)) \
+		{ \
+			HP_CLIENT_ERROR("Assertion Failed: %", __VA_ARGS__); \
+			__debugbreak(); \
+		} \
+	}
+#else
+#define HP_CORE_ASSERT
+#define HP_CLIENT_ASSERT
+#endif

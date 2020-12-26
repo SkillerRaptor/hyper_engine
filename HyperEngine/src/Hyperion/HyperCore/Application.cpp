@@ -22,13 +22,14 @@ namespace Hyperion
 
 	void Application::Init()
 	{
+		Log::Init();
+		Random::Init();
+
 		HP_CORE_INFO("");
 		HP_CORE_INFO("_     _ __   __  _____  _______  ______ _______ __   _  ______ _____ __   _ _______");
 		HP_CORE_INFO("|_____|   \\_/   |_____] |______ |_____/ |______ | \\  | |  ____   |   | \\  | |______");
 		HP_CORE_INFO("|     |    |    |       |______ |    \\_ |______ |  \\_| |_____| __|__ |  \\_| |______");
 		HP_CORE_INFO("");
-
-		Random::Init();
 
 		WindowPropsInfo windowPropsInfo{};
 		windowPropsInfo.Title = "HyperEngine (x64 - $api $version)";
