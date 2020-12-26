@@ -25,7 +25,7 @@ namespace Hyperion
 		{
 			auto* node = new Node();
 
-			HP_CORE_ASSERT(node != nullptr, "Heap Overflow");
+			HP_ASSERT(node != nullptr, "Heap Overflow");
 
 			node->Data = data;
 			node->NextNode = m_Head;
@@ -36,7 +36,7 @@ namespace Hyperion
 		{
 			auto* node = new Node();
 
-			HP_CORE_ASSERT(node != nullptr, "Heap Overflow");
+			HP_ASSERT(node != nullptr, "Heap Overflow");
 
 			node->Data = std::move(data);
 			node->NextNode = m_Head;
@@ -45,13 +45,13 @@ namespace Hyperion
 
 		T peek()
 		{
-			HP_CORE_ASSERT(m_Head != nullptr, "Stack Linked List is empty!");
+			HP_ASSERT(m_Head != nullptr, "Stack Linked List is empty!");
 			return m_Head->Data;
 		}
 
 		void pop()
 		{
-			HP_CORE_ASSERT(m_Head != nullptr, "Stack Linked List is empty!");
+			HP_ASSERT(m_Head != nullptr, "Stack Linked List is empty!");
 
 			Node* node = m_Head;
 			m_Head = m_Head->NextNode;

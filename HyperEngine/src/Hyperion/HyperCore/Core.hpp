@@ -1,6 +1,54 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
+
+#if defined(_WIN32)
+	#if defined(_WIN64)
+		#define HP_PLATFORM_WINDOWS
+	#else
+		#error "x86 Builds are not supported!"
+	#endif
+#elif defined(__APPLE__) || defined(__MACH__)
+	#include <TargetConditionals.h>
+
+	#if TARGET_IPHONE_SIMULATOR == 1
+		#error "IOS simulator is not supported!"
+	#elif TARGET_OS_IPHONE == 1
+		#define HP_PLATFORM_IOS
+		#error "IOS is not supported!"
+	#elif TARGET_OS_MAC == 1
+		#define HP_PLATFORM_MACOS
+		#error "MacOS is not supported!"
+	#else
+		#error "Unknown Apple platform!"
+	#endif
+#elif defined(__ANDROID__)
+	#define HP_PLATFORM_ANDROID
+	#error "Android is not supported!"
+#elif defined(__linux__)
+	#define HP_PLATFORM_LINUX
+#else
+	#error "Unknown platform!"
+#endif
+
+#ifdef HP_DEBUG
+	#if defined(HP_PLATFORM_WINDOWS)
+		#define HP_DEBUGBREAK() __debugbreak()
+	#elif defined(HP_PLATFORM_LINUX)
+		#include <signal.h>
+		#define HP_DEBUGBREAK() raise(SIGTRAP)
+	#else
+		#error "Platform doesn't support debugbreak yet!"
+	#endif
+
+	#define HP_ENABLE_ASSERTS
+#elif
+	#define HP_DEBUGBREAK()
+#endif
+
+#define HP_EXPAND_MACRO(x) x
+#define HP_STRINGIFY_MACRO(x) #x
 
 namespace Hyperion
 {
@@ -25,6 +73,21 @@ namespace Hyperion
 
 #include "HyperUtilities/Log.hpp"
 
+#ifdef HP_ENABLE_ASSERTS
+	#define HP_INTERNAL_ASSERT_IMPLEMENTATION(check, msg, ...) { if (!(check)) { HP_CORE_FATAL(msg, __VA_ARGS__); HP_DEBUGBREAK(); } }
+
+	#define HP_INTERNAL_ASSERT_WITH_MSG(check, ...) HP_INTERNAL_ASSERT_IMPLEMENTATION(check, "Assertion failed: %", __VA_ARGS__)
+	#define HP_INTERNAL_ASSERT_NO_MSG(check) HP_INTERNAL_ASSERT_IMPLEMENTATION(check, "Assertion '%' failed in % at line %", HP_STRINGIFY_MACRO(check), std::filesystem::path(__FILE__).filename().string(), __LINE__)
+
+	#define HP_INTERNAL_ASSERT_MACRO_NAME(arg1, arg2, macro, ...) macro
+	#define HP_INTERNAL_ASSERT_MACRO(...) HP_EXPAND_MACRO( HP_INTERNAL_ASSERT_MACRO_NAME(__VA_ARGS__, HP_INTERNAL_ASSERT_WITH_MSG, HP_INTERNAL_ASSERT_NO_MSG) )
+
+	#define HP_ASSERT(...) HP_EXPAND_MACRO( HP_INTERNAL_ASSERT_MACRO(__VA_ARGS__)(__VA_ARGS__) )
+#elif
+	#define HP_ASSERT(...)
+#endif
+
+#if false
 #ifdef HP_DEBUG
 #define HP_CORE_ASSERT(x, ...) \
 	{ \
@@ -43,7 +106,5 @@ namespace Hyperion
 			__debugbreak(); \
 		} \
 	}
-#else
-#define HP_CORE_ASSERT
-#define HP_CLIENT_ASSERT
+#endif
 #endif

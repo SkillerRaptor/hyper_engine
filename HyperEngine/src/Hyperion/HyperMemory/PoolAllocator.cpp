@@ -17,12 +17,12 @@ namespace Hyperion
 
 	void* PoolAllocator::Allocate(const size_t allocationSize, const size_t alignment)
 	{
-		HP_CORE_ASSERT(allocationSize == m_ChunkSize, "Allocation size must be equal to chunk size");
+		HP_ASSERT(allocationSize == m_ChunkSize, "Allocation size must be equal to chunk size");
 
 		FreeHeader freePosition = m_FreeList.peek();
 		m_FreeList.pop();
 
-		HP_CORE_ASSERT(freePosition.Ptr != nullptr, "The pool allocator is full");
+		HP_ASSERT(freePosition.Ptr != nullptr, "The pool allocator is full");
 
 		m_Size++;
 		m_Capacity += m_ChunkSize;

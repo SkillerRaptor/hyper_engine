@@ -28,7 +28,7 @@ namespace Hyperion
 			break;
 		}
 
-		HP_CORE_ASSERT(false, "Unknown Graphics API!");
+		HP_ASSERT(false, "Unknown Graphics API!");
 		return nullptr;
 	}
 }

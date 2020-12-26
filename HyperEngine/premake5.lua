@@ -53,11 +53,6 @@ project "HyperEngine"
 	filter "system:windows"
 		systemversion "latest"
 
-		defines
-		{
-			"HP_PLATFORM_WINDOWS"
-		}
-
 	filter "configurations:Debug"
 		defines "HP_DEBUG"
 		runtime "Debug"

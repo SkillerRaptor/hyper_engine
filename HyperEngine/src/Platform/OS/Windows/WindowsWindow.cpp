@@ -29,7 +29,7 @@ namespace Hyperion
 
 		if (m_Window == nullptr)
 		{
-			HP_CORE_ASSERT(false, "Failed to create GLFW window");
+			HP_ASSERT(false, "Failed to create GLFW window");
 			glfwTerminate();
 			std::exit(EXIT_FAILURE);
 		}
