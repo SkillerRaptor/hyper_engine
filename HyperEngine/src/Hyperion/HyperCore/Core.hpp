@@ -42,7 +42,7 @@
 	#endif
 
 	#define HP_ENABLE_ASSERTS
-#elif
+#else
 	#define HP_DEBUGBREAK()
 #endif
 
