@@ -1,0 +1,20 @@
+name: build-linux
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Generate Project Files
+      run: sh ./Scripts/Linux-GenProjects.sh
+
+    - name: Build Solution
+      run: make .
