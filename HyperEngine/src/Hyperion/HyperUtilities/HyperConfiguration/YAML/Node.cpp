@@ -1,5 +1,7 @@
 #include "Node.hpp"
 
+#include <fstream>
+
 namespace Hyperion { namespace YAML
 {
 	Node::Node()

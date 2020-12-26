@@ -6,6 +6,7 @@
 
 #include <string>
 #include <variant>
+#include <vector>
 
 #include "Node.hpp"
 #include "HyperCore/Core.hpp"
