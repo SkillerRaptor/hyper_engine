@@ -1,23 +1,18 @@
 #pragma once
 
-#include <ctime>
-#include <iostream>
-#include <memory>
 #include <sstream>
 #include <string>
-#include <queue>
 
 namespace Hyperion 
 {
 	enum class Level
 	{
-		HP_LEVEL_ALL,
-		HP_LEVEL_INFO,
-		HP_LEVEL_WARN,
-		HP_LEVEL_TRACE,
+		HP_LEVEL_DEBUG,
 		HP_LEVEL_ERROR,
 		HP_LEVEL_FATAL,
-		HP_LEVEL_DEBUG
+		HP_LEVEL_INFO,
+		HP_LEVEL_TRACE,
+		HP_LEVEL_WARN
 	};
 
 	class Logger
@@ -26,18 +21,11 @@ namespace Hyperion
 		std::string m_Name;
 		Level m_Level;
 
-		std::queue<std::pair<Level, std::string>>& m_MessageQueue;
-
 	public:
-		Logger(std::queue<std::pair<Level, std::string>>& messageQueue);
+		Logger();
 		~Logger();
 
 		void PrintInfo(const char* format);
-		void PrintTrace(const char* format);
-		void PrintWarn(const char* format);
-		void PrintError(const char* format);
-		void PrintFatal(const char* format);
-		void PrintDebug(const char* format);
 
 		template<typename T, typename... Targs>
 		void PrintInfo(const char* format, T&& value, Targs&&... Fargs)
@@ -45,11 +33,7 @@ namespace Hyperion
 			Print(Level::HP_LEVEL_INFO, format, value, std::forward<Targs>(Fargs)...);
 		}
 
-		template<typename T, typename... Targs>
-		void PrintTrace(const char* format, T&& value, Targs&&... Fargs)
-		{
-			Print(Level::HP_LEVEL_TRACE, format, value, std::forward<Targs>(Fargs)...);
-		}
+		void PrintWarn(const char* format);
 
 		template<typename T, typename... Targs>
 		void PrintWarn(const char* format, T&& value, Targs&&... Fargs)
@@ -57,17 +41,23 @@ namespace Hyperion
 			Print(Level::HP_LEVEL_WARN, format, value, std::forward<Targs>(Fargs)...);
 		}
 
+		void PrintError(const char* format);
+
 		template<typename T, typename... Targs>
 		void PrintError(const char* format, T&& value, Targs&&... Fargs)
 		{
 			Print(Level::HP_LEVEL_ERROR, format, value, std::forward<Targs>(Fargs)...);
 		}
 
+		void PrintFatal(const char* format);
+
 		template<typename T, typename... Targs>
 		void PrintFatal(const char* format, T&& value, Targs&&... Fargs)
 		{
 			Print(Level::HP_LEVEL_FATAL, format, value, std::forward<Targs>(Fargs)...);
 		}
+
+		void PrintDebug(const char* format);
 
 		template<typename T, typename... Targs>
 		void PrintDebug(const char* format, T&& value, Targs&&... Fargs)
@@ -82,16 +72,12 @@ namespace Hyperion
 
 			ss << m_Name << " " << ConvertLevelToString(level) << ": ";
 			FormatString(ss, format, value, std::forward<Targs>(Fargs)...);
-
 			ss << std::endl;
 
-			m_MessageQueue.push(std::make_pair(level, ss.str()));
+			Print(level, ss.str());
 		}
 
-		void FormatString(std::stringstream& ss, const char* format)
-		{
-			ss << format;
-		}
+		void FormatString(std::stringstream& ss, const char* format);
 
 		template<typename T, typename... Targs>
 		void FormatString(std::stringstream& ss, const char* format, T&& value, Targs&&... Fargs)
@@ -106,15 +92,16 @@ namespace Hyperion
 			}
 		}
 
-		const void SetName(std::string name) { m_Name = name; }
-		const void SetLevel(Level level) { m_Level = level; }
+		const void SetName(std::string name);
+		const std::string GetName() const;
 
-		const std::string GetName() const { return m_Name; }
-		const Level GetLevel() const { return m_Level; }
+		const void SetLevel(Level level);
+		const Level GetLevel() const;
 
 	private:
 		void Print(Level level, const char* format);
-		std::string ConvertLevelToString(Level level);
-		char* ConvertNumber(unsigned int number, int base);
+		void Print(Level level, const std::string& message);
+
+		std::string ConvertLevelToString(Level level) const;
 	};
 }

@@ -1,11 +1,14 @@
 #include "Logger.hpp"
 
-#include <stdarg.h>
+//#include <stdarg.h>
+#include <ctime>
+#include <iostream>
+#include <Windows.h>
 
 namespace Hyperion {
 
-	Logger::Logger(std::queue<std::pair<Level, std::string>>& messageQueue)
-		: m_Name("Example Logger Name"), m_Level(Level::HP_LEVEL_ALL), m_MessageQueue(messageQueue)
+	Logger::Logger()
+		: m_Name(""), m_Level(Level::HP_LEVEL_TRACE)
 	{
 	}
 
@@ -16,11 +19,6 @@ namespace Hyperion {
 	void Logger::PrintInfo(const char* format)
 	{
 		Print(Level::HP_LEVEL_INFO, format);
-	}
-
-	void Logger::PrintTrace(const char* format)
-	{
-		Print(Level::HP_LEVEL_TRACE, format);
 	}
 
 	void Logger::PrintWarn(const char* format)
@@ -48,19 +46,45 @@ namespace Hyperion {
 		std::stringstream ss;
 		ss << m_Name << " " << ConvertLevelToString(level) << ": " << format << std::endl;
 
-		m_MessageQueue.push(std::make_pair(level, ss.str()));
+		Print(level, ss.str());
 	}
 
-	std::string Logger::ConvertLevelToString(Level level)
+	void Logger::Print(Level level, const std::string& message)
+	{
+		switch (level)
+		{
+		case Level::HP_LEVEL_INFO: default:
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+			break;
+		case Level::HP_LEVEL_WARN:
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN);
+			break;
+		case Level::HP_LEVEL_ERROR:
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_INTENSITY);
+			break;
+		case Level::HP_LEVEL_FATAL:
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+			break;
+		case Level::HP_LEVEL_DEBUG:
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			break;
+		}
+
+		std::time_t time = std::time(0);
+		struct tm localTime;
+		localtime_s(&localTime, &time);
+
+		printf("[%c%i:%c%i:%c%i] %s", (localTime.tm_hour < 10 ? '0' : '\0'), localTime.tm_hour, (localTime.tm_min < 10 ? '0' : '\0'), localTime.tm_min, (localTime.tm_sec < 10 ? '0' : '\0'), localTime.tm_sec, message.c_str());
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+	}
+
+	std::string Logger::ConvertLevelToString(Level level) const
 	{
 		std::string levelName;
 		switch (level)
 		{
 		case Level::HP_LEVEL_INFO:
 			levelName = "Info";
-			break;
-		case Level::HP_LEVEL_TRACE:
-			levelName = "Trace";
 			break;
 		case Level::HP_LEVEL_WARN:
 			levelName = "Warn";
@@ -78,21 +102,29 @@ namespace Hyperion {
 		return levelName;
 	}
 
-	char* Logger::ConvertNumber(unsigned int number, int base)
+
+	void Logger::FormatString(std::stringstream& ss, const char* format)
 	{
-		static char Representation[] = "0123456789ABCDEF";
-		static char buffer[50];
-		char* ptr;
+		ss << format;
+	}
 
-		ptr = &buffer[49];
-		*ptr = '\0';
+	const void Logger::SetName(std::string name)
+	{
+		m_Name = name;
+	}
 
-		do
-		{
-			*--ptr = Representation[number % base];
-			number /= base;
-		} while (number != 0);
+	const std::string Logger::GetName() const
+	{
+		return m_Name;
+	}
 
-		return(ptr);
+	const void Logger::SetLevel(Level level)
+	{
+		m_Level = level;
+	}
+
+	const Level Logger::GetLevel() const
+	{
+		return m_Level;
 	}
 }
