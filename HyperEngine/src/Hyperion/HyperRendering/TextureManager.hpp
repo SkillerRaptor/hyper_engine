@@ -25,7 +25,7 @@ namespace Hyperion
 		unsigned char* Data = nullptr;
 
 		std::string Path = "";
-		TextureType TextureType = TextureType::DEFAULT;
+		TextureType Type = TextureType::DEFAULT;
 	};
 
 	struct TextureHandle

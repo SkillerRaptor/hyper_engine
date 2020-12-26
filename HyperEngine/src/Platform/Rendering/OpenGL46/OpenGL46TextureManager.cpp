@@ -27,7 +27,7 @@ namespace Hyperion
 	{
 		OpenGLTextureData textureData;
 		textureData.Path = path;
-		textureData.TextureType = textureType;
+		textureData.Type = textureType;
 
 		int width, height, channels;
 		textureData.Data = stbi_load(textureData.Path.c_str(), &width, &height, &channels, 0);
@@ -63,7 +63,7 @@ namespace Hyperion
 		OpenGLTextureData textureData;
 		textureData.Width = width;
 		textureData.Height = height;
-		textureData.TextureType = textureType;
+		textureData.Type  = textureType;
 
 		GenerateTexture(&textureData, true);
 
@@ -152,14 +152,14 @@ namespace Hyperion
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return;
-		m_Textures[handle].TextureType = textureType;
+		m_Textures[handle].Type = textureType;
 	}
 
 	TextureType OpenGL46TextureManager::GetTextureType(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return TextureType::DEFAULT;
-		return m_Textures[handle].TextureType;
+		return m_Textures[handle].Type;
 	}
 
 	uint8_t OpenGL46TextureManager::GetChannels(TextureHandle handle)
