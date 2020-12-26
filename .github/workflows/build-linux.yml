@@ -13,6 +13,9 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Installing Dependencies
+      run: sudo apt install xorg-dev
+
     - name: Generate Project Files
       run: sh ./Scripts/Linux-GenProjects.sh
 
