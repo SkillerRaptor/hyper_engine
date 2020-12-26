@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd ..
-vendor//premake//bin//premake5.exe gmake2
+vendor//premake//bin//premake5 gmake2
