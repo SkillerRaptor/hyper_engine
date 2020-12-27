@@ -1,3 +1,4 @@
+#ifdef HP_PLATFORM_WINDOWS
 // dear imgui: Renderer for DirectX11
 // This needs to be used along with a Platform Binding (e.g. Win32)
 
@@ -680,3 +681,4 @@ static void ImGui_ImplDX11_ShutdownPlatformInterface()
 {
     ImGui::DestroyPlatformWindows();
 }
+#endif

@@ -1,7 +1,7 @@
 project "HyperEngine"
 	kind "StaticLib"
 	language "C++"
-	cppdialect "C++latest"
+	cppdialect "c++17"
 	staticruntime "on"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")

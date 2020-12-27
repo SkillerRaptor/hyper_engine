@@ -1,7 +1,9 @@
 #include "EditorRenderer.hpp"
 
+#ifdef HP_PLATFORM_WINDOWS
 //#include "Platform/Rendering/DirectX11/DirectX11EditorRenderer.hpp"
 //#include "Platform/Rendering/DirectX12/DirectX12EditorRenderer.hpp"
+#endif
 #include "Platform/Rendering/OpenGL33/OpenGL33EditorRenderer.hpp"
 #include "Platform/Rendering/OpenGL46/OpenGL46EditorRenderer.hpp"
 //#include "Platform/Rendering/Vulkan/VulkanEditorRenderer.hpp"
