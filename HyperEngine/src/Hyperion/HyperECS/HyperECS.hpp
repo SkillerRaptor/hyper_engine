@@ -257,7 +257,7 @@ namespace Hyperion
 			entityLock.lock();
 		#endif /* HYPERECS_MUTEX */
 
-			([](auto* v)
+			([&](auto* v)
 				{
 					using C = decltype(*v);
 
@@ -360,7 +360,7 @@ namespace Hyperion
 
 			bool shouldSkip = false;
 
-			([](auto* v)
+			([&](auto* v)
 				{
 					using C = decltype(*v);
 
@@ -450,7 +450,7 @@ namespace Hyperion
 			for (auto& entity : m_Entities)
 			{
 				bool shouldSkip = false;
-				([](auto* v)
+				([&](auto* v)
 					{
 						using C = decltype(*v);
 						if (shouldSkip)
@@ -724,7 +724,7 @@ namespace Hyperion
 			std::unique_lock<std::mutex> systemLock(m_SystemLock);
 		#endif /* HYPERECS_MUTEX */
 
-			([](auto* v)
+			([&](auto* v)
 				{
 					using C = decltype(*v);
 					RemoveSystem<C>();
