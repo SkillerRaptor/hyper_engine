@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <cstdlib>
 #include <fstream>
 
 #include "HyperUtilities/Log.hpp"
@@ -272,7 +273,7 @@ namespace Hyperion
 
 		int length;
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-		char* message = (char*)_malloca(sizeof(char) * length);
+		auto* message = static_cast<char*>(malloc(sizeof(char) * length));
 		glGetShaderInfoLog(id, length, &length, message);
 
 		const char* shaderType;
@@ -294,6 +295,7 @@ namespace Hyperion
 		}
 
 		HP_CORE_ERROR("Shader - Compile-time error: % | %", shaderType, message);
+		free(message);
 		return false;
 	}
 
@@ -307,10 +309,11 @@ namespace Hyperion
 
 		int length;
 		glGetProgramiv(shaderData.ShaderId, GL_INFO_LOG_LENGTH, &length);
-		char* message = (char*)_malloca(sizeof(char) * length);
+		auto* message = static_cast<char*>(malloc(sizeof(char) * length));
 		glGetProgramInfoLog(shaderData.ShaderId, length, &length, message);
 
 		HP_CORE_ERROR("Shader - Link-time error: Program | %", message);
+		free(message);
 		return false;
 	}
 
