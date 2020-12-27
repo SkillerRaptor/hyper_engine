@@ -1,17 +1,20 @@
 #include "WindowsPlatformUtils.hpp"
 
 #include <GLFW/glfw3.h>
+
+#if defined(HP_PLATFORM_WINDOWS)
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-
 #include <Windows.h>
+#endif
 
 #include "HyperCore/Application.hpp"
 
 namespace Hyperion
 {
-    std::string WindowsPlatformUtils::OpenFile(const char* filter)
-    {
+	std::string WindowsPlatformUtils::OpenFile(const char* filter)
+	{
+	#if defined(HP_PLATFORM_WINDOWS)
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
@@ -24,11 +27,13 @@ namespace Hyperion
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 		if (GetOpenFileNameA(&ofn) == TRUE)
 			return ofn.lpstrFile;
-        return std::string();
-    }
+	#endif
+		return std::string();
+	}
 
 	std::string WindowsPlatformUtils::SaveFile(const char* filter)
 	{
+	#if defined(HP_PLATFORM_WINDOWS)
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
@@ -41,6 +46,7 @@ namespace Hyperion
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 		if (GetSaveFileNameA(&ofn) == TRUE)
 			return ofn.lpstrFile;
+	#endif
 		return std::string();
 	}
 }

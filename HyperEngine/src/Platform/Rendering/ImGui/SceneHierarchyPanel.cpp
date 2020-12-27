@@ -87,7 +87,7 @@ namespace Hyperion
 
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
-			strcpy_s(buffer, sizeof(buffer), tag.c_str());
+			tag.copy(buffer, sizeof(buffer));
 
 			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvailWidth() - ImGui::GetContentRegionAvailWidth() / 4);
 			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
