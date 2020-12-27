@@ -227,7 +227,7 @@ namespace Hyperion
 				{
 					m_Components[componentId][component.Index] = nullptr;
 					m_FreeIndex.push(component.Index);
-					components.erase(std::find(components.begin(), components.end(), component));
+					components.erase(std::remove(components.begin(), components.end(), component), components.end());
 				}
 		}
 
@@ -731,7 +731,7 @@ namespace Hyperion
 		template<class T, class = class std::enable_if<std::is_base_of<System, T>::value, T>::type>
 		constexpr T& GetSystem()
 		{
-			HP_ASSERT(HasSystem<T...>(), "World has not the System!");
+			HP_ASSERT(HasSystem<T>(), "World has not the System!");
 
 		#ifdef HYPERECS_MUTEX
 			std::unique_lock<std::mutex> systemLock(m_SystemLock);

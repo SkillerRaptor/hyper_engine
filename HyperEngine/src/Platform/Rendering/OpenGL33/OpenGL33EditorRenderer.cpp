@@ -9,7 +9,7 @@
 namespace Hyperion
 {
 	OpenGL33EditorRenderer::OpenGL33EditorRenderer(Ref<RenderContext> renderContext)
-		: EditorRenderer(renderContext), m_BufferTexture({ -1 }), m_BufferTextureId(-1)
+		: EditorRenderer(renderContext), m_BufferTexture({ 0 }), m_BufferTextureId(-1)
 	{
 	}
 
