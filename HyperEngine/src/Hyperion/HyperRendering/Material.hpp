@@ -14,7 +14,7 @@ namespace Hyperion
 		uint32_t m_Shader;
 
 	public:
-		Material(uint32_t shader);
+		explicit Material(uint32_t shader);
 		~Material();
 
 		void Bind();

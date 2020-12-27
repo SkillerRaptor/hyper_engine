@@ -3,8 +3,8 @@
 namespace Hyperion
 {
 	Timer::Timer()
+		: m_StartTimepoint(std::chrono::high_resolution_clock::now())
 	{
-		m_StartTimepoint = std::chrono::high_resolution_clock::now();
 	}
 
 	Timer::~Timer()

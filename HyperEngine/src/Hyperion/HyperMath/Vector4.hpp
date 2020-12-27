@@ -20,7 +20,7 @@ namespace Hyperion
 			: x(0), y(0), z(0), w(0) {}
 		Vector4(const Vector4<T>& xyzw)
 			: x(xyzw.x), y(xyzw.y), z(xyzw.z), w(xyzw.w) {}
-		Vector4(T xyzw)
+		explicit Vector4(T xyzw)
 			: x(xyzw), y(xyzw), z(xyzw), w(xyzw) {}
 		Vector4(T x, T y, T z, T w)
 			: x(x), y(y), z(z), w(w) {}
@@ -229,11 +229,4 @@ namespace Hyperion
 		template <typename U>
 		friend std::ostream& operator<<(std::ostream& os, const Vector4<U>& vector);
 	};
-
-	template <typename T>
-	inline std::ostream& operator<<(std::ostream& os, const Vector4<T>& vector)
-	{
-		os << "X: " << vector.x << ", Y: " << vector.y << ", Z: " << vector.z << ", W: " << vector.w;
-		return os;
-	}
 }

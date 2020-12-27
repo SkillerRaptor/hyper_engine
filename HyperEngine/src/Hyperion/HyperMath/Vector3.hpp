@@ -19,7 +19,7 @@ namespace Hyperion
 			: x(0), y(0), z(0) {}
 		Vector3(const Vector3<T>& xyz)
 			: x(xyz.x), y(xyz.y), z(xyz.z) {}
-		Vector3(T xyz)
+		explicit Vector3(T xyz)
 			: x(xyz), y(xyz), z(xyz) {}
 		Vector3(T x, T y, T z)
 			: x(x), y(y), z(z) {}
@@ -199,15 +199,5 @@ namespace Hyperion
 		{
 			return reinterpret_cast<float*>(this);
 		}
-
-		template <typename U>
-		friend std::ostream& operator<<(std::ostream& os, const Vector3<U>& vector);
 	};
-
-	template <typename T>
-	inline std::ostream& operator<<(std::ostream& os, const Vector3<T>& vector)
-	{
-		os << "X: " << vector.x << ", Y: " << vector.y << ", Z: " << vector.z;
-		return os;
-	}
 }

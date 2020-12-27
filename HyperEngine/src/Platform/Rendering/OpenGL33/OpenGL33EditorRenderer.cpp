@@ -9,7 +9,7 @@
 namespace Hyperion
 {
 	OpenGL33EditorRenderer::OpenGL33EditorRenderer(Ref<RenderContext> renderContext)
-		: EditorRenderer(renderContext)
+		: EditorRenderer(renderContext), m_BufferTexture({ -1 }), m_BufferTextureId(-1)
 	{
 	}
 
@@ -45,7 +45,7 @@ namespace Hyperion
 		Ref<TextureManager> textureManager = m_RenderContext->GetTextureManager();
 		m_BufferTexture = textureManager->CreateTexture(data.Width, data.Height, TextureType::FRAMEBUFFER);
 		m_BufferTextureId = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(m_BufferTexture))->TextureId;
-	
+
 		m_FrameBuffer = CreateScope<OpenGL33FrameBuffer>();
 	}
 

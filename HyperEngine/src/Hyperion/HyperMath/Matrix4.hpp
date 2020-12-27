@@ -299,25 +299,5 @@ namespace Hyperion
 		{ 
 			return matrix[i]; 
 		}
-
-		operator float* ()
-		{
-			return reinterpret_cast<float*>(this);
-		}
-
-		template <typename U>
-        friend std::ostream& operator<<(std::ostream& os, const Matrix4<U>& matrix);
 	};
-
-	template <typename T>
-	inline std::ostream& operator<<(std::ostream& os, const Matrix4<T>& matrix)
-	{
-		for (size_t i = 0; i < 4; i++)
-		{
-			os << "[" << matrix.matrix[i][0] << ", " << matrix.matrix[i][1] << ", " << matrix.matrix[i][2] << ", " << matrix.matrix[i][3] << "]";
-			if (i != 3)
-				os << std::endl;
-		}
-		return os;
-	}
 }

@@ -17,7 +17,7 @@ namespace Hyperion
 			: x(0), y(0) {}
 		Vector2(const Vector2<T>& xy)
 			: x(xy.x), y(xy.y) {}
-		Vector2(T xy)
+		explicit Vector2(T xy)
 			: x(xy), y(xy) {}
 		Vector2(T x, T y)
 			: x(x), y(y) {}
@@ -176,15 +176,5 @@ namespace Hyperion
 		{
 			return reinterpret_cast<float*>(this);
 		}
-
-		template <typename U>
-		friend std::ostream& operator<<(std::ostream& os, const Vector2<U>& vector);
 	};
-
-	template <typename T>
-	inline std::ostream& operator<<(std::ostream& os, const Vector2<T>& vector)
-	{
-		os << "X: " << vector.x << ", Y: " << vector.y;
-		return os;
-	}
 }
