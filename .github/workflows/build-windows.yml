@@ -3,7 +3,7 @@ name: build-windows
 on: [ push, pull_request ]
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
     defaults:
       run:
