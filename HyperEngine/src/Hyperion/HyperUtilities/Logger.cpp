@@ -4,6 +4,7 @@
 #include <Windows.h>
 #endif
 
+#include <chrono>
 #include <ctime>
 #include <iostream>
 
@@ -92,10 +93,8 @@ namespace Hyperion {
 			break;
 		}
 	#endif
-
-		std::time_t time = std::time(0);
-		struct tm localTime;
-		localtime_s(&localTime, &time);
+		std::time_t timePoint = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+		struct tm localTime = *localtime(&timePoint);
 
 		printf("[%c%i:%c%i:%c%i] %s", (localTime.tm_hour < 10 ? '0' : '\0'), localTime.tm_hour, (localTime.tm_min < 10 ? '0' : '\0'), localTime.tm_min, (localTime.tm_sec < 10 ? '0' : '\0'), localTime.tm_sec, message.c_str());
 	#if defined(HP_PLATFORM_WINDOWS)
