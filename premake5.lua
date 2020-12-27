@@ -47,5 +47,4 @@ group "Dependencies"
 group ""
 
 include "HyperEngine"
-include "HyperEditor"
 include "Sandbox"
