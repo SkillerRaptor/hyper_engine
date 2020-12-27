@@ -19,7 +19,7 @@ namespace Hyperion
 		{
 		}
 
-		Matrix4(T value)
+		explicit Matrix4(T value)
 		{
 			for (size_t i = 0; i < 4; i++)
 				for (size_t j = 0; j < 4; j++)

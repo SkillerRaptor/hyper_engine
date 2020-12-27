@@ -11,12 +11,9 @@ namespace Hyperion
 
 	Material::~Material()
 	{
-
 	}
 
 	void Material::Bind()
 	{
-		Ref<ShaderManager> shaderManager = Application::Get()->GetNativeWindow()->GetContext()->GetShaderManager();
-
 	}
 }

@@ -52,8 +52,7 @@ namespace Hyperion
 		Event& m_Event;
 
 	public:
-
-		EventDispatcher(Event& event)
+		explicit EventDispatcher(Event& event)
 			: m_Event(event)
 		{}
 
