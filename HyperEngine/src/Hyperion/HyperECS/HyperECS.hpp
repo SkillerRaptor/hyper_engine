@@ -7,6 +7,7 @@
 #include <vector>
 #include <queue>
 
+#include "HyperCore/Core.hpp"
 #include "HyperEvents/Event.hpp"
 #include "HyperRendering/Renderer2D.hpp"
 #include "HyperUtilities/Timestep.hpp"
@@ -128,11 +129,8 @@ namespace Hyperion
 		#ifdef HYPERECS_MUTEX
 			std::unique_lock<std::mutex> entityLock(m_EntityLock);
 		#endif /* HYPERECS_MUTEX */
-			if (m_Entities.find(entity) != m_Entities.end())
-			{
-				std::cerr << "[HyperECS] Entity does not exists!" << std::endl;
-				__debugbreak();
-			}
+
+			HP_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exists!");
 
 			m_Entities.erase(entity);
 		}
@@ -153,22 +151,14 @@ namespace Hyperion
 		#ifdef HYPERECS_MUTEX
 			std::unique_lock<std::mutex> entityLock(m_EntityLock);
 		#endif /* HYPERECS_MUTEX */
-
-			if (m_Entities.find(entity) == m_Entities.end())
-			{
-				std::cerr << "[HyperECS] Entity does not exists!" << std::endl;
-				__debugbreak();
-			}
+			
+			HP_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exists!");
 
 		#ifdef HYPERECS_MUTEX
 			entityLock.unlock();
 		#endif /* HYPERECS_MUTEX */
 
-			if (HasComponent<T>(entity))
-			{
-				std::cerr << "[HyperECS] Entity already has the component!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(!HasComponent<T>(entity), "Entity already has the component!");
 
 		#ifdef HYPERECS_MUTEX
 			entityLock.lock();
@@ -215,21 +205,13 @@ namespace Hyperion
 			std::unique_lock<std::mutex> entityLock(m_EntityLock);
 		#endif /* HYPERECS_MUTEX */
 
-			if (m_Entities.find(entity) == m_Entities.end())
-			{
-				std::cerr << "[HyperECS] Entity does not exists!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exists!");
 
 		#ifdef HYPERECS_MUTEX
 			entityLock.unlock();
 		#endif /* HYPERECS_MUTEX */
 
-			if (!HasComponent<T>(entity))
-			{
-				std::cerr << "[HyperECS] Entity has not the component!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(HasComponent<T>(entity), "Entity has not the component!");
 
 		#ifdef HYPERECS_MUTEX
 			entityLock.lock();
@@ -262,21 +244,13 @@ namespace Hyperion
 			std::unique_lock<std::mutex> entityLock(m_EntityLock);
 		#endif /* HYPERECS_MUTEX */
 
-			if (m_Entities.find(entity) == m_Entities.end())
-			{
-				std::cerr << "[HyperECS] Entity does not exists!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exists!");
 
 		#ifdef HYPERECS_MUTEX
 			entityLock.unlock();
 		#endif /* HYPERECS_MUTEX */
 
-			if (!HasMultipleComponent<T...>(entity))
-			{
-				std::cerr << "[HyperECS] Entity has not the component!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(HasMultipleComponent<T...>(entity), "Entity has not the component!");
 
 		#ifdef HYPERECS_MUTEX
 			entityLock.lock();
@@ -312,21 +286,13 @@ namespace Hyperion
 			std::unique_lock<std::mutex> entityLock(m_EntityLock);
 		#endif /* HYPERECS_MUTEX */
 
-			if (m_Entities.find(entity) == m_Entities.end())
-			{
-				std::cerr << "[HyperECS] Entity does not exists!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exists!");
 
 		#ifdef HYPERECS_MUTEX
 			entityLock.unlock();
 		#endif /* HYPERECS_MUTEX */
 
-			if (!HasComponent<T>(entity))
-			{
-				std::cerr << "[HyperECS] Entity has not the component!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(HasComponent<T>(entity), "Entity has not the component!");
 
 		#ifdef HYPERECS_MUTEX
 			entityLock.lock();
@@ -358,11 +324,7 @@ namespace Hyperion
 			std::unique_lock<std::mutex> entityLock(m_EntityLock);
 		#endif /* HYPERECS_MUTEX */
 
-			if (m_Entities.find(entity) == m_Entities.end())
-			{
-				std::cerr << "[HyperECS] Entity does not exists!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exists!");
 
 		#ifdef HYPERECS_MUTEX
 			std::unique_lock<std::mutex> componentLock(m_ComponentLock);
@@ -391,11 +353,7 @@ namespace Hyperion
 			std::unique_lock<std::mutex> entityLock(m_EntityLock);
 		#endif /* HYPERECS_MUTEX */
 
-			if (m_Entities.find(entity) == m_Entities.end())
-			{
-				std::cerr << "[HyperECS] Entity does not exists!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exists!");
 
 			bool shouldSkip = false;
 			auto lambda = [&]<typename C>() mutable
@@ -714,11 +672,7 @@ namespace Hyperion
 		template<class T, class = class std::enable_if<std::is_base_of<System, T>::value, T>::type, typename... Args>
 		constexpr T& AddSystem(Args&&... args)
 		{
-			if (HasSystem<T>())
-			{
-				std::cerr << "[HyperECS] World already has the System!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(!HasSystem<T>(), "World already has the System!");
 
 		#ifdef HYPERECS_MUTEX
 			std::unique_lock<std::mutex> systemLock(m_SystemLock);
@@ -737,11 +691,7 @@ namespace Hyperion
 		template<class T, class = class std::enable_if<std::is_base_of<System, T>::value, T>::type>
 		constexpr void RemoveSystem()
 		{
-			if (!HasSystem<T>())
-			{
-				std::cerr << "[HyperECS] World has not the System!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(!HasSystem<T>(), "World has not the System!");
 
 		#ifdef HYPERECS_MUTEX
 			std::unique_lock<std::mutex> systemLock(m_SystemLock);
@@ -758,11 +708,7 @@ namespace Hyperion
 		template<class... T, class = class std::enable_if<std::is_base_of<System, T...>::value, T...>::type>
 		constexpr void RemoveMultipleSystem()
 		{
-			if (!HasMultipleSystem<T...>())
-			{
-				std::cerr << "[HyperECS] World has not the System!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(HasMultipleSystem<T...>(), "World has not the Systems!");
 
 		#ifdef HYPERECS_MUTEX
 			std::unique_lock<std::mutex> systemLock(m_SystemLock);
@@ -785,11 +731,7 @@ namespace Hyperion
 		template<class T, class = class std::enable_if<std::is_base_of<System, T>::value, T>::type>
 		constexpr T& GetSystem()
 		{
-			if (!HasSystem<T>())
-			{
-				std::cerr << "[HyperECS] World has not the System!" << std::endl;
-				__debugbreak();
-			}
+			HP_ASSERT(HasSystem<T...>(), "World has not the System!");
 
 		#ifdef HYPERECS_MUTEX
 			std::unique_lock<std::mutex> systemLock(m_SystemLock);
