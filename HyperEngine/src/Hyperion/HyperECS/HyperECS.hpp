@@ -228,7 +228,7 @@ namespace Hyperion
 				{
 					m_Components[componentId][component.Index] = nullptr;
 					m_FreeIndex.push(component.Index);
-					components.erase(std::remove(components.begin(), components.end(), component), components.end());
+					components.erase(std::find(components.begin(), components.end(), component));
 				}
 		}
 
