@@ -13,7 +13,7 @@ namespace Hyperion
 	#if defined(HP_PLATFORM_WINDOWS)
 		return CreateRef<WindowsWindow>(windowPropsInfo);
 	#else
-		HP_CORE_ASSERT(false, "Unknown Platform!");
+		HP_ASSERT(false, "Unknown Platform!");
 		return nullptr;
 	#endif
 	}

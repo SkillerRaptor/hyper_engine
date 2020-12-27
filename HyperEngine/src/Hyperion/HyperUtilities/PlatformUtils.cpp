@@ -15,7 +15,7 @@ namespace Hyperion
 		#if defined(HP_PLATFORM_WINDOWS)
 			m_Instance = CreateRef<WindowsPlatformUtils>();
 		#else
-			HP_CORE_ASSERT(false, "Unknown Platform!");
+			HP_ASSERT(false, "Unknown Platform!");
 		#endif
 		}
 		return m_Instance;
