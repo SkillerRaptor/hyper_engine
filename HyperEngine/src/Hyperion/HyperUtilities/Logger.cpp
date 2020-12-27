@@ -1,9 +1,11 @@
 #include "Logger.hpp"
 
-//#include <stdarg.h>
+#if defined(HP_PLATFORM_WINDOWS)
+#include <Windows.h>
+#endif
+
 #include <ctime>
 #include <iostream>
-#include <Windows.h>
 
 namespace Hyperion {
 
@@ -51,6 +53,7 @@ namespace Hyperion {
 
 	void Logger::Print(Level level, const std::string& message)
 	{
+	#if defined(HP_PLATFORM_WINDOWS)
 		switch (level)
 		{
 		case Level::HP_LEVEL_INFO: default:
@@ -69,13 +72,37 @@ namespace Hyperion {
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 			break;
 		}
+	#elif defined(HP_PLATFORM_LINUX)
+		switch (level)
+		{
+		case Level::HP_LEVEL_INFO: default:
+			printf("\e[97m");
+			break;
+		case Level::HP_LEVEL_WARN:
+			printf("\e[33m");
+			break;
+		case Level::HP_LEVEL_ERROR:
+			printf("\e[91m");
+			break;
+		case Level::HP_LEVEL_FATAL:
+			printf("\e[31m");
+			break;
+		case Level::HP_LEVEL_DEBUG:
+			printf("\e[37m");
+			break;
+		}
+	#endif
 
 		std::time_t time = std::time(0);
 		struct tm localTime;
 		localtime_s(&localTime, &time);
 
 		printf("[%c%i:%c%i:%c%i] %s", (localTime.tm_hour < 10 ? '0' : '\0'), localTime.tm_hour, (localTime.tm_min < 10 ? '0' : '\0'), localTime.tm_min, (localTime.tm_sec < 10 ? '0' : '\0'), localTime.tm_sec, message.c_str());
+	#if defined(HP_PLATFORM_WINDOWS)
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+	#elif defined(HP_PLATFORM_LINUX)
+		printf("\e[39m");
+	#endif
 	}
 
 	std::string Logger::ConvertLevelToString(Level level) const

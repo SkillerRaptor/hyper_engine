@@ -152,7 +152,7 @@ namespace Hyperion
 		#ifdef HYPERECS_MUTEX
 			std::unique_lock<std::mutex> entityLock(m_EntityLock);
 		#endif /* HYPERECS_MUTEX */
-			
+
 			HP_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exists!");
 
 		#ifdef HYPERECS_MUTEX
@@ -257,19 +257,21 @@ namespace Hyperion
 			entityLock.lock();
 		#endif /* HYPERECS_MUTEX */
 
-			auto lambda = [&]<typename C>() mutable
-			{
-			#ifdef HYPERECS_MUTEX
-				entityLock.unlock();
-			#endif /* HYPERECS_MUTEX */
+			([](auto* v)
+				{
+					using C = decltype(*v);
 
-				RemoveComponent<C>(entity);
+				#ifdef HYPERECS_MUTEX
+					entityLock.unlock();
+				#endif /* HYPERECS_MUTEX */
 
-			#ifdef HYPERECS_MUTEX
-				entityLock.lock();
-			#endif /* HYPERECS_MUTEX */
-			};
-			(lambda.template operator() < T > (), ...);
+					RemoveComponent<C>(entity);
+
+				#ifdef HYPERECS_MUTEX
+					entityLock.lock();
+				#endif /* HYPERECS_MUTEX */
+
+				} ((T*)nullptr), ...);
 		}
 
 		/**
@@ -357,23 +359,26 @@ namespace Hyperion
 			HP_ASSERT(m_Entities.find(entity) != m_Entities.end(), "Entity does not exists!");
 
 			bool shouldSkip = false;
-			auto lambda = [&]<typename C>() mutable
-			{
-				if (shouldSkip)
-					return;
 
-			#ifdef HYPERECS_MUTEX
-				entityLock.unlock();
-			#endif /* HYPERECS_MUTEX */
+			([](auto* v)
+				{
+					using C = decltype(*v);
 
-				if (!HasComponent<C>(entity))
-					shouldSkip = true;
+					if (shouldSkip)
+						return;
 
-			#ifdef HYPERECS_MUTEX
-				entityLock.lock();
-			#endif /* HYPERECS_MUTEX */
-			};
-			(lambda.template operator() < T > (), ...);
+				#ifdef HYPERECS_MUTEX
+					entityLock.unlock();
+				#endif /* HYPERECS_MUTEX */
+
+					if (!HasComponent<C>(entity))
+						shouldSkip = true;
+
+				#ifdef HYPERECS_MUTEX
+					entityLock.lock();
+				#endif /* HYPERECS_MUTEX */
+				} ((T*)nullptr), ...);
+
 			if (shouldSkip)
 				return false;
 			return true;
@@ -402,14 +407,16 @@ namespace Hyperion
 			for (const auto& entity : m_Entities)
 			{
 				bool shouldSkip = false;
-				auto lambda = [&]<typename C>() mutable
-				{
-					if (shouldSkip)
-						return;
-					if (!HasComponent<C>(entity.first))
-						shouldSkip = true;
-				};
-				(lambda.template operator() < T > (), ...);
+
+				([&](auto* v)
+					{
+						using C = decltype(*v);
+						if (shouldSkip)
+							return;
+						if (!HasComponent<C>(entity.first))
+							shouldSkip = true;
+					} ((T*)nullptr), ...);
+
 				if (shouldSkip)
 					continue;
 				function(entity.first, GetComponent<T>(entity.first)...);
@@ -443,12 +450,14 @@ namespace Hyperion
 			for (auto& entity : m_Entities)
 			{
 				bool shouldSkip = false;
-				auto lambda = [&]<typename C>() mutable {
-					if (shouldSkip)
-						return;
-					if (!HasComponent<C>(entity.first))
-						shouldSkip = true;
-				}; (lambda.template operator() < T > (), ...);
+				([](auto* v)
+					{
+						using C = decltype(*v);
+						if (shouldSkip)
+							return;
+						if (!HasComponent<C>(entity.first))
+							shouldSkip = true;
+					} ((T*)nullptr), ...);
 				if (shouldSkip)
 					continue;
 				entities.push_back(entity.first);
@@ -715,11 +724,11 @@ namespace Hyperion
 			std::unique_lock<std::mutex> systemLock(m_SystemLock);
 		#endif /* HYPERECS_MUTEX */
 
-			auto lambda = [&]<typename C>() mutable
-			{
-				RemoveSystem<C>();
-			};
-			(lambda.template operator() < T > (), ...);
+			([](auto* v)
+				{
+					using C = decltype(*v);
+					RemoveSystem<C>();
+				} ((T*)nullptr), ...);
 		}
 
 		/**
@@ -788,7 +797,7 @@ namespace Hyperion
 			#ifdef HYPERECS_MUTEX
 				systemLock.lock();
 			#endif /* HYPERECS_MUTEX */
-			};
+		};
 			(lambda.template operator() < T > (), ...);
 			return !shouldSkip;
 		}
@@ -845,5 +854,5 @@ namespace Hyperion
 			for (auto& system : m_Systems)
 				system.second->OnEvent(m_Registry, event);
 		}
-	};
-}
+		};
+		}
