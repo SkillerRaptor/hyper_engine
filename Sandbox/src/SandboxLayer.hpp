@@ -5,6 +5,8 @@
 class SandboxLayer : public Hyperion::Layer
 {
 private:
+	Hyperion::ShaderHandle m_SpriteShader;
+
 public:
 	SandboxLayer();
 	virtual ~SandboxLayer();

@@ -11,7 +11,7 @@ SandboxLayer::~SandboxLayer()
 
 void SandboxLayer::OnAttach()
 {
-	m_RenderContext->GetShaderManager()->CreateShader("assets/shaders/SpriteShaderVertex.glsl", "assets/shaders/SpriteShaderFragment.glsl");
+	m_SpriteShader = m_RenderContext->GetShaderManager()->CreateShader("assets/shaders/SpriteShaderVertex.glsl", "assets/shaders/SpriteShaderFragment.glsl");
 }
 
 void SandboxLayer::OnDetach()

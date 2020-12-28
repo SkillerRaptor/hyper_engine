@@ -19,10 +19,10 @@ namespace Hyperion
 		~LayerStack();
 
 		void PushLayer(Layer* layer);
-		void PushOverlayLayer(OverlayLayer* overlayLayer);
+		void PushLayer(OverlayLayer* overlayLayer);
 
 		void PopLayer(Layer* layer);
-		void PopOverlayLayer(OverlayLayer* overlayLayer);
+		void PopLayer(OverlayLayer* overlayLayer);
 
 		void PopLayer(const std::string& layerName);
 		void PopOverlayLayer(const std::string& layerName);

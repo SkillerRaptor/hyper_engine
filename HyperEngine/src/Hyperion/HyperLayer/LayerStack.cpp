@@ -33,7 +33,7 @@ namespace Hyperion
 		m_Layers.push_back(layer);
 	}
 
-	void LayerStack::PushOverlayLayer(OverlayLayer* overlayLayer)
+	void LayerStack::PushLayer(OverlayLayer* overlayLayer)
 	{
 		overlayLayer->OnAttach();
 		m_OverlayLayers.push_back(overlayLayer);
@@ -46,7 +46,7 @@ namespace Hyperion
 			m_Layers.erase(elementPosition);
 	}
 
-	void LayerStack::PopOverlayLayer(OverlayLayer* overlayLayer)
+	void LayerStack::PopLayer(OverlayLayer* overlayLayer)
 	{
 		auto elementPosition = std::find(m_OverlayLayers.begin(), m_OverlayLayers.end(), overlayLayer);
 		if (elementPosition != m_OverlayLayers.end())

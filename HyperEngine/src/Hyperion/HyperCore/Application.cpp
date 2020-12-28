@@ -42,7 +42,7 @@ namespace Hyperion
 		m_Scene = CreateRef<Scene>("Main Scene", m_Window->GetContext()->GetRenderer2D());
 
 		m_LayerStack = CreateScope<LayerStack>();
-		PushOverlayLayer(new EditorLayer(m_Scene));
+		PushLayer(new EditorLayer(m_Scene));
 	}
 
 	void Application::Shutdown()
@@ -105,11 +105,11 @@ namespace Hyperion
 				return false;
 			});
 
-		for (Layer* layer : m_LayerStack->GetLayers())
-			layer->OnEvent(event);
-
 		for (OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
 			overlayLayer->OnEvent(event);
+
+		for (Layer* layer : m_LayerStack->GetLayers())
+			layer->OnEvent(event);
 
 		m_Scene->OnEvent(event);
 	}
@@ -120,10 +120,10 @@ namespace Hyperion
 		m_LayerStack->PushLayer(layer);
 	}
 
-	void Application::PushOverlayLayer(OverlayLayer* overlayLayer)
+	void Application::PushLayer(OverlayLayer* overlayLayer)
 	{
 		overlayLayer->m_RenderContext = m_Window->GetContext();
-		m_LayerStack->PushOverlayLayer(overlayLayer);
+		m_LayerStack->PushLayer(overlayLayer);
 	}
 
 	void Application::PopLayer(Layer* layer)
@@ -131,9 +131,9 @@ namespace Hyperion
 		m_LayerStack->PopLayer(layer);
 	}
 
-	void Application::PopOverlayLayer(OverlayLayer* overlayLayer)
+	void Application::PopLayer(OverlayLayer* overlayLayer)
 	{
-		m_LayerStack->PopOverlayLayer(overlayLayer);
+		m_LayerStack->PopLayer(overlayLayer);
 	}
 
 	void Application::PopLayer(const std::string& layerName)
