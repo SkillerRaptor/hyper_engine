@@ -2,7 +2,7 @@ include "./vendor/premake/premake_customization/solution_items.lua"
 
 workspace "HyperEngine"
 	architecture "x86_64"
-	startproject "Sandbox"
+	startproject "HyperEditor"
 
 	configurations
 	{
@@ -47,4 +47,5 @@ group "Dependencies"
 group ""
 
 include "HyperEngine"
+include "HyperEditor"
 include "Sandbox"
