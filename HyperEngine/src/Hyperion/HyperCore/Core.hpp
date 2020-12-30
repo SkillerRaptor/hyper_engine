@@ -1,7 +1,6 @@
 #pragma once
 
-#include <memory>
-
+/* Platform Detection */
 #if defined(_WIN32)
 	#if defined(_WIN64)
 		#define HP_PLATFORM_WINDOWS
@@ -32,6 +31,7 @@
 	#error "Unknown platform!"
 #endif
 
+/* Debug Break Detection */
 #ifdef HP_DEBUG
 	#if defined(HP_PLATFORM_WINDOWS)
 		#define HP_DEBUGBREAK() __debugbreak()
@@ -47,6 +47,7 @@
 	#define HP_DEBUGBREAK()
 #endif
 
+/* File System Include */
 #ifndef INCLUDE_STD_FILESYSTEM_EXPERIMENTAL
 	#if defined(__cpp_lib_filesystem)
 		#define INCLUDE_STD_FILESYSTEM_EXPERIMENTAL 0
@@ -57,22 +58,22 @@
 	#elif __has_include(<filesystem>)
 		#ifdef _MSC_VER
 			#if __has_include(<yvals_core.h>)
-					#include <yvals_core.h>
+				#include <yvals_core.h>
+				
 				#if defined(_HAS_CXX17) && _HAS_CXX17
 					#define INCLUDE_STD_FILESYSTEM_EXPERIMENTAL 0
 				#endif
 			#endif
 
-		#ifndef INCLUDE_STD_FILESYSTEM_EXPERIMENTAL
-			#define INCLUDE_STD_FILESYSTEM_EXPERIMENTAL 1
-		#endif
-
+			#ifndef INCLUDE_STD_FILESYSTEM_EXPERIMENTAL
+				#define INCLUDE_STD_FILESYSTEM_EXPERIMENTAL 1
+			#endif
+		#else
 			#define INCLUDE_STD_FILESYSTEM_EXPERIMENTAL 0
 		#endif
 
 	#elif __has_include(<experimental/filesystem>)
 		#define INCLUDE_STD_FILESYSTEM_EXPERIMENTAL 1
-
 	#else
 		#error Could not find system header "<filesystem>" or "<experimental/filesystem>"
 	#endif
@@ -88,8 +89,12 @@
 	#endif
 #endif
 
+/* Common Macros */
 #define HP_EXPAND_MACRO(x) x
 #define HP_STRINGIFY_MACRO(x) #x
+
+/* Memory Alias */
+#include <memory>
 
 namespace Hyperion
 {
@@ -112,8 +117,10 @@ namespace Hyperion
 	}
 }
 
+/* Including Logger */
 #include "HyperUtilities/Log.hpp"
 
+/* Enabling Asserts */
 #ifdef HP_ENABLE_ASSERTS
 	#define HP_INTERNAL_ASSERT_IMPLEMENTATION(check, msg, ...) { if (!(check)) { HP_CORE_FATAL(msg, __VA_ARGS__); HP_DEBUGBREAK(); } }
 
