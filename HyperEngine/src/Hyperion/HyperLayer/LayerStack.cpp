@@ -41,56 +41,56 @@ namespace Hyperion
 
 	void LayerStack::PopLayer(Layer* layer)
 	{
-		auto elementPosition = std::find(m_Layers.begin(), m_Layers.end(), layer);
-		if (elementPosition != m_Layers.end())
-			m_Layers.erase(elementPosition);
+		m_Layers.erase(std::remove(m_Layers.begin(), m_Layers.end(), layer), m_Layers.end());
 	}
 
 	void LayerStack::PopLayer(OverlayLayer* overlayLayer)
 	{
-		auto elementPosition = std::find(m_OverlayLayers.begin(), m_OverlayLayers.end(), overlayLayer);
-		if (elementPosition != m_OverlayLayers.end())
-			m_OverlayLayers.erase(elementPosition);
+		m_OverlayLayers.erase(std::remove(m_OverlayLayers.begin(), m_OverlayLayers.end(), overlayLayer), m_OverlayLayers.end());
 	}
 
 	void LayerStack::PopLayer(const std::string& layerName)
 	{
-		for (Layer* layer : m_Layers)
-			if (layer->GetName() == layerName)
-				m_Layers.erase(std::find(m_Layers.begin(), m_Layers.end(), layer));
+		m_Layers.erase(std::remove_if(m_Layers.begin(), m_Layers.end(), [&](Layer* layer)
+			{
+				return layer->GetName() == layerName;
+			}), m_Layers.end());
 	}
 
 	void LayerStack::PopOverlayLayer(const std::string& overlayLayerName)
 	{
-		for (OverlayLayer* overlayLayer : m_OverlayLayers)
-			if (overlayLayer->GetName() == overlayLayerName)
-				m_OverlayLayers.erase(std::find(m_OverlayLayers.begin(), m_OverlayLayers.end(), overlayLayer));
+		m_OverlayLayers.erase(std::remove_if(m_OverlayLayers.begin(), m_OverlayLayers.end(), [&](OverlayLayer* overlayLayer)
+			{
+				return overlayLayer->GetName() == overlayLayerName;
+			}), m_OverlayLayers.end());
 	}
 
-	void LayerStack::PopLayer()
+	void LayerStack::PopLastLayer()
 	{
 		m_Layers.pop_back();
 	}
 
-	void LayerStack::PopOverlayLayer()
+	void LayerStack::PopLastOverlayLayer()
 	{
 		m_OverlayLayers.pop_back();
 	}
 
-	Layer* LayerStack::GetLayer(const std::string& layerName)
+	const Layer* LayerStack::GetLayer(const std::string& layerName) const
 	{
-		for (Layer* layer : m_Layers)
-			if (layer->GetName() == layerName)
-				return layer;
-		return nullptr;
+		auto elementPosition = std::find_if(m_Layers.begin(), m_Layers.end(), [&](Layer* layer)
+			{
+				return layer->GetName() == layerName;
+			});
+		return elementPosition != m_Layers.end() ? *elementPosition : nullptr;
 	}
 
-	OverlayLayer* LayerStack::GetOverlayLayer(const std::string& overlayLayerName)
+	const OverlayLayer* LayerStack::GetOverlayLayer(const std::string& overlayLayerName) const
 	{
-		for (OverlayLayer* overlayLayer : m_OverlayLayers)
-			if (overlayLayer->GetName() == overlayLayerName)
-				return overlayLayer;
-		return nullptr;
+		auto elementPosition = std::find_if(m_OverlayLayers.begin(), m_OverlayLayers.end(), [&](OverlayLayer* overlayLayer)
+			{
+				return overlayLayer->GetName() == overlayLayerName;
+			});
+		return elementPosition != m_OverlayLayers.end() ? *elementPosition : nullptr;
 	}
 
 	const std::vector<Layer*>& LayerStack::GetLayers() const

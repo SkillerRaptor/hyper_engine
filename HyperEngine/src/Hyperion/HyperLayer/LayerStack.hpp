@@ -6,7 +6,7 @@
 #include "Layer.hpp"
 #include "OverlayLayer.hpp"
 
-namespace Hyperion 
+namespace Hyperion
 {
 	class LayerStack
 	{
@@ -27,11 +27,11 @@ namespace Hyperion
 		void PopLayer(const std::string& layerName);
 		void PopOverlayLayer(const std::string& layerName);
 
-		void PopLayer();
-		void PopOverlayLayer();
+		void PopLastLayer();
+		void PopLastOverlayLayer();
 
-		Layer* GetLayer(const std::string& layerName);
-		OverlayLayer* GetOverlayLayer(const std::string& layerName);
+		const Layer* GetLayer(const std::string& layerName) const;
+		const OverlayLayer* GetOverlayLayer(const std::string& layerName) const;
 
 		const std::vector<Layer*>& GetLayers() const;
 		const std::vector<OverlayLayer*>& GetOverlayLayers() const;
