@@ -2,47 +2,36 @@
 
 /* Include File for HyperEngine Application / Projects */
 
-/* Core */
+/* HyperCore */
 #include "Hyperion/HyperCore/Core.hpp"
 
-/* Entity Component System */
+/* HyperECS */
 #include "Hyperion/HyperECS/Components.hpp"
 #include "Hyperion/HyperECS/HyperEntity.hpp"
 #include "Hyperion/HyperECS/HyperECS.hpp"
 
-/* Events */
+/* HyperEvents */
 #include "Hyperion/HyperEvents/Event.hpp"
 #include "Hyperion/HyperEvents/KeyEvents.hpp"
 #include "Hyperion/HyperEvents/MouseEvents.hpp"
 #include "Hyperion/HyperEvents/WindowEvents.hpp"
 
-/* Layers */
+/* HyperLayer */
 #include "Hyperion/HyperLayer/Layer.hpp"
 #include "Hyperion/HyperLayer/OverlayLayer.hpp"
 
-/* Maths */
-// #include "Hyperion/HyperMath/Matrix.hpp"
-// #include "Hyperion/HyperMath/Vector.hpp"
-// #include "Hyperion/HyperMath/Quaternion.hpp"
-
-/* Memory */
-#include "Hyperion/HyperMemory/PoolAllocator.hpp"
-
-/* Physics */
-
-/* Rendering */
+/* HyperRendering */
 #include "Hyperion/HyperRendering/RenderContext.hpp"
 #include "Hyperion/HyperRendering/ShaderManager.hpp"
 #include "Hyperion/HyperRendering/TextureManager.hpp"
 
-/* Utilities */
+/* HyperUtilities */
 #include "Hyperion/HyperUtilities/Input.hpp"
 #include "Hyperion/HyperUtilities/KeyCodes.hpp"
-#include "Hyperion/HyperUtilities/Log.hpp"
-#include "Hyperion/HyperUtilities/Logger.hpp"
 #include "Hyperion/HyperUtilities/MouseCodes.hpp"
 #include "Hyperion/HyperUtilities/NonCopyable.hpp"
 #include "Hyperion/HyperUtilities/NonMoveable.hpp"
+#include "Hyperion/HyperUtilities/PlatformUtils.hpp"
 #include "Hyperion/HyperUtilities/Random.hpp"
 #include "Hyperion/HyperUtilities/Timer.hpp"
 #include "Hyperion/HyperUtilities/Timestep.hpp"
