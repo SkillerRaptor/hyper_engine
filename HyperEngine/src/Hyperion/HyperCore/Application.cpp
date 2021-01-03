@@ -1,7 +1,5 @@
 #include "Application.hpp"
 
-#include <GLFW/glfw3.h>
-
 #include <chrono>
 
 #include "HyperEvents/WindowEvents.hpp"
@@ -66,7 +64,7 @@ namespace Hyperion
 
 			editorLayer->StartCapture();
 
-			while (m_EventBus.size() > 0)
+			while (!m_EventBus.empty())
 			{
 				Ref<Event> e = m_EventBus.front();
 				if (e->Handled) continue;
@@ -146,22 +144,22 @@ namespace Hyperion
 		m_LayerStack->PopOverlayLayer(overlayLayerName);
 	}
 
-	void Application::PopLayer()
+	void Application::PopLastLayer()
 	{
-		m_LayerStack->PopLayer();
+		m_LayerStack->PopLastLayer();
 	}
 
-	void Application::PopOverlayLayer()
+	void Application::PopLastOverlayLayer()
 	{
-		m_LayerStack->PopOverlayLayer();
+		m_LayerStack->PopLastOverlayLayer();
 	}
 
-	Layer* Application::GetLayer(const std::string& layerName)
+	const Layer* Application::GetLayer(const std::string& layerName) const
 	{
 		return m_LayerStack->GetLayer(layerName);
 	}
 
-	OverlayLayer* Application::GetOverlayLayer(const std::string& overlayLayerName)
+	const OverlayLayer* Application::GetOverlayLayer(const std::string& overlayLayerName) const
 	{
 		return m_LayerStack->GetOverlayLayer(overlayLayerName);
 	}

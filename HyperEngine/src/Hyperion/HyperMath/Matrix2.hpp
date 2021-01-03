@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 
-#include "Vector.hpp"
+#include "HyperMath/Vector.hpp"
 
 namespace Hyperion
 {

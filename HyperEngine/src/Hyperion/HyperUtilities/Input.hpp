@@ -1,7 +1,7 @@
 #pragma once
 
-#include "KeyCodes.hpp"
-#include "MouseCodes.hpp"
+#include "HyperUtilities/KeyCodes.hpp"
+#include "HyperUtilities/MouseCodes.hpp"
 
 namespace Hyperion
 {

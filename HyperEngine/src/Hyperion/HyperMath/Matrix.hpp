@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Matrix2.hpp"
-#include "Matrix3.hpp"
-#include "Matrix4.hpp"
+#include "HyperMath/Matrix2.hpp"
+#include "HyperMath/Matrix3.hpp"
+#include "HyperMath/Matrix4.hpp"
 
 namespace Hyperion 
 {

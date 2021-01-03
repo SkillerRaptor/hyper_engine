@@ -4,8 +4,8 @@
 #include <iostream>
 #include <type_traits>
 
-#include "Vector2.hpp"
-#include "Vector3.hpp"
+#include "HyperMath/Vector2.hpp"
+#include "HyperMath/Vector3.hpp"
 
 namespace Hyperion 
 {
@@ -209,7 +209,7 @@ namespace Hyperion
 			return *this;
 		}
 
-		/* Comparsion */
+		/* Comparison */
 		bool operator==(const Vector4<T>& vector)
 		{
 			return (x == vector.x && y == vector.y && z == vector.z && w == vector.w);

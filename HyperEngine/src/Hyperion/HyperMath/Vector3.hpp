@@ -4,7 +4,7 @@
 #include <iostream>
 #include <type_traits>
 
-#include "Vector2.hpp"
+#include "HyperMath/Vector2.hpp"
 
 namespace Hyperion 
 {

@@ -3,9 +3,9 @@
 #include <iostream>
 #include <queue>
 
-#include "RenderContext.hpp"
 #include "HyperCore/Core.hpp"
 #include "HyperEvents/Event.hpp"
+#include "HyperRendering/RenderContext.hpp"
 #include "HyperUtilities/Timestep.hpp"
 
 namespace Hyperion

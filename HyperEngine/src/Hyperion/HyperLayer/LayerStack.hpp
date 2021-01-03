@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include "Layer.hpp"
-#include "OverlayLayer.hpp"
+#include "HyperLayer/Layer.hpp"
+#include "HyperLayer/OverlayLayer.hpp"
 
 namespace Hyperion
 {

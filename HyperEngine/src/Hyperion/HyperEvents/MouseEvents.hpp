@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "Event.hpp"
+#include "HyperEvents/Event.hpp"
 
 namespace Hyperion
 {

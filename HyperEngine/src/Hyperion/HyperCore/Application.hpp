@@ -2,7 +2,7 @@
 
 #include <queue>
 
-#include "Core.hpp"
+#include "HyperCore/Core.hpp"
 #include "HyperECS/Scene/Scene.hpp"
 #include "HyperEvents/Event.hpp"
 #include "HyperLayer/Layer.hpp"
@@ -37,13 +37,13 @@ namespace Hyperion
 		void PopLayer(OverlayLayer* overlayLayer);
 
 		void PopLayer(const std::string& layerName);
-		void PopOverlayLayer(const std::string& overlayLayerName);
+		void PopOverlayLayer(const std::string& layerName);
 
-		void PopLayer();
-		void PopOverlayLayer();
+		void PopLastLayer();
+		void PopLastOverlayLayer();
 
-		Layer* GetLayer(const std::string& layerName);
-		OverlayLayer* GetOverlayLayer(const std::string& overlayLayerName);
+		const Layer* GetLayer(const std::string& layerName) const;
+		const OverlayLayer* GetOverlayLayer(const std::string& layerName) const;
 
 		Ref<Window> GetNativeWindow() const;
 		static Application* Get();

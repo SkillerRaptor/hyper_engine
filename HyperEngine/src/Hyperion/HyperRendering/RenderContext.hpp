@@ -2,11 +2,11 @@
 
 #include <queue>
 
-#include "Renderer2D.hpp"
-#include "ShaderManager.hpp"
-#include "TextureManager.hpp"
 #include "HyperCore/Core.hpp"
 #include "HyperEvents/Event.hpp"
+#include "HyperRendering/Renderer2D.hpp"
+#include "HyperRendering/ShaderManager.hpp"
+#include "HyperRendering/TextureManager.hpp"
 #include "HyperUtilities/Timestep.hpp"
 
 struct GLFWwindow;

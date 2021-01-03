@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Logger.hpp"
 #include "HyperCore/Core.hpp"
+#include "HyperUtilities/Logger.hpp"
 
 namespace Hyperion 
 {

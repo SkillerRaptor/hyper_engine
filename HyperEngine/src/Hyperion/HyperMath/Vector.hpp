@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Vector2.hpp"
-#include "Vector3.hpp"
-#include "Vector4.hpp"
+#include "HyperMath/Vector2.hpp"
+#include "HyperMath/Vector3.hpp"
+#include "HyperMath/Vector4.hpp"
 
 namespace Hyperion 
 {

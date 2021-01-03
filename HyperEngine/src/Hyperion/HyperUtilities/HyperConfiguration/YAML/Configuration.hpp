@@ -8,8 +8,8 @@
 #include <variant>
 #include <vector>
 
-#include "Node.hpp"
 #include "HyperCore/Core.hpp"
+#include "HyperUtilities/HyperConfiguration/YAML/Node.hpp"
 
 namespace Hyperion { namespace YAML
 {
