@@ -4,12 +4,11 @@
 ![](https://github.com/SkillerRaptor/HyperEngine/workflows/build-linux/badge.svg)
 [![Trello](https://img.shields.io/badge/board-trello-blue.svg)](https://trello.com/b/xiuhLb05/hyperengine)
 
-The HyperEngine only supports OpenGL 3.3 and OpenGL 4.6, but will support Vulkan, DirectX11 and DirectX12 in the future. 
-The Engine is layed out to work on Windows x64 and Linux.
+This repository houses the source code for the HyperEngine.
 
 # Building
 In order to build the engine, you will need to follow these steps:
-1. Start cloning the repository by typing in your command prompt <code>git clone --recursive <a href="https://github.com/SkillerRaptor/HyperEngine">https://github.com/SkillerRaptor/HyperEngine</a></code>.
+1. Start cloning the repository by typing in the command prompt of your choice:<br><code>git clone --recursive <a href="https://github.com/SkillerRaptor/HyperEngine">https://github.com/SkillerRaptor/HyperEngine</a></code>.
 2. Run the script with the name of your operating system in the [Scripts](https://github.com/SkillerRaptor/HyperEngine/tree/master/Scripts) folder.<br>(For Windows: [`Win-GenProjects.bat`](https://github.com/SkillerRaptor/HyperEngine/blob/master/Scripts/Win-GenProjects.bat), For Linux: [`Linux-GenProjects.sh`](https://github.com/SkillerRaptor/HyperEngine/blob/master/Scripts/Linux-GenProjects.sh)) 
 3. After premake generates the project files. You can open the project and run the engine.
 
