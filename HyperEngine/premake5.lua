@@ -25,6 +25,7 @@ project "HyperEngine"
 	{
 		"src",
 		"src/Hyperion",
+		"%{IncludeDir.fmt}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.glfw}",
 		"%{IncludeDir.glm}",
@@ -41,6 +42,7 @@ project "HyperEngine"
 
 	links
 	{
+		"fmt",
 		"Glad",
 		"glfw",
 		"glm",

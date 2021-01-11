@@ -25,6 +25,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
+IncludeDir["fmt"] = "%{wks.location}/HyperEngine/vendor/fmt/include"
 IncludeDir["Glad"] = "%{wks.location}/HyperEngine/vendor/Glad/include"
 IncludeDir["glfw"] = "%{wks.location}/HyperEngine/vendor/glfw/include"
 IncludeDir["glm"] = "%{wks.location}/HyperEngine/vendor/glm"
@@ -38,6 +39,7 @@ LibDir["vulkan"] = "%{wks.location}/HyperEngine/vendor/vulkan/lib"
 
 group "Dependencies"
 	include "vendor/premake"
+	include "HyperEngine/vendor/fmt"
 	include "HyperEngine/vendor/Glad"
 	include "HyperEngine/vendor/glfw"
 	include "HyperEngine/vendor/glm"
