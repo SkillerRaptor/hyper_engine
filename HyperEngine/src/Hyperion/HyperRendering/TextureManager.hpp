@@ -9,12 +9,14 @@ namespace Hyperion
 {
 	enum class TextureType
 	{
+		COMPUTE,
 		DEFAULT,
 		DIFFUSE,
 		FRAMEBUFFER,
+		DEPTH,
 		HEIGHT,
 		NORMAL,
-		SPECULAR
+		SPECULAR,
 	};
 
 	struct TextureData

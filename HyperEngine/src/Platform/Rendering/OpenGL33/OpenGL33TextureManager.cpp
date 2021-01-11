@@ -90,7 +90,20 @@ namespace Hyperion
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, alpha ? GL_RGBA : GL_RGB, data->Width, data->Height, 0, alpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data->Data);
+		switch (textureData->Type)
+		{
+		case TextureType::FRAMEBUFFER:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, data->Width, data->Height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, data->TextureId, 0);
+			break;
+		case TextureType::DEPTH:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, data->Width, data->Height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, data->TextureId, 0);
+			break;
+		default:
+			glTexImage2D(GL_TEXTURE_2D, 0, alpha ? GL_RGBA : GL_RGB, data->Width, data->Height, 0, alpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data->Data);
+			break;
+		}
 	}
 
 	bool OpenGL33TextureManager::BindTexture(TextureHandle handle, uint32_t textureSlot)

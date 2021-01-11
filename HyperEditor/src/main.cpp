@@ -7,6 +7,7 @@ class HyperEditor : public Hyperion::Application
 {
 public:
 	HyperEditor()
+		: Application("HyperEditor", 1280, 720)
 	{
 		PushLayer(new EditorLayer());
 	}

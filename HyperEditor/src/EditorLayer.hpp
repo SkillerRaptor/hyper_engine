@@ -2,10 +2,13 @@
 
 #include <Hyperion.hpp>
 
+#include "Panels/SceneHierarchyPanel.hpp"
+
 class EditorLayer : public Hyperion::OverlayLayer
 {
 private:
 	Hyperion::ShaderHandle m_SpriteShader;
+	Hyperion::Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
 
 public:
 	EditorLayer();
@@ -17,4 +20,19 @@ public:
 	virtual void OnEvent(Hyperion::Event& event) override;
 	virtual void OnUpdate(Hyperion::Timestep timeStep) override;
 	virtual void OnRender() override;
+
+private:
+	void ShowDockingMenu();
+
+	void ShowAssetsMenu();
+
+	void ShowMenuFile();
+	void ShowMenuEdit();
+
+	void NewScene();
+	void OpenScene();
+	void SaveScene();
+	void SaveAsScene();
+
+	void DrawSelection();
 };

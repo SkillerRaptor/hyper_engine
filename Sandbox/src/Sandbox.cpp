@@ -7,6 +7,7 @@ class Sandbox : public Hyperion::Application
 {
 public:
 	Sandbox()
+		: Application("Sandbox", 1280, 720)
 	{
 		PushLayer(new SandboxLayer());
 	}

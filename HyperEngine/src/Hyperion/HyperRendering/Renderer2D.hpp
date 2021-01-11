@@ -25,7 +25,7 @@ namespace Hyperion
 	protected:
 		glm::vec4 m_QuadVertexPositions[4];
 
-		const uint32_t MaxQuads = 20000;
+		const uint32_t MaxQuads = 2000;
 		const uint32_t MaxVertices = MaxQuads * 4;
 		const uint32_t MaxIndices = MaxQuads * 6;
 

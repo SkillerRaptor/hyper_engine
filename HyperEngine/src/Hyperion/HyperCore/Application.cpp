@@ -1,25 +1,23 @@
 #include "Application.hpp"
 
-#include <chrono>
-
 #include "HyperEvents/WindowEvents.hpp"
+#include "HyperRendering/ImGuiLayer.hpp"
 #include "HyperUtilities/Random.hpp"
 #include "HyperUtilities/Timestep.hpp"
-
-#include "Platform/Rendering/ImGui/EditorLayer.hpp"
 
 namespace Hyperion
 {
 	Application* Application::m_Instance;
 
-	Application::Application()
+	Application::Application(const std::string& title, uint32_t width, uint32_t height)
 	{
-		m_Instance = this;
-		Init();
+		Init(title, width, height);
 	}
 
-	void Application::Init()
+	void Application::Init(const std::string& title, uint32_t width, uint32_t height)
 	{
+		m_Instance = this;
+
 		Log::Init();
 		Random::Init();
 
@@ -30,17 +28,19 @@ namespace Hyperion
 		HP_CORE_INFO("");
 
 		WindowPropsInfo windowPropsInfo{};
-		windowPropsInfo.Title = "HyperEngine (x64 - $api $version)";
-		windowPropsInfo.Width = 1280;
-		windowPropsInfo.Height = 720;
+		windowPropsInfo.Title = title;
+		windowPropsInfo.Width = width;
+		windowPropsInfo.Height = height;
 		windowPropsInfo.EventBus = &m_EventBus;
 
 		m_Window = Window::Construct(windowPropsInfo);
 
 		m_Scene = CreateRef<Scene>("Main Scene", m_Window->GetContext()->GetRenderer2D());
+		m_SceneRecorder = SceneRecorder::Construct(m_Window->GetContext());
 
 		m_LayerStack = CreateScope<LayerStack>();
-		PushLayer(new EditorLayer(m_Scene));
+		m_ImGuiLayer = new ImGuiLayer();
+		PushLayer(m_ImGuiLayer);
 	}
 
 	void Application::Shutdown()
@@ -50,19 +50,22 @@ namespace Hyperion
 
 	void Application::Run()
 	{
-		double lastFrame = 0.0;
+		double lastTime = 0.0;
 
-		EditorLayer* editorLayer = static_cast<EditorLayer*>(m_LayerStack->GetOverlayLayer("Editor Layer"));
-		editorLayer->InitCapture();
+		bool enableCapture = m_LayerStack->GetOverlayLayers().size() > 1;
+
+		if (enableCapture)
+		{
+			m_SceneRecorder->InitRecording();
+		}
+
 		while (m_Running)
 		{
-			double currentFrame = glfwGetTime();
-			const Timestep timeStep = currentFrame - lastFrame;
-			lastFrame = currentFrame;
+			double currentTime = m_Window->GetTime();
+			const Timestep timeStep = currentTime - lastTime;
+			lastTime = currentTime;
 
 			m_Window->OnPreUpdate();
-
-			editorLayer->StartCapture();
 
 			while (!m_EventBus.empty())
 			{
@@ -70,6 +73,11 @@ namespace Hyperion
 				if (e->Handled) continue;
 				OnEvent(*e);
 				m_EventBus.pop();
+			}
+
+			if (enableCapture)
+			{
+				m_SceneRecorder->StartRecording();
 			}
 
 			for (Layer* layer : m_LayerStack->GetLayers())
@@ -81,12 +89,20 @@ namespace Hyperion
 			m_Scene->OnUpdate(timeStep);
 			m_Scene->OnRender();
 
-			editorLayer->EndCapture();
-
-			for (OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
+			if (enableCapture)
 			{
-				overlayLayer->OnUpdate(timeStep);
-				overlayLayer->OnRender();
+				m_SceneRecorder->EndRecording();
+			}
+
+			if (enableCapture)
+			{
+				m_ImGuiLayer->Start();
+				for (OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
+				{
+					overlayLayer->OnUpdate(timeStep);
+					overlayLayer->OnRender();
+				}
+				m_ImGuiLayer->End();
 			}
 
 			m_Window->OnUpdate(timeStep);
@@ -115,12 +131,15 @@ namespace Hyperion
 	void Application::PushLayer(Layer* layer)
 	{
 		layer->m_RenderContext = m_Window->GetContext();
+		layer->m_Scene = m_Scene;
 		m_LayerStack->PushLayer(layer);
 	}
 
 	void Application::PushLayer(OverlayLayer* overlayLayer)
 	{
 		overlayLayer->m_RenderContext = m_Window->GetContext();
+		overlayLayer->m_Scene = m_Scene;
+		overlayLayer->m_SceneRecorder = m_SceneRecorder;
 		m_LayerStack->PushLayer(overlayLayer);
 	}
 
@@ -164,7 +183,7 @@ namespace Hyperion
 		return m_LayerStack->GetOverlayLayer(overlayLayerName);
 	}
 
-	Ref<Window> Application::GetNativeWindow() const
+	const Ref<Window>& Application::GetWindow() const
 	{
 		return m_Window;
 	}

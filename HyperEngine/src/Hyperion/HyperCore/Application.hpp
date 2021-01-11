@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <queue>
 
 #include "HyperCore/Core.hpp"
@@ -8,6 +9,8 @@
 #include "HyperLayer/Layer.hpp"
 #include "HyperLayer/LayerStack.hpp"
 #include "HyperLayer/OverlayLayer.hpp"
+#include "HyperRendering/ImGuiLayer.hpp"
+#include "HyperRendering/SceneRecorder.hpp"
 #include "HyperRendering/Window.hpp"
 
 namespace Hyperion 
@@ -16,17 +19,21 @@ namespace Hyperion
 	{
 	private:
 		Ref<Window> m_Window;
-		Scope<LayerStack> m_LayerStack;
-		bool m_Running = true;
 
 		std::queue<Ref<Event>> m_EventBus;
 
+		Scope<LayerStack> m_LayerStack;
+		ImGuiLayer* m_ImGuiLayer;
+
 		Ref<Scene> m_Scene;
+		Ref<SceneRecorder> m_SceneRecorder;
+
+		bool m_Running = true;
 
 		static Application* m_Instance;
 
 	public:
-		Application();
+		Application(const std::string& title, uint32_t width, uint32_t height);
 
 		void Run();
 
@@ -45,12 +52,13 @@ namespace Hyperion
 		const Layer* GetLayer(const std::string& layerName) const;
 		const OverlayLayer* GetOverlayLayer(const std::string& layerName) const;
 
-		Ref<Window> GetNativeWindow() const;
+		const Ref<Window>& GetWindow() const;
 		static Application* Get();
 
 	private:
-		void Init();
+		void Init(const std::string& title, uint32_t width, uint32_t height);
 		void Shutdown();
+
 		void OnEvent(Event& event);
 	};
 

@@ -7,6 +7,9 @@
 #include "HyperRendering/RenderContext.hpp"
 #include "HyperUtilities/Timestep.hpp"
 
+#include "HyperECS/Scene/Scene.hpp"
+#include "HyperRendering/SceneRecorder.hpp"
+
 namespace Hyperion 
 {
 	class OverlayLayer
@@ -15,10 +18,13 @@ namespace Hyperion
 		std::string m_Name;
 		Ref<RenderContext> m_RenderContext;
 
+		Ref<Scene> m_Scene;
+		Ref<SceneRecorder> m_SceneRecorder;
+
 		friend class Application;
 
 	public:
-		OverlayLayer(const std::string& name = "Default Overlay-Layer");
+		OverlayLayer(const std::string& name);
 		virtual ~OverlayLayer() = default;
 
 		virtual void OnAttach() {}

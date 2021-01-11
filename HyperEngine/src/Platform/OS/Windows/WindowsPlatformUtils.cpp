@@ -19,7 +19,7 @@ namespace Hyperion
 		CHAR szFile[260] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
 		ofn.lStructSize = sizeof(OPENFILENAMEA);
-		ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow()));
+		ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get()->GetWindow()->GetWindow()));
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		ofn.lpstrFilter = filter;
@@ -38,7 +38,7 @@ namespace Hyperion
 		CHAR szFile[260] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
 		ofn.lStructSize = sizeof(OPENFILENAMEA);
-		ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get()->GetNativeWindow()->GetWindow()));
+		ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get()->GetWindow()->GetWindow()));
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		ofn.lpstrFilter = filter;

@@ -41,6 +41,7 @@ namespace Hyperion
 		virtual void SetVSync(bool vSync) override;
 		virtual bool IsVSync() const override;
 
+		virtual double GetTime() override;
 		virtual void* GetWindow() override;
 	};
 }

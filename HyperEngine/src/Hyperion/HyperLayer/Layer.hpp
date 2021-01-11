@@ -7,6 +7,8 @@
 #include "HyperRendering/RenderContext.hpp"
 #include "HyperUtilities/Timestep.hpp"
 
+#include "HyperECS/Scene/Scene.hpp"
+
 namespace Hyperion 
 {
 	class Layer
@@ -15,6 +17,7 @@ namespace Hyperion
 		std::string m_Name;
 		Ref<RenderContext> m_RenderContext;
 
+		Ref<Scene> m_Scene;
 		friend class Application;
 
 	public:

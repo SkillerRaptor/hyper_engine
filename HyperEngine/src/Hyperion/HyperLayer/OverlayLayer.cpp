@@ -3,7 +3,7 @@
 namespace Hyperion 
 {
 	OverlayLayer::OverlayLayer(const std::string& name)
-		: m_Name(name)
+		: m_Name(name), m_RenderContext(nullptr)
 	{
 	}
 

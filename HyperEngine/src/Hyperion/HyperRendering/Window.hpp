@@ -54,6 +54,7 @@ namespace Hyperion
 		virtual void SetVSync(bool vSync) = 0;
 		virtual bool IsVSync() const = 0;
 
+		virtual double GetTime() = 0;
 		virtual void* GetWindow() = 0;
 
 		Ref<RenderContext> GetContext() const { return m_RenderContext; };

@@ -5,8 +5,8 @@
 
 namespace Hyperion
 {
-	OpenGL33FrameBuffer::OpenGL33FrameBuffer()
-		: m_RendererId(0)
+	OpenGL33FrameBuffer::OpenGL33FrameBuffer(uint32_t width, uint32_t height)
+		: m_RendererId(0), m_Width(width), m_Height(height)
 	{
 		glGenFramebuffers(1, &m_RendererId);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererId);
@@ -20,6 +20,7 @@ namespace Hyperion
 	void OpenGL33FrameBuffer::Bind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererId);
+		glViewport(0, 0, m_Width, m_Height);
 	}
 
 	void OpenGL33FrameBuffer::Unbind()

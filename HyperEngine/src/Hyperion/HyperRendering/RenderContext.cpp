@@ -2,10 +2,11 @@
 
 #include <regex>
 
-#include "HyperCore/Core.hpp"
+#if defined(HP_PLATFORM_WINDOWS)
+	#include "Platform/Rendering/DirectX11/DirectX11Context.hpp"
+	#include "Platform/Rendering/DirectX12/DirectX12Context.hpp"
+#endif
 
-#include "Platform/Rendering/DirectX11/DirectX11Context.hpp"
-#include "Platform/Rendering/DirectX12/DirectX12Context.hpp"
 #include "Platform/Rendering/OpenGL33/OpenGL33Context.hpp"
 #include "Platform/Rendering/OpenGL46/OpenGL46Context.hpp"
 #include "Platform/Rendering/Vulkan/VulkanContext.hpp"
@@ -16,6 +17,7 @@ namespace Hyperion
 	{
 		switch (graphicsAPI)
 		{
+		#if defined(HP_PLATFORM_WINDOWS)
 		case GraphicsAPI::DIRECTX_11:
 			title = std::regex_replace(title, std::regex("\\$api"), "DirectX");
 			title = std::regex_replace(title, std::regex("\\$version"), "11");
@@ -24,6 +26,7 @@ namespace Hyperion
 			title = std::regex_replace(title, std::regex("\\$api"), "DirectX");
 			title = std::regex_replace(title, std::regex("\\$version"), "12");
 			return CreateRef<DirectX12Context>(graphicsAPI);
+		#endif
 		case GraphicsAPI::OPENGL_33:
 			title = std::regex_replace(title, std::regex("\\$api"), "OpenGL");
 			title = std::regex_replace(title, std::regex("\\$version"), "3.3");

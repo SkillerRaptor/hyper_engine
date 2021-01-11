@@ -3,7 +3,7 @@
 #include "HyperCore/Core.hpp"
 
 #if defined(HP_PLATFORM_WINDOWS)
-#include "Platform/OS/Windows/WindowsWindow.hpp"
+	#include "Platform/OS/Windows/WindowsWindow.hpp"
 #endif
 
 namespace Hyperion

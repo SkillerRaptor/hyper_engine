@@ -45,6 +45,7 @@ namespace Hyperion
 		m_Renderer2D->SetTextureManager(m_TextureManager);
 
 		glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+		glEnable(GL_DEPTH_TEST);
 	}
 
 	void OpenGL33Context::Shutdown()

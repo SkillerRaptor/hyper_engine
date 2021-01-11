@@ -140,8 +140,8 @@ namespace Hyperion
 
 	void WindowsWindow::OnUpdate(Timestep timeStep)
 	{
-		m_RenderContext->OnUpdate(timeStep);
 		glfwPollEvents();
+		m_RenderContext->OnUpdate(timeStep);
 	}
 
 	void WindowsWindow::OnRender()
@@ -213,6 +213,11 @@ namespace Hyperion
 	bool WindowsWindow::IsVSync() const
 	{
 		return m_WindowDataInfo.VSync;
+	}
+
+	double WindowsWindow::GetTime()
+	{
+		return glfwGetTime();
 	}
 
 	void* WindowsWindow::GetWindow()

@@ -49,7 +49,7 @@ namespace Hyperion
 
 		bool m_Selected;
 
-		friend class EditorLayer;
+		friend class ImGuiLayer;
 
 	public:
 		EditorCamera(const glm::vec3& position, const glm::vec2& viewportSize, float speed, float zoom, float zoomSpeed, float nearPlane, float farPlane, float yaw, float pitch, CameraTypeInfo cameraTypeInfo);
