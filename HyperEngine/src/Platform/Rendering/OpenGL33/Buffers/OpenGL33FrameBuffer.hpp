@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace Hyperion
 {
 	class OpenGL33FrameBuffer

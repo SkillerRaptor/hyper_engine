@@ -3,7 +3,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "Platform/Rendering/ImGui/ImGuiOpenGLRenderer.hpp"
+#include <imgui.h>
+
 #include "Platform/Rendering/OpenGL33/OpenGL33TextureManager.hpp"
 
 namespace Hyperion
@@ -24,7 +25,7 @@ namespace Hyperion
 		WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(m_RenderContext->GetWindow()));
 		Ref<TextureManager> textureManager = m_RenderContext->GetTextureManager();
 
-		m_FrameBuffer = CreateScope<OpenGL33FrameBuffer>();
+		m_FrameBuffer = CreateScope<OpenGL33FrameBuffer>(data.Width, data.Height);
 		m_FrameBuffer->Bind();
 
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);

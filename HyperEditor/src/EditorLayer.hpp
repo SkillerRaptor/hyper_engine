@@ -8,7 +8,7 @@ class EditorLayer : public Hyperion::OverlayLayer
 {
 private:
 	Hyperion::ShaderHandle m_SpriteShader;
-	Hyperion::Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
+	Hyperion::Ref<Hyperion::SceneHierarchyPanel> m_SceneHierarchyPanel;
 
 public:
 	EditorLayer();

@@ -1,6 +1,6 @@
 #include "OpenGL46ImGuiRenderer.hpp"
 
-#include <backends/imgui_impl_opengl3.h>
+#include "Platform/Rendering/ImGui/ImGuiOpenGLRenderer.hpp"
 
 namespace Hyperion
 {
