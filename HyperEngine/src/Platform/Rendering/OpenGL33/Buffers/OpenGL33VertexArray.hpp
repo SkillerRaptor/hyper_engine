@@ -7,7 +7,7 @@ namespace Hyperion
 	class OpenGL33VertexArray
 	{
 	private:
-		unsigned int m_RendererId;
+		uint32_t m_RendererId;
 		VertexLayout m_VertexLayout;
 
 	public:
@@ -19,7 +19,7 @@ namespace Hyperion
 		void Bind();
 		void Unbind();
 
-		unsigned int GetRendererId() const;
+		uint32_t GetRendererId() const;
 		VertexLayout GetVertexLayout() const;
 	};
 }

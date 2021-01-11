@@ -1,11 +1,13 @@
 #pragma once
 
+#include <cstdint>
+
 namespace Hyperion
 {
 	class OpenGL46FrameBuffer
 	{
 	private:
-		unsigned int m_RendererId;
+		uint32_t m_RendererId;
 
 	public:
 		OpenGL46FrameBuffer();
@@ -14,6 +16,6 @@ namespace Hyperion
 		void Bind();
 		void Unbind();
 
-		unsigned int GetRendererId() const;
+		uint32_t GetRendererId() const;
 	};
 }

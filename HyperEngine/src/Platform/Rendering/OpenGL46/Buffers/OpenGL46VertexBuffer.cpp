@@ -22,7 +22,7 @@ namespace Hyperion
 		glDeleteBuffers(1, &m_RendererId);
 	}
 
-	void OpenGL46VertexBuffer::Bind(unsigned int vertexArray)
+	void OpenGL46VertexBuffer::Bind(uint32_t vertexArray)
 	{
 		glVertexArrayVertexBuffer(vertexArray, 0, m_RendererId, 0, (m_VertexLayout == VertexLayout::Vertex2D ? sizeof(Vertex2D) : sizeof(Vertex3D)));
 	}
@@ -32,7 +32,7 @@ namespace Hyperion
 		glNamedBufferSubData(m_RendererId, 0, (m_VertexLayout == VertexLayout::Vertex2D ? sizeof(Vertex2D) : sizeof(Vertex3D)) * vertexCount, vertices);
 	}
 
-	unsigned int OpenGL46VertexBuffer::GetRendererId() const
+	uint32_t OpenGL46VertexBuffer::GetRendererId() const
 	{
 		return m_RendererId;
 	}

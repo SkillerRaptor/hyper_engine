@@ -22,7 +22,7 @@ namespace Hyperion
 		glDeleteBuffers(1, &m_RendererId);
 	}
 
-	void OpenGL46IndexBuffer::Bind(unsigned int vertexArray)
+	void OpenGL46IndexBuffer::Bind(uint32_t vertexArray)
 	{
 		glVertexArrayElementBuffer(vertexArray, m_RendererId);
 	}
@@ -32,7 +32,7 @@ namespace Hyperion
 		glNamedBufferSubData(m_RendererId, 0, sizeof(uint32_t) * indexCount, indices);
 	}
 
-	unsigned int OpenGL46IndexBuffer::GetRendererId() const
+	uint32_t OpenGL46IndexBuffer::GetRendererId() const
 	{
 		return m_RendererId;
 	}

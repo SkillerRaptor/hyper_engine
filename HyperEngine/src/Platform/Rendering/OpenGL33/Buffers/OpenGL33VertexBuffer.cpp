@@ -39,7 +39,7 @@ namespace Hyperion
 		glBufferSubData(GL_ARRAY_BUFFER, 0, (m_VertexLayout == VertexLayout::Vertex2D ? sizeof(Vertex2D) : sizeof(Vertex3D)) * vertexCount, vertices);
 	}
 
-	unsigned int OpenGL33VertexBuffer::GetRendererId() const
+	uint32_t OpenGL33VertexBuffer::GetRendererId() const
 	{
 		return m_RendererId;
 	}

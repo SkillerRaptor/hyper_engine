@@ -7,7 +7,7 @@ namespace Hyperion
 	class OpenGL33FrameBuffer
 	{
 	private:
-		unsigned int m_RendererId;
+		uint32_t m_RendererId;
 
 		uint32_t m_Width;
 		uint32_t m_Height;
@@ -19,6 +19,6 @@ namespace Hyperion
 		void Bind();
 		void Unbind();
 
-		unsigned int GetRendererId() const;
+		uint32_t GetRendererId() const;
 	};
 }

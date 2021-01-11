@@ -27,7 +27,7 @@ namespace Hyperion
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	unsigned int OpenGL46FrameBuffer::GetRendererId() const
+	uint32_t OpenGL46FrameBuffer::GetRendererId() const
 	{
 		return m_RendererId;
 	}

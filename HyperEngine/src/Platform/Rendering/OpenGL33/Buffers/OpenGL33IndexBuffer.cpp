@@ -39,7 +39,7 @@ namespace Hyperion
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(uint32_t) * indexCount, indices);
 	}
 
-	unsigned int OpenGL33IndexBuffer::GetRendererId() const
+	uint32_t OpenGL33IndexBuffer::GetRendererId() const
 	{
 		return m_RendererId;
 	}

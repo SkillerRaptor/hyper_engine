@@ -8,7 +8,7 @@ namespace Hyperion
 	class OpenGL33IndexBuffer
 	{
 	private:
-		unsigned int m_RendererId;
+		uint32_t m_RendererId;
 
 	public:
 		explicit OpenGL33IndexBuffer(size_t indexCount);
@@ -19,6 +19,6 @@ namespace Hyperion
 		void Unbind();
 		void SetData(const uint32_t* indices, size_t indexCount);
 
-		unsigned int GetRendererId() const;
+		uint32_t GetRendererId() const;
 	};
 }

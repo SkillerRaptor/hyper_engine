@@ -71,7 +71,7 @@ namespace Hyperion
 		glBindVertexArray(0);
 	}
 
-	unsigned int OpenGL33VertexArray::GetRendererId() const
+	uint32_t OpenGL33VertexArray::GetRendererId() const
 	{
 		return m_RendererId;
 	}
