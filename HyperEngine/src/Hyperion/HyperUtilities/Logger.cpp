@@ -1,8 +1,8 @@
 #include "Logger.hpp"
 
-#if defined(HP_PLATFORM_WINDOWS)
-#include <Windows.h>
-#endif
+#include <fmt/core.h>
+#include <fmt/color.h>
+#include <fmt/chrono.h>
 
 #include <chrono>
 #include <ctime>
@@ -46,62 +46,32 @@ namespace Hyperion {
 
 	void Logger::Print(Level level, const char* format)
 	{
-		std::stringstream ss;
-		ss << m_Name << " " << ConvertLevelToString(level) << ": " << format << std::endl;
-
-		Print(level, ss.str());
+		Print(level, std::string(format));
 	}
 
 	void Logger::Print(Level level, const std::string& message)
 	{
-	#if defined(HP_PLATFORM_WINDOWS)
+		fmt::color levelColor;
 		switch (level)
 		{
 		case Level::HP_LEVEL_INFO: default:
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+			levelColor = fmt::color::white;
 			break;
 		case Level::HP_LEVEL_WARN:
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN);
+			levelColor = fmt::color::gold;
 			break;
 		case Level::HP_LEVEL_ERROR:
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_INTENSITY);
+			levelColor = fmt::color::red;
 			break;
 		case Level::HP_LEVEL_FATAL:
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+			levelColor = fmt::color::crimson;
 			break;
 		case Level::HP_LEVEL_DEBUG:
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+			levelColor = fmt::color::gray;
 			break;
 		}
-	#elif defined(HP_PLATFORM_LINUX)
-		switch (level)
-		{
-		case Level::HP_LEVEL_INFO: default:
-			printf("\e[97m");
-			break;
-		case Level::HP_LEVEL_WARN:
-			printf("\e[33m");
-			break;
-		case Level::HP_LEVEL_ERROR:
-			printf("\e[91m");
-			break;
-		case Level::HP_LEVEL_FATAL:
-			printf("\e[31m");
-			break;
-		case Level::HP_LEVEL_DEBUG:
-			printf("\e[37m");
-			break;
-		}
-	#endif
-		std::time_t timePoint = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-		struct tm localTime = *localtime(&timePoint);
-
-		printf("[%c%i:%c%i:%c%i] %s", (localTime.tm_hour < 10 ? '0' : '\0'), localTime.tm_hour, (localTime.tm_min < 10 ? '0' : '\0'), localTime.tm_min, (localTime.tm_sec < 10 ? '0' : '\0'), localTime.tm_sec, message.c_str());
-	#if defined(HP_PLATFORM_WINDOWS)
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-	#elif defined(HP_PLATFORM_LINUX)
-		printf("\e[39m");
-	#endif
+		std::time_t time = std::time(nullptr);
+		fmt::print(fg(levelColor), "[{:%H:%M:%S}] {} {}: {}\n", fmt::localtime(time), m_Name, ConvertLevelToString(level), message);
 	}
 
 	std::string Logger::ConvertLevelToString(Level level) const

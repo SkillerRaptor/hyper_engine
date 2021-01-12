@@ -70,9 +70,7 @@ namespace Hyperion
 		{
 			std::stringstream ss;
 
-			ss << m_Name << " " << ConvertLevelToString(level) << ": ";
 			FormatString(ss, format, value, std::forward<Targs>(Fargs)...);
-			ss << std::endl;
 
 			Print(level, ss.str());
 		}
