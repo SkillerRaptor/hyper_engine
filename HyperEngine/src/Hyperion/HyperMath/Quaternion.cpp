@@ -5,10 +5,6 @@
 
 namespace Hyperion
 {
-	Quaternion::Quaternion()
-	{
-	}
-
 	Quaternion::Quaternion(Vec3 rotation)
 	{
 		float Yaw = (float)rotation.z * ((float)M_PI) / 180;
@@ -42,9 +38,8 @@ namespace Hyperion
 	}
 
 	Quaternion::Quaternion(const Quaternion& other)
+		: m_Scalar(other.m_Scalar), m_Axis(other.m_Axis)
 	{
-		m_Scalar = other.m_Scalar;
-		m_Axis = other.m_Axis;
 	}
 
 	Quaternion& Quaternion::operator=(const Quaternion& other)

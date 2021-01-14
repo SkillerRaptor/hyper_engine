@@ -12,8 +12,7 @@ namespace Hyperion
 		Vec3 m_Axis;
 
 	public:
-		Quaternion();
-		Quaternion(Vec3 rotation);
+		explicit Quaternion(Vec3 rotation);
 		Quaternion(float scalar, Vec3 axis);
 		~Quaternion();
 
