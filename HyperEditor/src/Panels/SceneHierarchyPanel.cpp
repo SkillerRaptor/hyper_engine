@@ -290,7 +290,7 @@ namespace Hyperion
 	{
 		ImVec2 pos = ImGui::GetCursorScreenPos();
 		pos.x -= 5.0f;
-		pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.5f;
+		pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.6f;
 		ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
 		ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false, 5.0f);
 	}
