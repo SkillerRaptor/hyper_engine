@@ -9,10 +9,10 @@ namespace Hyperion
 	{
 		m_CoreLogger = CreateRef<Logger>();
 		m_CoreLogger->SetName("Core");
-		m_CoreLogger->SetLevel(Level::HP_LEVEL_TRACE);
+		m_CoreLogger->SetLevel(Logger::Level::HP_LEVEL_TRACE);
 
 		m_ClientLogger = CreateRef<Logger>();
 		m_ClientLogger->SetName("Client");
-		m_ClientLogger->SetLevel(Level::HP_LEVEL_TRACE);
+		m_ClientLogger->SetLevel(Logger::Level::HP_LEVEL_TRACE);
 	}
 }

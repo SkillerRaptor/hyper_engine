@@ -1,6 +1,5 @@
 #include "Logger.hpp"
 
-#include <fmt/core.h>
 #include <fmt/color.h>
 #include <fmt/chrono.h>
 
@@ -15,46 +14,17 @@ namespace Hyperion {
 	{
 	}
 
-	Logger::~Logger()
+	void Logger::Print(Level level, const std::string& format)
 	{
+		PrintInternal(level, format);
 	}
 
-	void Logger::PrintInfo(const char* format)
-	{
-		Print(Level::HP_LEVEL_INFO, format);
-	}
-
-	void Logger::PrintWarn(const char* format)
-	{
-		Print(Level::HP_LEVEL_WARN, format);
-	}
-
-	void Logger::PrintError(const char* format)
-	{
-		Print(Level::HP_LEVEL_ERROR, format);
-	}
-
-	void Logger::PrintFatal(const char* format)
-	{
-		Print(Level::HP_LEVEL_FATAL, format);
-	}
-
-	void Logger::PrintDebug(const char* format)
-	{
-		Print(Level::HP_LEVEL_DEBUG, format);
-	}
-
-	void Logger::Print(Level level, const char* format)
-	{
-		Print(level, std::string(format));
-	}
-
-	void Logger::Print(Level level, const std::string& message)
+	void Logger::PrintInternal(Level level, const std::string& message)
 	{
 		fmt::color levelColor;
 		switch (level)
 		{
-		case Level::HP_LEVEL_INFO: default:
+		case Level::HP_LEVEL_INFO:
 			levelColor = fmt::color::white;
 			break;
 		case Level::HP_LEVEL_WARN:
@@ -69,9 +39,12 @@ namespace Hyperion {
 		case Level::HP_LEVEL_DEBUG:
 			levelColor = fmt::color::gray;
 			break;
+		default:
+			levelColor = fmt::color::white;
+			break;
 		}
-		std::time_t time = std::time(nullptr);
-		fmt::print(fg(levelColor), "[{:%H:%M:%S}] {} {}: {}\n", fmt::localtime(time), m_Name, ConvertLevelToString(level), message);
+
+		fmt::print(fg(levelColor), "[{:%H:%M:%S}] {} {}: {}\n", fmt::localtime(std::time(nullptr)), m_Name, ConvertLevelToString(level), message);
 	}
 
 	std::string Logger::ConvertLevelToString(Level level) const
@@ -98,28 +71,22 @@ namespace Hyperion {
 		return levelName;
 	}
 
-
-	void Logger::FormatString(std::stringstream& ss, const char* format)
-	{
-		ss << format;
-	}
-
-	const void Logger::SetName(std::string name)
+	void Logger::SetName(const std::string& name)
 	{
 		m_Name = name;
 	}
 
-	const std::string Logger::GetName() const
+	const std::string& Logger::GetName() const
 	{
 		return m_Name;
 	}
 
-	const void Logger::SetLevel(Level level)
+	void Logger::SetLevel(Logger::Level level)
 	{
 		m_Level = level;
 	}
 
-	const Level Logger::GetLevel() const
+	const Logger::Level Logger::GetLevel() const
 	{
 		return m_Level;
 	}

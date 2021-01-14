@@ -81,7 +81,7 @@ namespace Hyperion
 		else
 			shaderId = static_cast<ShaderHandle>(ShaderHandle{ static_cast<uint32_t>(m_Shaders.size()) });
 		m_Shaders.emplace(shaderId, std::move(shaderData));
-		HP_CORE_DEBUG("Shader % loaded...", shaderId.Handle);
+		HP_CORE_DEBUG("Shader {} loaded...", shaderId.Handle);
 		return shaderId;
 	}
 
@@ -294,7 +294,7 @@ namespace Hyperion
 			break;
 		}
 
-		HP_CORE_ERROR("Shader - Compile-time error: % | %", shaderType, message);
+		HP_CORE_ERROR("Shader - Compile-time error: {} | {}", shaderType, message);
 		free(message);
 		return false;
 	}
@@ -312,7 +312,7 @@ namespace Hyperion
 		auto* message = static_cast<char*>(malloc(sizeof(char) * length));
 		glGetProgramInfoLog(shaderData.ShaderId, length, &length, message);
 
-		HP_CORE_ERROR("Shader - Link-time error: Program | %", message);
+		HP_CORE_ERROR("Shader - Link-time error: Program | {}", message);
 		free(message);
 		return false;
 	}

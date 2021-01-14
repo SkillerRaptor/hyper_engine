@@ -33,9 +33,9 @@ namespace Hyperion
 
 		HP_CORE_INFO("");
 		HP_CORE_INFO("OpenGL Info:");
-		HP_CORE_INFO("  Vendor: %", glGetString(GL_VENDOR));
-		HP_CORE_INFO("  Renderer: %", glGetString(GL_RENDERER));
-		HP_CORE_INFO("  Version: %", glGetString(GL_VERSION));
+		HP_CORE_INFO("  Vendor: {}", glGetString(GL_VENDOR));
+		HP_CORE_INFO("  Renderer: {}", glGetString(GL_RENDERER));
+		HP_CORE_INFO("  Version: {}", glGetString(GL_VERSION));
 		HP_CORE_INFO("");
 
 		m_Renderer2D = CreateRef<OpenGL33Renderer2D>();
