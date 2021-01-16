@@ -11,6 +11,7 @@ namespace Hyperion
 	DirectX12Context::DirectX12Context(GraphicsAPI graphicsAPI)
 		: RenderContext(graphicsAPI)
 	{
+		HP_ASSERT(false, "The DirectX12 Context is not implemented!");
 	}
 
 	void DirectX12Context::PreInit()
@@ -20,10 +21,6 @@ namespace Hyperion
 
 	void DirectX12Context::Init()
 	{
-		// TODO: DirectX12 Stuff
-		//m_Renderer2D = CreateRef<DirectX12Renderer2D>();
-		//m_ShaderManager = CreateRef<DirectX12ShaderManager>();
-		//m_TextureManager = CreateRef<DirectX12TextureManager>();
 	}
 
 	void DirectX12Context::Shutdown()
@@ -32,7 +29,6 @@ namespace Hyperion
 
 	void DirectX12Context::OnResize(size_t width, size_t height)
 	{
-
 	}
 
 	void DirectX12Context::OnPreUpdate()

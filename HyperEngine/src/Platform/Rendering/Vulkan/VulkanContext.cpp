@@ -12,6 +12,7 @@ namespace Hyperion
 	VulkanContext::VulkanContext(GraphicsAPI graphicsAPI)
 		: RenderContext(graphicsAPI), m_ValidationLayer(m_Instance, m_ValidationLayerInfo)
 	{
+		HP_ASSERT(false, "The Vulkan Context implementation is not finished!");
 	}
 
 	void VulkanContext::PreInit()
@@ -62,11 +63,6 @@ namespace Hyperion
 			std::cerr << " Failed to create Window Surface!" << std::endl;
 			std::exit(EXIT_FAILURE);
 		}
-
-		// TODO: Vulkan Stuff
-		//m_Renderer2D = CreateRef<VulkanRenderer2D>();
-		//m_ShaderManager = CreateRef<VulkanShaderManager>();
-		//m_TextureManager = CreateRef<VulkanTextureManager>();
 	}
 
 	void VulkanContext::Shutdown()
@@ -79,7 +75,6 @@ namespace Hyperion
 
 	void VulkanContext::OnResize(size_t width, size_t height)
 	{
-
 	}
 
 	void VulkanContext::OnPreUpdate()
