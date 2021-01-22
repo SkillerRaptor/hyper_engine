@@ -55,9 +55,7 @@ namespace Hyperion
 		bool enableCapture = m_LayerStack->GetOverlayLayers().size() > 1;
 
 		if (enableCapture)
-		{
 			m_SceneRecorder->InitRecording();
-		}
 
 		while (m_Running)
 		{
@@ -76,9 +74,7 @@ namespace Hyperion
 			}
 
 			if (enableCapture)
-			{
 				m_SceneRecorder->StartRecording();
-			}
 
 			for (Layer* layer : m_LayerStack->GetLayers())
 			{
@@ -90,9 +86,7 @@ namespace Hyperion
 			m_Scene->OnRender();
 
 			if (enableCapture)
-			{
 				m_SceneRecorder->EndRecording();
-			}
 
 			if (enableCapture)
 			{
