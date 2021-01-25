@@ -11,6 +11,8 @@ public:
 	Sandbox()
 		: Application("Sandbox", 1280, 720)
 	{
+		SetAppIcon("assets/textures/HyperEngine.PNG");
+
 		PushLayer(new SandboxLayer());
 	}
 

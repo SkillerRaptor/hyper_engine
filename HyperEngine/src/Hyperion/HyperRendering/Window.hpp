@@ -54,6 +54,8 @@ namespace Hyperion
 		virtual void SetVSync(bool vSync) = 0;
 		virtual bool IsVSync() const = 0;
 
+		virtual void SetAppIcon(const std::string& imagePath) = 0;
+
 		virtual double GetTime() = 0;
 		virtual void* GetWindow() = 0;
 

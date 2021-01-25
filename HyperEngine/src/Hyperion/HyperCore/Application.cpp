@@ -103,6 +103,12 @@ namespace Hyperion
 		}
 	}
 
+
+	void Application::SetAppIcon(const std::string& imagePath)
+	{
+		m_Window->SetAppIcon(imagePath);
+	}
+
 	void Application::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);

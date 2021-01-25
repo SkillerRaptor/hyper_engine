@@ -215,6 +215,15 @@ namespace Hyperion
 		return m_WindowDataInfo.VSync;
 	}
 
+	void WindowsWindow::SetAppIcon(const std::string& imagePath)
+	{
+		GLFWimage icon[1] = {};
+		int32_t channels = 0;
+		icon[0].pixels = m_RenderContext->GetTextureManager()->LoadImage(imagePath, icon[0].width, icon[0].height, channels);
+		glfwSetWindowIcon(m_Window, 1, icon);
+		m_RenderContext->GetTextureManager()->FreeImage(icon[0].pixels);
+	}
+
 	double WindowsWindow::GetTime()
 	{
 		return glfwGetTime();

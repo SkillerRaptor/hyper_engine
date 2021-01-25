@@ -37,6 +37,8 @@ namespace Hyperion
 
 		void Run();
 
+		void SetAppIcon(const std::string& imagePath);
+
 		void PushLayer(Layer* layer);
 		void PushLayer(OverlayLayer* overlayLayer);
 

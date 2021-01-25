@@ -11,6 +11,8 @@ public:
 	HyperEditor()
 		: Application("HyperEditor", 1280, 720)
 	{
+		SetAppIcon("assets/textures/HyperEngine.PNG");
+
 		PushLayer(new EditorLayer());
 	}
 
