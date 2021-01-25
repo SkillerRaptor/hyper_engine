@@ -1,9 +1,10 @@
-﻿# HyperEngine
+﻿<img src="Resources/HyperEngine.PNG" align="right" width="150"/>
+
+# HyperEngine
 ![](https://img.shields.io/badge/license-MIT-yellow)
 ![](https://github.com/SkillerRaptor/HyperEngine/workflows/build-windows/badge.svg)
 ![](https://github.com/SkillerRaptor/HyperEngine/workflows/build-linux/badge.svg)
 [![Trello](https://img.shields.io/badge/board-trello-blue.svg)](https://trello.com/b/xiuhLb05/hyperengine)
-![HyperEngine](Resources/HyperEngine.PNG)
 
 This repository houses the source code for the HyperEngine.
 
