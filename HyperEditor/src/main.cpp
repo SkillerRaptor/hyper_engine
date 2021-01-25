@@ -3,7 +3,9 @@
 
 #include "EditorLayer.hpp"
 
-class HyperEditor : public Hyperion::Application
+using namespace Hyperion;
+
+class HyperEditor : public Application
 {
 public:
 	HyperEditor()
@@ -17,7 +19,7 @@ public:
 	}
 };
 
-Hyperion::Application* Hyperion::CreateApplication()
+Application* CreateApplication()
 {
 	return new HyperEditor();
 }

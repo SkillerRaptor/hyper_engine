@@ -18,25 +18,25 @@ void EditorLayer::OnAttach()
 
 	for (size_t i = 0; i < 500; i++)
 	{
-		Hyperion::HyperEntity square = m_Scene->CreateEntity("Square-" + std::to_string(i));
-		square.AddComponent<Hyperion::SpriteRendererComponent>(glm::vec4(Hyperion::Random::Float(0.0f, 1.0f), Hyperion::Random::Float(0.0f, 1.0f), Hyperion::Random::Float(0.0f, 1.0f), 1.0f));
-		auto& transform = square.GetComponent<Hyperion::TransformComponent>();
-		static constexpr int32_t RANGE = 50;
-		transform.Position += glm::vec3{ 1.0f * Hyperion::Random::Int16(-RANGE, RANGE), 1.0f * Hyperion::Random::Int16(-RANGE, RANGE), 1.0f * Hyperion::Random::Int16(-RANGE, RANGE) };
+		HyperEntity square = m_Scene->CreateEntity("Square-" + std::to_string(i));
+		square.AddComponent<SpriteRendererComponent>(glm::vec4(Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), 1.0f));
+		auto& transform = square.GetComponent<TransformComponent>();
+		static constexpr int32_t RANGE = 100;
+		transform.Position += glm::vec3{ 1.0f * Random::Int16(-RANGE, RANGE), 1.0f * Random::Int16(-RANGE, RANGE), 1.0f * Random::Int16(-RANGE, RANGE) };
 	}
 
-	m_SceneHierarchyPanel = Hyperion::CreateRef<Hyperion::SceneHierarchyPanel>(m_Scene);
+	m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>(m_Scene);
 }
 
 void EditorLayer::OnDetach()
 {
 }
 
-void EditorLayer::OnEvent(Hyperion::Event& event)
+void EditorLayer::OnEvent(Event& event)
 {
 }
 
-void EditorLayer::OnUpdate(Hyperion::Timestep timeStep)
+void EditorLayer::OnUpdate(Timestep timeStep)
 {
 }
 
@@ -55,7 +55,7 @@ void EditorLayer::OnRender()
 	ImVec2 windowPos = ImGui::GetWindowPos();
 	ImVec2 windowSize = ImGui::GetWindowSize();
 
-	Hyperion::ImGuiFrameSizeInfo& imGuiEditorSizeInfo = m_RenderContext->GetImGuiEditorSizeInfo();
+	ImGuiFrameSizeInfo& imGuiEditorSizeInfo = m_RenderContext->GetImGuiEditorSizeInfo();
 	imGuiEditorSizeInfo.XPos = static_cast<uint32_t>(windowPos.x);
 	imGuiEditorSizeInfo.YPos = static_cast<uint32_t>(windowPos.y);
 	imGuiEditorSizeInfo.Width = static_cast<uint32_t>(windowSize.x);
@@ -71,7 +71,7 @@ void EditorLayer::OnRender()
 	ImGui::Begin("Game");
 	ImGui::BeginChild("GameRenderer");
 
-	Hyperion::ImGuiFrameSizeInfo& imGuiGameSizeInfo = m_RenderContext->GetImGuiGameSizeInfo();
+	ImGuiFrameSizeInfo& imGuiGameSizeInfo = m_RenderContext->GetImGuiGameSizeInfo();
 	imGuiGameSizeInfo.XPos = static_cast<uint32_t>(ImGui::GetWindowPos().x);
 	imGuiGameSizeInfo.YPos = static_cast<uint32_t>(ImGui::GetWindowPos().y);
 	imGuiGameSizeInfo.Width = static_cast<uint32_t>(ImGui::GetWindowSize().x);
@@ -236,7 +236,7 @@ void EditorLayer::NewScene()
 
 void EditorLayer::OpenScene()
 {
-	std::string filePath = Hyperion::PlatformUtils::Get()->OpenFile("Hyper Scene (*.hyper)\0*.hyper\0");
+	std::string filePath = PlatformUtils::Get()->OpenFile("Hyper Scene (*.hyper)\0*.hyper\0");
 
 	if (filePath.empty())
 		return;
@@ -260,7 +260,7 @@ void EditorLayer::SaveScene()
 
 void EditorLayer::SaveAsScene()
 {
-	std::string filePath = Hyperion::PlatformUtils::Get()->SaveFile("Hyper Scene (*.hyper)\0*.hyper\0");
+	std::string filePath = PlatformUtils::Get()->SaveFile("Hyper Scene (*.hyper)\0*.hyper\0");
 
 	if (filePath.empty())
 		return;

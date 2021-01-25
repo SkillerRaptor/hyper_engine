@@ -15,11 +15,11 @@ void SandboxLayer::OnAttach()
 
 	for (size_t i = 0; i < 100; i++)
 	{
-		Hyperion::HyperEntity square = m_Scene->CreateEntity(std::string("Square-" + i));
-		square.AddComponent<Hyperion::SpriteRendererComponent>(glm::vec4(Hyperion::Random::Float(0.0f, 1.0f), Hyperion::Random::Float(0.0f, 1.0f), Hyperion::Random::Float(0.0f, 1.0f), 1.0f));
-		auto& transform = square.GetComponent<Hyperion::TransformComponent>();
+		HyperEntity square = m_Scene->CreateEntity(std::string("Square-" + i));
+		square.AddComponent<SpriteRendererComponent>(glm::vec4(Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), 1.0f));
+		auto& transform = square.GetComponent<TransformComponent>();
 		static constexpr int32_t RANGE = 5;
-		transform.Position += glm::vec3{ 1.0f * Hyperion::Random::Int16(-RANGE, RANGE), 1.0f * Hyperion::Random::Int16(-RANGE, RANGE), 1.0f * Hyperion::Random::Int16(-RANGE, RANGE) };
+		transform.Position += glm::vec3{ 1.0f * Random::Int16(-RANGE, RANGE), 1.0f * Random::Int16(-RANGE, RANGE), 1.0f * Random::Int16(-RANGE, RANGE) };
 	}
 }
 
@@ -27,11 +27,11 @@ void SandboxLayer::OnDetach()
 {
 }
 
-void SandboxLayer::OnEvent(Hyperion::Event& event)
+void SandboxLayer::OnEvent(Event& event)
 {
 }
 
-void SandboxLayer::OnUpdate(Hyperion::Timestep timeStep)
+void SandboxLayer::OnUpdate(Timestep timeStep)
 {
 }
 

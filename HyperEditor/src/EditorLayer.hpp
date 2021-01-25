@@ -4,11 +4,13 @@
 
 #include "Panels/SceneHierarchyPanel.hpp"
 
-class EditorLayer : public Hyperion::OverlayLayer
+using namespace Hyperion;
+
+class EditorLayer : public OverlayLayer
 {
 private:
-	Hyperion::ShaderHandle m_SpriteShader;
-	Hyperion::Ref<Hyperion::SceneHierarchyPanel> m_SceneHierarchyPanel;
+	ShaderHandle m_SpriteShader;
+	Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
 
 public:
 	EditorLayer();
@@ -17,8 +19,8 @@ public:
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
 
-	virtual void OnEvent(Hyperion::Event& event) override;
-	virtual void OnUpdate(Hyperion::Timestep timeStep) override;
+	virtual void OnEvent(Event& event) override;
+	virtual void OnUpdate(Timestep timeStep) override;
 	virtual void OnRender() override;
 
 private:

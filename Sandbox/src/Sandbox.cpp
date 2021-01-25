@@ -3,7 +3,9 @@
 
 #include "SandboxLayer.hpp"
 
-class Sandbox : public Hyperion::Application
+using namespace Hyperion;
+
+class Sandbox : public Application
 {
 public:
 	Sandbox()
@@ -17,7 +19,7 @@ public:
 	}
 };
 
-Hyperion::Application* Hyperion::CreateApplication()
+Application* CreateApplication()
 {
 	return new Sandbox();
 }

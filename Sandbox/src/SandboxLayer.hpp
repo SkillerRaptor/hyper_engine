@@ -2,10 +2,12 @@
 
 #include <Hyperion.hpp>
 
-class SandboxLayer : public Hyperion::Layer
+using namespace Hyperion;
+
+class SandboxLayer : public Layer
 {
 private:
-	Hyperion::ShaderHandle m_SpriteShader;
+	ShaderHandle m_SpriteShader;
 
 public:
 	SandboxLayer();
@@ -14,7 +16,7 @@ public:
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
 
-	virtual void OnEvent(Hyperion::Event& event) override;
-	virtual void OnUpdate(Hyperion::Timestep timeStep) override;
+	virtual void OnEvent(Event& event) override;
+	virtual void OnUpdate(Timestep timeStep) override;
 	virtual void OnRender() override;
 };
