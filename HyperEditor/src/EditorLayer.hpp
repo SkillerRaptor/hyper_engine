@@ -9,7 +9,7 @@ using namespace Hyperion;
 class EditorLayer : public OverlayLayer
 {
 private:
-	ShaderHandle m_SpriteShader = 0;
+	ShaderHandle m_SpriteShader = { 0 };
 	Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
 
 public:

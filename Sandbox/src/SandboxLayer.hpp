@@ -7,7 +7,7 @@ using namespace Hyperion;
 class SandboxLayer : public Layer
 {
 private:
-	ShaderHandle m_SpriteShader = 0;
+	ShaderHandle m_SpriteShader = { 0 };
 
 public:
 	SandboxLayer();
