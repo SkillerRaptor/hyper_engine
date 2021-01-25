@@ -3,9 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <cstdlib>
-#include <fstream>
-
+#include "HyperUtilities/FileUtilities.hpp"
 #include "HyperUtilities/Log.hpp"
 
 namespace Hyperion
@@ -30,43 +28,11 @@ namespace Hyperion
 		shaderData.FragmentShaderPath = fragmentPath;
 		shaderData.GeometryShaderPath = geometryPath;
 
-		std::string vertexCode;
-		std::string fragmentCode;
-		std::string geometryCode;
+		std::string vertexCode = FileUtilities::ReadFileContent(vertexPath);
+		std::string fragmentCode = FileUtilities::ReadFileContent(fragmentPath);
+		std::string geometryCode = !geometryPath.empty() ? FileUtilities::ReadFileContent(geometryPath) : "";
 
-		try
-		{
-			std::ifstream vertexShaderFile(shaderData.VertexShaderPath);
-			std::ifstream fragmentShaderFile(shaderData.FragmentShaderPath);
-
-			std::stringstream vertexShaderStream, fragmentShaderStream;
-
-			vertexShaderStream << vertexShaderFile.rdbuf();
-			fragmentShaderStream << fragmentShaderFile.rdbuf();
-
-			vertexShaderFile.close();
-			fragmentShaderFile.close();
-
-			vertexCode = vertexShaderStream.str();
-			fragmentCode = fragmentShaderStream.str();
-
-			if (shaderData.GeometryShaderPath != "")
-			{
-				std::ifstream geometryShaderFile(shaderData.GeometryShaderPath);
-				std::stringstream geometryShaderStream;
-
-				geometryShaderStream << geometryShaderFile.rdbuf();
-				geometryShaderFile.close();
-				geometryCode = geometryShaderStream.str();
-			}
-		}
-		catch (std::exception exception)
-		{
-			HP_CORE_ERROR("Shader: Failed to read shader files");
-			return { static_cast<uint32_t>(-1) };
-		}
-
-		if (!GenerateShader(shaderData, vertexCode.c_str(), fragmentCode.c_str(), geometryCode != "" ? geometryCode.c_str() : nullptr))
+		if (!GenerateShader(shaderData, vertexCode.c_str(), fragmentCode.c_str(), !geometryPath.empty() ? geometryCode.c_str() : nullptr))
 		{
 			HP_CORE_DEBUG("Shader not loaded...");
 			return { static_cast<uint32_t>(-1) };

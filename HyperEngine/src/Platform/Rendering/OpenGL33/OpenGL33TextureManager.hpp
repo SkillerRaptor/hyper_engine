@@ -23,7 +23,7 @@ namespace Hyperion
 
 		virtual TextureHandle CreateTexture(const std::string& path, TextureType textureType = TextureType::DEFAULT) override;
 		virtual TextureHandle CreateTexture(uint32_t width, uint32_t height, TextureType textureType = TextureType::DEFAULT) override;
-		virtual void GenerateTexture(TextureData* textureData, bool alpha) override;
+		virtual void GenerateTexture(TextureData* textureData, unsigned char* pixels = nullptr) override;
 		virtual bool BindTexture(TextureHandle handle, uint32_t textureSlot) override;
 		virtual bool DeleteTexture(TextureHandle handle) override;
 		virtual bool DeleteTextureData(TextureHandle handle) override;
@@ -38,7 +38,6 @@ namespace Hyperion
 		virtual TextureType GetTextureType(TextureHandle handle) override;
 
 		virtual uint8_t GetChannels(TextureHandle handle) override;
-		virtual const unsigned char* GetData(TextureHandle handle) override;
 		virtual const std::string GetPath(TextureHandle handle) override;
 		virtual TextureData* GetTextureData(TextureHandle handle) override;
 	};

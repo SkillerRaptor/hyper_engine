@@ -29,8 +29,8 @@ namespace Hyperion
 		textureData.Type = textureType;
 
 		int width, height, channels;
-		textureData.Data = stbi_load(textureData.Path.c_str(), &width, &height, &channels, 0);
-		if (textureData.Data == nullptr)
+		unsigned char* pixels = LoadImage(textureData.Path, width, height, channels);
+		if (pixels == nullptr)
 		{
 			HP_CORE_DEBUG("Texture not loaded...");
 			return { static_cast<uint32_t>(-1) };
@@ -40,9 +40,9 @@ namespace Hyperion
 		textureData.Height = height;
 		textureData.Channels = channels;
 
-		GenerateTexture(&textureData, textureData.Channels >= 4);
-		
-		stbi_image_free(textureData.Data);
+		GenerateTexture(&textureData, pixels);
+
+		FreeImage(pixels);
 
 		TextureHandle textureId = { 1 };
 		if (!m_TextureIds.empty())
@@ -63,8 +63,9 @@ namespace Hyperion
 		textureData.Width = width;
 		textureData.Height = height;
 		textureData.Type  = textureType;
+		textureData.Channels = 4;
 
-		GenerateTexture(&textureData, true);
+		GenerateTexture(&textureData, nullptr);
 
 		TextureHandle textureId = { 1 };
 		if (!m_TextureIds.empty())
@@ -79,7 +80,7 @@ namespace Hyperion
 		return textureId;
 	}
 
-	void OpenGL46TextureManager::GenerateTexture(TextureData* textureData, bool alpha)
+	void OpenGL46TextureManager::GenerateTexture(TextureData* textureData, unsigned char* pixels)
 	{
 		OpenGLTextureData* data = static_cast<OpenGLTextureData*>(textureData);
 		glCreateTextures(GL_TEXTURE_2D, 1, &data->TextureId);
@@ -89,8 +90,8 @@ namespace Hyperion
 		glTextureParameteri(data->TextureId, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTextureParameteri(data->TextureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTextureStorage2D(data->TextureId, 1, alpha ? GL_RGBA8 : GL_RGB8, data->Width, data->Height);
-		glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, alpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data->Data);
+		glTextureStorage2D(data->TextureId, 1, textureData->Channels >= 4 ? GL_RGBA8 : GL_RGB8, data->Width, data->Height);
+		glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, textureData->Channels >= 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels);
 	}
 
 	bool OpenGL46TextureManager::BindTexture(TextureHandle handle, uint32_t textureSlot)
@@ -166,13 +167,6 @@ namespace Hyperion
 		if (m_Textures.find(handle) == m_Textures.end())
 			return -1;
 		return m_Textures[handle].Channels;
-	}
-
-	const unsigned char* OpenGL46TextureManager::GetData(TextureHandle handle)
-	{
-		if (m_Textures.find(handle) == m_Textures.end())
-			return nullptr;
-		return m_Textures[handle].Data;
 	}
 
 	const std::string OpenGL46TextureManager::GetPath(TextureHandle handle)

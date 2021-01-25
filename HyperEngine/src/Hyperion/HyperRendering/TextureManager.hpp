@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <queue>
 
 #include "HyperUtilities/NonCopyable.hpp"
@@ -24,7 +25,6 @@ namespace Hyperion
 		uint32_t Width = 0;
 		uint32_t Height = 0;
 		uint8_t Channels = 0;
-		unsigned char* Data = nullptr;
 
 		std::string Path = "";
 		TextureType Type = TextureType::DEFAULT;
@@ -54,7 +54,7 @@ namespace Hyperion
 
 		virtual TextureHandle CreateTexture(const std::string& path, TextureType textureType = TextureType::DEFAULT) = 0;
 		virtual TextureHandle CreateTexture(uint32_t width, uint32_t height, TextureType textureType = TextureType::DEFAULT) = 0;
-		virtual void GenerateTexture(TextureData* textureData, bool alpha) = 0;
+		virtual void GenerateTexture(TextureData* textureData, unsigned char* pixels = nullptr) = 0;
 		virtual bool BindTexture(TextureHandle handle, uint32_t textureSlot) = 0;
 		virtual bool DeleteTexture(TextureHandle handle) = 0;
 		virtual bool DeleteTextureData(TextureHandle handle) = 0;
@@ -69,8 +69,10 @@ namespace Hyperion
 		virtual TextureType GetTextureType(TextureHandle handle) = 0;
 
 		virtual uint8_t GetChannels(TextureHandle handle) = 0;
-		virtual const unsigned char* GetData(TextureHandle handle) = 0;
 		virtual const std::string GetPath(TextureHandle handle) = 0;
 		virtual TextureData* GetTextureData(TextureHandle handle) = 0;
+
+		unsigned char* LoadImage(const std::string& path, int32_t& width, int32_t& height, int32_t& channels);
+		void FreeImage(unsigned char* pixels);
 	};
 }

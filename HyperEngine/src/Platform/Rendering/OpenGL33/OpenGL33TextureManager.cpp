@@ -28,9 +28,9 @@ namespace Hyperion
 		textureData.Path = path;
 		textureData.Type = textureType;
 
-		int width, height, channels;
-		textureData.Data = stbi_load(textureData.Path.c_str(), &width, &height, &channels, 0);
-		if (textureData.Data == nullptr)
+		int32_t width, height, channels;
+		unsigned char* pixels = LoadImage(textureData.Path, width, height, channels);
+		if (pixels == nullptr)
 		{
 			HP_CORE_DEBUG("Texture not loaded...");
 			return { static_cast<uint32_t>(-1) };
@@ -40,9 +40,9 @@ namespace Hyperion
 		textureData.Height = height;
 		textureData.Channels = channels;
 
-		GenerateTexture(&textureData, textureData.Channels >= 4);
+		GenerateTexture(&textureData, pixels);
 
-		stbi_image_free(textureData.Data);
+		FreeImage(pixels);
 
 		TextureHandle textureId = { 1 };
 		if (!m_TextureIds.empty())
@@ -63,8 +63,9 @@ namespace Hyperion
 		textureData.Width = width;
 		textureData.Height = height;
 		textureData.Type = textureType;
+		textureData.Channels = 4;
 
-		GenerateTexture(&textureData, true);
+		GenerateTexture(&textureData, nullptr);
 
 		TextureHandle textureId = { 1 };
 		if (!m_TextureIds.empty())
@@ -79,7 +80,7 @@ namespace Hyperion
 		return textureId;
 	}
 
-	void OpenGL33TextureManager::GenerateTexture(TextureData* textureData, bool alpha)
+	void OpenGL33TextureManager::GenerateTexture(TextureData* textureData, unsigned char* pixels)
 	{
 		OpenGLTextureData* data = static_cast<OpenGLTextureData*>(textureData);
 		glGenTextures(1, &data->TextureId);
@@ -101,7 +102,7 @@ namespace Hyperion
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, data->TextureId, 0);
 			break;
 		default:
-			glTexImage2D(GL_TEXTURE_2D, 0, alpha ? GL_RGBA : GL_RGB, data->Width, data->Height, 0, alpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data->Data);
+			glTexImage2D(GL_TEXTURE_2D, 0, textureData->Channels >= 4 ? GL_RGBA : GL_RGB, data->Width, data->Height, 0, textureData->Channels >= 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels);
 			break;
 		}
 	}
@@ -180,13 +181,6 @@ namespace Hyperion
 		if (m_Textures.find(handle) == m_Textures.end())
 			return -1;
 		return m_Textures[handle].Channels;
-	}
-
-	const unsigned char* OpenGL33TextureManager::GetData(TextureHandle handle)
-	{
-		if (m_Textures.find(handle) == m_Textures.end())
-			return nullptr;
-		return m_Textures[handle].Data;
 	}
 
 	const std::string OpenGL33TextureManager::GetPath(TextureHandle handle)

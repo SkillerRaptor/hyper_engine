@@ -62,13 +62,13 @@ namespace Hyperion
 		textureData->Width = data.Width;
 		textureData->Height = data.Height;
 		textureManager->DeleteTextureData(m_BufferTexture);
-		textureManager->GenerateTexture(textureData, true);
+		textureManager->GenerateTexture(textureData, nullptr);
 
 		textureData = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(depthTexture));
 		textureData->Width = data.Width;
 		textureData->Height = data.Height;
 		textureManager->DeleteTextureData(depthTexture);
-		textureManager->GenerateTexture(textureData, true);
+		textureManager->GenerateTexture(textureData, nullptr);
 
 		glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
