@@ -19,7 +19,7 @@ public:
 	}
 };
 
-Application* CreateApplication()
+Application* Hyperion::CreateApplication()
 {
 	return new HyperEditor();
 }
