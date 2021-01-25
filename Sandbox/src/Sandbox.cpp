@@ -17,7 +17,7 @@ public:
 	~Sandbox()
 	{
 	}
-};1
+};
 
 Application* Hyperion::CreateApplication()
 {
