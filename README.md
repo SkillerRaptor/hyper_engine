@@ -15,6 +15,10 @@ In order to build the engine, you will need to follow these steps:
 3.  After premake generates the project files. You can open the project and run the engine.
 
 ## Screenshots
+#### HyperEdtior v2
+![alt-text](https://i.imgur.com/Eq7o4l8.png)
+
+#### HyperEdtior v1
 ![alt-text](https://i.imgur.com/I3OJPW7.png)
 
 ## Dependencies & License
