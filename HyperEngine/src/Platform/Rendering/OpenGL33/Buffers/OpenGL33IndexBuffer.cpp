@@ -11,25 +11,25 @@ namespace Hyperion
 	}
 
 	OpenGL33IndexBuffer::OpenGL33IndexBuffer(const uint32_t* indices, size_t indexCount)
-		: m_RendererId(0)
+		: m_RendererID(0)
 	{
-		glGenBuffers(1, &m_RendererId);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
+		glGenBuffers(1, &m_RendererID);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * indexCount, indices, (indices == nullptr ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
 	OpenGL33IndexBuffer::~OpenGL33IndexBuffer()
 	{
-		glDeleteBuffers(1, &m_RendererId);
+		glDeleteBuffers(1, &m_RendererID);
 	}
 
-	void OpenGL33IndexBuffer::Bind()
+	void OpenGL33IndexBuffer::Bind() const
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
 	}
 
-	void OpenGL33IndexBuffer::Unbind()
+	void OpenGL33IndexBuffer::Unbind() const
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
@@ -37,10 +37,5 @@ namespace Hyperion
 	void OpenGL33IndexBuffer::SetData(const uint32_t* indices, size_t indexCount)
 	{
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(uint32_t) * indexCount, indices);
-	}
-
-	uint32_t OpenGL33IndexBuffer::GetRendererId() const
-	{
-		return m_RendererId;
 	}
 }

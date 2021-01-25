@@ -11,30 +11,25 @@ namespace Hyperion
 	}
 
 	OpenGL46VertexBuffer::OpenGL46VertexBuffer(VertexLayout vertexLayout, const Vertex* vertices, size_t vertexCount)
-		: m_RendererId(0), m_VertexLayout(vertexLayout)
+		: m_RendererID(0), m_VertexLayout(vertexLayout)
 	{
-		glCreateBuffers(1, &m_RendererId);
-		glNamedBufferStorage(m_RendererId, (m_VertexLayout == VertexLayout::Vertex2D ? sizeof(Vertex2D) : sizeof(Vertex3D)) * vertexCount, vertices, GL_DYNAMIC_STORAGE_BIT);
+		glCreateBuffers(1, &m_RendererID);
+		glNamedBufferStorage(m_RendererID, (m_VertexLayout == VertexLayout::Vertex2D ? sizeof(Vertex2D) : sizeof(Vertex3D)) * vertexCount, vertices, GL_DYNAMIC_STORAGE_BIT);
 	}
 
 	OpenGL46VertexBuffer::~OpenGL46VertexBuffer()
 	{
-		glDeleteBuffers(1, &m_RendererId);
+		glDeleteBuffers(1, &m_RendererID);
 	}
 
 	void OpenGL46VertexBuffer::Bind(uint32_t vertexArray)
 	{
-		glVertexArrayVertexBuffer(vertexArray, 0, m_RendererId, 0, (m_VertexLayout == VertexLayout::Vertex2D ? sizeof(Vertex2D) : sizeof(Vertex3D)));
+		glVertexArrayVertexBuffer(vertexArray, 0, m_RendererID, 0, (m_VertexLayout == VertexLayout::Vertex2D ? sizeof(Vertex2D) : sizeof(Vertex3D)));
 	}
 
 	void OpenGL46VertexBuffer::SetData(const Vertex* vertices, size_t vertexCount)
 	{
-		glNamedBufferSubData(m_RendererId, 0, (m_VertexLayout == VertexLayout::Vertex2D ? sizeof(Vertex2D) : sizeof(Vertex3D)) * vertexCount, vertices);
-	}
-
-	uint32_t OpenGL46VertexBuffer::GetRendererId() const
-	{
-		return m_RendererId;
+		glNamedBufferSubData(m_RendererID, 0, (m_VertexLayout == VertexLayout::Vertex2D ? sizeof(Vertex2D) : sizeof(Vertex3D)) * vertexCount, vertices);
 	}
 
 	VertexLayout OpenGL46VertexBuffer::GetVertexLayout() const

@@ -90,8 +90,48 @@ namespace Hyperion
 		glTextureParameteri(data->TextureId, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTextureParameteri(data->TextureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTextureStorage2D(data->TextureId, 1, textureData->Channels >= 4 ? GL_RGBA8 : GL_RGB8, data->Width, data->Height);
-		glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, textureData->Channels >= 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels);
+		switch (textureData->Type)
+		{
+		case TextureType::COMPUTE:
+			HP_CORE_WARN("Compute texture type is (yet) not supported in OpenGL 4.6!");
+			break;
+		case TextureType::DEFAULT:
+			glTextureStorage2D(data->TextureId, 1, textureData->Channels >= 4 ? GL_RGBA8 : GL_RGB8, data->Width, data->Height);
+			glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, textureData->Channels >= 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels);
+			break;
+		case TextureType::DIFFUSE:
+			HP_CORE_WARN("Diffuse texture type is (yet) not supported in OpenGL 4.6!");
+			break;
+		case TextureType::COLOR:
+			glTextureStorage2D(data->TextureId, 1, GL_RGB8, data->Width, data->Height);
+			glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+			//glNamedFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, data->TextureId);
+			HP_CORE_WARN("Color texture type is (yet) not fully supported in OpenGL 4.6!");
+			break;
+		case TextureType::DEPTH:
+			HP_CORE_WARN("Depth texture type is (yet) not supported in OpenGL 4.6!");
+			break;
+		case TextureType::STENCIL:
+			HP_CORE_WARN("Stencil texture type is (yet) not supported in OpenGL 4.6!");
+			break;
+		case TextureType::DEPTH_STENCIL:
+			glTextureStorage2D(data->TextureId, 1, GL_DEPTH24_STENCIL8, data->Width, data->Height);
+			glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+			//glNamedFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, data->TextureId);
+			HP_CORE_WARN("Depth Stencil texture type is (yet) not fully supported in OpenGL 4.6!");
+			break;
+		case TextureType::HEIGHT:
+			HP_CORE_WARN("Height texture type is (yet) not supported in OpenGL 4.6!");
+			break;
+		case TextureType::NORMAL:
+			HP_CORE_WARN("Normal texture type is (yet) not supported in OpenGL 4.6!");
+			break;
+		case TextureType::SPECULAR:
+			HP_CORE_WARN("Specular texture type is (yet) not supported in OpenGL 4.6!");
+			break;
+		default:
+			break;
+		}
 	}
 
 	bool OpenGL46TextureManager::BindTexture(TextureHandle handle, uint32_t textureSlot)

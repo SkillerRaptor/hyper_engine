@@ -7,7 +7,7 @@ namespace Hyperion
 	class OpenGL46VertexBuffer
 	{
 	private:
-		uint32_t m_RendererId;
+		uint32_t m_RendererID = 0;
 		VertexLayout m_VertexLayout;
 
 	public:
@@ -19,7 +19,6 @@ namespace Hyperion
 
 		void SetData(const Vertex* vertices, size_t vertexCount);
 
-		uint32_t GetRendererId() const;
 		VertexLayout GetVertexLayout() const;
 	};
 }

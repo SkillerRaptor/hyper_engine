@@ -13,11 +13,13 @@ namespace Hyperion
 		COMPUTE,
 		DEFAULT,
 		DIFFUSE,
-		FRAMEBUFFER,
+		COLOR,
 		DEPTH,
+		STENCIL,
+		DEPTH_STENCIL,
 		HEIGHT,
 		NORMAL,
-		SPECULAR,
+		SPECULAR
 	};
 
 	struct TextureData

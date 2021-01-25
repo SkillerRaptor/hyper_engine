@@ -93,16 +93,39 @@ namespace Hyperion
 
 		switch (textureData->Type)
 		{
-		case TextureType::FRAMEBUFFER:
+		case TextureType::COMPUTE:
+			HP_CORE_WARN("Compute texture type is (yet) not supported in OpenGL 3.3!");
+			break;
+		case TextureType::DEFAULT:
+			glTexImage2D(GL_TEXTURE_2D, 0, textureData->Channels >= 4 ? GL_RGBA : GL_RGB, data->Width, data->Height, 0, textureData->Channels >= 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels);
+			break;
+		case TextureType::DIFFUSE:
+			HP_CORE_WARN("Diffuse texture type is (yet) not supported in OpenGL 3.3!");
+			break;
+		case TextureType::COLOR:
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, data->Width, data->Height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, data->TextureId, 0);
 			break;
 		case TextureType::DEPTH:
+			HP_CORE_WARN("Depth texture type is (yet) not supported in OpenGL 3.3!");
+			break;
+		case TextureType::STENCIL:
+			HP_CORE_WARN("Stencil texture type is (yet) not supported in OpenGL 3.3!");
+			break;
+		case TextureType::DEPTH_STENCIL:
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, data->Width, data->Height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, data->TextureId, 0);
 			break;
+		case TextureType::HEIGHT:
+			HP_CORE_WARN("Height texture type is (yet) not supported in OpenGL 3.3!");
+			break;
+		case TextureType::NORMAL:
+			HP_CORE_WARN("Normal texture type is (yet) not supported in OpenGL 3.3!");
+			break;
+		case TextureType::SPECULAR:
+			HP_CORE_WARN("Specular texture type is (yet) not supported in OpenGL 3.3!");
+			break;
 		default:
-			glTexImage2D(GL_TEXTURE_2D, 0, textureData->Channels >= 4 ? GL_RGBA : GL_RGB, data->Width, data->Height, 0, textureData->Channels >= 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels);
 			break;
 		}
 	}

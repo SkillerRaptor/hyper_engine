@@ -6,16 +6,16 @@
 namespace Hyperion
 {
 	OpenGL33VertexArray::OpenGL33VertexArray(VertexLayout vertexLayout)
-		: m_RendererId(0), m_VertexLayout(vertexLayout)
+		: m_RendererID(0), m_VertexLayout(vertexLayout)
 	{
-		glGenVertexArrays(1, &m_RendererId);
-		glBindVertexArray(m_RendererId);
+		glGenVertexArrays(1, &m_RendererID);
+		glBindVertexArray(m_RendererID);
 		glBindVertexArray(0);
 	}
 
 	OpenGL33VertexArray::~OpenGL33VertexArray()
 	{
-		glDeleteVertexArrays(1, &m_RendererId);
+		glDeleteVertexArrays(1, &m_RendererID);
 	}
 
 	void OpenGL33VertexArray::Init()
@@ -61,19 +61,14 @@ namespace Hyperion
 		}
 	}
 
-	void OpenGL33VertexArray::Bind()
+	void OpenGL33VertexArray::Bind() const
 	{
-		glBindVertexArray(m_RendererId);
+		glBindVertexArray(m_RendererID);
 	}
 
-	void OpenGL33VertexArray::Unbind()
+	void OpenGL33VertexArray::Unbind() const
 	{
 		glBindVertexArray(0);
-	}
-
-	uint32_t OpenGL33VertexArray::GetRendererId() const
-	{
-		return m_RendererId;
 	}
 
 	VertexLayout OpenGL33VertexArray::GetVertexLayout() const

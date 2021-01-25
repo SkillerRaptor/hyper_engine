@@ -7,8 +7,10 @@ namespace Hyperion
 	class OpenGL46VertexArray
 	{
 	private:
-		uint32_t m_RendererId;
+		uint32_t m_RendererID = 0;
 		VertexLayout m_VertexLayout;
+
+		friend class OpenGL46Renderer2D;
 
 	public:
 		OpenGL46VertexArray(VertexLayout vertexLayout);
@@ -19,7 +21,6 @@ namespace Hyperion
 		void Bind();
 		void Unbind();
 
-		uint32_t GetRendererId() const;
 		VertexLayout GetVertexLayout() const;
 	};
 }
