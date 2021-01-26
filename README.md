@@ -15,6 +15,8 @@ In order to build the engine, you will need to follow these steps:
 3.  After premake generates the project files. You can open the project and run the engine.
 
 ## Screenshots
+The following screenshots show features and designs of the engine:
+
 ### HyperEditor v2
 ![alt-text](https://i.imgur.com/Eq7o4l8.png)
 
