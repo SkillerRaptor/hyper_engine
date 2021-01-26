@@ -6,7 +6,7 @@
 #include "Utilities/FontAwesome.hpp"
 
 EditorLayer::EditorLayer(Ref<Scene> scene)
-	: OverlayLayer("Editor Layer"), m_Scene(scene)
+	: OverlayLayer("Editor Layer"), m_Scene(scene), m_AssetsPanel(), m_SceneHierarchyPanel(m_Scene)
 {
 }
 
@@ -26,9 +26,6 @@ void EditorLayer::OnAttach()
 	/* Loadin Shaders */
 	m_SpriteShader = m_RenderContext->GetShaderManager()->CreateShader("assets/shaders/SpriteShaderVertex.glsl", "assets/shaders/SpriteShaderFragment.glsl");
 
-	/* Creating Scene Hierarchy Panel */
-	m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>(m_Scene);
-
 	/* Creating Entites*/
 	for (size_t i = 0; i < 100; i++)
 	{
@@ -47,7 +44,7 @@ void EditorLayer::OnRender()
 
 	CreateDockingMenu();
 
-	m_SceneHierarchyPanel->OnRender();
+	m_SceneHierarchyPanel.OnRender();
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
@@ -93,6 +90,7 @@ void EditorLayer::OnRender()
 	ImGui::PopStyleVar();
 
 	ImGui::Begin(ICON_FK_FILES_O " Assets");
+	m_AssetsPanel.OnRender();
 	ImGui::End();
 }
 
@@ -153,19 +151,8 @@ void EditorLayer::CreateMenuBar()
 {
 	if (ImGui::BeginMenuBar())
 	{
-		if (ImGui::BeginMenu("File"))
-		{
-			CreateMenuFile();
-
-			ImGui::EndMenu();
-		}
-
-		if (ImGui::BeginMenu("Edit"))
-		{
-			CreateMenuEdit();
-
-			ImGui::EndMenu();
-		}
+		CreateMenuFile();
+		CreateMenuEdit();
 
 		ImGui::EndMenuBar();
 	}
@@ -173,72 +160,82 @@ void EditorLayer::CreateMenuBar()
 
 void EditorLayer::CreateMenuFile()
 {
-	if (ImGui::MenuItem("New", "Ctrl+N"))
-		CreateNewScene();
-	if (ImGui::IsItemHovered())
-		DrawSelection();
+	if (ImGui::BeginMenu("File"))
+	{
+		if (ImGui::MenuItem("New", "Ctrl+N"))
+			CreateNewScene();
+		if (ImGui::IsItemHovered())
+			DrawSelection();
 
-	if (ImGui::MenuItem("Open", "Ctrl+O"))
-		OpenScene();
-	if (ImGui::IsItemHovered())
-		DrawSelection();
+		if (ImGui::MenuItem("Open", "Ctrl+O"))
+			OpenScene();
+		if (ImGui::IsItemHovered())
+			DrawSelection();
 
-	if (ImGui::MenuItem("Open Recent", ""))
+		if (ImGui::MenuItem("Open Recent", ""))
+			HP_CORE_WARN("'Open Recent' menu item is not implemented yet!");
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
+		if (ImGui::MenuItem("Save", "Ctrl+S"))
+			SaveScene();
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
+		if (ImGui::MenuItem("Save As..", "Ctrl+Shift+S"))
+			HP_CORE_WARN("'Save As' menu item is not implemented yet!");
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
+		ImGui::Separator();
+
+		if (ImGui::BeginMenu("Options"))
+			ImGui::EndMenu();
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		ImGui::EndMenu();
-	if (ImGui::IsItemHovered())
-		DrawSelection();
-
-	if (ImGui::MenuItem("Save", "Ctrl+S"))
-		SaveScene();
-	if (ImGui::IsItemHovered())
-		DrawSelection();
-
-	if (ImGui::MenuItem("Save As..", "Ctrl+Shift+S"))
-		SaveAsScene();
-	if (ImGui::IsItemHovered())
-		DrawSelection();
-
-	ImGui::Separator();
-
-	if (ImGui::BeginMenu("Options"))
-		ImGui::EndMenu();
-	if (ImGui::IsItemHovered())
-		DrawSelection();
+	}
 }
 
 void EditorLayer::CreateMenuEdit()
 {
-	if (ImGui::MenuItem("Undo", "Ctrl+Z"))
-		ImGui::EndMenu();
-	if (ImGui::IsItemHovered())
-		DrawSelection();
+	if (ImGui::BeginMenu("Edit"))
+	{
+		if (ImGui::MenuItem("Undo", "Ctrl+Z"))
+			HP_CORE_WARN("'Undo' menu item is not implemented yet!");
+		if (ImGui::IsItemHovered())
+			DrawSelection();
 
-	if (ImGui::MenuItem("Redo", "Ctrl+Y"))
-		ImGui::EndMenu();
-	if (ImGui::IsItemHovered())
-		DrawSelection();
+		if (ImGui::MenuItem("Redo", "Ctrl+Y"))
+			HP_CORE_WARN("'Redo' menu item is not implemented yet!");
+		if (ImGui::IsItemHovered())
+			DrawSelection();
 
-	ImGui::Separator();
+		ImGui::Separator();
 
-	if (ImGui::MenuItem("Cut", "Ctrl+X"))
-		ImGui::EndMenu();
-	if (ImGui::IsItemHovered())
-		DrawSelection();
+		if (ImGui::MenuItem("Cut", "Ctrl+X"))
+			HP_CORE_WARN("'Cut' menu item is not implemented yet!");
+		if (ImGui::IsItemHovered())
+			DrawSelection();
 
-	if (ImGui::MenuItem("Copy", "Ctrl+C"))
-		ImGui::EndMenu();
-	if (ImGui::IsItemHovered())
-		DrawSelection();
+		if (ImGui::MenuItem("Copy", "Ctrl+C"))
+			HP_CORE_WARN("'Copy' menu item is not implemented yet!");
+		if (ImGui::IsItemHovered())
+			DrawSelection();
 
-	if (ImGui::MenuItem("Paste", "Ctrl+V"))
-		ImGui::EndMenu();
-	if (ImGui::IsItemHovered())
-		DrawSelection();
+		if (ImGui::MenuItem("Paste", "Ctrl+V"))
+			HP_CORE_WARN("'Paste' menu item is not implemented yet!");
+		if (ImGui::IsItemHovered())
+			DrawSelection();
 
-	if (ImGui::MenuItem("Delete", "Del"))
+		if (ImGui::MenuItem("Delete", "Del"))
+			HP_CORE_WARN("'Delete' menu item is not implemented yet!");
+		if (ImGui::IsItemHovered())
+			DrawSelection();
+
 		ImGui::EndMenu();
-	if (ImGui::IsItemHovered())
-		DrawSelection();
+	}
 }
 
 void EditorLayer::CreateNewScene()
@@ -253,7 +250,7 @@ void EditorLayer::OpenScene()
 		return;
 
 	m_Scene = CreateRef<Scene>("Example Scene", m_RenderContext->GetRenderer2D());
-	m_SceneHierarchyPanel->SetScene(m_Scene);
+	m_SceneHierarchyPanel.SetScene(m_Scene);
 
 	SceneSerializer sceneSerializer(m_Scene);
 	sceneSerializer.Deserialize(filePath);

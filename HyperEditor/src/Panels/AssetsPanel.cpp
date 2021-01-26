@@ -9,3 +9,8 @@ AssetsPanel::~AssetsPanel()
 {
 
 }
+
+void AssetsPanel::OnRender()
+{
+
+}

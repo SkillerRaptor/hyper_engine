@@ -2,6 +2,7 @@
 
 #include <Hyperion.hpp>
 
+#include "Panels/AssetsPanel.hpp"
 #include "Panels/SceneHierarchyPanel.hpp"
 
 using namespace Hyperion;
@@ -12,7 +13,8 @@ private:
 	Ref<Scene> m_Scene;
 
 	ShaderHandle m_SpriteShader = { 0 };
-	Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
+	AssetsPanel m_AssetsPanel;
+	SceneHierarchyPanel m_SceneHierarchyPanel;
 
 public:
 	EditorLayer(Ref<Scene> scene);

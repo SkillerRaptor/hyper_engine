@@ -2,11 +2,9 @@
 
 #include <Hyperion.hpp>
 
-#include "Panel.hpp"
-
 using namespace Hyperion;
 
-class SceneHierarchyPanel : public Panel
+class SceneHierarchyPanel
 {
 private:
 	Ref<Scene> m_Scene;

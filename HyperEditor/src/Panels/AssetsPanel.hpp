@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Panel.hpp"
-
-class AssetsPanel : public Panel
+class AssetsPanel
 {
 private:
 
 public:
 	AssetsPanel();
 	~AssetsPanel();
+
+	void OnRender();
 };

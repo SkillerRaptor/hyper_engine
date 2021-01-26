@@ -23,6 +23,9 @@
 #include "Hyperion/HyperLayer/OverlayLayer.hpp"
 
 /* HyperRendering */
+#include "Hyperion/HyperRendering/Camera.hpp"
+#include "Hyperion/HyperRendering/GameCamera.hpp"
+#include "Hyperion/HyperRendering/Material.hpp"
 #include "Hyperion/HyperRendering/RenderContext.hpp"
 #include "Hyperion/HyperRendering/ShaderManager.hpp"
 #include "Hyperion/HyperRendering/TextureManager.hpp"
