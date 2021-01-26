@@ -5,6 +5,7 @@
 #include "HyperCore/Core.hpp"
 #include "HyperEvents/Event.hpp"
 #include "HyperRendering/Renderer2D.hpp"
+#include "HyperRendering/SceneRecorder.hpp"
 #include "HyperRendering/ShaderManager.hpp"
 #include "HyperRendering/TextureManager.hpp"
 #include "HyperUtilities/Timestep.hpp"
@@ -57,6 +58,7 @@ namespace Hyperion
 		ImGuiFrameSizeInfo m_ImGuiEditorSizeInfo;
 		ImGuiFrameSizeInfo m_ImGuiGameSizeInfo;
 
+		Ref<SceneRecorder> m_SceneRecorder;
 		Ref<Renderer2D> m_Renderer2D;
 		Ref<ShaderManager> m_ShaderManager;
 		Ref<TextureManager> m_TextureManager;
@@ -76,15 +78,16 @@ namespace Hyperion
 		virtual void OnUpdate(Timestep timeStep) = 0;
 		virtual void OnRender() = 0;
 
-		GLFWwindow* GetWindow() const { return m_Window; };
-		GraphicsAPI GetGraphicsAPI() const { return m_GraphicsAPI; };
+		GLFWwindow* GetWindow() const { return m_Window; }
+		GraphicsAPI GetGraphicsAPI() const { return m_GraphicsAPI; }
 
 		ImGuiFrameSizeInfo& GetImGuiEditorSizeInfo() { return m_ImGuiEditorSizeInfo; }
 		ImGuiFrameSizeInfo& GetImGuiGameSizeInfo() { return m_ImGuiGameSizeInfo; }
 
-		Ref<Renderer2D> GetRenderer2D() { return m_Renderer2D; };
-		Ref<ShaderManager> GetShaderManager() { return m_ShaderManager; };
-		Ref<TextureManager> GetTextureManager() { return m_TextureManager; };
+		Ref<SceneRecorder> GetSceneRecorder() { return m_SceneRecorder; }
+		Ref<Renderer2D> GetRenderer2D() { return m_Renderer2D; }
+		Ref<ShaderManager> GetShaderManager() { return m_ShaderManager; }
+		Ref<TextureManager> GetTextureManager() { return m_TextureManager; }
 
 		static Ref<RenderContext> Construct(GraphicsAPI graphicsAPI, std::string& title);
 

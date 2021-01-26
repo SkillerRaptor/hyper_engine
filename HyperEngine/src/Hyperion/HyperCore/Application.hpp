@@ -26,7 +26,6 @@ namespace Hyperion
 		ImGuiLayer* m_ImGuiLayer;
 
 		Ref<Scene> m_Scene;
-		Ref<SceneRecorder> m_SceneRecorder;
 
 		bool m_Running = true;
 
@@ -55,7 +54,6 @@ namespace Hyperion
 		const OverlayLayer* GetOverlayLayer(const std::string& layerName) const;
 
 		Ref<Scene>& GetScene();
-		Ref<SceneRecorder>& GetSceneRecorder();
 
 		const Ref<Window>& GetWindow() const;
 		static Application* Get();

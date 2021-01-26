@@ -36,7 +36,6 @@ namespace Hyperion
 		m_Window = Window::Construct(windowPropsInfo);
 
 		m_Scene = CreateRef<Scene>("Main Scene", m_Window->GetContext()->GetRenderer2D());
-		m_SceneRecorder = SceneRecorder::Construct(m_Window->GetContext());
 
 		m_LayerStack = CreateScope<LayerStack>();
 		m_ImGuiLayer = new ImGuiLayer();
@@ -52,10 +51,11 @@ namespace Hyperion
 	{
 		double lastTime = 0.0;
 
+		Ref<SceneRecorder> sceneRecorder = m_Window->GetContext()->GetSceneRecorder();
 		bool enableCapture = m_LayerStack->GetOverlayLayers().size() > 1;
 
 		if (enableCapture)
-			m_SceneRecorder->InitRecording();
+			sceneRecorder->InitRecording();
 
 		while (m_Running)
 		{
@@ -74,7 +74,7 @@ namespace Hyperion
 			}
 
 			if (enableCapture)
-				m_SceneRecorder->StartRecording();
+				sceneRecorder->StartRecording();
 
 			for (Layer* layer : m_LayerStack->GetLayers())
 			{
@@ -86,7 +86,7 @@ namespace Hyperion
 			m_Scene->OnRender();
 
 			if (enableCapture)
-				m_SceneRecorder->EndRecording();
+				sceneRecorder->EndRecording();
 
 			if (enableCapture)
 			{
@@ -183,11 +183,6 @@ namespace Hyperion
 	Ref<Scene>& Application::GetScene()
 	{
 		return m_Scene;
-	}
-
-	Ref<SceneRecorder>& Application::GetSceneRecorder()
-	{
-		return m_SceneRecorder;
 	}
 
 	const Ref<Window>& Application::GetWindow() const

@@ -10,13 +10,12 @@ class EditorLayer : public OverlayLayer
 {
 private:
 	Ref<Scene> m_Scene;
-	Ref<SceneRecorder> m_SceneRecorder;
 
 	ShaderHandle m_SpriteShader = { 0 };
 	Ref<SceneHierarchyPanel> m_SceneHierarchyPanel;
 
 public:
-	EditorLayer(Ref<Scene> scene, Ref<SceneRecorder> sceneRecorder);
+	EditorLayer(Ref<Scene> scene);
 	virtual ~EditorLayer();
 
 	virtual void OnAttach() override;

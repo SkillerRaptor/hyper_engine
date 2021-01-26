@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "OpenGL33SceneRecorder.hpp"
 #include "OpenGL33Renderer2D.hpp"
 #include "OpenGL33ShaderManager.hpp"
 #include "OpenGL33TextureManager.hpp"
@@ -41,6 +42,7 @@ namespace Hyperion
 		m_Renderer2D = CreateRef<OpenGL33Renderer2D>();
 		m_ShaderManager = CreateRef<OpenGL33ShaderManager>();
 		m_TextureManager = CreateRef<OpenGL33TextureManager>();
+		m_SceneRecorder = CreateRef<OpenGL33SceneRecorder>(m_TextureManager, m_Window);
 		m_Renderer2D->SetShaderManager(m_ShaderManager);
 		m_Renderer2D->SetTextureManager(m_TextureManager);
 

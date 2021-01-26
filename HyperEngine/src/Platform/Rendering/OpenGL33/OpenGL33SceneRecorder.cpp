@@ -9,17 +9,16 @@
 
 namespace Hyperion
 {
-	OpenGL33SceneRecorder::OpenGL33SceneRecorder(Ref<RenderContext> renderContext)
-		: SceneRecorder(renderContext)
+	OpenGL33SceneRecorder::OpenGL33SceneRecorder(Ref<TextureManager> textureManager, GLFWwindow* window)
+		: SceneRecorder(textureManager, window)
 	{
 	}
 
 	void OpenGL33SceneRecorder::InitRecording()
 	{
-		WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(m_RenderContext->GetWindow()));
-		Ref<TextureManager> textureManager = m_RenderContext->GetTextureManager();
-
+		WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(m_Window));
 		m_FrameBuffer = CreateScope<OpenGL33FrameBuffer>(data.Width, data.Height);
+
 		m_FrameBuffer->Bind();
 		glEnable(GL_DEPTH_TEST);
 		m_FrameBuffer->Unbind();
@@ -27,8 +26,7 @@ namespace Hyperion
 
 	void OpenGL33SceneRecorder::StartRecording()
 	{
-		WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(m_RenderContext->GetWindow()));
-		Ref<TextureManager> textureManager = m_RenderContext->GetTextureManager();
+		WindowDataInfo& data = *static_cast<WindowDataInfo*>(glfwGetWindowUserPointer(m_Window));
 
 		if (m_FrameBuffer->GetWidth() != data.Width || m_FrameBuffer->GetHeight() != data.Height)
 			m_FrameBuffer->Resize(data.Width, data.Height);
@@ -44,8 +42,7 @@ namespace Hyperion
 
 	void OpenGL33SceneRecorder::RenderImage()
 	{
-		Ref<TextureManager> textureManager = m_RenderContext->GetTextureManager();
-		uint32_t colorTextureId = static_cast<OpenGLTextureData*>(textureManager->GetTextureData(m_FrameBuffer->GetColorAttachment()))->TextureId;
+		uint32_t colorTextureId = static_cast<OpenGLTextureData*>(m_TextureManager->GetTextureData(m_FrameBuffer->GetColorAttachment()))->TextureId;
 		ImGui::Image((ImTextureID)(intptr_t)colorTextureId, ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
 	}	
 }

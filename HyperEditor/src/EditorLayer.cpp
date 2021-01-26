@@ -3,8 +3,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-EditorLayer::EditorLayer(Ref<Scene> scene, Ref<SceneRecorder> sceneRecorder)
-	: OverlayLayer("Editor Layer"), m_Scene(scene), m_SceneRecorder(sceneRecorder)
+EditorLayer::EditorLayer(Ref<Scene> scene)
+	: OverlayLayer("Editor Layer"), m_Scene(scene)
 {
 }
 
@@ -31,6 +31,8 @@ void EditorLayer::OnAttach()
 
 void EditorLayer::OnRender()
 {
+	Ref<SceneRecorder> sceneRecorder = m_RenderContext->GetSceneRecorder();
+
 	CreateDockingMenu();
 
 	m_SceneHierarchyPanel->OnRender();
@@ -52,7 +54,7 @@ void EditorLayer::OnRender()
 
 	//m_EditorCamera->SetViewportSize(editorWindowSize.x, editorWindowSize.y);
 
-	m_SceneRecorder->RenderImage();
+	sceneRecorder->RenderImage();
 
 	ImGui::EndChild();
 	ImGui::End();
@@ -71,7 +73,7 @@ void EditorLayer::OnRender()
 
 	//m_GameCamera->SetViewportSize(gameWindowSize.x, gameWindowSize.y);
 
-	m_SceneRecorder->RenderImage();
+	sceneRecorder->RenderImage();
 
 	ImGui::EndChild();
 	ImGui::End();

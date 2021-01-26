@@ -1,28 +1,26 @@
 #pragma once
 
+#include "TextureManager.hpp"
 #include "HyperCore/Core.hpp"
-#include "HyperRendering/RenderContext.hpp"
+
+struct GLFWwindow;
 
 namespace Hyperion
 {
 	class SceneRecorder
 	{
 	protected:
-		Ref<RenderContext> m_RenderContext;
+		Ref<TextureManager> m_TextureManager;
+		GLFWwindow* m_Window;
 
 	public:
-		virtual ~SceneRecorder() = default;
+		SceneRecorder(Ref<TextureManager> textureManager, GLFWwindow* window)
+			: m_TextureManager(textureManager), m_Window(window) {}
 
 		virtual void InitRecording() = 0;
 		virtual void StartRecording() = 0;
 		virtual void EndRecording() = 0;
 
-		virtual void RenderImage() {};
-
-		static Ref<SceneRecorder> Construct(Ref<RenderContext> renderContext);
-	
-	protected:
-		SceneRecorder(Ref<RenderContext> renderContext)
-			: m_RenderContext(renderContext) {}
+		virtual void RenderImage() = 0;
 	};
 }

@@ -14,7 +14,7 @@ namespace Hyperion
 		Scope<OpenGL33FrameBuffer> m_FrameBuffer;
 
 	public:
-		OpenGL33SceneRecorder(Ref<RenderContext> renderContext);
+		OpenGL33SceneRecorder(Ref<TextureManager> textureManager, GLFWwindow* window);
 
 		virtual void InitRecording() override;
 		virtual void StartRecording() override;

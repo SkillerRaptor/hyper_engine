@@ -13,7 +13,7 @@ public:
 	{
 		SetAppIcon("assets/textures/HyperEngine.PNG");
 
-		PushLayer(new EditorLayer(GetScene(), GetSceneRecorder()));
+		PushLayer(new EditorLayer(GetScene()));
 	}
 
 	~HyperEditor()
