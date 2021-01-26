@@ -27,7 +27,7 @@ namespace Hyperion
 	HyperEntity Scene::CreateEntity(const std::string& name)
 	{
 		Entity entity = m_World->Construct();
-		m_World->AddComponent<TransformComponent>(entity, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f));
+		m_World->AddComponent<TransformComponent>(entity, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 		m_World->AddComponent<TagComponent>(entity, name.empty() ? "Entity" : name);
 		return HyperEntity(entity, this);
 	}
