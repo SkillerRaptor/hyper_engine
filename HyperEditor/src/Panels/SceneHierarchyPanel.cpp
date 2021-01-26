@@ -32,7 +32,6 @@ namespace Hyperion
 		{
 			m_SceneSelected = true;
 			m_SelectedEntity.Invalidate();
-			HP_CORE_INFO("CLICKED");
 		}
 
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())

@@ -18,9 +18,6 @@ namespace Hyperion
 		std::string m_Name;
 		Ref<RenderContext> m_RenderContext;
 
-		Ref<Scene> m_Scene;
-		Ref<SceneRecorder> m_SceneRecorder;
-
 		friend class Application;
 
 	public:

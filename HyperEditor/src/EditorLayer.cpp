@@ -3,8 +3,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-EditorLayer::EditorLayer()
-	: OverlayLayer("Editor Layer")
+EditorLayer::EditorLayer(Ref<Scene> scene, Ref<SceneRecorder> sceneRecorder)
+	: OverlayLayer("Editor Layer"), m_Scene(scene), m_SceneRecorder(sceneRecorder)
 {
 }
 

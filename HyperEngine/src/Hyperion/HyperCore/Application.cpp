@@ -131,15 +131,12 @@ namespace Hyperion
 	void Application::PushLayer(Layer* layer)
 	{
 		layer->m_RenderContext = m_Window->GetContext();
-		layer->m_Scene = m_Scene;
 		m_LayerStack->PushLayer(layer);
 	}
 
 	void Application::PushLayer(OverlayLayer* overlayLayer)
 	{
 		overlayLayer->m_RenderContext = m_Window->GetContext();
-		overlayLayer->m_Scene = m_Scene;
-		overlayLayer->m_SceneRecorder = m_SceneRecorder;
 		m_LayerStack->PushLayer(overlayLayer);
 	}
 
@@ -181,6 +178,16 @@ namespace Hyperion
 	const OverlayLayer* Application::GetOverlayLayer(const std::string& overlayLayerName) const
 	{
 		return m_LayerStack->GetOverlayLayer(overlayLayerName);
+	}
+
+	Ref<Scene>& Application::GetScene()
+	{
+		return m_Scene;
+	}
+
+	Ref<SceneRecorder>& Application::GetSceneRecorder()
+	{
+		return m_SceneRecorder;
 	}
 
 	const Ref<Window>& Application::GetWindow() const

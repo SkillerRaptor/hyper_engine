@@ -54,6 +54,9 @@ namespace Hyperion
 		const Layer* GetLayer(const std::string& layerName) const;
 		const OverlayLayer* GetOverlayLayer(const std::string& layerName) const;
 
+		Ref<Scene>& GetScene();
+		Ref<SceneRecorder>& GetSceneRecorder();
+
 		const Ref<Window>& GetWindow() const;
 		static Application* Get();
 
