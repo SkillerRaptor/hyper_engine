@@ -23,15 +23,17 @@ namespace Hyperion
 
 	void OpenGL33FrameBuffer::Build()
 	{
+		Ref<TextureManager> textureManager = Application::Get()->GetWindow()->GetContext()->GetTextureManager();
 		if (m_RendererID != 0)
 		{
 			glDeleteFramebuffers(1, &m_RendererID);
+			textureManager->DeleteTexture(m_ColorAttachment);
+			textureManager->DeleteTexture(m_DepthAttachment);
 		}
 
 		glGenFramebuffers(1, &m_RendererID);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 
-		Ref<TextureManager> textureManager = Application::Get()->GetWindow()->GetContext()->GetTextureManager();
 		m_ColorAttachment = textureManager->CreateTexture(m_Width, m_Height, TextureType::COLOR);
 		m_DepthAttachment = textureManager->CreateTexture(m_Width, m_Height, TextureType::DEPTH_STENCIL);
 

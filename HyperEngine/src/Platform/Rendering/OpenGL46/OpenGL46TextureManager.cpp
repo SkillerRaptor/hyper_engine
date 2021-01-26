@@ -157,6 +157,7 @@ namespace Hyperion
 		if (m_Textures.find(handle) == m_Textures.end())
 			return false;
 		glDeleteTextures(1, &m_Textures[handle].TextureId);
+		HP_CORE_DEBUG("Texture {} deleted...", handle.Handle);
 		return true;
 	}
 
