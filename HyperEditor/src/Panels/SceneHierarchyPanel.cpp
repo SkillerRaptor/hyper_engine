@@ -19,27 +19,54 @@ namespace Hyperion
 	void SceneHierarchyPanel::OnRender()
 	{
 		ImGui::Begin("Hierarchy");
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+		bool opened = ImGui::TreeNodeEx(m_Scene->GetName().c_str(), flags);
 
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
+		if (m_SceneSelected)
+			PanelUtilities::DrawSelection();
 
-		if (ImGui::TreeNodeEx(m_Scene->GetName().c_str(), flags))
+		if (ImGui::IsItemHovered())
+			PanelUtilities::DrawSelection();
+
+		if (ImGui::IsItemClicked())
+		{
+			m_SceneSelected = true;
+			m_SelectedEntity.Invalidate();
+			HP_CORE_INFO("CLICKED");
+		}
+
+		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+			m_SelectedEntity.Invalidate();
+
+		if (opened)
 		{
 			m_Scene->Each([&](HyperEntity entity)
 				{
 					DrawEntityNode(entity);
 				});
 
-			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-				m_SelectedEntity = { Entity(), nullptr };
-
 			ImGui::TreePop();
 		}
 		ImGui::End();
 
 		ImGui::Begin("Inspector");
-		if (m_SelectedEntity.GetEntityHandle().IsHandleValid())
-			DrawComponents();
+		if (m_SceneSelected)
+			DrawSceneInformation();
+		else if (m_SelectedEntity.GetEntityHandle().IsHandleValid())
+			DrawComponentInformation();
 		ImGui::End();
+	}
+
+	void SceneHierarchyPanel::DrawSceneInformation()
+	{
+		ImGui::PushItemWidth(-1.0f);
+		char buffer[256];
+		memset(buffer, 0, sizeof(buffer));
+		m_Scene->GetName().copy(buffer, sizeof(buffer));
+
+		if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
+			m_Scene->SetName(std::string(buffer).empty() ? "Empty!" : std::string(buffer));
+		ImGui::SameLine();
 	}
 
 	void SceneHierarchyPanel::DrawEntityNode(HyperEntity entity)
@@ -56,7 +83,10 @@ namespace Hyperion
 			PanelUtilities::DrawSelection();
 
 		if (ImGui::IsItemClicked())
+		{
+			m_SceneSelected = false;
 			m_SelectedEntity = entity;
+		}
 
 		if (opened)
 		{
@@ -74,10 +104,9 @@ namespace Hyperion
 		}
 	}
 
-	void SceneHierarchyPanel::DrawComponents()
+	void SceneHierarchyPanel::DrawComponentInformation()
 	{
 		World& registry = m_Scene->GetWorld();
-
 		HyperEntity& entity = m_SelectedEntity;
 
 		ImGui::PushItemWidth(-1.0f);
@@ -156,16 +185,16 @@ namespace Hyperion
 		ImGui::Columns(1);
 		ImGui::Separator();
 
-		if (!ImGui::IsWindowHovered() && (m_AddComponentPopupOpen || m_RemoveComponentPopupOpen))
+		if (!ImGui::IsWindowHovered() && (m_AddComponentPopup || m_RemoveComponentPopup))
 		{
-			m_AddComponentPopupOpen = false;
-			m_RemoveComponentPopupOpen = false;
+			m_AddComponentPopup = false;
+			m_RemoveComponentPopup = false;
 		}
 
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 		{
-			m_AddComponentPopupOpen = false;
-			m_RemoveComponentPopupOpen = false;
+			m_AddComponentPopup = false;
+			m_RemoveComponentPopup = false;
 		}
 
 		bool addComponent = false;
@@ -186,9 +215,9 @@ namespace Hyperion
 		if (addComponent)
 		{
 			if (ImGui::Button("Add Component", ImVec2(removeComponent ? ImGui::GetContentRegionAvailWidth() * 0.5f : ImGui::GetContentRegionAvailWidth(), 0.0f)))
-				m_AddComponentPopupOpen = true;
+				m_AddComponentPopup = true;
 
-			if (m_AddComponentPopupOpen)
+			if (m_AddComponentPopup)
 				ImGui::OpenPopup("ComponentAddPopup");
 
 			DrawAddComponentPopup();
@@ -199,9 +228,9 @@ namespace Hyperion
 		if (removeComponent)
 		{
 			if (ImGui::Button("Remove Component", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f)))
-				m_RemoveComponentPopupOpen = true;
+				m_RemoveComponentPopup = true;
 
-			if (m_RemoveComponentPopupOpen)
+			if (m_RemoveComponentPopup)
 				ImGui::OpenPopup("ComponentRemovePopup");
 
 			DrawRemoveComponentPopup();
@@ -262,7 +291,7 @@ namespace Hyperion
 			if (ImGui::MenuItem(SplitComponentName(typeid(T).name()).c_str()))
 			{
 				m_SelectedEntity.AddComponent<T>(std::forward<Args>(args)...);
-				m_AddComponentPopupOpen = false;
+				m_AddComponentPopup = false;
 				ImGui::CloseCurrentPopup();
 			}
 			if (ImGui::IsItemHovered())
@@ -278,7 +307,7 @@ namespace Hyperion
 			if (ImGui::MenuItem(SplitComponentName(typeid(T).name()).c_str()))
 			{
 				m_SelectedEntity.RemoveComponent<T>();
-				m_RemoveComponentPopupOpen = false;
+				m_RemoveComponentPopup = false;
 				ImGui::CloseCurrentPopup();
 			}
 			if (ImGui::IsItemHovered())
@@ -309,10 +338,5 @@ namespace Hyperion
 	const Ref<Scene>& SceneHierarchyPanel::GetScene() const
 	{
 		return m_Scene;
-	}
-
-	const HyperEntity& SceneHierarchyPanel::GetSelectedEntity() const
-	{
-		return m_SelectedEntity;
 	}
 }

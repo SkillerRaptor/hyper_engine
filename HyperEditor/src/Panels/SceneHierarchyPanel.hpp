@@ -8,9 +8,11 @@ namespace Hyperion
 	{
 	private:
 		Ref<Scene> m_Scene;
-		bool m_AddComponentPopupOpen = false;
-		bool m_RemoveComponentPopupOpen = false;
-		HyperEntity m_SelectedEntity = { Entity(), nullptr };
+		HyperEntity m_SelectedEntity;
+
+		bool m_SceneSelected = false;
+		bool m_AddComponentPopup = false;
+		bool m_RemoveComponentPopup = false;
 
 	public:
 		SceneHierarchyPanel(const Ref<Scene>& scene);
@@ -20,11 +22,10 @@ namespace Hyperion
 		void SetScene(const Ref<Scene>& scene);
 		const Ref<Scene>& GetScene() const;
 
-		const HyperEntity& GetSelectedEntity() const;
-
 	private:
 		void DrawEntityNode(HyperEntity entity);
-		void DrawComponents();
+		void DrawSceneInformation();
+		void DrawComponentInformation();
 
 		template<class T>
 		void DrawComponent(const std::string& componentName, const typename std::common_type<std::function<void(T&)>>::type function);

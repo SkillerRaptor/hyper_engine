@@ -14,7 +14,7 @@ namespace Hyperion
 
 	public:
 		HyperEntity(const HyperEntity& other) = default;
-		HyperEntity(Entity entityHandle, Scene* scene)
+		HyperEntity(Entity entityHandle = Entity(), Scene* scene = nullptr)
 			: m_EntityHandle(entityHandle), m_Scene(scene) {}
 
 		template<class T, typename... Args>
@@ -39,6 +39,12 @@ namespace Hyperion
 		bool HasComponent()
 		{
 			return m_Scene->GetWorld().HasComponent<T>(m_EntityHandle);
+		}
+
+		void Invalidate()
+		{
+			m_EntityHandle = Entity();
+			m_Scene = nullptr;
 		}
 
 		Entity GetEntityHandle() const { return m_EntityHandle; }
