@@ -17,21 +17,17 @@ public:
 	virtual ~EditorLayer();
 
 	virtual void OnAttach() override;
-	virtual void OnDetach() override;
 
-	virtual void OnEvent(Event& event) override;
-	virtual void OnUpdate(Timestep timeStep) override;
 	virtual void OnRender() override;
 
 private:
-	void ShowDockingMenu();
+	void CreateDockingMenu();
 
-	void ShowAssetsMenu();
+	void CreateMenuBar();
+	void CreateMenuFile();
+	void CreateMenuEdit();
 
-	void ShowMenuFile();
-	void ShowMenuEdit();
-
-	void NewScene();
+	void CreateNewScene();
 	void OpenScene();
 	void SaveScene();
 	void SaveAsScene();

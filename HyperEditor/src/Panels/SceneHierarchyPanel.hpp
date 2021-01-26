@@ -1,26 +1,24 @@
 #pragma once
 
-#include "HyperCore/Core.hpp"
-#include "HyperECS/HyperECS.hpp"
-#include "HyperECS/HyperEntity.hpp"
+#include <Hyperion.hpp>
 
 namespace Hyperion
 {
 	class SceneHierarchyPanel
 	{
 	private:
-		Ref<Scene> m_Context;
+		Ref<Scene> m_Scene;
 		bool m_AddComponentPopupOpen = false;
 		bool m_RemoveComponentPopupOpen = false;
 		HyperEntity m_SelectedEntity = { Entity(), nullptr };
 
 	public:
-		SceneHierarchyPanel(const Ref<Scene>& context);
+		SceneHierarchyPanel(const Ref<Scene>& scene);
 
 		void OnRender();
 
-		void SetContext(const Ref<Scene>& context);
-		const Ref<Scene>& GetContext() const;
+		void SetScene(const Ref<Scene>& scene);
+		const Ref<Scene>& GetScene() const;
 
 		const HyperEntity& GetSelectedEntity() const;
 
@@ -39,14 +37,6 @@ namespace Hyperion
 
 		template <class T>
 		void DrawRemoveComponentMenu();
-
-		void DrawCheckbox(const std::string& title, bool& value);
-		void DrawColorEdit4(const std::string& title, glm::vec4& value);
-		void DrawDragInt(const std::string& title, uint32_t& value, int speed = 1, int min = 0, int max = 0);
-		void DrawDragFloat(const std::string& title, float& value, float speed = 0.1f, float min = 0.0f, float max = 0.0f);
-		void DrawDragVec3(const std::string& title, glm::vec3& vector, float speed = 0.1f, float min = 0.0f, float max = 0.0f);
-
-		void DrawSelection();
 
 		std::string SplitComponentName(const std::string& componentName);
 	};

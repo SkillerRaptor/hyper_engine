@@ -7,8 +7,10 @@
 
 /* HyperECS */
 #include "Hyperion/HyperECS/Components.hpp"
-#include "Hyperion/HyperECS/HyperEntity.hpp"
 #include "Hyperion/HyperECS/HyperECS.hpp"
+#include "Hyperion/HyperECS/HyperEntity.hpp"
+#include "Hyperion/HyperECS/Scene/Scene.hpp"
+#include "Hyperion/HyperECS/Scene/SceneSerializer.hpp"
 
 /* HyperEvents */
 #include "Hyperion/HyperEvents/Event.hpp"
