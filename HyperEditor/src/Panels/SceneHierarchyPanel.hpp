@@ -2,43 +2,44 @@
 
 #include <Hyperion.hpp>
 
-namespace Hyperion
+#include "Panel.hpp"
+
+using namespace Hyperion;
+
+class SceneHierarchyPanel : public Panel
 {
-	class SceneHierarchyPanel
-	{
-	private:
-		Ref<Scene> m_Scene;
-		HyperEntity m_SelectedEntity;
+private:
+	Ref<Scene> m_Scene;
+	HyperEntity m_SelectedEntity;
 
-		bool m_SceneSelected = false;
-		bool m_AddComponentPopup = false;
-		bool m_RemoveComponentPopup = false;
+	bool m_SceneSelected = false;
+	bool m_AddComponentPopup = false;
+	bool m_RemoveComponentPopup = false;
 
-	public:
-		SceneHierarchyPanel(const Ref<Scene>& scene);
+public:
+	SceneHierarchyPanel(const Ref<Scene>& scene);
 
-		void OnRender();
+	void OnRender();
 
-		void SetScene(const Ref<Scene>& scene);
-		const Ref<Scene>& GetScene() const;
+	void SetScene(const Ref<Scene>& scene);
+	const Ref<Scene>& GetScene() const;
 
-	private:
-		void DrawEntityNode(HyperEntity entity);
-		void DrawSceneInformation();
-		void DrawComponentInformation();
+private:
+	void DrawEntityNode(HyperEntity entity);
+	void DrawSceneInformation();
+	void DrawComponentInformation();
 
-		template<class T>
-		void DrawComponent(const std::string& componentName, const typename std::common_type<std::function<void(T&)>>::type function);
+	template<class T>
+	void DrawComponent(const std::string& componentName, const typename std::common_type<std::function<void(T&)>>::type function);
 
-		void DrawAddComponentPopup();
-		void DrawRemoveComponentPopup();
+	void DrawAddComponentPopup();
+	void DrawRemoveComponentPopup();
 
-		template <class T, typename... Args>
-		void DrawAddComponentMenu(Args&&... args);
+	template <class T, typename... Args>
+	void DrawAddComponentMenu(Args&&... args);
 
-		template <class T>
-		void DrawRemoveComponentMenu();
+	template <class T>
+	void DrawRemoveComponentMenu();
 
-		std::string SplitComponentName(const std::string& componentName);
-	};
-}
+	std::string SplitComponentName(const std::string& componentName);
+};

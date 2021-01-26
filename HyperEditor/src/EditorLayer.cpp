@@ -3,6 +3,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include "Utilities/FontAwesome.hpp"
+
 EditorLayer::EditorLayer(Ref<Scene> scene)
 	: OverlayLayer("Editor Layer"), m_Scene(scene)
 {
@@ -14,19 +16,29 @@ EditorLayer::~EditorLayer()
 
 void EditorLayer::OnAttach()
 {
+	/* Adding Font */
+	ImGuiIO& io = ImGui::GetIO();
+	ImFontConfig config{};
+	config.MergeMode = true;
+	static const ImWchar icon_ranges[] = { 0xf000, 0xf307, 0 };
+	io.Fonts->AddFontFromFileTTF("assets/fonts/fontawesome-webfont.ttf", 14.0f, &config, icon_ranges);
+
+	/* Loadin Shaders */
 	m_SpriteShader = m_RenderContext->GetShaderManager()->CreateShader("assets/shaders/SpriteShaderVertex.glsl", "assets/shaders/SpriteShaderFragment.glsl");
 
+	/* Creating Scene Hierarchy Panel */
 	m_SceneHierarchyPanel = CreateRef<SceneHierarchyPanel>(m_Scene);
 
-	for (size_t i = 0; i < 500; i++)
+	/* Creating Entites*/
+	for (size_t i = 0; i < 100; i++)
 	{
 		HyperEntity square = m_Scene->CreateEntity("Square-" + std::to_string(i));
 		square.AddComponent<SpriteRendererComponent>(glm::vec4(Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), 1.0f));
 		auto& transform = square.GetComponent<TransformComponent>();
-		static constexpr int32_t RANGE = 100;
+		static constexpr int32_t RANGE = 25;
 		transform.Position += glm::vec3{ 1.0f * Random::Int16(-RANGE, RANGE), 1.0f * Random::Int16(-RANGE, RANGE), 1.0f * Random::Int16(-RANGE, RANGE) };
+		transform.Rotation += glm::vec3{ 1.0f * Random::Int16(-RANGE, RANGE), 1.0f * Random::Int16(-RANGE, RANGE), 1.0f * Random::Int16(-RANGE, RANGE) };
 	}
-
 }
 
 void EditorLayer::OnRender()
@@ -40,7 +52,7 @@ void EditorLayer::OnRender()
 	ImGuiStyle& style = ImGui::GetStyle();
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
 
-	ImGui::Begin("Editor");
+	ImGui::Begin(ICON_FK_WRENCH " Editor");
 	ImGui::BeginChild("EditorRenderer");
 
 	ImVec2 editorWindowPos = ImGui::GetWindowPos();
@@ -59,7 +71,7 @@ void EditorLayer::OnRender()
 	ImGui::EndChild();
 	ImGui::End();
 
-	ImGui::Begin("Game");
+	ImGui::Begin(ICON_FK_GAMEPAD " Game");
 	ImGui::BeginChild("GameRenderer");
 
 	ImVec2 gameWindowPos = ImGui::GetWindowPos();
@@ -80,7 +92,7 @@ void EditorLayer::OnRender()
 
 	ImGui::PopStyleVar();
 
-	ImGui::Begin("Assets");
+	ImGui::Begin(ICON_FK_FILES_O " Assets");
 	ImGui::End();
 }
 
@@ -121,11 +133,11 @@ void EditorLayer::CreateDockingMenu()
 		ImGuiID dockRightId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Right, 0.275f, nullptr, &dockMainId);
 		ImGuiID dockDownId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.2f, nullptr, &dockMainId);
 
-		ImGui::DockBuilderDockWindow("Hierarchy", dockLeftTopId);
-		ImGui::DockBuilderDockWindow("Inspector", dockRightId);
-		ImGui::DockBuilderDockWindow("Assets", dockLeftDownId);
-		ImGui::DockBuilderDockWindow("Game", dockMainId);
-		ImGui::DockBuilderDockWindow("Editor", dockMainId);
+		ImGui::DockBuilderDockWindow(ICON_FK_LIST " Hierarchy", dockLeftTopId);
+		ImGui::DockBuilderDockWindow(ICON_FK_INFO_CIRCLE " Inspector", dockRightId);
+		ImGui::DockBuilderDockWindow(ICON_FK_FILES_O " Assets", dockLeftDownId);
+		ImGui::DockBuilderDockWindow(ICON_FK_GAMEPAD " Game", dockMainId);
+		ImGui::DockBuilderDockWindow(ICON_FK_WRENCH " Editor", dockMainId);
 
 		ImGui::DockBuilderFinish(dockMainId);
 	}

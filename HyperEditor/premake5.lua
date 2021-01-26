@@ -16,6 +16,7 @@ project "HyperEditor"
 
 	includedirs
 	{
+		"src",
 		"%{wks.location}/HyperEngine/src",
 		"%{wks.location}/HyperEngine/src/Hyperion",
 		"%{wks.location}/HyperEngine/vendor",
