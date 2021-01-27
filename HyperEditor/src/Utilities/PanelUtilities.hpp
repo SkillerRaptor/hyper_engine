@@ -4,6 +4,7 @@
 
 #include <array>
 #include <string>
+#include <vector>
 
 namespace Hyperion::PanelUtilities
 {
@@ -22,6 +23,8 @@ namespace Hyperion::PanelUtilities
 	void DrawDragVec2(const std::string& title, glm::vec2& vector, float speed = 0.1f, float min = 0.0f, float max = 0.0f, const std::array<std::string, 2>& = { "X", "Y" });
 	void DrawDragVec3(const std::string& title, glm::vec3& vector, float speed = 0.1f, float min = 0.0f, float max = 0.0f, const std::array<std::string, 3>& = { "X", "Y", "Z" });
 	void DrawDragVec4(const std::string& title, glm::vec4& vector, float speed = 0.1f, float min = 0.0f, float max = 0.0f, const std::array<std::string, 4>& = { "X", "Y", "Z", "W" });
+
+	void DrawCombo(const std::string& title, std::string& currentItem, const std::vector<std::string>& items);
 
 	void DrawSelection();
 	void DrawRectAroundWindow(const glm::vec4& color);

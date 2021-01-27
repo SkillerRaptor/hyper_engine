@@ -250,6 +250,35 @@ namespace Hyperion::PanelUtilities
 		ImGui::PopID();
 	}
 
+	void DrawCombo(const std::string& title, std::string& currentItem, const std::vector<std::string>& items)
+	{
+		ImGui::PushID(title.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, 150.0f);
+		ImGui::Text(title.c_str());
+		ImGui::NextColumn();
+
+		ImGui::SetNextItemWidth(-1);
+
+		if (ImGui::BeginCombo("##combo", currentItem.c_str()))
+		{
+			for (size_t i = 0; i < items.size(); i++)
+			{
+				bool isSelected = currentItem == items[i];
+				if (ImGui::Selectable(items[i].c_str(), isSelected))
+					currentItem = items[i];
+				if (isSelected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+	}
+
 	void DrawSelection()
 	{
 		ImVec2 pos = ImGui::GetCursorScreenPos();

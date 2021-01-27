@@ -148,6 +148,25 @@ void SceneHierarchyPanel::DrawComponentInformation()
 		{
 			PanelUtilities::DrawColorEdit4("Background Color", component.BackgroundColor);
 
+			std::string currentProjection;
+			switch (component.Projection)
+			{
+			case CameraComponent::ProjectionType::ORTHOGRAPHIC:
+				currentProjection = "Orthographic";
+				break;
+			case CameraComponent::ProjectionType::PERSPECTIVE:
+				currentProjection = "Perspective";
+				break;
+			default:
+				break;
+			}
+
+			PanelUtilities::DrawCombo("Projection", currentProjection, { "Orthographic", "Perspective" });
+			if (currentProjection == "Orthographic")
+				component.Projection = CameraComponent::ProjectionType::ORTHOGRAPHIC;
+			else if (currentProjection == "Perspective")
+				component.Projection = CameraComponent::ProjectionType::PERSPECTIVE;
+
 			PanelUtilities::DrawDragFloat("Field of View", component.FOV, 1.0f, 0.1f, 179.9f);
 			if (component.FOV <= 0.0f) component.FOV = 0.1f;
 
