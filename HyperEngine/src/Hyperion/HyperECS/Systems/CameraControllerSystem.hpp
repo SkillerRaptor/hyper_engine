@@ -14,10 +14,23 @@ namespace Hyperion
 
 		virtual void OnUpdate(Registry& registry, Timestep timeStep) override
 		{
-			registry.Each<CameraControllerComponent, TransformComponent>([&](Entity entity, CameraControllerComponent& cameraController, TransformComponent& transform)
+			registry.Each<CameraComponent, CameraControllerComponent, TransformComponent>([&](Entity entity, CameraComponent& cameraComponent, CameraControllerComponent& cameraController, TransformComponent& transform)
 				{
-					transform.Position.x += (float)(cameraController.MoveSpeed * timeStep * Input::GetAxis(InputAxis::HORIZONTAL));
-					transform.Position.y -= (float)(cameraController.MoveSpeed * timeStep * Input::GetAxis(InputAxis::VERTICAL));
+					switch (cameraComponent.Projection)
+					{
+					case CameraComponent::ProjectionType::ORTHOGRAPHIC:
+					{
+						transform.Position.x += (float)(cameraController.MoveSpeed * timeStep * Input::GetAxis(InputAxis::HORIZONTAL));
+						transform.Position.y += (float)(cameraController.MoveSpeed * timeStep * Input::GetAxis(InputAxis::VERTICAL));
+						break;
+					}
+					case CameraComponent::ProjectionType::PERSPECTIVE:
+					{
+						break;
+					}
+					default:
+						break;
+					}
 				});
 		}
 	};

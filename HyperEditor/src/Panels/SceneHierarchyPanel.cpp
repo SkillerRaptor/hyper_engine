@@ -148,7 +148,7 @@ void SceneHierarchyPanel::DrawComponentInformation()
 		{
 			PanelUtilities::DrawColorEdit4("Background Color", component.BackgroundColor);
 
-			PanelUtilities::DrawDragFloat("Field of View", component.FOV, 1.0f, 0.1f, 360.0f);
+			PanelUtilities::DrawDragFloat("Field of View", component.FOV, 1.0f, 0.1f, 179.9f);
 			if (component.FOV <= 0.0f) component.FOV = 0.1f;
 
 			PanelUtilities::DrawDragVec2("Clipping Planes", component.ClippingPlanes, 1.0f, 0.1f, 10000.0f, { "Near", "Far" });
