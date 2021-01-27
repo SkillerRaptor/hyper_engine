@@ -11,19 +11,16 @@
 namespace Hyperion
 {
 	ImGuiLayer::ImGuiLayer()
-		: OverlayLayer("ImGui Layer")
+		: OverlayLayer("ImGui Layer"), m_EditorCamera(glm::vec3{ 0.0f, 0.0f, 0.0f }, glm::vec2{ 0.1f, 1000.0f }, glm::vec2{ 1.0f, 1.0f }, EditorCamera::ProjectionType::PERSPECTIVE, 10.0f, 90.0f, 1.0f)
 	{
 	}
 
 	void ImGuiLayer::OnAttach()
 	{
 		m_ImGuiRenderer = ImGuiRenderer::Construct(m_RenderContext);
-		m_EditorCamera = CreateRef<EditorCamera>(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec2(1280.0f, 720.0f), 25.0f, 45.0f, 1.0f, 0.1f, 1000.0f, -90.0f, 0.0f, EditorCamera::CameraTypeInfo::PROJECTION);
-		//m_EditorCamera = CreateRef<EditorCamera>(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec2(1280.0f, 720.0f), 0.1f, 45.0f, 1.0f, 0.0f, 1000.0f, -90.0f, 0.0f, EditorCamera::CameraTypeInfo::ORTHOGRAPHIC);
 
-		m_EditorCamera->m_ShaderManager = m_RenderContext->GetShaderManager();
-		m_EditorCamera->UpdateProjectionMatrix();
-		m_EditorCamera->UpdateViewMatrix();
+		m_EditorCamera.m_RenderContext = m_RenderContext;
+		m_EditorCamera.UpdateUniforms();
 
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
@@ -33,12 +30,12 @@ namespace Hyperion
 
 		io.Fonts->AddFontFromFileTTF("assets/fonts/Ruda-Regular.ttf", 15.0f);
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/Ruda-Regular.ttf", 15.0f);
-		
+
 		ImGui::StyleColorsDark();
 
 		SetupStyle();
 
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get()->GetWindow()->GetWindow());
+		auto* window = static_cast<GLFWwindow*>(Application::Get()->GetWindow()->GetWindow());
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 		m_ImGuiRenderer->OnAttach();
 	}
@@ -52,17 +49,12 @@ namespace Hyperion
 
 	void ImGuiLayer::OnEvent(Event& event)
 	{
-		m_EditorCamera->OnEvent(event);
+		m_EditorCamera.OnEvent(event);
 	}
 
 	void ImGuiLayer::OnUpdate(Timestep timeStep)
 	{
-		m_EditorCamera->OnUpdate(timeStep);
-	}
-
-	void ImGuiLayer::OnRender()
-	{
-		m_EditorCamera->SetViewportSize(glm::vec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y));
+		m_EditorCamera.OnUpdate(timeStep);
 	}
 
 	void ImGuiLayer::Start()
@@ -83,10 +75,10 @@ namespace Hyperion
 
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			GLFWwindow* backupContext = glfwGetCurrentContext();
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
-			glfwMakeContextCurrent(backup_current_context);
+			glfwMakeContextCurrent(backupContext);
 		}
 	}
 
@@ -142,5 +134,10 @@ namespace Hyperion
 		style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
 		style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.25f, 1.00f, 0.00f, 0.43f);
 		style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(1.00f, 0.98f, 0.95f, 0.73f);
+	}
+
+	EditorCamera& ImGuiLayer::GetEditorCamera()
+	{
+		return m_EditorCamera;
 	}
 }

@@ -728,7 +728,7 @@ namespace Hyperion
 				{
 					using C = decltype(*v);
 					RemoveSystem<C>();
-				} ((T*)nullptr), ...);
+		} ((T*)nullptr), ...);
 		}
 
 		/**
@@ -797,10 +797,10 @@ namespace Hyperion
 			#ifdef HYPERECS_MUTEX
 				systemLock.lock();
 			#endif /* HYPERECS_MUTEX */
-		};
+			};
 			(lambda.template operator() < T > (), ...);
 			return !shouldSkip;
-		}
+			}
 
 		/**
 		 * @brief Getting all systems
@@ -854,5 +854,5 @@ namespace Hyperion
 			for (auto& system : m_Systems)
 				system.second->OnEvent(m_Registry, event);
 		}
-		};
-		}
+	};
+}

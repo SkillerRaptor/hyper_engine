@@ -18,7 +18,7 @@ SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
 void SceneHierarchyPanel::OnRender()
 {
 	ImGui::Begin(ICON_FK_LIST " Hierarchy");
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
 	bool opened = ImGui::TreeNodeEx(m_Scene->GetName().c_str(), flags);
 
 	if (m_SceneSelected)
@@ -49,9 +49,13 @@ void SceneHierarchyPanel::OnRender()
 
 	ImGui::Begin(ICON_FK_INFO_CIRCLE " Inspector");
 	if (m_SceneSelected)
+	{
 		DrawSceneInformation();
+	}
 	else if (m_SelectedEntity.GetEntityHandle().IsHandleValid())
+	{
 		DrawComponentInformation();
+	}
 	ImGui::End();
 }
 
@@ -88,16 +92,6 @@ void SceneHierarchyPanel::DrawEntityNode(HyperEntity entity)
 
 	if (opened)
 	{
-		if (entity.HasComponent<TransformComponent>())
-			ImGui::BulletText("Transform Component");
-		if (entity.HasComponent<SpriteRendererComponent>())
-			ImGui::BulletText("Sprite Renderer Component");
-		if (entity.HasComponent<CameraComponent>())
-			ImGui::BulletText("Camera Component");
-		if (entity.HasComponent<CameraControllerComponent>())
-			ImGui::BulletText("Camera Controller Component");
-		if (entity.HasComponent<CharacterControllerComponent>())
-			ImGui::BulletText("Character Controller Component");
 		ImGui::TreePop();
 	}
 }
@@ -108,6 +102,7 @@ void SceneHierarchyPanel::DrawComponentInformation()
 	HyperEntity& entity = m_SelectedEntity;
 
 	ImGui::PushItemWidth(-1.0f);
+
 	if (entity.HasComponent<TagComponent>())
 	{
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -121,7 +116,7 @@ void SceneHierarchyPanel::DrawComponentInformation()
 			tag = std::string(buffer).empty() ? "Empty!" : std::string(buffer);
 		ImGui::SameLine();
 		ImGuiStyle& style = ImGui::GetStyle();
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.502f, 0.502f, 0.502f, 1.00f));
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.602f, 0.602f, 0.602f, 1.00f));
 		ImGui::Text("%u", entity.GetEntityHandle());
 		ImGui::PopStyleColor();
 	}
@@ -151,18 +146,24 @@ void SceneHierarchyPanel::DrawComponentInformation()
 
 	DrawComponent<CameraComponent>("Camera", [&](CameraComponent& component)
 		{
-			PanelUtilities::DrawDragUnsignedInt("Width", component.Width, 1);
+			PanelUtilities::DrawColorEdit4("Background Color", component.BackgroundColor);
 
-			PanelUtilities::DrawDragUnsignedInt("Height", component.Height, 1);
+			PanelUtilities::DrawDragFloat("Field of View", component.FOV, 1.0f, 0.1f, 360.0f);
+			if (component.FOV <= 0.0f) component.FOV = 0.1f;
 
-			PanelUtilities::DrawDragFloat("Zoom", component.Zoom, 0.1f, 0.1f, (std::numeric_limits<float>::max)());
-			if (component.Zoom <= 0.0f) component.Zoom = 0.1f;
+			PanelUtilities::DrawDragVec2("Clipping Planes", component.ClippingPlanes, 1.0f, 0.1f, 10000.0f, { "Near", "Far" });
+			PanelUtilities::DrawDragVec2("Viewport Rect", component.ViewportRect, 0.1f, 0.0f, 1.0f, { "W", "H" });
 
-			PanelUtilities::DrawDragFloat("Near Plane", component.NearPlane);
-
-			PanelUtilities::DrawDragFloat("Far Plane", component.FarPlane);
-
+			bool primary = component.Primary;
 			PanelUtilities::DrawCheckbox("Primary", component.Primary);
+			if (primary == false && component.Primary == true)
+			{
+				registry.Each<CameraComponent>([&](Entity e, CameraComponent& cameraComponent)
+					{
+						if (e.Handle != entity.GetEntityHandle().Handle)
+							cameraComponent.Primary = false;
+					});
+			}
 		});
 
 	DrawComponent<CameraControllerComponent>("Camera Controller", [&](CameraControllerComponent& component)
@@ -172,12 +173,6 @@ void SceneHierarchyPanel::DrawComponentInformation()
 
 			PanelUtilities::DrawDragFloat("Zoom Speed", component.ZoomSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
 			if (component.ZoomSpeed < 0.0f) component.ZoomSpeed = 0.0f;
-		});
-
-	DrawComponent<CharacterControllerComponent>("Character Controller", [&](CharacterControllerComponent& component)
-		{
-			PanelUtilities::DrawDragFloat("Speed", component.Speed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
-			if (component.Speed < 0.0f) component.Speed = 0.0f;
 		});
 
 	ImGui::Columns(1);
@@ -200,14 +195,12 @@ void SceneHierarchyPanel::DrawComponentInformation()
 
 	if (!m_SelectedEntity.HasComponent<SpriteRendererComponent>() ||
 		!m_SelectedEntity.HasComponent<CameraComponent>() ||
-		!m_SelectedEntity.HasComponent<CameraControllerComponent>() ||
-		!m_SelectedEntity.HasComponent<CharacterControllerComponent>())
+		!m_SelectedEntity.HasComponent<CameraControllerComponent>())
 		addComponent = true;
 
 	if (m_SelectedEntity.HasComponent<SpriteRendererComponent>() ||
 		m_SelectedEntity.HasComponent<CameraComponent>() ||
-		m_SelectedEntity.HasComponent<CameraControllerComponent>() ||
-		m_SelectedEntity.HasComponent<CharacterControllerComponent>())
+		m_SelectedEntity.HasComponent<CameraControllerComponent>())
 		removeComponent = true;
 
 	if (addComponent)
@@ -258,9 +251,8 @@ void SceneHierarchyPanel::DrawAddComponentPopup()
 		World& world = m_Scene->GetWorld();
 
 		DrawAddComponentMenu<SpriteRendererComponent>(glm::vec4{ 1.0f });
-		DrawAddComponentMenu<CameraComponent>(1280, 720, 5.0f, 0.1f, 1.0f, false, CameraComponent::CameraTypeInfo::ORTHOGRAPHIC);
+		DrawAddComponentMenu<CameraComponent>(glm::vec4{ 0.75f, 0.75f, 0.75f, 1.0f }, CameraComponent::ProjectionType::PERSPECTIVE, 90.0f, glm::vec2{ 0.1f, 1000.0f }, glm::vec2{ 1.0f, 1.0f }, false);
 		DrawAddComponentMenu<CameraControllerComponent>(0.1f, 1.0f);
-		DrawAddComponentMenu<CharacterControllerComponent>(1.0f);
 
 		ImGui::EndPopup();
 	}
@@ -275,7 +267,6 @@ void SceneHierarchyPanel::DrawRemoveComponentPopup()
 		DrawRemoveComponentMenu<SpriteRendererComponent>();
 		DrawRemoveComponentMenu<CameraComponent>();
 		DrawRemoveComponentMenu<CameraControllerComponent>();
-		DrawRemoveComponentMenu<CharacterControllerComponent>();
 
 		ImGui::EndPopup();
 	}

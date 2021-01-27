@@ -14,15 +14,6 @@ struct GLFWwindow;
 
 namespace Hyperion
 {
-	struct ImGuiFrameSizeInfo
-	{
-		uint32_t XPos;
-		uint32_t YPos;
-
-		uint32_t Width;
-		uint32_t Height;
-	};
-
 	enum class GraphicsAPI
 	{
 		DIRECTX_11,
@@ -55,9 +46,6 @@ namespace Hyperion
 		GLFWwindow* m_Window;
 		GraphicsAPI m_GraphicsAPI;
 
-		ImGuiFrameSizeInfo m_ImGuiEditorSizeInfo;
-		ImGuiFrameSizeInfo m_ImGuiGameSizeInfo;
-
 		Ref<SceneRecorder> m_SceneRecorder;
 		Ref<Renderer2D> m_Renderer2D;
 		Ref<ShaderManager> m_ShaderManager;
@@ -81,9 +69,6 @@ namespace Hyperion
 		GLFWwindow* GetWindow() const { return m_Window; }
 		GraphicsAPI GetGraphicsAPI() const { return m_GraphicsAPI; }
 
-		ImGuiFrameSizeInfo& GetImGuiEditorSizeInfo() { return m_ImGuiEditorSizeInfo; }
-		ImGuiFrameSizeInfo& GetImGuiGameSizeInfo() { return m_ImGuiGameSizeInfo; }
-
 		Ref<SceneRecorder> GetSceneRecorder() { return m_SceneRecorder; }
 		Ref<Renderer2D> GetRenderer2D() { return m_Renderer2D; }
 		Ref<ShaderManager> GetShaderManager() { return m_ShaderManager; }
@@ -93,6 +78,6 @@ namespace Hyperion
 
 	protected:
 		RenderContext(GraphicsAPI graphicsAPI)
-			: m_Window(nullptr), m_GraphicsAPI(graphicsAPI), m_ImGuiEditorSizeInfo({}), m_ImGuiGameSizeInfo({}) {}
+			: m_Window(nullptr), m_GraphicsAPI(graphicsAPI) {}
 	};
 }

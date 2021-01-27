@@ -16,6 +16,7 @@ namespace Hyperion
 	{
 	private:
 		std::string m_Name;
+
 		Ref<Renderer2D> m_Renderer2D;
 		Ref<World> m_World;
 
@@ -30,14 +31,13 @@ namespace Hyperion
 
 		void OnRender();
 		void OnUpdate(Timestep timeStep);
-
 		void OnEvent(Event& event);
 
 		void Each(const typename std::common_type<std::function<void(HyperEntity)>>::type function);
 
-		World& GetWorld();
-
 		void SetName(const std::string& name);
 		std::string GetName() const;
+
+		World& GetWorld();
 	};
 }

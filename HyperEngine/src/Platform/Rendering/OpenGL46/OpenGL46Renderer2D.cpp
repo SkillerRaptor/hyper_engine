@@ -64,10 +64,10 @@ namespace Hyperion
 			return;
 
 		uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadVertexBufferPtr - (uint8_t*)m_QuadVertexBufferBase);
-		m_QuadVertexBuffer->Bind({ 0 });
+		m_QuadVertexBuffer->Bind({ 1 });
 		m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize / sizeof(Vertex2D));
 
-		m_ShaderManager->UseShader({ 0 });
+		m_ShaderManager->UseShader({ 1 });
 
 		m_QuadVertexArray->Bind();
 		glDrawElements(GL_TRIANGLES, (unsigned int)m_QuadIndexCount, GL_UNSIGNED_INT, nullptr);
@@ -115,13 +115,13 @@ namespace Hyperion
 		StartBatch();
 	}
 
-	void OpenGL46Renderer2D::SetShaderManager(Ref<ShaderManager> shaderManager)
+	void OpenGL46Renderer2D::SetCamera(const glm::vec3& position, const glm::vec3& rotation, float fov, const glm::vec2& clippingPlanes, const glm::vec2& viewportRect, CameraComponent::ProjectionType projectionType)
 	{
-		m_ShaderManager = shaderManager;
+
 	}
 
-	void OpenGL46Renderer2D::SetTextureManager(Ref<TextureManager> textureManager)
+	void OpenGL46Renderer2D::SetCamera(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix)
 	{
-		m_TextureManager = textureManager;
+
 	}
 }

@@ -11,8 +11,8 @@ class EditorLayer : public OverlayLayer
 {
 private:
 	Ref<Scene> m_Scene;
+	ShaderHandle m_SpriteShader = { 0 }; // FIXME: TEMP
 
-	ShaderHandle m_SpriteShader = { 0 };
 	AssetsPanel m_AssetsPanel;
 	SceneHierarchyPanel m_SceneHierarchyPanel;
 
@@ -35,6 +35,4 @@ private:
 	void OpenScene();
 	void SaveScene();
 	void SaveAsScene();
-
-	void DrawSelection();
 };

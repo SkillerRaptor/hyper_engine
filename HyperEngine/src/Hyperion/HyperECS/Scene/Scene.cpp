@@ -1,7 +1,7 @@
 #include "Scene.hpp"
 
 #include "HyperECS/HyperEntity.hpp"
-#include "HyperECS/Systems/CharacterControllerSystem.hpp"
+#include "HyperECS/Systems/CameraControllerSystem.hpp"
 #include "HyperECS/Systems/SpriteRendererSystem.hpp"
 
 namespace Hyperion
@@ -20,7 +20,7 @@ namespace Hyperion
 	{
 		m_World = CreateRef<World>(m_Renderer2D);
 
-		m_World->AddSystem<CharacterControllerSystem>();
+		m_World->AddSystem<CameraControllerSystem>();
 		m_World->AddSystem<SpriteRendererSystem>();
 	}
 
@@ -60,11 +60,6 @@ namespace Hyperion
 			});
 	}
 
-	World& Scene::GetWorld()
-	{
-		return *m_World;
-	}
-
 	void Scene::SetName(const std::string& name)
 	{
 		m_Name = name;
@@ -73,5 +68,10 @@ namespace Hyperion
 	std::string Scene::GetName() const
 	{
 		return m_Name;
+	}
+
+	World& Scene::GetWorld()
+	{
+		return *m_World;
 	}
 }

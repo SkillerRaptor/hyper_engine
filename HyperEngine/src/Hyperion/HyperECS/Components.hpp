@@ -42,24 +42,25 @@ namespace Hyperion
 
 	struct CameraComponent
 	{
-		uint32_t Width;
-		uint32_t Height;
+		glm::vec4 BackgroundColor;
 
-		float Zoom;
-		float NearPlane;
-		float FarPlane;
-
-		bool Primary;
-		enum class CameraTypeInfo
+		enum class ProjectionType
 		{
 			ORTHOGRAPHIC,
-			PROJECTION
-		} CameraType;
+			PERSPECTIVE
+		} Projection;
+
+		float FOV;
+
+		glm::vec2 ClippingPlanes;
+		glm::vec2 ViewportRect;
+
+		bool Primary;
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
-		CameraComponent(uint32_t width, uint32_t height, float zoom, float nearPlane, float farPlane, bool primary, CameraTypeInfo cameraType)
-			: Width(width), Height(height), Zoom(zoom), NearPlane(nearPlane), FarPlane(farPlane), Primary(primary), CameraType(cameraType) {}
+		CameraComponent(const glm::vec4& backgroundColor, ProjectionType projectionType, float fov, const glm::vec2& clippingPlanes, const glm::vec2& viewportRect, bool primary)
+			: BackgroundColor(backgroundColor), Projection(projectionType), FOV(fov), ClippingPlanes(clippingPlanes), ViewportRect(viewportRect), Primary(primary) {}
 	};
 
 	struct CameraControllerComponent

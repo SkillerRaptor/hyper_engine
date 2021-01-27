@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "HyperECS/Components.hpp"
 #include "HyperRendering/Renderer.hpp"
 
 namespace Hyperion
@@ -44,8 +45,12 @@ namespace Hyperion
 
 		virtual void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale, const glm::vec4& color) = 0;
 
-		virtual void SetShaderManager(Ref<ShaderManager> shaderManager) = 0;
-		virtual void SetTextureManager(Ref<TextureManager> textureManager) = 0;
+		virtual void SetCamera(const glm::vec3& position, const glm::vec3& rotation, float fov, const glm::vec2& clippingPlanes, const glm::vec2& viewportRect, CameraComponent::ProjectionType projectionType) = 0;
+		virtual void SetCamera(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) = 0;
+
+		void SetShaderManager(Ref<ShaderManager> shaderManager) { m_ShaderManager = shaderManager; }
+		void SetTextureManager(Ref<TextureManager> textureManager) { m_TextureManager = textureManager; }
+		void SetSceneRecorder(Ref<SceneRecorder> sceneRecorder) { m_SceneRecorder = sceneRecorder; }
 
 	protected:
 		virtual void StartBatch() = 0;

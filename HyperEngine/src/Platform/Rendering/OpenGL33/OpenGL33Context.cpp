@@ -45,6 +45,7 @@ namespace Hyperion
 		m_SceneRecorder = CreateRef<OpenGL33SceneRecorder>(m_TextureManager, m_Window);
 		m_Renderer2D->SetShaderManager(m_ShaderManager);
 		m_Renderer2D->SetTextureManager(m_TextureManager);
+		m_Renderer2D->SetSceneRecorder(m_SceneRecorder);
 
 		glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 		glEnable(GL_DEPTH_TEST);

@@ -2,9 +2,8 @@
 
 #include "HyperCore/Core.hpp"
 #include "HyperLayer/OverlayLayer.hpp"
+#include "HyperRendering/EditorCamera.hpp"
 #include "HyperRendering/ImGuiRenderer.hpp"
-
-#include "Platform/Rendering/ImGui/EditorCamera.hpp"
 
 namespace Hyperion
 {
@@ -12,8 +11,8 @@ namespace Hyperion
 	{
 	private:
 		Ref<ImGuiRenderer> m_ImGuiRenderer;
-		Ref<EditorCamera> m_EditorCamera;
-			 
+		EditorCamera m_EditorCamera;
+
 	public:
 		ImGuiLayer();
 
@@ -23,10 +22,11 @@ namespace Hyperion
 		virtual void OnEvent(Event& event) override;
 
 		virtual void OnUpdate(Timestep timeStep) override;
-		virtual void OnRender() override;
 
 		void Start();
 		void End();
+
+		EditorCamera& GetEditorCamera();
 
 	private:
 		void SetupStyle();

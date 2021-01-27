@@ -53,10 +53,10 @@ namespace Hyperion
 					YAML::Node* componentNode = new YAML::Node();
 					auto& component = entity.GetComponent<CameraComponent>();
 
-					(*componentNode)["Zoom"] = component.Zoom;
-					(*componentNode)["NearPlane"] = component.NearPlane;
-					(*componentNode)["FarPlane"] = component.FarPlane;
-					(*componentNode)["Primary"] = component.Primary;
+					//(*componentNode)["Zoom"] = component.Zoom;
+					//(*componentNode)["NearPlane"] = component.NearPlane;
+					//(*componentNode)["FarPlane"] = component.FarPlane;
+					//(*componentNode)["Primary"] = component.Primary;
 
 					entityNode["CameraComponent"] = componentNode;
 				}

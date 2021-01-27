@@ -1,5 +1,6 @@
 #include "Application.hpp"
 
+#include "HyperECS/Components.hpp"
 #include "HyperEvents/WindowEvents.hpp"
 #include "HyperRendering/ImGuiLayer.hpp"
 #include "HyperUtilities/Random.hpp"
@@ -55,7 +56,7 @@ namespace Hyperion
 		bool enableCapture = m_LayerStack->GetOverlayLayers().size() > 1;
 
 		if (enableCapture)
-			sceneRecorder->InitRecording();
+			sceneRecorder->InitRecorder();
 
 		while (m_Running)
 		{
@@ -73,23 +74,61 @@ namespace Hyperion
 				m_EventBus.pop();
 			}
 
-			if (enableCapture)
-				sceneRecorder->StartRecording();
-
-			for (Layer* layer : m_LayerStack->GetLayers())
+			bool validCamera = false;
+			TransformComponent transformComponent;
+			CameraComponent cameraComponent;
+			for (Entity entity : m_Scene->GetWorld().GetEntities<CameraComponent>())
 			{
-				layer->OnUpdate(timeStep);
-				layer->OnRender();
+				CameraComponent& entityCameraComponent = m_Scene->GetWorld().GetComponent<CameraComponent>(entity);
+				if (!entityCameraComponent.Primary)
+					continue;
+
+				validCamera = true;
+				transformComponent = m_Scene->GetWorld().GetComponent<TransformComponent>(entity);
+				cameraComponent = entityCameraComponent;
+				break;
 			}
 
-			m_Scene->OnUpdate(timeStep);
-			m_Scene->OnRender();
+			sceneRecorder->RebuildRecoder();
 
 			if (enableCapture)
-				sceneRecorder->EndRecording();
+				sceneRecorder->StartGameRecording();
+
+			if (validCamera)
+			{
+				m_Window->GetContext()->GetRenderer2D()->SetCamera(transformComponent.Position, transformComponent.Rotation, cameraComponent.FOV, cameraComponent.ClippingPlanes, cameraComponent.ViewportRect, cameraComponent.Projection);
+
+				for (Layer* layer : m_LayerStack->GetLayers())
+				{
+					layer->OnUpdate(timeStep);
+					layer->OnRender();
+				}
+
+				m_Scene->OnUpdate(timeStep);
+				m_Scene->OnRender();
+			}
+
+			if (enableCapture)
+				sceneRecorder->EndGameRecording();
 
 			if (enableCapture)
 			{
+				EditorCamera& editorCamera = m_ImGuiLayer->GetEditorCamera();
+				m_Window->GetContext()->GetRenderer2D()->SetCamera(editorCamera.GetProjectionMatrix(), editorCamera.GetViewMatrix());
+
+				sceneRecorder->StartEditorRecording();
+
+				for (Layer* layer : m_LayerStack->GetLayers())
+				{
+					layer->OnUpdate(timeStep);
+					layer->OnRender();
+				}
+
+				m_Scene->OnUpdate(timeStep);
+				m_Scene->OnRender();
+
+				sceneRecorder->EndEditorRecording();
+
 				m_ImGuiLayer->Start();
 				for (OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
 				{

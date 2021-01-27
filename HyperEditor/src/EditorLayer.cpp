@@ -1,9 +1,12 @@
 #include "EditorLayer.hpp"
 
+#include <glm/gtc/constants.hpp>
+
 #include <imgui.h>
 #include <imgui_internal.h>
 
 #include "Utilities/FontAwesome.hpp"
+#include "Utilities/PanelUtilities.hpp"
 
 EditorLayer::EditorLayer(Ref<Scene> scene)
 	: OverlayLayer("Editor Layer"), m_Scene(scene), m_AssetsPanel(), m_SceneHierarchyPanel(m_Scene)
@@ -23,18 +26,36 @@ void EditorLayer::OnAttach()
 	static const ImWchar icon_ranges[] = { 0xf000, 0xf307, 0 };
 	io.Fonts->AddFontFromFileTTF("assets/fonts/fontawesome-webfont.ttf", 14.0f, &config, icon_ranges);
 
-	/* Loadin Shaders */
+	/* Loading Shaders */
 	m_SpriteShader = m_RenderContext->GetShaderManager()->CreateShader("assets/shaders/SpriteShaderVertex.glsl", "assets/shaders/SpriteShaderFragment.glsl");
 
-	/* Creating Entites*/
-	for (size_t i = 0; i < 100; i++)
+	float phi = glm::pi<float>() * (3.0f - glm::sqrt(5.0f));
+
+	static constexpr const size_t PLANE_COUNT = 100;
+	static constexpr const size_t RADIUS = 20;
+
+	/* Creating Entities */
+	for (size_t i = 0; i < PLANE_COUNT; i++)
 	{
 		HyperEntity square = m_Scene->CreateEntity("Square-" + std::to_string(i));
 		square.AddComponent<SpriteRendererComponent>(glm::vec4(Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), 1.0f));
 		auto& transform = square.GetComponent<TransformComponent>();
-		static constexpr int32_t RANGE = 25;
-		transform.Position += glm::vec3{ 1.0f * Random::Int16(-RANGE, RANGE), 1.0f * Random::Int16(-RANGE, RANGE), 1.0f * Random::Int16(-RANGE, RANGE) };
-		transform.Rotation += glm::vec3{ 1.0f * Random::Int16(-RANGE, RANGE), 1.0f * Random::Int16(-RANGE, RANGE), 1.0f * Random::Int16(-RANGE, RANGE) };
+
+		float y = 1 - (i / (static_cast<float>(PLANE_COUNT) - 1.0f)) * 2.0f;
+		float radius = glm::sqrt(1.0f - y * y);
+
+		float theta = phi * i;
+
+		float x = glm::cos(theta) * radius;
+		float z = glm::sin(theta) * radius;
+
+		transform.Position = glm::vec3{ x * RADIUS, y * RADIUS, z * RADIUS };
+
+		glm::vec3 direction = transform.Position - glm::vec3{ 0.0f };
+		float yaw = atan2(direction.x, direction.z) * 180.0f / glm::pi<float>();
+		auto padj = static_cast<float>(glm::sqrt(glm::pow(x, 2) + glm::pow(z, 2)));
+		auto pitch = static_cast<float>(atan2(padj, y) * 180.0 / glm::pi<float>());
+		transform.Rotation = glm::vec3{ 0.0f, yaw, pitch };
 	}
 }
 
@@ -52,18 +73,11 @@ void EditorLayer::OnRender()
 	ImGui::Begin(ICON_FK_WRENCH " Editor");
 	ImGui::BeginChild("EditorRenderer");
 
-	ImVec2 editorWindowPos = ImGui::GetWindowPos();
-	ImVec2 editorWindowSize = ImGui::GetWindowSize();
+	ImVec2 editorViewportPanelSize = ImGui::GetContentRegionAvail();
 
-	ImGuiFrameSizeInfo& imGuiEditorSizeInfo = m_RenderContext->GetImGuiEditorSizeInfo();
-	imGuiEditorSizeInfo.XPos = static_cast<uint32_t>(editorWindowPos.x);
-	imGuiEditorSizeInfo.YPos = static_cast<uint32_t>(editorWindowPos.y);
-	imGuiEditorSizeInfo.Width = static_cast<uint32_t>(editorWindowSize.x);
-	imGuiEditorSizeInfo.Height = static_cast<uint32_t>(editorWindowSize.y);
-
-	//m_EditorCamera->SetViewportSize(editorWindowSize.x, editorWindowSize.y);
-
-	sceneRecorder->RenderImage();
+	sceneRecorder->SetEditorFocused(ImGui::IsWindowFocused() && ImGui::IsWindowHovered());
+	sceneRecorder->RenderEditorImage();
+	sceneRecorder->SetEditorViewportSize(glm::vec2{ editorViewportPanelSize.x, editorViewportPanelSize.y });
 
 	ImGui::EndChild();
 	ImGui::End();
@@ -71,18 +85,11 @@ void EditorLayer::OnRender()
 	ImGui::Begin(ICON_FK_GAMEPAD " Game");
 	ImGui::BeginChild("GameRenderer");
 
-	ImVec2 gameWindowPos = ImGui::GetWindowPos();
-	ImVec2 gameWindowSize = ImGui::GetWindowSize();
+	ImVec2 gameViewportPanelSize = ImGui::GetContentRegionAvail();
 
-	ImGuiFrameSizeInfo& imGuiGameSizeInfo = m_RenderContext->GetImGuiGameSizeInfo();
-	imGuiGameSizeInfo.XPos = static_cast<uint32_t>(gameWindowPos.x);
-	imGuiGameSizeInfo.YPos = static_cast<uint32_t>(gameWindowPos.y);
-	imGuiGameSizeInfo.Width = static_cast<uint32_t>(gameWindowSize.x);
-	imGuiGameSizeInfo.Height = static_cast<uint32_t>(gameWindowSize.y);
-
-	//m_GameCamera->SetViewportSize(gameWindowSize.x, gameWindowSize.y);
-
-	sceneRecorder->RenderImage();
+	sceneRecorder->SetGameFocused(ImGui::IsWindowFocused() && ImGui::IsWindowHovered());
+	sceneRecorder->RenderGameImage();
+	sceneRecorder->SetGameViewportSize(glm::vec2{ gameViewportPanelSize.x, gameViewportPanelSize.y });
 
 	ImGui::EndChild();
 	ImGui::End();
@@ -165,34 +172,34 @@ void EditorLayer::CreateMenuFile()
 		if (ImGui::MenuItem("New", "Ctrl+N"))
 			CreateNewScene();
 		if (ImGui::IsItemHovered())
-			DrawSelection();
+			PanelUtilities::DrawSelection();
 
 		if (ImGui::MenuItem("Open", "Ctrl+O"))
 			OpenScene();
 		if (ImGui::IsItemHovered())
-			DrawSelection();
+			PanelUtilities::DrawSelection();
 
 		if (ImGui::MenuItem("Open Recent", ""))
 			HP_CORE_WARN("'Open Recent' menu item is not implemented yet!");
 		if (ImGui::IsItemHovered())
-			DrawSelection();
+			PanelUtilities::DrawSelection();
 
 		if (ImGui::MenuItem("Save", "Ctrl+S"))
 			SaveScene();
 		if (ImGui::IsItemHovered())
-			DrawSelection();
+			PanelUtilities::DrawSelection();
 
 		if (ImGui::MenuItem("Save As..", "Ctrl+Shift+S"))
 			HP_CORE_WARN("'Save As' menu item is not implemented yet!");
 		if (ImGui::IsItemHovered())
-			DrawSelection();
+			PanelUtilities::DrawSelection();
 
 		ImGui::Separator();
 
 		if (ImGui::BeginMenu("Options"))
 			ImGui::EndMenu();
 		if (ImGui::IsItemHovered())
-			DrawSelection();
+			PanelUtilities::DrawSelection();
 
 		ImGui::EndMenu();
 	}
@@ -205,34 +212,34 @@ void EditorLayer::CreateMenuEdit()
 		if (ImGui::MenuItem("Undo", "Ctrl+Z"))
 			HP_CORE_WARN("'Undo' menu item is not implemented yet!");
 		if (ImGui::IsItemHovered())
-			DrawSelection();
+			PanelUtilities::DrawSelection();
 
 		if (ImGui::MenuItem("Redo", "Ctrl+Y"))
 			HP_CORE_WARN("'Redo' menu item is not implemented yet!");
 		if (ImGui::IsItemHovered())
-			DrawSelection();
+			PanelUtilities::DrawSelection();
 
 		ImGui::Separator();
 
 		if (ImGui::MenuItem("Cut", "Ctrl+X"))
 			HP_CORE_WARN("'Cut' menu item is not implemented yet!");
 		if (ImGui::IsItemHovered())
-			DrawSelection();
+			PanelUtilities::DrawSelection();
 
 		if (ImGui::MenuItem("Copy", "Ctrl+C"))
 			HP_CORE_WARN("'Copy' menu item is not implemented yet!");
 		if (ImGui::IsItemHovered())
-			DrawSelection();
+			PanelUtilities::DrawSelection();
 
 		if (ImGui::MenuItem("Paste", "Ctrl+V"))
 			HP_CORE_WARN("'Paste' menu item is not implemented yet!");
 		if (ImGui::IsItemHovered())
-			DrawSelection();
+			PanelUtilities::DrawSelection();
 
 		if (ImGui::MenuItem("Delete", "Del"))
 			HP_CORE_WARN("'Delete' menu item is not implemented yet!");
 		if (ImGui::IsItemHovered())
-			DrawSelection();
+			PanelUtilities::DrawSelection();
 
 		ImGui::EndMenu();
 	}
@@ -275,13 +282,4 @@ void EditorLayer::SaveAsScene()
 
 	SceneSerializer sceneSerializer(m_Scene);
 	sceneSerializer.Serialize(filePath + ".hyper");
-}
-
-void EditorLayer::DrawSelection()
-{
-	ImVec2 pos = ImGui::GetCursorScreenPos();
-	pos.x -= 5.0f;
-	pos.y -= ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.6f;
-	ImU32 col = ImColor(ImVec4(0.70f, 0.70f, 0.70f, 0.40f));
-	ImGui::RenderFrame(pos, ImVec2(pos.x + ImGui::GetContentRegionAvailWidth(), pos.y + ImGui::GetTextLineHeight() + ImGui::GetTextLineHeight() * 0.25f), col, false, 5.0f);
 }

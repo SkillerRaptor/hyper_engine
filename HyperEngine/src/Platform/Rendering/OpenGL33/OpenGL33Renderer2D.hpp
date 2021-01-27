@@ -35,8 +35,8 @@ namespace Hyperion
 
 		virtual void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale, const glm::vec4& color) override;
 
-		virtual void SetShaderManager(Ref<ShaderManager> shaderManager) override;
-		virtual void SetTextureManager(Ref<TextureManager> textureManager) override;
+		virtual void SetCamera(const glm::vec3& position, const glm::vec3& rotation, float fov, const glm::vec2& clippingPlanes, const glm::vec2& viewportRect, CameraComponent::ProjectionType projectionType) override;
+		virtual void SetCamera(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) override;
 
 	protected:
 		virtual void StartBatch() override;

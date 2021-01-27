@@ -51,7 +51,7 @@ namespace Hyperion
 			m_TextureIds.pop();
 		}
 		else
-			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) });
+			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) + 1});
 		m_Textures.emplace(textureId, std::move(textureData));
 		HP_CORE_DEBUG("Texture {} loaded...", textureId.Handle);
 		return textureId;
@@ -74,7 +74,7 @@ namespace Hyperion
 			m_TextureIds.pop();
 		}
 		else
-			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) });
+			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) + 1});
 		m_Textures.emplace(textureId, std::move(textureData));
 		HP_CORE_DEBUG("Texture {} created...", textureId.Handle);
 		return textureId;
