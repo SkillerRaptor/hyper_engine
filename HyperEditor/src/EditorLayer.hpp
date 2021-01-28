@@ -10,14 +10,13 @@ using namespace Hyperion;
 class EditorLayer : public OverlayLayer
 {
 private:
-	Ref<Scene> m_Scene;
 	ShaderHandle m_SpriteShader = { 0 }; // FIXME: TEMP
 
-	AssetsPanel m_AssetsPanel;
-	SceneHierarchyPanel m_SceneHierarchyPanel;
+	Scope<AssetsPanel> m_AssetsPanel;
+	Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
 
 public:
-	EditorLayer(Ref<Scene> scene);
+	EditorLayer();
 	virtual ~EditorLayer();
 
 	virtual void OnAttach() override;

@@ -142,7 +142,6 @@ namespace Hyperion
 		}
 	}
 
-
 	void Application::SetAppIcon(const std::string& imagePath)
 	{
 		m_Window->SetAppIcon(imagePath);
@@ -170,12 +169,14 @@ namespace Hyperion
 	void Application::PushLayer(Layer* layer)
 	{
 		layer->m_RenderContext = m_Window->GetContext();
+		layer->m_Scene = m_Scene;
 		m_LayerStack->PushLayer(layer);
 	}
 
 	void Application::PushLayer(OverlayLayer* overlayLayer)
 	{
 		overlayLayer->m_RenderContext = m_Window->GetContext();
+		overlayLayer->m_Scene = m_Scene;
 		m_LayerStack->PushLayer(overlayLayer);
 	}
 
@@ -219,7 +220,12 @@ namespace Hyperion
 		return m_LayerStack->GetOverlayLayer(overlayLayerName);
 	}
 
-	Ref<Scene>& Application::GetScene()
+	void Application::SetScene(const Ref<Scene>& scene)
+	{
+		m_Scene = scene;
+	}
+
+	const Ref<Scene>& Application::GetScene() const
 	{
 		return m_Scene;
 	}

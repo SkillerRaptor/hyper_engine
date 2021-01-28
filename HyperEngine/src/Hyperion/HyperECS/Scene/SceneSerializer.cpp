@@ -1,9 +1,11 @@
 #include "SceneSerializer.hpp"
 
+#include <nlohmann/json.hpp>
+
+#include <fstream>
+
 #include "HyperECS/Components.hpp"
 #include "HyperECS/HyperEntity.hpp"
-#include "HyperUtilities/HyperConfiguration/YAML/Configuration.hpp"
-#include "HyperUtilities/HyperConfiguration/YAML/Node.hpp"
 
 namespace Hyperion
 {
@@ -14,85 +16,188 @@ namespace Hyperion
 
 	bool SceneSerializer::Serialize(const std::string& filePath)
 	{
-		YAML::Configuration configuration(filePath);
-		std::vector<YAML::Node> entities;
+		nlohmann::ordered_json configuration;
 
+		std::vector<nlohmann::ordered_json> entities;
 		m_Scene->Each([&](HyperEntity entity)
 			{
 				if (!entity)
 					return;
 
-				YAML::Node entityNode;
+				nlohmann::ordered_json entityJson;
 
-				entityNode["Entity"] = entity.GetComponent<TagComponent>().Tag;
+				entityJson["Entity"] = entity.GetComponent<TagComponent>().Tag;
 
 				if (entity.HasComponent<TransformComponent>())
 				{
-					YAML::Node* componentNode = new YAML::Node();
+					nlohmann::ordered_json componentData;
 					auto& component = entity.GetComponent<TransformComponent>();
 
-					(*componentNode)["Position"] = component.Position;
-					(*componentNode)["Rotation"] = component.Rotation;
-					(*componentNode)["Scale"] = component.Scale;
+					std::vector<float> position = { component.Position.x, component.Position.y, component.Position.z };
+					componentData["Position"] = position;
 
-					entityNode["TransformComponent"] = componentNode;
+					std::vector<float> rotation = { component.Rotation.x, component.Rotation.y, component.Rotation.z };
+					componentData["Rotation"] = rotation;
+
+					std::vector<float> scale = { component.Scale.x, component.Scale.y, component.Scale.z };
+					componentData["Scale"] = scale;
+
+					entityJson["Transform Component"] = componentData;
 				}
 
 				if (entity.HasComponent<SpriteRendererComponent>())
 				{
-					YAML::Node* componentNode = new YAML::Node();
+					nlohmann::ordered_json componentData;
 					auto& component = entity.GetComponent<SpriteRendererComponent>();
 
-					(*componentNode)["Color"] = component.Color;
+					std::vector<float> color = { component.Color.x, component.Color.y, component.Color.z, component.Color.w };
+					componentData["Color"] = color;
 
-					entityNode["SpriteRendererComponent"] = componentNode;
+					entityJson["Sprite Renderer Component"] = componentData;
 				}
 
 				if (entity.HasComponent<CameraComponent>())
 				{
-					YAML::Node* componentNode = new YAML::Node();
+					nlohmann::ordered_json componentData;
 					auto& component = entity.GetComponent<CameraComponent>();
 
-					//(*componentNode)["Zoom"] = component.Zoom;
-					//(*componentNode)["NearPlane"] = component.NearPlane;
-					//(*componentNode)["FarPlane"] = component.FarPlane;
-					//(*componentNode)["Primary"] = component.Primary;
+					std::vector<float> backgroundColor = { component.BackgroundColor.x, component.BackgroundColor.y, component.BackgroundColor.z, component.BackgroundColor.w };
+					componentData["Background Color"] = backgroundColor;
 
-					entityNode["CameraComponent"] = componentNode;
+					std::string currentProjection;
+					switch (component.Projection)
+					{
+					case CameraComponent::ProjectionType::ORTHOGRAPHIC:
+						currentProjection = "Orthographic";
+						break;
+					case CameraComponent::ProjectionType::PERSPECTIVE:
+						currentProjection = "Perspective";
+						break;
+					default:
+						break;
+					}
+					componentData["Projection"] = currentProjection;
+
+					componentData["FOV"] = component.FOV;
+
+					std::vector<float> clippingPlanes = { component.ClippingPlanes.x, component.ClippingPlanes.y };
+					componentData["Clipping Planes"] = clippingPlanes;
+					
+					std::vector<float> viewportRect = { component.ViewportRect.x, component.ViewportRect.y };
+					componentData["Viewport Rect"] = viewportRect;
+
+					componentData["Primary"] = component.Primary;
+
+					entityJson["Camera Component"] = componentData;
 				}
 
 				if (entity.HasComponent<CameraControllerComponent>())
 				{
-					YAML::Node* componentNode = new YAML::Node();
+					nlohmann::ordered_json componentData;
 					auto& component = entity.GetComponent<CameraControllerComponent>();
 
-					(*componentNode)["MoveSpeed"] = component.MoveSpeed;
-					(*componentNode)["ZoomSpeed"] = component.ZoomSpeed;
+					componentData["Move Speed"] = component.MoveSpeed;
+					componentData["Zoom Speed"] = component.ZoomSpeed;
 
-					entityNode["CameraControllerComponent"] = componentNode;
+					entityJson["Camera Controller Component"] = componentData;
 				}
 
-				if (entity.HasComponent<CharacterControllerComponent>())
-				{
-					YAML::Node* componentNode = new YAML::Node();
-					auto& component = entity.GetComponent<CharacterControllerComponent>();
-
-					(*componentNode)["Speed"] = component.Speed;
-
-					entityNode["CharacterControllerComponent"] = componentNode;
-				}
-
-				entities.push_back(entityNode);
+				entities.push_back(entityJson);
 			});
 
-		configuration["Scene"] = "Untitled";
+		configuration["Scene"] = m_Scene->GetName();
 		configuration["Entities"] = entities;
 
-		configuration.Write();
+		std::ofstream file(filePath);
+		file << configuration.dump(4);
+		return false;
+	}
+
+	bool SceneSerializer::SerializeRuntime(const std::string& filePath)
+	{
 		return false;
 	}
 
 	bool SceneSerializer::Deserialize(const std::string& filePath)
+	{
+		std::ifstream file(filePath);
+		nlohmann::json configuration = nlohmann::json::parse(file);
+		m_Scene->SetName(configuration.contains("Scene") ? configuration["Scene"] : "Undefined!");
+
+		if (configuration.contains("Entities"))
+		{
+			nlohmann::json entityJson = configuration["Entities"];
+			for (nlohmann::json entity : entityJson)
+			{
+				if(!entity.contains("Entity"))
+					continue;
+
+				HyperEntity hyperEntity = m_Scene->CreateEntity(entity["Entity"]);
+
+				if (entity.contains("Transform Component"))
+				{
+					nlohmann::json componentData = entity["Transform Component"];
+					TransformComponent& component = hyperEntity.GetComponent<TransformComponent>();
+
+					std::vector<float> position = componentData["Position"];
+					component.Position = glm::vec3{ position[0], position[1], position[2] };
+
+					std::vector<float> rotation = componentData["Rotation"];
+					component.Rotation = glm::vec3{ rotation[0], rotation[1], rotation[2] };
+
+					std::vector<float> scale = componentData["Scale"];
+					component.Scale = glm::vec3{ scale[0], scale[1], scale[2] };
+				}
+
+				if (entity.contains("Sprite Renderer Component"))
+				{
+					nlohmann::json componentData = entity["Sprite Renderer Component"];
+					SpriteRendererComponent& component = hyperEntity.AddComponent<SpriteRendererComponent>();
+
+					std::vector<float> color = componentData["Color"];
+					component.Color = glm::vec4{ color[0], color[1], color[2], color[3] };
+				}
+
+				if (entity.contains("Camera Component"))
+				{
+					nlohmann::json componentData = entity["Camera Component"];
+					CameraComponent& component = hyperEntity.AddComponent<CameraComponent>();
+
+					std::vector<float> backgroundColor = componentData["Background Color"];
+					component.BackgroundColor = glm::vec4{ backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3] };
+
+					std::string currentProjection = componentData["Projection"];
+					if (currentProjection == "Orthographic")
+						component.Projection = CameraComponent::ProjectionType::ORTHOGRAPHIC;
+					else if (currentProjection == "Perspective")
+						component.Projection = CameraComponent::ProjectionType::PERSPECTIVE;
+
+					component.FOV = componentData["FOV"];
+
+					std::vector<float> clippingPlanes = componentData["Clipping Planes"];
+					component.ClippingPlanes = glm::vec2{ clippingPlanes[0], clippingPlanes[1] };
+
+					std::vector<float> viewportRect = componentData["Viewport Rect"];
+					component.ViewportRect = glm::vec2{ viewportRect[0], viewportRect[1] };
+
+					component.Primary = componentData["Primary"];
+				}
+
+				if (entity.contains("Camera Controller Component"))
+				{
+					nlohmann::json componentData = entity["Camera Controller Component"];
+					CameraControllerComponent& component = hyperEntity.AddComponent<CameraControllerComponent>();
+
+					component.MoveSpeed = componentData["Move Speed"];
+					component.ZoomSpeed = componentData["Zoom Speed"];
+				}
+			}
+		}
+
+		return false;
+	}
+
+	bool SceneSerializer::DeserializeRuntime(const std::string& filePath)
 	{
 		return false;
 	}

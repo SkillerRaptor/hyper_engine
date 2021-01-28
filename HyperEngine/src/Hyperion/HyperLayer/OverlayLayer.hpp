@@ -3,12 +3,10 @@
 #include <string>
 
 #include "HyperCore/Core.hpp"
+#include "HyperECS/Scene/Scene.hpp"
 #include "HyperEvents/Event.hpp"
 #include "HyperRendering/RenderContext.hpp"
 #include "HyperUtilities/Timestep.hpp"
-
-#include "HyperECS/Scene/Scene.hpp"
-#include "HyperRendering/SceneRecorder.hpp"
 
 namespace Hyperion 
 {
@@ -17,6 +15,7 @@ namespace Hyperion
 	protected:
 		std::string m_Name;
 		Ref<RenderContext> m_RenderContext;
+		Ref<Scene> m_Scene;
 
 		friend class Application;
 

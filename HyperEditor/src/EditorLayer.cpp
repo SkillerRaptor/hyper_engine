@@ -8,8 +8,8 @@
 #include "Utilities/FontAwesome.hpp"
 #include "Utilities/PanelUtilities.hpp"
 
-EditorLayer::EditorLayer(Ref<Scene> scene)
-	: OverlayLayer("Editor Layer"), m_Scene(scene), m_AssetsPanel(), m_SceneHierarchyPanel(m_Scene)
+EditorLayer::EditorLayer()
+	: OverlayLayer("Editor Layer"), m_AssetsPanel()
 {
 }
 
@@ -19,6 +19,9 @@ EditorLayer::~EditorLayer()
 
 void EditorLayer::OnAttach()
 {
+	m_AssetsPanel = CreateScope<AssetsPanel>();
+	m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
+
 	/* Adding Font */
 	ImGuiIO& io = ImGui::GetIO();
 	ImFontConfig config{};
@@ -65,7 +68,7 @@ void EditorLayer::OnRender()
 
 	CreateDockingMenu();
 
-	m_SceneHierarchyPanel.OnRender();
+	m_SceneHierarchyPanel->OnRender();
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
@@ -97,7 +100,7 @@ void EditorLayer::OnRender()
 	ImGui::PopStyleVar();
 
 	ImGui::Begin(ICON_FK_FILES_O " Assets");
-	m_AssetsPanel.OnRender();
+	m_AssetsPanel->OnRender();
 	ImGui::End();
 }
 
@@ -190,7 +193,7 @@ void EditorLayer::CreateMenuFile()
 			PanelUtilities::DrawSelection();
 
 		if (ImGui::MenuItem("Save As..", "Ctrl+Shift+S"))
-			HP_CORE_WARN("'Save As' menu item is not implemented yet!");
+			SaveAsScene();
 		if (ImGui::IsItemHovered())
 			PanelUtilities::DrawSelection();
 
@@ -256,8 +259,8 @@ void EditorLayer::OpenScene()
 	if (filePath.empty())
 		return;
 
-	m_Scene = CreateRef<Scene>("Example Scene", m_RenderContext->GetRenderer2D());
-	m_SceneHierarchyPanel.SetScene(m_Scene);
+	m_Scene->Clear();
+	m_Scene->SetName("Example Scene");
 
 	SceneSerializer sceneSerializer(m_Scene);
 	sceneSerializer.Deserialize(filePath);

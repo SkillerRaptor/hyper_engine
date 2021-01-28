@@ -18,13 +18,14 @@ namespace Hyperion
 		std::string m_Name;
 
 		Ref<Renderer2D> m_Renderer2D;
-		Ref<World> m_World;
+		World* m_World;
 
 	public:
 		Scene(const std::string& name, Ref<Renderer2D> renderer2D);
 		~Scene();
 		
 		void Init();
+		void Clear();
 
 		HyperEntity CreateEntity(const std::string& name = std::string());
 		void DeleteEntity(HyperEntity& entity);

@@ -14,14 +14,26 @@ namespace Hyperion
 
 	Scene::~Scene()
 	{
+		if (m_World)
+			delete m_World;
 	}
 
 	void Scene::Init()
 	{
-		m_World = CreateRef<World>(m_Renderer2D);
+		m_World = new World(m_Renderer2D);
 
 		m_World->AddSystem<CameraControllerSystem>();
 		m_World->AddSystem<SpriteRendererSystem>();
+	}
+
+	void Scene::Clear()
+	{
+		if (m_World)
+		{
+			delete m_World;
+
+			Init();
+		}
 	}
 
 	HyperEntity Scene::CreateEntity(const std::string& name)

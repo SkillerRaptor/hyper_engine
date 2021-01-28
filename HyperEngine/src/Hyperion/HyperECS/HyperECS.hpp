@@ -115,7 +115,7 @@ namespace Hyperion
 			std::unique_lock<std::mutex> entityLock(m_EntityLock);
 		#endif /* HYPERECS_MUTEX */
 
-			Entity entity = Entity({ m_Entities.size() + 1000 });
+			Entity entity = Entity({ m_Entities.size() + 1 });
 			m_Entities[entity] = {};
 			return entity;
 		}
@@ -522,6 +522,13 @@ namespace Hyperion
 	public:
 		World(Ref<Renderer2D> renderer2D)
 			: m_Renderer2D(renderer2D) {}
+
+		~World()
+		{
+			for (auto [index, ptr] : m_Systems)
+				delete ptr;
+			m_Systems.clear();
+		}
 
 		/**
 		 * @brief Constructing an entity in the registry

@@ -31,7 +31,7 @@ IncludeDir["glfw"] = "%{wks.location}/HyperEngine/vendor/glfw/include"
 IncludeDir["glm"] = "%{wks.location}/HyperEngine/vendor/glm"
 IncludeDir["ImGui"] = "%{wks.location}/HyperEngine/vendor/ImGui"
 IncludeDir["ImGuizmo"] = "%{wks.location}/HyperEngine/vendor/ImGuizmo"
-IncludeDir["json"] = "%{wks.location}/HyperEngine/vendor/json"
+IncludeDir["json"] = "%{wks.location}/HyperEngine/vendor/json/single_include"
 IncludeDir["stb_image"] = "%{wks.location}/HyperEngine/vendor/stb_image"
 IncludeDir["vulkan"] = "%{wks.location}/HyperEngine/vendor/vulkan/include"
 
