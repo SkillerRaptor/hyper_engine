@@ -68,7 +68,14 @@ void SceneHierarchyPanel::DrawSceneInformation()
 
 	if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 		m_Scene->SetName(std::string(buffer).empty() ? "Empty!" : std::string(buffer));
-	ImGui::SameLine();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
+	if (ImGui::TreeNodeEx((void*) typeid(SceneHierarchyPanel).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Editor Camera"))
+	{
+		PanelUtilities::DrawSelectableImage("Texture", 0, [&]() {}, [&]() {});
+		ImGui::TreePop();
+	}
+	ImGui::PopStyleVar();
 }
 
 void SceneHierarchyPanel::DrawEntityNode(HyperEntity entity)

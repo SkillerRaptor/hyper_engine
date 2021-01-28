@@ -61,7 +61,7 @@ namespace Hyperion
 		OpenGLTextureData textureData;
 		textureData.Width = width;
 		textureData.Height = height;
-		textureData.Type  = textureType;
+		textureData.Type = textureType;
 		textureData.Channels = 4;
 
 		GenerateTexture(&textureData, nullptr);
@@ -103,8 +103,7 @@ namespace Hyperion
 		case TextureType::COLOR:
 			glTextureStorage2D(data->TextureId, 1, GL_RGB8, data->Width, data->Height);
 			glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-			//glNamedFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, data->TextureId);
-			HP_CORE_WARN("Color texture type is (yet) not fully supported in OpenGL 4.6!");
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, data->TextureId, 0);
 			break;
 		case TextureType::DEPTH:
 			HP_CORE_WARN("Depth texture type is (yet) not supported in OpenGL 4.6!");
@@ -115,8 +114,7 @@ namespace Hyperion
 		case TextureType::DEPTH_STENCIL:
 			glTextureStorage2D(data->TextureId, 1, GL_DEPTH24_STENCIL8, data->Width, data->Height);
 			glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
-			//glNamedFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, data->TextureId);
-			HP_CORE_WARN("Depth Stencil texture type is (yet) not fully supported in OpenGL 4.6!");
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, data->TextureId, 0);
 			break;
 		case TextureType::HEIGHT:
 			HP_CORE_WARN("Height texture type is (yet) not supported in OpenGL 4.6!");

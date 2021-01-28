@@ -43,6 +43,7 @@ namespace Hyperion
 	void OpenGL46FrameBuffer::Bind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
+		glViewport(0, 0, m_Width, m_Height);
 	}
 
 	void OpenGL46FrameBuffer::Unbind()

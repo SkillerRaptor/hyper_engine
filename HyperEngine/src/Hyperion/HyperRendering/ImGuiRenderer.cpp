@@ -6,7 +6,7 @@
 #endif
 
 #include "Platform/Rendering/OpenGL33/OpenGL33ImGuiRenderer.hpp"
-//#include "Platform/Rendering/OpenGL46/OpenGL46ImGuiRenderer.hpp"
+#include "Platform/Rendering/OpenGL46/OpenGL46ImGuiRenderer.hpp"
 //#include "Platform/Rendering/Vulkan/VulkanImGuiRenderer.hpp"
 
 namespace Hyperion
@@ -26,7 +26,7 @@ namespace Hyperion
 		case GraphicsAPI::OPENGL_33:
 			return CreateRef<OpenGL33ImGuiRenderer>();
 		case GraphicsAPI::OPENGL_46:
-			//return CreateRef<OpenGL46ImGuiRenderer>();
+			return CreateRef<OpenGL46ImGuiRenderer>();
 			break;
 		case GraphicsAPI::VULKAN_12:
 			//return CreateRef<VulkanImGuiRenderer>();

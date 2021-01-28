@@ -117,11 +117,44 @@ namespace Hyperion
 
 	void OpenGL46Renderer2D::SetCamera(const glm::vec3& position, const glm::vec3& rotation, float fov, const glm::vec2& clippingPlanes, const glm::vec2& viewportRect, CameraComponent::ProjectionType projectionType)
 	{
+		glm::mat4 projectionMatrix(1.0f);
+		glm::mat4 viewMatrix(1.0f);
 
+		float aspectRatio = 0.0f;
+		TextureHandle gameColorTexture = m_SceneRecorder->GetGameColorAttachment();
+
+		if (gameColorTexture.IsHandleValid())
+		{
+			TextureData* gameColorTextureData = m_TextureManager->GetTextureData(gameColorTexture);
+			aspectRatio = (static_cast<float>(gameColorTextureData->Width) * viewportRect.x) / (static_cast<float>(gameColorTextureData->Height) * viewportRect.y);
+		}
+
+		switch (projectionType)
+		{
+		case CameraComponent::ProjectionType::ORTHOGRAPHIC:
+			projectionMatrix = glm::ortho(-aspectRatio * fov, aspectRatio * fov, -fov, fov, clippingPlanes.x, clippingPlanes.y);
+			viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(position.z, position.y, position.x));
+			break;
+		case CameraComponent::ProjectionType::PERSPECTIVE:
+			projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, clippingPlanes.x, clippingPlanes.y);
+			viewMatrix = glm::translate(viewMatrix, glm::vec3{ position.x, -position.y, position.z });
+			viewMatrix = glm::rotate(viewMatrix, glm::radians(rotation.z), { 0.0f, 0.0f, 1.0f });
+			viewMatrix = glm::rotate(viewMatrix, glm::radians(rotation.y), { 0.0f, 1.0f, 0.0f });
+			viewMatrix = glm::rotate(viewMatrix, glm::radians(rotation.x), { 1.0f, 0.0f, 0.0f });
+			break;
+		default:
+			break;
+		}
+
+		m_ShaderManager->UseShader({ 1 });
+		m_ShaderManager->SetMatrix4({ 1 }, "u_ProjectionMatrix", projectionMatrix);
+		m_ShaderManager->SetMatrix4({ 1 }, "u_ViewMatrix", viewMatrix);
 	}
 
 	void OpenGL46Renderer2D::SetCamera(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix)
 	{
-
+		m_ShaderManager->UseShader({ 1 });
+		m_ShaderManager->SetMatrix4({ 1 }, "u_ProjectionMatrix", projectionMatrix);
+		m_ShaderManager->SetMatrix4({ 1 }, "u_ViewMatrix", viewMatrix);
 	}
 }

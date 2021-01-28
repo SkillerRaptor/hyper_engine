@@ -1,20 +1,20 @@
 #pragma once
 
-#include "Buffers/OpenGL33FrameBuffer.hpp"
+#include "Buffers/OpenGL46FrameBuffer.hpp"
 #include "HyperCore/Core.hpp"
 #include "HyperRendering/RenderContext.hpp"
 #include "HyperRendering/SceneRecorder.hpp"
 
 namespace Hyperion
 {
-	class OpenGL33SceneRecorder : public SceneRecorder
+	class OpenGL46SceneRecorder : public SceneRecorder
 	{
 	private:
-		Scope<OpenGL33FrameBuffer> m_GameFrameBuffer;
-		Scope<OpenGL33FrameBuffer> m_EditorFrameBuffer;
+		Scope<OpenGL46FrameBuffer> m_GameFrameBuffer;
+		Scope<OpenGL46FrameBuffer> m_EditorFrameBuffer;
 
 	public:
-		OpenGL33SceneRecorder(Ref<TextureManager> textureManager, GLFWwindow* window);
+		OpenGL46SceneRecorder(Ref<TextureManager> textureManager, GLFWwindow* window);
 
 		virtual void InitRecorder() override;
 		virtual void RebuildRecoder() override;

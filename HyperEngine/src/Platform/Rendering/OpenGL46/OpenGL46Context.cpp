@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "OpenGL46SceneRecorder.hpp"
 #include "OpenGL46Renderer2D.hpp"
 #include "OpenGL46ShaderManager.hpp"
 #include "OpenGL46TextureManager.hpp"
@@ -41,10 +42,13 @@ namespace Hyperion
 		m_Renderer2D = CreateRef<OpenGL46Renderer2D>();
 		m_ShaderManager = CreateRef<OpenGL46ShaderManager>();
 		m_TextureManager = CreateRef<OpenGL46TextureManager>();
+		m_SceneRecorder = CreateRef<OpenGL46SceneRecorder>(m_TextureManager, m_Window);
 		m_Renderer2D->SetShaderManager(m_ShaderManager);
 		m_Renderer2D->SetTextureManager(m_TextureManager);
+		m_Renderer2D->SetSceneRecorder(m_SceneRecorder);
 
 		glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+		glEnable(GL_DEPTH_TEST);
 	}
 
 	void OpenGL46Context::Shutdown()
