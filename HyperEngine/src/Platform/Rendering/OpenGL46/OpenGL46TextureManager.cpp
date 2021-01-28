@@ -53,7 +53,6 @@ namespace Hyperion
 		else
 			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) + 1});
 		m_Textures.emplace(textureId, std::move(textureData));
-		HP_CORE_DEBUG("Texture {} loaded...", textureId.Handle);
 		return textureId;
 	}
 
@@ -76,7 +75,6 @@ namespace Hyperion
 		else
 			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) + 1});
 		m_Textures.emplace(textureId, std::move(textureData));
-		HP_CORE_DEBUG("Texture {} created...", textureId.Handle);
 		return textureId;
 	}
 
@@ -157,7 +155,6 @@ namespace Hyperion
 		if (m_Textures.find(handle) == m_Textures.end())
 			return false;
 		glDeleteTextures(1, &m_Textures[handle].TextureId);
-		HP_CORE_DEBUG("Texture {} deleted...", handle.Handle);
 		return true;
 	}
 

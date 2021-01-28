@@ -13,8 +13,8 @@ namespace Hyperion
 		Ref<TextureManager> m_TextureManager;
 		GLFWwindow* m_Window;
 
-		glm::vec2 m_GameViewportSize;
-		glm::vec2 m_EditorViewportSize;
+		glm::vec2 m_GameViewportSize = { 1280.0f, 720.0f };
+		glm::vec2 m_EditorViewportSize = { 1280.0f, 720.0f };
 
 		bool m_GameFocused;
 		bool m_EditorFocused;

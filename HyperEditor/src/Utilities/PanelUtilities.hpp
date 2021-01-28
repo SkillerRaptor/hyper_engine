@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include <array>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -25,6 +26,8 @@ namespace Hyperion::PanelUtilities
 	void DrawDragVec4(const std::string& title, glm::vec4& vector, float speed = 0.1f, float min = 0.0f, float max = 0.0f, const std::array<std::string, 4>& = { "X", "Y", "Z", "W" });
 
 	void DrawCombo(const std::string& title, std::string& currentItem, const std::vector<std::string>& items);
+
+	void DrawSelectableImage(const std::string& title, uint32_t imageId, const typename std::common_type<std::function<void()>>::type clickFunction, const typename std::common_type<std::function<void()>>::type removeFunction);
 
 	void DrawSelection();
 	void DrawRectAroundWindow(const glm::vec4& color);

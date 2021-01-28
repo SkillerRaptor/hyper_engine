@@ -279,6 +279,33 @@ namespace Hyperion::PanelUtilities
 		ImGui::PopID();
 	}
 
+	void DrawSelectableImage(const std::string& title, uint32_t imageId, const typename std::common_type<std::function<void()>>::type clickFunction, const typename std::common_type<std::function<void()>>::type removeFunction)
+	{
+		ImGui::PushID(title.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, 150.0f);
+		ImGui::Text(title.c_str());
+		ImGui::NextColumn();
+
+		ImGui::SetNextItemWidth(-1);
+		ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
+		static const ImVec2 buttonSize = { 70, 70 };
+		if (ImGui::ImageButton((ImTextureID)imageId, buttonSize, { 0, 1 }, { 1, 0 }, 0))
+			clickFunction();
+		ImGui::PopItemWidth();
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("x", { buttonSize.x / 4, buttonSize.y }))
+			removeFunction();
+		ImGui::PopItemWidth();
+
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+	}
+
 	void DrawSelection()
 	{
 		ImVec2 pos = ImGui::GetCursorScreenPos();
