@@ -134,16 +134,8 @@ void SceneHierarchyPanel::DrawComponentInformation()
 			PanelUtilities::DrawDragVec3("Rotation", component.Rotation, 0.1f, 0.0f, 360.0f);
 			PanelUtilities::DrawDragVec3("Scale", component.Scale, 0.1f, 0.0f, (std::numeric_limits<float>::max)());
 
-			if (component.Rotation.x < 0.0f) component.Rotation.x = 0.0f;
-			if (component.Rotation.x > 360.0f) component.Rotation.x = 360.0f;
-			if (component.Rotation.y < 0.0f) component.Rotation.y = 0.0f;
-			if (component.Rotation.y > 360.0f) component.Rotation.y = 360.0f;
-			if (component.Rotation.z < 0.0f) component.Rotation.z = 0.0f;
-			if (component.Rotation.z > 360.0f) component.Rotation.z = 360.0f;
-
-			if (component.Scale.x <= 0.0f) component.Scale.x = 0.1f;
-			if (component.Scale.y <= 0.0f) component.Scale.y = 0.1f;
-			if (component.Scale.z <= 0.0f) component.Scale.z = 0.1f;
+			glm::clamp(component.Rotation, 0.0f, 360.0f);
+			component.Scale = glm::max(glm::vec3{ 0.1f }, component.Scale);
 		});
 
 	DrawComponent<SpriteRendererComponent>("Sprite Renderer", [&](SpriteRendererComponent& component)
@@ -154,6 +146,9 @@ void SceneHierarchyPanel::DrawComponentInformation()
 	DrawComponent<CameraComponent>("Camera", [&](CameraComponent& component)
 		{
 			PanelUtilities::DrawColorEdit4("Background Color", component.BackgroundColor);
+
+			static std::string cur = "AAA";
+			PanelUtilities::DrawInputCombo("Test", cur, { "AAA", "BBB", "CCC", "DDD", "EEE" });
 
 			std::string currentProjection;
 			switch (component.Projection)
@@ -175,7 +170,7 @@ void SceneHierarchyPanel::DrawComponentInformation()
 				component.Projection = CameraComponent::ProjectionType::PERSPECTIVE;
 
 			PanelUtilities::DrawDragFloat("Field of View", component.FOV, 1.0f, 0.1f, 179.9f);
-			if (component.FOV <= 0.0f) component.FOV = 0.1f;
+			component.FOV = glm::max(0.1f, component.FOV);
 
 			PanelUtilities::DrawDragVec2("Clipping Planes", component.ClippingPlanes, 1.0f, 0.1f, 10000.0f, { "Near", "Far" });
 			PanelUtilities::DrawDragVec2("Viewport Rect", component.ViewportRect, 0.1f, 0.0f, 1.0f, { "W", "H" });
@@ -195,10 +190,10 @@ void SceneHierarchyPanel::DrawComponentInformation()
 	DrawComponent<CameraControllerComponent>("Camera Controller", [&](CameraControllerComponent& component)
 		{
 			PanelUtilities::DrawDragFloat("Move Speed", component.MoveSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
-			if (component.MoveSpeed < 0.0f) component.MoveSpeed = 0.0f;
+			component.MoveSpeed = glm::max(0.0f, component.MoveSpeed);
 
 			PanelUtilities::DrawDragFloat("Zoom Speed", component.ZoomSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
-			if (component.ZoomSpeed < 0.0f) component.ZoomSpeed = 0.0f;
+			component.ZoomSpeed = glm::max(0.0f, component.ZoomSpeed);
 		});
 
 	ImGui::Columns(1);
@@ -263,7 +258,6 @@ void SceneHierarchyPanel::DrawComponent(const std::string& componentName, typena
 		if (ImGui::TreeNodeEx((void*) typeid(T).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, componentName.c_str()))
 		{
 			function(m_SelectedEntity.GetComponent<T>());
-
 			ImGui::TreePop();
 		}
 		ImGui::PopStyleVar();

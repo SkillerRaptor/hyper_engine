@@ -261,7 +261,7 @@ namespace Hyperion::PanelUtilities
 
 		ImGui::SetNextItemWidth(-1);
 
-		if (ImGui::BeginCombo("##combo", currentItem.c_str()))
+		if (ImGui::BeginCombo("##Combo", currentItem.c_str()))
 		{
 			for (size_t i = 0; i < items.size(); i++)
 			{
@@ -272,6 +272,61 @@ namespace Hyperion::PanelUtilities
 					ImGui::SetItemDefaultFocus();
 			}
 			ImGui::EndCombo();
+		}
+
+		ImGui::Columns(1);
+
+		ImGui::PopID();
+	}
+
+	void DrawInputCombo(const std::string& title, std::string& currentItem, const std::vector<std::string>& items)
+	{
+		ImGui::PushID(title.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, 150.0f);
+		ImGui::Text(title.c_str());
+		ImGui::NextColumn();
+
+		ImGui::SetNextItemWidth(-1);
+
+		char buffer[256];
+		memset(buffer, 0, sizeof(buffer));
+		currentItem.copy(buffer, sizeof(buffer));
+
+		if (ImGui::InputText("##Input", buffer, sizeof(buffer)))
+			currentItem = std::string(buffer).empty() ? "" : std::string(buffer);
+
+		ImGui::SameLine();
+
+		static bool isOpen = false;
+		bool isFocused = ImGui::IsItemFocused();
+		isOpen |= ImGui::IsItemActive();
+		if (isOpen)
+		{
+			ImGui::SetNextWindowPos({ ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y });
+			ImGui::SetNextWindowSize({ ImGui::GetItemRectSize().x, 0 });
+
+			if (ImGui::Begin("##Popup", &isOpen, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_Tooltip))
+			{
+				ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
+				isFocused |= ImGui::IsWindowFocused();
+				for (int i = 0; i < items.size(); i++)
+				{
+					std::string item = items[i];
+					if (!currentItem.empty() && item.find(currentItem) == std::string::npos)
+						continue;
+
+					if (ImGui::Selectable(item.c_str()) || (ImGui::IsItemFocused() && ImGui::IsKeyPressedMap(ImGuiKey_Enter)))
+					{
+						currentItem = item;
+						isOpen = false;
+					}
+				}
+			}
+			ImGui::End();
+
+			isOpen &= isFocused;
 		}
 
 		ImGui::Columns(1);
@@ -291,7 +346,7 @@ namespace Hyperion::PanelUtilities
 		ImGui::SetNextItemWidth(-1);
 		ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
 		static const ImVec2 buttonSize = { 70, 70 };
-		if (ImGui::ImageButton((ImTextureID)imageId, buttonSize, { 0, 1 }, { 1, 0 }, 0))
+		if (ImGui::ImageButton((ImTextureID)(uintptr_t)imageId, buttonSize, { 0, 1 }, { 1, 0 }, 0))
 			clickFunction();
 		ImGui::PopItemWidth();
 
@@ -304,6 +359,17 @@ namespace Hyperion::PanelUtilities
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+	}
+
+	void SplitNode(const std::string& title, typename std::common_type<std::function<void()>>::type function)
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
+		if (ImGui::TreeNodeEx((void*) std::hash<std::string>()(title), ImGuiTreeNodeFlags_DefaultOpen, title.c_str()))
+		{
+			function();
+			ImGui::TreePop();
+		}
+		ImGui::PopStyleVar();
 	}
 
 	void DrawSelection()

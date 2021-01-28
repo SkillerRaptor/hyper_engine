@@ -88,10 +88,11 @@ namespace Hyperion
 				break;
 			}
 
-			sceneRecorder->RebuildRecoder();
-
 			if (enableCapture)
+			{
+				sceneRecorder->RebuildRecoder();
 				sceneRecorder->StartGameRecording();
+			}
 
 			if (validCamera)
 			{
@@ -108,10 +109,9 @@ namespace Hyperion
 			}
 
 			if (enableCapture)
+			{
 				sceneRecorder->EndGameRecording();
 
-			if (enableCapture)
-			{
 				EditorCamera& editorCamera = m_ImGuiLayer->GetEditorCamera();
 				m_Window->GetContext()->GetRenderer2D()->SetCamera(editorCamera.GetProjectionMatrix(), editorCamera.GetViewMatrix());
 
