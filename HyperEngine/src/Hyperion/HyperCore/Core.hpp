@@ -120,9 +120,6 @@ namespace Hyperion
 /* Including Logger */
 #include "HyperUtilities/Log.hpp"
 
-/* Including Instrumentor */
-#include "HyperUtilities/Instrumentor.h"
-
 /* Enabling Asserts */
 #ifdef HP_ENABLE_ASSERTS
 	#define HP_INTERNAL_ASSERT_IMPLEMENTATION(check, msg, ...) { if (!(check)) { HP_CORE_FATAL(msg, __VA_ARGS__); HP_DEBUGBREAK(); } }
