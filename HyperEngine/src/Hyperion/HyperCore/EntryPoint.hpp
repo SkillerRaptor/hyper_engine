@@ -6,7 +6,7 @@ extern Hyperion::Application* Hyperion::CreateApplication();
 
 int main(int argc, char** argv)
 {
-	Log::Init();
+	Hyperion::Log::Init();
 
 	auto app = Hyperion::CreateApplication();
 	app->Run();
