@@ -19,7 +19,6 @@ namespace Hyperion
 	{
 		m_Instance = this;
 
-		Log::Init();
 		Random::Init();
 
 		HP_CORE_INFO("");
