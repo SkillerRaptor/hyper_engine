@@ -137,10 +137,10 @@ namespace Hyperion
 			break;
 		case CameraComponent::ProjectionType::PERSPECTIVE:
 			projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, clippingPlanes.x, clippingPlanes.y);
-			viewMatrix = glm::translate(viewMatrix, glm::vec3{ position.x, -position.y, position.z });
 			viewMatrix = glm::rotate(viewMatrix, glm::radians(rotation.z), { 0.0f, 0.0f, 1.0f });
 			viewMatrix = glm::rotate(viewMatrix, glm::radians(rotation.y), { 0.0f, 1.0f, 0.0f });
 			viewMatrix = glm::rotate(viewMatrix, glm::radians(rotation.x), { 1.0f, 0.0f, 0.0f });
+			viewMatrix = glm::translate(viewMatrix, glm::vec3{ -position.x, -position.y, -position.z });
 			break;
 		default:
 			break;
