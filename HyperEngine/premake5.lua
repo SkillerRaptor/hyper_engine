@@ -31,6 +31,7 @@ project "HyperEngine"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.json}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.vulkan}"
 	}
@@ -48,6 +49,7 @@ project "HyperEngine"
 		"glm",
 		"ImGui",
 		"ImGuizmo",
+		"json",
 		"vulkan",
 		"vulkan-1.lib"
 	}

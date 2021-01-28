@@ -25,6 +25,7 @@ project "Sandbox"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.json}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.vulkan}"
 	}

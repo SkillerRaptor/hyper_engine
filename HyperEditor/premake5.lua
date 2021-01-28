@@ -26,6 +26,7 @@ project "HyperEditor"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.json}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.vulkan}"
 	}
