@@ -17,3 +17,6 @@
 [submodule "HyperEngine/vendor/json"]
 	path = HyperEngine/vendor/json
 	url = https://github.com/SkillerRaptor/json
+[submodule "HyperEngine/vendor/rttr"]
+	path = HyperEngine/vendor/rttr
+	url = https://github.com/SkillerRaptor/rttr

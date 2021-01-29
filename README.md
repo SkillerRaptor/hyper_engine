@@ -30,6 +30,7 @@ The following screenshots show features and designs of the engine:
 -   [Dear ImGui](https://github.com/ocornut/imgui/blob/master/LICENSE.txt) Copyright (c) MIT, Omar Cornut 2014-2021
 -   [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo/blob/master/LICENSE) Copyright (c) MIT, Cedric Guillemet 2016
 -   [json](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT) Copyright (c) MIT, Niels Lohmann 2013-2021
+-   [rttr](https://github.com/rttrorg/rttr/blob/master/LICENSE.txt) Copyright (c) MIT, Axel Menzel 2014-2018
 -   [stb_image](https://github.com/nothings/stb/blob/master/LICENSE) Copyright (c) MIT, Sean Barrett 2017
 
 ## Contributing

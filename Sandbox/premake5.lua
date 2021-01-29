@@ -26,6 +26,7 @@ project "Sandbox"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.json}",
+		"%{IncludeDir.rttr}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.vulkan}"
 	}
