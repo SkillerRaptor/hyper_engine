@@ -3,72 +3,95 @@
 #include <fmt/color.h>
 #include <fmt/chrono.h>
 
-#include <chrono>
-#include <ctime>
-#include <iostream>
-
-namespace Hyperion {
+namespace Hyperion
+{
+	bool Logger::s_Running = true;
+	size_t Logger::s_CurrentMessage = 0;
+	std::thread Logger::s_LoggerThread = std::thread(&Logger::Run);
+	std::queue<Logger::Message> Logger::s_MessageQueue;
+	std::mutex Logger::s_MessageQueueMutex;
 
 	Logger::Logger()
-		: m_Name(""), m_Level(Level::HP_LEVEL_TRACE)
+		: m_Name("Undefined"), m_Level(Level::HP_LEVEL_TRACE)
 	{
 	}
 
-	void Logger::Print(Level level, const std::string& format)
+	Logger::Logger(const std::string& name, Level level)
+		: m_Name(name), m_Level(level)
 	{
-		PrintInternal(level, format);
 	}
 
-	void Logger::PrintInternal(Level level, const std::string& message)
+	void Logger::Run()
 	{
-		fmt::color levelColor;
+		while (s_Running)
+		{
+			while (!s_MessageQueue.empty())
+			{
+				const std::lock_guard<std::mutex> lock(s_MessageQueueMutex);
+				Message message = s_MessageQueue.front();
+				s_MessageQueue.pop();
+
+				Level level = message.ContentLevel;
+
+				fmt::color levelColor;
+				switch (level)
+				{
+				case Level::HP_LEVEL_INFO:
+					levelColor = fmt::color::white;
+					break;
+				case Level::HP_LEVEL_WARN:
+					levelColor = fmt::color::gold;
+					break;
+				case Level::HP_LEVEL_ERROR:
+					levelColor = fmt::color::red;
+					break;
+				case Level::HP_LEVEL_FATAL:
+					levelColor = fmt::color::crimson;
+					break;
+				case Level::HP_LEVEL_DEBUG:
+					levelColor = fmt::color::gray;
+					break;
+				default:
+					levelColor = fmt::color::white;
+					break;
+				}
+
+				fmt::print(fg(levelColor), "[{:%H:%M:%S}] {} {}: {}\n", fmt::localtime(std::time(nullptr)), message.LoggerName, GetLevelName(level), message.Content);
+				s_CurrentMessage = message.Id;
+			}
+		}
+	}
+
+	void Logger::Shutdown()
+	{
+		while (!s_MessageQueue.empty());
+
+		s_Running = false;
+		s_LoggerThread.join();
+	}
+
+	const char* Logger::GetLevelName(Level level)
+	{
 		switch (level)
 		{
 		case Level::HP_LEVEL_INFO:
-			levelColor = fmt::color::white;
-			break;
+			return "Info";
 		case Level::HP_LEVEL_WARN:
-			levelColor = fmt::color::gold;
-			break;
+			return "Warn";
 		case Level::HP_LEVEL_ERROR:
-			levelColor = fmt::color::red;
-			break;
+			return "Error";
 		case Level::HP_LEVEL_FATAL:
-			levelColor = fmt::color::crimson;
-			break;
+			return "Fatal";
 		case Level::HP_LEVEL_DEBUG:
-			levelColor = fmt::color::gray;
-			break;
+			return "Debug";
 		default:
-			levelColor = fmt::color::white;
-			break;
+			return "Undefined";
 		}
-
-		fmt::print(fg(levelColor), "[{:%H:%M:%S}] {} {}: {}\n", fmt::localtime(std::time(nullptr)), m_Name, ConvertLevelToString(level), message);
 	}
 
-	std::string Logger::ConvertLevelToString(Level level) const
+	void Logger::WaitForMessage(size_t messageId)
 	{
-		std::string levelName;
-		switch (level)
-		{
-		case Level::HP_LEVEL_INFO:
-			levelName = "Info";
-			break;
-		case Level::HP_LEVEL_WARN:
-			levelName = "Warn";
-			break;
-		case Level::HP_LEVEL_ERROR:
-			levelName = "Error";
-			break;
-		case Level::HP_LEVEL_FATAL:
-			levelName = "Fatal";
-			break;
-		case Level::HP_LEVEL_DEBUG:
-			levelName = "Debug";
-			break;
-		}
-		return levelName;
+		while (messageId != s_CurrentMessage);
 	}
 
 	void Logger::SetName(const std::string& name)
@@ -81,12 +104,12 @@ namespace Hyperion {
 		return m_Name;
 	}
 
-	void Logger::SetLevel(Logger::Level level)
+	void Logger::SetLevel(Level level)
 	{
 		m_Level = level;
 	}
 
-	const Logger::Level Logger::GetLevel() const
+	Logger::Level Logger::GetLevel() const
 	{
 		return m_Level;
 	}

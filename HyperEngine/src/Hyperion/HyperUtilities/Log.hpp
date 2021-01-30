@@ -13,6 +13,9 @@ namespace Hyperion
 
 	public:
 		static void Init();
+		static void Shutdown();
+
+		static void WaitForMessage(size_t messageId);
 
 		static const Ref<Logger> GetCoreLogger() { return m_CoreLogger; }
 		static const Ref<Logger> GetClientLogger() { return m_ClientLogger; }

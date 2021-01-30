@@ -15,4 +15,14 @@ namespace Hyperion
 		m_ClientLogger->SetName("Client");
 		m_ClientLogger->SetLevel(Logger::Level::HP_LEVEL_TRACE);
 	}
+
+	void Log::Shutdown()
+	{
+		Logger::Shutdown();
+	}
+
+	void Log::WaitForMessage(size_t messageId)
+	{
+		Logger::WaitForMessage(messageId);
+	}
 }

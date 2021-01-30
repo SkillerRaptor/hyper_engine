@@ -122,7 +122,7 @@ namespace Hyperion
 
 /* Enabling Asserts */
 #ifdef HP_ENABLE_ASSERTS
-	#define HP_INTERNAL_ASSERT_IMPLEMENTATION(check, msg, ...) { if (!(check)) { HP_CORE_FATAL(msg, __VA_ARGS__); HP_DEBUGBREAK(); } }
+#define HP_INTERNAL_ASSERT_IMPLEMENTATION(check, msg, ...) { if (!(check)) { size_t i = HP_CORE_FATAL(msg, __VA_ARGS__); Log::WaitForMessage(i); HP_DEBUGBREAK(); } }
 
 	#define HP_INTERNAL_ASSERT_WITH_MSG(check, ...) HP_INTERNAL_ASSERT_IMPLEMENTATION(check, "Assertion failed: {}", __VA_ARGS__)
 	#define HP_INTERNAL_ASSERT_NO_MSG(check) HP_INTERNAL_ASSERT_IMPLEMENTATION(check, "Assertion '{}' failed in {} at line {}", HP_STRINGIFY_MACRO(check), std::filesystem::path(__FILE__).filename().string(), __LINE__)

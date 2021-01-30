@@ -2,10 +2,13 @@
 
 #include <fmt/core.h>
 
-#include <sstream>
 #include <string>
+#include <thread>
+#include <mutex>
+#include <utility>
+#include <queue>
 
-namespace Hyperion 
+namespace Hyperion
 {
 	class Logger
 	{
@@ -20,32 +23,66 @@ namespace Hyperion
 			HP_LEVEL_TRACE
 		};
 
+		struct Message
+		{
+			size_t Id;
+			std::string Content;
+			Level ContentLevel;
+			std::string LoggerName;
+		};
+
 	private:
 		std::string m_Name;
 		Level m_Level;
 
+		static bool s_Running;
+		static size_t s_CurrentMessage;
+		static std::thread s_LoggerThread;
+		static std::queue<Message> s_MessageQueue;
+		static std::mutex s_MessageQueueMutex;
+
 	public:
 		Logger();
+		Logger(const std::string& name, Level level);
 
-		void Print(Level level, const std::string& format);
+		static void Run();
+		static void Shutdown();
 
 		template<typename... Args>
-		void Print(Level level, const std::string& format, Args&&... args)
+		size_t Print(Level level, const std::string& format, Args&&... args)
 		{
-			std::string string = fmt::format(format, std::forward<Args>(args)...);
+			if (m_Level != Level::HP_LEVEL_TRACE)
+				if (m_Level != level)
+					return -1;
 
-			PrintInternal(level, string);
+			std::string content = format;
+
+			size_t argsCount = sizeof...(Args);
+			if (argsCount != 0)
+				content = fmt::format(content, std::forward<Args>(args)...);
+
+			size_t messageId = s_MessageQueue.size() + 1;
+
+			Message message{};
+			message.Id = messageId;
+			message.Content = content;
+			message.ContentLevel = level;
+			message.LoggerName = m_Name;
+			const std::lock_guard<std::mutex> lock(s_MessageQueueMutex);
+			s_MessageQueue.push(message);
+
+			return messageId;
 		}
+
+		static void WaitForMessage(size_t messageId);
 
 		void SetName(const std::string& name);
 		const std::string& GetName() const;
 
 		void SetLevel(Level level);
-		const Level GetLevel() const;
+		Level GetLevel() const;
 
 	private:
-		void PrintInternal(Level level, const std::string& message);
-
-		std::string ConvertLevelToString(Level level) const;
+		static const char* GetLevelName(Level level);
 	};
 }

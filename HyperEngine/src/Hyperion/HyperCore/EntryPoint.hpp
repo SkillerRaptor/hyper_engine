@@ -11,4 +11,6 @@ int main(int argc, char** argv)
 	auto app = Hyperion::CreateApplication();
 	app->Run();
 	delete app;
+
+	Hyperion::Log::Shutdown();
 }
