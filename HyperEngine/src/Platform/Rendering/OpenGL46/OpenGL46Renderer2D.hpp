@@ -19,7 +19,7 @@ namespace Hyperion
 		Ref<OpenGL46VertexArray> m_QuadVertexArray;
 		Ref<OpenGL46VertexBuffer> m_QuadVertexBuffer;
 		Ref<OpenGL46IndexBuffer> m_QuadIndexBuffer;
-		uint32_t m_QuadShader;
+		uint32_t m_QuadShader = { 0 };
 
 		Vertex2D* m_QuadVertexBufferBase;
 		Vertex2D* m_QuadVertexBufferPtr;

@@ -10,7 +10,7 @@
 namespace Hyperion
 {
 	VulkanContext::VulkanContext(GraphicsAPI graphicsAPI)
-		: RenderContext(graphicsAPI), m_ValidationLayer(m_Instance, m_ValidationLayerInfo)
+		: RenderContext(graphicsAPI), m_ValidationLayerInfo({}), m_ValidationLayer(m_Instance, m_ValidationLayerInfo)
 	{
 		HP_ASSERT(false, "The Vulkan Context implementation is not finished!");
 	}

@@ -16,11 +16,11 @@ namespace Hyperion
 		glm::vec2 m_GameViewportSize = { 1280.0f, 720.0f };
 		glm::vec2 m_EditorViewportSize = { 1280.0f, 720.0f };
 
-		bool m_GameFocused;
-		bool m_EditorFocused;
+		bool m_GameFocused = false;
+		bool m_EditorFocused = false;
 
-		bool m_RebuildGameImage;
-		bool m_RebuildEditorImage;
+		bool m_RebuildGameImage = false;
+		bool m_RebuildEditorImage = false;
 
 	public:
 		SceneRecorder(Ref<TextureManager> textureManager, GLFWwindow* window)
