@@ -35,7 +35,7 @@ namespace Hyperion
 
 		SetupStyle();
 
-		auto* window = static_cast<GLFWwindow*>(Application::Get()->GetWindow()->GetWindow());
+		GLFWwindow* window = Application::Get()->GetWindow()->GetContext()->GetWindow();
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 		m_ImGuiRenderer->OnAttach();
 	}

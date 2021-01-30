@@ -228,9 +228,4 @@ namespace Hyperion
 	{
 		return glfwGetTime();
 	}
-
-	void* WindowsWindow::GetWindow()
-	{
-		return m_Window;
-	}
 }

@@ -44,6 +44,5 @@ namespace Hyperion
 		virtual void SetAppIcon(const std::string& imagePath) override;
 
 		virtual double GetTime() override;
-		virtual void* GetWindow() override;
 	};
 }

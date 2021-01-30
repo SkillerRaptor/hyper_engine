@@ -1,7 +1,11 @@
 #pragma once
 
+#include <utility>
+
 #include "HyperUtilities/KeyCodes.hpp"
 #include "HyperUtilities/MouseCodes.hpp"
+
+struct GLFWwindow;
 
 namespace Hyperion
 {
@@ -23,5 +27,10 @@ namespace Hyperion
 		static bool IsMouseButtonPressed(MouseCode button);
 		static float GetMouseX();
 		static float GetMouseY();
+		static std::pair<float, float> GetMousePosition();
+
+	private:
+		static int GetKeyState(KeyCode keyCode);
+		static GLFWwindow* GetWindow();
 	};
 }

@@ -57,7 +57,6 @@ namespace Hyperion
 		virtual void SetAppIcon(const std::string& imagePath) = 0;
 
 		virtual double GetTime() = 0;
-		virtual void* GetWindow() = 0;
 
 		Ref<RenderContext> GetContext() const { return m_RenderContext; };
 		const WindowDataInfo& GetWindowDataInfo() const { return m_WindowDataInfo; };
