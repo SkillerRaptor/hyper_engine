@@ -25,6 +25,7 @@ namespace Hyperion
 
 		struct Message
 		{
+			size_t Id;
 			std::string Content;
 			Level ContentLevel;
 			std::string LoggerName;
