@@ -127,7 +127,7 @@ namespace Hyperion
 		if (gameColorTexture.IsHandleValid())
 		{
 			TextureData* gameColorTextureData = m_TextureManager->GetTextureData(gameColorTexture);
-			aspectRatio = (static_cast<float>(gameColorTextureData->Width) * viewportRect.x) / (static_cast<float>(gameColorTextureData->Height) * viewportRect.y);
+			aspectRatio = static_cast<float>(gameColorTextureData->Width) / static_cast<float>(gameColorTextureData->Height);
 		}
 
 		switch (projectionType)

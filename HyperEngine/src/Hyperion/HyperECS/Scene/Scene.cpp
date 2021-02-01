@@ -1,7 +1,6 @@
 #include "Scene.hpp"
 
 #include "HyperECS/HyperEntity.hpp"
-#include "HyperECS/Systems/CameraControllerSystem.hpp"
 #include "HyperECS/Systems/SpriteRendererSystem.hpp"
 
 namespace Hyperion
@@ -22,7 +21,6 @@ namespace Hyperion
 	{
 		m_World = new World(m_Renderer2D);
 
-		m_World->AddSystem<CameraControllerSystem>();
 		m_World->AddSystem<SpriteRendererSystem>();
 	}
 

@@ -52,13 +52,13 @@ void EditorLayer::OnAttach()
 		float x = glm::cos(theta) * radius;
 		float z = glm::sin(theta) * radius;
 
-		transform.Position = glm::vec3{ x * RADIUS, y * RADIUS, z * RADIUS };
+		transform.SetPosition(glm::vec3{ x * RADIUS, y * RADIUS, z * RADIUS });
 
-		glm::vec3 direction = transform.Position - glm::vec3{ 0.0f };
+		glm::vec3 direction = transform.GetPosition() - glm::vec3{ 0.0f };
 		float yaw = atan2(direction.x, direction.z) * 180.0f / glm::pi<float>();
 		auto padj = static_cast<float>(glm::sqrt(glm::pow(x, 2) + glm::pow(z, 2)));
 		auto pitch = static_cast<float>(atan2(padj, y) * 180.0 / glm::pi<float>());
-		transform.Rotation = glm::vec3{ 0.0f, yaw, pitch };
+		transform.SetRotation(glm::vec3{ 0.0f, yaw, pitch });
 	}
 }
 

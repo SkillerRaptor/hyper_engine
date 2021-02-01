@@ -80,7 +80,7 @@ void SceneHierarchyPanel::DrawSceneInformation()
 
 void SceneHierarchyPanel::DrawEntityNode(HyperEntity entity)
 {
-	auto& tag = entity.GetComponent<TagComponent>().Tag;
+	auto tag = entity.GetComponent<TagComponent>().GetTag();
 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 	bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(size_t)entity, flags, tag.c_str());
@@ -98,9 +98,7 @@ void SceneHierarchyPanel::DrawEntityNode(HyperEntity entity)
 	}
 
 	if (opened)
-	{
 		ImGui::TreePop();
-	}
 }
 
 void SceneHierarchyPanel::DrawComponentInformation()
@@ -112,7 +110,7 @@ void SceneHierarchyPanel::DrawComponentInformation()
 
 	if (entity.HasComponent<TagComponent>())
 	{
-		auto& tag = entity.GetComponent<TagComponent>().Tag;
+		auto tag = entity.GetComponent<TagComponent>().GetTag();
 
 		char buffer[256];
 		memset(buffer, 0, sizeof(buffer));
@@ -121,6 +119,7 @@ void SceneHierarchyPanel::DrawComponentInformation()
 		ImGui::SetNextItemWidth(ImGui::GetContentRegionAvailWidth() - ImGui::GetContentRegionAvailWidth() / 4);
 		if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 			tag = std::string(buffer).empty() ? "Empty!" : std::string(buffer);
+		entity.GetComponent<TagComponent>().SetTag(tag);
 		ImGui::SameLine();
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.602f, 0.602f, 0.602f, 1.00f));
@@ -128,73 +127,9 @@ void SceneHierarchyPanel::DrawComponentInformation()
 		ImGui::PopStyleColor();
 	}
 
-	DrawComponent<TransformComponent>("Transform", [&](TransformComponent& component)
-		{
-			PanelUtilities::DrawDragVec3("Position", component.Position);
-			PanelUtilities::DrawDragVec3("Rotation", component.Rotation, 0.1f, 0.0f, 360.0f);
-			PanelUtilities::DrawDragVec3("Scale", component.Scale, 0.1f, 0.0f, (std::numeric_limits<float>::max)());
-
-			glm::clamp(component.Rotation, 0.0f, 360.0f);
-			component.Scale = glm::max(glm::vec3{ 0.1f }, component.Scale);
-		});
-
-	DrawComponent<SpriteRendererComponent>("Sprite Renderer", [&](SpriteRendererComponent& component)
-		{
-			PanelUtilities::DrawColorEdit4("Sprite Color", component.Color);
-		});
-
-	DrawComponent<CameraComponent>("Camera", [&](CameraComponent& component)
-		{
-			PanelUtilities::DrawColorEdit4("Background Color", component.BackgroundColor);
-
-			static std::string cur = "AAA";
-			PanelUtilities::DrawInputCombo("Test", cur, { "AAA", "BBB", "CCC", "DDD", "EEE" });
-
-			std::string currentProjection;
-			switch (component.Projection)
-			{
-			case CameraComponent::ProjectionType::ORTHOGRAPHIC:
-				currentProjection = "Orthographic";
-				break;
-			case CameraComponent::ProjectionType::PERSPECTIVE:
-				currentProjection = "Perspective";
-				break;
-			default:
-				break;
-			}
-
-			PanelUtilities::DrawCombo("Projection", currentProjection, { "Orthographic", "Perspective" });
-			if (currentProjection == "Orthographic")
-				component.Projection = CameraComponent::ProjectionType::ORTHOGRAPHIC;
-			else if (currentProjection == "Perspective")
-				component.Projection = CameraComponent::ProjectionType::PERSPECTIVE;
-
-			PanelUtilities::DrawDragFloat("Field of View", component.FOV, 1.0f, 0.1f, 179.9f);
-			component.FOV = glm::max(0.1f, component.FOV);
-
-			PanelUtilities::DrawDragVec2("Clipping Planes", component.ClippingPlanes, 1.0f, 0.1f, 10000.0f, { "Near", "Far" });
-			PanelUtilities::DrawDragVec2("Viewport Rect", component.ViewportRect, 0.1f, 0.0f, 1.0f, { "W", "H" });
-
-			bool primary = component.Primary;
-			PanelUtilities::DrawCheckbox("Primary", component.Primary);
-			if (primary == false && component.Primary == true)
-			{
-				registry.Each<CameraComponent>([&](Entity e, CameraComponent& cameraComponent)
-					{
-						if (e.Handle != entity.GetEntityHandle().Handle)
-							cameraComponent.Primary = false;
-					});
-			}
-		});
-
-	DrawComponent<CameraControllerComponent>("Camera Controller", [&](CameraControllerComponent& component)
-		{
-			PanelUtilities::DrawDragFloat("Move Speed", component.MoveSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
-			component.MoveSpeed = glm::max(0.0f, component.MoveSpeed);
-
-			PanelUtilities::DrawDragFloat("Zoom Speed", component.ZoomSpeed, 0.01f, 0.0f, (std::numeric_limits<float>::max)());
-			component.ZoomSpeed = glm::max(0.0f, component.ZoomSpeed);
-		});
+	DrawComponent<TransformComponent>("Transform");
+	DrawComponent<SpriteRendererComponent>("Sprite Renderer");
+	DrawComponent<CameraComponent>("Camera");
 
 	ImGui::Columns(1);
 	ImGui::Separator();
@@ -215,13 +150,11 @@ void SceneHierarchyPanel::DrawComponentInformation()
 	bool removeComponent = false;
 
 	if (!m_SelectedEntity.HasComponent<SpriteRendererComponent>() ||
-		!m_SelectedEntity.HasComponent<CameraComponent>() ||
-		!m_SelectedEntity.HasComponent<CameraControllerComponent>())
+		!m_SelectedEntity.HasComponent<CameraComponent>())
 		addComponent = true;
 
 	if (m_SelectedEntity.HasComponent<SpriteRendererComponent>() ||
-		m_SelectedEntity.HasComponent<CameraComponent>() ||
-		m_SelectedEntity.HasComponent<CameraControllerComponent>())
+		m_SelectedEntity.HasComponent<CameraComponent>())
 		removeComponent = true;
 
 	if (addComponent)
@@ -250,17 +183,120 @@ void SceneHierarchyPanel::DrawComponentInformation()
 }
 
 template<class T>
-void SceneHierarchyPanel::DrawComponent(const std::string& componentName, typename std::common_type<std::function<void(T&)>>::type function)
+void SceneHierarchyPanel::DrawComponent(const std::string& componentName)
 {
 	if (m_SelectedEntity.HasComponent<T>())
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
-		if (ImGui::TreeNodeEx((void*) typeid(T).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, componentName.c_str()))
+		if (ImGui::TreeNodeEx((void*)typeid(T).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, componentName.c_str()))
 		{
-			function(m_SelectedEntity.GetComponent<T>());
+			T& component = m_SelectedEntity.GetComponent<T>();
+			rttr::instance componentInstance = component;
+			rttr::type type = rttr::type::get<T>();
+
+			ReflectionMeta typeMeta(type);
+			for (auto& property : type.get_properties())
+			{
+				ReflectionMeta propertyMeta(property);
+				if ((propertyMeta.Flags & MetaInfo::EDITABLE) == 0) continue;
+				if (propertyMeta.Editor.ViewCondition != nullptr && !propertyMeta.Editor.ViewCondition(componentInstance)) continue;
+
+				if (propertyMeta.Editor.CustomView != nullptr)
+				{
+					propertyMeta.Editor.CustomView(componentInstance);
+					continue;
+				}
+
+				const char* name = property.get_name().cbegin();
+				if (property.is_readonly())
+				{
+					DrawDisplay(name, property.get_value(componentInstance), propertyMeta);
+				}
+				else
+				{
+					rttr::variant editedValue = DrawEdit(name, property.get_value(componentInstance), propertyMeta);
+					if (editedValue.is_valid())
+						property.set_value(componentInstance, editedValue);
+				}
+			}
+
 			ImGui::TreePop();
 		}
 		ImGui::PopStyleVar();
+	}
+}
+
+void SceneHierarchyPanel::DrawDisplay(const std::string& name, rttr::variant value, ReflectionMeta meta)
+{
+
+}
+
+rttr::variant SceneHierarchyPanel::DrawEdit(const std::string& name, rttr::variant value, ReflectionMeta meta)
+{
+	rttr::type type = value.get_type();
+	std::string typeName = type.get_name().cbegin();
+
+	Range editRange = meta.Editor.EditRange;
+	float editPrecision = meta.Editor.EditPrecision;
+
+	switch (meta.Editor.InterpretAs)
+	{
+	case InterpretAsInfo::DEFAULT:
+		if (type.is_enumeration())
+		{
+			return PanelUtilities::DrawCombo(name, value);
+		}
+		else if (typeName == "bool")
+		{
+			return PanelUtilities::DrawCheckbox(name, value.convert<bool>());
+		}
+		else if (typeName == "float")
+		{
+			return PanelUtilities::DrawDragFloat(name, value.convert<float>(), editPrecision, editRange.Min, editRange.Max);
+		}
+		else if (typeName == "Vector2")
+		{
+			return PanelUtilities::DrawDragVec2(name, value.convert<glm::vec2>(), editPrecision, editRange.Min, editRange.Max);
+		}
+		else if (typeName == "Vector3")
+		{
+			return PanelUtilities::DrawDragVec3(name, value.convert<glm::vec3>(), editPrecision, editRange.Min, editRange.Max);
+		}
+		else if (typeName == "Vector4")
+		{
+			return PanelUtilities::DrawDragVec4(name, value.convert<glm::vec4>(), editPrecision, editRange.Min, editRange.Max);
+		}
+		break;
+	case InterpretAsInfo::COLOR:
+		if (typeName == "Vector3")
+		{
+			return PanelUtilities::DrawColorEdit3(name, value.convert<glm::vec3>());
+		}
+		else if (typeName == "Vector4")
+		{
+			return PanelUtilities::DrawColorEdit4(name, value.convert<glm::vec4>());
+		}
+		break;
+	default:
+		break;
+	}
+	return rttr::variant{};
+}
+
+template <class T, typename... Args>
+void SceneHierarchyPanel::DrawAddComponentMenu(Args&&... args)
+{
+	if (!m_SelectedEntity.HasComponent<T>())
+	{
+		rttr::type type = rttr::type::get<T>();
+		if (ImGui::MenuItem(type.get_name().cbegin()))
+		{
+			m_SelectedEntity.AddComponent<T>(std::forward<Args>(args)...);
+			m_AddComponentPopup = false;
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::IsItemHovered())
+			PanelUtilities::DrawSelection();
 	}
 }
 
@@ -272,9 +308,25 @@ void SceneHierarchyPanel::DrawAddComponentPopup()
 
 		DrawAddComponentMenu<SpriteRendererComponent>(glm::vec4{ 1.0f });
 		DrawAddComponentMenu<CameraComponent>(glm::vec4{ 0.75f, 0.75f, 0.75f, 1.0f }, CameraComponent::ProjectionType::PERSPECTIVE, 90.0f, glm::vec2{ 0.1f, 1000.0f }, glm::vec2{ 1.0f, 1.0f }, false);
-		DrawAddComponentMenu<CameraControllerComponent>(0.1f, 1.0f);
 
 		ImGui::EndPopup();
+	}
+}
+
+template <class T>
+void SceneHierarchyPanel::DrawRemoveComponentMenu()
+{
+	if (m_SelectedEntity.HasComponent<T>())
+	{
+		rttr::type type = rttr::type::get<T>();
+		if (ImGui::MenuItem(type.get_name().cbegin()))
+		{
+			m_SelectedEntity.RemoveComponent<T>();
+			m_RemoveComponentPopup = false;
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::IsItemHovered())
+			PanelUtilities::DrawSelection();
 	}
 }
 
@@ -286,57 +338,9 @@ void SceneHierarchyPanel::DrawRemoveComponentPopup()
 
 		DrawRemoveComponentMenu<SpriteRendererComponent>();
 		DrawRemoveComponentMenu<CameraComponent>();
-		DrawRemoveComponentMenu<CameraControllerComponent>();
 
 		ImGui::EndPopup();
 	}
-}
-
-template <class T, typename... Args>
-void SceneHierarchyPanel::DrawAddComponentMenu(Args&&... args)
-{
-	if (!m_SelectedEntity.HasComponent<T>())
-	{
-		if (ImGui::MenuItem(SplitComponentName(typeid(T).name()).c_str()))
-		{
-			m_SelectedEntity.AddComponent<T>(std::forward<Args>(args)...);
-			m_AddComponentPopup = false;
-			ImGui::CloseCurrentPopup();
-		}
-		if (ImGui::IsItemHovered())
-			PanelUtilities::DrawSelection();
-	}
-}
-
-template <class T>
-void SceneHierarchyPanel::DrawRemoveComponentMenu()
-{
-	if (m_SelectedEntity.HasComponent<T>())
-	{
-		if (ImGui::MenuItem(SplitComponentName(typeid(T).name()).c_str()))
-		{
-			m_SelectedEntity.RemoveComponent<T>();
-			m_RemoveComponentPopup = false;
-			ImGui::CloseCurrentPopup();
-		}
-		if (ImGui::IsItemHovered())
-			PanelUtilities::DrawSelection();
-	}
-}
-
-std::string SceneHierarchyPanel::SplitComponentName(const std::string& componentName)
-{
-	std::string shortName = componentName.substr(componentName.find("::") + 2, componentName.length());
-	std::regex regex("[A-Z][^A-Z]*");
-	std::stringstream ss;
-
-	auto regexBegin = std::sregex_iterator(shortName.begin(), shortName.end(), regex);
-	auto regexEnd = std::sregex_iterator();
-
-	for (std::sregex_iterator it = regexBegin; it != regexEnd; ++it)
-		ss << it->str();
-
-	return ss.str();
 }
 
 void SceneHierarchyPanel::SetScene(const Ref<Scene>& scene)

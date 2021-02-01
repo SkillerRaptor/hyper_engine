@@ -28,16 +28,16 @@ private:
 	void DrawComponentInformation();
 
 	template<class T>
-	void DrawComponent(const std::string& componentName, const typename std::common_type<std::function<void(T&)>>::type function);
+	void DrawComponent(const std::string& componentName);
 
-	void DrawAddComponentPopup();
-	void DrawRemoveComponentPopup();
+	void DrawDisplay(const std::string& name, rttr::variant value, ReflectionMeta meta);
+	rttr::variant DrawEdit(const std::string& name, rttr::variant value, ReflectionMeta meta);
 
 	template <class T, typename... Args>
 	void DrawAddComponentMenu(Args&&... args);
+	void DrawAddComponentPopup();
 
 	template <class T>
 	void DrawRemoveComponentMenu();
-
-	std::string SplitComponentName(const std::string& componentName);
+	void DrawRemoveComponentPopup();
 };

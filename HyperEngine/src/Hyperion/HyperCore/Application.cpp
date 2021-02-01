@@ -1,6 +1,6 @@
 #include "Application.hpp"
 
-#include "HyperECS/Components.hpp"
+#include "HyperECS/Components/Components.hpp"
 #include "HyperEvents/WindowEvents.hpp"
 #include "HyperRendering/ImGuiLayer.hpp"
 #include "HyperUtilities/Random.hpp"
@@ -79,7 +79,7 @@ namespace Hyperion
 			for (Entity entity : m_Scene->GetWorld().GetEntities<CameraComponent>())
 			{
 				CameraComponent& entityCameraComponent = m_Scene->GetWorld().GetComponent<CameraComponent>(entity);
-				if (!entityCameraComponent.Primary)
+				if (!entityCameraComponent.IsPrimary())
 					continue;
 
 				validCamera = true;
@@ -96,7 +96,7 @@ namespace Hyperion
 
 			if (validCamera)
 			{
-				m_Window->GetContext()->GetRenderer2D()->SetCamera(transformComponent.Position, transformComponent.Rotation, cameraComponent.FOV, cameraComponent.ClippingPlanes, cameraComponent.ViewportRect, cameraComponent.Projection);
+				m_Window->GetContext()->GetRenderer2D()->SetCamera(transformComponent.GetPosition(), transformComponent.GetRotation(), cameraComponent.GetFieldOfView(), cameraComponent.GetClippingPlanes(), cameraComponent.GetViewportRect(), cameraComponent.GetProjection());
 
 				for (Layer* layer : m_LayerStack->GetLayers())
 				{

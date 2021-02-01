@@ -6,9 +6,9 @@
 #include "Hyperion/HyperCore/Core.hpp"
 
 /* HyperECS */
-#include "Hyperion/HyperECS/Components.hpp"
 #include "Hyperion/HyperECS/HyperECS.hpp"
 #include "Hyperion/HyperECS/HyperEntity.hpp"
+#include "Hyperion/HyperECS/Components/Components.hpp"
 #include "Hyperion/HyperECS/Scene/Scene.hpp"
 #include "Hyperion/HyperECS/Scene/SceneSerializer.hpp"
 
@@ -29,6 +29,7 @@
 #include "Hyperion/HyperRendering/TextureManager.hpp"
 
 /* HyperUtilities */
+#include "Hyperion/HyperUtilities/FileUtilities.hpp"
 #include "Hyperion/HyperUtilities/Input.hpp"
 #include "Hyperion/HyperUtilities/KeyCodes.hpp"
 #include "Hyperion/HyperUtilities/MouseCodes.hpp"
@@ -36,5 +37,6 @@
 #include "Hyperion/HyperUtilities/NonMoveable.hpp"
 #include "Hyperion/HyperUtilities/PlatformUtils.hpp"
 #include "Hyperion/HyperUtilities/Random.hpp"
+#include "Hyperion/HyperUtilities/Reflection.hpp"
 #include "Hyperion/HyperUtilities/Timer.hpp"
 #include "Hyperion/HyperUtilities/Timestep.hpp"

@@ -5,10 +5,12 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-namespace Hyperion::PanelUtilities
+namespace PanelUtilities
 {
-	void DrawCheckbox(const std::string& title, bool& value)
+	rttr::variant DrawCheckbox(const std::string& title, bool value)
 	{
+		bool edited = false;
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -17,15 +19,19 @@ namespace Hyperion::PanelUtilities
 		ImGui::NextColumn();
 
 		ImGui::SetNextItemWidth(-1);
-		ImGui::Checkbox(std::string("##" + title).c_str(), &value);
+		edited = ImGui::Checkbox(std::string("##" + title).c_str(), &value);
 
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return edited ? rttr::variant{ value } : rttr::variant{};
 	}
 
-	void DrawColorEdit3(const std::string& title, glm::vec3& value)
+	rttr::variant DrawColorEdit3(const std::string& title, glm::vec3 value)
 	{
+		bool edited = false;
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -34,15 +40,19 @@ namespace Hyperion::PanelUtilities
 		ImGui::NextColumn();
 
 		ImGui::SetNextItemWidth(-1);
-		ImGui::ColorEdit3(std::string("##" + title).c_str(), glm::value_ptr(value));
+		edited = ImGui::ColorEdit3(std::string("##" + title).c_str(), glm::value_ptr(value));
 
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return edited ? rttr::variant{ value } : rttr::variant{};
 	}
 
-	void DrawColorEdit4(const std::string& title, glm::vec4& value)
+	rttr::variant DrawColorEdit4(const std::string& title, glm::vec4 value)
 	{
+		bool edited = false;
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -51,15 +61,19 @@ namespace Hyperion::PanelUtilities
 		ImGui::NextColumn();
 
 		ImGui::SetNextItemWidth(-1);
-		ImGui::ColorEdit4(std::string("##" + title).c_str(), glm::value_ptr(value));
+		edited = ImGui::ColorEdit4(std::string("##" + title).c_str(), glm::value_ptr(value));
 
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return edited ? rttr::variant{ value } : rttr::variant{};
 	}
 
-	void DrawDragInt(const std::string& title, int& value, int speed, int min, int max)
+	rttr::variant DrawDragInt(const std::string& title, int value, int speed, int min, int max)
 	{
+		bool edited = false;
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -68,15 +82,19 @@ namespace Hyperion::PanelUtilities
 		ImGui::NextColumn();
 
 		ImGui::SetNextItemWidth(-1);
-		ImGui::DragInt(std::string("##" + title).c_str(), (int*)&value, static_cast<float>(speed), min, max, "%.2f", 0);
+		edited = ImGui::DragInt(std::string("##" + title).c_str(), (int*)&value, static_cast<float>(speed), min, max, "%.2f", 0);
 
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return edited ? rttr::variant{ value } : rttr::variant{};
 	}
 
-	void DrawDragUnsignedInt(const std::string& title, uint8_t& value, int speed, int max)
+	rttr::variant DrawDragUnsignedInt(const std::string& title, uint8_t value, int speed, int max)
 	{
+		bool edited = false;
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -85,15 +103,19 @@ namespace Hyperion::PanelUtilities
 		ImGui::NextColumn();
 
 		ImGui::SetNextItemWidth(-1);
-		ImGui::DragInt(std::string("##" + title).c_str(), (int*)&value, static_cast<float>(speed), 0, max, "%.2f", 0);
+		edited = ImGui::DragInt(std::string("##" + title).c_str(), (int*)&value, static_cast<float>(speed), 0, max, "%.2f", 0);
 
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return edited ? rttr::variant{ value } : rttr::variant{};
 	}
 
-	void DrawDragUnsignedInt(const std::string& title, uint16_t& value, int speed, int max)
+	rttr::variant DrawDragUnsignedInt(const std::string& title, uint16_t value, int speed, int max)
 	{
+		bool edited = false;
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -102,15 +124,19 @@ namespace Hyperion::PanelUtilities
 		ImGui::NextColumn();
 
 		ImGui::SetNextItemWidth(-1);
-		ImGui::DragInt(std::string("##" + title).c_str(), (int*)&value, static_cast<float>(speed), 0, max, "%.2f", 0);
+		edited = ImGui::DragInt(std::string("##" + title).c_str(), (int*)&value, static_cast<float>(speed), 0, max, "%.2f", 0);
 
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return edited ? rttr::variant{ value } : rttr::variant{};
 	}
 
-	void DrawDragUnsignedInt(const std::string& title, uint32_t& value, int speed, int max)
+	rttr::variant DrawDragUnsignedInt(const std::string& title, uint32_t value, int speed, int max)
 	{
+		bool edited = false;
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -119,15 +145,19 @@ namespace Hyperion::PanelUtilities
 		ImGui::NextColumn();
 
 		ImGui::SetNextItemWidth(-1);
-		ImGui::DragInt(std::string("##" + title).c_str(), (int*)&value, static_cast<float>(speed), 0, max, "%.2f", 0);
+		edited = ImGui::DragInt(std::string("##" + title).c_str(), (int*)&value, static_cast<float>(speed), 0, max, "%.2f", 0);
 
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return edited ? rttr::variant{ value } : rttr::variant{};
 	}
 
-	void DrawDragUnsignedInt(const std::string& title, uint64_t& value, int speed, int max)
+	rttr::variant DrawDragUnsignedInt(const std::string& title, uint64_t value, int speed, int max)
 	{
+		bool edited = false;
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -136,15 +166,19 @@ namespace Hyperion::PanelUtilities
 		ImGui::NextColumn();
 
 		ImGui::SetNextItemWidth(-1);
-		ImGui::DragInt(std::string("##" + title).c_str(), (int*)&value, static_cast<float>(speed), 0, max, "%.2f", 0);
+		edited = ImGui::DragInt(std::string("##" + title).c_str(), (int*)&value, static_cast<float>(speed), 0, max, "%.2f", 0);
 
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return edited ? rttr::variant{ value } : rttr::variant{};
 	}
 
-	void DrawDragFloat(const std::string& title, float& value, float speed, float min, float max)
+	rttr::variant DrawDragFloat(const std::string& title, float value, float speed, float min, float max)
 	{
+		bool edited = false;
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -153,15 +187,20 @@ namespace Hyperion::PanelUtilities
 		ImGui::NextColumn();
 
 		ImGui::SetNextItemWidth(-1);
-		ImGui::DragFloat(std::string("##" + title).c_str(), &value, speed, min, max, "%.2f", 1.0f);
+		edited = ImGui::DragFloat(std::string("##" + title).c_str(), &value, speed, min, max, "%.2f", 1.0f);
 
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return edited ? rttr::variant{ value } : rttr::variant{};
 	}
 
-	void DrawDragVec2(const std::string& title, glm::vec2& vector, float speed, float min, float max, const std::array<std::string, 2>& labels)
+	rttr::variant DrawDragVec2(const std::string& title, glm::vec2 vector, float speed, float min, float max, const std::array<std::string, 2>& labels)
 	{
+		bool editedX = false;
+		bool editedY = false;
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -172,21 +211,27 @@ namespace Hyperion::PanelUtilities
 		ImGui::SetNextItemWidth(-1);
 		ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
 
-		ImGui::DragFloat(std::string("##" + title + "X").c_str(), &vector.x, speed, min, max, (labels[0] + ": %.2f").c_str(), 1.0f);
+		editedX = ImGui::DragFloat(std::string("##" + title + "X").c_str(), &vector.x, speed, min, max, (labels[0] + ": %.2f").c_str(), 1.0f);
 		ImGui::PopItemWidth();
 
 		ImGui::SameLine();
 
-		ImGui::DragFloat(std::string("##" + title + "Y").c_str(), &vector.y, speed, min, max, (labels[1] + ": %.2f").c_str(), 1.0f);
+		editedY = ImGui::DragFloat(std::string("##" + title + "Y").c_str(), &vector.y, speed, min, max, (labels[1] + ": %.2f").c_str(), 1.0f);
 		ImGui::PopItemWidth();
 
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return (editedX || editedY) ? rttr::variant{ vector } : rttr::variant{};
 	}
 
-	void DrawDragVec3(const std::string& title, glm::vec3& vector, float speed, float min, float max, const std::array<std::string, 3>& labels)
+	rttr::variant DrawDragVec3(const std::string& title, glm::vec3 vector, float speed, float min, float max, const std::array<std::string, 3>& labels)
 	{
+		bool editedX = false;
+		bool editedY = false;
+		bool editedZ = false;
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -197,26 +242,33 @@ namespace Hyperion::PanelUtilities
 		ImGui::SetNextItemWidth(-1);
 		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
 
-		ImGui::DragFloat(std::string("##" + title + "X").c_str(), &vector.x, speed, min, max, (labels[0] + ": %.2f").c_str(), 1.0f);
+		editedX = ImGui::DragFloat(std::string("##" + title + "X").c_str(), &vector.x, speed, min, max, (labels[0] + ": %.2f").c_str(), 1.0f);
 		ImGui::PopItemWidth();
 
 		ImGui::SameLine();
 
-		ImGui::DragFloat(std::string("##" + title + "Y").c_str(), &vector.y, speed, min, max, (labels[1] + ": %.2f").c_str(), 1.0f);
+		editedY = ImGui::DragFloat(std::string("##" + title + "Y").c_str(), &vector.y, speed, min, max, (labels[1] + ": %.2f").c_str(), 1.0f);
 		ImGui::PopItemWidth();
 
 		ImGui::SameLine();
 
-		ImGui::DragFloat(std::string("##" + title + "Z").c_str(), &vector.z, speed, min, max, (labels[2] + ": %.2f").c_str(), 1.0f);
+		editedZ = ImGui::DragFloat(std::string("##" + title + "Z").c_str(), &vector.z, speed, min, max, (labels[2] + ": %.2f").c_str(), 1.0f);
 		ImGui::PopItemWidth();
 
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return (editedX || editedY || editedZ) ? rttr::variant{ vector } : rttr::variant{};
 	}
 
-	void DrawDragVec4(const std::string& title, glm::vec4& vector, float speed, float min, float max, const std::array<std::string, 4>& labels)
+	rttr::variant DrawDragVec4(const std::string& title, glm::vec4 vector, float speed, float min, float max, const std::array<std::string, 4>& labels)
 	{
+		bool editedX = false;
+		bool editedY = false;
+		bool editedZ = false;
+		bool editedW = false;
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -227,31 +279,36 @@ namespace Hyperion::PanelUtilities
 		ImGui::SetNextItemWidth(-1);
 		ImGui::PushMultiItemsWidths(4, ImGui::CalcItemWidth());
 
-		ImGui::DragFloat(std::string("##" + title + "X").c_str(), &vector.x, speed, min, max, (labels[0] + ": %.2f").c_str(), 1.0f);
+		editedX = ImGui::DragFloat(std::string("##" + title + "X").c_str(), &vector.x, speed, min, max, (labels[0] + ": %.2f").c_str(), 1.0f);
 		ImGui::PopItemWidth();
 
 		ImGui::SameLine();
 
-		ImGui::DragFloat(std::string("##" + title + "Y").c_str(), &vector.y, speed, min, max, (labels[1] + ": %.2f").c_str(), 1.0f);
+		editedY = ImGui::DragFloat(std::string("##" + title + "Y").c_str(), &vector.y, speed, min, max, (labels[1] + ": %.2f").c_str(), 1.0f);
 		ImGui::PopItemWidth();
 
 		ImGui::SameLine();
 
-		ImGui::DragFloat(std::string("##" + title + "Z").c_str(), &vector.z, speed, min, max, (labels[2] + ": %.2f").c_str(), 1.0f);
+		editedZ = ImGui::DragFloat(std::string("##" + title + "Z").c_str(), &vector.z, speed, min, max, (labels[2] + ": %.2f").c_str(), 1.0f);
 		ImGui::PopItemWidth();
 
 		ImGui::SameLine();
 
-		ImGui::DragFloat(std::string("##" + title + "W").c_str(), &vector.w, speed, min, max, (labels[3] + ": % .2f").c_str(), 1.0f);
+		editedW = ImGui::DragFloat(std::string("##" + title + "W").c_str(), &vector.w, speed, min, max, (labels[3] + ": % .2f").c_str(), 1.0f);
 		ImGui::PopItemWidth();
 
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return (editedX || editedY || editedZ || editedW) ? rttr::variant{ vector } : rttr::variant{};
 	}
 
-	void DrawCombo(const std::string& title, std::string& currentItem, const std::vector<std::string>& items)
+	rttr::variant DrawCombo(const std::string& title, const rttr::variant& v)
 	{
+		rttr::enumeration e = v.get_type().get_enumeration();
+		const char* currentItem = e.value_to_name(v).cbegin();
+
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -261,15 +318,18 @@ namespace Hyperion::PanelUtilities
 
 		ImGui::SetNextItemWidth(-1);
 
-		if (ImGui::BeginCombo("##Combo", currentItem.c_str()))
+		rttr::variant value{};
+		if (ImGui::BeginCombo("##Combo", currentItem))
 		{
-			for (size_t i = 0; i < items.size(); i++)
+			for (const rttr::string_view& enumName : e.get_names())
 			{
-				bool isSelected = currentItem == items[i];
-				if (ImGui::Selectable(items[i].c_str(), isSelected))
-					currentItem = items[i];
-				if (isSelected)
+				rttr::variant enumValue = e.name_to_value(enumName);
+				if (ImGui::Selectable(enumName.cbegin(), enumValue == v))
+				{
 					ImGui::SetItemDefaultFocus();
+					value = enumValue;
+					break;
+				}
 			}
 			ImGui::EndCombo();
 		}
@@ -277,10 +337,13 @@ namespace Hyperion::PanelUtilities
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+
+		return value;
 	}
 
-	void DrawInputCombo(const std::string& title, std::string& currentItem, const std::vector<std::string>& items)
+	rttr::variant DrawInputCombo(const std::string& title, const rttr::variant& v)
 	{
+		/*
 		ImGui::PushID(title.c_str());
 
 		ImGui::Columns(2);
@@ -321,6 +384,7 @@ namespace Hyperion::PanelUtilities
 					{
 						currentItem = item;
 						isOpen = false;
+						edited = true;
 					}
 				}
 			}
@@ -332,6 +396,8 @@ namespace Hyperion::PanelUtilities
 		ImGui::Columns(1);
 
 		ImGui::PopID();
+		*/
+		return rttr::variant{};
 	}
 
 	void DrawSelectableImage(const std::string& title, uint32_t imageId, const typename std::common_type<std::function<void()>>::type clickFunction, const typename std::common_type<std::function<void()>>::type removeFunction)
@@ -364,7 +430,7 @@ namespace Hyperion::PanelUtilities
 	void SplitNode(const std::string& title, typename std::common_type<std::function<void()>>::type function)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
-		if (ImGui::TreeNodeEx((void*) std::hash<std::string>()(title), ImGuiTreeNodeFlags_DefaultOpen, title.c_str()))
+		if (ImGui::TreeNodeEx((void*)std::hash<std::string>()(title), ImGuiTreeNodeFlags_DefaultOpen, title.c_str()))
 		{
 			function();
 			ImGui::TreePop();
