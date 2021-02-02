@@ -422,7 +422,11 @@ rttr::variant PanelUtilities::DrawSelectableImage(const std::string& title, Text
 	Ref<TextureManager> textureManager = s_RenderContext->GetTextureManager();
 	if (ImGui::ImageButton(textureManager->GetImageTextureId(texture), buttonSize, { 0, 1 }, { 1, 0 }, 0))
 	{
-		std::string filePath = PlatformUtils::Get()->OpenFile("Image (*.png)\0*.png\0");
+		std::optional<std::string> filePath = PlatformUtils::Get()->OpenFile("Image (*.png)\0*.png\0");
+		if (filePath.has_value())
+		{
+
+		}
 	}
 	ImGui::PopItemWidth();
 

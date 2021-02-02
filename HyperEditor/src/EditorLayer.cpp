@@ -255,16 +255,16 @@ void EditorLayer::CreateNewScene()
 
 void EditorLayer::OpenScene()
 {
-	std::string filePath = PlatformUtils::Get()->OpenFile("Hyper Scene (*.hyper)\0*.hyper\0");
+	std::optional<std::string> filePath = PlatformUtils::Get()->OpenFile("Hyper Scene (*.hyper)\0*.hyper\0");
 
-	if (filePath.empty())
+	if (!filePath.has_value())
 		return;
 
 	m_Scene->Clear();
 	m_Scene->SetName("Example Scene");
 
 	SceneSerializer sceneSerializer(m_Scene);
-	sceneSerializer.Deserialize(filePath);
+	sceneSerializer.Deserialize(filePath.value());
 }
 
 void EditorLayer::SaveScene()
@@ -279,11 +279,11 @@ void EditorLayer::SaveScene()
 
 void EditorLayer::SaveAsScene()
 {
-	std::string filePath = PlatformUtils::Get()->SaveFile("Hyper Scene (*.hyper)\0*.hyper\0");
+	std::optional<std::string> filePath = PlatformUtils::Get()->SaveFile("Hyper Scene (*.hyper)\0*.hyper\0");
 
-	if (filePath.empty())
+	if (!filePath.has_value())
 		return;
 
 	SceneSerializer sceneSerializer(m_Scene);
-	sceneSerializer.Serialize(filePath + ".hyper");
+	sceneSerializer.Serialize(filePath.value() + ".hyper");
 }
