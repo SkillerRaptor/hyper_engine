@@ -2,18 +2,21 @@
 
 #include <glm/glm.hpp>
 
+#include "HyperRendering/TextureManager.hpp"
+
 namespace Hyperion
 {
 	class SpriteRendererComponent
 	{
 	private:
 		glm::vec4 m_Color;
+		TextureHandle m_Texture;
 
 	public:
 		SpriteRendererComponent() = default;
 		~SpriteRendererComponent() = default;
 
-		SpriteRendererComponent(const glm::vec4& color);
+		SpriteRendererComponent(const glm::vec4& color, TextureHandle texture);
 
 		SpriteRendererComponent(const SpriteRendererComponent& other);
 		SpriteRendererComponent& operator=(const SpriteRendererComponent& other);
@@ -26,5 +29,8 @@ namespace Hyperion
 
 		SpriteRendererComponent& SetColor(const glm::vec4& color);
 		const glm::vec4& GetColor() const;
+
+		SpriteRendererComponent& SetTexture(TextureHandle texture);
+		TextureHandle GetTexture() const;
 	};
 }

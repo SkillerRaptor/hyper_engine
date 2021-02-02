@@ -6,7 +6,7 @@
 
 namespace Hyperion
 {
-	struct OpenGLTextureData : public TextureData
+	struct OpenGL46TextureData : public TextureData
 	{
 		uint32_t TextureId = -1;
 	};
@@ -14,7 +14,7 @@ namespace Hyperion
 	class OpenGL46TextureManager : public TextureManager
 	{
 	private:
-		std::unordered_map<TextureHandle, OpenGLTextureData, TextureHandleHasher> m_Textures;
+		std::unordered_map<TextureHandle, OpenGL46TextureData, TextureHandleHasher> m_Textures;
 
 	public:
 		OpenGL46TextureManager();
@@ -39,5 +39,7 @@ namespace Hyperion
 		virtual uint8_t GetChannels(TextureHandle handle) override;
 		virtual const std::string GetPath(TextureHandle handle) override;
 		virtual TextureData* GetTextureData(TextureHandle handle) override;
+
+		void* GetImageTextureId(TextureHandle handle) override;
 	};
 }

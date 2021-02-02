@@ -72,7 +72,6 @@ void SceneHierarchyPanel::DrawSceneInformation()
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 	if (ImGui::TreeNodeEx((void*) typeid(SceneHierarchyPanel).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Editor Camera"))
 	{
-		PanelUtilities::DrawSelectableImage("Texture", 0, [&]() {}, [&]() {});
 		ImGui::TreePop();
 	}
 	ImGui::PopStyleVar();
@@ -228,7 +227,6 @@ void SceneHierarchyPanel::DrawComponent(const std::string& componentName)
 
 void SceneHierarchyPanel::DrawDisplay(const std::string& name, rttr::variant value, ReflectionMeta meta)
 {
-
 }
 
 rttr::variant SceneHierarchyPanel::DrawEdit(const std::string& name, rttr::variant value, ReflectionMeta meta)
@@ -265,6 +263,10 @@ rttr::variant SceneHierarchyPanel::DrawEdit(const std::string& name, rttr::varia
 		else if (typeName == "Vector4")
 		{
 			return PanelUtilities::DrawDragVec4(name, value.convert<glm::vec4>(), editPrecision, editRange.Min, editRange.Max);
+		}
+		else if (typeName == "Texture")
+		{
+			return PanelUtilities::DrawSelectableImage(name, value.convert<TextureHandle>());
 		}
 		break;
 	case InterpretAsInfo::COLOR:
@@ -306,7 +308,7 @@ void SceneHierarchyPanel::DrawAddComponentPopup()
 	{
 		World& world = m_Scene->GetWorld();
 
-		DrawAddComponentMenu<SpriteRendererComponent>(glm::vec4{ 1.0f });
+		DrawAddComponentMenu<SpriteRendererComponent>(glm::vec4{ 1.0f }, TextureHandle{ 0 });
 		DrawAddComponentMenu<CameraComponent>(glm::vec4{ 0.75f, 0.75f, 0.75f, 1.0f }, CameraComponent::ProjectionType::PERSPECTIVE, 90.0f, glm::vec2{ 0.1f, 1000.0f }, glm::vec2{ 1.0f, 1.0f }, false);
 
 		ImGui::EndPopup();

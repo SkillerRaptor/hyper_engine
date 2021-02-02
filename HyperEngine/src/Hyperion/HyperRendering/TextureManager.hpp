@@ -54,6 +54,9 @@ namespace Hyperion
 		TextureManager() = default;
 		virtual ~TextureManager() = default;
 
+		unsigned char* LoadImage(const std::string & path, int32_t & width, int32_t & height, int32_t & channels);
+		void FreeImage(unsigned char* pixels);
+
 		virtual TextureHandle CreateTexture(const std::string& path, TextureType textureType = TextureType::DEFAULT) = 0;
 		virtual TextureHandle CreateTexture(uint32_t width, uint32_t height, TextureType textureType = TextureType::DEFAULT) = 0;
 		virtual void GenerateTexture(TextureData* textureData, unsigned char* pixels = nullptr) = 0;
@@ -73,8 +76,7 @@ namespace Hyperion
 		virtual uint8_t GetChannels(TextureHandle handle) = 0;
 		virtual const std::string GetPath(TextureHandle handle) = 0;
 		virtual TextureData* GetTextureData(TextureHandle handle) = 0;
-
-		unsigned char* LoadImage(const std::string& path, int32_t& width, int32_t& height, int32_t& channels);
-		void FreeImage(unsigned char* pixels);
+		
+		virtual void* GetImageTextureId(TextureHandle handle) = 0;
 	};
 }

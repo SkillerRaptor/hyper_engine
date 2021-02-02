@@ -24,7 +24,7 @@ namespace Hyperion
 
 	TextureHandle OpenGL33TextureManager::CreateTexture(const std::string& path, TextureType textureType)
 	{
-		OpenGLTextureData textureData;
+		OpenGL33TextureData textureData;
 		textureData.Path = path;
 		textureData.Type = textureType;
 
@@ -58,7 +58,7 @@ namespace Hyperion
 
 	TextureHandle OpenGL33TextureManager::CreateTexture(uint32_t width, uint32_t height, TextureType textureType)
 	{
-		OpenGLTextureData textureData;
+		OpenGL33TextureData textureData;
 		textureData.Width = width;
 		textureData.Height = height;
 		textureData.Type = textureType;
@@ -80,7 +80,7 @@ namespace Hyperion
 
 	void OpenGL33TextureManager::GenerateTexture(TextureData* textureData, unsigned char* pixels)
 	{
-		OpenGLTextureData* data = static_cast<OpenGLTextureData*>(textureData);
+		OpenGL33TextureData* data = static_cast<OpenGL33TextureData*>(textureData);
 		glGenTextures(1, &data->TextureId);
 		glBindTexture(GL_TEXTURE_2D, data->TextureId);
 
@@ -216,5 +216,12 @@ namespace Hyperion
 		if (m_Textures.find(handle) == m_Textures.end())
 			return nullptr;
 		return &m_Textures[handle];
+	}
+
+	void* OpenGL33TextureManager::GetImageTextureId(TextureHandle handle)
+	{
+		if (m_Textures.find(handle) == m_Textures.end())
+			return nullptr;
+		return (void*)m_Textures[handle].TextureId;
 	}
 }

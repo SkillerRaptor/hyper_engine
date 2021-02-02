@@ -58,8 +58,7 @@ namespace Hyperion
 
 	void OpenGL46SceneRecorder::RenderGameImage()
 	{
-		uint32_t colorTextureId = static_cast<OpenGLTextureData*>(m_TextureManager->GetTextureData(m_GameFrameBuffer->GetColorAttachment()))->TextureId;
-		ImGui::Image((ImTextureID)(intptr_t)colorTextureId, ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image(m_TextureManager->GetImageTextureId(m_GameFrameBuffer->GetColorAttachment()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
 	}
 
 	void OpenGL46SceneRecorder::StartEditorRecording()
@@ -75,8 +74,7 @@ namespace Hyperion
 
 	void OpenGL46SceneRecorder::RenderEditorImage()
 	{
-		static uint32_t colorTextureId = static_cast<OpenGLTextureData*>(m_TextureManager->GetTextureData(m_EditorFrameBuffer->GetColorAttachment()))->TextureId;
-		ImGui::Image((ImTextureID)(intptr_t)colorTextureId, ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image(m_TextureManager->GetImageTextureId(m_EditorFrameBuffer->GetColorAttachment()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
 	}
 
 	TextureHandle OpenGL46SceneRecorder::GetGameColorAttachment()

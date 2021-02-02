@@ -22,6 +22,8 @@ void EditorLayer::OnAttach()
 	m_AssetsPanel = CreateScope<AssetsPanel>();
 	m_SceneHierarchyPanel = CreateScope<SceneHierarchyPanel>(m_Scene);
 
+	PanelUtilities::SetRenderContext(m_RenderContext);
+
 	/* Adding Font */
 	ImGuiIO& io = ImGui::GetIO();
 	ImFontConfig config{};
@@ -32,16 +34,17 @@ void EditorLayer::OnAttach()
 	/* Loading Shaders */
 	m_SpriteShader = m_RenderContext->GetShaderManager()->CreateShader("assets/shaders/SpriteShaderVertex.glsl", "assets/shaders/SpriteShaderFragment.glsl");
 
+	/* Creating Entities */
+
 	float phi = glm::pi<float>() * (3.0f - glm::sqrt(5.0f));
 
 	static constexpr const size_t PLANE_COUNT = 100;
 	static constexpr const size_t RADIUS = 20;
 
-	/* Creating Entities */
 	for (size_t i = 0; i < PLANE_COUNT; i++)
 	{
 		HyperEntity square = m_Scene->CreateEntity("Square-" + std::to_string(i));
-		square.AddComponent<SpriteRendererComponent>(glm::vec4(Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), 1.0f));
+		square.AddComponent<SpriteRendererComponent>(glm::vec4(Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), 1.0f), TextureHandle{ 0 });
 		auto& transform = square.GetComponent<TransformComponent>();
 
 		float y = 1 - (i / (static_cast<float>(PLANE_COUNT) - 1.0f)) * 2.0f;

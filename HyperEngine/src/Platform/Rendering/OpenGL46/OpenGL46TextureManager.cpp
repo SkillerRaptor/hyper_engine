@@ -24,7 +24,7 @@ namespace Hyperion
 
 	TextureHandle OpenGL46TextureManager::CreateTexture(const std::string& path, TextureType textureType)
 	{
-		OpenGLTextureData textureData;
+		OpenGL46TextureData textureData;
 		textureData.Path = path;
 		textureData.Type = textureType;
 
@@ -58,7 +58,7 @@ namespace Hyperion
 
 	TextureHandle OpenGL46TextureManager::CreateTexture(uint32_t width, uint32_t height, TextureType textureType)
 	{
-		OpenGLTextureData textureData;
+		OpenGL46TextureData textureData;
 		textureData.Width = width;
 		textureData.Height = height;
 		textureData.Type = textureType;
@@ -80,7 +80,7 @@ namespace Hyperion
 
 	void OpenGL46TextureManager::GenerateTexture(TextureData* textureData, unsigned char* pixels)
 	{
-		OpenGLTextureData* data = static_cast<OpenGLTextureData*>(textureData);
+		OpenGL46TextureData* data = static_cast<OpenGL46TextureData*>(textureData);
 		glCreateTextures(GL_TEXTURE_2D, 1, &data->TextureId);
 		
 		glTextureParameteri(data->TextureId, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -217,5 +217,12 @@ namespace Hyperion
 		if (m_Textures.find(handle) == m_Textures.end())
 			return nullptr;
 		return &m_Textures[handle];
+	}
+
+	void* OpenGL46TextureManager::GetImageTextureId(TextureHandle handle)
+	{
+		if (m_Textures.find(handle) == m_Textures.end())
+			return nullptr;
+		return (void*)m_Textures[handle].TextureId;
 	}
 }

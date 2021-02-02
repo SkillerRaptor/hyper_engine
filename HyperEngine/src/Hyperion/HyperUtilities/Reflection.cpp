@@ -2,6 +2,9 @@
 
 #include <glm/glm.hpp>
 
+#include "HyperRendering/ShaderManager.hpp"
+#include "HyperRendering/TextureManager.hpp"
+
 namespace Hyperion
 {
 	HP_REFLECT_TYPE
@@ -52,6 +55,13 @@ namespace Hyperion
 			.property("W", &glm::vec4::w)
 			(
 				rttr::metadata(MetaInfo::FLAGS, MetaInfo::SERIALIZABLE | MetaInfo::EDITABLE)
+			);
+
+		rttr::registration::class_<TextureHandle>("Texture")
+			.constructor<>()
+			.property("Handle", &TextureHandle::Handle)
+			(
+				rttr::metadata(MetaInfo::FLAGS, MetaInfo::EDITABLE)
 			);
 	}
 }
