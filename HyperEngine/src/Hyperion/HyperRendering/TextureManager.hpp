@@ -1,7 +1,8 @@
 #pragma once
 
-#include <string>
+#include <optional>
 #include <queue>
+#include <string>
 
 #include "HyperUtilities/NonCopyable.hpp"
 #include "HyperUtilities/NonMoveable.hpp"
@@ -54,29 +55,29 @@ namespace Hyperion
 		TextureManager() = default;
 		virtual ~TextureManager() = default;
 
-		unsigned char* LoadImage(const std::string & path, int32_t & width, int32_t & height, int32_t & channels);
+		unsigned char* LoadImage(const std::string& path, int32_t& width, int32_t& height, int32_t& channels);
 		void FreeImage(unsigned char* pixels);
 
 		virtual TextureHandle CreateTexture(const std::string& path, TextureType textureType = TextureType::DEFAULT) = 0;
 		virtual TextureHandle CreateTexture(uint32_t width, uint32_t height, TextureType textureType = TextureType::DEFAULT) = 0;
-		virtual void GenerateTexture(TextureData* textureData, unsigned char* pixels = nullptr) = 0;
-		virtual bool BindTexture(TextureHandle handle, uint32_t textureSlot) = 0;
-		virtual bool DeleteTexture(TextureHandle handle) = 0;
-		virtual bool DeleteTextureData(TextureHandle handle) = 0;
+		virtual void BindTexture(TextureHandle handle, uint32_t textureSlot) = 0;
+		virtual void DeleteTexture(TextureHandle handle) = 0;
 
 		virtual void SetWidth(TextureHandle handle, uint32_t width) = 0;
-		virtual uint32_t GetWidth(TextureHandle handle) = 0;
+		virtual std::optional<uint32_t> GetWidth(TextureHandle handle) = 0;
 
 		virtual void SetHeight(TextureHandle handle, uint32_t height) = 0;
-		virtual uint32_t GetHeight(TextureHandle handle) = 0;
+		virtual std::optional<uint32_t> GetHeight(TextureHandle handle) = 0;
 
 		virtual void SetTextureType(TextureHandle handle, TextureType textureType) = 0;
-		virtual TextureType GetTextureType(TextureHandle handle) = 0;
+		virtual std::optional<TextureType> GetTextureType(TextureHandle handle) = 0;
 
-		virtual uint8_t GetChannels(TextureHandle handle) = 0;
-		virtual const std::string GetPath(TextureHandle handle) = 0;
-		virtual TextureData* GetTextureData(TextureHandle handle) = 0;
+		virtual std::optional<uint8_t> GetColorChannels(TextureHandle handle) = 0;
+		virtual std::optional<std::string> GetFilePath(TextureHandle handle) = 0;
 		
 		virtual void* GetImageTextureId(TextureHandle handle) = 0;
+
+	protected:
+		virtual void GenerateTexture(TextureData* textureData, unsigned char* pixels = nullptr) = 0;
 	};
 }

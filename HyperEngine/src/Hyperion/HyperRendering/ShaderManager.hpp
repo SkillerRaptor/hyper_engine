@@ -42,8 +42,8 @@ namespace Hyperion
 		virtual ~ShaderManager() = default;
 
 		virtual ShaderHandle CreateShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath = "") = 0;
-		virtual bool UseShader(ShaderHandle handle) = 0;
-		virtual bool DeleteShader(ShaderHandle handle) = 0;
+		virtual void UseShader(ShaderHandle handle) = 0;
+		virtual void DeleteShader(ShaderHandle handle) = 0;
 
 		virtual void SetInteger(ShaderHandle handle, const std::string& name, int value) = 0;
 		virtual void SetUnsignedInteger(ShaderHandle handle, const std::string& name, unsigned int value) = 0;
@@ -64,9 +64,5 @@ namespace Hyperion
 		virtual void SetMatrix2(ShaderHandle handle, const std::string& name, const glm::mat2& matrix) = 0;
 		virtual void SetMatrix3(ShaderHandle handle, const std::string& name, const glm::mat3& matrix) = 0;
 		virtual void SetMatrix4(ShaderHandle handle, const std::string& name, const glm::mat4& matrix) = 0;
-
-		virtual const std::string GetVertexShaderPath(ShaderHandle handle) = 0;
-		virtual const std::string GetFragmentShaderPath(ShaderHandle handle) = 0;
-		virtual const std::string GetGeometryShaderPath(ShaderHandle handle) = 0;
 	};
 }

@@ -97,7 +97,7 @@ namespace Hyperion
 			m_QuadVertexBufferPtr->TextureId = -1;
 			m_QuadVertexBufferPtr++;
 		}
-		
+
 		m_QuadIndexCount += 6;
 		m_QuadCount++;
 	}
@@ -125,8 +125,9 @@ namespace Hyperion
 
 		if (gameColorTexture.IsHandleValid())
 		{
-			TextureData* gameColorTextureData = m_TextureManager->GetTextureData(gameColorTexture);
-			aspectRatio = (static_cast<float>(gameColorTextureData->Width) * viewportRect.x) / (static_cast<float>(gameColorTextureData->Height) * viewportRect.y);
+			uint32_t width = m_TextureManager->GetWidth(gameColorTexture).value_or(0);
+			uint32_t height = m_TextureManager->GetHeight(gameColorTexture).value_or(0);
+			aspectRatio = (static_cast<float>(width) * viewportRect.x) / (static_cast<float>(height) * viewportRect.y);
 		}
 
 		switch (projectionType)

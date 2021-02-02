@@ -9,7 +9,7 @@ namespace Hyperion
 {
 	struct OpenGLShaderData : public ShaderData
 	{
-		uint32_t ShaderId;
+		uint32_t ShaderId = 0;
 		std::unordered_map<std::string, uint32_t> UniformCache = {};
 	};
 
@@ -23,8 +23,8 @@ namespace Hyperion
 		~OpenGL46ShaderManager();
 
 		virtual ShaderHandle CreateShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath = "") override;
-		virtual bool UseShader(ShaderHandle handle) override;
-		virtual bool DeleteShader(ShaderHandle handle) override;
+		virtual void UseShader(ShaderHandle handle) override;
+		virtual void DeleteShader(ShaderHandle handle) override;
 
 		virtual void SetInteger(ShaderHandle handle, const std::string& name, int value) override;
 		virtual void SetUnsignedInteger(ShaderHandle handle, const std::string& name, unsigned int value) override;
@@ -45,10 +45,6 @@ namespace Hyperion
 		virtual void SetMatrix2(ShaderHandle handle, const std::string& name, const glm::mat2& matrix) override;
 		virtual void SetMatrix3(ShaderHandle handle, const std::string& name, const glm::mat3& matrix) override;
 		virtual void SetMatrix4(ShaderHandle handle, const std::string& name, const glm::mat4& matrix) override;
-
-		virtual const std::string GetVertexShaderPath(ShaderHandle handle) override;
-		virtual const std::string GetFragmentShaderPath(ShaderHandle handle) override;
-		virtual const std::string GetGeometryShaderPath(ShaderHandle handle) override;
 
 	private:
 		bool GenerateShader(OpenGLShaderData& shaderData, const char* vertexCode, const char* fragmentCode, const char* geometryCode);

@@ -196,8 +196,9 @@ namespace Hyperion
 
 		if (editorColorTexture.IsHandleValid())
 		{
-			TextureData* editorColorTextureData = m_RenderContext->GetTextureManager()->GetTextureData(editorColorTexture);
-			aspectRatio = (static_cast<float>(editorColorTextureData->Width) * m_ViewportRect.x) / (static_cast<float>(editorColorTextureData->Height) * m_ViewportRect.y);
+			uint32_t width = m_RenderContext->GetTextureManager()->GetWidth(editorColorTexture).value_or(0);
+			uint32_t height = m_RenderContext->GetTextureManager()->GetHeight(editorColorTexture).value_or(0);
+			aspectRatio = (static_cast<float>(width) * m_ViewportRect.x) / (static_cast<float>(height) * m_ViewportRect.y);
 		}
 
 		switch (m_Projection)

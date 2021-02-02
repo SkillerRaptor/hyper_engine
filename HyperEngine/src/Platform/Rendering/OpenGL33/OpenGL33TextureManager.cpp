@@ -128,31 +128,21 @@ namespace Hyperion
 		}
 	}
 
-	bool OpenGL33TextureManager::BindTexture(TextureHandle handle, uint32_t textureSlot)
+	void OpenGL33TextureManager::BindTexture(TextureHandle handle, uint32_t textureSlot)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
-			return false;
+			return;
 		glActiveTexture(GL_TEXTURE0 + textureSlot);
 		glBindTexture(GL_TEXTURE_2D, m_Textures[handle].TextureId);
-		return true;
 	}
 
-	bool OpenGL33TextureManager::DeleteTexture(TextureHandle handle)
+	void OpenGL33TextureManager::DeleteTexture(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
-			return false;
+			return;
 		glDeleteTextures(1, &m_Textures[handle].TextureId);
 		m_Textures.erase(handle);
 		m_TextureIds.push(handle);
-		return true;
-	}
-
-	bool OpenGL33TextureManager::DeleteTextureData(TextureHandle handle)
-	{
-		if (m_Textures.find(handle) == m_Textures.end())
-			return false;
-		glDeleteTextures(1, &m_Textures[handle].TextureId);
-		return true;
 	}
 
 	void OpenGL33TextureManager::SetWidth(TextureHandle handle, uint32_t width)
@@ -162,10 +152,10 @@ namespace Hyperion
 		m_Textures[handle].Width = width;
 	}
 
-	uint32_t OpenGL33TextureManager::GetWidth(TextureHandle handle)
+	std::optional<uint32_t> OpenGL33TextureManager::GetWidth(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
-			return -1;
+			return std::nullopt;
 		return m_Textures[handle].Width;
 	}
 
@@ -176,10 +166,10 @@ namespace Hyperion
 		m_Textures[handle].Height = height;
 	}
 
-	uint32_t OpenGL33TextureManager::GetHeight(TextureHandle handle)
+	std::optional<uint32_t> OpenGL33TextureManager::GetHeight(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
-			return -1;
+			return std::nullopt;
 		return m_Textures[handle].Height;
 	}
 
@@ -190,38 +180,31 @@ namespace Hyperion
 		m_Textures[handle].Type = textureType;
 	}
 
-	TextureType OpenGL33TextureManager::GetTextureType(TextureHandle handle)
+	std::optional<TextureType> OpenGL33TextureManager::GetTextureType(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
-			return TextureType::DEFAULT;
+			return std::nullopt;
 		return m_Textures[handle].Type;
 	}
 
-	uint8_t OpenGL33TextureManager::GetChannels(TextureHandle handle)
+	std::optional<uint8_t> OpenGL33TextureManager::GetColorChannels(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
-			return -1;
+			return std::nullopt;
 		return m_Textures[handle].Channels;
 	}
 
-	const std::string OpenGL33TextureManager::GetPath(TextureHandle handle)
+	std::optional<std::string> OpenGL33TextureManager::GetFilePath(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
-			return std::string();
+			return std::nullopt;
 		return m_Textures[handle].Path;
-	}
-
-	TextureData* OpenGL33TextureManager::GetTextureData(TextureHandle handle)
-	{
-		if (m_Textures.find(handle) == m_Textures.end())
-			return nullptr;
-		return &m_Textures[handle];
 	}
 
 	void* OpenGL33TextureManager::GetImageTextureId(TextureHandle handle)
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return nullptr;
-		return (void*)m_Textures[handle].TextureId;
+		return (void*)static_cast<uintptr_t>(m_Textures[handle].TextureId);
 	}
 }

@@ -24,7 +24,7 @@ namespace Hyperion
 	class Renderer2D : public Renderer
 	{
 	protected:
-		glm::vec4 m_QuadVertexPositions[4];
+		glm::vec4 m_QuadVertexPositions[4] = {};
 
 		const uint32_t MaxQuads = 2000;
 		const uint32_t MaxVertices = MaxQuads * 4;

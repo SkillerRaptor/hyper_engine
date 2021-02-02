@@ -90,23 +90,21 @@ namespace Hyperion
 		return true;
 	}
 
-	bool OpenGL33ShaderManager::UseShader(ShaderHandle handle)
+	void OpenGL33ShaderManager::UseShader(ShaderHandle handle)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
-			return false;
+			return;
 		glUseProgram(m_Shaders[handle].ShaderId);
-		return true;
 	}
 
-	bool OpenGL33ShaderManager::DeleteShader(ShaderHandle handle)
+	void OpenGL33ShaderManager::DeleteShader(ShaderHandle handle)
 	{
 		if (m_Shaders.find(handle) == m_Shaders.end())
-			return false;
+			return;
 		m_Shaders[handle].UniformCache.clear();
 		glDeleteProgram(m_Shaders[handle].ShaderId);
 		m_Shaders.erase(handle);
 		m_ShaderIds.push(handle);
-		return true;
 	}
 
 	void OpenGL33ShaderManager::SetInteger(ShaderHandle handle, const std::string& name, int value)
@@ -205,27 +203,6 @@ namespace Hyperion
 		if (m_Shaders.find(handle) == m_Shaders.end())
 			return;
 		glUniformMatrix4fv(GetUniformLocation(m_Shaders[handle], name), 1, false, glm::value_ptr(matrix));
-	}
-
-	const std::string OpenGL33ShaderManager::GetVertexShaderPath(ShaderHandle handle)
-	{
-		if (m_Shaders.find(handle) == m_Shaders.end())
-			return "";
-		return m_Shaders[handle].VertexShaderPath;
-	}
-
-	const std::string OpenGL33ShaderManager::GetFragmentShaderPath(ShaderHandle handle)
-	{
-		if (m_Shaders.find(handle) == m_Shaders.end())
-			return "";
-		return m_Shaders[handle].FragmentShaderPath;
-	}
-
-	const std::string OpenGL33ShaderManager::GetGeometryShaderPath(ShaderHandle handle)
-	{
-		if (m_Shaders.find(handle) == m_Shaders.end())
-			return "";
-		return m_Shaders[handle].GeometryShaderPath;
 	}
 
 	bool OpenGL33ShaderManager::CheckShaderErrors(uint32_t id, uint32_t shader)
