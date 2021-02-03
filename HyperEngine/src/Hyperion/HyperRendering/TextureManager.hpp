@@ -20,7 +20,8 @@ namespace Hyperion
 		DEPTH_STENCIL,
 		HEIGHT,
 		NORMAL,
-		SPECULAR
+		SPECULAR,
+		PREBUILT
 	};
 
 	struct TextureData
@@ -64,18 +65,20 @@ namespace Hyperion
 		virtual void DeleteTexture(TextureHandle handle) = 0;
 
 		virtual void SetWidth(TextureHandle handle, uint32_t width) = 0;
-		virtual std::optional<uint32_t> GetWidth(TextureHandle handle) = 0;
+		virtual std::optional<uint32_t> GetWidth(TextureHandle handle) const = 0;
 
 		virtual void SetHeight(TextureHandle handle, uint32_t height) = 0;
-		virtual std::optional<uint32_t> GetHeight(TextureHandle handle) = 0;
+		virtual std::optional<uint32_t> GetHeight(TextureHandle handle) const = 0;
 
 		virtual void SetTextureType(TextureHandle handle, TextureType textureType) = 0;
-		virtual std::optional<TextureType> GetTextureType(TextureHandle handle) = 0;
+		virtual std::optional<TextureType> GetTextureType(TextureHandle handle) const = 0;
 
-		virtual std::optional<uint8_t> GetColorChannels(TextureHandle handle) = 0;
-		virtual std::optional<std::string> GetFilePath(TextureHandle handle) = 0;
+		virtual void SetTexturePixels(TextureHandle handle, void* pixels, uint32_t size) = 0;
+
+		virtual std::optional<uint8_t> GetColorChannels(TextureHandle handle) const = 0;
+		virtual std::optional<std::string> GetFilePath(TextureHandle handle) const = 0;
 		
-		virtual void* GetImageTextureId(TextureHandle handle) = 0;
+		virtual void* GetImageTextureId(TextureHandle handle) const = 0;
 
 	protected:
 		virtual void GenerateTexture(TextureData* textureData, unsigned char* pixels = nullptr) = 0;

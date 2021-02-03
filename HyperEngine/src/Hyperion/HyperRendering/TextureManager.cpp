@@ -9,6 +9,7 @@ namespace Hyperion
 	unsigned char* TextureManager::LoadImage(const std::string& path, int32_t& width, int32_t& height, int32_t& channels)
 	{
 		HP_ASSERT(!path.empty(), "Texture Manager can't load an empty path!");
+		stbi_set_flip_vertically_on_load(true);
 		return stbi_load(path.c_str(), &width, &height, &channels, 0);
 	}
 

@@ -49,6 +49,8 @@ namespace Hyperion
 
 	void Application::Run()
 	{
+		m_Window->GetContext()->GetRenderer2D()->Setup();
+
 		double lastTime = 0.0;
 
 		Ref<SceneRecorder> sceneRecorder = m_Window->GetContext()->GetSceneRecorder();

@@ -35,10 +35,13 @@ namespace Hyperion
 		m_QuadIndexBuffer->Bind(m_QuadVertexArray->m_RendererID);
 		delete[] quadIndices;
 
-		m_QuadVertexPositions[0] = { 0.5f,  0.5f, 0.0f, 1.0f };
-		m_QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
-		m_QuadVertexPositions[2] = { -0.5f, -0.5f, 0.0f, 1.0f };
-		m_QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
+		int32_t samplers[32];
+		for (uint32_t i = 0; i < 32; i++)
+			samplers[i] = i;
+
+		m_ShaderManager->SetIntegerArray(ShaderHandle{ 1 }, "u_Textures", 32, samplers);
+		TextureHandle whiteTexture = m_TextureManager->CreateTexture(1, 1, TextureType::DEFAULT);
+		m_TextureSlots[0] = whiteTexture;
 
 		m_QuadVertexArray->Init();
 	}
@@ -46,6 +49,28 @@ namespace Hyperion
 	OpenGL46Renderer2D::~OpenGL46Renderer2D()
 	{
 		delete[] m_QuadVertexBufferBase;
+	}
+
+
+	void OpenGL46Renderer2D::Setup()
+	{
+		int32_t samplers[32];
+		for (uint32_t i = 0; i < MaxTextureSlots; i++)
+			samplers[i] = i;
+
+		m_ShaderManager->UseShader({ 1 });
+		m_ShaderManager->SetIntegerArray({ 1 }, "u_Textures", MaxTextureSlots, samplers);
+
+		uint32_t whiteTextureData = 0xFFFFFFFF;
+
+		TextureHandle whiteTexture = m_TextureManager->CreateTexture(1, 1, TextureType::DEFAULT);
+		m_TextureManager->BindTexture(whiteTexture, 0);
+		m_TextureManager->SetTexturePixels(whiteTexture, &whiteTextureData, sizeof(uint32_t));
+
+		m_TextureSlots.resize(MaxTextureSlots);
+		for (size_t i = 0; i < MaxTextureSlots; i++)
+			m_TextureSlots[i] = TextureHandle{ 0 };
+		m_TextureSlots[0] = whiteTexture;
 	}
 
 	void OpenGL46Renderer2D::BeginScene()
@@ -69,6 +94,9 @@ namespace Hyperion
 
 		m_ShaderManager->UseShader({ 1 });
 
+		for (uint32_t i = 0; i < m_TextureSlotIndex; i++)
+			m_TextureManager->BindTexture(m_TextureSlots[i], i);
+
 		m_QuadVertexArray->Bind();
 		glDrawElements(GL_TRIANGLES, (unsigned int)m_QuadIndexCount, GL_UNSIGNED_INT, nullptr);
 
@@ -77,10 +105,58 @@ namespace Hyperion
 
 	void OpenGL46Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale, const glm::vec4& color)
 	{
+		DrawQuad(position, rotation, scale, color, TextureHandle{ 0 });
+	}
+
+	void OpenGL46Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale, TextureHandle texture)
+	{
+		DrawQuad(position, rotation, scale, glm::vec4{ 1.0f, 1.0f, 1.0f, 1.0f }, texture);
+	}
+
+	void OpenGL46Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale, const glm::vec4& color, TextureHandle texture)
+	{
+		static constexpr const size_t quadVertexCount = 4;
+		static constexpr const glm::vec3 vertexPositions[4] =
+		{
+			{  0.5f,  0.5f, 0.0f },
+			{  0.5f, -0.5f, 0.0f },
+			{ -0.5f, -0.5f, 0.0f },
+			{ -0.5f,  0.5f, 0.0f }
+		};
+
+		static constexpr const glm::vec2 textureCoords[4] =
+		{
+			{ 1.0f, 1.0f },
+			{ 1.0f, 0.0f },
+			{ 0.0f, 0.0f },
+			{ 0.0f, 1.0f }
+		};
+
 		if (m_QuadIndexCount >= MaxIndices)
 			NextBatch();
 
-		constexpr size_t quadVertexCount = 4;
+		uint32_t textureIndex = 0;
+		if (texture.IsHandleValid())
+		{
+			for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
+			{
+				if (m_TextureSlots[i] == texture)
+				{
+					textureIndex = i;
+					break;
+				}
+			}
+
+			if (textureIndex == 0)
+			{
+				if (m_TextureSlotIndex >= MaxTextureSlots)
+					NextBatch();
+
+				textureIndex = m_TextureSlotIndex;
+				m_TextureSlots[m_TextureSlotIndex] = texture;
+				m_TextureSlotIndex++;
+			}
+		}
 
 		glm::mat4 rotationMatrix = glm::mat4(1.0f);
 		rotationMatrix = glm::rotate(rotationMatrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -91,10 +167,10 @@ namespace Hyperion
 
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
-			m_QuadVertexBufferPtr->Position = transform * m_QuadVertexPositions[i];
-			m_QuadVertexBufferPtr->Color = color;
-			m_QuadVertexBufferPtr->TextureCoords = {};
-			m_QuadVertexBufferPtr->TextureId = -1;
+			m_QuadVertexBufferPtr->Position = transform * glm::vec4{ vertexPositions[i], 1.0f };
+			m_QuadVertexBufferPtr->Color = glm::vec4{ 0.0 };
+			m_QuadVertexBufferPtr->TextureCoords = textureCoords[i];
+			m_QuadVertexBufferPtr->TextureId = textureIndex;
 			m_QuadVertexBufferPtr++;
 		}
 

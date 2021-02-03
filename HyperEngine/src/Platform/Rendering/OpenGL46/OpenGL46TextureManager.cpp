@@ -153,11 +153,11 @@ namespace Hyperion
 		m_Textures[handle].Width = width;
 	}
 
-	std::optional<uint32_t> OpenGL46TextureManager::GetWidth(TextureHandle handle)
+	std::optional<uint32_t> OpenGL46TextureManager::GetWidth(TextureHandle handle) const
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return std::nullopt;
-		return m_Textures[handle].Width;
+		return m_Textures.at(handle).Width;
 	}
 
 	void OpenGL46TextureManager::SetHeight(TextureHandle handle, uint32_t height)
@@ -167,11 +167,11 @@ namespace Hyperion
 		m_Textures[handle].Height = height;
 	}
 
-	std::optional<uint32_t> OpenGL46TextureManager::GetHeight(TextureHandle handle)
+	std::optional<uint32_t> OpenGL46TextureManager::GetHeight(TextureHandle handle) const
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return std::nullopt;
-		return m_Textures[handle].Height;
+		return m_Textures.at(handle).Height;
 	}
 
 	void OpenGL46TextureManager::SetTextureType(TextureHandle handle, TextureType textureType)
@@ -181,31 +181,40 @@ namespace Hyperion
 		m_Textures[handle].Type = textureType;
 	}
 
-	std::optional<TextureType> OpenGL46TextureManager::GetTextureType(TextureHandle handle)
+	std::optional<TextureType> OpenGL46TextureManager::GetTextureType(TextureHandle handle) const
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return std::nullopt;
-		return m_Textures[handle].Type;
+		return m_Textures.at(handle).Type;
 	}
 
-	std::optional<uint8_t> OpenGL46TextureManager::GetColorChannels(TextureHandle handle)
+	void OpenGL46TextureManager::SetTexturePixels(TextureHandle handle, void* pixels, uint32_t size)
+	{
+		if (m_Textures.find(handle) == m_Textures.end())
+			return;
+
+		HP_ASSERT(size == m_Textures[handle].Width * m_Textures[handle].Height * m_Textures[handle].Channels, "Data must be entire texture!");
+		glTextureSubImage2D(m_Textures[handle].TextureId, 0, 0, 0, m_Textures[handle].Width, m_Textures[handle].Height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+	}
+
+	std::optional<uint8_t> OpenGL46TextureManager::GetColorChannels(TextureHandle handle) const
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return std::nullopt;
-		return m_Textures[handle].Channels;
+		return m_Textures.at(handle).Channels;
 	}
 
-	std::optional<std::string> OpenGL46TextureManager::GetFilePath(TextureHandle handle)
+	std::optional<std::string> OpenGL46TextureManager::GetFilePath(TextureHandle handle) const
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return std::nullopt;
-		return m_Textures[handle].Path;
+		return m_Textures.at(handle).Path;
 	}
 
-	void* OpenGL46TextureManager::GetImageTextureId(TextureHandle handle)
+	void* OpenGL46TextureManager::GetImageTextureId(TextureHandle handle) const
 	{
 		if (m_Textures.find(handle) == m_Textures.end())
 			return nullptr;
-		return (void*)static_cast<uintptr_t>(m_Textures[handle].TextureId);
+		return (void*)static_cast<uintptr_t>(m_Textures.at(handle).TextureId);
 	}
 }

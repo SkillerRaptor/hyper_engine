@@ -404,10 +404,12 @@ rttr::variant PanelUtilities::DrawInputCombo(const std::string& title, const rtt
 	return value;
 }
 
-#include <Platform/Rendering/OpenGL33/OpenGL33TextureManager.hpp>
-
 rttr::variant PanelUtilities::DrawSelectableImage(const std::string& title, TextureHandle texture)
 {
+	bool newTexture = false;
+
+	Ref<TextureManager> textureManager = s_RenderContext->GetTextureManager();
+
 	ImGui::PushID(title.c_str());
 
 	ImGui::Columns(2);
@@ -419,13 +421,14 @@ rttr::variant PanelUtilities::DrawSelectableImage(const std::string& title, Text
 	ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth());
 	static const ImVec2 buttonSize = { 70, 70 };
 
-	Ref<TextureManager> textureManager = s_RenderContext->GetTextureManager();
+	TextureHandle newTextureHandle;
 	if (ImGui::ImageButton(textureManager->GetImageTextureId(texture), buttonSize, { 0, 1 }, { 1, 0 }, 0))
 	{
-		std::optional<std::string> filePath = PlatformUtils::Get()->OpenFile("Image (*.png)\0*.png\0");
+		std::optional<std::string> filePath = PlatformUtils::Get()->OpenFile("Image File\0*.png;*.jpg\0");
 		if (filePath.has_value())
 		{
-
+			newTextureHandle = textureManager->CreateTexture(filePath.value());
+			newTexture = true;
 		}
 	}
 	ImGui::PopItemWidth();
@@ -434,7 +437,9 @@ rttr::variant PanelUtilities::DrawSelectableImage(const std::string& title, Text
 
 	if (ImGui::Button("x", { buttonSize.x / 4, buttonSize.y }))
 	{
-
+		textureManager->DeleteTexture(texture);
+		newTextureHandle = TextureHandle{ 0 };
+		newTexture = true;
 	}
 	ImGui::PopItemWidth();
 
@@ -442,7 +447,7 @@ rttr::variant PanelUtilities::DrawSelectableImage(const std::string& title, Text
 
 	ImGui::PopID();
 
-	return rttr::variant{};
+	return newTexture ? rttr::variant{ newTextureHandle } : rttr::variant{};
 }
 
 void PanelUtilities::SplitNode(const std::string& title, typename std::common_type<std::function<void()>>::type function)

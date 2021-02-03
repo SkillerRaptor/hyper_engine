@@ -26,18 +26,20 @@ namespace Hyperion
 		virtual void DeleteTexture(TextureHandle handle) override;
 
 		virtual void SetWidth(TextureHandle handle, uint32_t width) override;
-		virtual std::optional<uint32_t> GetWidth(TextureHandle handle) override;
+		virtual std::optional<uint32_t> GetWidth(TextureHandle handle) const override;
 
 		virtual void SetHeight(TextureHandle handle, uint32_t height) override;
-		virtual std::optional<uint32_t> GetHeight(TextureHandle handle) override;
+		virtual std::optional<uint32_t> GetHeight(TextureHandle handle) const override;
 
 		virtual void SetTextureType(TextureHandle handle, TextureType textureType) override;
-		virtual std::optional<TextureType> GetTextureType(TextureHandle handle) override;
+		virtual std::optional<TextureType> GetTextureType(TextureHandle handle) const override;
 
-		virtual std::optional<uint8_t> GetColorChannels(TextureHandle handle) override;
-		virtual std::optional<std::string> GetFilePath(TextureHandle handle) override;
+		virtual void SetTexturePixels(TextureHandle handle, void* pixels, uint32_t size) override;
 
-		void* GetImageTextureId(TextureHandle handle) override;
+		virtual std::optional<uint8_t> GetColorChannels(TextureHandle handle) const override;
+		virtual std::optional<std::string> GetFilePath(TextureHandle handle) const override;
+
+		virtual void* GetImageTextureId(TextureHandle handle) const override;
 
 	protected:
 		virtual void GenerateTexture(TextureData* textureData, unsigned char* pixels = nullptr) override;
