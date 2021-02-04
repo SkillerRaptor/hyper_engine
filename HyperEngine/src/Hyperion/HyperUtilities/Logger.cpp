@@ -5,10 +5,10 @@
 
 namespace Hyperion
 {
-	bool Logger::s_Running = true;
-	size_t Logger::s_CurrentMessage = 0;
+	std::atomic<bool> Logger::s_Running = true;
+	std::atomic<size_t> Logger::s_CurrentMessage = 0;
 	std::thread Logger::s_LoggerThread = std::thread(&Logger::Run);
-	std::queue<Logger::Message> Logger::s_MessageQueue;
+	std::queue<Logger::Message> Logger::s_MessageQueue = {};
 	std::mutex Logger::s_MessageQueueMutex;
 
 	Logger::Logger()

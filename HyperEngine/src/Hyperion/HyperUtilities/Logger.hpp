@@ -2,6 +2,7 @@
 
 #include <fmt/core.h>
 
+#include <atomic>
 #include <string>
 #include <thread>
 #include <mutex>
@@ -35,8 +36,8 @@ namespace Hyperion
 		std::string m_Name;
 		Level m_Level;
 
-		static bool s_Running;
-		static size_t s_CurrentMessage;
+		static std::atomic<bool> s_Running;
+		static std::atomic<size_t> s_CurrentMessage;
 		static std::thread s_LoggerThread;
 		static std::queue<Message> s_MessageQueue;
 		static std::mutex s_MessageQueueMutex;
