@@ -7,7 +7,7 @@ namespace Hyperion
 	class OpenGL46FrameBuffer
 	{
 	private:
-		uint32_t m_RendererID;
+		uint32_t m_RendererID = 0;
 		TextureHandle m_ColorAttachment = { 0 };
 		TextureHandle m_DepthAttachment = { 0 };
 

@@ -80,9 +80,12 @@ void SceneHierarchyPanel::DrawSceneInformation()
 void SceneHierarchyPanel::DrawEntityNode(HyperEntity entity)
 {
 	auto tag = entity.GetComponent<TagComponent>().GetTag();
+	
+	std::stringstream ss;
+	ss << ICON_FK_CUBE << " " << tag;
 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
-	bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(size_t)entity, flags, tag.c_str());
+	bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(size_t)entity, flags, ss.str().c_str());
 
 	if ((size_t)m_SelectedEntity == (size_t)entity)
 		PanelUtilities::DrawSelection();

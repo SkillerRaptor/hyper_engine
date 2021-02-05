@@ -51,7 +51,7 @@ namespace Hyperion
 			m_TextureIds.pop();
 		}
 		else
-			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) + 1});
+			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) + 1 });
 		m_Textures.emplace(textureId, std::move(textureData));
 		return textureId;
 	}
@@ -73,7 +73,7 @@ namespace Hyperion
 			m_TextureIds.pop();
 		}
 		else
-			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) + 1});
+			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) + 1 });
 		m_Textures.emplace(textureId, std::move(textureData));
 		return textureId;
 	}
@@ -82,7 +82,7 @@ namespace Hyperion
 	{
 		OpenGL46TextureData* data = static_cast<OpenGL46TextureData*>(textureData);
 		glCreateTextures(GL_TEXTURE_2D, 1, &data->TextureId);
-		
+
 		glTextureParameteri(data->TextureId, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(data->TextureId, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTextureParameteri(data->TextureId, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -95,14 +95,16 @@ namespace Hyperion
 			break;
 		case TextureType::DEFAULT:
 			glTextureStorage2D(data->TextureId, 1, textureData->Channels >= 4 ? GL_RGBA8 : GL_RGB8, data->Width, data->Height);
-			glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, textureData->Channels >= 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels);
+			if (pixels != nullptr)
+				glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, textureData->Channels >= 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels);
 			break;
 		case TextureType::DIFFUSE:
 			HP_CORE_WARN("Diffuse texture type is (yet) not supported in OpenGL 4.6!");
 			break;
 		case TextureType::COLOR:
 			glTextureStorage2D(data->TextureId, 1, GL_RGB8, data->Width, data->Height);
-			glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+			if (pixels != nullptr)
+				glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, data->TextureId, 0);
 			break;
 		case TextureType::DEPTH:
@@ -113,7 +115,8 @@ namespace Hyperion
 			break;
 		case TextureType::DEPTH_STENCIL:
 			glTextureStorage2D(data->TextureId, 1, GL_DEPTH24_STENCIL8, data->Width, data->Height);
-			glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+			if (pixels != nullptr)
+				glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, data->TextureId, 0);
 			break;
 		case TextureType::HEIGHT:

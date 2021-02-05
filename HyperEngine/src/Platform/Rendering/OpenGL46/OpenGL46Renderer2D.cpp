@@ -35,14 +35,6 @@ namespace Hyperion
 		m_QuadIndexBuffer->Bind(m_QuadVertexArray->m_RendererID);
 		delete[] quadIndices;
 
-		int32_t samplers[32];
-		for (uint32_t i = 0; i < 32; i++)
-			samplers[i] = i;
-
-		m_ShaderManager->SetIntegerArray(ShaderHandle{ 1 }, "u_Textures", 32, samplers);
-		TextureHandle whiteTexture = m_TextureManager->CreateTexture(1, 1, TextureType::DEFAULT);
-		m_TextureSlots[0] = whiteTexture;
-
 		m_QuadVertexArray->Init();
 	}
 
@@ -168,7 +160,7 @@ namespace Hyperion
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
 			m_QuadVertexBufferPtr->Position = transform * glm::vec4{ vertexPositions[i], 1.0f };
-			m_QuadVertexBufferPtr->Color = glm::vec4{ 0.0 };
+			m_QuadVertexBufferPtr->Color = color;
 			m_QuadVertexBufferPtr->TextureCoords = textureCoords[i];
 			m_QuadVertexBufferPtr->TextureId = textureIndex;
 			m_QuadVertexBufferPtr++;
