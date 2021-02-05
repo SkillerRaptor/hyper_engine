@@ -8,7 +8,7 @@ class SceneHierarchyPanel
 {
 private:
 	Ref<Scene> m_Scene;
-	HyperEntity m_SelectedEntity;
+	Entity m_SelectedEntity;
 
 	bool m_SceneSelected = false;
 	bool m_AddComponentPopup = false;
@@ -23,7 +23,7 @@ public:
 	const Ref<Scene>& GetScene() const;
 
 private:
-	void DrawEntityNode(HyperEntity entity);
+	void DrawEntityNode(Entity entity);
 	void DrawSceneInformation();
 	void DrawComponentInformation();
 

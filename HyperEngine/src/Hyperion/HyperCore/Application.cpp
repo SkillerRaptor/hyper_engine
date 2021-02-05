@@ -78,14 +78,15 @@ namespace Hyperion
 			bool validCamera = false;
 			TransformComponent transformComponent;
 			CameraComponent cameraComponent;
-			for (Entity entity : m_Scene->GetWorld().GetEntities<CameraComponent>())
+
+			for (Entity entity : m_Scene->GetRegistry().Each<CameraComponent>())
 			{
-				CameraComponent& entityCameraComponent = m_Scene->GetWorld().GetComponent<CameraComponent>(entity);
+				CameraComponent& entityCameraComponent = m_Scene->GetRegistry().GetComponent<CameraComponent>(entity);
 				if (!entityCameraComponent.IsPrimary())
 					continue;
 
 				validCamera = true;
-				transformComponent = m_Scene->GetWorld().GetComponent<TransformComponent>(entity);
+				transformComponent = m_Scene->GetRegistry().GetComponent<TransformComponent>(entity);
 				cameraComponent = entityCameraComponent;
 				break;
 			}
@@ -163,8 +164,6 @@ namespace Hyperion
 
 		for (Layer* layer : m_LayerStack->GetLayers())
 			layer->OnEvent(event);
-
-		m_Scene->OnEvent(event);
 	}
 
 	void Application::PushLayer(Layer* layer)

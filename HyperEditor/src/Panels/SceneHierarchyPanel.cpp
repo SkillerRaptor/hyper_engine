@@ -30,15 +30,15 @@ void SceneHierarchyPanel::OnRender()
 	if (ImGui::IsItemClicked())
 	{
 		m_SceneSelected = true;
-		m_SelectedEntity.Invalidate();
+		m_SelectedEntity = Null;
 	}
 
 	if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-		m_SelectedEntity.Invalidate();
+		m_SelectedEntity = Null;
 
 	if (opened)
 	{
-		m_Scene->Each([&](HyperEntity entity)
+		m_Scene->GetRegistry().Each([&](Entity entity)
 			{
 				DrawEntityNode(entity);
 			});
@@ -52,7 +52,7 @@ void SceneHierarchyPanel::OnRender()
 	{
 		DrawSceneInformation();
 	}
-	else if (m_SelectedEntity.GetEntityHandle().IsHandleValid())
+	else if (m_SelectedEntity != Null)
 	{
 		DrawComponentInformation();
 	}
@@ -77,10 +77,10 @@ void SceneHierarchyPanel::DrawSceneInformation()
 	ImGui::PopStyleVar();
 }
 
-void SceneHierarchyPanel::DrawEntityNode(HyperEntity entity)
+void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 {
-	auto tag = entity.GetComponent<TagComponent>().GetTag();
-	
+	const std::string& tag = m_Scene->GetRegistry().GetComponent<TagComponent>(entity).GetTag();
+
 	std::stringstream ss;
 	ss << ICON_FK_CUBE << " " << tag;
 
@@ -105,14 +105,13 @@ void SceneHierarchyPanel::DrawEntityNode(HyperEntity entity)
 
 void SceneHierarchyPanel::DrawComponentInformation()
 {
-	World& registry = m_Scene->GetWorld();
-	HyperEntity& entity = m_SelectedEntity;
+	Registry& registry = m_Scene->GetRegistry();
 
 	ImGui::PushItemWidth(-1.0f);
 
-	if (entity.HasComponent<TagComponent>())
+	if (registry.HasComponent<TagComponent>(m_SelectedEntity))
 	{
-		auto tag = entity.GetComponent<TagComponent>().GetTag();
+		std::string tag = registry.GetComponent<TagComponent>(m_SelectedEntity).GetTag();
 
 		char buffer[256];
 		memset(buffer, 0, sizeof(buffer));
@@ -121,11 +120,11 @@ void SceneHierarchyPanel::DrawComponentInformation()
 		ImGui::SetNextItemWidth(ImGui::GetContentRegionAvailWidth() - ImGui::GetContentRegionAvailWidth() / 4);
 		if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 			tag = std::string(buffer).empty() ? "Empty!" : std::string(buffer);
-		entity.GetComponent<TagComponent>().SetTag(tag);
+		registry.GetComponent<TagComponent>(m_SelectedEntity).SetTag(tag);
 		ImGui::SameLine();
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.602f, 0.602f, 0.602f, 1.00f));
-		ImGui::Text("%u", entity.GetEntityHandle());
+		ImGui::Text("%u", m_SelectedEntity);
 		ImGui::PopStyleColor();
 	}
 
@@ -151,12 +150,12 @@ void SceneHierarchyPanel::DrawComponentInformation()
 	bool addComponent = false;
 	bool removeComponent = false;
 
-	if (!m_SelectedEntity.HasComponent<SpriteRendererComponent>() ||
-		!m_SelectedEntity.HasComponent<CameraComponent>())
+	if (!registry.HasComponent<SpriteRendererComponent>(m_SelectedEntity) ||
+		!registry.HasComponent<CameraComponent>(m_SelectedEntity))
 		addComponent = true;
 
-	if (m_SelectedEntity.HasComponent<SpriteRendererComponent>() ||
-		m_SelectedEntity.HasComponent<CameraComponent>())
+	if (registry.HasComponent<SpriteRendererComponent>(m_SelectedEntity) ||
+		registry.HasComponent<CameraComponent>(m_SelectedEntity))
 		removeComponent = true;
 
 	if (addComponent)
@@ -187,12 +186,13 @@ void SceneHierarchyPanel::DrawComponentInformation()
 template<class T>
 void SceneHierarchyPanel::DrawComponent(const std::string& componentName)
 {
-	if (m_SelectedEntity.HasComponent<T>())
+	Registry& registry = m_Scene->GetRegistry();
+	if (registry.HasComponent<T>(m_SelectedEntity))
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 		if (ImGui::TreeNodeEx((void*)typeid(T).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, componentName.c_str()))
 		{
-			T& component = m_SelectedEntity.GetComponent<T>();
+			T& component = registry.GetComponent<T>(m_SelectedEntity);
 			rttr::instance componentInstance = component;
 			rttr::type type = rttr::type::get<T>();
 
@@ -291,12 +291,13 @@ rttr::variant SceneHierarchyPanel::DrawEdit(const std::string& name, rttr::varia
 template <class T, typename... Args>
 void SceneHierarchyPanel::DrawAddComponentMenu(Args&&... args)
 {
-	if (!m_SelectedEntity.HasComponent<T>())
+	Registry& registry = m_Scene->GetRegistry();
+	if (!registry.HasComponent<T>(m_SelectedEntity))
 	{
 		rttr::type type = rttr::type::get<T>();
 		if (ImGui::MenuItem(type.get_name().cbegin()))
 		{
-			m_SelectedEntity.AddComponent<T>(std::forward<Args>(args)...);
+			registry.AddComponent<T>(m_SelectedEntity, std::forward<Args>(args)...);
 			m_AddComponentPopup = false;
 			ImGui::CloseCurrentPopup();
 		}
@@ -309,8 +310,6 @@ void SceneHierarchyPanel::DrawAddComponentPopup()
 {
 	if (ImGui::BeginPopup("ComponentAddPopup"))
 	{
-		World& world = m_Scene->GetWorld();
-
 		DrawAddComponentMenu<SpriteRendererComponent>(glm::vec4{ 1.0f }, TextureHandle{ 0 });
 		DrawAddComponentMenu<CameraComponent>(glm::vec4{ 0.75f, 0.75f, 0.75f, 1.0f }, CameraComponent::ProjectionType::PERSPECTIVE, 90.0f, glm::vec2{ 0.1f, 1000.0f }, glm::vec2{ 1.0f, 1.0f }, false);
 
@@ -321,12 +320,13 @@ void SceneHierarchyPanel::DrawAddComponentPopup()
 template <class T>
 void SceneHierarchyPanel::DrawRemoveComponentMenu()
 {
-	if (m_SelectedEntity.HasComponent<T>())
+	Registry& registry = m_Scene->GetRegistry();
+	if (registry.HasComponent<T>(m_SelectedEntity))
 	{
 		rttr::type type = rttr::type::get<T>();
 		if (ImGui::MenuItem(type.get_name().cbegin()))
 		{
-			m_SelectedEntity.RemoveComponent<T>();
+			registry.RemoveComponent<T>(m_SelectedEntity);
 			m_RemoveComponentPopup = false;
 			ImGui::CloseCurrentPopup();
 		}
@@ -339,8 +339,6 @@ void SceneHierarchyPanel::DrawRemoveComponentPopup()
 {
 	if (ImGui::BeginPopup("ComponentRemovePopup"))
 	{
-		World& registry = m_Scene->GetWorld();
-
 		DrawRemoveComponentMenu<SpriteRendererComponent>();
 		DrawRemoveComponentMenu<CameraComponent>();
 

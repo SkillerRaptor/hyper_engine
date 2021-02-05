@@ -1,24 +1,21 @@
 #pragma once
 
-#include "HyperECS/HyperECS.hpp"
+#include "HyperCore/Core.hpp"
 #include "HyperECS/Components/Components.hpp"
+#include "HyperECS/Systems/System.hpp"
+#include "HyperRendering/Renderer2D.hpp"
 
 namespace Hyperion
 {
 	class SpriteRendererSystem : public System
 	{
-	public:
-		SpriteRendererSystem() {};
-		virtual ~SpriteRendererSystem() {};
+	private:
+		Ref<Renderer2D> m_Renderer2D;
 
-		virtual void OnUpdate(Registry& registry, Timestep timeStep) override
-		{
-			m_Renderer2D->BeginScene();
-			registry.Each<SpriteRendererComponent, TransformComponent>([&](Entity entity, SpriteRendererComponent& spriteRenderer, TransformComponent& transform)
-				{
-					m_Renderer2D->DrawQuad(transform.GetPosition(), transform.GetRotation(), transform.GetScale(), spriteRenderer.GetColor(), spriteRenderer.GetTexture());
-				});
-			m_Renderer2D->EndScene();
-		}
+	public:
+		SpriteRendererSystem(Ref<Renderer2D> renderer2D);
+		virtual ~SpriteRendererSystem() = default;
+
+		virtual void OnRender(Registry& registry) override;
 	};
 }

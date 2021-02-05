@@ -14,17 +14,18 @@ namespace Hyperion
 
 	bool SceneSerializer::Serialize(const std::string& filePath)
 	{
-		nlohmann::ordered_json configuration;
+		Registry& registry = m_Scene->GetRegistry();
 
+		nlohmann::ordered_json configuration;
 		std::vector<nlohmann::ordered_json> entities;
-		m_Scene->Each([&](HyperEntity entity)
+		registry.Each([&](Entity entity)
 			{
-				if (!entity)
+				if (entity == Null)
 					return;
 
 				nlohmann::ordered_json entityJson;
 
-				entityJson["Entity"] = entity.GetComponent<TagComponent>().GetTag();
+				entityJson["Entity"] = registry.GetComponent<TagComponent>(entity).GetTag();
 
 				SerializeImplement<TransformComponent>(entity, entityJson);
 				SerializeImplement<SpriteRendererComponent>(entity, entityJson);
@@ -49,22 +50,22 @@ namespace Hyperion
 	bool SceneSerializer::Deserialize(const std::string& filePath)
 	{
 		std::ifstream file(filePath);
+
 		nlohmann::json configuration = nlohmann::json::parse(file);
 		m_Scene->SetName(configuration.contains("Scene") ? configuration["Scene"] : "Undefined!");
-
 		if (configuration.contains("Entities"))
 		{
 			nlohmann::json entityJson = configuration["Entities"];
-			for (nlohmann::json entity : entityJson)
+			for (nlohmann::json entityData : entityJson)
 			{
-				if(!entity.contains("Entity"))
+				if (!entityData.contains("Entity"))
 					continue;
 
-				HyperEntity hyperEntity = m_Scene->CreateEntity(entity["Entity"]);
+				Entity entity = m_Scene->CreateEntity(entityData["Entity"]);
 
-				DeserializeImplement<TransformComponent>(hyperEntity, entity);
-				DeserializeImplement<SpriteRendererComponent>(hyperEntity, entity);
-				DeserializeImplement<CameraComponent>(hyperEntity, entity);
+				DeserializeImplement<TransformComponent>(entity, entityData);
+				DeserializeImplement<SpriteRendererComponent>(entity, entityData);
+				DeserializeImplement<CameraComponent>(entity, entityData);
 			}
 		}
 

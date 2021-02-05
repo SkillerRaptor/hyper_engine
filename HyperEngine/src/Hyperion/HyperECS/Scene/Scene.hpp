@@ -3,22 +3,23 @@
 #include <string>
 
 #include "HyperCore/Core.hpp"
-#include "HyperECS/HyperECS.hpp"
+#include "HyperECS/Registry.hpp"
+#include "HyperECS/Systems/System.hpp"
 #include "HyperEvents/Event.hpp"
 #include "HyperRendering/Renderer2D.hpp"
 #include "HyperUtilities/Timestep.hpp"
 
 namespace Hyperion
 {
-	class HyperEntity;
-
 	class Scene
 	{
 	private:
 		std::string m_Name;
-
 		Ref<Renderer2D> m_Renderer2D;
-		World* m_World;
+
+		std::vector<System*> m_Systems;
+
+		Registry* m_Registry;
 
 	public:
 		Scene(const std::string& name, Ref<Renderer2D> renderer2D);
@@ -27,18 +28,15 @@ namespace Hyperion
 		void Init();
 		void Clear();
 
-		HyperEntity CreateEntity(const std::string& name = std::string());
-		void DeleteEntity(HyperEntity& entity);
-
 		void OnRender();
 		void OnUpdate(Timestep timeStep);
-		void OnEvent(Event& event);
 
-		void Each(const typename std::common_type<std::function<void(HyperEntity)>>::type function);
+		Entity CreateEntity(const std::string& name);
+		void DestroyEntity(Entity entity);
 
 		void SetName(const std::string& name);
 		std::string GetName() const;
 
-		World& GetWorld();
+		Registry& GetRegistry();
 	};
 }

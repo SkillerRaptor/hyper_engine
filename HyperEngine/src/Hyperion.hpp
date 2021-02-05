@@ -6,8 +6,7 @@
 #include "Hyperion/HyperCore/Core.hpp"
 
 /* HyperECS */
-#include "Hyperion/HyperECS/HyperECS.hpp"
-#include "Hyperion/HyperECS/HyperEntity.hpp"
+#include "Hyperion/HyperECS/Registry.hpp"
 #include "Hyperion/HyperECS/Components/Components.hpp"
 #include "Hyperion/HyperECS/Scene/Scene.hpp"
 #include "Hyperion/HyperECS/Scene/SceneSerializer.hpp"

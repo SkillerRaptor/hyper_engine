@@ -1,6 +1,5 @@
 #include "Scene.hpp"
 
-#include "HyperECS/HyperEntity.hpp"
 #include "HyperECS/Systems/SpriteRendererSystem.hpp"
 
 namespace Hyperion
@@ -13,61 +12,48 @@ namespace Hyperion
 
 	Scene::~Scene()
 	{
-		if (m_World)
-			delete m_World;
+		if (m_Registry)
+			delete m_Registry;
 	}
 
 	void Scene::Init()
 	{
-		m_World = new World(m_Renderer2D);
+		m_Registry = new Registry();
 
-		m_World->AddSystem<SpriteRendererSystem>();
+		m_Systems.push_back(std::move(new SpriteRendererSystem(m_Renderer2D)));
 	}
 
 	void Scene::Clear()
 	{
-		if (m_World)
-		{
-			delete m_World;
+		if (m_Registry)
+			delete m_Registry;
 
-			Init();
-		}
-	}
-
-	HyperEntity Scene::CreateEntity(const std::string& name)
-	{
-		Entity entity = m_World->Construct();
-		m_World->AddComponent<TransformComponent>(entity, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		m_World->AddComponent<TagComponent>(entity, name.empty() ? "Entity" : name);
-		return HyperEntity(entity, this);
-	}
-
-	void Scene::DeleteEntity(HyperEntity& entity)
-	{
-		m_World->Destroy(entity.GetEntityHandle());
+		Init();
 	}
 
 	void Scene::OnRender()
 	{
-		m_World->OnRender();
+		for (System* system : m_Systems)
+			system->OnRender(*m_Registry);
 	}
 
 	void Scene::OnUpdate(Timestep timeStep)
 	{
-		m_World->OnUpdate(timeStep);
+		for (System* system : m_Systems)
+			system->OnUpdate(*m_Registry, timeStep);
 	}
 
-	void Scene::OnEvent(Event& event)
+	Entity Scene::CreateEntity(const std::string& name)
 	{
-		m_World->OnEvent(event);
+		Entity entity = m_Registry->Create();
+		m_Registry->AddComponent<TagComponent>(entity, name);
+		m_Registry->AddComponent<TransformComponent>(entity, glm::vec3{ 0.0f }, glm::vec3{ 0.0f }, glm::vec3{ 1.0f });
+		return entity;
 	}
 
-	void Scene::Each(const typename std::common_type<std::function<void(HyperEntity)>>::type function)
+	void Scene::DestroyEntity(Entity entity)
 	{
-		m_World->Each([&](Entity entity)
-			{
-				function(HyperEntity(entity, this));
-			});
+		m_Registry->Destroy(entity);
 	}
 
 	void Scene::SetName(const std::string& name)
@@ -80,8 +66,8 @@ namespace Hyperion
 		return m_Name;
 	}
 
-	World& Scene::GetWorld()
+	Registry& Scene::GetRegistry()
 	{
-		return *m_World;
+		return *m_Registry;
 	}
 }

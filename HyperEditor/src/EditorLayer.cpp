@@ -38,14 +38,15 @@ void EditorLayer::OnAttach()
 
 	float phi = glm::pi<float>() * (3.0f - glm::sqrt(5.0f));
 
-	static constexpr const size_t PLANE_COUNT = 100;
+	static constexpr const size_t PLANE_COUNT = 10'000;
 	static constexpr const size_t RADIUS = 20;
 
+	Registry& registry = m_Scene->GetRegistry();
 	for (size_t i = 0; i < PLANE_COUNT; i++)
 	{
-		HyperEntity square = m_Scene->CreateEntity("Square-" + std::to_string(i));
-		square.AddComponent<SpriteRendererComponent>(glm::vec4(Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), 1.0f), TextureHandle{ 0 });
-		auto& transform = square.GetComponent<TransformComponent>();
+		Entity square = m_Scene->CreateEntity("Square-" + std::to_string(i));
+		registry.AddComponent<SpriteRendererComponent>(square, glm::vec4(Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), 1.0f), TextureHandle{ 0 });
+		auto& transform = registry.GetComponent<TransformComponent>(square);
 
 		float y = 1 - (i / (static_cast<float>(PLANE_COUNT) - 1.0f)) * 2.0f;
 		float radius = glm::sqrt(1.0f - y * y);

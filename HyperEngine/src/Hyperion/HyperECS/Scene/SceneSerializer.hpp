@@ -3,7 +3,7 @@
 #include <nlohmann/json.hpp>
 
 #include "HyperCore/Core.hpp"
-#include "HyperECS/HyperEntity.hpp"
+#include "HyperECS/Registry.hpp"
 #include "HyperECS/Scene/Scene.hpp"
 
 namespace Hyperion
@@ -24,11 +24,13 @@ namespace Hyperion
 
 	private:
 		template<typename T>
-		void SerializeImplement(HyperEntity entity, nlohmann::ordered_json& json)
+		void SerializeImplement(Entity entity, nlohmann::ordered_json& json)
 		{
-			if (entity.HasComponent<T>())
+			Registry& registry = m_Scene->GetRegistry();
+
+			if (registry.HasComponent<T>(entity))
 			{
-				T& component = entity.GetComponent<T>();
+				T& component = registry.GetComponent<T>(entity);
 
 				rttr::instance instance = component;
 				rttr::type type = instance.get_type();
@@ -65,7 +67,7 @@ namespace Hyperion
 					std::string typeName = propertyType.get_name().cbegin();
 					if (typeName == "Vector2")
 					{
-						std::array<float, 2> array;
+						std::array<float, 2> array = {};
 						size_t i = 0;
 						for (auto& propertyProperty : propertyType.get_properties())
 						{
@@ -77,7 +79,7 @@ namespace Hyperion
 					}
 					else if (typeName == "Vector3")
 					{
-						std::array<float, 3> array;
+						std::array<float, 3> array = {};
 						size_t i = 0;
 						for (auto& propertyProperty : propertyType.get_properties())
 						{
@@ -89,7 +91,7 @@ namespace Hyperion
 					}
 					else if (typeName == "Vector4")
 					{
-						std::array<float, 4> array;
+						std::array<float, 4> array = {};
 						size_t i = 0;
 						for (auto& propertyProperty : propertyType.get_properties())
 						{
@@ -106,16 +108,18 @@ namespace Hyperion
 		}
 
 		template<typename T>
-		void DeserializeImplement(HyperEntity entity, const nlohmann::ordered_json& json)
+		void DeserializeImplement(Entity entity, const nlohmann::ordered_json& json)
 		{
+			Registry& registry = m_Scene->GetRegistry();
+
 			rttr::type type = rttr::type::get<T>();
 			const char* key = type.get_name().cbegin();
 			if (json.contains(key))
 			{
-				if (!entity.HasComponent<T>())
-					entity.AddComponent<T>();
+				if (!registry.HasComponent<T>(entity))
+					registry.AddComponent<T>(entity);
 
-				T& component = entity.GetComponent<T>();
+				T& component = registry.GetComponent<T>(entity);
 				rttr::instance componentInstance = component;
 				nlohmann::json componentData = json[key];
 
