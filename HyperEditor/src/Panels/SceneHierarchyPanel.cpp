@@ -19,7 +19,7 @@ void SceneHierarchyPanel::OnRender()
 {
 	ImGui::Begin(ICON_FK_LIST " Hierarchy");
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
-	bool opened = ImGui::TreeNodeEx(m_Scene->GetName().c_str(), flags);
+	bool sceneOpen = ImGui::TreeNodeEx(m_Scene->GetName().c_str(), flags);
 
 	if (m_SceneSelected)
 		PanelUtilities::DrawSelection();
@@ -36,7 +36,7 @@ void SceneHierarchyPanel::OnRender()
 	if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 		m_SelectedEntity = Null;
 
-	if (opened)
+	if (sceneOpen)
 	{
 		m_Scene->GetRegistry().Each([&](Entity entity)
 			{
@@ -45,36 +45,27 @@ void SceneHierarchyPanel::OnRender()
 
 		ImGui::TreePop();
 	}
+
 	ImGui::End();
 
 	ImGui::Begin(ICON_FK_INFO_CIRCLE " Inspector");
 	if (m_SceneSelected)
-	{
 		DrawSceneInformation();
-	}
 	else if (m_SelectedEntity != Null)
-	{
 		DrawComponentInformation();
-	}
 	ImGui::End();
 }
 
 void SceneHierarchyPanel::DrawSceneInformation()
 {
 	ImGui::PushItemWidth(-1.0f);
+
 	char buffer[256];
 	memset(buffer, 0, sizeof(buffer));
 	m_Scene->GetName().copy(buffer, sizeof(buffer));
 
-	if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
+	if (ImGui::InputText("##SceneName", buffer, sizeof(buffer)))
 		m_Scene->SetName(std::string(buffer).empty() ? "Empty!" : std::string(buffer));
-
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
-	if (ImGui::TreeNodeEx((void*) typeid(SceneHierarchyPanel).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Editor Camera"))
-	{
-		ImGui::TreePop();
-	}
-	ImGui::PopStyleVar();
 }
 
 void SceneHierarchyPanel::DrawEntityNode(Entity entity)
@@ -93,10 +84,14 @@ void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	if (ImGui::IsItemHovered())
 		PanelUtilities::DrawSelection();
 
-	if (ImGui::IsItemClicked())
+	if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
 	{
 		m_SceneSelected = false;
 		m_SelectedEntity = entity;
+	}
+	else if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+	{
+
 	}
 
 	if (opened)
