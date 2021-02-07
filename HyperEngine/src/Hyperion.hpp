@@ -37,5 +37,4 @@
 #include "Hyperion/HyperUtilities/PlatformUtils.hpp"
 #include "Hyperion/HyperUtilities/Random.hpp"
 #include "Hyperion/HyperUtilities/Reflection.hpp"
-#include "Hyperion/HyperUtilities/Timer.hpp"
 #include "Hyperion/HyperUtilities/Timestep.hpp"
