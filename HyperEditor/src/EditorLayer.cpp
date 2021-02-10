@@ -38,7 +38,7 @@ void EditorLayer::OnAttach()
 
 	float phi = glm::pi<float>() * (3.0f - glm::sqrt(5.0f));
 
-	static constexpr const size_t PLANE_COUNT = 10'000;
+	static constexpr const size_t PLANE_COUNT = 1000;
 	static constexpr const size_t RADIUS = 20;
 
 	Registry& registry = m_Scene->GetRegistry();
@@ -46,6 +46,7 @@ void EditorLayer::OnAttach()
 	{
 		Entity square = m_Scene->CreateEntity("Square-" + std::to_string(i));
 		registry.AddComponent<SpriteRendererComponent>(square, glm::vec4(Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), Random::Float(0.0f, 1.0f), 1.0f), TextureHandle{ 0 });
+
 		auto& transform = registry.GetComponent<TransformComponent>(square);
 
 		float y = 1 - (i / (static_cast<float>(PLANE_COUNT) - 1.0f)) * 2.0f;
@@ -58,11 +59,18 @@ void EditorLayer::OnAttach()
 
 		transform.SetPosition(glm::vec3{ x * RADIUS, y * RADIUS, z * RADIUS });
 
-		glm::vec3 direction = transform.GetPosition() - glm::vec3{ 0.0f };
-		float yaw = atan2(direction.x, direction.z) * 180.0f / glm::pi<float>();
-		auto padj = static_cast<float>(glm::sqrt(glm::pow(x, 2) + glm::pow(z, 2)));
-		auto pitch = static_cast<float>(atan2(padj, y) * 180.0 / glm::pi<float>());
-		transform.SetRotation(glm::vec3{ 0.0f, yaw, pitch });
+		glm::vec3 D = glm::normalize(glm::vec3{ 0.0f, 0.0f, 0.0f } - transform.GetPosition());
+		glm::vec3 U = glm::vec3{ 0.0f, 1.0f, 0.0f };
+
+		float angleH = atan2(D.y, D.x);
+		float angleP = asin(D.z);
+
+		glm::vec3 W0 = glm::vec3{ -D.y, D.x, 0.0f };
+		glm::vec3 U0 = glm::cross(W0, D);
+
+		float angleB = atan2(glm::dot(W0, U), glm::dot(U0, U));
+
+		transform.SetRotation(glm::vec3{ glm::degrees(angleH), glm::degrees(angleB), glm::degrees(angleP) });
 	}
 }
 

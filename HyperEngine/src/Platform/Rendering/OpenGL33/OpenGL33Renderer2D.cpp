@@ -153,9 +153,7 @@ namespace Hyperion
 			}
 		}
 
-		glm::quat quaternion = glm::quat(glm::vec3{ glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z) });
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::toMat4(quaternion) * glm::scale(glm::mat4(1.0f), scale);
+		glm::mat4 transform = glm::translate(glm::mat4{ 1.0f }, position) * glm::toMat4(glm::quat{ glm::radians(rotation) }) * glm::scale(glm::mat4{ 1.0f }, scale);
 
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
