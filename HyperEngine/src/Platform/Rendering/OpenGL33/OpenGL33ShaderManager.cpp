@@ -215,7 +215,7 @@ namespace Hyperion
 
 		int length;
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-		auto* message = static_cast<char*>(malloc(sizeof(char) * length));
+		char* message = new char[length];
 		glGetShaderInfoLog(id, length, &length, message);
 
 		const char* shaderType;
@@ -237,7 +237,7 @@ namespace Hyperion
 		}
 
 		HP_CORE_ERROR("Shader - Compile-time error: {} | {}", shaderType, message);
-		free(message);
+		delete[] message;
 		return false;
 	}
 
@@ -251,11 +251,11 @@ namespace Hyperion
 
 		int length;
 		glGetProgramiv(shaderData.ShaderId, GL_INFO_LOG_LENGTH, &length);
-		auto* message = static_cast<char*>(malloc(sizeof(char) * length));
+		char* message = new char[length];
 		glGetProgramInfoLog(shaderData.ShaderId, length, &length, message);
 
 		HP_CORE_ERROR("Shader - Link-time error: Program | {}", message);
-		free(message);
+		delete[] message;
 		return false;
 	}
 
