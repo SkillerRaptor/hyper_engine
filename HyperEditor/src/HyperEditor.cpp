@@ -1,27 +1,28 @@
-#include <Hyperion/HyperCore/Application.hpp>
-#include <Hyperion/HyperCore/EntryPoint.hpp>
+#include <HyperEngine/HyperCore/Application.hpp>
+#include <HyperEngine/HyperCore/EntryPoint.hpp>
 
-#include "EditorLayer.hpp"
+#include "HyperEditor/EditorLayer.hpp"
 
-using namespace Hyperion;
-
-class HyperEditor : public Application
+namespace HyperEditor
 {
-public:
-	HyperEditor()
-		: Application("HyperEditor", 1280, 720)
+	class HyperEditor : public HyperCore::Application
 	{
-		SetAppIcon("assets/textures/HyperEngine.PNG");
+	public:
+		HyperEditor()
+			: Application("HyperEditor", 1280, 720)
+		{
+			SetAppIcon("assets/textures/HyperEngine.PNG");
 
-		PushLayer(new EditorLayer());
-	}
+			PushLayer(new EditorLayer());
+		}
 
-	~HyperEditor()
-	{
-	}
-};
+		~HyperEditor()
+		{
+		}
+	};
+}
 
-Application* Hyperion::CreateApplication()
+HyperCore::Application* HyperCore::CreateApplication()
 {
-	return new HyperEditor();
+	return new HyperEditor::HyperEditor();
 }

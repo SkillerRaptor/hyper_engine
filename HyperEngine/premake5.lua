@@ -24,7 +24,7 @@ project "HyperEngine"
 	includedirs
 	{
 		"src",
-		"src/Hyperion",
+		"src/HyperEngine",
 		"%{IncludeDir.fmt}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.glfw}",

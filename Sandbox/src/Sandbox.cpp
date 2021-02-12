@@ -1,11 +1,9 @@
-#include <Hyperion/HyperCore/Application.hpp>
-#include <Hyperion/HyperCore/EntryPoint.hpp>
+#include <HyperEngine/HyperCore/Application.hpp>
+#include <HyperEngine/HyperCore/EntryPoint.hpp>
 
 #include "SandboxLayer.hpp"
 
-using namespace Hyperion;
-
-class Sandbox : public Application
+class Sandbox : public HyperCore::Application
 {
 public:
 	Sandbox()
@@ -21,7 +19,7 @@ public:
 	}
 };
 
-Application* Hyperion::CreateApplication()
+HyperCore::Application* HyperCore::CreateApplication()
 {
 	return new Sandbox();
 }

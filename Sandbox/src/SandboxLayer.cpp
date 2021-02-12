@@ -1,7 +1,7 @@
 #include "SandboxLayer.hpp"
 
 SandboxLayer::SandboxLayer()
-	: Layer("Sandbox Layer")
+	: Layer{ "Sandbox Layer" }
 {
 }
 
@@ -18,11 +18,11 @@ void SandboxLayer::OnDetach()
 {
 }
 
-void SandboxLayer::OnEvent(Event& event)
+void SandboxLayer::OnEvent(HyperEvent::Event& event)
 {
 }
 
-void SandboxLayer::OnUpdate(Timestep timeStep)
+void SandboxLayer::OnUpdate(HyperUtilities::Timestep timeStep)
 {
 }
 
