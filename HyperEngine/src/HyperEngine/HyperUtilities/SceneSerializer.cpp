@@ -18,26 +18,26 @@ namespace HyperUtilities
 
 		nlohmann::ordered_json configuration;
 		std::vector<nlohmann::ordered_json> entities;
-		registry.Each([&](HyperECS::Entity entity)
-			{
-				if (entity == HyperECS::Null)
-					return;
+		for (HyperECS::Entity entity : registry.GetEntities())
+		{
+			if (entity == HyperECS::Null)
+				continue;
 
-				nlohmann::ordered_json entityJson;
+			nlohmann::ordered_json entityJson;
 
-				entityJson["Entity"] = registry.GetComponent<HyperECS::TagComponent>(entity).GetTag();
+			entityJson["Entity"] = registry.GetComponent<HyperECS::TagComponent>(entity).GetTag();
 
-				SerializeImplement<HyperECS::TransformComponent>(entity, entityJson);
-				SerializeImplement<HyperECS::SpriteRendererComponent>(entity, entityJson);
-				SerializeImplement<HyperECS::CameraComponent>(entity, entityJson);
+			SerializeImplement<HyperECS::TransformComponent>(entity, entityJson);
+			SerializeImplement<HyperECS::SpriteRendererComponent>(entity, entityJson);
+			SerializeImplement<HyperECS::CameraComponent>(entity, entityJson);
 
-				entities.push_back(entityJson);
-			});
+			entities.push_back(entityJson);
+		}
 
 		configuration["Scene"] = m_Scene->GetName();
 		configuration["Entities"] = entities;
 
-		std::ofstream file{filePath};
+		std::ofstream file{ filePath };
 		file << configuration.dump(4);
 		return false;
 	}

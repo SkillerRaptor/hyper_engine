@@ -45,12 +45,6 @@ namespace HyperECS
 		}
 	}
 
-	void Registry::Each(std::function<void(Entity)> function)
-	{
-		for (const auto& entity : m_Entities)
-			function(entity);
-	}
-
 	Entity Registry::GenerateIdentifier()
 	{
 		HP_ASSERT(EntityTraits::EntityType{ m_Entities.size() } < EntityTraits::EntityMask);
