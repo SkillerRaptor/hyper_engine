@@ -27,27 +27,27 @@ namespace HyperRendering
 		virtual void EndEditorRecording() override;
 		virtual void RenderEditorImage() override;
 
-		virtual inline TextureHandle OpenGL46SceneRecorder::GetGameColorAttachment() override
+		virtual inline TextureHandle GetGameColorAttachment() override
 		{
 			return m_GameFrameBuffer ? m_GameFrameBuffer->GetColorAttachment() : TextureHandle{ 0 };
 		}
 
-		virtual inline TextureHandle OpenGL46SceneRecorder::GetGameDepthAttachment() override
+		virtual inline TextureHandle GetGameDepthAttachment() override
 		{
 			return m_GameFrameBuffer ? m_GameFrameBuffer->GetDepthAttachment() : TextureHandle{ 0 };
 		}
 
-		virtual inline TextureHandle OpenGL46SceneRecorder::GetEditorColorAttachment() override
+		virtual inline TextureHandle GetEditorColorAttachment() override
 		{
 			return m_EditorFrameBuffer ? m_EditorFrameBuffer->GetColorAttachment() : TextureHandle{ 0 };
 		}
 
-		virtual inline TextureHandle OpenGL46SceneRecorder::GetEditorDepthAttachment() override
+		virtual inline TextureHandle GetEditorDepthAttachment() override
 		{
 			return m_EditorFrameBuffer ? m_EditorFrameBuffer->GetDepthAttachment() : TextureHandle{ 0 };
 		}
 
-		virtual inline void OpenGL46SceneRecorder::SetGameViewportSize(const glm::vec2& gameViewportSize) override
+		virtual inline void SetGameViewportSize(const glm::vec2& gameViewportSize) override
 		{
 			if (!(gameViewportSize.x > 0 && gameViewportSize.x < 8096 && gameViewportSize.y > 0 && gameViewportSize.y < 8096))
 				return;
@@ -56,12 +56,12 @@ namespace HyperRendering
 				m_RebuildGameImage = true;
 		}
 
-		virtual inline const glm::vec2& OpenGL46SceneRecorder::GetGameViewportSize() const override
+		virtual inline const glm::vec2& GetGameViewportSize() const override
 		{
 			return m_GameViewportSize;
 		}
 
-		virtual inline void OpenGL46SceneRecorder::SetEditorViewportSize(const glm::vec2& editorViewportSize) override
+		virtual inline void SetEditorViewportSize(const glm::vec2& editorViewportSize) override
 		{
 			if (!(editorViewportSize.x > 0 && editorViewportSize.x < 8096 && editorViewportSize.y > 0 && editorViewportSize.y < 8096))
 				return;
@@ -70,7 +70,7 @@ namespace HyperRendering
 				m_RebuildEditorImage = true;
 		}
 
-		virtual inline const glm::vec2& OpenGL46SceneRecorder::GetEditorViewportSize() const override
+		virtual inline const glm::vec2& GetEditorViewportSize() const override
 		{
 			return m_EditorViewportSize;
 		}

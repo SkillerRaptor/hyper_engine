@@ -5,6 +5,7 @@
 #include "HyperCore/Core.hpp"
 #include "HyperECS/Registry.hpp"
 #include "HyperRendering/Scene.hpp"
+#include "HyperUtilities/Reflection.hpp"
 
 namespace HyperUtilities
 {

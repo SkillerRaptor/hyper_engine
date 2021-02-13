@@ -1,7 +1,9 @@
 #pragma once
 
+#include <exception>
 #include <functional>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 #include "HyperECS/Entity.hpp"
@@ -36,7 +38,7 @@ namespace HyperECS
 		T& AddComponent(const Entity entity, Args&&... args)
 		{
 			if (HasComponent<T>(entity))
-				throw std::exception("The provided entity has already the specified component!");
+				throw std::runtime_error("The provided entity has already the specified component!");
 
 			size_t componentId{ typeid(T).hash_code() };
 			PoolData* pool = FindPool(componentId);
@@ -45,9 +47,7 @@ namespace HyperECS
 				pool = &m_Pools.emplace_back(PoolData{ static_cast<uint64_t>(componentId), std::make_unique<SparseSet>() });
 			}
 			else if (pool->Pool->Contains(entity))
-			{
-				throw std::exception("The provided entity exists already in the pool!");
-			}
+				throw std::runtime_error("The provided entity exists already in the pool!");
 
 			T* component = new T{ std::forward<Args>(args)... };
 			pool->Pool->Emplace(entity, (void*)std::move(component));
@@ -60,13 +60,13 @@ namespace HyperECS
 			size_t componentId{ typeid(T).hash_code() };
 			PoolData* pool = FindPool(componentId);
 			if (pool == nullptr)
-				throw std::exception("The pool for specified component does not exists!");
+				throw std::runtime_error("The pool for specified component does not exists!");
 
 			if (!pool->Pool->Contains(entity))
-				throw std::exception("The provided entity does not exists in the pool!");
+				throw std::runtime_error("The provided entity does not exists in the pool!");
 
 			if (!HasComponent<T>(entity))
-				throw std::exception("The provided entity has not the specified component!");
+				throw std::runtime_error("The provided entity has not the specified component!");
 
 			pool->Pool->Remove(entity);
 		}
@@ -79,10 +79,10 @@ namespace HyperECS
 			size_t componentId{ typeid(T).hash_code() };
 			PoolData* pool = FindPool(componentId);
 			if (pool == nullptr)
-				throw std::exception("The pool for specified component does not exists!");
+				throw std::runtime_error("The pool for specified component does not exists!");
 
 			if (!HasComponent<T>(entity))
-				throw std::exception("The provided entity has not the specified component!");
+				throw std::runtime_error("The provided entity has not the specified component!");
 
 			return *reinterpret_cast<T*>(pool->Pool->Get(entity));
 		}
@@ -96,54 +96,6 @@ namespace HyperECS
 				return false;
 
 			return pool->Pool->Contains(entity);
-		}
-
-		void Each(std::function<void(Entity)> function);
-
-		template<class... T>
-		void Each(std::function<void(T&...)> function)
-		{
-			for (const auto& entity : m_Entities)
-			{
-				bool shouldSkip = false;
-
-				([&](auto* v)
-					{
-						using C = decltype(*v);
-						if (shouldSkip)
-							return;
-						if (!HasComponent<C>(entity))
-							shouldSkip = true;
-					} ((T*)nullptr), ...);
-
-				if (shouldSkip)
-					continue;
-		
-				function(GetComponent<T>(entity)...);
-			}
-		}
-
-		template<class... T>
-		void Each(std::function<void(Entity, T&...)> function)
-		{
-			for (const auto& entity : m_Entities)
-			{
-				bool shouldSkip = false;
-
-				([&](auto* v)
-					{
-						using C = decltype(*v);
-						if (shouldSkip)
-							return;
-						if (!HasComponent<C>(entity))
-							shouldSkip = true;
-					} ((T*)nullptr), ...);
-
-				if (shouldSkip)
-					continue;
-
-				function(entity, GetComponent<T>(entity)...);
-			}
 		}
 
 		template<class... T>
@@ -171,14 +123,19 @@ namespace HyperECS
 			return entities;
 		}
 
-		static inline EntityTraits::EntityType Registry::GetEntityId(const Entity entity) noexcept
+		inline const std::vector<Entity>& GetEntities() const
+		{
+			return m_Entities;
+		}
+
+		static inline EntityTraits::EntityType GetEntityId(const Entity entity) noexcept
 		{
 			return EntityTraits::EntityType{ entity & EntityTraits::EntityMask };
 		}
 
-		static inline EntityTraits::VersionType Registry::GetEntityVersion(const Entity entity) noexcept
+		static inline EntityTraits::VersionType GetEntityVersion(const Entity entity) noexcept
 		{
-			return EntityTraits::VersionType{ entity >> EntityTraits::EntityShift };
+			return EntityTraits::VersionType{ static_cast<EntityTraits::VersionType>(entity >> static_cast<EntityTraits::EntityType>(EntityTraits::EntityShift)) };
 		}
 
 	private:

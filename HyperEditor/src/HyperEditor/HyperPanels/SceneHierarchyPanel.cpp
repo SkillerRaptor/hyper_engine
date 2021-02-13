@@ -40,10 +40,8 @@ namespace HyperEditor
 
 		if (sceneOpen)
 		{
-			m_Scene->GetRegistry().Each([&](HyperECS::Entity entity)
-				{
-					DrawEntityNode(entity);
-				});
+			for (HyperECS::Entity entity : m_Scene->GetRegistry().GetEntities())
+				DrawEntityNode(entity);
 
 			ImGui::TreePop();
 		}

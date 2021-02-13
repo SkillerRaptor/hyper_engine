@@ -305,7 +305,7 @@ namespace HyperMath
 
 		Quaternion operator/=(const std::complex<T>& value)
 		{
-			T n2 = y.real() * value.real() + y.imag() * value.imag();
+			T n2 = value.real() * value.real() + value.imag() * value.imag();
 
 			T at = m_Scalar * value.real() + m_Axis.x * value.imag();
 			T bt = -m_Scalar * value.imag() + m_Axis.x * value.real();
@@ -323,7 +323,7 @@ namespace HyperMath
 		template <typename T1, typename std::enable_if<std::is_convertible<T1, T>::value>::type* = nullptr>
 		Quaternion operator/=(const std::complex<T>& value)
 		{
-			T n2 = y.GetReal() * value.real() + y.imag() * value.imag();
+			T n2 = value.GetReal() * value.real() + value.imag() * value.imag();
 
 			T at = m_Scalar * value.real() + m_Axis.x * value.imag();
 			T bt = -m_Scalar * value.imag() + m_Axis.x * value.real();
@@ -446,19 +446,19 @@ namespace HyperMath
 		template<typename T1, typename T2>
 		bool IsScalarZero(T1 x, T2 epsilon = 0)
 		{
-			typedef typename std::common_type<T1, T2>::type T;
-			T xx = static_cast<T>(x);
-			T ee = static_cast<T>(epsilon);
+			typedef typename std::common_type<T1, T2>::type U;
+			U xx = static_cast<U>(x);
+			U ee = static_cast<U>(epsilon);
 			return std::abs(xx) <= ee;
 		}
 
 		template<typename T1, typename T2, typename T3>
 		bool IsNearlyEqual(T1 x, T2 y, T3 epsilon = 0)
 		{
-			typedef typename std::common_type<T1, T2, T3>::type T;
-			T xx = static_cast<T>(x);
-			T yy = static_cast<T>(y);
-			T ee = static_cast<T>(epsilon);
+			typedef typename std::common_type<T1, T2, T3>::type U;
+			U xx = static_cast<U>(x);
+			U yy = static_cast<U>(y);
+			U ee = static_cast<U>(epsilon);
 			if (xx == 0)
 				return IsScalarZero(yy, ee);
 			else if (yy == 0)

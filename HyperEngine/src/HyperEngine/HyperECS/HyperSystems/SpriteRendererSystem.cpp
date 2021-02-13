@@ -10,10 +10,12 @@ namespace HyperECS
 	void SpriteRendererSystem::OnRender(Registry& registry)
 	{
 		m_Renderer2D->BeginScene();
-		registry.Each<SpriteRendererComponent, TransformComponent>([&](Entity entity, SpriteRendererComponent& spriteRenderer, TransformComponent& transform)
-			{
-				m_Renderer2D->DrawQuad(transform.GetPosition(), transform.GetRotation(), transform.GetScale(), spriteRenderer.GetColor(), spriteRenderer.GetTexture());
-			});
+		for (Entity entity : registry.Each<SpriteRendererComponent, TransformComponent>())
+		{
+			SpriteRendererComponent& spriteRenderer = registry.GetComponent<SpriteRendererComponent>(entity);
+			TransformComponent& transform = registry.GetComponent<TransformComponent>(entity);
+			m_Renderer2D->DrawQuad(transform.GetPosition(), transform.GetRotation(), transform.GetScale(), spriteRenderer.GetColor(), spriteRenderer.GetTexture());
+		}
 		m_Renderer2D->EndScene();
 	}
 }
