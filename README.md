@@ -34,8 +34,9 @@ The following screenshots show features and designs of the engine:
 -   [stb_image](https://github.com/nothings/stb/blob/master/LICENSE) Copyright (c) MIT, Sean Barrett 2017
 
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-Please make sure to update tests as appropriate.
+Pull requests are forbidden. This project is a learning project for myself and I want to do everything by my own. 
+If you still would like to change something, please open an issue first to discuss what you would like to change. 
+The change will then reviewed by myself and if I like the change I will implement it by my own.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
