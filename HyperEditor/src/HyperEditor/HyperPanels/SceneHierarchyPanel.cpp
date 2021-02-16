@@ -12,11 +12,6 @@
 
 namespace HyperEditor
 {
-	SceneHierarchyPanel::SceneHierarchyPanel(const HyperCore::Ref<HyperRendering::Scene>& scene)
-		: m_Scene{ scene }
-	{
-	}
-
 	void SceneHierarchyPanel::OnRender()
 	{
 		ImGui::Begin(ICON_FK_LIST " Hierarchy");

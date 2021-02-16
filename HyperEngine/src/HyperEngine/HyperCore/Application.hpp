@@ -33,6 +33,7 @@ namespace HyperCore
 
 	public:
 		Application(const std::string& title, uint32_t width, uint32_t height);
+		virtual ~Application() = default;
 
 		void Run();
 

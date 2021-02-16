@@ -2,11 +2,6 @@
 
 namespace HyperEditor
 {
-	AssetsPanel::AssetsPanel()
-	{
-
-	}
-
 	AssetsPanel::~AssetsPanel()
 	{
 

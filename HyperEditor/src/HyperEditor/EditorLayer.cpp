@@ -1,7 +1,5 @@
 #include "EditorLayer.hpp"
 
-#include <glm/gtc/constants.hpp>
-
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -11,19 +9,14 @@
 namespace HyperEditor
 {
 	EditorLayer::EditorLayer()
-		: OverlayLayer{ "Editor Layer" }
-	{
-	}
-
-	EditorLayer::~EditorLayer()
+		: OverlayLayer{ "Editor Layer" }, m_AssetsPanel{}, m_SceneHierarchyPanel{}
 	{
 	}
 
 	void EditorLayer::OnAttach()
 	{
-		m_AssetsPanel = HyperCore::CreateScope<AssetsPanel>();
-		m_SceneHierarchyPanel = HyperCore::CreateScope<SceneHierarchyPanel>(m_Scene);
-
+		/* Setting variables*/
+		m_SceneHierarchyPanel.SetScene(m_Scene);
 		PanelUtilities::SetRenderContext(m_RenderContext);
 
 		/* Adding Font */
@@ -35,59 +28,18 @@ namespace HyperEditor
 
 		/* Loading Shaders */
 		m_SpriteShader = m_RenderContext->GetShaderManager()->CreateShader("assets/shaders/SpriteShaderVertex.glsl", "assets/shaders/SpriteShaderFragment.glsl");
-
-		/* Creating Entities */
-
-		float phi = glm::pi<float>() * (3.0f - glm::sqrt(5.0f));
-
-		static constexpr const size_t PLANE_COUNT = 1000;
-		static constexpr const size_t RADIUS = 20;
-
-		HyperMath::Random random{};
-
-		HyperECS::Registry& registry = m_Scene->GetRegistry();
-		for (size_t i = 0; i < PLANE_COUNT; i++)
-		{
-			HyperECS::Entity square = m_Scene->CreateEntity("Square-" + std::to_string(i));
-			registry.AddComponent<HyperECS::SpriteRendererComponent>(square, glm::vec4{ random.Float(0.0f, 1.0f), random.Float(0.0f, 1.0f), random.Float(0.0f, 1.0f), 1.0f }, HyperRendering::TextureHandle{ 0 });
-
-			auto& transform = registry.GetComponent<HyperECS::TransformComponent>(square);
-
-			float y = 1 - (i / (static_cast<float>(PLANE_COUNT) - 1.0f)) * 2.0f;
-			float radius = glm::sqrt(1.0f - y * y);
-
-			float theta = phi * i;
-
-			float x = glm::cos(theta) * radius;
-			float z = glm::sin(theta) * radius;
-
-			transform.SetPosition(glm::vec3{ x * RADIUS, y * RADIUS, z * RADIUS });
-
-			glm::vec3 D = glm::normalize(glm::vec3{ 0.0f, 0.0f, 0.0f } - transform.GetPosition());
-			glm::vec3 U = glm::vec3{ 0.0f, 1.0f, 0.0f };
-
-			float angleH = atan2(D.y, D.x);
-			float angleP = asin(D.z);
-
-			glm::vec3 W0 = glm::vec3{ -D.y, D.x, 0.0f };
-			glm::vec3 U0 = glm::cross(W0, D);
-
-			float angleB = atan2(glm::dot(W0, U), glm::dot(U0, U));
-
-			transform.SetRotation(glm::vec3{ glm::degrees(angleH), glm::degrees(angleB), glm::degrees(angleP) });
-		}
 	}
 
 	void EditorLayer::OnRender()
 	{
-		HyperCore::Ref<HyperRendering::SceneRecorder> sceneRecorder = m_RenderContext->GetSceneRecorder();
-
 		CreateDockingMenu();
 
-		m_SceneHierarchyPanel->OnRender();
+		m_SceneHierarchyPanel.OnRender();
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2, 2));
+
+		HyperCore::Ref<HyperRendering::SceneRecorder> sceneRecorder = m_RenderContext->GetSceneRecorder();
 
 		ImGui::Begin(ICON_FK_WRENCH " Editor");
 		ImGui::BeginChild("EditorRenderer");
@@ -116,7 +68,7 @@ namespace HyperEditor
 		ImGui::PopStyleVar();
 
 		ImGui::Begin(ICON_FK_FILES_O " Assets");
-		m_AssetsPanel->OnRender();
+		m_AssetsPanel.OnRender();
 		ImGui::End();
 	}
 

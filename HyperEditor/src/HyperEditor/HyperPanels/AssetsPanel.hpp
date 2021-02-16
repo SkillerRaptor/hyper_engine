@@ -7,7 +7,7 @@ namespace HyperEditor
 	private:
 
 	public:
-		AssetsPanel();
+		AssetsPanel() = default;
 		~AssetsPanel();
 
 		void OnRender();

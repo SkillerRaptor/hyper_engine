@@ -16,9 +16,7 @@ namespace HyperEditor
 			PushLayer(new EditorLayer());
 		}
 
-		~HyperEditor()
-		{
-		}
+		~HyperEditor() = default;
 	};
 }
 

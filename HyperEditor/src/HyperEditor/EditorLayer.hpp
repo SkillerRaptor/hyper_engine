@@ -10,14 +10,15 @@ namespace HyperEditor
 	class EditorLayer : public HyperLayer::OverlayLayer
 	{
 	private:
-		HyperRendering::ShaderHandle m_SpriteShader{ 0 }; // FIXME: TEMP
+		/* Todo: Replace temporary shader handle with assets */
+		HyperRendering::ShaderHandle m_SpriteShader{ 0 };
 
-		HyperCore::Scope<AssetsPanel> m_AssetsPanel;
-		HyperCore::Scope<SceneHierarchyPanel> m_SceneHierarchyPanel;
+		AssetsPanel m_AssetsPanel;
+		SceneHierarchyPanel m_SceneHierarchyPanel;
 
 	public:
 		EditorLayer();
-		virtual ~EditorLayer();
+		virtual ~EditorLayer() = default;
 
 		virtual void OnAttach() override;
 

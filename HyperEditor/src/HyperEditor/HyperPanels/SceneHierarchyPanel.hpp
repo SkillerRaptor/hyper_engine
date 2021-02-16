@@ -7,15 +7,16 @@ namespace HyperEditor
 	class SceneHierarchyPanel
 	{
 	private:
-		HyperCore::Ref<HyperRendering::Scene> m_Scene;
-		HyperECS::Entity m_SelectedEntity;
+		HyperCore::Ref<HyperRendering::Scene> m_Scene{ nullptr };
+		HyperECS::Entity m_SelectedEntity{ HyperECS::Null };
 
-		bool m_SceneSelected = false;
-		bool m_AddComponentPopup = false;
-		bool m_RemoveComponentPopup = false;
+		bool m_SceneSelected{ false };
+		bool m_AddComponentPopup{ false };
+		bool m_RemoveComponentPopup{ false };
 
 	public:
-		SceneHierarchyPanel(const HyperCore::Ref<HyperRendering::Scene>& scene);
+		SceneHierarchyPanel() = default;
+		~SceneHierarchyPanel() = default;
 
 		void OnRender();
 
