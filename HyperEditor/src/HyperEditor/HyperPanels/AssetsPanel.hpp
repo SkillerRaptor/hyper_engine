@@ -21,8 +21,9 @@ namespace HyperEditor
 
 		bool m_Selected = false;
 		std::string m_CurrentDirectory = "";
-		std::stack<std::string> m_LastDirectories = {};
 		std::string m_SelectedFile = "";
+
+		static std::stack<std::string> m_LastDirectories;
 
 	public:
 		AssetsPanel() = default;

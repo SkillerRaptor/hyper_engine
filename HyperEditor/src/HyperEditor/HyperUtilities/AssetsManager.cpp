@@ -127,6 +127,11 @@ namespace HyperEditor
 
 		std::string extension = path.extension().string();
 
+		std::transform(extension.begin(), extension.end(), extension.begin(), [](unsigned char c)
+			{
+				return std::tolower(c);
+			});
+
 		if (s_FileTypes.find(extension) == s_FileTypes.end())
 			return FileType::FILE;
 

@@ -8,6 +8,8 @@
 
 namespace HyperEditor
 {
+	std::stack<std::string> AssetsPanel::m_LastDirectories;
+
 	void AssetsPanel::OnAttach()
 	{
 		m_FolderTexture = m_TextureManager->CreateTexture("cache/textures/icons/folder-solid.png");
@@ -27,6 +29,9 @@ namespace HyperEditor
 			{
 				if (event.GetMouseButton() == HyperUtilities::MouseCode::Button3 && m_Selected)
 				{
+					if (m_LastDirectories.empty())
+						return false;
+
 					m_CurrentDirectory = m_LastDirectories.top();
 					m_LastDirectories.pop();
 				}
@@ -135,6 +140,7 @@ namespace HyperEditor
 					if (ImGui::BeginDragDropSource())
 					{
 						ImGui::SetDragDropPayload("_TEXTURE", &filePath, sizeof(filePath));
+						ImGui::Text(fileData.Name.c_str());
 						ImGui::EndDragDropSource();
 					}
 					break;
