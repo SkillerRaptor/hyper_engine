@@ -431,6 +431,17 @@ namespace HyperEditor
 				newTexture = true;
 			}
 		}
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_TEXTURE"))
+			{
+				const std::string texturePath = *(const std::string*)payload->Data;
+
+				newTextureHandle = textureManager->CreateTexture(texturePath);
+				newTexture = true;
+			}
+			ImGui::EndDragDropTarget();
+		}
 		ImGui::PopItemWidth();
 
 		ImGui::SameLine();

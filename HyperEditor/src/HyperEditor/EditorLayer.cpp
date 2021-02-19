@@ -16,9 +16,12 @@ namespace HyperEditor
 	void EditorLayer::OnAttach()
 	{
 		/* Setting variables*/
-		m_SceneHierarchyPanel.SetScene(m_Scene);
-		PanelUtilities::SetRenderContext(m_RenderContext);
 		AssetsManager::Init();
+		PanelUtilities::SetRenderContext(m_RenderContext);
+		m_AssetsPanel.SetTextureManager(m_RenderContext->GetTextureManager());
+		m_SceneHierarchyPanel.SetScene(m_Scene);
+		
+		m_AssetsPanel.OnAttach();
 
 		/* Adding Font */
 		ImGuiIO& io = ImGui::GetIO();
@@ -29,6 +32,13 @@ namespace HyperEditor
 
 		/* Loading Shaders */
 		m_SpriteShader = m_RenderContext->GetShaderManager()->CreateShader("assets/shaders/SpriteShaderVertex.glsl", "assets/shaders/SpriteShaderFragment.glsl");
+	
+		m_Scene->CreateEntity("Test Entity");
+	}
+
+	void EditorLayer::OnEvent(HyperEvent::Event& event)
+	{
+		m_AssetsPanel.OnEvent(event);
 	}
 
 	void EditorLayer::OnUpdate(HyperUtilities::Timestep timeStep)
@@ -40,6 +50,9 @@ namespace HyperEditor
 	{
 		CreateDockingMenu();
 
+		m_RenderContext->GetTextureManager(),
+
+		m_AssetsPanel.OnRender();
 		m_SceneHierarchyPanel.OnRender();
 
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -72,10 +85,6 @@ namespace HyperEditor
 		ImGui::End();
 
 		ImGui::PopStyleVar();
-
-		ImGui::Begin(ICON_FK_FILES_O " Assets");
-		m_AssetsPanel.OnRender();
-		ImGui::End();
 	}
 
 	void EditorLayer::CreateDockingMenu()

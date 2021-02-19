@@ -21,23 +21,41 @@ namespace HyperEditor
 
 	enum class FileType : uint8_t
 	{
+		FILE,
+		FOLDER,
+	
 		GLSL,
 		HLSL,
 		PNG,
 		JPG,
 		OBJ,
-		FBX
+		FBX,
+		GLTF
+	};
+
+	struct FileData
+	{
+		std::string Name;
+		FileType Type;
+		std::chrono::system_clock::rep LastWriteTime;
+	
+		std::string ParentFolder;
 	};
 
 	class AssetsManager
 	{
 	private:
-		static std::unordered_map<std::string, std::chrono::system_clock::rep, StringHasher> s_LastFileChanges;
+		static std::unordered_map<std::string, FileData, StringHasher> s_Files;
 		static std::unordered_map<std::string, FileType, StringHasher> s_FileTypes;
 
 	public:
 		static void Init();
 		static void CheckAssets();
+
+		static inline std::unordered_map<std::string, FileData, StringHasher>& GetFiles()
+		{
+			return s_Files;
+		}
 
 	private:
 		static void CacheDirectory(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory);
@@ -46,5 +64,7 @@ namespace HyperEditor
 		static void ProcessShader(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory);
 		static void ProcessTexture(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory);
 		static void ProcessModel(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory);
+
+		static FileType GetFileType(const std::filesystem::path& path);
 	};
 }
