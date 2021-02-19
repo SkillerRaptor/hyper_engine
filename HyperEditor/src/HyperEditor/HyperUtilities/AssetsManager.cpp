@@ -20,20 +20,49 @@ namespace HyperEditor
 
 		/* Cache assets */
 		std::filesystem::path currentPath = std::filesystem::current_path();
-
-		/* Todo: Adding project path */
-		CachingFiles(currentPath / "assets", currentPath / "cache");
+		CacheDirectory(currentPath / "assets", currentPath / "cache"); /* Todo: Adding project path */
 	}
 
 	void AssetsManager::CheckAssets()
 	{
-		std::filesystem::path assetsPath = std::filesystem::current_path() / "assets";
-		if (s_LastFileChanges[assetsPath.string()] != std::filesystem::last_write_time(assetsPath).time_since_epoch().count())
-		{
-		}
+		std::filesystem::path currentPath = std::filesystem::current_path();
+		std::filesystem::path assetsPath = currentPath / "assets";
+		if (s_LastFileChanges[assetsPath.filename().string()] != std::filesystem::last_write_time(assetsPath).time_since_epoch().count())
+			CacheDirectory(assetsPath, currentPath / "cache");
 	}
+	/*
+#####################################################################
+	-> Cache File
+	If folder
+		Create cache folder & recursive
+	If file
+		Check file extension
+			If Shader
+				Convert to SPIR-V
+			If Texture
+				Compress it
+			If Model
+				Optimize Mesh & Convert to binary
+#####################################################################
 
-	void AssetsManager::CachingFiles(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory)
+	Case 2: Cache exists
+		Iterate through assets (recursive)
+
+			If asset exists in cache folder
+				Compare asset in cache and current asset
+					If same time
+						Skip
+					If not same time
+						Cache File
+							Copy to cache folder
+
+			If asset not exists in cache folder
+				Cache File
+					Copy to cache folder
+			Cache the last file write time in map
+	*/
+
+	void AssetsManager::CacheDirectory(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory)
 	{
 		if (!std::filesystem::exists(cacheDirectory))
 			std::filesystem::create_directory(cacheDirectory);
@@ -46,38 +75,77 @@ namespace HyperEditor
 			std::filesystem::path cachePath = cacheDirectory / assetPath.filename();
 			std::filesystem::file_time_type lastAssetWriteTime = std::filesystem::last_write_time(assetPath);
 
-			if (!std::filesystem::is_directory(assetPath))
+			if (s_LastFileChanges.find(assetPath.string()) == s_LastFileChanges.end())
 			{
-				if (std::filesystem::exists(cachePath))
+				if (!std::filesystem::is_directory(assetPath))
 				{
-					// Cache files
+					if (std::filesystem::exists(cachePath))
+					{
+						if (std::filesystem::last_write_time(cachePath).time_since_epoch().count() != lastAssetWriteTime.time_since_epoch().count())
+							CacheFile(assetPath, cacheDirectory);
+					}
+					else
+						CacheFile(assetPath, cacheDirectory);
+					s_LastFileChanges[assetPath.string()] = lastAssetWriteTime.time_since_epoch().count();
 				}
 				else
-					std::filesystem::copy_file(assetPath, cachePath);
-				s_LastFileChanges[assetPath.string()] = lastAssetWriteTime.time_since_epoch().count();
+					CacheDirectory(assetPath, cachePath);
 			}
 			else
-				CachingFiles(assetPath, cachePath);
+			{
+				if (s_LastFileChanges[assetPath.string()] != lastAssetWriteTime.time_since_epoch().count())
+					CacheFile(path, cacheDirectory);
+			}
 			
 			std::filesystem::last_write_time(cachePath, lastAssetWriteTime);
 		}
 	}
 
+	void AssetsManager::CacheFile(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory)
+	{
+		if (!std::filesystem::is_directory(path))
+		{
+			std::string extension = path.extension().string();
+
+			if (s_FileTypes.find(extension) != s_FileTypes.end())
+			{
+				/* Extension found */
+				switch (s_FileTypes[extension])
+				{
+				case FileType::GLSL: case FileType::HLSL:
+					ProcessShader(path, cacheDirectory);
+					break;
+				case FileType::PNG: case FileType::JPG:
+					ProcessTexture(path, cacheDirectory);
+					break;
+				case FileType::OBJ: case FileType::FBX:
+					ProcessModel(path, cacheDirectory);
+					break;
+				}
+			}
+			else
+				std::filesystem::copy_file(path, cacheDirectory / path.filename());
+		}
+	}
+
 	/* glsl, hlsl */
-	void AssetsManager::ProcessShader()
+	void AssetsManager::ProcessShader(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory)
 	{
 		/* Todo: Convert to SPIR-V */
+		std::filesystem::copy_file(path, cacheDirectory / path.filename());
 	}
 
 	/* png, jpg */
-	void AssetsManager::ProcessTexture()
+	void AssetsManager::ProcessTexture(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory)
 	{
 		/* Todo: Compress Image */
+		std::filesystem::copy_file(path, cacheDirectory / path.filename());
 	}
 
 	/* obj, fbx */
-	void AssetsManager::ProcessModel()
+	void AssetsManager::ProcessModel(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory)
 	{
-		/* Todo: Optimize Mesh & Convert to binary*/
+		/* Todo: Optimize Mesh & Convert to binary */
+		std::filesystem::copy_file(path, cacheDirectory / path.filename());
 	}
 }

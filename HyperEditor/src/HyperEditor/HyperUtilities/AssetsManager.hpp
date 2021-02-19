@@ -8,14 +8,14 @@ namespace HyperEditor
 {
 	struct StringHasher
 	{
-		inline size_t HashString(uint32_t hash, const char* string) const
+		inline size_t HashString(uint32_t hash, const char* str) const
 		{
-			return (*string == 0) ? hash : HashString(((hash << 5) + hash) + *string, string + 1);
+			return (*str == 0) ? hash : HashString(((hash << 5) + hash) + *str, str + 1);
 		}
 
-		inline size_t operator()(const std::string& string) const
+		inline size_t operator()(std::string str) const
 		{
-			return (string.empty()) ? 0 : HashString(5381, string.c_str());
+			return (str.empty()) ? 0 : HashString(5381, str.c_str());
 		}
 	};
 
@@ -40,10 +40,11 @@ namespace HyperEditor
 		static void CheckAssets();
 
 	private:
-		static void CachingFiles(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory);
+		static void CacheDirectory(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory);
+		static void CacheFile(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory);
 
-		static void ProcessShader();
-		static void ProcessTexture();
-		static void ProcessModel();
+		static void ProcessShader(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory);
+		static void ProcessTexture(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory);
+		static void ProcessModel(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory);
 	};
 }

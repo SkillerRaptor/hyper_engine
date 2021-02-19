@@ -18,6 +18,7 @@ namespace HyperEditor
 		/* Setting variables*/
 		m_SceneHierarchyPanel.SetScene(m_Scene);
 		PanelUtilities::SetRenderContext(m_RenderContext);
+		AssetsManager::Init();
 
 		/* Adding Font */
 		ImGuiIO& io = ImGui::GetIO();
@@ -28,6 +29,11 @@ namespace HyperEditor
 
 		/* Loading Shaders */
 		m_SpriteShader = m_RenderContext->GetShaderManager()->CreateShader("assets/shaders/SpriteShaderVertex.glsl", "assets/shaders/SpriteShaderFragment.glsl");
+	}
+
+	void EditorLayer::OnUpdate(HyperUtilities::Timestep timeStep)
+	{
+		m_AssetsPanel.OnUpdate();
 	}
 
 	void EditorLayer::OnRender()

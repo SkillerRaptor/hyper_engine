@@ -1,15 +1,16 @@
 #pragma once
 
+#include "HyperUtilities/AssetsManager.hpp"
+
 namespace HyperEditor
 {
 	class AssetsPanel
 	{
-	private:
-
 	public:
 		AssetsPanel() = default;
-		~AssetsPanel();
+		~AssetsPanel() = default;
 
+		void OnUpdate();
 		void OnRender();
 	};
 }

@@ -22,6 +22,7 @@ namespace HyperEditor
 
 		virtual void OnAttach() override;
 
+		virtual void OnUpdate(HyperUtilities::Timestep timeStep) override;
 		virtual void OnRender() override;
 
 	private:
