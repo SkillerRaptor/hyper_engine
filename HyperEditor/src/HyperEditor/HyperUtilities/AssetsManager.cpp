@@ -82,7 +82,7 @@ namespace HyperEditor
 			FileType fileType = GetFileType(path);
 
 			if (fileType == FileType::FILE)
-				std::filesystem::copy_file(path, cacheDirectory / path.filename());
+				std::filesystem::copy_file(path, cacheDirectory / path.filename(), std::filesystem::copy_options::update_existing);
 
 			switch (fileType)
 			{
@@ -103,21 +103,21 @@ namespace HyperEditor
 	void AssetsManager::ProcessShader(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory)
 	{
 		/* Todo: Convert to SPIR-V */
-		std::filesystem::copy_file(path, cacheDirectory / path.filename());
+		std::filesystem::copy_file(path, cacheDirectory / path.filename(), std::filesystem::copy_options::update_existing);
 	}
 
 	/* png, jpg */
 	void AssetsManager::ProcessTexture(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory)
 	{
 		/* Todo: Compress Image */
-		std::filesystem::copy_file(path, cacheDirectory / path.filename());
+		std::filesystem::copy_file(path, cacheDirectory / path.filename(), std::filesystem::copy_options::update_existing);
 	}
 
 	/* obj, fbx */
 	void AssetsManager::ProcessModel(const std::filesystem::path& path, const std::filesystem::path& cacheDirectory)
 	{
 		/* Todo: Optimize Mesh & Convert to binary */
-		std::filesystem::copy_file(path, cacheDirectory / path.filename());
+		std::filesystem::copy_file(path, cacheDirectory / path.filename(), std::filesystem::copy_options::update_existing);
 	}
 
 	FileType AssetsManager::GetFileType(const std::filesystem::path& path)

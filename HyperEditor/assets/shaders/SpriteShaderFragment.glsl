@@ -10,5 +10,10 @@ uniform sampler2D u_Textures[32];
 
 void main()
 {
-    a_FragColor = texture(u_Textures[int(v_TextureId)], v_TextureCoords) * v_SpriteColor;
+	vec4 textureColor = texture(u_Textures[int(v_TextureId)], v_TextureCoords);
+
+	if (textureColor.a < 0.1)
+		discard;
+
+    a_FragColor = textureColor * v_SpriteColor;
 }
