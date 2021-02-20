@@ -29,7 +29,7 @@ namespace HyperRendering
 			return HyperCore::CreateRef<VulkanContext>(graphicsAPI);
 		}
 
-		HP_ASSERT(false, "Unknown Graphics API!");
+		HP_ASSERT(false, "Couldn't create the render context - Unknown graphics api!");
 		return nullptr;
 	}
 }

@@ -13,7 +13,7 @@ namespace HyperRendering
 	#if defined(HP_PLATFORM_WINDOWS)
 		return HyperCore::CreateRef<HyperSystem::WindowsWindow>(windowPropsInfo);
 	#else
-		HP_ASSERT(false, "Unknown Platform!");
+		HP_ASSERT(false, "Couldn't create the window - Unknown platform!");
 	#endif
 	return nullptr;
 	}

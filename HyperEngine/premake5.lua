@@ -7,6 +7,8 @@ project "HyperEngine"
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
+	linkgroups "On"
+
 	files 
 	{ 
 		"src/**.cpp",
@@ -14,7 +16,7 @@ project "HyperEngine"
 		"vendor/stb_image/**.h",
 		"vendor/stb_image/**.cpp"
 	}
-	
+
 	defines
 	{
 		"_CRT_SECURE_NO_WARNINGS",
@@ -58,6 +60,15 @@ project "HyperEngine"
 
 	filter "system:windows"
 		systemversion "latest"
+
+	filter "system:linux"
+		systemversion "latest"
+
+		links
+		{
+			"dl",
+			"pthread"
+		}
 
 	filter "configurations:Debug"
 		defines "HP_DEBUG"

@@ -6,6 +6,8 @@ project "HyperEditor"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+	
+	linkgroups "On"
 
 	files 
 	{ 
@@ -35,11 +37,29 @@ project "HyperEditor"
 
 	links
 	{
+		"fmt",
+		"Glad",
+		"glfw",
+		"glm",
+		"ImGui",
+		"ImGuizmo",
+		"json",
+		"rttr",
+		"vulkan",
 		"HyperEngine"
 	}
 
 	filter "system:windows"
 		systemversion "latest"
+
+	filter "system:linux"
+		systemversion "latest"
+
+		links
+		{
+			"dl",
+			"pthread"
+		}
 
 	filter "configurations:Debug"
 		defines "HP_DEBUG"
