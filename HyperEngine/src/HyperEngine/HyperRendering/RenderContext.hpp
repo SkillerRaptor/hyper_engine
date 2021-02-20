@@ -37,7 +37,7 @@ namespace HyperRendering
 		HyperCore::Ref<RenderContext> Context;
 
 		bool VSync;
-		std::queue<HyperCore::Ref<HyperEvent::Event>>* EventBus;
+		HyperEvent::EventManager* EventManager;
 	};
 
 	class RenderContext

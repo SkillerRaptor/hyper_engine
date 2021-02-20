@@ -17,7 +17,10 @@ namespace HyperEvent
 			return m_KeyCode;
 		}
 
-		EVENT_CLASS_CATEGORY(KeyCategory | InputCategory)
+		virtual inline int GetCategoryFlags() const override
+		{
+			return EventCategory::KeyCategory | EventCategory::InputCategory;
+		}
 
 	protected:
 		KeyEvent(int keycode)
@@ -49,7 +52,15 @@ namespace HyperEvent
 			return ss.str().c_str();
 		}
 
-		EVENT_CLASS_TYPE(KeyPressed)
+		virtual inline EventType GetEventType() const override
+		{
+			return EventType::KeyPressed;
+		}
+
+		virtual inline const char* GetName() const override
+		{
+			return "KeyPressed";
+		}
 	};
 
 	class KeyReleasedEvent : public KeyEvent
@@ -67,7 +78,15 @@ namespace HyperEvent
 			return ss.str().c_str();
 		}
 
-		EVENT_CLASS_TYPE(KeyReleased)
+		virtual inline EventType GetEventType() const override
+		{
+			return EventType::KeyReleased;
+		}
+
+		virtual inline const char* GetName() const override
+		{
+			return "KeyReleased";
+		}
 	};
 
 	class KeyTypedEvent : public KeyEvent
@@ -85,6 +104,14 @@ namespace HyperEvent
 			return ss.str().c_str();
 		}
 
-		EVENT_CLASS_TYPE(KeyTyped)
+		virtual inline EventType GetEventType() const override
+		{
+			return EventType::KeyTyped;
+		}
+
+		virtual inline const char* GetName() const override
+		{
+			return "KeyTyped";
+		}
 	};
 }

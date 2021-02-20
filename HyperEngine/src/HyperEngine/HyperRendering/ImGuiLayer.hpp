@@ -21,7 +21,7 @@ namespace HyperRendering
 
 		virtual void OnUpdate(HyperUtilities::Timestep timeStep) override;
 
-		virtual void OnEvent(HyperEvent::Event& event) override;
+		virtual void RegisterEvents(HyperEvent::EventManager& eventManager) override;
 
 		void Start();
 		void End();

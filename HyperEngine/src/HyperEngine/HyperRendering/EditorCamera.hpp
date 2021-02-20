@@ -52,7 +52,8 @@ namespace HyperRendering
 		EditorCamera(const glm::vec3& position, const glm::vec2& clippingPlanes, const glm::vec2& viewportRect, ProjectionType projection, float movementSpeed, float fov, float fovSpeed, const glm::vec4 backgroundColor = { 0.15, 0.15f, 0.15f, 1.0f });
 
 		void OnUpdate(HyperUtilities::Timestep timeStep);
-		void OnEvent(HyperEvent::Event& event);
+
+		void RegisterEvents(HyperEvent::EventManager& eventManager);
 
 		inline void SetPosition(const glm::vec3& position)
 		{

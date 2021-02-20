@@ -71,22 +71,18 @@ namespace HyperRendering
 		m_LastMousePosition.y = HyperUtilities::Input::GetMouseY();
 	}
 
-	void EditorCamera::OnEvent(HyperEvent::Event& event)
+	void EditorCamera::RegisterEvents(HyperEvent::EventManager& eventManager)
 	{
-		if (m_RenderContext->GetSceneRecorder()->IsEditorFocused())
-		{
-			HyperEvent::EventDispatcher dispatcher(event);
+		eventManager.RegisterEventCallback<HyperEvent::MouseScrolledEvent>([&](const HyperEvent::MouseScrolledEvent& event)
+			{
+				if (!m_RenderContext->GetSceneRecorder()->IsEditorFocused())
+					return;
 
-			dispatcher.Dispatch<HyperEvent::MouseScrolledEvent>([&](HyperEvent::MouseScrolledEvent& event)
-				{
-					m_FieldOfView -= event.GetYOffset() * m_FieldOfViewSpeed;
-					m_FieldOfView = (m_FieldOfView < m_FieldOfViewSpeed) ? m_FieldOfViewSpeed : m_FieldOfView;
+				m_FieldOfView -= event.GetYOffset() * m_FieldOfViewSpeed;
+				m_FieldOfView = (m_FieldOfView < m_FieldOfViewSpeed) ? m_FieldOfViewSpeed : m_FieldOfView;
 
-					UpdateUniforms();
-
-					return false;
-				});
-		}
+				UpdateUniforms();
+			});
 	}
 
 	void EditorCamera::UpdateProjectionVectors()

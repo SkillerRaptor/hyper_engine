@@ -32,10 +32,10 @@ namespace HyperEditor
 
 		void OnAttach();
 
-		void OnEvent(HyperEvent::Event& event);
-
 		void OnUpdate(HyperUtilities::Timestep timeStep);
 		void OnRender();
+
+		void RegisterEvents(HyperEvent::EventManager& eventManager);
 
 		inline void SetTextureManager(HyperCore::Ref<HyperRendering::TextureManager>& textureManager)
 		{

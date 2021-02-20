@@ -28,7 +28,7 @@ namespace HyperCore
 		windowPropsInfo.Title = title;
 		windowPropsInfo.Width = width;
 		windowPropsInfo.Height = height;
-		windowPropsInfo.EventBus = &m_EventBus;
+		windowPropsInfo.EventManger = &m_EventManager;
 
 		m_Window = HyperRendering::Window::Construct(windowPropsInfo);
 
@@ -37,6 +37,11 @@ namespace HyperCore
 		m_LayerStack = CreateScope<HyperLayer::LayerStack>();
 		m_ImGuiLayer = new HyperRendering::ImGuiLayer();
 		PushLayer(m_ImGuiLayer);
+
+		m_EventManager.RegisterEventCallback<HyperEvent::WindowCloseEvent>([&](const HyperEvent::WindowCloseEvent& e)
+			{
+				Shutdown();
+			});
 	}
 
 	void Application::Shutdown()
@@ -63,14 +68,6 @@ namespace HyperCore
 			lastTime = currentTime;
 
 			m_Window->OnPreUpdate();
-
-			while (!m_EventBus.empty())
-			{
-				Ref<HyperEvent::Event> e = m_EventBus.front();
-				if (e->Handled) continue;
-				OnEvent(*e);
-				m_EventBus.pop();
-			}
 
 			bool validCamera = false;
 			HyperECS::TransformComponent transformComponent;
@@ -144,22 +141,5 @@ namespace HyperCore
 	void Application::SetAppIcon(const std::string& imagePath)
 	{
 		m_Window->SetAppIcon(imagePath);
-	}
-
-	void Application::OnEvent(HyperEvent::Event& event)
-	{
-		HyperEvent::EventDispatcher dispatcher(event);
-
-		dispatcher.Dispatch<HyperEvent::WindowCloseEvent>([&](HyperEvent::WindowCloseEvent& e)
-			{
-				Shutdown();
-				return false;
-			});
-
-		for (HyperLayer::OverlayLayer* overlayLayer : m_LayerStack->GetOverlayLayers())
-			overlayLayer->OnEvent(event);
-
-		for (HyperLayer::Layer* layer : m_LayerStack->GetLayers())
-			layer->OnEvent(event);
 	}
 }

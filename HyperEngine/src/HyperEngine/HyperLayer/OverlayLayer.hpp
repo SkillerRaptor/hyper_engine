@@ -29,10 +29,10 @@ namespace HyperLayer
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
 
-		virtual void OnEvent(HyperEvent::Event& event) {}
-
 		virtual void OnUpdate(HyperUtilities::Timestep timeStep) {}
 		virtual void OnRender() {}
+
+		virtual void RegisterEvents(HyperEvent::EventManager& eventManager) {}
 
 		inline void SetName(const std::string& name)
 		{

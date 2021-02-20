@@ -36,11 +36,6 @@ namespace HyperEditor
 		m_Scene->CreateEntity("Test Entity");
 	}
 
-	void EditorLayer::OnEvent(HyperEvent::Event& event)
-	{
-		m_AssetsPanel.OnEvent(event);
-	}
-
 	void EditorLayer::OnUpdate(HyperUtilities::Timestep timeStep)
 	{
 		m_AssetsPanel.OnUpdate(timeStep);
@@ -85,6 +80,11 @@ namespace HyperEditor
 		ImGui::End();
 
 		ImGui::PopStyleVar();
+	}
+
+	void EditorLayer::RegisterEvents(HyperEvent::EventManager& eventManager)
+	{
+		m_AssetsPanel.RegisterEvents(eventManager);
 	}
 
 	void EditorLayer::CreateDockingMenu()

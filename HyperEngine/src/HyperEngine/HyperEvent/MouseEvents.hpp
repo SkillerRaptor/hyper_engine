@@ -34,8 +34,20 @@ namespace HyperEvent
 			return ss.str().c_str();
 		}
 
-		EVENT_CLASS_TYPE(MouseMoved)
-		EVENT_CLASS_CATEGORY(MouseCategory | InputCategory)
+		virtual inline EventType GetEventType() const override
+		{
+			return EventType::MouseMoved;
+		}
+
+		virtual inline const char* GetName() const override
+		{
+			return "MouseMoved";
+		}
+
+		virtual inline int GetCategoryFlags() const override
+		{
+			return EventCategory::MouseCategory | EventCategory::InputCategory;
+		}
 	};
 
 	class MouseScrolledEvent : public Event
@@ -66,8 +78,20 @@ namespace HyperEvent
 			return ss.str().c_str();
 		}
 
-		EVENT_CLASS_TYPE(MouseScrolled)
-		EVENT_CLASS_CATEGORY(MouseCategory | InputCategory)
+		virtual inline EventType GetEventType() const override
+		{
+			return EventType::MouseScrolled;
+		}
+
+		virtual inline const char* GetName() const override
+		{
+			return "MouseScrolled";
+		}
+
+		virtual inline int GetCategoryFlags() const override
+		{
+			return EventCategory::MouseCategory | EventCategory::InputCategory;
+		}
 	};
 
 	class MouseButtonEvent : public Event
@@ -81,7 +105,10 @@ namespace HyperEvent
 			return m_Button;
 		}
 
-		EVENT_CLASS_CATEGORY(MouseCategory | InputCategory)
+		virtual inline int GetCategoryFlags() const override
+		{
+			return EventCategory::MouseCategory | EventCategory::InputCategory;
+		}
 
 	protected:
 		MouseButtonEvent(int button)
@@ -105,7 +132,15 @@ namespace HyperEvent
 			return ss.str().c_str();
 		}
 
-		EVENT_CLASS_TYPE(MouseButtonPressed)
+		virtual inline EventType GetEventType() const override
+		{
+			return EventType::MouseButtonPressed;
+		}
+
+		virtual inline const char* GetName() const override
+		{
+			return "MouseButtonPressed";
+		}
 	};
 
 	class MouseButtonReleasedEvent : public MouseButtonEvent
@@ -123,6 +158,14 @@ namespace HyperEvent
 			return ss.str().c_str();
 		}
 
-		EVENT_CLASS_TYPE(MouseButtonReleased)
+		virtual inline EventType GetEventType() const override
+		{
+			return EventType::MouseButtonReleased;
+		}
+
+		virtual inline const char* GetName() const override
+		{
+			return "MouseButtonReleased";
+		}
 	};
 }

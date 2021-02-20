@@ -23,43 +23,6 @@ namespace HyperEditor
 		m_CurrentDirectory = std::filesystem::current_path().append("assets").string();
 	}
 
-	void AssetsPanel::OnEvent(HyperEvent::Event& event)
-	{
-		HyperEvent::EventDispatcher dispatcher(event);
-
-		dispatcher.Dispatch<HyperEvent::MouseButtonPressedEvent>([&](HyperEvent::MouseButtonPressedEvent event)
-			{
-				if (event.GetMouseButton() == HyperUtilities::MouseCode::Button3 && m_Selected)
-				{
-					if (m_LastDirectories.empty())
-						return false;
-
-					m_CurrentDirectory = m_LastDirectories.top();
-					m_LastDirectories.pop();
-				}
-
-				return false;
-			});
-
-		dispatcher.Dispatch<HyperEvent::MouseScrolledEvent>([&](HyperEvent::MouseScrolledEvent event)
-			{
-				float yOffset = event.GetYOffset();
-				if (yOffset != 0 && m_Selected)
-				{
-					if (HyperUtilities::Input::IsKeyPressed(HyperUtilities::LeftControl))
-					{
-						m_ItemSize += yOffset * 5.0f;
-						if (m_ItemSize <= 45.0f)
-							m_ItemSize = 45.0f;
-						else if (m_ItemSize >= 280.0f)
-							m_ItemSize = 280.0f;
-					}
-				}
-
-				return false;
-			});
-	}
-
 	void AssetsPanel::OnUpdate(HyperUtilities::Timestep timeStep)
 	{
 		AssetsManager::CheckAssets();
@@ -213,5 +176,37 @@ namespace HyperEditor
 		ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
 		ImGui::PopStyleColor();
+	}
+
+	void AssetsPanel::RegisterEvents(HyperEvent::EventManager& eventManager)
+	{
+		eventManager.RegisterEventCallback<HyperEvent::MouseButtonPressedEvent>([&](const HyperEvent::MouseButtonPressedEvent& event)
+			{
+				if (event.GetMouseButton() != HyperUtilities::MouseCode::Button3 || !m_Selected)
+					return;
+
+				if (m_LastDirectories.empty())
+					return;
+
+				m_CurrentDirectory = m_LastDirectories.top();
+				m_LastDirectories.pop();
+			});
+
+		eventManager.RegisterEventCallback<HyperEvent::MouseScrolledEvent>([&](const HyperEvent::MouseScrolledEvent& event)
+			{
+				float yOffset = event.GetYOffset();
+
+				if (yOffset == 0 || !m_Selected)
+					return;
+
+				if (!HyperUtilities::Input::IsKeyPressed(HyperUtilities::LeftControl))
+					return;
+
+				m_ItemSize += yOffset * 5.0f;
+				if (m_ItemSize <= 45.0f)
+					m_ItemSize = 45.0f;
+				else if (m_ItemSize >= 280.0f)
+					m_ItemSize = 280.0f;
+			});
 	}
 }

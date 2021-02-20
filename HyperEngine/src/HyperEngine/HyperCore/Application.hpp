@@ -20,7 +20,7 @@ namespace HyperCore
 	private:
 		Ref<HyperRendering::Window> m_Window;
 
-		std::queue<Ref<HyperEvent::Event>> m_EventBus;
+		HyperEvent::EventManager m_EventManager;
 
 		Scope<HyperLayer::LayerStack> m_LayerStack;
 		HyperRendering::ImGuiLayer* m_ImGuiLayer;
@@ -43,6 +43,7 @@ namespace HyperCore
 		{
 			layer->SetRenderContext(m_Window->GetContext());
 			layer->SetScene(m_Scene);
+			layer->RegisterEvents(m_EventManager);
 			m_LayerStack->PushLayer(layer);
 		}
 
@@ -50,6 +51,7 @@ namespace HyperCore
 		{
 			overlayLayer->SetRenderContext(m_Window->GetContext());
 			overlayLayer->SetScene(m_Scene);
+			overlayLayer->RegisterEvents(m_EventManager);
 			m_LayerStack->PushLayer(overlayLayer);
 		}
 
@@ -116,8 +118,6 @@ namespace HyperCore
 	private:
 		void Init(const std::string& title, uint32_t width, uint32_t height);
 		void Shutdown();
-
-		void OnEvent(HyperEvent::Event& event);
 	};
 
 	Application* CreateApplication();

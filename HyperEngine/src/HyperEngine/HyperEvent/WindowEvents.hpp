@@ -35,8 +35,20 @@ namespace HyperEvent
 			return ss.str().c_str();
 		}
 
-		EVENT_CLASS_TYPE(WindowResize)
-		EVENT_CLASS_CATEGORY(WindowCategory)
+		virtual inline EventType GetEventType() const override
+		{
+			return EventType::WindowResize;
+		}
+
+		virtual inline const char* GetName() const override
+		{
+			return "WindowResize";
+		}
+
+		virtual inline int GetCategoryFlags() const override
+		{
+			return EventCategory::WindowCategory;
+		}
 	};
 
 	class WindowCloseEvent : public Event
@@ -44,8 +56,20 @@ namespace HyperEvent
 	public:
 		WindowCloseEvent() = default;
 
-		EVENT_CLASS_TYPE(WindowClose)
-		EVENT_CLASS_CATEGORY(WindowCategory)
+		virtual inline EventType GetEventType() const override
+		{
+			return EventType::WindowClose;
+		}
+
+		virtual inline const char* GetName() const override
+		{
+			return "WindowClose";
+		}
+
+		virtual inline int GetCategoryFlags() const override
+		{
+			return EventCategory::WindowCategory;
+		}
 	};
 
 	class WindowFocusEvent : public Event
@@ -53,8 +77,20 @@ namespace HyperEvent
 	public:
 		WindowFocusEvent() = default;
 
-		EVENT_CLASS_TYPE(WindowFocus)
-		EVENT_CLASS_CATEGORY(WindowCategory)
+		virtual inline EventType GetEventType() const override
+		{
+			return EventType::WindowFocus;
+		}
+
+		virtual inline const char* GetName() const override
+		{
+			return "WindowFocus";
+		}
+
+		virtual inline int GetCategoryFlags() const override
+		{
+			return EventCategory::WindowCategory;
+		}
 	};
 
 	class WindowLostFocusEvent : public Event
@@ -62,8 +98,20 @@ namespace HyperEvent
 	public:
 		WindowLostFocusEvent() = default;
 
-		EVENT_CLASS_TYPE(WindowLostFocus)
-		EVENT_CLASS_CATEGORY(WindowCategory)
+		virtual inline EventType GetEventType() const override
+		{
+			return EventType::MouseMoved;
+		}
+
+		virtual inline const char* GetName() const override
+		{
+			return "MouseMoved";
+		}
+
+		virtual inline int GetCategoryFlags() const override
+		{
+			return EventCategory::MouseCategory | EventCategory::InputCategory;
+		}
 	};
 
 	class WindowMovedEvent : public Event
@@ -95,7 +143,19 @@ namespace HyperEvent
 			return ss.str().c_str();
 		}
 
-		EVENT_CLASS_TYPE(WindowMoved)
-		EVENT_CLASS_CATEGORY(WindowCategory)
+		virtual inline EventType GetEventType() const override
+		{
+			return EventType::WindowMoved;
+		}
+
+		virtual inline const char* GetName() const override
+		{
+			return "WindowMoved";
+		}
+
+		virtual inline int GetCategoryFlags() const override
+		{
+			return EventCategory::WindowCategory;
+		}
 	};
 }

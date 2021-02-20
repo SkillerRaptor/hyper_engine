@@ -52,9 +52,9 @@ namespace HyperRendering
 		m_EditorCamera.OnUpdate(timeStep);
 	}
 
-	void ImGuiLayer::OnEvent(HyperEvent::Event& event)
+	void ImGuiLayer::RegisterEvents(HyperEvent::EventManager& eventManager)
 	{
-		m_EditorCamera.OnEvent(event);
+		m_EditorCamera.RegisterEvents(eventManager);
 	}
 
 	void ImGuiLayer::Start()

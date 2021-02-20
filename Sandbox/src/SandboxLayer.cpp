@@ -18,14 +18,14 @@ void SandboxLayer::OnDetach()
 {
 }
 
-void SandboxLayer::OnEvent(HyperEvent::Event& event)
-{
-}
-
 void SandboxLayer::OnUpdate(HyperUtilities::Timestep timeStep)
 {
 }
 
 void SandboxLayer::OnRender()
+{
+}
+
+void SandboxLayer::RegisterEvents(HyperEvent::EventManager& eventManager)
 {
 }

@@ -51,13 +51,13 @@ namespace HyperSystem
 
 				data.Context->OnResize(static_cast<size_t>(width), static_cast<size_t>(height));
 
-				if (data.EventBus) data.EventBus->push(std::make_shared<HyperEvent::WindowResizeEvent>(width, height));
+				data.EventManager->CallEvent<HyperEvent::WindowResizeEvent>(static_cast<unsigned int>(width), static_cast<unsigned int>(height));
 			});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 			{
 				HyperRendering::WindowDataInfo& data = *static_cast<HyperRendering::WindowDataInfo*>(glfwGetWindowUserPointer(window));
-				if (data.EventBus) data.EventBus->push(std::make_shared<HyperEvent::WindowCloseEvent>());
+				data.EventManager->CallEvent<HyperEvent::WindowCloseEvent>();
 			});
 
 		glfwSetWindowPosCallback(m_Window, [](GLFWwindow* window, int x, int y)
@@ -66,7 +66,7 @@ namespace HyperSystem
 				data.XPos = x;
 				data.YPos = y;
 
-				if (data.EventBus) data.EventBus->push(std::make_shared<HyperEvent::WindowMovedEvent>(x, y));
+				data.EventManager->CallEvent<HyperEvent::WindowMovedEvent>(static_cast<unsigned int>(x), static_cast<unsigned int>(y));
 			});
 
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -76,19 +76,19 @@ namespace HyperSystem
 				case GLFW_PRESS:
 				{
 					HyperRendering::WindowDataInfo& data = *static_cast<HyperRendering::WindowDataInfo*>(glfwGetWindowUserPointer(window));
-					if (data.EventBus) data.EventBus->push(std::make_shared<HyperEvent::KeyPressedEvent>(key, 0));
+					data.EventManager->CallEvent<HyperEvent::KeyPressedEvent>(key, 0);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
 					HyperRendering::WindowDataInfo& data = *static_cast<HyperRendering::WindowDataInfo*>(glfwGetWindowUserPointer(window));
-					if (data.EventBus) data.EventBus->push(std::make_shared<HyperEvent::KeyReleasedEvent>(key));
+					data.EventManager->CallEvent<HyperEvent::KeyReleasedEvent>(key);
 					break;
 				}
 				case GLFW_REPEAT:
 				{
 					HyperRendering::WindowDataInfo& data = *static_cast<HyperRendering::WindowDataInfo*>(glfwGetWindowUserPointer(window));
-					if (data.EventBus) data.EventBus->push(std::make_shared<HyperEvent::KeyPressedEvent>(key, 1));
+					data.EventManager->CallEvent<HyperEvent::KeyPressedEvent>(key, 1);
 					break;
 				}
 				}
@@ -101,13 +101,13 @@ namespace HyperSystem
 				case GLFW_PRESS:
 				{
 					HyperRendering::WindowDataInfo& data = *static_cast<HyperRendering::WindowDataInfo*>(glfwGetWindowUserPointer(window));
-					if (data.EventBus) data.EventBus->push(std::make_shared<HyperEvent::MouseButtonPressedEvent>(button));
+					data.EventManager->CallEvent<HyperEvent::MouseButtonPressedEvent>(button);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
 					HyperRendering::WindowDataInfo& data = *static_cast<HyperRendering::WindowDataInfo*>(glfwGetWindowUserPointer(window));
-					if (data.EventBus) data.EventBus->push(std::make_shared<HyperEvent::MouseButtonReleasedEvent>(button));
+					data.EventManager->CallEvent<HyperEvent::MouseButtonReleasedEvent>(button);
 					break;
 				}
 				}
@@ -116,13 +116,13 @@ namespace HyperSystem
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 			{
 				HyperRendering::WindowDataInfo& data = *static_cast<HyperRendering::WindowDataInfo*>(glfwGetWindowUserPointer(window));
-				if (data.EventBus) data.EventBus->push(std::make_shared<HyperEvent::MouseScrolledEvent>((float)xOffset, (float)yOffset));
+				data.EventManager->CallEvent<HyperEvent::MouseScrolledEvent>((float)xOffset, (float)yOffset);
 			});
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
 			{
 				HyperRendering::WindowDataInfo& data = *static_cast<HyperRendering::WindowDataInfo*>(glfwGetWindowUserPointer(window));
-				if (data.EventBus) data.EventBus->push(std::make_shared<HyperEvent::MouseMovedEvent>((float)xPos, (float)yPos));
+				data.EventManager->CallEvent<HyperEvent::MouseMovedEvent>((float)xPos, (float)yPos);
 			});
 	}
 
