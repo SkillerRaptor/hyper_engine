@@ -5,7 +5,7 @@
 
 #include "HyperUtilities/AssetsManager.hpp"
 #include "HyperUtilities/FontAwesome.hpp"
-#include "HyperUtilities/PanelUtilities.hpp"7
+#include "HyperUtilities/PanelUtilities.hpp"
 
 namespace HyperEditor
 {
