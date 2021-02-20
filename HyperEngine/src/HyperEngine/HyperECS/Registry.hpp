@@ -102,18 +102,11 @@ namespace HyperECS
 		std::vector<Entity> Each()
 		{
 			std::vector<Entity> entities;
-			for (const auto& entity : m_Entities)
+			for (const Entity& entity : m_Entities)
 			{
 				bool shouldSkip = false;
 
-				([&shouldSkip, &entity, this](auto* v)
-					{
-						using C = decltype(*v);
-						if (shouldSkip)
-							return;
-						if (!HasComponent<C>(entity))
-							shouldSkip = true;
-					} ((T*)nullptr), ...);
+				(IterateEntities(shouldSkip, entity, ((T*) nullptr)), ...);
 
 				if (shouldSkip)
 					continue;
@@ -142,5 +135,15 @@ namespace HyperECS
 		Entity GenerateIdentifier();
 		Entity RecycleIdentifier();
 		PoolData* FindPool(uint64_t id);
+
+		template <class T>
+		void IterateEntities(bool& shouldSkip, const Entity& entity, T* v)
+		{
+			using C = decltype(*v);
+			if (shouldSkip)
+				return;
+			if (!HasComponent<C>(entity))
+				shouldSkip = true;
+		}
 	};
 }
