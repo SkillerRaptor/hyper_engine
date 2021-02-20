@@ -43,7 +43,7 @@ namespace HyperEditor
 
 	void EditorLayer::OnUpdate(HyperUtilities::Timestep timeStep)
 	{
-		m_AssetsPanel.OnUpdate();
+		m_AssetsPanel.OnUpdate(timeStep);
 	}
 
 	void EditorLayer::OnRender()

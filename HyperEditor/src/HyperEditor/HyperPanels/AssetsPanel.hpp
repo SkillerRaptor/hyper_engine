@@ -23,6 +23,9 @@ namespace HyperEditor
 		std::string m_CurrentDirectory = "";
 		std::string m_SelectedFile = "";
 
+		float m_PastTime = 0;
+
+		static float m_ItemSize;
 		static std::stack<std::string> m_LastDirectories;
 
 	public:
@@ -33,7 +36,7 @@ namespace HyperEditor
 
 		void OnEvent(HyperEvent::Event& event);
 
-		void OnUpdate();
+		void OnUpdate(HyperUtilities::Timestep timeStep);
 		void OnRender();
 
 		inline void SetTextureManager(HyperCore::Ref<HyperRendering::TextureManager>& textureManager)
