@@ -20,7 +20,7 @@ namespace HyperEditor
 
 		void OnRender();
 
-		inline void SceneHierarchyPanel::SetScene(const HyperCore::Ref<HyperRendering::Scene>& scene)
+		inline void SetScene(const HyperCore::Ref<HyperRendering::Scene>& scene)
 		{
 			m_Scene = scene;
 		}

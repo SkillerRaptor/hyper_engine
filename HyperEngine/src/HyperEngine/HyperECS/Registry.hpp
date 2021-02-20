@@ -106,7 +106,7 @@ namespace HyperECS
 			{
 				bool shouldSkip = false;
 
-				([&](auto* v)
+				([&shouldSkip](auto* v)
 					{
 						using C = decltype(*v);
 						if (shouldSkip)
