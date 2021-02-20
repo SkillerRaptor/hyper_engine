@@ -20,8 +20,10 @@ namespace HyperEditor
 
 		void OnRender();
 
-		void SetScene(const HyperCore::Ref<HyperRendering::Scene>& scene);
-		const HyperCore::Ref<HyperRendering::Scene>& GetScene() const;
+		inline void SceneHierarchyPanel::SetScene(const HyperCore::Ref<HyperRendering::Scene>& scene)
+		{
+			m_Scene = scene;
+		}
 
 	private:
 		void DrawEntityNode(HyperECS::Entity entity);

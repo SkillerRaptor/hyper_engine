@@ -37,7 +37,7 @@ namespace HyperEditor
 
 		void RegisterEvents(HyperEvent::EventManager& eventManager);
 
-		inline void SetTextureManager(HyperCore::Ref<HyperRendering::TextureManager>& textureManager)
+		inline void SetTextureManager(const HyperCore::Ref<HyperRendering::TextureManager>& textureManager)
 		{
 			m_TextureManager = textureManager;
 		}

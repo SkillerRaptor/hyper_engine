@@ -340,14 +340,4 @@ namespace HyperEditor
 			ImGui::EndPopup();
 		}
 	}
-
-	void SceneHierarchyPanel::SetScene(const HyperCore::Ref<HyperRendering::Scene>& scene)
-	{
-		m_Scene = scene;
-	}
-
-	const HyperCore::Ref<HyperRendering::Scene>& SceneHierarchyPanel::GetScene() const
-	{
-		return m_Scene;
-	}
 }
