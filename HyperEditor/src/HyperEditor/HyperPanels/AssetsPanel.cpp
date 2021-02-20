@@ -5,6 +5,7 @@
 
 #include "HyperUtilities/AssetsManager.hpp"
 #include "HyperUtilities/FontAwesome.hpp"
+#include "HyperUtilities/PanelUtilities.hpp"7
 
 namespace HyperEditor
 {
@@ -42,9 +43,6 @@ namespace HyperEditor
 
 		dispatcher.Dispatch<HyperEvent::MouseScrolledEvent>([&](HyperEvent::MouseScrolledEvent event)
 			{
-				/* -1 -> Smaller */
-				/* 1 -> Bigger */
-				
 				float yOffset = event.GetYOffset();
 				if (yOffset != 0 && m_Selected)
 				{
@@ -53,6 +51,8 @@ namespace HyperEditor
 						m_ItemSize += yOffset * 5.0f;
 						if (m_ItemSize <= 45.0f)
 							m_ItemSize = 45.0f;
+						else if (m_ItemSize >= 280.0f)
+							m_ItemSize = 280.0f;
 					}
 				}
 
@@ -63,16 +63,6 @@ namespace HyperEditor
 	void AssetsPanel::OnUpdate(HyperUtilities::Timestep timeStep)
 	{
 		AssetsManager::CheckAssets();
-	
-		if (!m_SelectedFile.empty())
-		{
-			m_PastTime += static_cast<float>(10.0f * timeStep);
-			if (m_PastTime >= 3.0f)
-			{
-				m_SelectedFile = "";
-				m_PastTime = 0;
-			}
-		}
 	}
 
 	void AssetsPanel::OnRender()
@@ -106,66 +96,70 @@ namespace HyperEditor
 
 				ImGui::PushID(index++);
 
+				HyperRendering::TextureHandle textureHandle{ 0 };
 				switch (fileData.Type)
 				{
 				case FileType::FOLDER:
+					textureHandle = m_FolderTexture;
+					break;
+				case FileType::FILE:
+					textureHandle = m_FileTexture;
+					break;
+				case FileType::GLSL: case FileType::HLSL:
+					textureHandle = m_ShaderTexture;
+					break;
+				case FileType::PNG: case FileType::JPG:
+					textureHandle = m_ImageTexture;
+					break;
+				case FileType::OBJ: case FileType::FBX: case FileType::GLTF:
+					textureHandle = m_ModelTexture;
+					break;
+				default:
+					break;
+				}
+
+				ImGui::ImageButton(m_TextureManager->GetImageTextureId(textureHandle), { m_ItemSize, m_ItemSize }, { 0, 1 }, { 1, 0 }, 0, buttonBackground);
+
+				if (ImGui::IsItemHovered())
 				{
-					if (ImGui::ImageButton(m_TextureManager->GetImageTextureId(m_FolderTexture), { m_ItemSize, m_ItemSize }, { 0, 1 }, { 1, 0 }, 0, buttonBackground))
+					if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 					{
-						if (m_SelectedFile == filePath)
+						if (fileData.Type == FileType::FOLDER)
 						{
 							m_LastDirectories.push(m_CurrentDirectory);
 							m_CurrentDirectory = filePath;
 						}
-
-						m_SelectedFile = filePath;
-					}
-					break;
-				}
-
-				case FileType::FILE:
-				{
-					if (ImGui::ImageButton(m_TextureManager->GetImageTextureId(m_FileTexture), { m_ItemSize, m_ItemSize }, { 0, 1 }, { 1, 0 }, 0, buttonBackground))
-					{
-						if (m_SelectedFile == filePath)
+						else
 						{
+							/* Todo: Open file */
 						}
-
+					}
+					else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+					{
 						m_SelectedFile = filePath;
 					}
-					break;
+					else if (ImGui::IsMouseClicked(1) && ImGui::IsItemHovered())
+					{
+						ImGui::OpenPopup("##AssetBrowserPopup");
+					}
+					else if (ImGui::IsItemHovered())
+					{
+						ImGui::BeginTooltip();
+						ImGui::Text(filePath.c_str());
+						ImGui::EndTooltip();
+					}
 				}
 
+				switch (fileData.Type)
+				{
 				case FileType::GLSL: case FileType::HLSL:
-				{
-					if (ImGui::ImageButton(m_TextureManager->GetImageTextureId(m_ShaderTexture), { m_ItemSize, m_ItemSize }, { 0, 1 }, { 1, 0 }, 0, buttonBackground))
-					{
-						if (m_SelectedFile == filePath)
-						{
-						}
-
-						m_SelectedFile = filePath;
-					}
-
 					if (ImGui::BeginDragDropSource())
 					{
 						ImGui::SetDragDropPayload("_SHADER", nullptr, 0);
 						ImGui::EndDragDropSource();
 					}
 					break;
-				}
-
 				case FileType::PNG: case FileType::JPG:
-				{
-					if (ImGui::ImageButton(m_TextureManager->GetImageTextureId(m_ImageTexture), { m_ItemSize, m_ItemSize }, { 0, 1 }, { 1, 0 }, 0, buttonBackground))
-					{
-						if (m_SelectedFile == filePath)
-						{
-						}
-
-						m_SelectedFile = filePath;
-					}
-
 					if (ImGui::BeginDragDropSource())
 					{
 						ImGui::SetDragDropPayload("_TEXTURE", &filePath, sizeof(filePath));
@@ -173,26 +167,37 @@ namespace HyperEditor
 						ImGui::EndDragDropSource();
 					}
 					break;
-				}
 
 				case FileType::OBJ: case FileType::FBX: case FileType::GLTF:
-				{
-					if (ImGui::ImageButton(m_TextureManager->GetImageTextureId(m_ModelTexture), { m_ItemSize, m_ItemSize }, { 0, 1 }, { 1, 0 }, 0, buttonBackground))
-					{
-						if (m_SelectedFile == filePath)
-						{
-						}
-
-						m_SelectedFile = filePath;
-					}
-
 					if (ImGui::BeginDragDropSource())
 					{
 						ImGui::SetDragDropPayload("_MODEL", nullptr, 0);
 						ImGui::EndDragDropSource();
 					}
 					break;
+				default:
+					break;
 				}
+
+				if (ImGui::BeginPopup("##AssetBrowserPopup"))
+				{
+					if (ImGui::MenuItem(ICON_FK_FOLDER_OPEN " Open File"))
+					{
+						ImGui::CloseCurrentPopup();
+					}
+
+					if (ImGui::IsItemHovered())
+						PanelUtilities::DrawSelection();
+
+					if (ImGui::MenuItem(ICON_FK_TRASH " Delete File"))
+					{
+						ImGui::CloseCurrentPopup();
+					}
+
+					if (ImGui::IsItemHovered())
+						PanelUtilities::DrawSelection();
+
+					ImGui::EndPopup();
 				}
 
 				ImGui::TextWrapped(fileData.Name.c_str());
