@@ -70,6 +70,11 @@ project "HyperEngine"
 			"pthread"
 		}
 
+		buildoptions
+		{
+			"-lstdc++fs"
+		}
+
 	filter "configurations:Debug"
 		defines "HP_DEBUG"
 		runtime "Debug"
