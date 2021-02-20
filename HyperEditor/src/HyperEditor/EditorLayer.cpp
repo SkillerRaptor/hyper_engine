@@ -28,10 +28,10 @@ namespace HyperEditor
 		ImFontConfig config{};
 		config.MergeMode = true;
 		static const ImWchar icon_ranges[] = { 0xf000, 0xf307, 0 };
-		io.Fonts->AddFontFromFileTTF("assets/fonts/fontawesome-webfont.ttf", 14.0f, &config, icon_ranges);
+		io.Fonts->AddFontFromFileTTF("./assets/fonts/fontawesome-webfont.ttf", 14.0f, &config, icon_ranges);
 
 		/* Loading Shaders */
-		m_SpriteShader = m_RenderContext->GetShaderManager()->CreateShader("assets/shaders/SpriteShaderVertex.glsl", "assets/shaders/SpriteShaderFragment.glsl");
+		m_SpriteShader = m_RenderContext->GetShaderManager()->CreateShader("./assets/shaders/SpriteShaderVertex.glsl", "./assets/shaders/SpriteShaderFragment.glsl");
 	
 		m_Scene->CreateEntity("Test Entity");
 	}

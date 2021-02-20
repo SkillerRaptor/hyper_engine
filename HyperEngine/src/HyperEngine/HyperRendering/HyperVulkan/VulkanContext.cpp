@@ -22,6 +22,7 @@ namespace HyperRendering
 
 	void VulkanContext::Init()
 	{
+	#if defined(HP_SUPPORT_VULKAN)
 		VkApplicationInfo applicationInfo{};
 		applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		applicationInfo.pApplicationName = "HyperEngine";
@@ -55,14 +56,18 @@ namespace HyperRendering
 		m_ValidationLayer.SetupValidationDebugger();
 
 		HP_ASSERT(glfwCreateWindowSurface(m_Instance, m_Window, nullptr, &m_Surface) == VK_SUCCESS, "Failed to create Vulkan window surface!");
+
+	#endif
 	}
 
 	void VulkanContext::Shutdown()
 	{
+	#if defined(HP_SUPPORT_VULKAN)
 		m_ValidationLayer.Shutdown();
 
 		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
 		vkDestroyInstance(m_Instance, nullptr);
+	#endif
 	}
 
 	void VulkanContext::OnResize(size_t width, size_t height)

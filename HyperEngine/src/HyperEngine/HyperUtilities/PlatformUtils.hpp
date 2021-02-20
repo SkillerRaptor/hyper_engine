@@ -12,6 +12,8 @@ namespace HyperUtilities
 		static HyperCore::Ref<PlatformUtils> m_Instance;
 
 	public:
+		virtual ~PlatformUtils() = default;
+
 		virtual std::optional<std::string> SaveFile(const char* filter) = 0;
 		virtual std::optional<std::string> OpenFile(const char* filter) = 0;
 

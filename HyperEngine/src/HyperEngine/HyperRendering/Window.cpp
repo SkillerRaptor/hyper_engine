@@ -4,6 +4,8 @@
 
 #if defined(HP_PLATFORM_WINDOWS)
 	#include "HyperSystem/HyperWindows/WindowsWindow.hpp"
+#elif defined(HP_PLATFORM_LINUX)
+	#include "HyperSystem/HyperLinux/LinuxWindow.hpp"
 #endif
 
 namespace HyperRendering
@@ -12,6 +14,8 @@ namespace HyperRendering
 	{
 	#if defined(HP_PLATFORM_WINDOWS)
 		return HyperCore::CreateRef<HyperSystem::WindowsWindow>(windowPropsInfo);
+	#elif defined(HP_PLATFORM_LINUX)
+		return HyperCore::CreateRef<HyperSystem::LinuxWindow>(windowPropsInfo);
 	#else
 		HP_ASSERT(false, "Couldn't create the window - Unknown platform!");
 	#endif

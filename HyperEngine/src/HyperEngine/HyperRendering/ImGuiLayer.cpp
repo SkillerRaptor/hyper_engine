@@ -28,8 +28,8 @@ namespace HyperRendering
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-		io.Fonts->AddFontFromFileTTF("assets/fonts/Ruda-Regular.ttf", 15.0f);
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/Ruda-Regular.ttf", 15.0f);
+		io.Fonts->AddFontFromFileTTF("./assets/fonts/Ruda-Regular.ttf", 15.0f);
+		io.FontDefault = io.Fonts->AddFontFromFileTTF("./assets/fonts/Ruda-Regular.ttf", 15.0f);
 
 		ImGui::StyleColorsDark();
 

@@ -1,8 +1,9 @@
 #pragma once
 
 #include <chrono>
-#include <filesystem>
 #include <unordered_map>
+
+#include <HyperEngine.hpp>
 
 namespace HyperEditor
 {

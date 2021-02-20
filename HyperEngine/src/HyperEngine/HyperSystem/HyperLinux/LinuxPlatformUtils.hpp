@@ -4,11 +4,11 @@
 
 namespace HyperSystem
 {
-	class WindowsPlatformUtils : public HyperUtilities::PlatformUtils
+	class LinuxPlatformUtils : public HyperUtilities::PlatformUtils
 	{
 	public:
-		WindowsPlatformUtils() = default;
-		~WindowsPlatformUtils() = default;
+		LinuxPlatformUtils() = default;
+		~LinuxPlatformUtils() = default;
 
 		virtual std::optional<std::string> SaveFile(const char* filter) override;
 		virtual std::optional<std::string> OpenFile(const char* filter) override;

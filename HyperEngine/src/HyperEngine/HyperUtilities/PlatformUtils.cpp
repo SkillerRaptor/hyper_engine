@@ -2,6 +2,8 @@
 
 #if defined(HP_PLATFORM_WINDOWS)
 	#include "HyperSystem/HyperWindows/WindowsPlatformUtils.hpp"
+#elif defined(HP_PLATFORM_LINUX)
+	#include "HyperSystem/HyperLinux/LinuxPlatformUtils.hpp"
 #endif
 
 namespace HyperUtilities
@@ -14,6 +16,8 @@ namespace HyperUtilities
 		{
 		#if defined(HP_PLATFORM_WINDOWS)
 			m_Instance = HyperCore::CreateRef<HyperSystem::WindowsPlatformUtils>();
+		#elif defined(HP_PLATFORM_LINUX)
+			m_Instance = HyperCore::CreateRef<HyperSystem::LinuxPlatformUtils>();
 		#else
 			HP_ASSERT(false, "Unknown Platform!");
 		#endif

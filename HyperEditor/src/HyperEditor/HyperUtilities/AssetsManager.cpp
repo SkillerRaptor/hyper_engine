@@ -1,7 +1,5 @@
 #include "HyperUtilities/AssetsManager.hpp"
 
-#include <HyperEngine.hpp>
-
 #include <unordered_map>
 
 namespace HyperEditor

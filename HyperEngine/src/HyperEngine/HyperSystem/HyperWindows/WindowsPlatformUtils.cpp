@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-#ifdef HP_PLATFORM_WINDOWS
+#if defined(HP_PLATFORM_WINDOWS)
 	#define GLFW_EXPOSE_NATIVE_WIN32
 	#include <GLFW/glfw3native.h>
 	#include <Windows.h>
