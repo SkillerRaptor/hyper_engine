@@ -23,6 +23,9 @@ target_include_directories(HyperEngine PRIVATE
         "${CMAKE_SOURCE_DIR}/vendor/stb_image/include/"
         )
 
+set_target_properties(HyperEngine PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin/HyperEngine/Debug/")
+set_target_properties(HyperEngine PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin/HyperEngine/Release/")
+
 message(STATUS "Searching for Vulkan")
 find_package(Vulkan)
 
