@@ -93,24 +93,4 @@ namespace HyperUtilities
 	{
 		while (messageId != s_CurrentMessage);
 	}
-
-	void Logger::SetName(const std::string& name)
-	{
-		m_Name = name;
-	}
-
-	const std::string& Logger::GetName() const
-	{
-		return m_Name;
-	}
-
-	void Logger::SetLevel(Level level)
-	{
-		m_Level = level;
-	}
-
-	Logger::Level Logger::GetLevel() const
-	{
-		return m_Level;
-	}
 }

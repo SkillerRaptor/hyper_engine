@@ -18,8 +18,15 @@ namespace HyperUtilities
 
 		static void WaitForMessage(size_t messageId);
 
-		static const std::shared_ptr<Logger> GetCoreLogger() { return m_CoreLogger; }
-		static const std::shared_ptr<Logger> GetClientLogger() { return m_ClientLogger; }
+		static inline const std::shared_ptr<Logger> GetCoreLogger()
+		{
+			return m_CoreLogger;
+		}
+
+		static inline const std::shared_ptr<Logger> GetClientLogger()
+		{
+			return m_ClientLogger;
+		}
 	};
 }
 

@@ -77,11 +77,25 @@ namespace HyperUtilities
 
 		static void WaitForMessage(size_t messageId);
 
-		void SetName(const std::string& name);
-		const std::string& GetName() const;
-
-		void SetLevel(Level level);
-		Level GetLevel() const;
+		inline void SetName(const std::string& name)
+		{
+			m_Name = name;
+		}
+		
+		inline const std::string& GetName() const
+		{
+			return m_Name;
+		}
+		
+		inline void SetLevel(Level level)
+		{
+			m_Level = level;
+		}
+		
+		inline Level GetLevel() const
+		{
+			return m_Level;
+		}
 
 	private:
 		static const char* GetLevelName(Level level);
