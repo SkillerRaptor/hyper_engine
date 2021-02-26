@@ -1,6 +1,10 @@
 #pragma once
 
 #include "HyperCore/Core.hpp"
+
+#ifdef HP_PLATFORM_LINUX
+
+#include "HyperCore/Core.hpp"
 #include "HyperRendering/Window.hpp"
 
 struct GLFWwindow;
@@ -46,3 +50,5 @@ namespace HyperSystem
 		virtual double GetTime() override;
 	};
 }
+
+#endif

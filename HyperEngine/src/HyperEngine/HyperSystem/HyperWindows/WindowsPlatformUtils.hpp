@@ -1,5 +1,9 @@
 #pragma once
 
+#include "HyperCore/Core.hpp"
+
+#ifdef HP_PLATFORM_WINDOWS
+
 #include "HyperUtilities/PlatformUtils.hpp"
 
 namespace HyperSystem
@@ -14,3 +18,5 @@ namespace HyperSystem
 		virtual std::optional<std::string> OpenFile(const char* filter) override;
 	};
 }
+
+#endif

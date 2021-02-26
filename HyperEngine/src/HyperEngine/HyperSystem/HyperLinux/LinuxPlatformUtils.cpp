@@ -1,5 +1,7 @@
 #include "HyperSystem/HyperLinux/LinuxPlatformUtils.hpp"
 
+#ifdef HP_PLATFORM_LINUX
+
 #include <GLFW/glfw3.h>
 
 #include "HyperCore/Application.hpp"
@@ -22,3 +24,5 @@ namespace HyperSystem
 		return std::nullopt;
 	}
 }
+
+#endif

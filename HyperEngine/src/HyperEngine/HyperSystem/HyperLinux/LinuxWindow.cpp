@@ -1,5 +1,7 @@
 #include "HyperSystem/HyperLinux/LinuxWindow.hpp"
 
+#ifdef HP_PLATFORM_LINUX
+
 #include <GLFW/glfw3.h>
 
 #include "HyperEvent/KeyEvents.hpp"
@@ -229,3 +231,5 @@ namespace HyperSystem
 		return glfwGetTime();
 	}
 }
+
+#endif

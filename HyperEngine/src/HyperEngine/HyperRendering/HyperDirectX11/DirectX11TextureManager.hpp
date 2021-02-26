@@ -1,5 +1,7 @@
 #pragma once
 
+#include "HyperCore/Core.hpp"
+
 #ifdef HP_PLATFORM_WINDOWS
 
 namespace HyperRendering
