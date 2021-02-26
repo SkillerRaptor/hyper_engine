@@ -16,6 +16,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS}  /std:c++17 /W4 /arch:AVX2 /fp:fast /MP /DNOMINMAX")
 endif()
 
+# Definitions
+add_definitions(_CRT_SECURE_NO_WARNINGS GLFW_INCLUDE_NONE)
+
 # Dependencies
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 

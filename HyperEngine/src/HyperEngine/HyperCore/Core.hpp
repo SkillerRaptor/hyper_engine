@@ -88,10 +88,6 @@
 	#endif
 #endif
 
-/* Activate Vulkan */
-#define HP_SUPPORT_VULKAN
-#undef HP_SUPPORT_VULKAN
-
 /* Common Macros */
 #define HP_EXPAND_MACRO(x) x
 #define HP_STRINGIFY_MACRO(x) #x
