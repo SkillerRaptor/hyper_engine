@@ -24,7 +24,9 @@ jobs:
       run: sudo apt install xorg-dev
 
     - name: Generate Project Files
-      run: sh ./Scripts/Linux-GenProjects.sh
+      run: cmake -S . -B build
 
     - name: Build Solution
-      run: make
+      run: |
+        cd build
+        make
