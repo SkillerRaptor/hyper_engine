@@ -1,5 +1,7 @@
 #include "HyperRendering/HyperVulkan/VulkanContext.hpp"
 
+#ifdef HP_SUPPORT_VULKAN
+
 #include <vector>
 
 #include "HyperRendering/HyperVulkan/VulkanRenderer2D.hpp"
@@ -51,7 +53,7 @@ namespace HyperRendering
 		VkDebugUtilsMessengerCreateInfoEXT debugInstanceMessengerCreateInfo{};
 		m_ValidationLayer.SetupInstanceDebugger(instanceCreateInfo, debugInstanceMessengerCreateInfo);
 
-		HP_ASSERT(vkCreateInstance(&instanceCreateInfo, nullptr, &m_Instance) == VK_SUCCESS, "Failed to create Vulkan înstance!");
+		HP_ASSERT(vkCreateInstance(&instanceCreateInfo, nullptr, &m_Instance) == VK_SUCCESS, "Failed to create Vulkan ï¿½nstance!");
 
 		m_ValidationLayer.SetupValidationDebugger();
 
@@ -86,3 +88,5 @@ namespace HyperRendering
 	{
 	}
 }
+
+#endif

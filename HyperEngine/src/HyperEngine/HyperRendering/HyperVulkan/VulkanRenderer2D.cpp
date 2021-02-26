@@ -1,5 +1,7 @@
 #include "HyperRendering/HyperVulkan/VulkanRenderer2D.hpp"
 
+#ifdef HP_SUPPORT_VULKAN
+
 #include "HyperCore/Core.hpp"
 
 namespace HyperRendering
@@ -13,3 +15,5 @@ namespace HyperRendering
 	{
 	}
 }
+
+#endif

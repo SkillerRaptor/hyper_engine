@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef HP_SUPPORT_VULKAN
+
 namespace HyperRendering
 {
 	class VulkanShaderManager
@@ -11,3 +13,5 @@ namespace HyperRendering
 		~VulkanShaderManager();
 	};
 }
+
+#endif

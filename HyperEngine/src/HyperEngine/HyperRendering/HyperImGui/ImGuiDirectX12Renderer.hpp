@@ -1,4 +1,3 @@
-#ifdef HP_PLATFORM_WINDOWS
 // dear imgui: Renderer for DirectX12
 // This needs to be used along with a Platform Binding (e.g. Win32)
 
@@ -16,6 +15,9 @@
 // https://github.com/ocornut/imgui
 
 #pragma once
+
+#ifdef HP_PLATFORM_WINDOWS
+
 #include "imgui.h"      // IMGUI_IMPL_API
 
 enum DXGI_FORMAT;

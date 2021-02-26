@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef HP_PLATFORM_WINDOWS
+
 #include "HyperRendering/RenderContext.hpp"
 
 namespace HyperRendering
@@ -20,3 +22,5 @@ namespace HyperRendering
 		virtual void OnRender() override;
 	};
 }
+
+#endif

@@ -30,6 +30,7 @@ target_link_libraries(HyperEngine PUBLIC fmt glad glfw glm imgui ImGuizmo nlohma
 
 if(NOT Vulkan_FOUND)
     message(STATUS "Vulkan not found.")
+    target_compile_definitions(HyperEngine PUBLIC GLFW_INCLUDE_NONE)
 else()
     message(STATUS "Vulkan found.")
     target_link_libraries(HyperEngine PUBLIC Vulkan::Vulkan)

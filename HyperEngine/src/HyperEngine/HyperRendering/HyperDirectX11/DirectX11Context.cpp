@@ -1,5 +1,7 @@
 #include "HyperRendering/HyperDirectX11/DirectX11Context.hpp"
 
+#ifdef HP_PLATFORM_WINDOWS
+
 #include <GLFW/glfw3.h>
 
 #include "HyperRendering/HyperDirectX11/DirectX11Renderer2D.hpp"
@@ -43,3 +45,5 @@ namespace HyperRendering
 	{
 	}
 }
+
+#endif

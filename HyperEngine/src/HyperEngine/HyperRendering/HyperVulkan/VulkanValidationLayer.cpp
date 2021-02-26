@@ -1,15 +1,14 @@
 #include "HyperRendering/HyperVulkan/VulkanValidationLayer.hpp"
 
-#include <iostream>
+#ifdef HP_SUPPORT_VULKAN
+
 #include <cstring>
 
 #include "HyperCore/Core.hpp"
 
-#if defined(HP_SUPPORT_VULKAN)
 	VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
 	VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
 	void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
-#endif
 
 namespace HyperRendering
 {
@@ -24,7 +23,6 @@ namespace HyperRendering
 
 	void VulkanValidationLayer::SetupInstanceDebugger(VkInstanceCreateInfo& instanceCreateInfo, VkDebugUtilsMessengerCreateInfoEXT& debugInstanceMessengerCreateInfo)
 	{
-	#if defined(HP_SUPPORT_VULKAN)
 		if (!m_ValidationLayerInfo.ValidationLayersEnabled)
 			return;
 		instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayerInfo.ValidationLayers.size());
@@ -35,12 +33,10 @@ namespace HyperRendering
 		debugInstanceMessengerCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 		debugInstanceMessengerCreateInfo.pfnUserCallback = DebugCallback;
 		instanceCreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugInstanceMessengerCreateInfo;
-	#endif
 	}
 
 	void VulkanValidationLayer::SetupValidationDebugger()
 	{
-	#if defined(HP_SUPPORT_VULKAN)
 		if (!m_ValidationLayerInfo.ValidationLayersEnabled)
 			return;
 
@@ -52,20 +48,16 @@ namespace HyperRendering
 		debugValidationMessengerCreateInfo.pUserData = nullptr;
 
 		HP_ASSERT(CreateDebugUtilsMessengerEXT(m_Instance, &debugValidationMessengerCreateInfo, nullptr, &m_ValidationLayerInfo.DebugMessenger) == VK_SUCCESS, "Failed to setup vulkan debug messenger!");
-	#endif
 	}
 
 	void VulkanValidationLayer::Shutdown()
 	{
-	#if defined(HP_SUPPORT_VULKAN)
 		if (m_ValidationLayerInfo.ValidationLayersEnabled)
 			DestroyDebugUtilsMessengerEXT(m_Instance, m_ValidationLayerInfo.DebugMessenger, nullptr);
-	#endif
 	}
 
 	bool VulkanValidationLayer::CheckValidationLayerSupport()
 	{
-	#if defined(HP_SUPPORT_VULKAN)
 		uint32_t layerCount;
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
@@ -86,15 +78,13 @@ namespace HyperRendering
 			if (!layerFound)
 				return false;
 		}
-	#endif
 		return true;
 	}
 }
 
-#if defined(HP_SUPPORT_VULKAN)
 VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
 {
-	HP_CORE_ERROR("Vulkan validiation layer: {}", pCallbackData->pMessage);
+	HP_CORE_ERROR("Vulkan validation layer: {}", pCallbackData->pMessage);
 	return VK_FALSE;
 }
 
@@ -111,4 +101,5 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 	if (func != nullptr)
 		func(instance, debugMessenger, pAllocator);
 }
+
 #endif

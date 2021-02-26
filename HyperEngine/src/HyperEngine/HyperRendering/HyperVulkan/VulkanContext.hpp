@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef HP_SUPPORT_VULKAN
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -32,3 +34,5 @@ namespace HyperRendering
 		virtual void OnRender() override;
 	};
 }
+
+#endif

@@ -1,5 +1,7 @@
 #include "HyperRendering/HyperDirectX12/DirectX12ShaderManager.hpp"
 
+#ifdef HP_PLATFORM_WINDOWS
+
 #include "HyperCore/Core.hpp"
 
 namespace HyperRendering
@@ -13,3 +15,5 @@ namespace HyperRendering
 	{
 	}
 }
+
+#endif

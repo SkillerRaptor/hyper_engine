@@ -1,4 +1,3 @@
-#ifdef HP_SUPPORT_VULKAN
 // dear imgui: Renderer for Vulkan
 // This needs to be used along with a Platform Binding (e.g. GLFW, SDL, Win32, custom..)
 
@@ -23,6 +22,9 @@
 // Read comments in imgui_impl_vulkan.h.
 
 #pragma once
+
+#ifdef HP_SUPPORT_VULKAN
+
 #include "imgui.h"      // IMGUI_IMPL_API
 #include <vulkan/vulkan.h>
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef HP_SUPPORT_VULKAN
+
 namespace HyperRendering
 {
 	class VulkanRenderer2D
@@ -11,3 +13,5 @@ namespace HyperRendering
 		~VulkanRenderer2D();
 	};
 }
+
+#endif

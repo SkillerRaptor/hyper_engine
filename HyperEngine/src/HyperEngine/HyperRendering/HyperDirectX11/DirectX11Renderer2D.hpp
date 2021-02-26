@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef HP_PLATFORM_WINDOWS
+
 namespace HyperRendering
 {
 	class DirectX11Renderer2D
@@ -11,3 +13,5 @@ namespace HyperRendering
 		~DirectX11Renderer2D();
 	};
 }
+
+#endif
