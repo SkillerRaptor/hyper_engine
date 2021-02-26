@@ -1,3 +1,4 @@
+#ifdef HP_SUPPORT_VULKAN
 // dear imgui: Renderer for Vulkan
 // This needs to be used along with a Platform Binding (e.g. GLFW, SDL, Win32, custom..)
 
@@ -125,4 +126,4 @@ struct ImGui_ImplVulkanH_Window
         ClearEnable = true;
     }
 };
-
+#endif
