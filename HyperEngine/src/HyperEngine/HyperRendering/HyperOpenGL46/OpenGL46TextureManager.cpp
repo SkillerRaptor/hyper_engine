@@ -3,9 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <stb_image.h>
-
-#include "HyperUtilities/Log.hpp"
+#include "HyperCore/Core.hpp"
 
 namespace HyperRendering
 {

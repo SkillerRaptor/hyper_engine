@@ -1,6 +1,7 @@
 #pragma once
 
-#include "HyperCore/Core.hpp"
+#include <memory>
+
 #include "HyperUtilities/Logger.hpp"
 
 namespace HyperUtilities
@@ -8,8 +9,8 @@ namespace HyperUtilities
 	class Log
 	{
 	private:
-		static HyperCore::Ref<Logger> m_CoreLogger;
-		static HyperCore::Ref<Logger> m_ClientLogger;
+		static std::shared_ptr<Logger> m_CoreLogger;
+		static std::shared_ptr<Logger> m_ClientLogger;
 
 	public:
 		static void Init();
@@ -17,8 +18,8 @@ namespace HyperUtilities
 
 		static void WaitForMessage(size_t messageId);
 
-		static const HyperCore::Ref<Logger> GetCoreLogger() { return m_CoreLogger; }
-		static const HyperCore::Ref<Logger> GetClientLogger() { return m_ClientLogger; }
+		static const std::shared_ptr<Logger> GetCoreLogger() { return m_CoreLogger; }
+		static const std::shared_ptr<Logger> GetClientLogger() { return m_ClientLogger; }
 	};
 }
 

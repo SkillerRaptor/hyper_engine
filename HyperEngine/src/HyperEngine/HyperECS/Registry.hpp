@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <vector>
 
+#include "HyperCore/Core.hpp"
 #include "HyperECS/Entity.hpp"
 #include "HyperECS/SparseSet.hpp"
 
@@ -17,7 +18,7 @@ namespace HyperECS
 		struct PoolData
 		{
 			uint64_t Id;
-			std::unique_ptr<SparseSet> Pool{};
+			HyperCore::Ref<SparseSet> Pool{};
 		};
 
 	private:
@@ -43,15 +44,14 @@ namespace HyperECS
 			size_t componentId{ typeid(T).hash_code() };
 			PoolData* pool = FindPool(componentId);
 			if (pool == nullptr)
-			{
-				pool = &m_Pools.emplace_back(PoolData{ static_cast<uint64_t>(componentId), std::make_unique<SparseSet>() });
-			}
-			else if (pool->Pool->Contains(entity))
+				pool = &m_Pools.emplace_back(PoolData{ static_cast<uint64_t>(componentId), HyperCore::CreateRef<SparseSetImpl<T>>() });
+			
+			HyperCore::Ref<SparseSetImpl<T>> sparsePool = std::static_pointer_cast<SparseSetImpl<T>>(pool->Pool);
+			
+			if (pool->Pool->Contains(entity))
 				throw std::runtime_error("The provided entity exists already in the pool!");
 
-			T* component = new T{ std::forward<Args>(args)... };
-			pool->Pool->Emplace(entity, (void*)std::move(component));
-			return *component;
+			return sparsePool->Emplace(entity, std::forward<Args>(args)...);
 		}
 
 		template<typename T>
@@ -61,13 +61,13 @@ namespace HyperECS
 			PoolData* pool = FindPool(componentId);
 			if (pool == nullptr)
 				throw std::runtime_error("The pool for specified component does not exists!");
-
+			
 			if (!pool->Pool->Contains(entity))
 				throw std::runtime_error("The provided entity does not exists in the pool!");
 
 			if (!HasComponent<T>(entity))
 				throw std::runtime_error("The provided entity has not the specified component!");
-
+			
 			pool->Pool->Remove(entity);
 		}
 
@@ -84,7 +84,7 @@ namespace HyperECS
 			if (!HasComponent<T>(entity))
 				throw std::runtime_error("The provided entity has not the specified component!");
 
-			return *reinterpret_cast<T*>(pool->Pool->Get(entity));
+			return *static_cast<T*>(pool->Pool->Get(entity));
 		}
 
 		template<typename T>
@@ -94,7 +94,7 @@ namespace HyperECS
 			PoolData* pool = FindPool(componentId);
 			if (pool == nullptr)
 				return false;
-
+			
 			return pool->Pool->Contains(entity);
 		}
 

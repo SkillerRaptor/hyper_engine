@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <stdexcept>
 #include <vector>
 
 #include "HyperECS/Entity.hpp"
@@ -9,28 +11,102 @@ namespace HyperECS
 	class SparseSet
 	{
 	public:
+		SparseSet() = default;
+		virtual ~SparseSet() = default;
+		
+		virtual void Remove(const Entity entity) = 0;
+		
+		virtual void* Get(const Entity entity) = 0;
+		virtual bool Contains(const Entity entity) const = 0;
+		
+		virtual void Clear() = 0;
+	};
+	
+	template <typename T>
+	class SparseSetImpl : public SparseSet
+	{
+	public:
 		using Iterator = typename std::vector<Entity>::const_iterator;
 		using ConstIterator = typename std::vector<Entity>::const_iterator;
 
 	private:
 		std::vector<Entity> m_Sparse = {};
 		std::vector<Entity> m_Packed = {};
-		std::vector<void*> m_ComponentArray = {};
+		std::vector<T> m_ComponentArray = {};
 
 	public:
-		SparseSet() = default;
-		SparseSet(SparseSet&& other) = default;
-		~SparseSet();
+		SparseSetImpl() = default;
+		SparseSetImpl(SparseSetImpl&& other) = default;
+		~SparseSetImpl()
+		{
+			Clear();
+		}
+		
+		SparseSetImpl& operator=(SparseSetImpl&& other) = default;
+		
+		template<typename... Args>
+		T& Emplace(const Entity entity, Args&&... args)
+		{
+			if (Contains(entity))
+				throw std::runtime_error("Sparse Set already contains entity");
+			
+			size_t size = m_Packed.size();
+			
+			m_Packed.push_back(entity);
+			T& component = m_ComponentArray.emplace_back(std::forward<Args>(args)...);
+			
+			if (size <= entity)
+				m_Sparse.resize(entity + 1);
+			
+			m_Sparse[entity] = size;
+			return component;
+		}
+		
+		virtual void Remove(const Entity entity) override
+		{
+			if (!Contains(entity))
+				return;
+			
+			std::swap(m_ComponentArray[m_Sparse[entity]], m_ComponentArray.back());
+			m_Packed[m_Sparse[entity]] = m_Packed.back();
+			m_Sparse[m_Packed.back()] = m_Sparse[entity];
+			
+			m_ComponentArray.pop_back();
+			m_Packed.pop_back();
+		}
+		
+		void* Get(const Entity entity)
+		{
+			if (!Contains(entity))
+				return nullptr;
+			
+			return &m_ComponentArray[m_Sparse[entity]];
+		}
+		
+		virtual bool Contains(const Entity entity) const override
+		{
+			if (entity >= m_Sparse.size())
+				return false;
+			
+			if (m_Sparse[entity] == Null)
+				return false;
+			
+			try
+			{
+				return m_Packed.at(m_Sparse.at(entity)) == entity;
+			}
+			catch (std::exception ex)
+			{
+				return false;
+			}
+		}
 
-		SparseSet& operator=(SparseSet&& other) = default;
-
-		void Emplace(const Entity entity, void* component = nullptr);
-		void Remove(const Entity entity);
-		void* Get(const Entity entity);
-
-		bool Contains(const Entity entity) const;
-
-		void Clear();
+		virtual void Clear() override
+		{
+			m_Sparse.clear();
+			m_Packed.clear();
+			m_ComponentArray.clear();
+		}
 
 		inline bool Empty() const noexcept
 		{

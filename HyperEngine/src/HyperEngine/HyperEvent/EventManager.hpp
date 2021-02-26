@@ -44,7 +44,7 @@ namespace HyperEvent
 
 	public:
 		EventWrapperImpl() = default;
-		~EventWrapperImpl() = default;
+		~EventWrapperImpl() override = default;
 
 		inline void RegisterEventCallback(const std::function<void(const T&)> eventCallback)
 		{
