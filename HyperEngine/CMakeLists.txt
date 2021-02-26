@@ -24,7 +24,7 @@ target_include_directories(HyperEngine PRIVATE
         )
 
 message(STATUS "Searching for Vulkan")
-find_package(Vulkan REQUIRED)
+find_package(Vulkan)
 
 if(NOT Vulkan_FOUND)
     message(STATUS "Vulkan not found.")
