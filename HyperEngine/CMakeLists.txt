@@ -26,11 +26,12 @@ target_include_directories(HyperEngine PRIVATE
 message(STATUS "Searching for Vulkan")
 find_package(Vulkan)
 
+target_link_libraries(HyperEngine PUBLIC fmt glad glfw glm imgui ImGuizmo nlohmann_json rttr_core_lib stb_image)
+
 if(NOT Vulkan_FOUND)
     message(STATUS "Vulkan not found.")
-    target_link_libraries(HyperEngine PUBLIC fmt glad glfw glm imgui ImGuizmo nlohmann_json rttr_core_lib stb_image)
-    target_compile_definitions(HyperEngine PUBLIC HP_SUPPORT_VULKAN)
 else()
     message(STATUS "Vulkan found.")
-    target_link_libraries(HyperEngine PUBLIC fmt glad glfw glm imgui ImGuizmo nlohmann_json rttr_core_lib stb_image Vulkan::Vulkan)
+    target_link_libraries(HyperEngine PUBLIC Vulkan::Vulkan)
+    target_compile_definitions(HyperEngine PUBLIC HP_SUPPORT_VULKAN)
 endif()

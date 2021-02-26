@@ -17,7 +17,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 endif()
 
 # Definitions
-add_definitions(_CRT_SECURE_NO_WARNINGS GLFW_INCLUDE_NONE)
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 # Dependencies
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
