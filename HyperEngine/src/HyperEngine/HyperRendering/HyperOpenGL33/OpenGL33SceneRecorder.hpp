@@ -3,7 +3,7 @@
 #include "HyperCore/Core.hpp"
 #include "HyperRendering/RenderContext.hpp"
 #include "HyperRendering/SceneRecorder.hpp"
-#include "HyperRendering/HyperOpenGL33/HyperBuffers/OpenGL33FrameBuffer.hpp"
+#include "HyperRendering/HyperOpenGL33/OpenGL33FrameBuffer.hpp"
 
 namespace HyperRendering
 {

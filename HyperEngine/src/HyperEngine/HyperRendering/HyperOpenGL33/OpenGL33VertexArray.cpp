@@ -1,4 +1,4 @@
-#include "HyperRendering/HyperOpenGL33/HyperBuffers/OpenGL33VertexArray.hpp"
+#include "HyperRendering/HyperOpenGL33/OpenGL33VertexArray.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

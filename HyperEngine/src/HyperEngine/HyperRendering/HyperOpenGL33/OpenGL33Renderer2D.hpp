@@ -5,9 +5,9 @@
 #include "HyperCore/Core.hpp"
 #include "HyperRendering/Renderer2D.hpp"
 #include "HyperRendering/Vertex.hpp"
-#include "HyperRendering/HyperOpenGL33/HyperBuffers/OpenGL33IndexBuffer.hpp"
-#include "HyperRendering/HyperOpenGL33/HyperBuffers/OpenGL33VertexArray.hpp"
-#include "HyperRendering/HyperOpenGL33/HyperBuffers/OpenGL33VertexBuffer.hpp"
+#include "HyperRendering/HyperOpenGL33/OpenGL33IndexBuffer.hpp"
+#include "HyperRendering/HyperOpenGL33/OpenGL33VertexArray.hpp"
+#include "HyperRendering/HyperOpenGL33/OpenGL33VertexBuffer.hpp"
 
 namespace HyperRendering
 {

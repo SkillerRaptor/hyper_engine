@@ -1,4 +1,4 @@
-#include "HyperRendering/HyperOpenGL46/HyperBuffers/OpenGL46VertexArray.hpp"
+#include "HyperRendering/HyperOpenGL46/OpenGL46VertexArray.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

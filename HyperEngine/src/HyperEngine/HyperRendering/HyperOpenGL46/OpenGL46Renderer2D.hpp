@@ -5,9 +5,9 @@
 #include "HyperCore/Core.hpp"
 #include "HyperRendering/Renderer2D.hpp"
 #include "HyperRendering/Vertex.hpp"
-#include "HyperRendering/HyperOpenGL46/HyperBuffers/OpenGL46IndexBuffer.hpp"
-#include "HyperRendering/HyperOpenGL46/HyperBuffers/OpenGL46VertexArray.hpp"
-#include "HyperRendering/HyperOpenGL46/HyperBuffers/OpenGL46VertexBuffer.hpp"
+#include "HyperRendering/HyperOpenGL46/OpenGL46IndexBuffer.hpp"
+#include "HyperRendering/HyperOpenGL46/OpenGL46VertexArray.hpp"
+#include "HyperRendering/HyperOpenGL46/OpenGL46VertexBuffer.hpp"
 
 namespace HyperRendering
 {

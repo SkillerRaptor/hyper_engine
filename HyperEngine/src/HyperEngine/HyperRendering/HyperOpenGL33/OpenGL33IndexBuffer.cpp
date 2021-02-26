@@ -1,4 +1,4 @@
-#include "HyperRendering/HyperOpenGL33/HyperBuffers/OpenGL33IndexBuffer.hpp"
+#include "HyperRendering/HyperOpenGL33/OpenGL33IndexBuffer.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
