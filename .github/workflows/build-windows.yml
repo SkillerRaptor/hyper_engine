@@ -14,10 +14,10 @@ jobs:
         submodules: recursive
 
     - name: Generate Project Files
-      run: ./Scripts/Win-GenProjects.bat
+      run: cmake -G "Visual Studio 16 2019" -A x64 -S . -B build
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.0.2
 
     - name: Build Solution
-      run: msbuild -property:Configuration=Release,MultiProcessorCompilation=true -maxCpuCount -verbosity:minimal -noLogo HyperEngine.sln
+      run: msbuild -property:Configuration=Release,MultiProcessorCompilation=true -maxCpuCount -verbosity:minimal -noLogo build/HyperEngine.sln

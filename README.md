@@ -11,8 +11,8 @@ This repository houses the source code for the HyperEngine.
 ## Building
 In order to build the engine, you will need to follow these steps:
 1.  Start cloning the repository by typing in the command prompt of your choice:<br><code>git clone --recursive <a href="https://github.com/SkillerRaptor/HyperEngine">https://github.com/SkillerRaptor/HyperEngine</a></code>.
-2.  Run the script with the name of your operating system in the [Scripts](https://github.com/SkillerRaptor/HyperEngine/tree/master/Scripts) folder.<br>(For Windows: [`Win-GenProjects.bat`](https://github.com/SkillerRaptor/HyperEngine/blob/master/Scripts/Win-GenProjects.bat), For Linux: [`Linux-GenProjects.sh`](https://github.com/SkillerRaptor/HyperEngine/blob/master/Scripts/Linux-GenProjects.sh)) 
-3.  After premake generates the project files. You can open the project and run the engine.
+2.  Inside the root directory of the project you run `cmake -A x64 -S . -B build`
+3.  After CMake has generated everything you can open the project and run it.
 
 ## Screenshots
 The following screenshots show features and designs of the engine:
@@ -24,7 +24,7 @@ The following screenshots show features and designs of the engine:
 ![alt-text](https://i.imgur.com/I3OJPW7.png)
 
 ## Dependencies & License
--   [GLAD](https://github.com/Dav1dde/glad/blob/master/LICENSE) Copyright (c) MIT, David Herberth 2013-2020
+-   [glad](https://github.com/Dav1dde/glad/blob/master/LICENSE) Copyright (c) MIT, David Herberth 2013-2020
 -   [glfw](https://github.com/glfw/glfw/blob/master/LICENSE.md) Copyright (c) zlib, Camilla Löwy 2006-2019
 -   [glm](https://github.com/g-truc/glm/blob/master/copying.txt) Copyright (c) The Happy Bunny License, G-Truc Creation 2005
 -   [Dear ImGui](https://github.com/ocornut/imgui/blob/master/LICENSE.txt) Copyright (c) MIT, Omar Cornut 2014-2021
@@ -34,9 +34,9 @@ The following screenshots show features and designs of the engine:
 -   [stb_image](https://github.com/nothings/stb/blob/master/LICENSE) Copyright (c) MIT, Sean Barrett 2017
 
 ## Contributing
-Pull requests are forbidden. This project is a learning project for myself and I want to do everything by my own. 
+Pull requests are not allowed. I want this engine to be my learning project and do everything by myself.
 If you still would like to change something, please open an issue first to discuss what you would like to change. 
-The change will then reviewed by myself and if I like the change I will implement it by my own.
+The change will then reviewed and maybe I will implement it in the engine.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
