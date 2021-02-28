@@ -19,6 +19,12 @@ endif()
 # Definitions
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
+if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    add_definitions(-DHP_RELEASE)
+else()
+    add_definitions(-DHP_DEBUG)
+endif()
+
 # Dependencies
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 
