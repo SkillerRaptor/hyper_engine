@@ -422,12 +422,12 @@ namespace HyperEditor
 		static const ImVec2 buttonSize = { 70, 70 };
 
 		HyperRendering::TextureHandle newTextureHandle;
-		if (ImGui::ImageButton(textureManager->GetImageTextureId(texture), buttonSize, { 0, 1 }, { 1, 0 }, 0))
+		if (ImGui::ImageButton(textureManager->GetImageId(texture), buttonSize, { 0, 1 }, { 1, 0 }, 0))
 		{
 			std::optional<std::string> filePath = HyperUtilities::PlatformUtils::Get()->OpenFile("Image File\0*.png;*.jpg\0");
 			if (filePath.has_value())
 			{
-				newTextureHandle = textureManager->CreateTexture(filePath.value());
+				newTextureHandle = textureManager->Create(filePath.value());
 				newTexture = true;
 			}
 		}
@@ -437,7 +437,7 @@ namespace HyperEditor
 			{
 				const std::string texturePath = *(const std::string*)payload->Data;
 
-				newTextureHandle = textureManager->CreateTexture(texturePath);
+				newTextureHandle = textureManager->Create(texturePath);
 				newTexture = true;
 			}
 			ImGui::EndDragDropTarget();
@@ -448,7 +448,7 @@ namespace HyperEditor
 
 		if (ImGui::Button("x", { buttonSize.x / 4, buttonSize.y }))
 		{
-			textureManager->DeleteTexture(texture);
+			textureManager->Delete(texture);
 			newTextureHandle = HyperRendering::TextureHandle{ 0 };
 			newTexture = true;
 		}

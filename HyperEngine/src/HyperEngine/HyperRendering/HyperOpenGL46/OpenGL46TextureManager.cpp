@@ -8,214 +8,236 @@
 namespace HyperRendering
 {
 	OpenGL46TextureManager::OpenGL46TextureManager()
+		: m_TextureStorage{ 256 }
 	{
-		HP_CORE_DEBUG("OpenGL Texture-Manager loaded...");
+		HP_CORE_DEBUG("OpenGL 4.6 Texture-Manager loaded...");
 	}
 
 	OpenGL46TextureManager::~OpenGL46TextureManager()
 	{
-		HP_CORE_DEBUG("OpenGL Texture-Manager unloaded...");
-		for (const auto& [handle, textureData] : m_Textures)
-			glDeleteTextures(1, &textureData.TextureId);
-		m_Textures.clear();
+		for (size_t i = 0; i < m_TextureStorage.GetPoolSize(); i++)
+			glDeleteTextures(1, &m_TextureStorage[i].Id);
+		m_TextureStorage.Clear();
+		
+		HP_CORE_DEBUG("OpenGL 4.6 Texture-Manager unloaded...");
 	}
 
-	TextureHandle OpenGL46TextureManager::CreateTexture(const std::string& path, TextureType textureType)
+	TextureHandle OpenGL46TextureManager::Create(const std::string& path, TextureType type)
 	{
-		OpenGL46TextureData textureData;
-		textureData.Path = path;
-		textureData.Type = textureType;
-
-		int width, height, channels;
-		unsigned char* pixels = LoadImage(textureData.Path, width, height, channels);
+		int32_t width;
+		int32_t height;
+		int32_t channels;
+		
+		uint8_t* pixels = LoadImage(path, width, height, channels);
 		if (pixels == nullptr)
 		{
-			HP_CORE_DEBUG("Texture not loaded...");
-			return { static_cast<uint32_t>(-1) };
+			HP_CORE_ERROR("Failed to load texture!");
+			return TextureHandle{ 0 };
 		}
-
+		
+		uint32_t id;
+		glCreateTextures(GL_TEXTURE_2D, 1, &id);
+		
+		glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
+		switch (type)
+		{
+			case TextureType::COMPUTE:
+				HP_CORE_WARN("Compute texture type is (yet) not supported in OpenGL 4.6!");
+				break;
+			case TextureType::DEFAULT:
+				glTextureStorage2D(id, 1, channels >= 4 ? GL_RGBA8 : GL_RGB8, width, height);
+				glTextureSubImage2D(id, 0, 0, 0, width, height, channels >= 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels);
+				break;
+			case TextureType::DIFFUSE:
+				HP_CORE_WARN("Diffuse texture type is (yet) not supported in OpenGL 4.6!");
+				break;
+			case TextureType::COLOR:
+				glTextureStorage2D(id, 1, GL_RGB8, width, height);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, id, 0);
+				break;
+			case TextureType::DEPTH:
+				HP_CORE_WARN("Depth texture type is (yet) not supported in OpenGL 4.6!");
+				break;
+			case TextureType::DEPTH_STENCIL:
+				glTextureStorage2D(id, 1, GL_DEPTH24_STENCIL8, width, height);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, id, 0);
+				break;
+			case TextureType::HEIGHT:
+				HP_CORE_WARN("Height texture type is (yet) not supported in OpenGL 4.6!");
+				break;
+			case TextureType::NORMAL:
+				HP_CORE_WARN("Normal texture type is (yet) not supported in OpenGL 4.6!");
+				break;
+			case TextureType::SPECULAR:
+				HP_CORE_WARN("Specular texture type is (yet) not supported in OpenGL 4.6!");
+				break;
+			default:
+				break;
+		}
+		
+		FreeImage(pixels);
+		
+		uint32_t index{};
+		TextureData& textureData = m_TextureStorage.Allocate(index);
+		textureData.MagicNumber = m_TextureVersion++;
 		textureData.Width = width;
 		textureData.Height = height;
 		textureData.Channels = channels;
-
-		GenerateTexture(&textureData, pixels);
-
-		FreeImage(pixels);
-
-		TextureHandle textureId = { 1 };
-		if (!m_TextureIds.empty())
-		{
-			textureId = m_TextureIds.front();
-			m_TextureIds.pop();
-		}
-		else
-			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) + 1 });
-		m_Textures.emplace(textureId, std::move(textureData));
-		return textureId;
+		textureData.Type = type;
+		textureData.Id = id;
+		
+		return TextureHandle{ (textureData.MagicNumber << 16) | index };
 	}
 
-	TextureHandle OpenGL46TextureManager::CreateTexture(uint32_t width, uint32_t height, TextureType textureType)
+	TextureHandle OpenGL46TextureManager::Create(uint32_t width, uint32_t height, TextureType type)
 	{
-		OpenGL46TextureData textureData;
+		uint32_t id;
+		glCreateTextures(GL_TEXTURE_2D, 1, &id);
+		
+		glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
+		switch (type)
+		{
+			case TextureType::COMPUTE:
+				HP_CORE_WARN("Compute texture type is (yet) not supported in OpenGL 4.6!");
+				break;
+			case TextureType::DEFAULT:
+				glTextureStorage2D(id, 1, GL_RGBA8, width, height);
+				break;
+			case TextureType::DIFFUSE:
+				HP_CORE_WARN("Diffuse texture type is (yet) not supported in OpenGL 4.6!");
+				break;
+			case TextureType::COLOR:
+				glTextureStorage2D(id, 1, GL_RGB8, width, height);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, id, 0);
+				break;
+			case TextureType::DEPTH:
+				HP_CORE_WARN("Depth texture type is (yet) not supported in OpenGL 4.6!");
+				break;
+			case TextureType::DEPTH_STENCIL:
+				glTextureStorage2D(id, 1, GL_DEPTH24_STENCIL8, width, height);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, id, 0);
+				break;
+			case TextureType::HEIGHT:
+				HP_CORE_WARN("Height texture type is (yet) not supported in OpenGL 4.6!");
+				break;
+			case TextureType::NORMAL:
+				HP_CORE_WARN("Normal texture type is (yet) not supported in OpenGL 4.6!");
+				break;
+			case TextureType::SPECULAR:
+				HP_CORE_WARN("Specular texture type is (yet) not supported in OpenGL 4.6!");
+				break;
+			default:
+				break;
+		}
+		
+		uint32_t index{};
+		TextureData& textureData = m_TextureStorage.Allocate(index);
+		textureData.MagicNumber = m_TextureVersion++;
 		textureData.Width = width;
 		textureData.Height = height;
-		textureData.Type = textureType;
 		textureData.Channels = 4;
-
-		GenerateTexture(&textureData, nullptr);
-
-		TextureHandle textureId = { 1 };
-		if (!m_TextureIds.empty())
-		{
-			textureId = m_TextureIds.front();
-			m_TextureIds.pop();
-		}
-		else
-			textureId = static_cast<TextureHandle>(TextureHandle{ static_cast<uint32_t>(m_Textures.size()) + 1 });
-		m_Textures.emplace(textureId, std::move(textureData));
-		return textureId;
+		textureData.Type = type;
+		textureData.Id = id;
+		
+		return TextureHandle{ (textureData.MagicNumber << 16) | index };
 	}
-
-	void OpenGL46TextureManager::GenerateTexture(TextureData* textureData, unsigned char* pixels)
+	
+	void OpenGL46TextureManager::Delete(TextureHandle handle)
 	{
-		OpenGL46TextureData* data = static_cast<OpenGL46TextureData*>(textureData);
-		glCreateTextures(GL_TEXTURE_2D, 1, &data->TextureId);
-
-		glTextureParameteri(data->TextureId, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(data->TextureId, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTextureParameteri(data->TextureId, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTextureParameteri(data->TextureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		switch (textureData->Type)
-		{
-		case TextureType::COMPUTE:
-			HP_CORE_WARN("Compute texture type is (yet) not supported in OpenGL 4.6!");
-			break;
-		case TextureType::DEFAULT:
-			glTextureStorage2D(data->TextureId, 1, textureData->Channels >= 4 ? GL_RGBA8 : GL_RGB8, data->Width, data->Height);
-			if (pixels != nullptr)
-				glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, textureData->Channels >= 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels);
-			break;
-		case TextureType::DIFFUSE:
-			HP_CORE_WARN("Diffuse texture type is (yet) not supported in OpenGL 4.6!");
-			break;
-		case TextureType::COLOR:
-			glTextureStorage2D(data->TextureId, 1, GL_RGB8, data->Width, data->Height);
-			if (pixels != nullptr)
-				glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, data->TextureId, 0);
-			break;
-		case TextureType::DEPTH:
-			HP_CORE_WARN("Depth texture type is (yet) not supported in OpenGL 4.6!");
-			break;
-		case TextureType::STENCIL:
-			HP_CORE_WARN("Stencil texture type is (yet) not supported in OpenGL 4.6!");
-			break;
-		case TextureType::DEPTH_STENCIL:
-			glTextureStorage2D(data->TextureId, 1, GL_DEPTH24_STENCIL8, data->Width, data->Height);
-			if (pixels != nullptr)
-				glTextureSubImage2D(data->TextureId, 0, 0, 0, data->Width, data->Height, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, data->TextureId, 0);
-			break;
-		case TextureType::HEIGHT:
-			HP_CORE_WARN("Height texture type is (yet) not supported in OpenGL 4.6!");
-			break;
-		case TextureType::NORMAL:
-			HP_CORE_WARN("Normal texture type is (yet) not supported in OpenGL 4.6!");
-			break;
-		case TextureType::SPECULAR:
-			HP_CORE_WARN("Specular texture type is (yet) not supported in OpenGL 4.6!");
-			break;
-		default:
-			break;
-		}
-	}
-
-	void OpenGL46TextureManager::BindTexture(TextureHandle handle, uint32_t textureSlot)
-	{
-		if (m_Textures.find(handle) == m_Textures.end())
+		TextureData& textureData = m_TextureStorage[handle.GetIndex()];
+		if (textureData.MagicNumber != handle.GetVersion())
 			return;
-		glBindTextureUnit(textureSlot, m_Textures[handle].TextureId);
+		glDeleteTextures(1, &textureData.Id);
+		m_TextureStorage.Deallocate(handle.GetIndex());
 	}
-
-	void OpenGL46TextureManager::DeleteTexture(TextureHandle handle)
+	
+	void OpenGL46TextureManager::Bind(TextureHandle handle, uint32_t textureSlot)
 	{
-		if (m_Textures.find(handle) == m_Textures.end())
+		TextureData& textureData = m_TextureStorage[handle.GetIndex()];
+		if (textureData.MagicNumber != handle.GetVersion())
 			return;
-		glDeleteTextures(1, &m_Textures[handle].TextureId);
-		m_Textures.erase(handle);
-		m_TextureIds.push(handle);
+		glBindTextureUnit(textureSlot, textureData.Id);
 	}
 
 	void OpenGL46TextureManager::SetWidth(TextureHandle handle, uint32_t width)
 	{
-		if (m_Textures.find(handle) == m_Textures.end())
+		TextureData& textureData = m_TextureStorage[handle.GetIndex()];
+		if (textureData.MagicNumber != handle.GetVersion())
 			return;
-		m_Textures[handle].Width = width;
+		textureData.Width = width;
 	}
 
 	std::optional<uint32_t> OpenGL46TextureManager::GetWidth(TextureHandle handle) const
 	{
-		if (m_Textures.find(handle) == m_Textures.end())
+		const TextureData& textureData = m_TextureStorage[handle.GetIndex()];
+		if (textureData.MagicNumber != handle.GetVersion())
 			return std::nullopt;
-		return m_Textures.at(handle).Width;
+		return textureData.Width;
 	}
 
 	void OpenGL46TextureManager::SetHeight(TextureHandle handle, uint32_t height)
 	{
-		if (m_Textures.find(handle) == m_Textures.end())
+		TextureData& textureData = m_TextureStorage[handle.GetIndex()];
+		if (textureData.MagicNumber != handle.GetVersion())
 			return;
-		m_Textures[handle].Height = height;
+		textureData.Height = height;
 	}
 
 	std::optional<uint32_t> OpenGL46TextureManager::GetHeight(TextureHandle handle) const
 	{
-		if (m_Textures.find(handle) == m_Textures.end())
+		const TextureData& textureData = m_TextureStorage[handle.GetIndex()];
+		if (textureData.MagicNumber != handle.GetVersion())
 			return std::nullopt;
-		return m_Textures.at(handle).Height;
+		return textureData.Height;
 	}
 
-	void OpenGL46TextureManager::SetTextureType(TextureHandle handle, TextureType textureType)
+	void OpenGL46TextureManager::SetType(TextureHandle handle, TextureType textureType)
 	{
-		if (m_Textures.find(handle) == m_Textures.end())
+		TextureData& textureData = m_TextureStorage[handle.GetIndex()];
+		if (textureData.MagicNumber != handle.GetVersion())
 			return;
-		m_Textures[handle].Type = textureType;
+		textureData.Type = textureType;
 	}
 
-	std::optional<TextureType> OpenGL46TextureManager::GetTextureType(TextureHandle handle) const
+	std::optional<TextureType> OpenGL46TextureManager::GetType(TextureHandle handle) const
 	{
-		if (m_Textures.find(handle) == m_Textures.end())
+		const TextureData& textureData = m_TextureStorage[handle.GetIndex()];
+		if (textureData.MagicNumber != handle.GetVersion())
 			return std::nullopt;
-		return m_Textures.at(handle).Type;
+		return textureData.Type;
 	}
 
-	void OpenGL46TextureManager::SetTexturePixels(TextureHandle handle, void* pixels, uint32_t size)
+	void OpenGL46TextureManager::SetData(TextureHandle handle, void* pixels, uint32_t size)
 	{
-		if (m_Textures.find(handle) == m_Textures.end())
+		TextureData& textureData = m_TextureStorage[handle.GetIndex()];
+		if (textureData.MagicNumber != handle.GetVersion())
 			return;
 
-		HP_ASSERT(size == m_Textures[handle].Width * m_Textures[handle].Height * m_Textures[handle].Channels, "Data must be entire texture!");
-		glTextureSubImage2D(m_Textures[handle].TextureId, 0, 0, 0, m_Textures[handle].Width, m_Textures[handle].Height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+		HP_ASSERT(size == textureData.Width * textureData.Height * textureData.Channels, "Data has to be the same size as the texture!");
+		glTextureSubImage2D(textureData.Id, 0, 0, 0, textureData.Width, textureData.Height, textureData.Channels >= 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, pixels);
 	}
 
-	std::optional<uint8_t> OpenGL46TextureManager::GetColorChannels(TextureHandle handle) const
+	std::optional<uint8_t> OpenGL46TextureManager::GetChannels(TextureHandle handle) const
 	{
-		if (m_Textures.find(handle) == m_Textures.end())
+		const TextureData& textureData = m_TextureStorage[handle.GetIndex()];
+		if (textureData.MagicNumber != handle.GetVersion())
 			return std::nullopt;
-		return m_Textures.at(handle).Channels;
+		return textureData.Channels;
 	}
 
-	std::optional<std::string> OpenGL46TextureManager::GetFilePath(TextureHandle handle) const
+	void* OpenGL46TextureManager::GetImageId(TextureHandle handle) const
 	{
-		if (m_Textures.find(handle) == m_Textures.end())
-			return std::nullopt;
-		return m_Textures.at(handle).Path;
-	}
-
-	void* OpenGL46TextureManager::GetImageTextureId(TextureHandle handle) const
-	{
-		if (m_Textures.find(handle) == m_Textures.end())
+		const TextureData& textureData = m_TextureStorage[handle.GetIndex()];
+		if (textureData.MagicNumber != handle.GetVersion())
 			return nullptr;
-		return (void*)static_cast<uintptr_t>(m_Textures.at(handle).TextureId);
+		return (void*)static_cast<uintptr_t>(textureData.Id);
 	}
 }

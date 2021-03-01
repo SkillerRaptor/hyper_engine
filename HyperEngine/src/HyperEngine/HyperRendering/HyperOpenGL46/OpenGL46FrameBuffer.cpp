@@ -27,15 +27,15 @@ namespace HyperRendering
 		if (m_RendererID != 0)
 		{
 			glDeleteFramebuffers(1, &m_RendererID);
-			textureManager->DeleteTexture(m_ColorAttachment);
-			textureManager->DeleteTexture(m_DepthAttachment);
+			textureManager->Delete(m_ColorAttachment);
+			textureManager->Delete(m_DepthAttachment);
 		}
 
 		glGenFramebuffers(1, &m_RendererID);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 
-		m_ColorAttachment = textureManager->CreateTexture(m_Width, m_Height, TextureType::COLOR);
-		m_DepthAttachment = textureManager->CreateTexture(m_Width, m_Height, TextureType::DEPTH_STENCIL);
+		m_ColorAttachment = textureManager->Create(m_Width, m_Height, TextureType::COLOR);
+		m_DepthAttachment = textureManager->Create(m_Width, m_Height, TextureType::DEPTH_STENCIL);
 
 		HP_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!");
 	}

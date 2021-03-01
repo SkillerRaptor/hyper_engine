@@ -55,13 +55,13 @@ namespace HyperRendering
 		for (uint32_t i = 0; i < MaxTextureSlots; i++)
 			samplers[i] = i;
 
-		m_ShaderManager->UseShader({ 1 });
-		m_ShaderManager->SetIntegerArray({ 1 }, "u_Textures", MaxTextureSlots, samplers);
+		m_ShaderManager->Use({ 65536 });
+		m_ShaderManager->SetIntegerArray({ 65536 }, "u_Textures", MaxTextureSlots, samplers);
 
 		uint32_t whiteTextureData = 0xFFFFFFFF;
 
-		TextureHandle whiteTexture = m_TextureManager->CreateTexture(1, 1, TextureType::DEFAULT);
-		m_TextureManager->SetTexturePixels(whiteTexture, &whiteTextureData, sizeof(uint32_t));
+		TextureHandle whiteTexture = m_TextureManager->Create(1, 1, TextureType::DEFAULT);
+		m_TextureManager->SetData(whiteTexture, &whiteTextureData, sizeof(uint32_t));
 
 		m_TextureSlots.resize(MaxTextureSlots);
 		for (size_t i = 0; i < MaxTextureSlots; i++)
@@ -88,10 +88,10 @@ namespace HyperRendering
 		m_QuadVertexBuffer->Bind();
 		m_QuadVertexBuffer->SetData(m_QuadVertexBufferBase, dataSize / sizeof(Vertex2D));
 
-		m_ShaderManager->UseShader({ 1 });
+		m_ShaderManager->Use({ 65536 });
 
 		for (uint32_t i = 0; i < m_TextureSlotIndex; i++)
-			m_TextureManager->BindTexture(m_TextureSlots[i], i);
+			m_TextureManager->Bind(m_TextureSlots[i], i);
 
 		m_QuadVertexArray->Bind();
 		glDrawElements(GL_TRIANGLES, (unsigned int)m_QuadIndexCount, GL_UNSIGNED_INT, nullptr);
@@ -215,15 +215,15 @@ namespace HyperRendering
 			break;
 		}
 
-		m_ShaderManager->UseShader({ 1 });
-		m_ShaderManager->SetMatrix4({ 1 }, "u_ProjectionMatrix", projectionMatrix);
-		m_ShaderManager->SetMatrix4({ 1 }, "u_ViewMatrix", viewMatrix);
+		m_ShaderManager->Use({ 65536 });
+		m_ShaderManager->SetMatrix4({ 65536 }, "u_ProjectionMatrix", projectionMatrix);
+		m_ShaderManager->SetMatrix4({ 65536 }, "u_ViewMatrix", viewMatrix);
 	}
 
 	void OpenGL33Renderer2D::SetCamera(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix)
 	{
-		m_ShaderManager->UseShader({ 1 });
-		m_ShaderManager->SetMatrix4({ 1 }, "u_ProjectionMatrix", projectionMatrix);
-		m_ShaderManager->SetMatrix4({ 1 }, "u_ViewMatrix", viewMatrix);
+		m_ShaderManager->Use({ 65536 });
+		m_ShaderManager->SetMatrix4({ 65536 }, "u_ProjectionMatrix", projectionMatrix);
+		m_ShaderManager->SetMatrix4({ 65536 }, "u_ViewMatrix", viewMatrix);
 	}
 }

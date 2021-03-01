@@ -10,48 +10,42 @@
 
 namespace HyperRendering
 {
-	struct ShaderData
-	{
-		const char* VertexShaderPath = "";
-		const char* FragmentShaderPath = "";
-		const char* GeometryShaderPath = "";
-	};
-
 	struct ShaderHandle
 	{
 		uint32_t Handle;
-
+		
 		inline bool IsHandleValid() const
 		{
 			return Handle != 0;
 		}
-
+		
+		inline uint16_t GetIndex() const
+		{
+			static constexpr const uint32_t INDEX_MASK = ((1u << 16) - 1);
+			return (Handle & INDEX_MASK) >> 0;
+		}
+		
+		inline uint16_t GetVersion() const
+		{
+			static constexpr const uint32_t VERSION_MASK = ~((1u << 16) - 1);
+			return (Handle & VERSION_MASK) >> 16;
+		}
+		
 		inline bool operator==(const ShaderHandle& shaderHandle) const
 		{
 			return Handle == shaderHandle.Handle;
 		}
 	};
 
-	struct ShaderHandleHasher
-	{
-		inline size_t operator()(const ShaderHandle& shaderHandle) const
-		{
-			return (std::hash<uint32_t>()(shaderHandle.Handle));
-		}
-	};
-
 	class ShaderManager : public HyperUtilities::NonCopyable, HyperUtilities::NonMoveable
 	{
-	protected:
-		std::queue<ShaderHandle> m_ShaderIds;
-
 	public:
 		ShaderManager() = default;
 		virtual ~ShaderManager() = default;
 
-		virtual ShaderHandle CreateShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath = "") = 0;
-		virtual void UseShader(ShaderHandle handle) = 0;
-		virtual void DeleteShader(ShaderHandle handle) = 0;
+		virtual ShaderHandle Create(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath = "") = 0;
+		virtual void Use(ShaderHandle handle) = 0;
+		virtual void Delete(ShaderHandle handle) = 0;
 
 		virtual void SetInteger(ShaderHandle handle, const std::string& name, int value) = 0;
 		virtual void SetUnsignedInteger(ShaderHandle handle, const std::string& name, unsigned int value) = 0;

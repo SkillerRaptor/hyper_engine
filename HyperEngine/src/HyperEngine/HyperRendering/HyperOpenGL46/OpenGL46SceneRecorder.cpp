@@ -58,7 +58,7 @@ namespace HyperRendering
 
 	void OpenGL46SceneRecorder::RenderGameImage()
 	{
-		ImGui::Image(m_TextureManager->GetImageTextureId(m_GameFrameBuffer->GetColorAttachment()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image(m_TextureManager->GetImageId(m_GameFrameBuffer->GetColorAttachment()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
 	}
 
 	void OpenGL46SceneRecorder::StartEditorRecording()
@@ -74,6 +74,6 @@ namespace HyperRendering
 
 	void OpenGL46SceneRecorder::RenderEditorImage()
 	{
-		ImGui::Image(m_TextureManager->GetImageTextureId(m_EditorFrameBuffer->GetColorAttachment()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image(m_TextureManager->GetImageId(m_EditorFrameBuffer->GetColorAttachment()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
 	}
 }

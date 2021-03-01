@@ -32,7 +32,6 @@
 #include "HyperEngine/HyperMath/Vector.hpp"
 
 /* HyperRendering */
-#include "HyperEngine/HyperRendering/Material.hpp"
 #include "HyperEngine/HyperRendering/RenderContext.hpp"
 #include "HyperEngine/HyperRendering/ShaderManager.hpp"
 #include "HyperEngine/HyperRendering/TextureManager.hpp"

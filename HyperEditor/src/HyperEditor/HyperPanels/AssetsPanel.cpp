@@ -14,11 +14,11 @@ namespace HyperEditor
 
 	void AssetsPanel::OnAttach()
 	{
-		m_FolderTexture = m_TextureManager->CreateTexture("./cache/textures/icons/folder-solid.png");
-		m_FileTexture = m_TextureManager->CreateTexture("./cache/textures/icons/file-solid.png");
-		m_ShaderTexture = m_TextureManager->CreateTexture("./cache/textures/icons/code-solid.png");
-		m_ImageTexture = m_TextureManager->CreateTexture("./cache/textures/icons/image-solid.png");
-		m_ModelTexture = m_TextureManager->CreateTexture("./cache/textures/icons/cubes-solid.png");
+		m_FolderTexture = m_TextureManager->Create("./cache/textures/icons/folder-solid.png");
+		m_FileTexture = m_TextureManager->Create("./cache/textures/icons/file-solid.png");
+		m_ShaderTexture = m_TextureManager->Create("./cache/textures/icons/code-solid.png");
+		m_ImageTexture = m_TextureManager->Create("./cache/textures/icons/image-solid.png");
+		m_ModelTexture = m_TextureManager->Create("./cache/textures/icons/cubes-solid.png");
 
 		m_CurrentDirectory = std::filesystem::current_path().append("assets").string();
 	}
@@ -81,7 +81,7 @@ namespace HyperEditor
 					break;
 				}
 
-				ImGui::ImageButton(m_TextureManager->GetImageTextureId(textureHandle), { m_ItemSize, m_ItemSize }, { 0, 1 }, { 1, 0 }, 0, buttonBackground);
+				ImGui::ImageButton(m_TextureManager->GetImageId(textureHandle), { m_ItemSize, m_ItemSize }, { 0, 1 }, { 1, 0 }, 0, buttonBackground);
 
 				if (ImGui::IsItemHovered())
 				{

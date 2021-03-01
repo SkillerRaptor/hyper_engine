@@ -30,7 +30,7 @@ target_include_directories(Sandbox PRIVATE
         "${CMAKE_SOURCE_DIR}/vendor/stb_image/include/"
         )
 
-set_target_properties(Sandbox PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin/HyperEngine/Debug/")
-set_target_properties(Sandbox PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin/HyperEngine/Release/")
+set_target_properties(Sandbox PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin/HyperEngine/Sandbox/Debug/")
+set_target_properties(Sandbox PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin/HyperEngine/Sandbox/Release/")
 
-file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/assets" DESTINATION "${CMAKE_BINARY_DIR}/bin/HyperEngine/${CMAKE_BUILD_TYPE}/")
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/assets" DESTINATION "${CMAKE_BINARY_DIR}/bin/HyperEngine/Sandbox/${CMAKE_BUILD_TYPE}/")

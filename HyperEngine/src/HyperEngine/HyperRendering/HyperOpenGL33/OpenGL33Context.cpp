@@ -25,7 +25,7 @@ namespace HyperRendering
 	void OpenGL33Context::Init()
 	{
 		glfwMakeContextCurrent(m_Window);
-
+		
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{
 			HP_CORE_FATAL("Failed to initialize GLAD");
