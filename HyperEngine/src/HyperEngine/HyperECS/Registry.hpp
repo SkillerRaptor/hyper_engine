@@ -46,12 +46,10 @@ namespace HyperECS
 			if (pool == nullptr)
 				pool = &m_Pools.emplace_back(PoolData{ static_cast<uint64_t>(componentId), HyperCore::CreateRef<SparseSetImpl<T>>() });
 			
-			HyperCore::Ref<SparseSetImpl<T>> sparsePool = std::static_pointer_cast<SparseSetImpl<T>>(pool->Pool);
-			
 			if (pool->Pool->Contains(entity))
 				throw std::runtime_error("The provided entity exists already in the pool!");
 
-			return sparsePool->Emplace(entity, std::forward<Args>(args)...);
+			return std::static_pointer_cast<SparseSetImpl<T>>(pool->Pool)->Emplace(entity, std::forward<Args>(args)...);
 		}
 
 		template<typename T>

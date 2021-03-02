@@ -53,13 +53,12 @@ namespace HyperECS
 			size_t size = m_Packed.size();
 			
 			m_Packed.push_back(entity);
-			T& component = m_ComponentArray.emplace_back(std::forward<Args>(args)...);
 			
 			if (size <= entity)
 				m_Sparse.resize(entity + 1);
 			
 			m_Sparse[entity] = size;
-			return component;
+			return m_ComponentArray.emplace_back(std::forward<Args>(args)...);
 		}
 		
 		virtual void Remove(const Entity entity) override
@@ -95,7 +94,7 @@ namespace HyperECS
 			{
 				return m_Packed.at(m_Sparse.at(entity)) == entity;
 			}
-			catch (std::exception ex)
+			catch (const std::exception& ex)
 			{
 				return false;
 			}
