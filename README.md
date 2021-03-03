@@ -33,13 +33,10 @@ The following screenshots are showing features and designs from the engine:
 -   [rttr](https://github.com/rttrorg/rttr/blob/master/LICENSE.txt) Copyright (c) MIT, Axel Menzel 2014-2018
 -   [stb_image](https://github.com/nothings/stb/blob/master/LICENSE) Copyright (c) MIT, Sean Barrett 2017
 
-## License
-The HyperEngine is distributed under the MIT [license](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE).
-
 ## Contributing
 Pull requests are not allowed. I want this engine to be my learning project and do everything by myself.
 If you still would like to change something, please open an issue first to discuss what you would like to change. 
 The change will then reviewed and maybe I will implement it in the engine.
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
+The HyperEngine is distributed under the MIT [license](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE).
