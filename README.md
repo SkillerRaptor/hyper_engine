@@ -11,11 +11,11 @@ This repository houses the source code for the HyperEngine.
 ## Building
 In order to build the engine, you will need to follow these steps:
 1.  Start cloning the repository by typing in the command prompt of your choice:<br><code>git clone --recursive <a href="https://github.com/SkillerRaptor/HyperEngine">https://github.com/SkillerRaptor/HyperEngine</a></code>.
-2.  Inside the root directory of the project you run `cmake -A x64 -S . -B build`
-3.  After CMake has generated everything you can open the project and run it.
+2.  Inside the root directory of the project you run `cmake "-A x64 -S . -B build`
+3.  After CMake finished, you can open the project, build and run it.
 
 ## Screenshots
-The following screenshots show features and designs of the engine:
+The following screenshots are showing features and designs from the engine:
 
 ### HyperEditor v2
 ![alt-text](https://i.imgur.com/Eq7o4l8.png)
@@ -23,7 +23,7 @@ The following screenshots show features and designs of the engine:
 ### HyperEditor v1
 ![alt-text](https://i.imgur.com/I3OJPW7.png)
 
-## Dependencies & License
+## Dependencies
 -   [glad](https://github.com/Dav1dde/glad/blob/master/LICENSE) Copyright (c) MIT, David Herberth 2013-2020
 -   [glfw](https://github.com/glfw/glfw/blob/master/LICENSE.md) Copyright (c) zlib, Camilla Löwy 2006-2019
 -   [glm](https://github.com/g-truc/glm/blob/master/copying.txt) Copyright (c) The Happy Bunny License, G-Truc Creation 2005
@@ -32,6 +32,9 @@ The following screenshots show features and designs of the engine:
 -   [json](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT) Copyright (c) MIT, Niels Lohmann 2013-2021
 -   [rttr](https://github.com/rttrorg/rttr/blob/master/LICENSE.txt) Copyright (c) MIT, Axel Menzel 2014-2018
 -   [stb_image](https://github.com/nothings/stb/blob/master/LICENSE) Copyright (c) MIT, Sean Barrett 2017
+
+## License
+The HyperEngine is distributed under the MIT [license](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE).
 
 ## Contributing
 Pull requests are not allowed. I want this engine to be my learning project and do everything by myself.
