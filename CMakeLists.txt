@@ -6,6 +6,7 @@ project(HyperEngine LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -g3 -O0 -Wall -pedantic -Wextra -m64 -mavx2 -mfma -ffast-math")
