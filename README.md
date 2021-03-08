@@ -1,4 +1,4 @@
-﻿<img src="Resources/HyperEngine.PNG" align="right" width="150"/>
+﻿<img src="Images/HyperEngine.png" align="right" width="150"/>
 
 # HyperEngine
 ![](https://img.shields.io/badge/license-MIT-yellow)
@@ -18,10 +18,10 @@ In order to build the engine, you will need to follow these steps:
 The following screenshots are showing features and designs from the engine:
 
 ### HyperEditor v2
-![alt-text](https://i.imgur.com/Eq7o4l8.png)
+![alt-text](./Images/HyperEditor-V2.png)
 
 ### HyperEditor v1
-![alt-text](https://i.imgur.com/I3OJPW7.png)
+![alt-text](./Images/HyperEditor-V1.png)
 
 ## Dependencies
 -   [glad](https://github.com/Dav1dde/glad/blob/master/LICENSE) Copyright (c) MIT, David Herberth 2013-2020
