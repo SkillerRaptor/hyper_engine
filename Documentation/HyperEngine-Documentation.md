@@ -1,3 +1,3 @@
 # HyperEngine Documentation
 
-## Documentation is under construction
+Documentation is under construction

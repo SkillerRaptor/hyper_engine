@@ -1,3 +1,3 @@
 # HyperEngine Scripting-API Documentation
 
-## Documentation is under construction
+Documentation is under construction
