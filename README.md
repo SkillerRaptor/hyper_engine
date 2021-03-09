@@ -24,6 +24,7 @@ The following screenshots are showing features and designs from the engine:
 ![alt-text](./Images/HyperEditor-V1.png)
 
 ## Dependencies
+-   [fmt](https://github.com/fmtlib/fmt/blob/master/LICENSE.rst) Copyright (c) MIT, Victor Zverovich 2012-present
 -   [glad](https://github.com/Dav1dde/glad/blob/master/LICENSE) Copyright (c) MIT, David Herberth 2013-2020
 -   [glfw](https://github.com/glfw/glfw/blob/master/LICENSE.md) Copyright (c) zlib, Camilla Löwy 2006-2019
 -   [glm](https://github.com/g-truc/glm/blob/master/copying.txt) Copyright (c) The Happy Bunny License, G-Truc Creation 2005
