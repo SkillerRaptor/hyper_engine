@@ -9,17 +9,7 @@ jobs:
       run:
         shell: bash
     steps:
-    - name: Caching Submodules
-      uses: actions/cache@v2
-      id: cache-submodules
-      env:
-        cache-name: cache-submodules
-      with:
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-        path: vendor
-
     - name: Download Submodules
-      if: steps.cache-submodules.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         submodules: recursive
