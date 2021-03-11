@@ -8,11 +8,11 @@
 
 This repository houses the source code for the HyperEngine.
 
-## Building
+## Installing and Building
 In order to build the engine, you will need to follow these steps:
 1.  Start cloning the repository by typing in the command prompt of your choice:<br><code>git clone --recursive <a href="https://github.com/SkillerRaptor/HyperEngine">https://github.com/SkillerRaptor/HyperEngine</a></code>.
-2.  Inside the root directory of the project you run `cmake -B build`
-3.  After CMake finished, you can open the project, build and run it.
+2.  Build the project by running the `CMakeLists.txt` inside of the root directory.
+3.  Select one of the sample projects and run it to check if everything was built successfully.
 
 ## Screenshots
 The following screenshots are showing features and designs from the engine:
