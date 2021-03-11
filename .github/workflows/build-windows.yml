@@ -8,17 +8,54 @@ jobs:
     defaults:
       run:
         shell: cmd
+    env:
+      build_type: "Release"
+      vulkan_sdk: "$GITHUB_WORKSPACE/vulkan_sdk/"
+      vulkan_version: "1.2.131.1"
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Windows MSVC",
+            artifact: "windows-msvc.zip",
+            cc: "cl",
+            cxx: "cl",
+            cmake_build_options: "--config Release",
+            cmake_configure_options: '-G "Visual Studio 16 2019" -A x64',
+          }
     steps:
-    - name: Download Submodules
+    - name: Checkout
       uses: actions/checkout@v2
       with:
         submodules: recursive
 
-    - name: Generate Project Files
-      run: cmake -G "Visual Studio 16 2019" -A x64 -S . -B build
+    - name: Install Vulkan SDK
+      run: |
+        curl -LS -o vulkansdk.exe \
+          https://sdk.lunarg.com/sdk/download/${{ env.vulkan_version }}/windows/VulkanSDK-${{ env.vulkan_version }}-Installer.exe?Human=true
+        7z x vulkansdk.exe -o"${{ env.vulkan_sdk }}"
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.0.2
+    - name: Configure CMake
+      run: |
+        $env:CC="${{ matrix.config.cc }}"
+        $env:CXX="${{ matrix.config.cxx }}"
+        $env:Path += ";${{ env.vulkan_sdk }}\;${{ env.vulkan_sdk }}\Bin\"
 
-    - name: Build Solution
-      run: msbuild -property:Configuration=Release,MultiProcessorCompilation=true -maxCpuCount -verbosity:minimal -noLogo build/HyperEngine.sln
+        cmake . \
+          -Bbuild \
+          -DCMAKE_BUILD_TYPE=${{ env.build_type }}
+
+    - name: Build
+      run: |
+        cmake --build build ${{ matrix.config.cmake_build_options }}
+
+    - name: Prepare upload
+      run: |
+        7z a -tzip ${{ matrix.config.artifact }} build/*
+
+    - name: Upload
+      uses: actions/upload-artifact@v1
+      with:
+        path: ${{ matrix.config.artifact }}
+        name: ${{ matrix.config.artifact }}
