@@ -47,8 +47,7 @@ jobs:
 
     - name: Install Vulkan SDK
       run: |
-        curl -LS -o vulkansdk.tar.gz \
-          https://sdk.lunarg.com/sdk/download/${{ env.vulkan_version }}/linux/vulkansdk-linux-x86_64-${{ env.vulkan_version }}.tar.gz
+        curl -LS -o vulkansdk.tar.gz https://sdk.lunarg.com/sdk/download/${{ env.vulkan_version }}/linux/vulkansdk-linux-x86_64-${{ env.vulkan_version }}.tar.gz
 
         mkdir "${{ env.vulkan_sdk }}"
         tar xfz vulkansdk.tar.gz -C "${{ env.vulkan_sdk }}"
@@ -62,9 +61,7 @@ jobs:
         export LD_LIBRARY_PATH=$VULKAN_SDK/lib:$LD_LIBRARY_PATH
         export VK_LAYER_PATH=$VULKAN_SDK/etc/explicit_layer.d
 
-        cmake . \
-          -Bbuild \
-          -DCMAKE_BUILD_TYPE=${{ env.build_type }}
+        cmake . -Bbuild -DCMAKE_BUILD_TYPE=${{ env.build_type }}
 
     - name: Build
       run: |

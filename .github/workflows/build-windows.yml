@@ -37,13 +37,11 @@ jobs:
 
     - name: Configure CMake
       run: |
-        $env:CC="${{ matrix.config.cc }}"
-        $env:CXX="${{ matrix.config.cxx }}"
-        $env:Path += ";${{ env.vulkan_sdk }}\;${{ env.vulkan_sdk }}\Bin\"
+        set CC=${{ matrix.config.cc }}
+        set CXX=${{ matrix.config.cxx }}
+        set PATH=%PATH%;${{ env.vulkan_sdk }}\;${{ env.vulkan_sdk }}\Bin\
 
-        cmake . \
-          -Bbuild \
-          -DCMAKE_BUILD_TYPE=${{ env.build_type }}
+        cmake . -Bbuild -DCMAKE_BUILD_TYPE=${{ env.build_type }}
 
     - name: Build
       run: |
