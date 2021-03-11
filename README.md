@@ -17,11 +17,10 @@ In order to build the engine, you will need to follow these steps:
 ## Screenshots
 The following screenshots are showing features and designs from the engine:
 
-### HyperEditor v2
-![alt-text](./Images/HyperEditor-V2.png)
+### HyperEditor Versions
 
-### HyperEditor v1
-![alt-text](./Images/HyperEditor-V1.png)
+<img align="right" src="./Images/HyperEditor-V1.png" alt="HyperEditor V1" width="48%"/>
+<img src="./Images/HyperEditor-V2.png" alt="HyperEditor V2" width="48%"/>
 
 ## Dependencies
 -   [fmt](https://github.com/fmtlib/fmt/blob/master/LICENSE.rst) Copyright (c) MIT, Victor Zverovich 2012-present
