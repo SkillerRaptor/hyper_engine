@@ -6,9 +6,9 @@
 ![](https://github.com/SkillerRaptor/HyperEngine/workflows/build-linux/badge.svg)
 [![Trello](https://img.shields.io/badge/board-trello-blue.svg)](https://trello.com/b/xiuhLb05/hyperengine)
 
-This repository houses the source code for the HyperEngine.<br>
-The project is cross-platform graphics & game-engine written in C++17.
-The engine is supporting in the moment Windows & Linux and uses in the moment OpenGL as backend.<br>
+This repository houses the source code for the HyperEngine.<br><br>
+The project is a cross-platform game-engine written in C++17.
+The engine is supporting Windows & Linux and uses in the moment only OpenGL as backend.<br><br>
 The goal of the project is to give the user an easy way to develop & publish games.
 
 ## Installing and Building
