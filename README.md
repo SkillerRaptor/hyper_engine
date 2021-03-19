@@ -34,7 +34,8 @@ The following screenshots are showing features and designs from the engine:
 -   [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo/blob/master/LICENSE) Copyright (c) MIT, Cedric Guillemet 2016
 -   [json](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT) Copyright (c) MIT, Niels Lohmann 2013-2021
 -   [rttr](https://github.com/rttrorg/rttr/blob/master/LICENSE.txt) Copyright (c) MIT, Axel Menzel 2014-2018
--   [stb_image](https://github.com/nothings/stb/blob/master/LICENSE) Copyright (c) MIT, Sean Barrett 2017
+-   [stb](https://github.com/nothings/stb/blob/master/LICENSE) Copyright (c) MIT, Sean Barrett 2017
+-   [vulkan](https://www.lunarg.com/vulkan-sdk/) Copyright (c), Khronos Group
 
 ## Contributing
 Pull requests are not allowed. I want this engine to be my learning project and do everything by myself.
