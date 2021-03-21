@@ -1,4 +1,4 @@
-﻿<img src="Images/HyperEngine.png" align="right" width="150"/>
+﻿<img src="./Resources/Images/Branding.png" align="right" width="150"/>
 
 # HyperEngine
 ![](https://img.shields.io/badge/license-MIT-yellow)
@@ -22,8 +22,8 @@ The following screenshots are showing features and designs from the engine:
 
 ### HyperEditor Versions
 
-<img align="right" src="./Images/HyperEditor-V2.png" alt="HyperEditor V2" width="48%"/>
-<img src="./Images/HyperEditor-V1.png" alt="HyperEditor V1" width="48%"/>
+<img align="right" src="./Resources/Images/HyperEditor-V2.png" alt="HyperEditor V2" width="48%"/>
+<img src="./Resources/Images/HyperEditor-V1.png" alt="HyperEditor V1" width="48%"/>
 
 ## Dependencies
 -   [fmt](https://github.com/fmtlib/fmt/blob/master/LICENSE.rst) Copyright (c) MIT, Victor Zverovich 2012-present
