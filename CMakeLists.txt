@@ -34,9 +34,9 @@ endif ()
 
 # Adding Projects
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    add_compile_options(-fno-rtti fno-exceptions)
+    add_compile_options(-fno-rtti -fno-exceptions)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    add_compile_options(-fno-rtti fno-exceptions)
+    add_compile_options(-fno-rtti -fno-exceptions)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     string(REGEX REPLACE "/GR" "/GR-" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     add_compile_options(/EHsc)
