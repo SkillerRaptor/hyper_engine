@@ -1,6 +1,6 @@
 #pragma once
 
-#include <HyperSystem/Application.hpp>
+#include <HyperEngine.hpp>
 
 using namespace HyperEngine;
 
