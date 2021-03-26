@@ -1,38 +1,32 @@
 #pragma once
 
-#ifdef HP_SUPPORT_VULKAN
-
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
-#include "HyperRendering/RenderContext.hpp"
-#include "HyperRendering/HyperVulkan/Vulkan.hpp"
-#include "HyperRendering/HyperVulkan/VulkanValidationLayer.hpp"
-
-namespace HyperRendering
-{
-	class VulkanContext : public RenderContext
+#if HYPERENGINE_BUILD_VULKAN
+	#include <HyperRendering/Context.hpp>
+	
+	#include <cstdint>
+	
+	struct VkInstance_T;
+	typedef struct VkInstance_T* VkInstance;
+	
+	namespace HyperEngine
 	{
-	private:
-		VkInstance m_Instance;
-		VkSurfaceKHR m_Surface;
-
-		VulkanValidationLayer m_ValidationLayer;
-		VulkanValidationLayerInfo m_ValidationLayerInfo;
-
-	public:
-		VulkanContext(GraphicsAPI graphicsAPI);
-
-		virtual void PreInit() override;
-		virtual void Init() override;
-		virtual void Shutdown() override;
-
-		virtual void OnResize(size_t width, size_t height) override;
-
-		virtual void OnPreUpdate() override;
-		virtual void OnUpdate(HyperUtilities::Timestep timeStep) override;
-		virtual void OnRender() override;
-	};
-}
-
+		class VulkanContext : public Context
+		{
+		public:
+			virtual void SetWindowHints() override;
+			
+			virtual void Initialize(GLFWwindow* pWindow) override;
+			virtual void Terminate() override;
+			
+			virtual void Present() override;
+		
+		private:
+			static bool IsValidationLayerAvailable();
+			static void GetRequiredExtensions(const char**& extensions, uint32_t& extensionCount);
+		
+		private:
+			bool m_isValidationLayerSupported{ false };
+			VkInstance m_instance{ nullptr };
+		};
+	}
 #endif

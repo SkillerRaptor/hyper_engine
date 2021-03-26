@@ -1,78 +1,75 @@
 #pragma once
 
-#include <queue>
+#include "Context.hpp"
 
-#include "HyperCore/Core.hpp"
-#include "HyperEvent/Event.hpp"
-#include "HyperRendering/RenderContext.hpp"
-#include "HyperUtilities/Timestep.hpp"
+#include <HyperEvent/EventManager.hpp>
+#include <HyperMath/Vector2.hpp>
 
-namespace HyperRendering
+#include <string>
+
+struct GLFWwindow;
+
+namespace HyperEngine
 {
-	struct WindowPropsInfo
+	struct WindowInfo
 	{
-		std::string Title;
-		uint32_t Width;
-		uint32_t Height;
-
-		HyperEvent::EventManager* EventManger;
+		std::string title;
+		
+		Vec2ui position;
+		uint32_t width;
+		uint32_t height;
+		
+		bool isDecorated;
+		bool isResizable;
+		bool isVsync;
+		bool isShown;
+		bool isFocused;
+		
+		EventManager* pEventManager;
 	};
-
+	
 	class Window
 	{
-	protected:
-		HyperCore::Ref<RenderContext> m_RenderContext;
-		GraphicsAPI m_GraphicsAPI;
-		WindowDataInfo m_WindowDataInfo;
-
 	public:
-		virtual ~Window() = default;
-
-		virtual void Init() = 0;
-		virtual void Shutdown() = 0;
-
-		virtual void OnPreUpdate() = 0;
-		virtual void OnUpdate(HyperUtilities::Timestep timeStep) = 0;
-		virtual void OnRender() = 0;
-
-		virtual void SetTitle(const std::string& title) = 0;
-		virtual const std::string& GetTitle() const = 0;
-
-		virtual void SetWidth(uint32_t width) = 0;
-		virtual uint32_t GetWidth() const = 0;
-
-		virtual void SetHeight(uint32_t height) = 0;
-		virtual uint32_t GetHeight() const = 0;
-
-		virtual void SetXPos(uint32_t xPos) = 0;
-		virtual uint32_t GetXPos() const = 0;
-
-		virtual void SetYPos(uint32_t yPos) = 0;
-		virtual uint32_t GetYPos() const = 0;
-
-		virtual void SetVSync(bool vSync) = 0;
-		virtual bool IsVSync() const = 0;
-
-		virtual void SetAppIcon(const std::string& imagePath) = 0;
-
-		virtual double GetTime() = 0;
-
-		inline HyperCore::Ref<RenderContext> GetContext() const
-		{
-			return m_RenderContext;
-		}
-
-		inline const WindowDataInfo& GetWindowDataInfo() const
-		{
-			return m_WindowDataInfo;
-		}
-
-		static HyperCore::Ref<Window> Construct(const WindowPropsInfo& windowPropsInfo);
-
-	protected:
-		Window(const WindowPropsInfo& windowProps)
-			: m_RenderContext{ nullptr }, m_GraphicsAPI{ GraphicsAPI::OPENGL_33 }, m_WindowDataInfo{ windowProps.Title, windowProps.Width, windowProps.Height, 0, 0, nullptr, false, windowProps.EventManger }
-		{
-		}
+		explicit Window(WindowInfo windowInfo);
+		~Window();
+		
+		void Present();
+		
+		void SetTitle(const std::string& title);
+		const std::string& GetTitle() const;
+		
+		void SetPosition(Vec2ui position);
+		Vec2ui GetPosition() const;
+		
+		void SetWidth(uint32_t width);
+		uint32_t GetWidth() const;
+		
+		void SetHeight(uint32_t height);
+		uint32_t GetHeight() const;
+		
+		void SetDecorated(bool isDecorated);
+		bool IsDecorated() const;
+		
+		void SetResizable(bool isResizable);
+		bool IsResizable() const;
+		
+		void SetVsync(bool isVsync);
+		bool IsVsync() const;
+		
+		void SetShown(bool isShown);
+		bool IsShown() const;
+		
+		void SetFocused(bool isFocused);
+		bool IsFocused() const;
+		
+		Vec2ui GetFramebufferSize() const;
+		float GetTime() const;
+		
+	private:
+		GLFWwindow* m_pWindow;
+		Context* m_pRenderContext;
+		
+		WindowInfo m_windowInfo;
 	};
 }

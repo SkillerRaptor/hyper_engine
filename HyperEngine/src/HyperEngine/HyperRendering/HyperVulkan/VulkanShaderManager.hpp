@@ -1,17 +1,11 @@
 #pragma once
 
-#ifdef HP_SUPPORT_VULKAN
-
-namespace HyperRendering
-{
-	class VulkanShaderManager
+#if HYPERENGINE_BUILD_VULKAN
+	namespace HyperEngine
 	{
-	private:
-
-	public:
-		VulkanShaderManager();
-		~VulkanShaderManager();
-	};
-}
-
+		class VulkanShaderManager
+		{
+		
+		};
+	}
 #endif

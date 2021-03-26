@@ -1,22 +1,20 @@
 #pragma once
 
-#include "HyperRendering/RenderContext.hpp"
+#include <HyperRendering/Context.hpp>
 
-namespace HyperRendering
+namespace HyperEngine
 {
-	class OpenGL33Context : public RenderContext
+	class OpenGL33Context : public Context
 	{
 	public:
-		OpenGL33Context(GraphicsAPI graphicsAPI);
-
-		virtual void PreInit() override;
-		virtual void Init() override;
-		virtual void Shutdown() override;
-
-		virtual void OnResize(size_t width, size_t height) override;
-
-		virtual void OnPreUpdate() override;
-		virtual void OnUpdate(HyperUtilities::Timestep timeStep) override;
-		virtual void OnRender() override;
+		virtual void SetWindowHints() override;
+		
+		virtual void Initialize(GLFWwindow* pWindow) override;
+		virtual void Terminate() override;
+		
+		virtual void Present() override;
+	
+	private:
+		GLFWwindow* m_pWindow;
 	};
 }

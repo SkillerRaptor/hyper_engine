@@ -1,13 +1,11 @@
 #pragma once
 
-namespace HyperRendering
-{
-	class VulkanTextureManager
+#if HYPERENGINE_BUILD_VULKAN
+	namespace HyperEngine
 	{
-	private:
-
-	public:
-		VulkanTextureManager();
-		~VulkanTextureManager();
-	};
-}
+		class VulkanTextureManager
+		{
+		
+		};
+	}
+#endif
