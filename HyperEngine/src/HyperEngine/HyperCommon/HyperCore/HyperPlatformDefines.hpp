@@ -62,8 +62,6 @@
 	#if !HYPERENGINE_PLATFORM_X64
 		#error Unsupported Linux CPU (the only supported are x86-64).
 	#endif
-	
-	#error Linux is not supported in the moment.
 #else
 	#error Unknown target platform.
 #endif

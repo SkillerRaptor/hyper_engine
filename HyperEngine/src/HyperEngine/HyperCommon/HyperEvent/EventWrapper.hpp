@@ -59,7 +59,7 @@ namespace HyperEngine
 			m_eventListeners.push_back(std::move(eventListener));
 		}
 		
-		inline void UnregisterEventListener(const std::string& name, const std::function<void(const T&)>& eventCallback)
+		inline void UnregisterEventListener(const std::string& name)
 		{
 			for (typename std::vector<EventListener>::iterator it = m_eventListeners.begin(); it != m_eventListeners.end(); it++)
 			{
