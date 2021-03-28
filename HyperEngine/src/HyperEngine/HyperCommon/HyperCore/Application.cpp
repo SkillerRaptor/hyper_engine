@@ -54,6 +54,7 @@ namespace HyperEngine
 		OnTerminate();
 		
 		delete m_pEventManager;
+		m_pWindow->Terminate();
 	}
 	
 	void Application::Run()

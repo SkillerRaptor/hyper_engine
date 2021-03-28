@@ -5,7 +5,7 @@
 	
 	#include <HyperRendering/Context.hpp>
 	
-	#include <cstdint>
+	#include <vector>
 	
 	struct VkInstance_T;
 	typedef struct VkInstance_T* VkInstance;
@@ -26,11 +26,15 @@
 			virtual void Present() override;
 		
 		private:
-			bool CreateInstance(GLFWwindow* pWindow);
+			bool CreateInstance(
+				GLFWwindow* pWindow,
+				const std::vector<const char*>& validationLayers);
 			bool SetupDebugMessenger();
 			
-			static bool IsValidationLayerAvailable();
-			static void GetRequiredExtensions(const char**& extensions, uint32_t& extensionCount);
+			static bool IsValidationLayerAvailable(const std::vector<const char*>& validationLayers);
+			static void GetRequiredExtensions(
+				const char**& extensions,
+				uint32_t& extensionCount);
 		
 		private:
 			bool m_isValidationLayerSupported{ false };

@@ -9,7 +9,30 @@
 #if HYPERENGINE_BUILD_VULKAN
 	namespace HyperEngine
 	{
-		bool VulkanDevice::Initialize(VkInstance instance)
+		bool VulkanDevice::Initialize(
+			VkInstance instance,
+			bool isValidationLayerSupported,
+			const std::vector<const char*>& validationLayers)
+		{
+			if (!PickPhysicalDevice(instance))
+			{
+				return false;
+			}
+			
+			if (!CreateLogicalDevice(isValidationLayerSupported, validationLayers))
+			{
+				return false;
+			}
+			
+			return true;
+		}
+		
+		void VulkanDevice::Terminate()
+		{
+			vkDestroyDevice(m_logicalDevice, nullptr);
+		}
+		
+		bool VulkanDevice::PickPhysicalDevice(VkInstance instance)
 		{
 			uint32_t physicalDeviceCount{ 0 };
 			vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
@@ -45,9 +68,46 @@
 			return true;
 		}
 		
-		void VulkanDevice::Terminate()
+		bool VulkanDevice::CreateLogicalDevice(
+			bool isValidationLayerSupported,
+			const std::vector<const char*>& validationLayers)
 		{
-		
+			QueueFamilyIndices queueFamilyIndices{ FindQueueFamilies(m_physicalDevice) };
+			
+			VkDeviceQueueCreateInfo logicalDeviceQueueCreateInfo{};
+			logicalDeviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			logicalDeviceQueueCreateInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+			logicalDeviceQueueCreateInfo.queueCount = 1;
+			
+			float logicalDeviceQueuePriority{ 1.0f };
+			logicalDeviceQueueCreateInfo.pQueuePriorities = &logicalDeviceQueuePriority;
+			
+			VkPhysicalDeviceFeatures physicalDeviceFeatures{};
+			
+			VkDeviceCreateInfo logicalDeviceCreateInfo{};
+			logicalDeviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+			logicalDeviceCreateInfo.pQueueCreateInfos = &logicalDeviceQueueCreateInfo;
+			logicalDeviceCreateInfo.queueCreateInfoCount = 1;
+			logicalDeviceCreateInfo.pEnabledFeatures = &physicalDeviceFeatures;
+			logicalDeviceCreateInfo.ppEnabledExtensionNames = nullptr;
+			logicalDeviceCreateInfo.enabledExtensionCount = 0;
+			
+			logicalDeviceCreateInfo.ppEnabledLayerNames = nullptr;
+			logicalDeviceCreateInfo.enabledLayerCount = 0;
+			
+			if (isValidationLayerSupported)
+			{
+				logicalDeviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+				logicalDeviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+			}
+			
+			if (vkCreateDevice(m_physicalDevice, &logicalDeviceCreateInfo, nullptr, &m_logicalDevice) != VK_SUCCESS)
+			{
+				HYPERENGINE_ASSERT(false, "Failed to create a logical device!");
+				return false;
+			}
+			
+			return true;
 		}
 		
 		uint32_t VulkanDevice::RateDeviceSuitability(VkPhysicalDevice physicalDevice)

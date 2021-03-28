@@ -15,11 +15,6 @@
 			VkDebugUtilsMessageTypeFlagsEXT debugUtilsMessageTypeFlagsEXT,
 			const VkDebugUtilsMessengerCallbackDataEXT* pDebugUtilsMessengerCallbackDataEXT,
 			void* pUserData);
-	
-		static const char* g_szValidationLayers[] =
-		{
-			"VK_LAYER_KHRONOS_validation"
-		};
 		
 		void VulkanContext::SetWindowHints()
 		{
@@ -28,14 +23,18 @@
 		
 		bool VulkanContext::Initialize(GLFWwindow* pWindow)
 		{
+			const std::vector<const char*> validationLayers = {
+				"VK_LAYER_KHRONOS_validation"
+			};
+			
 			#if HYPERENGINE_DEBUG
-				if (IsValidationLayerAvailable())
+				if (IsValidationLayerAvailable(validationLayers))
 				{
 					m_isValidationLayerSupported = true;
 				}
 			#endif
 			
-			if (!CreateInstance(pWindow))
+			if (!CreateInstance(pWindow, validationLayers))
 			{
 				return false;
 			}
@@ -45,7 +44,7 @@
 				return false;
 			}
 			
-			if (!m_vulkanDevice.Initialize(m_instance))
+			if (!m_vulkanDevice.Initialize(m_instance, m_isValidationLayerSupported, validationLayers))
 			{
 				return false;
 			}
@@ -55,6 +54,8 @@
 		
 		void VulkanContext::Terminate()
 		{
+			m_vulkanDevice.Terminate();
+			
 			if (m_isValidationLayerSupported)
 			{
 				PFN_vkVoidFunction vkDestroyDebugUtilsMessengerEXTFunction{ vkGetInstanceProcAddr(m_instance, "vkDestroyDebugUtilsMessengerEXT") };
@@ -70,7 +71,9 @@
 			glfwPollEvents();
 		}
 		
-		bool VulkanContext::CreateInstance(GLFWwindow* pWindow)
+		bool VulkanContext::CreateInstance(
+			GLFWwindow* pWindow,
+			const std::vector<const char*>& validationLayers)
 		{
 			VkApplicationInfo applicationInfo{};
 			applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -105,8 +108,8 @@
 			VkDebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo{};
 			if (m_isValidationLayerSupported)
 			{
-				instanceCreateInfo.ppEnabledLayerNames = g_szValidationLayers;
-				instanceCreateInfo.enabledLayerCount = sizeof(g_szValidationLayers) / sizeof(g_szValidationLayers[0]);
+				instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+				instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 				
 				debugMessengerCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 				debugMessengerCreateInfo.messageSeverity =
@@ -164,7 +167,7 @@
 			return true;
 		}
 		
-		bool VulkanContext::IsValidationLayerAvailable()
+		bool VulkanContext::IsValidationLayerAvailable(const std::vector<const char*>& validationLayers)
 		{
 			uint32_t layerCount{ 0 };
 			vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -172,7 +175,7 @@
 			std::vector<VkLayerProperties> availableLayers{ layerCount };
 			vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 			
-			for (const char* szLayerName : g_szValidationLayers)
+			for (const char* szLayerName : validationLayers)
 			{
 				bool wasLayerFound{ false };
 				
@@ -195,7 +198,9 @@
 			return true;
 		}
 		
-		void VulkanContext::GetRequiredExtensions(const char**& extensions, uint32_t& extensionCount)
+		void VulkanContext::GetRequiredExtensions(
+			const char**& extensions,
+			uint32_t& extensionCount)
 		{
 			extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
 		}
