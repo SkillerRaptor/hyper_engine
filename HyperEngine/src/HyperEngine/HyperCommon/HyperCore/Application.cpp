@@ -25,8 +25,8 @@ namespace HyperEngine
 		
 		WindowInfo windowInfo{};
 		windowInfo.title = applicationInfo.szTitle;
-		windowInfo.width = applicationInfo.width;
-		windowInfo.height = applicationInfo.height;
+		windowInfo.width = static_cast<uint32_t>(applicationInfo.width);
+		windowInfo.height = static_cast<uint32_t>(applicationInfo.height);
 		windowInfo.isDecorated = true;
 		windowInfo.isResizable = true;
 		windowInfo.isVsync = false;
@@ -35,7 +35,11 @@ namespace HyperEngine
 		windowInfo.pEventManager = m_pEventManager;
 		
 		m_pWindow = new Window{};
-		m_pWindow->Initialize(windowInfo);
+		if(!m_pWindow->Initialize(windowInfo))
+		{
+			Terminate();
+			std::exit(EXIT_FAILURE);
+		}
 		
 		m_running = true;
 		

@@ -86,7 +86,7 @@
 			std::vector<const char*> requiredExtensions{ extensionCount };
 			for (size_t i{ 0 }; i < static_cast<size_t>(extensionCount); i++)
 			{
-				requiredExtensions.emplace_back(extensions[i]);
+				requiredExtensions[i] = extensions[i];
 			}
 			
 			requiredExtensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -97,15 +97,15 @@
 			instanceCreateInfo.ppEnabledLayerNames = nullptr;
 			instanceCreateInfo.enabledLayerCount = 0;
 			
+			VkDebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo{};
 			if (m_isValidationLayerSupported)
 			{
 				instanceCreateInfo.ppEnabledLayerNames = g_szValidationLayers;
 				instanceCreateInfo.enabledLayerCount = sizeof(g_szValidationLayers) / sizeof(g_szValidationLayers[0]);
 				
-				VkDebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo{};
 				debugMessengerCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 				debugMessengerCreateInfo.messageSeverity =
-					VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+					VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
 					VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
 					VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 				debugMessengerCreateInfo.messageType =
@@ -137,7 +137,7 @@
 			VkDebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo{};
 			debugMessengerCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 			debugMessengerCreateInfo.messageSeverity =
-				VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+				VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 			debugMessengerCreateInfo.messageType =
@@ -165,7 +165,7 @@
 			vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 			
 			std::vector<VkLayerProperties> availableLayers{ layerCount };
-			vkEnumerateInstanceLayerProperties(&layerCount, &availableLayers[0]);
+			vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 			
 			for (const char* szLayerName : g_szValidationLayers)
 			{
@@ -203,16 +203,16 @@
 		{
 			if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 			{
-				HYPERENGINE_CORE_ERROR("{}", pCallbackData->pMessage);
+				HYPERENGINE_CORE_ERROR("Vulkan Validation Error - {}", pCallbackData->pMessage);
 				HYPERENGINE_DEBUGBREAK();
 			}
 			else if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
 			{
-				HYPERENGINE_CORE_WARNING("{}", pCallbackData->pMessage);
+				HYPERENGINE_CORE_WARNING("Vulkan Validation Warning - {}", pCallbackData->pMessage);
 			}
 			else if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
 			{
-				HYPERENGINE_CORE_INFO("{}", pCallbackData->pMessage);
+				HYPERENGINE_CORE_INFO("Vulkan Validation Info - {}", pCallbackData->pMessage);
 			}
 			
 			return VK_FALSE;

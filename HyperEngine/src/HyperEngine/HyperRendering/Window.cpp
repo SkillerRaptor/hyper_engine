@@ -18,8 +18,8 @@ namespace HyperEngine
 	{
 		m_windowInfo = std::move(windowInfo);
 		
-		m_pContext = new OpenGL33Context{};
-		//m_pRenderContext = new VulkanRenderContext{};
+		//m_pContext = new OpenGL33Context{};
+		m_pContext = new VulkanContext{};
 		
 		glfwInit();
 		m_pContext->SetWindowHints();
@@ -32,9 +32,9 @@ namespace HyperEngine
 			return false;
 		}
 		
-		if (m_pContext->Initialize(m_pWindow))
+		if (!m_pContext->Initialize(m_pWindow))
 		{
-			HYPERENGINE_ASSERT(false, "Failed to initialize render context!");
+			HYPERENGINE_ASSERT(false, "Failed to initialize context!");
 			glfwDestroyWindow(m_pWindow);
 			glfwTerminate();
 			return false;
