@@ -2,7 +2,7 @@
 
 
 #if HYPERENGINE_BUILD_VULKAN
-	#include <cstdint>
+	#include <optional>
 	
 	struct VkInstance_T;
 	typedef struct VkInstance_T* VkInstance;
@@ -14,12 +14,24 @@
 	{
 		class VulkanDevice
 		{
+		private:
+			struct QueueFamilyIndices
+			{
+				std::optional<uint32_t> graphicsFamily;
+				
+				bool IsComplete() const
+				{
+					return graphicsFamily.has_value();
+				}
+			};
+			
 		public:
 			bool Initialize(VkInstance instance);
 			void Terminate();
 		
 		private:
-			uint32_t RateDeviceSuitability(VkPhysicalDevice physicalDevice);
+			static uint32_t RateDeviceSuitability(VkPhysicalDevice physicalDevice);
+			static QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice physicalDevice);
 			
 		private:
 			VkPhysicalDevice m_physicalDevice{ nullptr };

@@ -72,7 +72,42 @@
 				return 0;
 			}
 			
+			QueueFamilyIndices queueFamilyIndices{ FindQueueFamilies(physicalDevice) };
+			if (!queueFamilyIndices.IsComplete())
+			{
+				return 0;
+			}
+			
 			return score;
+		}
+		
+		VulkanDevice::QueueFamilyIndices VulkanDevice::FindQueueFamilies(VkPhysicalDevice physicalDevice)
+		{
+			QueueFamilyIndices queueFamilyIndices{};
+			
+			uint32_t queueFamilyCount{ 0 };
+			vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+			
+			std::vector<VkQueueFamilyProperties> queueFamilyProperties{ queueFamilyCount };
+			vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilyProperties.data());
+			
+			uint32_t i{ 0 };
+			for (const VkQueueFamilyProperties& queueFamilyProperty : queueFamilyProperties)
+			{
+				if (queueFamilyProperty.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+				{
+					queueFamilyIndices.graphicsFamily = i;
+				}
+				
+				if (queueFamilyIndices.IsComplete())
+				{
+					break;
+				}
+				
+				i++;
+			}
+			
+			return queueFamilyIndices;
 		}
 	}
 #endif
