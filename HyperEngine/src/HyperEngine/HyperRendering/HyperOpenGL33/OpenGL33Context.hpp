@@ -9,7 +9,7 @@ namespace HyperEngine
 	public:
 		virtual void SetWindowHints() override;
 		
-		virtual void Initialize(GLFWwindow* pWindow) override;
+		virtual bool Initialize(GLFWwindow* pWindow) override;
 		virtual void Terminate() override;
 		
 		virtual void Present() override;

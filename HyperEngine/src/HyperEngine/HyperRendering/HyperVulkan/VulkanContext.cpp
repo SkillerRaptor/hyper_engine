@@ -10,6 +10,12 @@
 	
 	namespace HyperEngine
 	{
+		static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
+			VkDebugUtilsMessageSeverityFlagBitsEXT debugUtilsMessageSeverityFlagBitsEXT,
+			VkDebugUtilsMessageTypeFlagsEXT debugUtilsMessageTypeFlagsEXT,
+			const VkDebugUtilsMessengerCallbackDataEXT* pDebugUtilsMessengerCallbackDataEXT,
+			void* pUserData);
+	
 		static const char* g_szValidationLayers[] =
 		{
 			"VK_LAYER_KHRONOS_validation"
@@ -20,7 +26,7 @@
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		}
 		
-		void VulkanContext::Initialize(GLFWwindow* pWindow)
+		bool VulkanContext::Initialize(GLFWwindow* pWindow)
 		{
 			#if HYPERENGINE_DEBUG
 				if (IsValidationLayerAvailable())
@@ -29,6 +35,38 @@
 				}
 			#endif
 			
+			if (!CreateInstance(pWindow))
+			{
+				return false;
+			}
+			
+			if (!SetupDebugMessenger())
+			{
+				return false;
+			}
+			
+			return true;
+		}
+		
+		void VulkanContext::Terminate()
+		{
+			if (m_isValidationLayerSupported)
+			{
+				PFN_vkVoidFunction vkDestroyDebugUtilsMessengerEXTFunction{ vkGetInstanceProcAddr(m_instance, "vkDestroyDebugUtilsMessengerEXT") };
+				PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT{ reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkDestroyDebugUtilsMessengerEXTFunction) };
+				vkDestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
+			}
+			
+			vkDestroyInstance(m_instance, nullptr);
+		}
+		
+		void VulkanContext::Present()
+		{
+			glfwPollEvents();
+		}
+		
+		bool VulkanContext::CreateInstance(GLFWwindow* pWindow)
+		{
 			VkApplicationInfo applicationInfo{};
 			applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 			applicationInfo.pApplicationName = "HyperEngine";
@@ -63,25 +101,62 @@
 			{
 				instanceCreateInfo.ppEnabledLayerNames = g_szValidationLayers;
 				instanceCreateInfo.enabledLayerCount = sizeof(g_szValidationLayers) / sizeof(g_szValidationLayers[0]);
+				
+				VkDebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo{};
+				debugMessengerCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+				debugMessengerCreateInfo.messageSeverity =
+					VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+					VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+					VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+				debugMessengerCreateInfo.messageType =
+					VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+					VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+					VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+				debugMessengerCreateInfo.pfnUserCallback = DebugCallback;
+				debugMessengerCreateInfo.pUserData = nullptr;
+				
+				instanceCreateInfo.pNext = reinterpret_cast<const void*>(&debugMessengerCreateInfo);
 			}
 			
 			if (vkCreateInstance(&instanceCreateInfo, nullptr, &m_instance) != VK_SUCCESS)
 			{
 				HYPERENGINE_ASSERT(false, "Failed to create vulkan instance!");
-				glfwDestroyWindow(pWindow);
-				glfwTerminate();
-				std::exit(EXIT_FAILURE);
+				return false;
 			}
+			
+			return true;
 		}
 		
-		void VulkanContext::Terminate()
+		bool VulkanContext::SetupDebugMessenger()
 		{
-			vkDestroyInstance(m_instance, nullptr);
-		}
-		
-		void VulkanContext::Present()
-		{
-			glfwPollEvents();
+			if (!m_isValidationLayerSupported)
+			{
+				return true;
+			}
+			
+			VkDebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo{};
+			debugMessengerCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+			debugMessengerCreateInfo.messageSeverity =
+				VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+				VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+				VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+			debugMessengerCreateInfo.messageType =
+				VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+				VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+				VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+			debugMessengerCreateInfo.pfnUserCallback = DebugCallback;
+			debugMessengerCreateInfo.pUserData = nullptr;
+			
+			PFN_vkVoidFunction vkCreateDebugUtilsMessengerEXTFunction{ vkGetInstanceProcAddr(m_instance, "vkCreateDebugUtilsMessengerEXT") };
+			PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT{ reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkCreateDebugUtilsMessengerEXTFunction) };
+			
+			if (vkCreateDebugUtilsMessengerEXT(m_instance, &debugMessengerCreateInfo, nullptr, &m_debugMessenger) != VK_SUCCESS)
+			{
+				HYPERENGINE_ASSERT(false, "Failed to setup debug messenger!");
+				return false;
+			}
+			
+			return true;
 		}
 		
 		bool VulkanContext::IsValidationLayerAvailable()
@@ -118,6 +193,29 @@
 		void VulkanContext::GetRequiredExtensions(const char**& extensions, uint32_t& extensionCount)
 		{
 			extensions = glfwGetRequiredInstanceExtensions(&extensionCount);
+		}
+		
+		static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
+			VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+			VkDebugUtilsMessageTypeFlagsEXT type,
+			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+			void* pUserData)
+		{
+			if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+			{
+				HYPERENGINE_CORE_ERROR("{}", pCallbackData->pMessage);
+				HYPERENGINE_DEBUGBREAK();
+			}
+			else if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+			{
+				HYPERENGINE_CORE_WARNING("{}", pCallbackData->pMessage);
+			}
+			else if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
+			{
+				HYPERENGINE_CORE_INFO("{}", pCallbackData->pMessage);
+			}
+			
+			return VK_FALSE;
 		}
 	}
 #endif

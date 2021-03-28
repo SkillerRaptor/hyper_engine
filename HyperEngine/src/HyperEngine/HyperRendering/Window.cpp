@@ -14,23 +14,31 @@
 
 namespace HyperEngine
 {
-	Window::Window(WindowInfo windowInfo)
-		: m_windowInfo{ std::move(windowInfo) }
+	bool Window::Initialize(WindowInfo windowInfo)
 	{
-		m_pRenderContext = new OpenGL33Context{};
+		m_windowInfo = std::move(windowInfo);
+		
+		m_pContext = new OpenGL33Context{};
 		//m_pRenderContext = new VulkanRenderContext{};
 		
 		glfwInit();
-		m_pRenderContext->SetWindowHints();
+		m_pContext->SetWindowHints();
 		m_pWindow = glfwCreateWindow(m_windowInfo.width, m_windowInfo.height, m_windowInfo.title.c_str(), nullptr, nullptr);
 		if (m_pWindow == nullptr)
 		{
 			HYPERENGINE_ASSERT(false, "Failed to created GLFW window!");
+			glfwDestroyWindow(m_pWindow);
 			glfwTerminate();
-			std::exit(EXIT_FAILURE);
+			return false;
 		}
 		
-		m_pRenderContext->Initialize(m_pWindow);
+		if (m_pContext->Initialize(m_pWindow))
+		{
+			HYPERENGINE_ASSERT(false, "Failed to initialize render context!");
+			glfwDestroyWindow(m_pWindow);
+			glfwTerminate();
+			return false;
+		}
 		
 		glfwSetWindowUserPointer(m_pWindow, &m_windowInfo);
 		
@@ -135,12 +143,14 @@ namespace HyperEngine
 			WindowInfo& windowInfo{ *reinterpret_cast<WindowInfo*>(pWindowUserPointer) };
 			windowInfo.pEventManager->InvokeEvent<MouseMovedEvent>((float) xPos, (float) yPos);
 		});
+		
+		return true;
 	}
 	
-	Window::~Window()
+	void Window::Terminate()
 	{
-		m_pRenderContext->Terminate();
-		delete m_pRenderContext;
+		m_pContext->Terminate();
+		delete m_pContext;
 		
 		glfwDestroyWindow(m_pWindow);
 		glfwTerminate();
@@ -148,7 +158,7 @@ namespace HyperEngine
 	
 	void Window::Present()
 	{
-		m_pRenderContext->Present();
+		m_pContext->Present();
 	}
 	
 	void Window::SetTitle(const std::string& title)

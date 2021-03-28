@@ -31,8 +31,8 @@ namespace HyperEngine
 	class Window
 	{
 	public:
-		explicit Window(WindowInfo windowInfo);
-		~Window();
+		bool Initialize(WindowInfo windowInfo);
+		void Terminate();
 		
 		void Present();
 		
@@ -67,8 +67,8 @@ namespace HyperEngine
 		float GetTime() const;
 		
 	private:
-		GLFWwindow* m_pWindow;
-		Context* m_pRenderContext;
+		GLFWwindow* m_pWindow{ nullptr };
+		Context* m_pContext{ nullptr };
 		
 		WindowInfo m_windowInfo;
 	};

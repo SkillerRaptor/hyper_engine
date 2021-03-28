@@ -12,7 +12,7 @@ namespace HyperEngine
 		
 		virtual void SetWindowHints() = 0;
 		
-		virtual void Initialize(GLFWwindow* pWindow) = 0;
+		virtual bool Initialize(GLFWwindow* pWindow) = 0;
 		virtual void Terminate() = 0;
 		
 		virtual void Present() = 0;

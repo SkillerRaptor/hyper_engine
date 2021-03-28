@@ -34,7 +34,8 @@ namespace HyperEngine
 		windowInfo.isFocused = true;
 		windowInfo.pEventManager = m_pEventManager;
 		
-		m_pWindow = new Window{ windowInfo };
+		m_pWindow = new Window{};
+		m_pWindow->Initialize(windowInfo);
 		
 		m_running = true;
 		

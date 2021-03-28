@@ -15,7 +15,7 @@ namespace HyperEngine
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 	}
 	
-	void OpenGL33Context::Initialize(GLFWwindow* pWindow)
+	bool OpenGL33Context::Initialize(GLFWwindow* pWindow)
 	{
 		m_pWindow = pWindow;
 		
@@ -24,9 +24,7 @@ namespace HyperEngine
 		if(!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
 		{
 			HYPERENGINE_ASSERT(false, "Failed to initialize Glad!");
-			glfwDestroyWindow(m_pWindow);
-			glfwTerminate();
-			std::exit(EXIT_FAILURE);
+			return false;
 		}
 		
 		HYPERENGINE_CORE_INFO("");
@@ -35,6 +33,8 @@ namespace HyperEngine
 		HYPERENGINE_CORE_INFO("  Renderer: {}", glGetString(GL_RENDERER));
 		HYPERENGINE_CORE_INFO("  Version: {}", glGetString(GL_VERSION));
 		HYPERENGINE_CORE_INFO("");
+		
+		return true;
 	}
 	
 	void OpenGL33Context::Terminate()
