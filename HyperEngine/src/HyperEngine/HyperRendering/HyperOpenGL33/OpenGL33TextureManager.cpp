@@ -1,4 +1,4 @@
-#include "OpenGl33TextureManager.hpp"
+#include "OpenGL33TextureManager.hpp"
 
 namespace HyperEngine
 {

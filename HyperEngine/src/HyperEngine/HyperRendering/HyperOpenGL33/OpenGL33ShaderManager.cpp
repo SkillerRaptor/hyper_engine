@@ -1,4 +1,4 @@
-#include "OpenGl33ShaderManager.hpp"
+#include "OpenGL33ShaderManager.hpp"
 
 namespace HyperEngine
 {
