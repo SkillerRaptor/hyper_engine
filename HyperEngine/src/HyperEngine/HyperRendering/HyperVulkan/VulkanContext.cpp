@@ -45,6 +45,11 @@
 				return false;
 			}
 			
+			if (!m_vulkanDevice.Initialize(m_instance))
+			{
+				return false;
+			}
+			
 			return true;
 		}
 		

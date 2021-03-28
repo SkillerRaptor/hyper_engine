@@ -1,6 +1,8 @@
 #pragma once
 
 #if HYPERENGINE_BUILD_VULKAN
+	#include "VulkanDevice.hpp"
+	
 	#include <HyperRendering/Context.hpp>
 	
 	#include <cstdint>
@@ -32,8 +34,11 @@
 		
 		private:
 			bool m_isValidationLayerSupported{ false };
+			
 			VkInstance m_instance{ nullptr };
 			VkDebugUtilsMessengerEXT m_debugMessenger{ nullptr };
+			
+			VulkanDevice m_vulkanDevice;
 		};
 	}
 #endif
