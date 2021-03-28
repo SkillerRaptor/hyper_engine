@@ -46,7 +46,7 @@ namespace HyperEngine
 		{
 			HYPERENGINE_ASSERT(index < m_poolSize, "SparseMemoryPool: Index out of range!");
 			
-			uint32_t* pBlock{ reinterpret_cast<uint32_t*>(&m_pMemory[m_nextAllocation]) }1;
+			uint32_t* pBlock{ reinterpret_cast<uint32_t*>(&m_pMemory[m_nextAllocation]) };
 			*pBlock = m_nextAllocation;
 			
 			m_nextAllocation = index;
