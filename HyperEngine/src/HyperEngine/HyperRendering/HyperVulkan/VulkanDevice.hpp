@@ -2,6 +2,7 @@
 
 
 #if HYPERENGINE_BUILD_VULKAN
+	#include <cstdint>
 	#include <optional>
 	#include <vector>
 	
