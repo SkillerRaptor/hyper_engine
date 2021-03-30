@@ -21,14 +21,18 @@ namespace HyperEngine
 		};
 	
 	public:
-		Logger(std::string  name, Level level)
+		Logger(
+			std::string name,
+			Level level)
 			: m_name{ std::move( name ) }
 			, m_level{ level }
 		{
 		}
 		
 		template <typename... Args>
-		void LogInfo(const std::string_view format, Args... args)
+		void LogInfo(
+			const std::string_view format,
+			Args... args)
 		{
 			if (m_level != Level::Trace && m_level != Level::Info)
 			{
@@ -47,7 +51,9 @@ namespace HyperEngine
 		}
 		
 		template <typename... Args>
-		void LogWarning(const std::string_view format, Args&& ... args)
+		void LogWarning(
+			const std::string_view format,
+			Args... args)
 		{
 			if (m_level != Level::Trace && m_level != Level::Warning)
 			{
@@ -66,7 +72,9 @@ namespace HyperEngine
 		}
 		
 		template <typename... Args>
-		void LogError(const std::string_view format, Args&& ... args)
+		void LogError(
+			const std::string_view format,
+			Args... args)
 		{
 			if (m_level != Level::Trace && m_level != Level::Error)
 			{
@@ -85,7 +93,9 @@ namespace HyperEngine
 		}
 		
 		template <typename... Args>
-		void LogFatal(const std::string_view format, Args&& ... args)
+		void LogFatal(
+			const std::string_view format,
+			Args... args)
 		{
 			if (m_level != Level::Trace && m_level != Level::Fatal)
 			{
@@ -104,7 +114,9 @@ namespace HyperEngine
 		}
 		
 		template <typename... Args>
-		void LogDebug(const std::string_view format, Args&& ... args)
+		void LogDebug(
+			const std::string_view format,
+			Args... args)
 		{
 			if (m_level != Level::Trace && m_level != Level::Debug)
 			{
@@ -123,7 +135,9 @@ namespace HyperEngine
 		}
 		
 		template <typename... Args>
-		void LogTrace(const std::string_view format, Args&& ... args)
+		void LogTrace(
+			const std::string_view format,
+			Args... args)
 		{
 			if (m_level != Level::Trace)
 			{
@@ -148,7 +162,9 @@ namespace HyperEngine
 		inline Level GetLevel() const { return m_level; }
 	
 	private:
-		void LogInternal(Level level, std::string_view format);
+		void LogInternal(
+			Level level,
+			std::string_view format);
 	
 	private:
 		std::string m_name;

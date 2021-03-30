@@ -71,7 +71,9 @@ namespace HyperEngine
 		}
 		
 		template <class T>
-		void RegisterEventListener(const std::string& name, const std::function<void(const T&)>& eventListener)
+		void RegisterEventListener(
+			const std::string& name,
+			const std::function<void(const T&)>& eventListener)
 		{
 			static_assert(std::is_base_of_v<Event, T>, "Template argument is not a base class of Event");
 			

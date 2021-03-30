@@ -5,7 +5,9 @@
 
 namespace HyperEngine
 {
-	void Logger::LogInternal(Logger::Level level, const std::string_view format)
+	void Logger::LogInternal(
+		Logger::Level level,
+		const std::string_view format)
 	{
 		fmt::color levelColor;
 		std::string levelName;
@@ -42,7 +44,7 @@ namespace HyperEngine
 			break;
 		}
 		
-		//fmt::print(fg(levelColor), "[ {:%H:%M:%S} | {} ] {}: {}\n", fmt::localtime(std::time(nullptr)), levelName, m_szName, format);
+		//fmt::print(fg(levelColor), "[ {:%H:%M:%S} | {} ] {}: {}\n", fmt::localtime(std::time(nullptr)), levelName, m_name, format);
 		fmt::print("[ {:%H:%M:%S} | {} ] {}: {}\n", fmt::localtime(std::time(nullptr)), levelName, m_name, format);
 	}
 }

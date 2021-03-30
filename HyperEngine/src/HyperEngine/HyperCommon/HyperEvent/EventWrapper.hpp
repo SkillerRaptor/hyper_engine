@@ -42,7 +42,9 @@ namespace HyperEngine
 			}
 		}
 		
-		inline void RegisterEventListener(const std::string& name, const std::function<void(const T&)>& eventListenerFunction)
+		inline void RegisterEventListener(
+			const std::string& name,
+			const std::function<void(const T&)>& eventListenerFunction)
 		{
 			for (const EventListener& eventListener : m_eventListeners)
 			{
