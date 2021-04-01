@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
+set(OUTPUT_DIR_DEBUG "${CMAKE_BINARY_DIR}/bin/HyperEngine/HyperEngine/Debug")
+set(OUTPUT_DIR_RELEASE "${CMAKE_BINARY_DIR}/bin/HyperEngine/HyperEngine/Release")
+
 file(GLOB_RECURSE "HYPERENGINE_SOURCE" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 file(GLOB_RECURSE "HYPERENGINE_HEADERS" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
 
@@ -17,6 +20,7 @@ target_include_directories(HyperEngine PUBLIC
         "${CMAKE_SOURCE_DIR}/vendor/fmt/include/"
         "${CMAKE_SOURCE_DIR}/vendor/glad/include/"
         "${CMAKE_SOURCE_DIR}/vendor/glfw/include/"
+        "${CMAKE_SOURCE_DIR}/vendor/glm/"
         "${CMAKE_SOURCE_DIR}/vendor/json/include/"
         "${CMAKE_SOURCE_DIR}/vendor/rttr/src/")
 
