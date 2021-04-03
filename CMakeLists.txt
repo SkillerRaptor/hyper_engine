@@ -44,7 +44,7 @@ endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEngine)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperResource)
-#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEditor)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEditor)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     string(REGEX REPLACE "-fno-rtti -fno-exceptions" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
