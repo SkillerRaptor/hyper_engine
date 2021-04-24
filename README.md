@@ -26,6 +26,7 @@ The following screenshots are showing features and designs from the engine:
 <img src="./Resources/Images/HyperEditor-V1.png" alt="HyperEditor V1" width="48%"/>
 
 ## Dependencies
+ -   [assimp](https://github.com/assimp/assimp/blob/master/LICENSE) Copyright (c) Open Asset Import Library License, assimp team 2006-2021
  -   [DirectXShaderCompiler](https://github.com/microsoft/DirectXShaderCompiler/blob/master/LICENSE.TXT) Copyright (c) LLVM Release License, University of Illinois 2003-2015
  -   [fmt](https://github.com/fmtlib/fmt/blob/master/LICENSE.rst) Copyright (c) MIT License, Victor Zverovich 2012-present
  -   [glad](https://github.com/Dav1dde/glad/blob/master/LICENSE) Copyright (c) MIT License, David Herberth 2013-2020
@@ -34,6 +35,7 @@ The following screenshots are showing features and designs from the engine:
  -   [Dear ImGui](https://github.com/ocornut/imgui/blob/master/LICENSE.txt) Copyright (c) MIT License, Omar Cornut 2014-2021
  -   [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo/blob/master/LICENSE) Copyright (c) MIT License, Cedric Guillemet 2016
  -   [json](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT) Copyright (c) MIT License, Niels Lohmann 2013-2021
+ -   [meshoptimizer](https://github.com/zeux/meshoptimizer/blob/master/LICENSE.md) Copyright (c) MIT License, Arseny Kapoulkine 2016-2021
  -   [rttr](https://github.com/rttrorg/rttr/blob/master/LICENSE.txt) Copyright (c) MIT License, Axel Menzel 2014-2018
  -   [SPIRV-Cross](https://github.com/KhronosGroup/SPIRV-Cross/blob/master/LICENSE) Copyright (c) Apache License 2.0, ARM Limited 2015-2017
  -   [stb](https://github.com/nothings/stb/blob/master/LICENSE) Copyright (c) MIT License, Sean Barrett 2017
@@ -41,8 +43,8 @@ The following screenshots are showing features and designs from the engine:
 
 ## Contributing
 Pull requests are not welcome. This project is a learning project and will be only developed by myself.<br>
-If you still would like to change something or gie some ideas, please open an issue first to discuss what you would like to change.<br>
-The change will then reviewed and the feature will be implemented into the engine.
+If you still would like to change something, please open an issue first to discuss what you would like to change.<br>
+The change will then reviewed and the feature will be implemented by me into the engine.
 
 ## License
 The HyperEngine is distributed under the [MIT](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE) license.
