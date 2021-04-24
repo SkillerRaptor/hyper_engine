@@ -3,13 +3,13 @@
 # HyperEngine
 [![Build Windows](https://github.com/SkillerRaptor/HyperEngine/workflows/build-windows/badge.svg)](https://github.com/SkillerRaptor/HyperEngine/blob/master/.github/workflows/build-windows.yml)
 [![Build Linux](https://github.com/SkillerRaptor/HyperEngine/workflows/build-linux/badge.svg)](https://github.com/SkillerRaptor/HyperEngine/blob/master/.github/workflows/build-linux.yml)
-[![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE)
-[![Trello](https://img.shields.io/badge/board-trello-blue.svg)](https://trello.com/b/xiuhLb05/hyperengine)
+[![License](https://img.shields.io/badge/license-MIT-yellow)](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE)
+[![Trello](https://img.shields.io/badge/board-Trello-blue.svg)](https://trello.com/b/xiuhLb05/hyperengine)
 
-This repository houses the source code for the HyperEngine.<br>
+This repository houses the source code for the HyperEngine.<br><br>
 The project is a cross-platform game-engine written in C++17.<br>
 The engine can only be used on Windows and Linux as platform at the time.<br>
-The HyperEngine has only OpenGL as backend supported in th moment.<br>
+The HyperEngine has only OpenGL as backend supported in the moment.<br><br>
 The goal of the project is to give the user an easy way to develop and publish games.<br>
 
 ## Installing and Building
