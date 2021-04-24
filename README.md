@@ -40,8 +40,8 @@ The following screenshots are showing features and designs from the engine:
  -   [vulkan](https://www.lunarg.com/vulkan-sdk/) Copyright (c), Khronos Group
 
 ## Contributing
-Pull requests are not welcome. This project is a learning project and will be only developed by myself.
-If you still would like to change something or gie some ideas, please open an issue first to discuss what you would like to change. 
+Pull requests are not welcome. This project is a learning project and will be only developed by myself.<br>
+If you still would like to change something or gie some ideas, please open an issue first to discuss what you would like to change.<br>
 The change will then reviewed and the feature will be implemented into the engine.
 
 ## License
