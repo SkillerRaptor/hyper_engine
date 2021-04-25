@@ -49,7 +49,7 @@ if (NOT EXISTS "${DXC_FILE}")
 
     execute_process(
             COMMAND ${CMAKE_COMMAND} -E tar xzf
-            ${DXC_FILE}WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler/)
+            ${DXC_FILE} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler/)
 endif ()
 
 add_library(dxcompiler SHARED IMPORTED GLOBAL)
@@ -63,7 +63,7 @@ elseif (UNIX AND NOT APPLE)
     set_target_properties(
             dxcompiler
             PROPERTIES
-            IMPORTED_IMPLIB  ${CMAKE_SOURCE_DIR}/vendor/DirectXShaderCompiler/lib/lixdxcompiler.so)
+            IMPORTED_IMPLIB ${CMAKE_SOURCE_DIR}/vendor/DirectXShaderCompiler/lib/lixdxcompiler.so)
 endif ()
 
 #-------------------------------------------------------------------------------------------
