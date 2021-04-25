@@ -62,4 +62,6 @@ cmake-build-*/
 .idea/
 
 # Local Dependencies
+*.zip
+*.tar.gz
 vendor/DirectXShaderCompiler

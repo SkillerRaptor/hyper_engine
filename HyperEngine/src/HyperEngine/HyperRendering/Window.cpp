@@ -18,8 +18,8 @@ namespace HyperEngine
 	{
 		m_windowInfo = std::move(windowInfo);
 		
-		//m_pContext = new OpenGL33Context{};
-		m_pContext = new VulkanContext{};
+		m_pContext = new OpenGL33Context{};
+		//m_pContext = new VulkanContext{};
 		
 		glfwInit();
 		m_pContext->SetWindowHints();
