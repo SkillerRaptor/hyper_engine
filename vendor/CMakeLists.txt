@@ -37,16 +37,16 @@ set_target_properties(assimp PROPERTIES FOLDER vendor/assimp)
 # DirectXShaderCompiler
 #-------------------------------------------------------------------------------------------
 if (WIN32)
-    hyperengine_set_cache_value(DXC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler.zip")
+    hyperengine_set_cache_value(DXC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler/DirectXShaderCompiler.zip")
     hyperengine_set_cache_value(DXC_URL "https://ci.appveyor.com/api/projects/dnovillo/directxshadercompiler/artifacts/build%2FRelease%2Fdxc-artifacts.zip?branch=master&pr=false&job=image%3A%20Visual%20Studio%202019")
 
     if (NOT EXISTS "${DXC_FILE}")
         file(DOWNLOAD ${DXC_URL} ${DXC_FILE})
-    endif ()
 
-    execute_process(
-            COMMAND ${CMAKE_COMMAND} -E tar xzf
-            ${DXC_FILE} WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler/")
+        execute_process(
+                COMMAND ${CMAKE_COMMAND} -E tar xzf
+                ${DXC_FILE} WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler/")
+    endif ()
 
     add_library(dxcompiler SHARED IMPORTED GLOBAL)
     set_target_properties(
