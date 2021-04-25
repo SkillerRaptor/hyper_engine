@@ -3,7 +3,7 @@
 #include "KeyCodes.hpp"
 #include "MouseCodes.hpp"
 
-#include <HyperMath/Vector2.hpp>
+#include <glm/glm.hpp>
 
 namespace HyperEngine
 {
@@ -23,7 +23,7 @@ namespace HyperEngine
 		void SetCursorInputMode(CursorInputMode inputMode);
 		CursorInputMode GetCursorInputMode();
 		
-		void SetCursorPosition(Vec2 position);
-		Vec2 GetCursorPosition();
+		void SetCursorPosition(glm::vec2 position); // TODO: Replace GLM with HyperMath
+		glm::vec2 GetCursorPosition(); // TODO: Replace GLM with HyperMath
 	};
 }

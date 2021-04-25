@@ -60,13 +60,13 @@ namespace HyperEngine
 			}
 		}
 		
-		void SetCursorPosition(Vec2 position)
+		void SetCursorPosition(glm::vec2 position)
 		{
 			GLFWwindow* pWindow{ nullptr };
 			glfwSetCursorPos(pWindow, static_cast<float>(position.x), static_cast<float>(position.y));
 		}
 		
-		Vec2 GetCursorPosition()
+		glm::vec2 GetCursorPosition()
 		{
 			GLFWwindow* pWindow{ nullptr };
 			
