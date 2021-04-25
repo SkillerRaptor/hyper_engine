@@ -39,7 +39,7 @@ set_target_properties(assimp PROPERTIES FOLDER vendor/assimp)
 if (WIN32)
     hyperengine_set_cache_value(DXC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler/DirectXShaderCompiler.zip")
     hyperengine_set_cache_value(DXC_URL "https://ci.appveyor.com/api/projects/dnovillo/directxshadercompiler/artifacts/build%2FRelease%2Fdxc-artifacts.zip?branch=master&pr=false&job=image%3A%20Visual%20Studio%202019")
-elseif (UNIX AND NOT APPLE)
+elseif (${CMAKE_SYSTEM} MATCHES "Linux")
     hyperengine_set_cache_value(DXC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler/DirectXShaderCompiler.tar.gz")
     hyperengine_set_cache_value(DXC_URL "https://ci.appveyor.com/api/projects/dnovillo/directxshadercompiler/artifacts/build%2Fdxc-artifacts.tar.gz?branch=master&pr=false&job=image%3A%20Ubuntu")
 endif ()
@@ -59,11 +59,13 @@ if (WIN32)
             PROPERTIES
             IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/vendor/DirectXShaderCompiler/bin/dxcompiler.dll
             IMPORTED_IMPLIB ${CMAKE_SOURCE_DIR}/vendor/DirectXShaderCompiler/lib/dxcompiler.lib)
-elseif (UNIX AND NOT APPLE)
+    message("dxcompiler was configured for Windows!")
+elseif (${CMAKE_SYSTEM} MATCHES "Linux")
     set_target_properties(
             dxcompiler
             PROPERTIES
             IMPORTED_IMPLIB ${CMAKE_SOURCE_DIR}/vendor/DirectXShaderCompiler/lib/lixdxcompiler.so)
+    message("dxcompiler was configured for Linux!")
 endif ()
 
 #-------------------------------------------------------------------------------------------
