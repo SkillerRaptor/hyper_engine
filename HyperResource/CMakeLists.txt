@@ -1,26 +1,30 @@
-cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
+#-------------------------------------------------------------------------------------------
+# Copyright (C) Hyperion. All rights reserved.
+#-------------------------------------------------------------------------------------------
 
-set(OUTPUT_DIR_DEBUG "${CMAKE_BINARY_DIR}/bin/HyperEngine/HyperResource/Debug")
-set(OUTPUT_DIR_RELEASE "${CMAKE_BINARY_DIR}/bin/HyperEngine/HyperResource/Release")
+#-------------------------------------------------------------------------------------------
+# CMake info
+#-------------------------------------------------------------------------------------------
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
-file(GLOB_RECURSE "SOURCES" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
-file(GLOB_RECURSE "HEADERS" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
+#-------------------------------------------------------------------------------------------
+# HyperResource
+#-------------------------------------------------------------------------------------------
+file(GLOB_RECURSE "C_SOURCES" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
+file(GLOB_RECURSE "C_HEADERS" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
+file(GLOB_RECURSE "CXX_SOURCES" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE "CXX_HEADERS" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp")
 
-foreach(item IN ITEMS ${SOURCES} ${HEADERS})
-    get_filename_component(src_path "${item}" PATH)
-    string(REPLACE "${CMAKE_SOURCE_DIR}" "" group_path "${src_path}")
-    string(REPLACE "." "\\" group_path "${group_path}")
-    source_group("${group_path}" FILES "${item}")
-endforeach()
+set(SOURCES ${C_SOURCES} ${CXX_SOURCES})
+set(HEADERS ${C_HEADERS} ${CXX_HEADERS})
 
-add_library(HyperResource ${SOURCES} ${HEADERS})
+hyperengine_group_files("${SOURCES}")
+hyperengine_group_files("${HEADERS}")
+add_library(HyperResource STATIC ${SOURCES} ${HEADERS})
 
-target_link_libraries(HyperResource PUBLIC
-        stb_image)
+target_include_directories(HyperResource PUBLIC ${CMAKE_SOURCE_DIR}/HyperResource/src/HyperResource/)
 
-target_include_directories(HyperResource PUBLIC
-        "${CMAKE_SOURCE_DIR}/HyperResource/src/HyperResource/"
-        "${CMAKE_SOURCE_DIR}/vendor/stb_image/include/")
+target_link_libraries(HyperResource PUBLIC stb_image)
+target_include_directories(HyperResource PUBLIC ${CMAKE_SOURCE_DIR}/vendor/stb_image/include/)
 
-set_target_properties(HyperResource PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin/HyperEngine/HyperResource/Debug/")
-set_target_properties(HyperResource PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin/HyperEngine/HyperResource/Release/")
+hyperengine_set_output_directories(HyperResource)
