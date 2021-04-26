@@ -1,8 +1,8 @@
 #pragma once
 
-#include <HyperRendering/ShaderManager.hpp>
-
 #if HYPERENGINE_BUILD_VULKAN
+	#include <HyperRendering/ShaderManager.hpp>
+	
 	namespace HyperEngine
 	{
 		class VulkanShaderManager : public ShaderManager

@@ -27,12 +27,12 @@
 				"VK_LAYER_KHRONOS_validation"
 			};
 			
-			#if HYPERENGINE_DEBUG
-				if (IsValidationLayerAvailable(validationLayers))
-				{
-					m_isValidationLayerSupported = true;
-				}
-			#endif
+	#if HYPERENGINE_DEBUG
+			if (IsValidationLayerAvailable(validationLayers))
+			{
+				m_isValidationLayerSupported = true;
+			}
+	#endif
 			
 			if (!CreateInstance(pWindow, validationLayers))
 			{
@@ -58,8 +58,10 @@
 			
 			if (m_isValidationLayerSupported)
 			{
-				PFN_vkVoidFunction vkDestroyDebugUtilsMessengerEXTFunction{ vkGetInstanceProcAddr(m_instance, "vkDestroyDebugUtilsMessengerEXT") };
-				PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT{ reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkDestroyDebugUtilsMessengerEXTFunction) };
+				PFN_vkVoidFunction vkDestroyDebugUtilsMessengerEXTFunction{
+					vkGetInstanceProcAddr(m_instance, "vkDestroyDebugUtilsMessengerEXT") };
+				PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT{
+					reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkDestroyDebugUtilsMessengerEXTFunction) };
 				vkDestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
 			}
 			
@@ -155,10 +157,13 @@
 			debugMessengerCreateInfo.pfnUserCallback = DebugCallback;
 			debugMessengerCreateInfo.pUserData = nullptr;
 			
-			PFN_vkVoidFunction vkCreateDebugUtilsMessengerEXTFunction{ vkGetInstanceProcAddr(m_instance, "vkCreateDebugUtilsMessengerEXT") };
-			PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT{ reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkCreateDebugUtilsMessengerEXTFunction) };
+			PFN_vkVoidFunction vkCreateDebugUtilsMessengerEXTFunction{
+				vkGetInstanceProcAddr(m_instance, "vkCreateDebugUtilsMessengerEXT") };
+			PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT{
+				reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkCreateDebugUtilsMessengerEXTFunction) };
 			
-			if (vkCreateDebugUtilsMessengerEXT(m_instance, &debugMessengerCreateInfo, nullptr, &m_debugMessenger) != VK_SUCCESS)
+			if (vkCreateDebugUtilsMessengerEXT(m_instance, &debugMessengerCreateInfo, nullptr, &m_debugMessenger) !=
+				VK_SUCCESS)
 			{
 				HYPERENGINE_ASSERT(false, "Failed to setup debug messenger!");
 				return false;

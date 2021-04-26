@@ -1,6 +1,5 @@
 #pragma once
 
-
 #if HYPERENGINE_BUILD_VULKAN
 	#include <cstdint>
 	#include <optional>
@@ -8,13 +7,13 @@
 	
 	struct VkInstance_T;
 	typedef struct VkInstance_T* VkInstance;
-
+	
 	struct VkPhysicalDevice_T;
 	typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
-
+	
 	struct VkDevice_T;
 	typedef struct VkDevice_T* VkDevice;
-
+	
 	namespace HyperEngine
 	{
 		class VulkanDevice
@@ -29,7 +28,7 @@
 					return graphicsFamily.has_value();
 				}
 			};
-			
+		
 		public:
 			bool Initialize(
 				VkInstance instance,
@@ -45,7 +44,7 @@
 			
 			static uint32_t RateDeviceSuitability(VkPhysicalDevice physicalDevice);
 			static QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice physicalDevice);
-			
+		
 		private:
 			VkPhysicalDevice m_physicalDevice{ nullptr };
 			VkDevice m_logicalDevice{ nullptr };

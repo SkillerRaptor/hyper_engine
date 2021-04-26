@@ -1,8 +1,8 @@
 #pragma once
 
-#include <HyperRendering/TextureManager.hpp>
-
 #if HYPERENGINE_BUILD_VULKAN
+	#include <HyperRendering/TextureManager.hpp>
+	
 	namespace HyperEngine
 	{
 		class VulkanTextureManager : public TextureManager

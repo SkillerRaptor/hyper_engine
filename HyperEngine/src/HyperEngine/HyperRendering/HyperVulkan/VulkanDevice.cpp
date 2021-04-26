@@ -1,12 +1,12 @@
 #include "VulkanDevice.hpp"
 
-#include <HyperCore/HyperAssert.hpp>
-
-#include <vulkan/vulkan.h>
-
-#include <vector>
-
 #if HYPERENGINE_BUILD_VULKAN
+	#include <HyperCore/HyperAssert.hpp>
+	
+	#include <vulkan/vulkan.h>
+	
+	#include <vector>
+	
 	namespace HyperEngine
 	{
 		bool VulkanDevice::Initialize(
@@ -117,7 +117,7 @@
 			
 			VkPhysicalDeviceFeatures physicalDeviceFeatures{};
 			vkGetPhysicalDeviceFeatures(physicalDevice, &physicalDeviceFeatures);
-		
+			
 			uint32_t score{ 0 };
 			
 			if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
