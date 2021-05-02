@@ -5,15 +5,18 @@
 #-------------------------------------------------------------------------------------------
 # CMake info
 #-------------------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
+#-------------------------------------------------------------------------------------------
+# Utility Functions
+#-------------------------------------------------------------------------------------------
 function(hyperengine_group_files FILES)
-    foreach(item IN ITEMS ${FILES})
+    foreach (item IN ITEMS ${FILES})
         get_filename_component(src_path "${item}" PATH)
         string(REPLACE "${CMAKE_SOURCE_DIR}" "" group_path "${src_path}")
-        string(REPLACE "." "\\" group_path "${group_path}")
+        string(REPLACE ".." "\\" group_path "${group_path}")
         source_group("${group_path}" FILES "${item}")
-    endforeach()
+    endforeach ()
 endfunction()
 
 function(hyperengine_set_output_directories TARGET)

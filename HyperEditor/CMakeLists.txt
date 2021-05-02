@@ -15,12 +15,12 @@ file(GLOB_RECURSE "C_HEADERS" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
 file(GLOB_RECURSE "CXX_SOURCES" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 file(GLOB_RECURSE "CXX_HEADERS" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp")
 
-set(SOURCES ${C_SOURCES} ${CXX_SOURCES})
-set(HEADERS ${C_HEADERS} ${CXX_HEADERS})
+set(SOURCES "${C_SOURCES}" "${CXX_SOURCES}")
+set(HEADERS "${C_HEADERS}" "${CXX_HEADERS}")
 
 hyperengine_group_files("${SOURCES}")
 hyperengine_group_files("${HEADERS}")
-add_executable(HyperEditor ${SOURCES} ${HEADERS})
+add_executable(HyperEditor "${SOURCES}" "${HEADERS}")
 
 target_include_directories(HyperEditor PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 

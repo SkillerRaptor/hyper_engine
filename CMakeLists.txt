@@ -11,8 +11,10 @@ project(HyperEngine LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/)
-include(${CMAKE_CURRENT_SOURCE_DIR}/HyperEngine.cmake)
+
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/Utils")
+include("${CMAKE_CURRENT_SOURCE_DIR}/Utils/HyperPlatform.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/Utils/HyperUtils.cmake")
 
 #-------------------------------------------------------------------------------------------
 # Options
@@ -26,10 +28,10 @@ option(HYPERENGINE_BUILD_TESTS "Enable generation of build files for tests" ON)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    add_definitions(-DHYPERENGINE_RELEASE)
+if (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    hyperengine_set_cache_value(HYPERENGINE_BUILD_TYPE "Debug")
 else ()
-    add_definitions(-DHYPERENGINE_DEBUG)
+    hyperengine_set_cache_value(HYPERENGINE_BUILD_TYPE "Release")
 endif ()
 
 #-------------------------------------------------------------------------------------------
@@ -40,7 +42,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/vendor)
 #-------------------------------------------------------------------------------------------
 # Optimization Flags
 #-------------------------------------------------------------------------------------------
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+if ("${HYPERENGINE_BUILD_TYPE}" STREQUAL "Release")
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -O0 -Wall -pedantic -Wextra -m64 -mavx2 -mfma -ffast-math")
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -66,8 +68,9 @@ endif ()
 #-------------------------------------------------------------------------------------------
 # Projects
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEngine)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperResource)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperRendering)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEngine)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEditor)
 
 #-------------------------------------------------------------------------------------------
