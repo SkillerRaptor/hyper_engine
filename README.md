@@ -42,9 +42,8 @@ The following screenshots are showing features and designs from the engine:
  -   [vulkan](https://www.lunarg.com/vulkan-sdk/) Copyright (c), Khronos Group
 
 ## Contributing
-Pull requests are not welcome. This project is a learning project and will be only developed by myself.<br>
-If you still would like to change something, please open an issue first to discuss what you would like to change.<br>
-The change will then reviewed and the feature will be implemented by me into the engine.
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Please make sure to update tests as appropriate.
 
 ## License
 The HyperEngine is distributed under the [MIT](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE) license.
