@@ -69,7 +69,11 @@ endif ()
 # Projects
 #-------------------------------------------------------------------------------------------
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEngine)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEditor)
+
+#-----------------------------------------------------------------------------------
+# TODO: Updating HyperEditor
+#-----------------------------------------------------------------------------------
+# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEditor)
 
 #-------------------------------------------------------------------------------------------
 # Enable Exceptions & RTTI
@@ -87,7 +91,10 @@ endif ()
 # Subprojects
 #-------------------------------------------------------------------------------------------
 if (HYPERENGINE_BUILD_SAMPLES)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Samples)
+    #-----------------------------------------------------------------------------------
+    # TODO: Updating Samples
+    #-----------------------------------------------------------------------------------
+    # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Samples)
 endif ()
 
 if (HYPERENGINE_BUILD_TESTS)
