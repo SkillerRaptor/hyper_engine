@@ -28,7 +28,7 @@ option(HYPERENGINE_BUILD_TESTS "Enable generation of build files for tests" ON)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 
-if (NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     hyperengine_set_cache_value(HYPERENGINE_BUILD_TYPE "Debug")
 else ()
     hyperengine_set_cache_value(HYPERENGINE_BUILD_TYPE "Release")
@@ -61,15 +61,13 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_compile_options(-fno-rtti -fno-exceptions)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    string(REGEX REPLACE "/GR" "/GR-" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    add_compile_options(/EHsc)
+    string(REGEX REPLACE "/GR" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    add_compile_options(/GR- /EHsc)
 endif ()
 
 #-------------------------------------------------------------------------------------------
 # Projects
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperResource)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperRendering)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEngine)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEditor)
 

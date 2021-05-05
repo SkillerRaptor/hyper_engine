@@ -6,6 +6,7 @@
 # CMake info
 #-------------------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+include("${CMAKE_SOURCE_DIR}/Utils/HyperUtils.cmake")
 
 #-------------------------------------------------------------------------------------------
 # assimp
@@ -32,6 +33,7 @@ hyperengine_set_cache_value(ASSIMP_IGNORE_GIT_HASH OFF)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/assimp)
 set_target_properties(assimp PROPERTIES FOLDER vendor/assimp)
+hyperengine_set_output_directories(assimp)
 
 #-------------------------------------------------------------------------------------------
 # DirectXShaderCompiler
@@ -74,6 +76,7 @@ elseif (${CMAKE_SYSTEM} MATCHES "Linux")
             PROPERTIES
             IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/vendor/DirectXShaderCompiler/lib/libdxcompiler.so")
 endif ()
+hyperengine_set_output_directories(dxcompiler)
 
 #-------------------------------------------------------------------------------------------
 # fmt
@@ -88,12 +91,14 @@ hyperengine_set_cache_value(FMT_CUDA_TEST OFF)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/fmt)
 set_target_properties(fmt PROPERTIES FOLDER vendor/fmt)
+hyperengine_set_output_directories(fmt)
 
 #-------------------------------------------------------------------------------------------
 # glad
 #-------------------------------------------------------------------------------------------
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glad)
 set_target_properties(glad PROPERTIES FOLDER vendor/glad)
+hyperengine_set_output_directories(glad)
 
 #-------------------------------------------------------------------------------------------
 # glfw
@@ -106,6 +111,7 @@ hyperengine_set_cache_value(GLFW_VULKAN_STATIC OFF)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glfw)
 set_target_properties(glfw PROPERTIES FOLDER vendor/glfw)
+hyperengine_set_output_directories(glfw)
 
 #-------------------------------------------------------------------------------------------
 # glm
@@ -121,6 +127,7 @@ file(GLOB "IMGUI_HEADERS" "${CMAKE_CURRENT_SOURCE_DIR}/imgui/*.h")
 add_library(imgui ${IMGUI_SOURCES} ${IMGUI_HEADERS})
 set_target_properties(imgui PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(imgui PROPERTIES FOLDER vendor/imgui)
+hyperengine_set_output_directories(imgui)
 
 #-------------------------------------------------------------------------------------------
 # ImGuizmo
@@ -132,6 +139,7 @@ add_library(ImGuizmo ${IMGUIZMO_SOURCES} ${IMGUIZMO_HEADERS})
 target_include_directories(ImGuizmo PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/imgui/")
 set_target_properties(ImGuizmo PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(ImGuizmo PROPERTIES FOLDER vendor/ImGuizmo)
+hyperengine_set_output_directories(ImGuizmo)
 
 #-------------------------------------------------------------------------------------------
 # json
@@ -142,6 +150,7 @@ hyperengine_set_cache_value(JSON_MultipleHeaders OFF)
 hyperengine_set_cache_value(JSON_ImplicitConversions ON)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/json)
+hyperengine_set_output_directories(nlohmann_json)
 
 #-------------------------------------------------------------------------------------------
 # meshoptimizer
@@ -152,6 +161,7 @@ hyperengine_set_cache_value(MESHOPT_BUILD_SHARED_LIBS OFF)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/meshoptimizer)
 set_target_properties(meshoptimizer PROPERTIES FOLDER vendor/meshoptimizer)
+hyperengine_set_output_directories(meshoptimizer)
 
 #-------------------------------------------------------------------------------------------
 # rttr
@@ -168,6 +178,7 @@ hyperengine_set_cache_value(BUILD_PACKAGE OFF)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/rttr)
 set_target_properties(rttr_core_lib PROPERTIES FOLDER vendor/rttr_core_lib)
+hyperengine_set_output_directories(rttr_core_lib)
 
 #-------------------------------------------------------------------------------------------
 # SPIRV-Cross
@@ -201,9 +212,15 @@ set_target_properties(spirv-cross-cpp PROPERTIES FOLDER vendor/spirv-cross-cpp)
 set_target_properties(spirv-cross-hlsl PROPERTIES FOLDER vendor/spirv-cross-hlsl)
 set_target_properties(spirv-cross-glsl PROPERTIES FOLDER vendor/spirv-cross-glsl)
 set_target_properties(spirv-cross-reflect PROPERTIES FOLDER vendor/spirv-cross-reflect)
+hyperengine_set_output_directories(spirv-cross-core)
+hyperengine_set_output_directories(spirv-cross-cpp)
+hyperengine_set_output_directories(spirv-cross-hlsl)
+hyperengine_set_output_directories(spirv-cross-glsl)
+hyperengine_set_output_directories(spirv-cross-reflect)
 
 #-------------------------------------------------------------------------------------------
 # stb_image
 #-------------------------------------------------------------------------------------------
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/stb_image)
 set_target_properties(stb_image PROPERTIES FOLDER vendor/stb_image)
+hyperengine_set_output_directories(stb_image)
