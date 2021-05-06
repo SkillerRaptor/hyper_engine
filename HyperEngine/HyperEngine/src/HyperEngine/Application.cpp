@@ -1,5 +1,7 @@
 #include <HyperEngine/Application.hpp>
 
+#include <HyperCore/Log.hpp>
+
 namespace HyperEngine
 {
 	Application::Application()
@@ -9,6 +11,8 @@ namespace HyperEngine
 	
 	void Application::Initialize()
 	{
+		HyperCore::Log::Initialize();
+		
 		OnInitialize();
 		
 		m_running = true;
@@ -17,6 +21,8 @@ namespace HyperEngine
 	void Application::Terminate()
 	{
 		OnTerminate();
+		
+		HyperCore::Log::Terminate();
 	}
 	
 	void Application::Run()

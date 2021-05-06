@@ -1,5 +1,7 @@
 #pragma once
 
+#include <HyperCore/Log.hpp>
+
 #include <random>
 #include <type_traits>
 #include <utility>
