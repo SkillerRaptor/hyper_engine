@@ -19,7 +19,7 @@ namespace HyperMath
 			if constexpr (min > max)
 			{
 				std::swap(min, max);
-				HYPERENGINE_WARN("HyperMath: The minimum is greater than the maximum in %s!", __FUNCTION__);
+				HYPERENGINE_CORE_WARNING("HyperMath: The minimum is greater than the maximum in {0}!", __FUNCTION__);
 			}
 			
 			if constexpr (std::is_integral_v<T>)
@@ -42,7 +42,7 @@ namespace HyperMath
 			
 			if constexpr(!std::is_integral_v<T> || !std::is_floating_point_v<T> || !std::is_same_v<T, bool>)
 			{
-				HYPERENGINE_ERROR("HyperMath: Invalid arithmetic type in %s!", __FUNCTION__);
+				HYPERENGINE_CORE_ERROR("HyperMath: Invalid arithmetic type in {0}!", __FUNCTION__);
 				return static_cast<T>(-1);
 			}
 		}
