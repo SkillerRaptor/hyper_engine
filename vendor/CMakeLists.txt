@@ -76,6 +76,10 @@ elseif (${CMAKE_SYSTEM} MATCHES "Linux")
             PROPERTIES
             IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/vendor/DirectXShaderCompiler/lib/libdxcompiler.so")
 endif ()
+set_target_properties(
+        dxcompiler
+        PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler/include")
 hyperengine_set_output_directories(dxcompiler)
 
 #-------------------------------------------------------------------------------------------
@@ -98,6 +102,7 @@ hyperengine_set_output_directories(fmt)
 #-------------------------------------------------------------------------------------------
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glad)
 set_target_properties(glad PROPERTIES FOLDER vendor/glad)
+target_include_directories(glad PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/glad/include")
 hyperengine_set_output_directories(glad)
 
 #-------------------------------------------------------------------------------------------
@@ -127,6 +132,7 @@ file(GLOB "IMGUI_HEADERS" "${CMAKE_CURRENT_SOURCE_DIR}/imgui/*.h")
 add_library(imgui ${IMGUI_SOURCES} ${IMGUI_HEADERS})
 set_target_properties(imgui PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(imgui PROPERTIES FOLDER vendor/imgui)
+target_include_directories(imgui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/imgui")
 hyperengine_set_output_directories(imgui)
 
 #-------------------------------------------------------------------------------------------
@@ -136,9 +142,9 @@ file(GLOB "IMGUIZMO_SOURCES" "${CMAKE_CURRENT_SOURCE_DIR}/ImGuizmo/*.cpp")
 file(GLOB "IMGUIZMO_HEADERS" "${CMAKE_CURRENT_SOURCE_DIR}/ImGuizmo/*.h")
 
 add_library(ImGuizmo ${IMGUIZMO_SOURCES} ${IMGUIZMO_HEADERS})
-target_include_directories(ImGuizmo PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/imgui/")
 set_target_properties(ImGuizmo PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(ImGuizmo PROPERTIES FOLDER vendor/ImGuizmo)
+target_include_directories(ImGuizmo PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/ImGuizmo")
 hyperengine_set_output_directories(ImGuizmo)
 
 #-------------------------------------------------------------------------------------------
@@ -223,4 +229,5 @@ hyperengine_set_output_directories(spirv-cross-reflect)
 #-------------------------------------------------------------------------------------------
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/stb_image)
 set_target_properties(stb_image PROPERTIES FOLDER vendor/stb_image)
+target_include_directories(stb_image PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/stb_image/include")
 hyperengine_set_output_directories(stb_image)
