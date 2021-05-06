@@ -2,9 +2,9 @@
 
 #include <HyperPlatform/PlatformDetection.hpp>
 
-#include <Windows.h>
-
 #if HYPERENGINE_PLATFORM_WINDOWS
+	#include <Windows.h>
+
 	namespace HyperPlatform
 	{
 		namespace FileUtilities
