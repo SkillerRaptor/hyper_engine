@@ -144,6 +144,7 @@ file(GLOB "IMGUIZMO_HEADERS" "${CMAKE_CURRENT_SOURCE_DIR}/ImGuizmo/*.h")
 add_library(ImGuizmo ${IMGUIZMO_SOURCES} ${IMGUIZMO_HEADERS})
 set_target_properties(ImGuizmo PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(ImGuizmo PROPERTIES FOLDER vendor/ImGuizmo)
+target_include_directories(ImGuizmo PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/imgui")
 target_include_directories(ImGuizmo PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/ImGuizmo")
 hyperengine_set_output_directories(ImGuizmo)
 
