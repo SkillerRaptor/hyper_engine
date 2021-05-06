@@ -16,4 +16,6 @@ add_library(HyperPlatform STATIC "${SOURCES}" "${HEADERS}")
 
 target_include_directories(HyperPlatform PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 
+target_link_libraries(HyperPlatform PUBLIC HyperCore)
+
 hyperengine_set_output_directories(HyperPlatform)
