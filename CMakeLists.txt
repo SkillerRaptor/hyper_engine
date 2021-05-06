@@ -91,10 +91,7 @@ endif ()
 # Subprojects
 #-------------------------------------------------------------------------------------------
 if (HYPERENGINE_BUILD_SAMPLES)
-    #-----------------------------------------------------------------------------------
-    # TODO: Updating Samples
-    #-----------------------------------------------------------------------------------
-    # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Samples)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Samples)
 endif ()
 
 if (HYPERENGINE_BUILD_TESTS)

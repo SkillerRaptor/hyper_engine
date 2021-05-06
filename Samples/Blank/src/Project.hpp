@@ -1,10 +1,8 @@
 #pragma once
 
-#include <HyperEngine.hpp>
+#include <HyperEngine/HyperEngine.hpp>
 
-using namespace HyperEngine;
-
-class Project : public Application
+class Project : public HyperEngine::Application
 {
 public:
 	virtual void OnInitialize() override;

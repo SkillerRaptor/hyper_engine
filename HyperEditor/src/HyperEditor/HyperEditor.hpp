@@ -2,11 +2,9 @@
 
 #include <HyperEngine.hpp>
 
-using namespace HyperEngine;
-
 namespace HyperEditor
 {
-	class HyperEditor : public Application
+	class HyperEditor : public HyperEngine::Application
 	{
 		virtual void OnInitialize() override;
 		virtual void OnTerminate() override;
