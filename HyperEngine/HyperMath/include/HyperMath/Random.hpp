@@ -1,5 +1,6 @@
 #pragma once
 
+#include <HyperCore/Assert.hpp>
 #include <HyperCore/Log.hpp>
 
 #include <random>
@@ -40,11 +41,8 @@ namespace HyperMath
 				return static_cast<T>(distribution(m_randomEngine));
 			}
 			
-			if constexpr(!std::is_integral_v<T> || !std::is_floating_point_v<T> || !std::is_same_v<T, bool>)
-			{
-				HYPERENGINE_CORE_ERROR("HyperMath: Invalid arithmetic type in {0}!", __FUNCTION__);
-				return static_cast<T>(-1);
-			}
+			constexpr bool isValid = std::is_integral_v<T> || std::is_floating_point_v<T> || std::is_same_v<T, bool>;
+			HYPERENGINE_ASSERT(isValid, "HyperMath: Failed to generate random number of invalid arithmetic type!");
 		}
 	
 	private:

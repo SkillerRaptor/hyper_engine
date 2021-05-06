@@ -18,4 +18,12 @@ target_include_directories(HyperCore PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include
 
 target_link_libraries(HyperCore PUBLIC fmt)
 
+if ("${HYPERENGINE_BUILD_TYPE}" STREQUAL "Debug")
+    target_compile_definitions(HyperCore PUBLIC HYPERENGINE_RELEASE=0)
+    target_compile_definitions(HyperCore PUBLIC HYPERENGINE_DEBUG=1)
+else ()
+    target_compile_definitions(HyperCore PUBLIC HYPERENGINE_RELEASE=1)
+    target_compile_definitions(HyperCore PUBLIC HYPERENGINE_DEBUG=0)
+endif ()
+
 hyperengine_set_output_directories(HyperCore)
