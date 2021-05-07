@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 
-namespace HyperCore
+namespace HyperEngine
 {
 	class Logger
 	{

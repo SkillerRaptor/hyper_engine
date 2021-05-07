@@ -3,7 +3,7 @@
 #include <string>
 #include <optional>
 
-namespace HyperPlatform
+namespace HyperEngine
 {
 	namespace FileUtilities
 	{

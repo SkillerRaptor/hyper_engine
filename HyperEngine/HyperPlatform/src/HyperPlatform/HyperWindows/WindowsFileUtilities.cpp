@@ -5,7 +5,7 @@
 #if HYPERENGINE_PLATFORM_WINDOWS
 	#include <Windows.h>
 
-	namespace HyperPlatform
+	namespace HyperEngine
 	{
 		namespace FileUtilities
 		{

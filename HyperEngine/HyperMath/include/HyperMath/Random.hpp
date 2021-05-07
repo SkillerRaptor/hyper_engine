@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace HyperMath
+namespace HyperEngine
 {
 	class Random
 	{

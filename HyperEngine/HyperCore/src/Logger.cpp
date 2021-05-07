@@ -3,7 +3,7 @@
 #include <fmt/color.h>
 #include <fmt/chrono.h>
 
-namespace HyperCore
+namespace HyperEngine
 {
 	void Logger::LogInternal(Logger::Level level, const std::string_view format) const
 	{

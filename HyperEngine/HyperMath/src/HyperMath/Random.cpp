@@ -1,6 +1,6 @@
 #include <HyperMath/Random.hpp>
 
-namespace HyperMath
+namespace HyperEngine
 {
 	Random::Random(uint32_t seed)
 	{

@@ -1,6 +1,6 @@
 #include <HyperCore/Log.hpp>
 
-namespace HyperCore
+namespace HyperEngine
 {
 	Logger* Log::s_pCoreLogger{};
 	Logger* Log::s_pClientLogger{};

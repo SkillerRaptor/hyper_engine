@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace HyperCore
+namespace HyperEngine
 {
 	class Log
 	{
