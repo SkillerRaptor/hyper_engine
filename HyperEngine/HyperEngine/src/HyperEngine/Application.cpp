@@ -11,7 +11,7 @@ namespace HyperEngine
 	
 	void Application::Initialize()
 	{
-		HyperCore::Log::Initialize();
+		Log::Initialize();
 		
 		OnInitialize();
 		
@@ -22,7 +22,7 @@ namespace HyperEngine
 	{
 		OnTerminate();
 		
-		HyperCore::Log::Terminate();
+		Log::Terminate();
 	}
 	
 	void Application::Run()
