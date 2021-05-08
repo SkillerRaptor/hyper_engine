@@ -4,8 +4,9 @@
 
 #include <string>
 #include <iostream>
+#include <utility>
 
-namespace HyperEngine
+namespace HyperCore
 {
 	class Logger
 	{
@@ -21,14 +22,14 @@ namespace HyperEngine
 		};
 	
 	public:
-		Logger(const std::string& name, Level level = Level::Trace)
-			: m_name{ name }
+		Logger(std::string name, Level level)
+			: m_name{ std::move(name) }
 			, m_level{ level }
 		{
 		}
 		
 		template <typename... Args>
-		constexpr void Log(Level level, const std::string_view format, Args&&... args) const
+		constexpr void Log(Level level, std::string_view format, Args&& ... args) const
 		{
 			if (m_level != Level::Trace && m_level != level)
 			{
@@ -51,10 +52,10 @@ namespace HyperEngine
 		
 		void SetLevel(Level level);
 		Level GetLevel() const;
-		
+	
 	private:
-		void LogInternal(Level level, const std::string_view format) const;
-		
+		void LogInternal(Level level, std::string_view format) const;
+	
 	private:
 		std::string m_name;
 		Level m_level;

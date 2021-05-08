@@ -157,7 +157,6 @@ hyperengine_set_cache_value(JSON_MultipleHeaders OFF)
 hyperengine_set_cache_value(JSON_ImplicitConversions ON)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/json)
-hyperengine_set_output_directories(nlohmann_json)
 
 #-------------------------------------------------------------------------------------------
 # meshoptimizer

@@ -3,9 +3,9 @@
 #include <fmt/color.h>
 #include <fmt/chrono.h>
 
-namespace HyperEngine
+namespace HyperCore
 {
-	void Logger::LogInternal(Logger::Level level, const std::string_view format) const
+	void Logger::LogInternal(Logger::Level level, std::string_view format) const
 	{
 		fmt::color levelColor;
 		std::string levelName;
