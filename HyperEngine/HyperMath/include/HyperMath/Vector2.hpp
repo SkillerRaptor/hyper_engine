@@ -16,10 +16,42 @@ namespace HyperEngine
 			, y{ static_cast<T>(0) }
 		{
 		}
+		
+		Vector2(T scalar)
+			: x{ scalar }
+			, y{ scalar }
+		{
+		}
+		
+		Vector2(T x, T y)
+			: x{ x }
+			, y{ y }
+		{
+		}
 	
 	public:
-		T x;
-		T y;
+		union
+		{
+			T data[2];
+			
+			struct
+			{
+				T x;
+				T y;
+			};
+			
+			struct
+			{
+				T s;
+				T t;
+			};
+			
+			struct
+			{
+				T u;
+				T v;
+			};
+		};
 	};
 	
 	using Vec2 = Vector2<float>;

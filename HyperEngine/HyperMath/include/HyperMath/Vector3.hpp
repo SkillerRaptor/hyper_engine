@@ -17,11 +17,47 @@ namespace HyperEngine
 			, z{ static_cast<T>(0) }
 		{
 		}
+		
+		Vector3(T scalar)
+			: x{ scalar }
+			, y{ scalar }
+			, z{ scalar }
+		{
+		}
+		
+		Vector3(T x, T y, T z)
+			: x{ x }
+			, y{ y }
+			, z{ z }
+		{
+		}
 	
 	public:
-		T x;
-		T y;
-		T z;
+		union
+		{
+			T data[3];
+			
+			struct
+			{
+				T x;
+				T y;
+				T z;
+			};
+			
+			struct
+			{
+				T r;
+				T g;
+				T b;
+			};
+			
+			struct
+			{
+				T s;
+				T t;
+				T p;
+			};
+		};
 	};
 	
 	using Vec3 = Vector3<float>;

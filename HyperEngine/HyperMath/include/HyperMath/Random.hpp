@@ -20,7 +20,7 @@ namespace HyperEngine
 			if constexpr (min > max)
 			{
 				std::swap(min, max);
-				HYPERENGINE_CORE_WARNING("HyperMath: The minimum is greater than the maximum in {0}!", __FUNCTION__);
+				HYPERENGINE_CORE_WARNING("The minimum is greater than the maximum in random number generator!");
 			}
 			
 			if constexpr (std::is_integral_v<T>)
@@ -42,7 +42,7 @@ namespace HyperEngine
 			}
 			
 			constexpr bool isValid = std::is_integral_v<T> || std::is_floating_point_v<T> || std::is_same_v<T, bool>;
-			HYPERENGINE_ASSERT(isValid, "HyperMath: Failed to generate random number of invalid arithmetic type!");
+			HYPERENGINE_ASSERT(isValid, "Failed to generate random number of invalid arithmetic type!");
 		}
 	
 	private:

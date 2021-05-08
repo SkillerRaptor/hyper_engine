@@ -18,12 +18,52 @@ namespace HyperEngine
 			, w{ static_cast<T>(0) }
 		{
 		}
+		
+		Vector4(T scalar)
+			: x{ scalar }
+			, y{ scalar }
+			, z{ scalar }
+			, w{ scalar }
+		{
+		}
+		
+		Vector4(T x, T y, T z, T w)
+			: x{ x }
+			, y{ y }
+			, z{ z }
+			, w{ w }
+		{
+		}
 	
 	public:
-		T x;
-		T y;
-		T z;
-		T w;
+		union
+		{
+			T data[4];
+			
+			struct
+			{
+				T x;
+				T y;
+				T z;
+				T w;
+			};
+			
+			struct
+			{
+				T r;
+				T g;
+				T b;
+				T a;
+			};
+			
+			struct
+			{
+				T s;
+				T t;
+				T p;
+				T q;
+			};
+		};
 	};
 	
 	using Vec4 = Vector4<float>;
