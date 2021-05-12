@@ -28,3 +28,12 @@
 [submodule "vendor/meshoptimizer"]
 	path = vendor/meshoptimizer
 	url = https://github.com/zeux/meshoptimizer
+[submodule "vendor/DirectXShaderCompiler"]
+	path = vendor/DirectXShaderCompiler
+	url = https://github.com/Microsoft/DirectXShaderCompiler
+[submodule "vendor/SPIRV-Headers"]
+	path = vendor/SPIRV-Headers
+	url = https://github.com/KhronosGroup/SPIRV-Headers
+[submodule "vendor/SPIRV-Tools"]
+	path = vendor/SPIRV-Tools
+	url = https://github.com/KhronosGroup/SPIRV-Tools

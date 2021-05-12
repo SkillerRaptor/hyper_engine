@@ -36,51 +36,121 @@ set_target_properties(assimp PROPERTIES FOLDER vendor/assimp)
 hyperengine_set_output_directories(assimp)
 
 #-------------------------------------------------------------------------------------------
+# SPIRV-Headers
+#-------------------------------------------------------------------------------------------
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Headers)
+foreach(TARGET
+        "install-headers" "SPIRV-Headers-example")
+    set_target_properties(${TARGET} PROPERTIES FOLDER vendor/${TARGET})
+    hyperengine_set_output_directories(${TARGET})
+endforeach()
+
+#-------------------------------------------------------------------------------------------
+# SPIRV-Cross
+#-------------------------------------------------------------------------------------------
+hyperengine_set_cache_value(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS ON)
+hyperengine_set_cache_value(SPIRV_CROSS_SHARED OFF)
+hyperengine_set_cache_value(SPIRV_CROSS_STATIC ON)
+hyperengine_set_cache_value(SPIRV_CROSS_CLI OFF)
+hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_TESTS OFF)
+hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_GLSL ON)
+hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_HLSL ON)
+hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_MSL ON)
+hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_CPP ON)
+hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_REFLECT ON)
+hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_C_API ON)
+hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_UTIL ON)
+hyperengine_set_cache_value(SPIRV_CROSS_SANITIZE_ADDRESS OFF)
+hyperengine_set_cache_value(SPIRV_CROSS_SANITIZE_MEMORY OFF)
+hyperengine_set_cache_value(SPIRV_CROSS_SANITIZE_THREADS OFF)
+hyperengine_set_cache_value(SPIRV_CROSS_SANITIZE_UNDEFINED OFF)
+hyperengine_set_cache_value(SPIRV_CROSS_NAMESPACE_OVERRIDE ON)
+hyperengine_set_cache_value(SPIRV_CROSS_FORCE_STL_TYPES OFF)
+hyperengine_set_cache_value(SPIRV_CROSS_SKIP_INSTALL ON)
+hyperengine_set_cache_value(SPIRV_CROSS_WERROR OFF)
+hyperengine_set_cache_value(SPIRV_CROSS_MISC_WARNINGS OFF)
+hyperengine_set_cache_value(SPIRV_CROSS_FORCE_PIC OFF)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Cross)
+foreach(TARGET
+        "spirv-cross-core" "spirv-cross-cpp"
+        "spirv-cross-hlsl" "spirv-cross-glsl"
+        "spirv-cross-reflect")
+    set_target_properties(${TARGET} PROPERTIES FOLDER vendor/${TARGET})
+    hyperengine_set_output_directories(${TARGET})
+endforeach()
+
+#-------------------------------------------------------------------------------------------
+# SPIRV-Tools
+#-------------------------------------------------------------------------------------------
+hyperengine_set_cache_value(SPIRV_SKIP_EXECUTABLES ON)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Tools)
+foreach(TARGET
+        "core_tables" "enum_string_mapping" "extinst_tables"
+        "spirv-tools-pkg-config" "spirv-tools-shared-pkg-config"
+        "spirv-tools-build-version" "spirv-tools-header-DebugInfo"
+        "SPIRV-Tools-link" "SPIRV-Tools-shared"
+        "spirv-tools-header-OpenCLDebugInfo100" "spirv-tools-vimsyntax" "spv-tools-cldi100" "spv-tools-clspvreflection" "spv-tools-debuginfo" "spv-tools-spv-amd-gs"
+        "spv-tools-spv-amd-sb" "spv-tools-spv-amd-sevp" "spv-tools-spv-amd-stm")
+    set_target_properties(${TARGET} PROPERTIES FOLDER vendor/${TARGET})
+    hyperengine_set_output_directories(${TARGET})
+endforeach()
+
+#-------------------------------------------------------------------------------------------
 # DirectXShaderCompiler
 #-------------------------------------------------------------------------------------------
-if (WIN32)
-    hyperengine_set_cache_value(DXC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler/DirectXShaderCompiler.zip")
-    hyperengine_set_cache_value(DXC_URL "https://ci.appveyor.com/api/projects/dnovillo/directxshadercompiler/artifacts/build%2FRelease%2Fdxc-artifacts.zip?branch=master&pr=false&job=image%3A%20Visual%20Studio%202019")
+hyperengine_set_cache_value(ENABLE_SPIRV_CODEGEN ON)
+hyperengine_set_cache_value(CLANG_ENABLE_ARCMT OFF)
+hyperengine_set_cache_value(CLANG_ENABLE_STATIC_ANALYZER OFF)
+hyperengine_set_cache_value(CLANG_INCLUDE_TESTS OFF)
+hyperengine_set_cache_value(LLVM_INCLUDE_TESTS OFF)
+hyperengine_set_cache_value(HLSL_INCLUDE_TESTS OFF)
+hyperengine_set_cache_value(HLSL_BUILD_DXILCONV OFF)
+hyperengine_set_cache_value(HLSL_SUPPORT_QUERY_GIT_COMMIT_INFO OFF)
+hyperengine_set_cache_value(HLSL_ENABLE_DEBUG_ITERATORS ON)
+hyperengine_set_cache_value(LLVM_TARGETS_TO_BUILD "None" CACHE STRING "" FORCE)
+hyperengine_set_cache_value(LLVM_INCLUDE_DOCS OFF)
+hyperengine_set_cache_value(LLVM_INCLUDE_EXAMPLES OFF)
+hyperengine_set_cache_value(LIBCLANG_BUILD_STATIC ON)
+hyperengine_set_cache_value(LLVM_OPTIMIZED_TABLEGEN OFF)
+hyperengine_set_cache_value(LLVM_REQUIRES_EH ON)
+hyperengine_set_cache_value(LLVM_APPEND_VC_REV ON)
+hyperengine_set_cache_value(LLVM_ENABLE_RTTI ON)
+hyperengine_set_cache_value(LLVM_ENABLE_EH ON)
+hyperengine_set_cache_value(LLVM_ENABLE_TERMINFO OFF)
+hyperengine_set_cache_value(LLVM_DEFAULT_TARGET_TRIPLE "dxil-ms-dx" CACHE STRING "" FORCE)
+hyperengine_set_cache_value(CLANG_BUILD_EXAMPLES OFF)
+hyperengine_set_cache_value(LLVM_REQUIRES_RTTI ON)
+hyperengine_set_cache_value(CLANG_CL OFF)
+hyperengine_set_cache_value(DXC_BUILD_ARCH "x64" CACHE STRING "" FORCE)
+hyperengine_set_cache_value(SPIRV_BUILD_TESTS OFF)
+hyperengine_set_cache_value(SPIRV_SKIP_EXECUTABLES ON)
+hyperengine_set_cache_value(SPIRV_SKIP_TESTS ON)
 
-    if (NOT EXISTS "${DXC_FILE}")
-        file(DOWNLOAD ${DXC_URL} ${DXC_FILE})
-
-        execute_process(
-                COMMAND ${CMAKE_COMMAND} -E tar xzf
-                ${DXC_FILE} WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler/")
-    endif ()
-
-    add_library(dxcompiler SHARED IMPORTED GLOBAL)
-    set_target_properties(
-            dxcompiler
-            PROPERTIES
-            IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/vendor/DirectXShaderCompiler/bin/dxcompiler.dll"
-            IMPORTED_IMPLIB "${CMAKE_SOURCE_DIR}/vendor/DirectXShaderCompiler/lib/dxcompiler.lib")
-elseif (${CMAKE_SYSTEM} MATCHES "Linux")
-    hyperengine_set_cache_value(DXC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler.tar.gz")
-    hyperengine_set_cache_value(DXC_URL "https://ci.appveyor.com/api/projects/dnovillo/directxshadercompiler/artifacts/build%2Fdxc-artifacts.tar.gz?branch=master&pr=false&job=image%3A%20Ubuntu")
-
-    if (NOT EXISTS "${DXC_FILE}")
-        file(DOWNLOAD ${DXC_URL} ${DXC_FILE})
-
-        execute_process(
-                COMMAND ${CMAKE_COMMAND} -E tar xzf
-                ${DXC_FILE} WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/")
-
-        file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/dxc-artifacts" "${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler")
-    endif ()
-
-    add_library(dxcompiler SHARED IMPORTED GLOBAL)
-    set_target_properties(
-            dxcompiler
-            PROPERTIES
-            IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/vendor/DirectXShaderCompiler/lib/libdxcompiler.so")
-endif ()
-set_target_properties(
-        dxcompiler
-        PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler/include")
-hyperengine_set_output_directories(dxcompiler)
+set(CMAKE_CXX_STANDARD 14)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler)
+set(CMAKE_CXX_STANDARD 17)
+foreach(TARGET
+        "clang" "dxc"
+        "clangAnalysis" "clangAST" "clangASTMatchers" "clangBasic" "clangCodeGen" "clangDriver" "clangEdit" "clangFormat" "clangFrontend"
+        "clangFrontendTool" "clangIndex" "clangLex" "clangParse" "clangRewrite" "clangRewriteFrontend" "clangSema" "clangSPIRV" "clangTooling"
+        "clangToolingCore" "dxcompiler" "libclang"
+        "ClangAttrClasses" "ClangAttrDump" "ClangAttrHasAttributeImpl" "ClangAttrImpl" "ClangAttrList" "ClangAttrParsedAttrImpl"
+        "ClangAttrParsedAttrKinds" "ClangAttrParsedAttrList" "ClangAttrParserStringSwitches" "ClangAttrPCHRead" "ClangAttrPCHWrite"
+        "ClangAttrSpellingListIndex" "ClangAttrTemplateInstantiate" "ClangAttrVisitor" "ClangCommentCommandInfo" "ClangCommentCommandList"
+        "ClangCommentHTMLNamedCharacterReferences" "ClangCommentHTMLTags" "ClangCommentHTMLTagsProperties" "ClangCommentNodes" "ClangDeclNodes"
+        "ClangDiagnosticAnalysis" "ClangDiagnosticAST" "ClangDiagnosticComment" "ClangDiagnosticCommon" "ClangDiagnosticDriver"
+        "ClangDiagnosticFrontend" "ClangDiagnosticGroups" "ClangDiagnosticIndexName" "ClangDiagnosticLex" "ClangDiagnosticParse"
+        "ClangDiagnosticSema" "ClangDiagnosticSerialization" "ClangStmtNodes"
+        "LLVMAnalysis" "LLVMAsmParser" "LLVMBitReader" "LLVMBitWriter" "LLVMCore" "LLVMDxcSupport" "LLVMDXIL" "LLVMDxilContainer"
+        "LLVMDxilPIXPasses" "LLVMDxilRootSignature" "LLVMDxrFallback" "LLVMHLSL" "LLVMInstCombine" "LLVMipa" "LLVMipo" "LLVMIRReader"
+        "LLVMLinker" "LLVMLTO" "LLVMMSSupport" "LLVMOption" "LLVMPasses" "LLVMPassPrinters" "LLVMProfileData" "LLVMScalarOpts" "LLVMSupport"
+        "LLVMTableGen" "LLVMTarget" "LLVMTransformUtils" "LLVMVectorize"
+        "ClangDriverOptions" "DxcEtw" "intrinsics_gen" "TablegenHLSLOptions"
+        "clang-tblgen" "llvm-tblgen" "hlsl_dxcversion_autogen" "hlsl_version_autogen")
+    set_target_properties(${TARGET} PROPERTIES FOLDER vendor/${TARGET})
+    hyperengine_set_output_directories(${TARGET})
+endforeach()
 
 #-------------------------------------------------------------------------------------------
 # fmt
@@ -122,6 +192,8 @@ hyperengine_set_output_directories(glfw)
 # glm
 #-------------------------------------------------------------------------------------------
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glm)
+set_target_properties(glm PROPERTIES FOLDER vendor/glm)
+hyperengine_set_output_directories(glm)
 
 #-------------------------------------------------------------------------------------------
 # Dear ImGui
@@ -157,6 +229,8 @@ hyperengine_set_cache_value(JSON_MultipleHeaders OFF)
 hyperengine_set_cache_value(JSON_ImplicitConversions ON)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/json)
+set_target_properties(nlohmann_json PROPERTIES FOLDER vendor/nlohmann_json)
+hyperengine_set_output_directories(nlohmann_json)
 
 #-------------------------------------------------------------------------------------------
 # meshoptimizer
@@ -185,44 +259,6 @@ hyperengine_set_cache_value(BUILD_PACKAGE OFF)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/rttr)
 set_target_properties(rttr_core_lib PROPERTIES FOLDER vendor/rttr_core_lib)
 hyperengine_set_output_directories(rttr_core_lib)
-
-#-------------------------------------------------------------------------------------------
-# SPIRV-Cross
-#-------------------------------------------------------------------------------------------
-hyperengine_set_cache_value(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS ON)
-hyperengine_set_cache_value(SPIRV_CROSS_SHARED OFF)
-hyperengine_set_cache_value(SPIRV_CROSS_STATIC ON)
-hyperengine_set_cache_value(SPIRV_CROSS_CLI OFF)
-hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_TESTS OFF)
-hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_GLSL ON)
-hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_HLSL ON)
-hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_MSL ON)
-hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_CPP ON)
-hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_REFLECT ON)
-hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_C_API ON)
-hyperengine_set_cache_value(SPIRV_CROSS_ENABLE_UTIL ON)
-hyperengine_set_cache_value(SPIRV_CROSS_SANITIZE_ADDRESS OFF)
-hyperengine_set_cache_value(SPIRV_CROSS_SANITIZE_MEMORY OFF)
-hyperengine_set_cache_value(SPIRV_CROSS_SANITIZE_THREADS OFF)
-hyperengine_set_cache_value(SPIRV_CROSS_SANITIZE_UNDEFINED OFF)
-hyperengine_set_cache_value(SPIRV_CROSS_NAMESPACE_OVERRIDE ON)
-hyperengine_set_cache_value(SPIRV_CROSS_FORCE_STL_TYPES OFF)
-hyperengine_set_cache_value(SPIRV_CROSS_SKIP_INSTALL ON)
-hyperengine_set_cache_value(SPIRV_CROSS_WERROR OFF)
-hyperengine_set_cache_value(SPIRV_CROSS_MISC_WARNINGS OFF)
-hyperengine_set_cache_value(SPIRV_CROSS_FORCE_PIC OFF)
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Cross)
-set_target_properties(spirv-cross-core PROPERTIES FOLDER vendor/spirv-cross-core)
-set_target_properties(spirv-cross-cpp PROPERTIES FOLDER vendor/spirv-cross-cpp)
-set_target_properties(spirv-cross-hlsl PROPERTIES FOLDER vendor/spirv-cross-hlsl)
-set_target_properties(spirv-cross-glsl PROPERTIES FOLDER vendor/spirv-cross-glsl)
-set_target_properties(spirv-cross-reflect PROPERTIES FOLDER vendor/spirv-cross-reflect)
-hyperengine_set_output_directories(spirv-cross-core)
-hyperengine_set_output_directories(spirv-cross-cpp)
-hyperengine_set_output_directories(spirv-cross-hlsl)
-hyperengine_set_output_directories(spirv-cross-glsl)
-hyperengine_set_output_directories(spirv-cross-reflect)
 
 #-------------------------------------------------------------------------------------------
 # stb_image

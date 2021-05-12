@@ -60,8 +60,3 @@ cmake-build-*/
 
 # CLion
 .idea/
-
-# Local Dependencies
-*.zip
-*.tar.gz
-vendor/DirectXShaderCompiler

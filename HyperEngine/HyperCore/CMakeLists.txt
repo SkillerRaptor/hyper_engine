@@ -17,6 +17,7 @@ add_library(HyperCore STATIC "${SOURCES}" "${HEADERS}")
 target_include_directories(HyperCore PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 
 target_link_libraries(HyperCore PUBLIC fmt)
+target_include_directories(HyperCore PUBLIC "${CMAKE_SOURCE_DIR}/fmt/include/")
 
 if ("${HYPERENGINE_BUILD_TYPE}" STREQUAL "Debug")
     target_compile_definitions(HyperCore PUBLIC HYPERENGINE_RELEASE=0)

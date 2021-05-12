@@ -37,9 +37,11 @@ The following screenshots are showing features and designs from the engine:
  -   [json](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT) Copyright (c) MIT License, Niels Lohmann 2013-2021
  -   [meshoptimizer](https://github.com/zeux/meshoptimizer/blob/master/LICENSE.md) Copyright (c) MIT License, Arseny Kapoulkine 2016-2021
  -   [rttr](https://github.com/rttrorg/rttr/blob/master/LICENSE.txt) Copyright (c) MIT License, Axel Menzel 2014-2018
- -   [SPIRV-Cross](https://github.com/KhronosGroup/SPIRV-Cross/blob/master/LICENSE) Copyright (c) Apache License 2.0, ARM Limited 2015-2017
+ -   [SPIRV-Cross](https://github.com/KhronosGroup/SPIRV-Cross/blob/master/LICENSE) Copyright (c) Apache License 2.0, The Khronos Group Inc. 2015-2017
+ -   [SPIRV-Headers](https://github.com/KhronosGroup/SPIRV-Headers/blob/master/LICENSE) Copyright (c), The Khronos Group Inc. 2015-2018
+ -   [SPIRV-Tools](https://github.com/KhronosGroup/SPIRV-Tools/blob/master/LICENSE) Copyright (c) Apache License 2.0, The Khronos Group Inc. 2015-2016
  -   [stb](https://github.com/nothings/stb/blob/master/LICENSE) Copyright (c) MIT License, Sean Barrett 2017
- -   [vulkan](https://www.lunarg.com/vulkan-sdk/) Copyright (c), Khronos Group
+ -   [vulkan](https://www.lunarg.com/vulkan-sdk/) Copyright (c), The Khronos Group Inc.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

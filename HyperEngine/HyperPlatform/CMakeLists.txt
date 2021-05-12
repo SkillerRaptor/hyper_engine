@@ -18,4 +18,7 @@ target_include_directories(HyperPlatform PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/inc
 
 target_link_libraries(HyperPlatform PUBLIC HyperCore)
 
+target_link_libraries(HyperPlatform PUBLIC glfw)
+target_include_directories(HyperPlatform PUBLIC "${CMAKE_SOURCE_DIR}/vendor/glfw/include")
+
 hyperengine_set_output_directories(HyperPlatform)

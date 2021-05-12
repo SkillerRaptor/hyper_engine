@@ -25,7 +25,9 @@ option(HYPERENGINE_BUILD_TESTS "Enable generation of build files for tests" ON)
 #-------------------------------------------------------------------------------------------
 # Defines
 #-------------------------------------------------------------------------------------------
+add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")

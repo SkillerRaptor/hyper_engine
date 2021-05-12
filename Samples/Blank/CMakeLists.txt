@@ -7,10 +7,12 @@
 #-------------------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
+set(PROJECT "Blank")
+project(${PROJECT} LANGUAGES C CXX)
+
 #-------------------------------------------------------------------------------------------
 # Project
 #-------------------------------------------------------------------------------------------
-set(PROJECT "Blank")
 
 file(GLOB_RECURSE "C_SOURCES" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 file(GLOB_RECURSE "C_HEADERS" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")

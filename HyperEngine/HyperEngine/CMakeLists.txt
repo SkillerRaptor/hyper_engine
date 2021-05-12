@@ -21,4 +21,11 @@ target_link_libraries(HyperEngine PUBLIC HyperCore)
 target_link_libraries(HyperEngine PUBLIC HyperMath)
 target_link_libraries(HyperEngine PUBLIC HyperPlatform)
 
+target_link_libraries(HyperEngine PUBLIC HyperAnimation)
+target_link_libraries(HyperEngine PUBLIC HyperAudio)
+target_link_libraries(HyperEngine PUBLIC HyperGame)
+target_link_libraries(HyperEngine PUBLIC HyperNetwork)
+target_link_libraries(HyperEngine PUBLIC HyperPhysics)
+target_link_libraries(HyperEngine PUBLIC HyperResource)
+
 hyperengine_set_output_directories(HyperEngine)
