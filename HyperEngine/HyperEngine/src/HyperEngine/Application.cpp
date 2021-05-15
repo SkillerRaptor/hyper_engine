@@ -1,6 +1,6 @@
 #include <HyperEngine/Application.hpp>
 
-#include <HyperCore/Log.hpp>
+#include <HyperCore/Logger.hpp>
 
 namespace HyperEngine
 {
@@ -11,7 +11,6 @@ namespace HyperEngine
 	
 	void Application::Initialize()
 	{
-		HyperCore::Log::Initialize();
 		
 		OnInitialize();
 		

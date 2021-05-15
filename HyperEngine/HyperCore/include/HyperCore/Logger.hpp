@@ -22,16 +22,40 @@ namespace HyperCore
 		};
 	
 	public:
-		Logger(std::string name, Level level)
-			: m_name{ std::move(name) }
-			, m_level{ level }
+		template <typename... T>
+		static constexpr void Info(const std::string& format, T&&... args)
 		{
+			Logger::Log(Logger::Level::Info, format, std::forward<T&&>(args)...);
+		}
+		
+		template <typename... T>
+		static constexpr void Warning(const std::string& format, T&&... args)
+		{
+			Logger::Log(Logger::Level::Warning, format, std::forward<T&&>(args)...);
+		}
+		
+		template <typename... T>
+		static constexpr void Error(const std::string& format, T&&... args)
+		{
+			Logger::Log(Logger::Level::Error, format, std::forward<T&&>(args)...);
+		}
+		
+		template <typename... T>
+		static constexpr void Fatal(const std::string& format, T&&... args)
+		{
+			Logger::Log(Logger::Level::Fatal, format, std::forward<T&&>(args)...);
+		}
+		
+		template <typename... T>
+		static constexpr void Debug(const std::string& format, T&&... args)
+		{
+			Logger::Log(Logger::Level::Debug, format, std::forward<T&&>(args)...);
 		}
 		
 		template <typename... Args>
-		constexpr void Log(Level level, std::string_view format, Args&& ... args) const
+		static constexpr void Log(Level level, std::string_view format, Args&& ... args)
 		{
-			if (m_level != Level::Trace && m_level != level)
+			if (s_level != Logger::Level::Trace && s_level != level)
 			{
 				return;
 			}
@@ -47,17 +71,13 @@ namespace HyperCore
 			}
 		}
 		
-		void SetName(const std::string& name);
-		std::string GetName() const;
-		
-		void SetLevel(Level level);
-		Level GetLevel() const;
+		static void SetLevel(Level level);
+		static Level GetLevel();
 	
 	private:
-		void LogInternal(Level level, std::string_view format) const;
+		static void LogInternal(Level level, std::string_view format);
 	
 	private:
-		std::string m_name;
-		Level m_level;
+		static Level s_level;
 	};
 }

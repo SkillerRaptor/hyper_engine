@@ -5,7 +5,9 @@
 
 namespace HyperCore
 {
-	void Logger::LogInternal(Logger::Level level, std::string_view format) const
+	Logger::Level Logger::s_level{ Level::Trace };
+	
+	void Logger::LogInternal(Logger::Level level, std::string_view format)
 	{
 		fmt::color levelColor;
 		std::string levelName;
@@ -42,26 +44,16 @@ namespace HyperCore
 			break;
 		}
 		
-		fmt::print(fg(levelColor), "[ {:%H:%M:%S} | {} ] {}: {}\n", fmt::localtime(std::time(nullptr)), levelName, m_name, format);
-	}
-	
-	void Logger::SetName(const std::string& name)
-	{
-		m_name = name;
-	}
-	
-	std::string Logger::GetName() const
-	{
-		return m_name;
+		fmt::print("[ {:%H:%M:%S} | {} ] {}\n", fmt::localtime(std::time(nullptr)), levelName, format);
 	}
 	
 	void Logger::SetLevel(Logger::Level level)
 	{
-		m_level = level;
+		s_level = level;
 	}
 	
-	Logger::Level Logger::GetLevel() const
+	Logger::Level Logger::GetLevel()
 	{
-		return m_level;
+		return s_level;
 	}
 }

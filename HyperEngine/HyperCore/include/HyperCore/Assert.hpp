@@ -1,6 +1,6 @@
 #pragma once
 
-#include <HyperCore/Log.hpp>
+#include <HyperCore/Logger.hpp>
 #include <HyperCore/Prerequisites.hpp>
 
 #include <cstdlib>
@@ -11,7 +11,7 @@
 		{                                                               \
 			if (!(check))                                               \
 			{                                                           \
-				HYPERENGINE_CORE_FATAL(msg, __VA_ARGS__);               \
+				HyperCore::Logger::Fatal(msg, __VA_ARGS__);             \
 				std::abort();                                           \
 			}                                                           \
 		} while (0)
