@@ -1,13 +1,13 @@
 #pragma once
 
 #include <HyperCore/Assert.hpp>
-#include <HyperCore/Log.hpp>
+#include <HyperCore/Logger.hpp>
 
 #include <random>
 #include <type_traits>
 #include <utility>
 
-namespace HyperEngine
+namespace HyperMath
 {
 	class Random
 	{
@@ -15,33 +15,36 @@ namespace HyperEngine
 		Random(uint32_t seed = std::random_device()());
 		
 		template <class T>
-		T Generate(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max1())
+		T Generate(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max())
 		{
 			if constexpr (min > max)
 			{
 				std::swap(min, max);
-				HYPERENGINE_CORE_WARNING("The minimum is greater than the maximum in random number generator!");
+				HyperCore::Logger::Warning("HyperMath: The minimum is bigger than the maximum!");
 			}
 			
-			if constexpr (std::is_integral_v<T>)
+			constexpr bool isIntegral = std::is_integral_v<T>;
+			if constexpr (isIntegral)
 			{
 				std::uniform_int_distribution<T> distribution{ min, max };
 				return static_cast<T>(distribution(m_randomEngine));
 			}
 			
-			if constexpr (std::is_floating_point_v<T>)
+			constexpr bool isFloatingPoint = std::is_floating_point_v<T>;
+			if constexpr (isFloatingPoint)
 			{
 				std::uniform_real_distribution<T> distribution{ min, max };
 				return static_cast<T>(distribution(m_randomEngine));
 			}
 			
-			if constexpr (std::is_same_v<T, bool>)
+			constexpr bool isBool = std::is_same_v<T, bool>;
+			if constexpr (isBool)
 			{
 				std::bernoulli_distribution distribution{ 0.5f };
 				return static_cast<T>(distribution(m_randomEngine));
 			}
 			
-			constexpr bool isValid = std::is_integral_v<T> || std::is_floating_point_v<T> || std::is_same_v<T, bool>;
+			constexpr bool isValid = isIntegral | isFloatingPoint | isBool;
 			HYPERENGINE_ASSERT(isValid, "Failed to generate random number of invalid arithmetic type!");
 		}
 	

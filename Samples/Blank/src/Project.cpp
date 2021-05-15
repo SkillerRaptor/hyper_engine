@@ -1,4 +1,4 @@
-#include "Project.hpp"
+#include <Project.hpp>
 
 void Project::OnInitialize()
 {

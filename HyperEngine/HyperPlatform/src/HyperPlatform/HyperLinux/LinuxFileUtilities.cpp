@@ -3,7 +3,7 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_LINUX
-	namespace HyperEngine
+	namespace HyperPlatform
 	{
 		namespace FileUtilities
 		{

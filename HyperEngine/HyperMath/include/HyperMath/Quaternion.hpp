@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace HyperEngine
+namespace HyperMath
 {
 	template <typename T>
 	class Quaternion
