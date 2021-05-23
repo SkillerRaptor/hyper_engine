@@ -1,21 +1,25 @@
 #pragma once
 
+#include <Platform/Window.hpp>
+
 namespace Engine
 {
 	class Application
 	{
 	public:
-		void run();
+		void Run();
 	
 	protected:
-		virtual void initialize() = 0;
-		virtual void terminate() = 0;
+		virtual void Initialize() = 0;
+		virtual void Terminate() = 0;
 		
 	private:
-		void internal_initialize();
-		void internal_terminate();
+		void InternalInitialize();
+		void InternalTerminate();
 	
 	private:
 		bool m_running{ false };
+		
+		Platform::Window* m_window;
 	};
 }

@@ -7,7 +7,7 @@ namespace Editor
 	class Editor : public Engine::Application
 	{
 	private:
-		virtual void initialize() override;
-		virtual void terminate() override;
+		virtual void Initialize() override;
+		virtual void Terminate() override;
 	};
 }

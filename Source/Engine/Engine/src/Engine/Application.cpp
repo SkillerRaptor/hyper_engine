@@ -2,25 +2,33 @@
 
 namespace Engine
 {
-	void Application::internal_initialize()
+	void Application::InternalInitialize()
 	{
-		initialize();
+		Platform::WindowCreateInfo createInfo{};
+		createInfo.title = "";
+		createInfo.width = 1280;
+		createInfo.height = 720;
+		m_window = Platform::Window::Construct(createInfo);
+	
+		Initialize();
 	}
 	
-	void Application::internal_terminate()
+	void Application::InternalTerminate()
 	{
-		terminate();
+		Terminate();
+		
+		delete m_window;
 	}
 	
-	void Application::run()
+	void Application::Run()
 	{
-		internal_initialize();
+		InternalInitialize();
 		
 		while (m_running)
 		{
 		
 		}
 		
-		internal_terminate();
+		InternalTerminate();
 	}
 }

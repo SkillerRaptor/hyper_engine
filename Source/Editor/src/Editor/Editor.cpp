@@ -2,12 +2,12 @@
 
 namespace Editor
 {
-	void Editor::initialize()
+	void Editor::Initialize()
 	{
 	
 	}
 	
-	void Editor::terminate()
+	void Editor::Terminate()
 	{
 	
 	}

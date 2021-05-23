@@ -18,7 +18,9 @@ target_link_libraries(Engine PUBLIC Audio Core Math Network Physics Platform Res
 # DirectX
 # TODO: Check if platform is windows
 #-------------------------------------------------------------------------------------------
-add_dependencies(Engine DirectX11 DirectX12)
+if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
+    add_dependencies(Engine DirectX11 DirectX12)
+endif ()
 
 #-------------------------------------------------------------------------------------------
 # OpenGL
@@ -27,6 +29,8 @@ add_dependencies(Engine OpenGL33 OpenGL46)
 
 #-------------------------------------------------------------------------------------------
 # Vulkan
-# TODO: Check if vulkan sdk is installed
 #-------------------------------------------------------------------------------------------
-add_dependencies(Engine Vulkan)
+find_package(Vulkan)
+if (Vulkan_FOUND)
+    add_dependencies(Engine Vulkan)
+endif ()

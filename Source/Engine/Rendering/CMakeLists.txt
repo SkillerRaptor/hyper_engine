@@ -13,10 +13,11 @@ cmake_minimum_required(VERSION 3.10)
 
 #-------------------------------------------------------------------------------------------
 # DirectX
-# TODO: Check if platform is windows
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/DirectX11)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/DirectX12)
+if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/DirectX11)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/DirectX12)
+endif ()
 
 #-------------------------------------------------------------------------------------------
 # OpenGL
@@ -26,6 +27,8 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/OpenGL46)
 
 #-------------------------------------------------------------------------------------------
 # Vulkan
-# TODO: Check if vulkan sdk is installed
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vulkan)
+find_package(Vulkan)
+if (Vulkan_FOUND)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vulkan)
+endif ()
