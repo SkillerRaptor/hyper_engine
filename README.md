@@ -5,7 +5,7 @@
 
 ## Installing & Building
 In order to build the engine, you will need to follow these steps:
- 1.  Start cloning the repository with the git large file system: <br><code>git lfs clone <a href="https://github.com/SkillerRaptor/HyperEngine">https://github.com/SkillerRaptor/HyperEngine</a></code>
+ 1.  Start cloning the repository with the git (with lfs): <br><code>git clone <a href="https://github.com/SkillerRaptor/HyperEngine">https://github.com/SkillerRaptor/HyperEngine</a></code>
  2.  Build the project by using the `CMakeLists.txt` inside of the root directory.
  3.  Run the engine to check if everything was built successful.
 
