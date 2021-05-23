@@ -13,3 +13,20 @@ file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
 add_library(Engine STATIC ${SOURCES} ${HEADERS})
 target_include_directories(Engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(Engine PUBLIC Audio Core Math Network Physics Platform Resource)
+
+#-------------------------------------------------------------------------------------------
+# DirectX
+# TODO: Check if platform is windows
+#-------------------------------------------------------------------------------------------
+add_dependencies(Engine DirectX11 DirectX12)
+
+#-------------------------------------------------------------------------------------------
+# OpenGL
+#-------------------------------------------------------------------------------------------
+add_dependencies(Engine OpenGL33 OpenGL46)
+
+#-------------------------------------------------------------------------------------------
+# Vulkan
+# TODO: Check if vulkan sdk is installed
+#-------------------------------------------------------------------------------------------
+add_dependencies(Engine Vulkan)

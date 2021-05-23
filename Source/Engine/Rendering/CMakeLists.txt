@@ -25,7 +25,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/OpenGL33)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/OpenGL46)
 
 #-------------------------------------------------------------------------------------------
-# DirectX
+# Vulkan
 # TODO: Check if vulkan sdk is installed
 #-------------------------------------------------------------------------------------------
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Vulkan)
