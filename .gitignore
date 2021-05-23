@@ -33,13 +33,11 @@
 # Visual Studio
 .vs/
 *.sln
-**/*.vcxproj
-**/*.filters
-**/*.user
-/bin/
-/bin-int/
-*/*/*/bin/
-*/*/*/bin-int/
+*.vcxproj
+*.filters
+*.user
+bin/
+bin-int/
 
 # Visual C++ cache files
 ipch/
@@ -50,13 +48,13 @@ ipch/
 *.sdf
 *.cachefile
 
-# Others
+# CLion
+.idea/
+
+# Config Files
 *.ini
 *.cfg
 *.json
 
 # CMake
 cmake-build-*/
-
-# CLion
-.idea/
