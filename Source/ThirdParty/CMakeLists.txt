@@ -21,8 +21,6 @@ if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
         set_property(TARGET ${target} PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/${include})
     endfunction()
 elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
-    # TODO: Fixing undefined reference for linux build
-
     set(HYPERENGINE_IMPORT_LOCATION ${CMAKE_SOURCE_DIR}/Source/Platforms/Linux/Binaries)
 
     function(hyperengine_import_library target type library include)
