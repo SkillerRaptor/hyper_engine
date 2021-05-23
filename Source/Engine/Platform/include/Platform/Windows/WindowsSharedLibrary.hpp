@@ -1,6 +1,6 @@
 #pragma once
 
-#include <HyperPlatform/PlatformDetection.hpp>
+#include <Platform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
 	#ifdef HYPERENGINE_SHARED_EXPORT
