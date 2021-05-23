@@ -1,4 +1,4 @@
-<img src="./Resources/Images/Branding.png" align="right" width="150"/>
+<img src="./Development/Images/Branding.png" align="right" width="150"/>
 
 # HyperEngine
 [![License](https://img.shields.io/badge/license-MIT-yellow)](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE)
