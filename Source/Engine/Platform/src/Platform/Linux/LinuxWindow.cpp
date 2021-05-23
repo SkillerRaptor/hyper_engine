@@ -1,6 +1,8 @@
 #include <Platform/Linux/LinuxWindow.hpp>
 
 #if HYPERENGINE_PLATFORM_LINUX
+	#include <Core/Logger.hpp>
+	
 	#include <GLFW/glfw3.h>
 	
 	namespace Platform
@@ -19,7 +21,7 @@
 			
 			if (m_nativeWindow == nullptr)
 			{
-				// TODO: Log Error
+				Core::Logger::Fatal("Failed to create GLFW window!");
 				std::exit(1);
 			}
 		}

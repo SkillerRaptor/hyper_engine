@@ -23,6 +23,12 @@ elseif (UNIX AND NOT APPLE)
     set(HYPERENGINE_ARCH Linux)
 endif ()
 
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    set(HYPERENGINE_BUILD_TYPE Debug)
+else ()
+    set(HYPERENGINE_BUILD_TYPE Release)
+endif ()
+
 #-------------------------------------------------------------------------------------------
 # Source
 #-------------------------------------------------------------------------------------------
