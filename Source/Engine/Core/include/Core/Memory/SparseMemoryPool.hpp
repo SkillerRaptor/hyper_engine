@@ -19,7 +19,7 @@ namespace Core
 		
 		~SparseMemoryPool()
 		{
-			delete m_buffer;
+			delete[] m_buffer;
 		}
 		
 		T& Allocate(uint32_t& index)
