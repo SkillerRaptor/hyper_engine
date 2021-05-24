@@ -3,19 +3,21 @@
 #include <Platform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-	#include <Platform/Window.hpp>
-	
-	struct GLFWwindow;
-	
-	namespace Platform
+#include <Platform/Window.hpp>
+#include <Windows.h>
+
+namespace Platform
+{
+	class WindowsWindow : public Window
 	{
-		class WindowsWindow : public Window
-		{
-		public:
-			explicit WindowsWindow(const WindowCreateInfo& createInfo);
+	public:
+		explicit WindowsWindow(const WindowCreateInfo& createInfo);
 		
-		private:
-			GLFWwindow* m_nativeWindow;
-		};
-	}
+		virtual void Update() override;
+	
+	private:
+		HINSTANCE m_hInstance{};
+		HWND m_hNativeWindow{};
+	};
+}
 #endif

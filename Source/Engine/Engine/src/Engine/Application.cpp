@@ -2,15 +2,19 @@
 
 namespace Engine
 {
+	
 	void Application::InternalInitialize()
 	{
 		Platform::WindowCreateInfo createInfo{};
-		createInfo.title = "";
+		createInfo.title = "Title";
 		createInfo.width = 1280;
 		createInfo.height = 720;
+		createInfo.graphicsApi = Platform::GraphicsApi::OpenGL33;
 		m_window = Platform::Window::Construct(createInfo);
-	
+		
 		Initialize();
+		
+		m_running = true;
 	}
 	
 	void Application::InternalTerminate()
@@ -26,7 +30,7 @@ namespace Engine
 		
 		while (m_running)
 		{
-		
+			m_window->Update();
 		}
 		
 		InternalTerminate();

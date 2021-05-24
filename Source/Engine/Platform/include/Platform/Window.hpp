@@ -27,11 +27,16 @@ namespace Platform
 	public:
 		virtual ~Window() = default;
 		
+		virtual void Update() = 0;
+		
 		static Window* Construct(const WindowCreateInfo& createInfo);
 	
 	protected:
 		Window() = default;
-		
-		void SetWindowHints(GraphicsApi graphicsApi);
+	
+	protected:
+		std::string m_title{ "" };
+		size_t m_width{ 0 };
+		size_t m_height{ 0 };
 	};
 }
