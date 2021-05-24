@@ -12,7 +12,7 @@ namespace Platform
 		{
 		case WM_CLOSE:
 		case WM_DESTROY:
-			Shutdown();
+			// Handle Events
 			break;
 		default:
 			break;

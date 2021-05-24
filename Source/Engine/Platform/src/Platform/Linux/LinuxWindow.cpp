@@ -1,7 +1,6 @@
 #include <Platform/Linux/LinuxWindow.hpp>
 
 #if HYPERENGINE_PLATFORM_LINUX
-	
 #include <Core/Logger.hpp>
 
 #include <stdio.h>
@@ -41,6 +40,8 @@ namespace Platform
 	{
 		XEvent event{};
 		XNextEvent(m_display, &event);
+		
+		// Handle Events
 	}
 }
 #endif

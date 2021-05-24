@@ -21,6 +21,7 @@ namespace Engine
 	{
 		Terminate();
 		
+		m_window->Shutdown();
 		delete m_window;
 	}
 	
