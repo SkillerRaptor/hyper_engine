@@ -27,6 +27,8 @@ namespace Platform
 	public:
 		virtual ~Window() = default;
 		
+		virtual void Shutdown() = 0;
+		
 		virtual void Update() = 0;
 		
 		static Window* Construct(const WindowCreateInfo& createInfo);

@@ -1,90 +1,46 @@
 #include <Platform/Linux/LinuxWindow.hpp>
 
 #if HYPERENGINE_PLATFORM_LINUX
-	#include <Core/Logger.hpp>
+	
+#include <Core/Logger.hpp>
 
-	#include<stdio.h>
-	#include<stdlib.h>
-	#include<X11/X.h>
-	#include<X11/Xlib.h>
-	#include<GL/gl.h>
-	#include<GL/glx.h>
-	#include<GL/glu.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 namespace Platform
 {
 	LinuxWindow::LinuxWindow(const WindowCreateInfo& createInfo)
 	{
+		m_title = createInfo.title;
+		m_width = createInfo.width;
+		m_height = createInfo.height;
 		
-		Display                 *dpy;
-		::Window                  root;
-		GLint                   att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-		XVisualInfo             *vi;
-		Colormap                cmap;
-		XSetWindowAttributes    swa;
-		::Window                  win;
-		GLXContext              glc;
-		XWindowAttributes       gwa;
-		XEvent                  xev;
-		
-		dpy = XOpenDisplay(NULL);
-		
-		if(dpy == NULL) {
-			printf("\n\tcannot connect to X server\n\n");
-			exit(0);
+		m_display = XOpenDisplay(nullptr);
+		if (m_display == nullptr)
+		{
+			Core::Logger::Fatal("Failed to open X display!");
+			std::exit(1);
 		}
 		
-		root = DefaultRootWindow(dpy);
+		m_screen = DefaultScreen(m_display);
+		m_window = XCreateSimpleWindow(
+			m_display, RootWindow(m_display, m_screen),
+			0, 0, m_width, m_height,
+			0, BlackPixel(m_display, m_screen), BlackPixel(m_display, m_screen));
 		
-		vi = glXChooseVisual(dpy, 0, att);
-		
-		if(vi == NULL) {
-			printf("\n\tno appropriate visual found\n\n");
-			exit(0);
-		}
-		else {
-			printf("\n\tvisual %p selected\n", (void *)vi->visualid); /* %p creates hexadecimal output like in glxinfo */
-		}
-		
-		
-		cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
-		
-		swa.colormap = cmap;
-		swa.event_mask = ExposureMask | KeyPressMask;
-		
-		win = XCreateWindow(dpy, root, 0, 0, 600, 600, 0, vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
-		
-		XMapWindow(dpy, win);
-		XStoreName(dpy, win, "VERY SIMPLE APPLICATION");
-		
-		glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
-		glXMakeCurrent(dpy, win, glc);
-		
-		glEnable(GL_DEPTH_TEST);
-		
-		while(1) {
-			XNextEvent(dpy, &xev);
-			
-			if(xev.type == Expose) {
-				XGetWindowAttributes(dpy, win, &gwa);
-				glViewport(0, 0, gwa.width, gwa.height);
-				//DrawAQuad();
-				glXSwapBuffers(dpy, win);
-			}
-			
-			else if(xev.type == KeyPress) {
-				glXMakeCurrent(dpy, None, NULL);
-				glXDestroyContext(dpy, glc);
-				XDestroyWindow(dpy, win);
-				XCloseDisplay(dpy);
-				exit(0);
-			}
-		} /* this closes while(1) { */
+		XSelectInput(m_display, m_window, ExposureMask | KeyPressMask);
+		XMapWindow(m_display, m_window);
+	}
+	
+	void LinuxWindow::Shutdown()
+	{
+		XCloseDisplay(m_display);
 	}
 	
 	void LinuxWindow::Update()
 	{
-	
+		XEvent event{};
+		XNextEvent(m_display, &event);
 	}
 }
 #endif

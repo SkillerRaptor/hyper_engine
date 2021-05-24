@@ -13,6 +13,8 @@ namespace Platform
 	public:
 		explicit WindowsWindow(const WindowCreateInfo& createInfo);
 		
+		virtual void Shutdown() override;
+		
 		virtual void Update() override;
 	
 	private:

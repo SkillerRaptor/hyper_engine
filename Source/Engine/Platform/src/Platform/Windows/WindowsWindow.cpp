@@ -12,7 +12,7 @@ namespace Platform
 		{
 		case WM_CLOSE:
 		case WM_DESTROY:
-			PostQuitMessage(0);
+			Shutdown();
 			break;
 		default:
 			break;
@@ -45,15 +45,15 @@ namespace Platform
 		
 		if (!RegisterClassEx(&windowClass))
 		{
-			Core::Logger::Error("Failed to register window class! Error: {}", GetLastError());
+			Core::Logger::Fatal("Failed to register window class! Error: {}", GetLastError());
 			std::exit(1);
 		}
 		
 		RECT windowRect{};
 		windowRect.left = 0;
 		windowRect.top = 0;
-		windowRect.right = static_cast<LONG>(createInfo.width);
-		windowRect.bottom = static_cast<LONG>(createInfo.height);
+		windowRect.right = static_cast<LONG>(m_width);
+		windowRect.bottom = static_cast<LONG>(m_height);
 		
 		constexpr DWORD style{ WS_OVERLAPPEDWINDOW | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX };
 		AdjustWindowRectEx(&windowRect, style, false, 0);
@@ -64,7 +64,7 @@ namespace Platform
 			nullptr, nullptr, m_hInstance, 0);
 		if(!m_hNativeWindow)
 		{
-			Core::Logger::Error("Failed to create window! Error: {}", GetLastError());
+			Core::Logger::Fatal("Failed to create window! Error: {}", GetLastError());
 			std::exit(1);
 		}
 		
@@ -74,6 +74,11 @@ namespace Platform
 		SetFocus(m_hNativeWindow);
 		
 		ShowCursor(true);
+	}
+	
+	void WindowsWindow::Shutdown()
+	{
+		PostQuitMessage(0);
 	}
 	
 	void WindowsWindow::Update()
