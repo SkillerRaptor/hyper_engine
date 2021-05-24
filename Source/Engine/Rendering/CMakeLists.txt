@@ -22,8 +22,11 @@ endif ()
 #-------------------------------------------------------------------------------------------
 # OpenGL
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/OpenGL33)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/OpenGL46)
+find_package(OpenGL)
+if (OPENGL_FOUND)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/OpenGL33)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/OpenGL46)
+endif ()
 
 #-------------------------------------------------------------------------------------------
 # Vulkan

@@ -23,3 +23,7 @@ add_library(Vulkan SHARED ${SOURCES} ${HEADERS})
 set_target_properties(Vulkan PROPERTIES FOLDER Modules/Rendering)
 target_include_directories(Vulkan PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${HYPERENGINE_RENDERING_FOLDER}/Common/include)
 target_link_libraries(Vulkan PUBLIC Core Math Platform)
+
+find_package(Vulkan)
+target_include_directories(Vulkan PUBLIC ${Vulkan_INCLUDE_DIRS})
+target_link_libraries(Vulkan PUBLIC ${Vulkan_LIBRARIES})
