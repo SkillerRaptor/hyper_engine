@@ -106,7 +106,7 @@ namespace platform::windows
 		void* create_context_address{ m_library_manager->get_function(m_graphics_handle, "create_context") };
 		create_context_function create_context{ reinterpret_cast<create_context_function>(create_context_address) };
 		m_context = create_context();
-		m_context->initialize(m_native_window);
+		m_context->initialize(m_instance, m_native_window);
 		
 		return true;
 	}

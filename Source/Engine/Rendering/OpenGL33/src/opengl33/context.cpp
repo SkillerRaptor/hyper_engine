@@ -11,10 +11,10 @@ namespace rendering
 	
 	namespace opengl33
 	{
-		bool context::initialize(void* native_window)
+		bool context::initialize(void* instance, void* native_window)
 		{
 			m_platform_context = platform_context::construct();
-			m_platform_context->initialize(native_window);
+			m_platform_context->initialize(instance, native_window);
 			return true;
 		}
 		

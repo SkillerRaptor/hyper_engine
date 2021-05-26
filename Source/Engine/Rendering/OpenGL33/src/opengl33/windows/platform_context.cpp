@@ -5,10 +5,12 @@
 #if HYPERENGINE_PLATFORM_WINDOWS
 namespace rendering::windows
 {
-	void platform_context::initialize(void* native_window)
+	void platform_context::initialize(void* instance, void* native_window)
 	{
-		m_native_window = reinterpret_cast<HWND>(native_window);
-		HDC window_handle{ GetDC(m_native_window) };
+		m_instance = reinterpret_cast<HINSTANCE>(instance);
+		m_window = reinterpret_cast<HWND>(native_window);
+		
+		HDC window_handle{ GetDC(m_window) };
 		
 		PIXELFORMATDESCRIPTOR pfd =
 			{
@@ -38,7 +40,6 @@ namespace rendering::windows
 		wglMakeCurrent(window_handle, m_context);
 		
 		MessageBoxA(0, (char*) glGetString(GL_VERSION), "OPENGL VERSION", 0);
-		//core::logger::debug("The opengl version is: {}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
 	}
 	
 	void platform_context::shutdown()
@@ -48,7 +49,7 @@ namespace rendering::windows
 	
 	void platform_context::swap_buffers()
 	{
-		HDC window_handle{ GetDC(m_native_window) };
+		HDC window_handle{ GetDC(m_window) };
 		wglSwapLayerBuffers(window_handle, WGL_SWAP_MAIN_PLANE);
 	}
 }
