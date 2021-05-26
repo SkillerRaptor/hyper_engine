@@ -10,7 +10,7 @@ namespace rendering
 	public:
 		virtual ~context() = default;
 		
-		virtual bool initialize() = 0;
+		virtual bool initialize(void* native_window) = 0;
 		virtual void shutdown() = 0;
 		
 		virtual void update() = 0;

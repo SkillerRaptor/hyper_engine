@@ -13,13 +13,14 @@ namespace rendering::windows
 	class platform_context : public ::rendering::platform_context
 	{
 	public:
-		virtual void initialize() override;
+		virtual void initialize(void* native_window) override;
 		virtual void shutdown() override;
 		
 		virtual void swap_buffers() override;
 		
 	private:
 		HGLRC m_context;
+		HWND m_native_window;
 	};
 }
 #endif

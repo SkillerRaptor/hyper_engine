@@ -13,7 +13,7 @@ namespace rendering
 	
 	namespace vulkan
 	{
-		bool context::initialize()
+		bool context::initialize(void* native_window)
 		{
 			if (!create_instance())
 			{

@@ -9,7 +9,7 @@ namespace rendering::vulkan
 	class context : public ::rendering::context
 	{
 	public:
-		virtual bool initialize() override;
+		virtual bool initialize(void* native_window) override;
 		virtual void shutdown() override;
 		
 		virtual void update() override;

@@ -10,7 +10,7 @@ namespace rendering::linux
 	class platform_context : public ::rendering::platform_context
 	{
 	public:
-		virtual void initialize() override;
+		virtual void initialize(void* native_window) override;
 		virtual void shutdown() override;
 		
 		virtual void swap_buffers() override;

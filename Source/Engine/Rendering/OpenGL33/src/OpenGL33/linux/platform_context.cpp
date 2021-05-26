@@ -3,7 +3,7 @@
 #if HYPERENGINE_PLATFORM_LINUX
 namespace rendering::linux
 {
-	void platform_context::initialize()
+	void platform_context::initialize(void* native_window)
 	{
 	
 	}
