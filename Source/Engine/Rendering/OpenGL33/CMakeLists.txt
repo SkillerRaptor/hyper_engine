@@ -27,3 +27,9 @@ target_link_libraries(OpenGL33 PUBLIC Core Math Platform)
 find_package(OpenGL)
 target_include_directories(OpenGL33 PUBLIC ${OPENGL_INCLUDE_DIRS})
 target_link_libraries(OpenGL33 PUBLIC ${OPENGL_LIBRARIES})
+
+add_custom_command(
+        TARGET OpenGL33
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_FILE:OpenGL33> ${CMAKE_BINARY_DIR}/bin/)

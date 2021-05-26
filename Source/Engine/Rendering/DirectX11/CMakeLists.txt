@@ -23,3 +23,9 @@ add_library(DirectX11 SHARED ${SOURCES} ${HEADERS})
 set_target_properties(DirectX11 PROPERTIES FOLDER Modules/Rendering)
 target_include_directories(DirectX11 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${HYPERENGINE_RENDERING_FOLDER}/Common/include)
 target_link_libraries(DirectX11 PUBLIC Core Math Platform)
+
+add_custom_command(
+        TARGET DirectX11
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_FILE:DirectX11> ${CMAKE_BINARY_DIR}/bin/)

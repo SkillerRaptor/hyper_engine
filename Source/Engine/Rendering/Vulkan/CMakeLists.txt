@@ -27,3 +27,9 @@ target_link_libraries(Vulkan PUBLIC Core Math Platform)
 find_package(Vulkan)
 target_include_directories(Vulkan PUBLIC ${Vulkan_INCLUDE_DIRS})
 target_link_libraries(Vulkan PUBLIC ${Vulkan_LIBRARIES})
+
+add_custom_command(
+        TARGET Vulkan
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_FILE:Vulkan> ${CMAKE_BINARY_DIR}/bin/)
