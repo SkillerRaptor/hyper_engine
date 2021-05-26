@@ -14,7 +14,7 @@ namespace platform::linux
 	public:
 		explicit window(const window_create_info& create_info);
 		
-		virtual bool initialize() override;
+		virtual bool initialize(library_manager* library_manager) override;
 		virtual void shutdown() override;
 		
 		virtual void update() override;

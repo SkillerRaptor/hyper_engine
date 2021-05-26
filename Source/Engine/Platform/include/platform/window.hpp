@@ -1,5 +1,8 @@
 #pragma once
 
+#include <common/context.hpp>
+#include <platform/library_manager.hpp>
+
 #include <string>
 
 namespace platform
@@ -24,10 +27,13 @@ namespace platform
 	
 	class window
 	{
+	protected:
+		typedef rendering::context* (*create_context_function)();
+		
 	public:
 		virtual ~window() = default;
 		
-		virtual bool initialize() = 0;
+		virtual bool initialize(library_manager* library_manager) = 0;
 		virtual void shutdown() = 0;
 		
 		virtual void update() = 0;
@@ -41,5 +47,11 @@ namespace platform
 		std::string m_title{ "" };
 		size_t m_width{ 0 };
 		size_t m_height{ 0 };
+		graphics_api m_api;
+		
+		library_manager* m_library_manager;
+		library_handle m_graphics_handle;
+	
+		rendering::context* m_context;
 	};
 }

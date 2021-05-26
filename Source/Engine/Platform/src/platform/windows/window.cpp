@@ -26,10 +26,13 @@ namespace platform::windows
 		m_title = create_info.title;
 		m_width = create_info.width;
 		m_height = create_info.height;
+		m_api = create_info.api;
 	}
 	
-	bool window::initialize()
+	bool window::initialize(library_manager* library_manager)
 	{
+		m_library_manager = library_manager;
+		
 		m_instance = GetModuleHandle(nullptr);
 		
 		WNDCLASSEX window_class{};
@@ -78,11 +81,40 @@ namespace platform::windows
 		
 		ShowCursor(true);
 		
+		std::string graphics_library{ "" };
+		switch (m_api)
+		{
+		case graphics_api::directx11:
+			graphics_library = "DirectX11.dll";
+			break;
+		case graphics_api::directx12:
+			graphics_library = "DirectX12.dll";
+			break;
+		case graphics_api::opengl33:
+			graphics_library = "OpenGL33.dll";
+			break;
+		case graphics_api::opengl46:
+			graphics_library = "OpenGL46.dll";
+			break;
+		case graphics_api::vulkan:
+			graphics_library = "Vulkan.dll";
+			break;
+		}
+		
+		m_graphics_handle = m_library_manager->load(graphics_library);
+		
+		void* create_context_address{ m_library_manager->get_function(m_graphics_handle, "create_context") };
+		create_context_function create_context{ reinterpret_cast<create_context_function>(create_context_address) };
+		m_context = create_context();
+		m_context->initialize();
+		
 		return true;
 	}
 	
 	void window::shutdown()
 	{
+		m_library_manager->unload(m_graphics_handle);
+		
 		PostQuitMessage(0);
 	}
 	

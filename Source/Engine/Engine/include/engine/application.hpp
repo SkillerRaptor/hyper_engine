@@ -1,5 +1,6 @@
 #pragma once
 
+#include <platform/library_manager.hpp>
 #include <platform/window.hpp>
 
 namespace engine
@@ -21,5 +22,6 @@ namespace engine
 		bool m_running{ false };
 		
 		platform::window* m_window;
+		platform::library_manager* m_library_manager;
 	};
 }

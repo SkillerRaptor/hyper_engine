@@ -13,10 +13,13 @@ namespace platform::linux
 		m_title = create_info.title;
 		m_width = create_info.width;
 		m_height = create_info.height;
+		m_api = create_info.api;
 	}
 	
-	bool window::initialize()
+	bool window::initialize(library_manager* library_manager)
 	{
+		m_library_manager = library_manager;
+		
 		m_display = XOpenDisplay(nullptr);
 		if (m_display == nullptr)
 		{
@@ -33,11 +36,39 @@ namespace platform::linux
 		XSelectInput(m_display, m_window, ExposureMask | KeyPressMask);
 		XMapWindow(m_display, m_window);
 		
+		std::string graphics_library{ "" };
+		switch (m_api)
+		{
+		case graphics_api::directx11:
+			graphics_library = "libDirectX11.so";
+			break;
+		case graphics_api::directx12:
+			graphics_library = "libDirectX12.so";
+			break;
+		case graphics_api::opengl33:
+			graphics_library = "libOpenGL33.so";
+			break;
+		case graphics_api::opengl46:
+			graphics_library = "libOpenGL46.so";
+			break;
+		case graphics_api::vulkan:
+			graphics_library = "libVulkan.so";
+			break;
+		}
+		
+		m_graphics_handle = m_library_manager->load(graphics_library);
+		
+		void* create_context_address{ m_library_manager->get_function(m_graphics_handle, "create_context") };
+		create_context_function create_context{ reinterpret_cast<create_context_function>(create_context_address) };
+		m_context = create_context();
+		
 		return true;
 	}
 	
 	void window::shutdown()
 	{
+		m_library_manager->unload(m_graphics_handle);
+		
 		XCloseDisplay(m_display);
 	}
 	

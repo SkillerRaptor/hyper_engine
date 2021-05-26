@@ -19,7 +19,7 @@ endforeach ()
 
 add_library(Platform STATIC ${SOURCES} ${HEADERS})
 set_target_properties(Platform PROPERTIES FOLDER Modules)
-target_include_directories(Platform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(Platform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/Source/Engine/Rendering/Common/include)
 target_link_libraries(Platform PUBLIC Core)
 
 if ("${HYPERENGINE_ARCH}" STREQUAL "Linux")

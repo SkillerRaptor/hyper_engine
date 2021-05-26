@@ -10,8 +10,10 @@ namespace engine
 		create_info.height = 720;
 		create_info.api = platform::graphics_api::opengl33;
 		
+		m_library_manager = platform::library_manager::construct();
+		
 		m_window = platform::window::construct(create_info);
-		m_window->initialize();
+		m_window->initialize(m_library_manager);
 		
 		initialize();
 		
@@ -24,6 +26,8 @@ namespace engine
 		
 		m_window->shutdown();
 		delete m_window;
+		
+		delete m_library_manager;
 	}
 	
 	void application::run()
