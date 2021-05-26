@@ -1,8 +1,8 @@
-#include <Editor/Editor.hpp>
+#include <editor/editor.hpp>
 
 int main(int, char**)
 {
-	Editor::Editor* editor{ new Editor::Editor() };
-	editor->Run();
+	editor::editor* editor{ new editor::editor() };
+	editor->run();
 	delete editor;
 }
