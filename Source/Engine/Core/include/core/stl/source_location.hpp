@@ -20,9 +20,20 @@ namespace core
 			uint32_t line = __builtin_LINE())
 		{
 			source_location location{};
-			location.m_file = file;
 			location.m_function = function;
 			location.m_line = line;
+			
+			const char* file_name = file;
+			while (*file)
+			{
+				const char next_char = *(file++);
+				if (next_char == '/' || next_char == '\\')
+				{
+					file_name = file;
+				}
+			}
+			location.m_file = file_name;
+			
 			return location;
 		}
 		
