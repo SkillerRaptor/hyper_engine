@@ -15,6 +15,9 @@ namespace rendering
 	{
 		bool context::initialize(void* instance, void* native_window)
 		{
+			m_platform_context = platform_context::construct();
+			m_platform_context->initialize(instance, native_window);
+			
 			if (!create_instance())
 			{
 				return false;
@@ -46,9 +49,9 @@ namespace rendering
 			instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 			instanceCreateInfo.pApplicationInfo = &applicationInfo;
 			
-			const char* szSurfaceExtension = "VK_KHR_surface";
-			instanceCreateInfo.enabledExtensionCount = 1;
-			instanceCreateInfo.ppEnabledExtensionNames = &szSurfaceExtension;
+			const char* szSurfaceExtension[] = { "VK_KHR_surface", m_platform_context->get_required_extension() };
+			instanceCreateInfo.enabledExtensionCount = 2;
+			instanceCreateInfo.ppEnabledExtensionNames = szSurfaceExtension;
 			
 			if (vkCreateInstance(&instanceCreateInfo, nullptr, &m_instance) != VK_SUCCESS)
 			{
