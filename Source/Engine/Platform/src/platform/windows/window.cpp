@@ -84,21 +84,34 @@ namespace platform::windows
 		std::string graphics_library{ "" };
 		switch (m_api)
 		{
+#if HYPERENGINE_BUILD_DIRECTX11
 		case graphics_api::directx11:
 			graphics_library = "DirectX11.dll";
 			break;
+#endif
+#if HYPERENGINE_BUILD_DIRECTX12
 		case graphics_api::directx12:
 			graphics_library = "DirectX12.dll";
 			break;
+#endif
+#if HYPERENGINE_BUILD_OPENGL33
 		case graphics_api::opengl33:
 			graphics_library = "OpenGL33.dll";
 			break;
+#endif
+#if HYPERENGINE_BUILD_OPENGL46
 		case graphics_api::opengl46:
 			graphics_library = "OpenGL46.dll";
 			break;
+#endif
+#if HYPERENGINE_BUILD_VULKAN
 		case graphics_api::vulkan:
 			graphics_library = "Vulkan.dll";
 			break;
+#endif
+		default:
+			core::logger::fatal("There is no graphics api available!");
+			return false;
 		}
 		
 		m_graphics_handle = m_library_manager->load(graphics_library);
