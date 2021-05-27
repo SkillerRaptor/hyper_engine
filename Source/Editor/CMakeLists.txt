@@ -20,9 +20,3 @@ endforeach ()
 add_executable(Editor ${SOURCES} ${HEADERS})
 target_include_directories(Editor PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(Editor PRIVATE Engine)
-
-add_custom_command(
-        TARGET Editor
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        $<TARGET_FILE:Editor> ${CMAKE_BINARY_DIR}/bin/)

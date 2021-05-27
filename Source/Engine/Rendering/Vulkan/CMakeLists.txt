@@ -32,4 +32,4 @@ add_custom_command(
         TARGET Vulkan
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-        $<TARGET_FILE:Vulkan> ${CMAKE_BINARY_DIR}/bin/)
+        $<TARGET_FILE:Vulkan> ${CMAKE_BINARY_DIR}/Source/Editor/)

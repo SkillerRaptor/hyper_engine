@@ -28,4 +28,4 @@ add_custom_command(
         TARGET DirectX12
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-        $<TARGET_FILE:DirectX12> ${CMAKE_BINARY_DIR}/bin/)
+        $<TARGET_FILE:DirectX12> ${CMAKE_BINARY_DIR}/Source/Editor/)

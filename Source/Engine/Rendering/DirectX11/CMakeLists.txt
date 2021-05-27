@@ -28,4 +28,4 @@ add_custom_command(
         TARGET DirectX11
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-        $<TARGET_FILE:DirectX11> ${CMAKE_BINARY_DIR}/bin/)
+        $<TARGET_FILE:DirectX11> ${CMAKE_BINARY_DIR}/Source/Editor/)
