@@ -3,9 +3,9 @@
 #include <platform/platform_detection.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-	#include <opengl33/windows/platform_context.hpp>
+#include <opengl33/windows/platform_context.hpp>
 #elif HYPERENGINE_PLATFORM_LINUX
-	#include <opengl33/linux/platform_context.hpp>
+#include <opengl33/linux/platform_context.hpp>
 #endif
 
 namespace rendering
@@ -16,7 +16,8 @@ namespace rendering
 		return new windows::platform_context{};
 #elif HYPERENGINE_PLATFORM_LINUX
 		return new linux::platform_context{};
-#endif
+#else
 		return nullptr;
+#endif
 	}
 }

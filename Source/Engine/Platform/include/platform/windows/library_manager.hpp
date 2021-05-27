@@ -15,7 +15,7 @@ namespace platform::windows
 	private:
 		struct library_data
 		{
-			uint16_t magic_number;
+			uint32_t magic_number;
 			
 			std::string path;
 			HINSTANCE library;

@@ -3,9 +3,9 @@
 #include <platform/platform_detection.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-	#include <platform/windows/window.hpp>
+#include <platform/windows/window.hpp>
 #elif HYPERENGINE_PLATFORM_LINUX
-	#include <platform/linux/window.hpp>
+#include <platform/linux/window.hpp>
 #endif
 
 namespace platform
@@ -16,7 +16,8 @@ namespace platform
 		return new windows::window{ create_info };
 #elif HYPERENGINE_PLATFORM_LINUX
 		return new linux::window{ create_info };
-#endif
+#else
 		return nullptr;
+#endif
 	}
 }

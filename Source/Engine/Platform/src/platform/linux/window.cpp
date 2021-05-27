@@ -36,21 +36,21 @@ namespace platform::linux
 		std::string graphics_library{ "" };
 		switch (m_api)
 		{
-#if HYPERENGINE_BUILD_OPENGL33
+	#if HYPERENGINE_BUILD_OPENGL33
 		case graphics_api::opengl33:
 			graphics_library = "./libOpenGL33.so";
 			break;
-#endif
-#if HYPERENGINE_BUILD_OPENGL46
+	#endif
+	#if HYPERENGINE_BUILD_OPENGL46
 		case graphics_api::opengl46:
 			graphics_library = "./libOpenGL46.so";
 			break;
-#endif
-#if HYPERENGINE_BUILD_VULKAN
+	#endif
+	#if HYPERENGINE_BUILD_VULKAN
 		case graphics_api::vulkan:
 			graphics_library = "./libVulkan.so";
 			break;
-#endif
+	#endif
 		default:
 			core::logger::fatal("There is no graphics api available!");
 			return false;

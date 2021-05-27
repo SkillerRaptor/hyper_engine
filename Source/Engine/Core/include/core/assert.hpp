@@ -10,7 +10,7 @@
 namespace core
 {
 #if HYPERENGINE_DEBUG
-#   define HYPERENGINE_ASSERT(condition) \
+	#define HYPERENGINE_ASSERT(condition) \
         do \
 		{ \
 			if (!(condition)) \
@@ -25,6 +25,6 @@ namespace core
 			} \
 		} while (0)
 #else
-#   define HYPERENGINE_ASSERT()
+	#define HYPERENGINE_ASSERT()
 #endif
 }

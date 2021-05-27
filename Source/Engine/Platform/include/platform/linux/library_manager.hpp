@@ -3,7 +3,6 @@
 #include <platform/platform_detection.hpp>
 
 #if HYPERENGINE_PLATFORM_LINUX
-
 #include <core/memory/sparse_memory_pool.hpp>
 #include <platform/library_manager.hpp>
 
@@ -14,7 +13,7 @@ namespace platform::linux
 	private:
 		struct library_data
 		{
-			uint16_t magic_number;
+			uint32_t magic_number;
 			
 			std::string path;
 			void* library;

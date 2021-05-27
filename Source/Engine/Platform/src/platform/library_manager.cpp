@@ -3,9 +3,9 @@
 #include <platform/platform_detection.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-	#include <platform/windows/library_manager.hpp>
+#include <platform/windows/library_manager.hpp>
 #elif HYPERENGINE_PLATFORM_LINUX
-	#include <platform/linux/library_manager.hpp>
+#include <platform/linux/library_manager.hpp>
 #endif
 
 namespace platform
@@ -38,7 +38,8 @@ namespace platform
 		return new windows::library_manager{};
 #elif HYPERENGINE_PLATFORM_LINUX
 		return new linux::library_manager{};
-#endif
+#else
 		return nullptr;
+#endif
 	}
 }
