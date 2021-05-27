@@ -1,6 +1,5 @@
 #pragma once
 
-#include <core/format.hpp>
 #include <core/logger.hpp>
 #include <core/macro_utilities.hpp>
 #include <core/stl/source_location.hpp>
@@ -11,7 +10,7 @@
 namespace core
 {
 #if HYPERENGINE_DEBUG
-#   define HYPERENGINE_ASSERT(condition, message, ...) \
+#   define HYPERENGINE_ASSERT(condition) \
         do \
 		{ \
 			if (!(condition)) \
