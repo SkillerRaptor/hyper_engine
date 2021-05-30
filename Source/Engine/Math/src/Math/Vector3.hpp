@@ -5,47 +5,43 @@
 namespace Math
 {
 	template <typename T>
-	class vector4
+	class Vector3
 	{
 	public:
-		static_assert(std::is_arithmetic_v<T>, "Invalid template type for Vector4!");
+		static_assert(std::is_arithmetic_v<T>, "Invalid template type for Vector3!");
 	
 	public:
-		vector4()
+		Vector3()
 			: x{ static_cast<T>(0) }
 			, y{ static_cast<T>(0) }
 			, z{ static_cast<T>(0) }
-			, w{ static_cast<T>(0) }
 		{
 		}
 		
-		vector4(T scalar)
+		Vector3(T scalar)
 			: x{ scalar }
 			, y{ scalar }
 			, z{ scalar }
-			, w{ scalar }
 		{
 		}
 		
-		vector4(T x, T y, T z, T w)
+		Vector3(T x, T y, T z)
 			: x{ x }
 			, y{ y }
 			, z{ z }
-			, w{ w }
 		{
 		}
 	
 	public:
 		union
 		{
-			T data[4];
+			T data[3];
 			
 			struct
 			{
 				T x;
 				T y;
 				T z;
-				T w;
 			};
 			
 			struct
@@ -53,7 +49,6 @@ namespace Math
 				T r;
 				T g;
 				T b;
-				T a;
 			};
 			
 			struct
@@ -61,14 +56,13 @@ namespace Math
 				T s;
 				T t;
 				T p;
-				T q;
 			};
 		};
 	};
 	
-	using vec4 = vector4<float>;
-	using vec4f = vector4<float>;
-	using vec4d = vector4<double>;
-	using vec4i = vector4<int>;
-	using vec4ui = vector4<unsigned int>;
+	using Vec3 = Vector3<float>;
+	using Vec3f = Vector3<float>;
+	using Vec3d = Vector3<double>;
+	using Vec3i = Vector3<int32_t>;
+	using Vec3ui = Vector3<uint32_t>;
 }

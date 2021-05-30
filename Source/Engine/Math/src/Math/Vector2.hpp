@@ -5,25 +5,25 @@
 namespace Math
 {
 	template <typename T>
-	class vector2
+	class Vector2
 	{
 	public:
 		static_assert(std::is_arithmetic_v<T>, "Invalid template type for Vector2!");
 	
 	public:
-		vector2()
+		Vector2()
 			: x{ static_cast<T>(0) }
 			, y{ static_cast<T>(0) }
 		{
 		}
 		
-		vector2(T scalar)
+		Vector2(T scalar)
 			: x{ scalar }
 			, y{ scalar }
 		{
 		}
 		
-		vector2(T x, T y)
+		Vector2(T x, T y)
 			: x{ x }
 			, y{ y }
 		{
@@ -54,9 +54,9 @@ namespace Math
 		};
 	};
 	
-	using vec2 = vector2<float>;
-	using vec2f = vector2<float>;
-	using vec2d = vector2<double>;
-	using vec2i = vector2<int>;
-	using vec2ui = vector2<unsigned int>;
+	using Vec2 = Vector2<float>;
+	using Vec2f = Vector2<float>;
+	using Vec2d = Vector2<double>;
+	using Vec2i = Vector2<int32_t>;
+	using Vec2ui = Vector2<uint32_t>;
 }

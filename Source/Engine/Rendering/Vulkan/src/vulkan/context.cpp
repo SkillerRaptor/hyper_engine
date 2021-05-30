@@ -1,6 +1,6 @@
 #include <vulkan/context.hpp>
 
-#include <core/logger.hpp>
+#include <core/Logger.hpp>
 
 #include <vulkan/vulkan.h>
 
@@ -55,7 +55,7 @@ namespace rendering
 			
 			if (vkCreateInstance(&instanceCreateInfo, nullptr, &m_instance) != VK_SUCCESS)
 			{
-				core::logger::fatal("Failed to create vulkan instance!");
+				core::Logger::fatal("Failed to create vulkan instance!");
 				return false;
 			}
 			

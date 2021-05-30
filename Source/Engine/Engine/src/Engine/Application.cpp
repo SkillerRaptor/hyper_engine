@@ -1,28 +1,28 @@
-#include <engine/application.hpp>
+#include "Application.hpp"
 
-namespace engine
+namespace Engine
 {
-	void application::internal_initialize()
+	void Application::initialize()
 	{
 		platform::window_create_info create_info{};
 		create_info.title = "Title";
 		create_info.width = 1280;
 		create_info.height = 720;
-		create_info.api = platform::graphics_api::opengl33;
+		create_info.api = platform::graphics_api::vulkan;
 		
 		m_library_manager = platform::library_manager::construct();
 		
 		m_window = platform::window::construct(create_info);
 		m_window->initialize(m_library_manager);
 		
-		initialize();
+		startup();
 		
 		m_running = true;
 	}
 	
-	void application::internal_terminate()
+	void Application::terminate()
 	{
-		terminate();
+		shutdown();
 		
 		m_window->shutdown();
 		delete m_window;
@@ -30,15 +30,15 @@ namespace engine
 		delete m_library_manager;
 	}
 	
-	void application::run()
+	void Application::run()
 	{
-		internal_initialize();
+		initialize();
 		
 		while (m_running)
 		{
 			m_window->update();
 		}
 		
-		internal_terminate();
+		terminate();
 	}
 }

@@ -8,7 +8,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     get_filename_component(src_path "${item}" PATH)
@@ -18,5 +18,11 @@ foreach (item IN ITEMS ${SOURCES} ${HEADERS})
 endforeach ()
 
 add_executable(Editor ${SOURCES} ${HEADERS})
-target_include_directories(Editor PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(Editor PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(Editor PRIVATE Engine)
+
+add_custom_command(
+        TARGET Editor
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets)

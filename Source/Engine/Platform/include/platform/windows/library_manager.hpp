@@ -3,7 +3,7 @@
 #include <platform/platform_detection.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-#include <core/memory/sparse_memory_pool.hpp>
+#include <Core/Memory/SparsePoolAllocator.hpp>
 #include <platform/library_manager.hpp>
 	
 #include <Windows.h>
@@ -34,7 +34,7 @@ namespace platform::windows
 		void internal_unload(library_data& data);
 	
 	private:
-		core::sparse_memory_pool<library_data> m_storage{ 256 };
+		Core::SparsePoolAllocator<library_data> m_storage{ 256 };
 		uint32_t m_version{ 1 };
 	};
 }

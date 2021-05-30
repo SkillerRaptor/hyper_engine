@@ -3,20 +3,20 @@
 #include <platform/library_manager.hpp>
 #include <platform/window.hpp>
 
-namespace engine
+namespace Engine
 {
-	class application
+	class Application
 	{
 	public:
 		void run();
 	
 	protected:
-		virtual void initialize() = 0;
-		virtual void terminate() = 0;
+		virtual void startup() = 0;
+		virtual void shutdown() = 0;
 		
 	private:
-		void internal_initialize();
-		void internal_terminate();
+		void initialize();
+		void terminate();
 	
 	private:
 		bool m_running{ false };

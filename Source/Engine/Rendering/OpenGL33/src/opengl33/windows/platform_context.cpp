@@ -1,6 +1,6 @@
 #include <opengl33/windows/platform_context.hpp>
 
-#include <core/logger.hpp>
+#include <core/Logger.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
 namespace rendering::windows

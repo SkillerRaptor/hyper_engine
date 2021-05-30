@@ -1,7 +1,7 @@
 #include <platform/windows/window.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-#include <core/logger.hpp>
+#include <core/Logger.hpp>
 
 namespace platform::windows
 {
@@ -51,7 +51,7 @@ namespace platform::windows
 		
 		if (!RegisterClassEx(&window_class))
 		{
-			core::logger::fatal("Failed to register window class! Error: {}", GetLastError());
+			core::Logger::fatal("Failed to register window class! Error: {}", GetLastError());
 			return false;
 		}
 		
@@ -70,7 +70,7 @@ namespace platform::windows
 			nullptr, nullptr, m_instance, 0);
 		if (!m_native_window)
 		{
-			core::logger::fatal("Failed to create window! Error: {}", GetLastError());
+			core::Logger::fatal("Failed to create window! Error: {}", GetLastError());
 			return false;
 		}
 		
@@ -110,7 +110,7 @@ namespace platform::windows
 			break;
 	#endif
 		default:
-			core::logger::fatal("There is no graphics api available!");
+			core::Logger::fatal("There is no graphics api available!");
 			return false;
 		}
 		

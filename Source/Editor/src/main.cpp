@@ -1,8 +1,10 @@
-#include <editor/editor.hpp>
+#include "Editor/Editor.hpp"
 
-int main(int, char**)
+int32_t main(int32_t argc, char** argv)
 {
-	editor::editor* editor{ new editor::editor() };
+	Editor::Editor* editor = new Editor::Editor(argc, argv);
 	editor->run();
 	delete editor;
+	
+	return 0;
 }

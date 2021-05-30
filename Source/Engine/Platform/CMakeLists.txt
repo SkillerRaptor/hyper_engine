@@ -36,8 +36,8 @@ endif()
 # DirectX
 #-------------------------------------------------------------------------------------------
 if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
-    target_compile_definitions(Platform PUBLIC HYPERENGINE_BUILD_DIRECTX11=1)
-    target_compile_definitions(Platform PUBLIC HYPERENGINE_BUILD_DIRECTX12=1)
+    target_compile_definitions(Platform PUBLIC HE_BUILD_DIRECTX11=1)
+    target_compile_definitions(Platform PUBLIC HE_BUILD_DIRECTX12=1)
 endif ()
 
 #-------------------------------------------------------------------------------------------
@@ -45,8 +45,8 @@ endif ()
 #-------------------------------------------------------------------------------------------
 find_package(OpenGL)
 if (OPENGL_FOUND)
-    target_compile_definitions(Platform PUBLIC HYPERENGINE_BUILD_OPENGL33=1)
-    target_compile_definitions(Platform PUBLIC HYPERENGINE_BUILD_OPENGL46=1)
+    target_compile_definitions(Platform PUBLIC HE_BUILD_OPENGL33=1)
+    target_compile_definitions(Platform PUBLIC HE_BUILD_OPENGL46=1)
 endif ()
 
 #-------------------------------------------------------------------------------------------
@@ -54,5 +54,5 @@ endif ()
 #-------------------------------------------------------------------------------------------
 find_package(Vulkan)
 if (Vulkan_FOUND)
-    target_compile_definitions(Platform PUBLIC HYPERENGINE_BUILD_VULKAN=1)
+    target_compile_definitions(Platform PUBLIC HE_BUILD_VULKAN=1)
 endif ()
