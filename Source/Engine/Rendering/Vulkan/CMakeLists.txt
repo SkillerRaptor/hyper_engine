@@ -5,7 +5,7 @@
 #-------------------------------------------------------------------------------------------
 # CMake info
 #-------------------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)
 
 set(HYPERENGINE_RENDERING_FOLDER ${CMAKE_SOURCE_DIR}/Source/Engine/Rendering)
 
