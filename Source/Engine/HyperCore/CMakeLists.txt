@@ -10,7 +10,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 #-------------------------------------------------------------------------------------------
-# HyperEditor
+# HyperCore
 #-------------------------------------------------------------------------------------------
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
@@ -22,12 +22,13 @@ foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     source_group("${group_path}" FILES "${item}")
 endforeach ()
 
-add_executable(HyperEditor ${SOURCES} ${HEADERS})
-target_include_directories(HyperEditor PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(HyperEditor PRIVATE HyperEngine)
+add_library(HyperCore STATIC ${SOURCES} ${HEADERS})
+set_target_properties(HyperCore PROPERTIES FOLDER HyperModules)
+target_include_directories(HyperCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(HyperCore PUBLIC fmt)
 
-add_custom_command(
-        TARGET HyperEditor
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets)
+if ("${HYPERENGINE_BUILD_TYPE}" STREQUAL "Debug")
+    target_compile_definitions(HyperCore PUBLIC HYPERENGINE_DEBUG=1)
+else ()
+    target_compile_definitions(HyperCore PUBLIC HYPERENGINE_RELEASE=1)
+endif ()

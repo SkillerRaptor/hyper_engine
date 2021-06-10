@@ -1,14 +1,16 @@
 #-------------------------------------------------------------------------------------------
-# Copyright (C) HyperEngine. All rights reserved.
+# Copyright (c) 2021, SkillerRaptor <skillerraptor@protonmail.com>
+#
+# SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# CMake info
+# CMake Info
 #-------------------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.15)
 
 #-------------------------------------------------------------------------------------------
-# Variables
+# Functions
 #-------------------------------------------------------------------------------------------
 if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
     set(HYPERENGINE_IMPORT_LOCATION ${CMAKE_SOURCE_DIR}/Source/Platforms/Windows/Binaries)

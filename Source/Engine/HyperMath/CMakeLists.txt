@@ -10,8 +10,10 @@
 cmake_minimum_required(VERSION 3.15)
 
 #-------------------------------------------------------------------------------------------
-# HyperEditor
+# HyperMath
 #-------------------------------------------------------------------------------------------
+cmake_minimum_required(VERSION 3.15)
+
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
 
@@ -22,12 +24,7 @@ foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     source_group("${group_path}" FILES "${item}")
 endforeach ()
 
-add_executable(HyperEditor ${SOURCES} ${HEADERS})
-target_include_directories(HyperEditor PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(HyperEditor PRIVATE HyperEngine)
-
-add_custom_command(
-        TARGET HyperEditor
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets)
+add_library(HyperMath STATIC ${SOURCES} ${HEADERS})
+set_target_properties(HyperMath PROPERTIES FOLDER HyperModules)
+target_include_directories(HyperMath PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(HyperMath PUBLIC HyperCore)

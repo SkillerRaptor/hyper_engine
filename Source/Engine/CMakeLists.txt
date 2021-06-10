@@ -10,24 +10,24 @@ cmake_minimum_required(VERSION 3.15)
 #-------------------------------------------------------------------------------------------
 # Core Module
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Core)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperCore)
 
 #-------------------------------------------------------------------------------------------
 # Support Modules
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Platform)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Math)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperPlatform)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperMath)
 
 #-------------------------------------------------------------------------------------------
 # Abstraction Modules
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Audio)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Network)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Physics)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Rendering)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Resource)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperAudio)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperNetwork)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperPhysics)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Rendering)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperResource)
 
 #-------------------------------------------------------------------------------------------
 # Engine
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Engine)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEngine)
