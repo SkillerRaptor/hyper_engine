@@ -61,11 +61,6 @@ namespace HyperPlatform::Linux
 		return m_title;
 	}
 	
-	std::string CWindow::title() const
-	{
-		return m_title;
-	}
-	
 	void CWindow::set_resizable(bool resizeable)
 	{
 		// TODO: Implement set_resizeable in linux window
