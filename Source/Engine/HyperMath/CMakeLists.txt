@@ -26,5 +26,6 @@ endforeach ()
 
 add_library(HyperMath STATIC ${SOURCES} ${HEADERS})
 set_target_properties(HyperMath PROPERTIES FOLDER HyperModules)
+set_target_properties(HyperMath PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(HyperMath PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(HyperMath PUBLIC HyperCore)

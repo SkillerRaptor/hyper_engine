@@ -24,6 +24,7 @@ endforeach ()
 
 add_library(HyperCore STATIC ${SOURCES} ${HEADERS})
 set_target_properties(HyperCore PROPERTIES FOLDER HyperModules)
+set_target_properties(HyperCore PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(HyperCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(HyperCore PUBLIC fmt)
 
