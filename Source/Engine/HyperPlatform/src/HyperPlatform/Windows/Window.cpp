@@ -7,6 +7,7 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
+
 #include <HyperCore/Logger.hpp>
 #include <HyperPlatform/Windows/Window.hpp>
 
@@ -61,20 +62,22 @@ namespace HyperPlatform::Windows
 		
 		AdjustWindowRectEx(&window_rect, get_window_style(), false, 0);
 		
-		m_handle = CreateWindowEx(
+		m_window = CreateWindowEx(
 			0, window_class.lpszClassName, m_title.c_str(), get_window_style(), 0, 0,
 			window_rect.right - window_rect.left, window_rect.bottom - window_rect.top,
 			nullptr, nullptr, m_instance, nullptr);
-		if (!m_handle)
+		if (!m_window)
 		{
 			HyperCore::CLogger::fatal("Failed to create window! Error: {}", GetLastError());
 			return false;
 		}
 		
-		ShowWindow(m_handle, SW_SHOWDEFAULT);
-		UpdateWindow(m_handle);
-		SetForegroundWindow(m_handle);
-		SetFocus(m_handle);
+		m_handle = GetDC(m_window);
+		
+		ShowWindow(m_window, SW_SHOWDEFAULT);
+		UpdateWindow(m_window);
+		SetForegroundWindow(m_window);
+		SetFocus(m_window);
 		
 		ShowCursor(true);
 		
@@ -101,12 +104,52 @@ namespace HyperPlatform::Windows
 	{
 		m_title = title;
 		
-		SetWindowText(m_handle, title.c_str());
+		SetWindowText(m_window, title.c_str());
 	}
 	
 	std::string CWindow::title() const
 	{
 		return m_title;
+	}
+	
+	void CWindow::set_resizable(bool resizeable)
+	{
+		// TODO: Implement set_resizeable in windows window
+	}
+	
+	bool CWindow::resizable() const
+	{
+		return m_resizable;
+	}
+	
+	void CWindow::set_visible(bool visible)
+	{
+		// TODO: Implement set_visible in windows window
+	}
+	
+	bool CWindow::visible() const
+	{
+		return m_visible;
+	}
+	
+	void CWindow::set_decorated(bool decorated)
+	{
+		// TODO: Implement set_decorated in windows window
+	}
+	
+	bool CWindow::decorated() const
+	{
+		return m_decorated;
+	}
+	
+	void CWindow::set_focused(bool focused)
+	{
+		// TODO: Implement set_focused in windows window
+	}
+	
+	bool CWindow::focused() const
+	{
+		return m_focused;
 	}
 	
 	void CWindow::set_position(size_t x, size_t y)
@@ -120,7 +163,7 @@ namespace HyperPlatform::Windows
 		AdjustWindowRectEx(&rect, get_window_style(), false, 0);
 		
 		SetWindowPos(
-			m_handle, nullptr,
+			m_window, nullptr,
 			rect.left, rect.top, 0, 0,
 			SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 	}
@@ -128,7 +171,7 @@ namespace HyperPlatform::Windows
 	void CWindow::position(size_t& x, size_t& y) const
 	{
 		RECT rect{};
-		GetWindowRect(m_handle, &rect);
+		GetWindowRect(m_window, &rect);
 		
 		x = rect.left;
 		y = rect.top;
@@ -173,7 +216,7 @@ namespace HyperPlatform::Windows
 		AdjustWindowRectEx(&rect, get_window_style(), false, 0);
 		
 		SetWindowPos(
-			m_handle, HWND_TOP,
+			m_window, HWND_TOP,
 			0, 0, rect.right - rect.left, rect.bottom - rect.top,
 			SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOZORDER);
 	}
@@ -181,7 +224,7 @@ namespace HyperPlatform::Windows
 	void CWindow::size(size_t& width, size_t& height) const
 	{
 		RECT rect{};
-		GetWindowRect(m_handle, &rect);
+		GetWindowRect(m_window, &rect);
 		
 		width = rect.right - rect.left;
 		height = rect.bottom - rect.top;
@@ -242,7 +285,12 @@ namespace HyperPlatform::Windows
 		return m_instance;
 	}
 	
-	HWND CWindow::handle() const
+	HWND CWindow::window() const
+	{
+		return m_window;
+	}
+	
+	HDC CWindow::handle() const
 	{
 		return m_handle;
 	}

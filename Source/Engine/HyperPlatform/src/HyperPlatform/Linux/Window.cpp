@@ -61,6 +61,51 @@ namespace HyperPlatform::Linux
 		return m_title;
 	}
 	
+	std::string CWindow::title() const
+	{
+		return m_title;
+	}
+	
+	void CWindow::set_resizable(bool resizeable)
+	{
+		// TODO: Implement set_resizeable in linux window
+	}
+	
+	bool CWindow::resizable() const
+	{
+		return m_resizable;
+	}
+	
+	void CWindow::set_visible(bool visible)
+	{
+		// TODO: Implement set_visible in linux window
+	}
+	
+	bool CWindow::visible() const
+	{
+		return m_visible;
+	}
+	
+	void CWindow::set_decorated(bool decorated)
+	{
+		// TODO: Implement set_decorated in linux window
+	}
+	
+	bool CWindow::decorated() const
+	{
+		return m_decorated;
+	}
+	
+	void CWindow::set_focused(bool focused)
+	{
+		// TODO: Implement set_focused in linux window
+	}
+	
+	bool CWindow::focused() const
+	{
+		return m_focused;
+	}
+	
 	void CWindow::set_position(size_t x, size_t y)
 	{
 		XMoveWindow(m_display, m_window, static_cast<int>(x), static_cast<int>(y));

@@ -28,6 +28,18 @@ namespace HyperPlatform::Linux
 		virtual void set_title(const std::string& title) override;
 		virtual std::string title() const override;
 		
+		virtual void set_resizable(bool resizeable) override;
+		virtual bool resizable() const override;
+		
+		virtual void set_visible(bool visible) override;
+		virtual bool visible() const override;
+		
+		virtual void set_decorated(bool decorated) override;
+		virtual bool decorated() const override;
+		
+		virtual void set_focused(bool focused) override;
+		virtual bool focused() const override;
+		
 		virtual void set_position(size_t x, size_t y) override;
 		virtual void position(size_t& x, size_t& y) const override;
 		

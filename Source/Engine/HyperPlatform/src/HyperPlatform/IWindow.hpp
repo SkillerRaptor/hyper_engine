@@ -32,6 +32,18 @@ namespace HyperPlatform
 		virtual void set_title(const std::string& title) = 0;
 		virtual std::string title() const = 0;
 		
+		virtual void set_resizable(bool resizeable) = 0;
+		virtual bool resizable() const = 0;
+		
+		virtual void set_visible(bool visible) = 0;
+		virtual bool visible() const = 0;
+		
+		virtual void set_decorated(bool decorated) = 0;
+		virtual bool decorated() const = 0;
+		
+		virtual void set_focused(bool focused) = 0;
+		virtual bool focused() const = 0;
+		
 		virtual void set_position(size_t x, size_t y) = 0;
 		virtual void position(size_t& x, size_t& y) const = 0;
 		
@@ -54,7 +66,9 @@ namespace HyperPlatform
 	
 	protected:
 		std::string m_title{ "unknown" };
-		bool m_decorated{ true };
 		bool m_resizable{ true };
+		bool m_visible{ true };
+		bool m_decorated{ true };
+		bool m_focused{ true };
 	};
 }
