@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace HyperEngine
 {
 	class IApplication;
@@ -13,7 +15,10 @@ namespace HyperEngine
 	class CLauncher
 	{
 	public:
-		static void launch(IApplication& application);
-		static void launch(IApplication* application);
+		static void launch(IApplication& application, int32_t argc = 0, char** argv = nullptr);
+		static void launch(IApplication* application, int32_t argc = 0, char** argv = nullptr);
+	
+	private:
+		static void launch_application(IApplication& application, int32_t argc, char** argv);
 	};
 }

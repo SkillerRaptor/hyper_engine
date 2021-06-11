@@ -14,8 +14,8 @@ namespace HyperEditor
 	class CEditor : public HyperEngine::IApplication
 	{
 	public:
-		CEditor(int32_t argc, char** argv);
-		virtual ~CEditor() override;
+		CEditor() = default;
+		virtual ~CEditor() override = default;
 		
 	private:
 		virtual void startup() override;

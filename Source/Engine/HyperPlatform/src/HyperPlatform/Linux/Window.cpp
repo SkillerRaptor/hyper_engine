@@ -7,7 +7,6 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_LINUX
-
 #include <HyperCore/Logger.hpp>
 #include <HyperPlatform/Linux/Window.hpp>
 #include <X11/Xutil.h>
@@ -16,6 +15,8 @@ namespace HyperPlatform::Linux
 {
 	bool CWindow::initialize(const SWindowCreateInfo& create_info)
 	{
+		m_title = create_info.title;
+		
 		m_display = XOpenDisplay(nullptr);
 		if (m_display == nullptr)
 		{

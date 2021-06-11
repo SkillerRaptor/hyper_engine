@@ -30,6 +30,7 @@ namespace HyperPlatform::Windows
 	
 	bool CWindow::initialize(const SWindowCreateInfo& create_info)
 	{
+		m_title = create_info.title;
 		m_instance = GetModuleHandle(nullptr);
 		
 		WNDCLASSEX window_class{};

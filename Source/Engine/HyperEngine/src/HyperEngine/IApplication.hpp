@@ -11,6 +11,9 @@ namespace HyperEngine
 	class IApplication
 	{
 	public:
+		friend class CLauncher;
+		
+	public:
 		IApplication() = default;
 		virtual ~IApplication() = default;
 	

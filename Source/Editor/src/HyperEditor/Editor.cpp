@@ -8,16 +8,6 @@
 
 namespace HyperEditor
 {
-	CEditor::CEditor(int32_t argc, char** argv)
-	{
-		(void) argc;
-		(void) argv;
-	}
-	
-	CEditor::~CEditor()
-	{
-	}
-	
 	void CEditor::startup()
 	{
 	}
