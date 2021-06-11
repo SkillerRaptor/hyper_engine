@@ -6,9 +6,16 @@
 
 #pragma once
 
+#include <HyperPlatform/ILibraryManager.hpp>
+
 namespace HyperPlatform
 {
 	class IWindow;
+}
+
+namespace HyperRendering
+{
+	class IContext;
 }
 
 namespace HyperEngine
@@ -17,6 +24,9 @@ namespace HyperEngine
 	
 	class CEngineLoop
 	{
+	private:
+		using CreateContextFunction = HyperRendering::IContext* (*)();
+	
 	public:
 		void initialize(IApplication* application);
 		void shutdown();
@@ -25,7 +35,13 @@ namespace HyperEngine
 	
 	private:
 		bool m_running{ false };
+		
 		IApplication* m_application{ nullptr };
+		
 		HyperPlatform::IWindow* m_window{ nullptr };
+		HyperPlatform::ILibraryManager* m_library_manager{ nullptr };
+		HyperPlatform::SLibraryHandle m_graphics_library{};
+		
+		HyperRendering::IContext* m_graphics_context{ nullptr };
 	};
 }

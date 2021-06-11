@@ -12,6 +12,8 @@ cmake_minimum_required(VERSION 3.15)
 #-------------------------------------------------------------------------------------------
 # HyperEngine
 #-------------------------------------------------------------------------------------------
+set(HYPERENGINE_COMMON_PATH ${CMAKE_SOURCE_DIR}/Source/Engine/HyperRendering/HyperCommon)
+
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
 
@@ -23,7 +25,7 @@ foreach (item IN ITEMS ${SOURCES} ${HEADERS})
 endforeach ()
 
 add_library(HyperEngine STATIC ${SOURCES} ${HEADERS})
-target_include_directories(HyperEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(HyperEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src ${HYPERENGINE_COMMON_PATH}/src)
 target_link_libraries(HyperEngine PUBLIC HyperAudio HyperCore HyperMath HyperNetwork HyperPhysics HyperPlatform HyperResource)
 
 #-------------------------------------------------------------------------------------------
