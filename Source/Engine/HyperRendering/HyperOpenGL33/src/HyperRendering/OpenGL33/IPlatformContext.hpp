@@ -11,7 +11,7 @@ namespace HyperPlatform
 	class IWindow;
 }
 
-namespace HyperRendering::Vulkan
+namespace HyperRendering::OpenGL33
 {
 	class IPlatformContext
 	{
@@ -22,7 +22,7 @@ namespace HyperRendering::Vulkan
 		virtual void initialize(HyperPlatform::IWindow* window) = 0;
 		virtual void shutdown() = 0;
 		
-		virtual const char* get_required_extension() const = 0;
+		virtual void swap_buffers() const = 0;
 		
 		static IPlatformContext* construct();
 	};

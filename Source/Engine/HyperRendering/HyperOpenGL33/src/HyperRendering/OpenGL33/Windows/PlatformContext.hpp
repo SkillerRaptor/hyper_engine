@@ -8,11 +8,12 @@
 
 #include <HyperPlatform/PlatformDetection.hpp>
 
-#if HYPERENGINE_PLATFORM_LINUX
-#include <HyperPlatform/Linux/Window.hpp>
-#include <HyperRendering/Vulkan/IPlatformContext.hpp>
+#if HYPERENGINE_PLATFORM_WINDOWS
+#include <HyperPlatform/Windows/Window.hpp>
+#include <HyperRendering/OpenGL33/IPlatformContext.hpp>
+#include <GL/gl.h>
 
-namespace HyperRendering::Vulkan::Linux
+namespace HyperRendering::OpenGL33::Windows
 {
 	class CPlatformContext final : public IPlatformContext
 	{
@@ -23,10 +24,12 @@ namespace HyperRendering::Vulkan::Linux
 		virtual void initialize(HyperPlatform::IWindow* window) override;
 		virtual void shutdown() override;
 		
-		virtual const char* get_required_extension() const override;
+		virtual void swap_buffers() const override;
 	
 	private:
-		HyperPlatform::Linux::CWindow* m_window{ nullptr };
+		HyperPlatform::Windows::CWindow* m_window{ nullptr };
+	
+		HGLRC m_graphics_context{ nullptr };
 	};
 }
 #endif

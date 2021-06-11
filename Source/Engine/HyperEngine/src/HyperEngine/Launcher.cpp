@@ -10,7 +10,7 @@ namespace HyperEngine
 {
 	void CLauncher::launch(IApplication& application)
 	{
-	
+		(void) application;
 	}
 	
 	void CLauncher::launch(IApplication* application)

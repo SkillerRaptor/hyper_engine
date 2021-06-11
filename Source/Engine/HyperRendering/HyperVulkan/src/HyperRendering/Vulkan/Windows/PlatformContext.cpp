@@ -13,6 +13,7 @@ namespace HyperRendering::Vulkan::Windows
 {
 	void CPlatformContext::initialize(HyperPlatform::IWindow* window)
 	{
+		m_window = static_cast<HyperPlatform::Windows::CWindow*>(window);
 	}
 	
 	void CPlatformContext::shutdown()

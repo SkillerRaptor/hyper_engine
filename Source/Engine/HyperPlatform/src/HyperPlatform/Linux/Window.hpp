@@ -45,6 +45,10 @@ namespace HyperPlatform::Linux
 		
 		virtual void set_height(size_t height) override;
 		virtual size_t height() const override;
+		
+		Window window() const;
+		Display* display() const;
+		int32_t screen() const;
 	
 	private:
 		void update_normal_hints(size_t width, size_t height) const;
@@ -52,7 +56,7 @@ namespace HyperPlatform::Linux
 	private:
 		Window m_window{ 0 };
 		Display* m_display{ nullptr };
-		int m_screen{ 0 };
+		int32_t m_screen{ 0 };
 	};
 }
 #endif

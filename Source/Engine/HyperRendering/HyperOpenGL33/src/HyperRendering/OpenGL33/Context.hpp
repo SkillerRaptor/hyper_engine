@@ -8,9 +8,7 @@
 
 #include <HyperRendering/IContext.hpp>
 
-using VkInstance = struct VkInstance_T*;
-
-namespace HyperRendering::Vulkan
+namespace HyperRendering::OpenGL33
 {
 	class IPlatformContext;
 	
@@ -26,11 +24,6 @@ namespace HyperRendering::Vulkan
 		virtual void update() override;
 	
 	private:
-		bool create_instance();
-	
-	private:
 		IPlatformContext* m_platform_context{ nullptr };
-		
-		VkInstance m_instance{ nullptr };
 	};
 }

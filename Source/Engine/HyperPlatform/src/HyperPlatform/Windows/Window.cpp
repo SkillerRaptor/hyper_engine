@@ -154,8 +154,8 @@ namespace HyperPlatform::Windows
 	
 	size_t CWindow::y() const
 	{
-		size_t x = 0
-		size_t y = 0
+		size_t x = 0;
+		size_t y = 0;
 		position(x, y);
 		
 		return y;
@@ -234,6 +234,16 @@ namespace HyperPlatform::Windows
 		style |= WS_MAXIMIZEBOX | WS_THICKFRAME;
 		
 		return style;
+	}
+	
+	HINSTANCE CWindow::instance() const
+	{
+		return m_instance;
+	}
+	
+	HWND CWindow::handle() const
+	{
+		return m_handle;
 	}
 }
 #endif

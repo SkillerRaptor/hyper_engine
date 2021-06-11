@@ -46,6 +46,9 @@ namespace HyperPlatform::Windows
 		virtual void set_height(size_t height) override;
 		virtual size_t height() const override;
 		
+		HINSTANCE instance() const;
+		HWND handle() const;
+		
 	private:
 		DWORD get_window_style() const;
 	

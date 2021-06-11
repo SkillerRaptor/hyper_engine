@@ -173,5 +173,20 @@ namespace HyperPlatform::Linux
 		XSetWMNormalHints(m_display, m_window, hints);
 		XFree(hints);
 	}
+	
+	Window CWindow::window() const
+	{
+		return m_window;
+	}
+	
+	Display* CWindow::display() const
+	{
+		return m_display;
+	}
+	
+	int32_t CWindow::screen() const
+	{
+		return m_screen;
+	}
 }
 #endif
