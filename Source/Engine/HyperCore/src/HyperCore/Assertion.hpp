@@ -17,7 +17,7 @@
 	        if (!(expression)) \
 	        { \
 	            HyperCore::CSourceLocation current_location = HyperCore::CSourceLocation::current(); \
-	            HyperCore::CLogger::fatal("Assertion failed: {}", HE_STRINGIFY(expression)); \
+	            HyperCore::CLogger::fatal("Assertion failed: {}", HYPERENGINE_STRINGIFY(expression)); \
 	            HyperCore::CLogger::fatal( \
 	                "{}:{} in {}", \
 	                current_location.file_name(), \

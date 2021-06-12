@@ -5,6 +5,7 @@
  */
 
 #include <HyperCore/Logger.hpp>
+#include <HyperCore/Utilities/Prerequisites.hpp>
 #include <HyperPlatform/IWindow.hpp>
 #include <HyperRendering/Vulkan/Context.hpp>
 #include <HyperRendering/Vulkan/IPlatformContext.hpp>
@@ -29,6 +30,9 @@ namespace HyperRendering
 			const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
 			void* user_data)
 		{
+			HYPERENGINE_NOT_USED(type);
+			HYPERENGINE_NOT_USED(user_data);
+			
 			if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 			{
 				HyperCore::CLogger::fatal("Vulkan Validation Error - {}", callback_data->pMessage);

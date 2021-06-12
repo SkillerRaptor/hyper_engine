@@ -24,7 +24,7 @@ namespace HyperEngine
 	{
 		if (argc > 0 && argv != nullptr)
 		{
-			// TODO: Use program arguments
+			// TODO: Implement program argument validation and processing
 		}
 		
 		CEngineLoop engine_loop;

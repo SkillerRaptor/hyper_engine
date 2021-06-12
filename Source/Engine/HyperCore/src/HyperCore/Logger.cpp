@@ -50,6 +50,6 @@ namespace HyperCore
 			}
 		}();
 		
-		fmt::print("[ {:%H:%M:%S} | {} ] {}\n", fmt::localtime(std::time(nullptr)), level_name, string);
+		fmt::print(fg(level_color), "[ {:%H:%M:%S} | {} ] {}\n", fmt::localtime(std::time(nullptr)), level_name, string);
 	}
 }

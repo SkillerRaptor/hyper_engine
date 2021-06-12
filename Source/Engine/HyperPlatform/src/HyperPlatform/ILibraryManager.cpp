@@ -47,8 +47,8 @@ namespace HyperPlatform
 		return new Windows::CLibraryManager();
 #elif HYPERENGINE_PLATFORM_LINUX
 		return new Linux::CLibraryManager();
-#endif
-		
+#else
 		HYPERENGINE_ASSERT_NOT_REACHED();
+#endif
 	}
 }

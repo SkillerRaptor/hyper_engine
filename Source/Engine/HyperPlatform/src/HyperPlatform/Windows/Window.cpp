@@ -7,24 +7,15 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-
 #include <HyperCore/Logger.hpp>
+#include <HyperCore/Utilities/Prerequisites.hpp>
 #include <HyperPlatform/Windows/Window.hpp>
 
 namespace HyperPlatform::Windows
 {
 	LRESULT CALLBACK win_proc(HWND window, UINT message, WPARAM first_parameter, LPARAM second_parameter)
 	{
-		// TODO: Handle Events
-		
-		switch (message)
-		{
-		case WM_CLOSE:
-		case WM_DESTROY:
-			break;
-		default:
-			break;
-		}
+		// TODO: Implement win_proc(HWND window, UINT message, WPARAM first_parameter, LPARAM second_parameter)
 		
 		return DefWindowProc(window, message, first_parameter, second_parameter);
 	}
@@ -114,7 +105,9 @@ namespace HyperPlatform::Windows
 	
 	void CWindow::set_resizable(bool resizeable)
 	{
-		// TODO: Implement set_resizeable in windows window
+		HYPERENGINE_NOT_USED(resizeable);
+		
+		// TODO: Implement set_resizable(bool resizeable)
 	}
 	
 	bool CWindow::resizable() const
@@ -124,7 +117,9 @@ namespace HyperPlatform::Windows
 	
 	void CWindow::set_visible(bool visible)
 	{
-		// TODO: Implement set_visible in windows window
+		HYPERENGINE_NOT_USED(visible);
+		
+		// TODO: Implement set_visible(bool visible)
 	}
 	
 	bool CWindow::visible() const
@@ -134,7 +129,9 @@ namespace HyperPlatform::Windows
 	
 	void CWindow::set_decorated(bool decorated)
 	{
-		// TODO: Implement set_decorated in windows window
+		HYPERENGINE_NOT_USED(decorated);
+		
+		// TODO: Implement set_decorated(bool decorated)
 	}
 	
 	bool CWindow::decorated() const
@@ -144,7 +141,9 @@ namespace HyperPlatform::Windows
 	
 	void CWindow::set_focused(bool focused)
 	{
-		// TODO: Implement set_focused in windows window
+		HYPERENGINE_NOT_USED(focused);
+		
+		// TODO: Implement set_focused(bool focused)
 	}
 	
 	bool CWindow::focused() const

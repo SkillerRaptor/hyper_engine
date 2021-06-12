@@ -22,8 +22,8 @@ namespace HyperRendering::Vulkan
 		return new Windows::CPlatformContext();
 #elif HYPERENGINE_PLATFORM_LINUX
 		return new Linux::CPlatformContext();
-#endif
-		
+#else
 		HYPERENGINE_ASSERT_NOT_REACHED();
+#endif
 	}
 }

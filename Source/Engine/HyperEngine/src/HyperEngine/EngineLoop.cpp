@@ -52,7 +52,7 @@ namespace HyperEngine
 		{
 			m_window->poll_events();
 			
-			// TODO: Draw
+			// TODO: Implement Renderer
 			
 			m_graphics_context->update();
 		}

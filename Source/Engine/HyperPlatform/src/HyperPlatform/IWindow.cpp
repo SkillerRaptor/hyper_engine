@@ -22,8 +22,8 @@ namespace HyperPlatform
 		return new Windows::CWindow();
 #elif HYPERENGINE_PLATFORM_LINUX
 		return new Linux::CWindow();
-#endif
-		
+#else
 		HYPERENGINE_ASSERT_NOT_REACHED();
+#endif
 	}
 }

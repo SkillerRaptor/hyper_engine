@@ -8,6 +8,7 @@
 
 #if HYPERENGINE_PLATFORM_LINUX
 #include <HyperCore/Logger.hpp>
+#include <HyperCore/Utilities/Prerequisites.hpp>
 #include <HyperPlatform/Linux/Window.hpp>
 #include <X11/Xutil.h>
 
@@ -43,7 +44,7 @@ namespace HyperPlatform::Linux
 	
 	void CWindow::poll_events()
 	{
-		// TODO: Handle Events
+		// TODO: Implement poll_events()
 		
 		XEvent event{};
 		XNextEvent(m_display, &event);
@@ -63,7 +64,9 @@ namespace HyperPlatform::Linux
 	
 	void CWindow::set_resizable(bool resizeable)
 	{
-		// TODO: Implement set_resizeable in linux window
+		HYPERENGINE_NOT_USED(resizeable);
+		
+		// TODO: Implement set_resizable(bool resizeable)
 	}
 	
 	bool CWindow::resizable() const
@@ -73,7 +76,9 @@ namespace HyperPlatform::Linux
 	
 	void CWindow::set_visible(bool visible)
 	{
-		// TODO: Implement set_visible in linux window
+		HYPERENGINE_NOT_USED(visible);
+		
+		// TODO: Implement set_visible(bool visible)
 	}
 	
 	bool CWindow::visible() const
@@ -83,7 +88,9 @@ namespace HyperPlatform::Linux
 	
 	void CWindow::set_decorated(bool decorated)
 	{
-		// TODO: Implement set_decorated in linux window
+		HYPERENGINE_NOT_USED(decorated);
+		
+		// TODO: Implement set_decorated(bool decorated)
 	}
 	
 	bool CWindow::decorated() const
@@ -93,7 +100,9 @@ namespace HyperPlatform::Linux
 	
 	void CWindow::set_focused(bool focused)
 	{
-		// TODO: Implement set_focused in linux window
+		HYPERENGINE_NOT_USED(focused);
+		
+		// TODO: Implement set_focused(bool focused)
 	}
 	
 	bool CWindow::focused() const
