@@ -16,29 +16,39 @@
 
 namespace HyperPlatform
 {
-	bool SLibraryHandle::valid() const noexcept
+	CLibraryHandle::CLibraryHandle(uint32_t handle)
+		: m_handle(handle)
 	{
-		return handle != 0;
+	}
+
+	uint32_t CLibraryHandle::handle() const noexcept
+	{
+		return m_handle;
 	}
 	
-	uint16_t SLibraryHandle::index() const noexcept
+	bool CLibraryHandle::valid() const noexcept
 	{
-		return (handle & s_index_mask) >> 0;
+		return m_handle != 0;
 	}
 	
-	uint16_t SLibraryHandle::version() const noexcept
+	uint16_t CLibraryHandle::index() const noexcept
 	{
-		return (handle & s_version_mask) >> 16;
+		return (m_handle & s_index_mask) >> 0;
 	}
 	
-	bool SLibraryHandle::operator==(const SLibraryHandle& SLibraryHandle) const noexcept
+	uint16_t CLibraryHandle::version() const noexcept
 	{
-		return handle == SLibraryHandle.handle;
+		return (m_handle & s_version_mask) >> 16;
 	}
 	
-	bool SLibraryHandle::operator!=(const SLibraryHandle& SLibraryHandle) const noexcept
+	bool CLibraryHandle::operator==(const CLibraryHandle& library_handle) const noexcept
 	{
-		return handle != SLibraryHandle.handle;
+		return m_handle == library_handle.m_handle;
+	}
+	
+	bool CLibraryHandle::operator!=(const CLibraryHandle& library_handle) const noexcept
+	{
+		return m_handle != library_handle.m_handle;
 	}
 	
 	ILibraryManager* ILibraryManager::construct()

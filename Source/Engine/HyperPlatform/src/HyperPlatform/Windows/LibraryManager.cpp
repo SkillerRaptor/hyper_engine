@@ -20,7 +20,7 @@ namespace HyperPlatform::Windows
 		m_storage.clear();
 	}
 	
-	SLibraryHandle CLibraryManager::load(const std::string& path)
+	CLibraryHandle CLibraryManager::load(const std::string& path)
 	{
 		HyperCore::CSparsePoolAllocator<SLibraryData>::SizeType index = 0;
 		SLibraryData& data = m_storage.allocate(index);
@@ -28,10 +28,10 @@ namespace HyperPlatform::Windows
 		data.path = path;
 		data.library = LoadLibrary(path.c_str());
 		
-		return { (data.magic_number << 16) | static_cast<uint32_t>(index) };
+		return CLibraryHandle((data.magic_number << 16) | static_cast<uint32_t>(index));
 	}
 	
-	void CLibraryManager::unload(SLibraryHandle handle)
+	void CLibraryManager::unload(CLibraryHandle handle)
 	{
 		SLibraryData& data = m_storage[handle.index()];
 		if (data.magic_number != handle.version())
@@ -43,7 +43,7 @@ namespace HyperPlatform::Windows
 		m_storage.deallocate(handle.index());
 	}
 	
-	void* CLibraryManager::get_function_address(SLibraryHandle handle, const std::string& function)
+	void* CLibraryManager::get_function_address(CLibraryHandle handle, const std::string& function)
 	{
 		SLibraryData& data = m_storage[handle.index()];
 		if (data.magic_number != handle.version())

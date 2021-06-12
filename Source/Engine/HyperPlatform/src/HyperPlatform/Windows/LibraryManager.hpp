@@ -30,10 +30,10 @@ namespace HyperPlatform::Windows
 		CLibraryManager() = default;
 		virtual ~CLibraryManager() override;
 		
-		virtual SLibraryHandle load(const std::string& path) override;
-		virtual void unload(SLibraryHandle library_handle) override;
+		virtual CLibraryHandle load(const std::string& path) override;
+		virtual void unload(CLibraryHandle library_handle) override;
 		
-		virtual void* get_function_address(SLibraryHandle library_handle, const std::string& function) override;
+		virtual void* get_function_address(CLibraryHandle library_handle, const std::string& function) override;
 	
 	private:
 		static void internal_unload(SLibraryData& data);

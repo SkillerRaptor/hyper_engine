@@ -40,7 +40,7 @@ namespace HyperEngine
 		
 		HyperPlatform::IWindow* m_window{ nullptr };
 		HyperPlatform::ILibraryManager* m_library_manager{ nullptr };
-		HyperPlatform::SLibraryHandle m_graphics_library{};
+		HyperPlatform::CLibraryHandle m_graphics_library{};
 		
 		HyperRendering::IContext* m_graphics_context{ nullptr };
 	};
