@@ -1,6 +1,8 @@
 <img src="./Development/Images/Branding.png" align="right" width="150"/>
 
 # HyperEngine
+[![Build Windows](https://github.com/SkillerRaptor/HyperEngine/workflows/build-windows/badge.svg)](https://github.com/SkillerRaptor/HyperEngine/blob/master/.github/workflows/build-windows.yml)
+[![Build Linux](https://github.com/SkillerRaptor/HyperEngine/workflows/build-linux/badge.svg)](https://github.com/SkillerRaptor/HyperEngine/blob/master/.github/workflows/build-linux.yml)
 [![License](https://img.shields.io/badge/license-MIT-yellow)](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE)
 
 ## Installing & Building
