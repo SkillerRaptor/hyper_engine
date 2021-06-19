@@ -7,6 +7,7 @@
 #pragma once
 
 #include <HyperRendering/IContext.hpp>
+#include <array>
 #include <vector>
 
 using VkInstance = struct VkInstance_T*;
@@ -19,7 +20,7 @@ namespace HyperRendering::Vulkan
 	class CContext final : public IContext
 	{
 	private:
-		static const std::vector<const char*> s_validation_layers;
+		static constexpr const std::array<const char*, 1> s_validation_layers = { "VK_LAYER_KHRONOS_validation" };
 		
 	public:
 		CContext() = default;

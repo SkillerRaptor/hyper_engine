@@ -25,7 +25,7 @@ namespace HyperEngine
 		
 		m_library_manager = HyperPlatform::ILibraryManager::construct();
 		
-		m_graphics_library = m_library_manager->load(HyperRendering::convert_to_library(HyperRendering::RenderingAPI::OpenGL33));
+		m_graphics_library = m_library_manager->load(HyperRendering::convert_to_library(HyperRendering::RenderingAPI::Vulkan));
 		
 		void* create_context_address = m_library_manager->get_function_address(m_graphics_library, "create_context");
 		CreateContextFunction create_context = reinterpret_cast<CreateContextFunction>(create_context_address);

@@ -20,24 +20,20 @@ namespace HyperRendering
 	
 	namespace Vulkan
 	{
-		const std::vector<const char*> CContext::s_validation_layers = {
-			"VK_LAYER_KHRONOS_validation"
-		};
-		
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
-			VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-			VkDebugUtilsMessageTypeFlagsEXT type,
+			VkDebugUtilsMessageSeverityFlagBitsEXT severity_flags,
+			VkDebugUtilsMessageTypeFlagsEXT type_flags,
 			const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
 			void* user_data)
 		{
-			HYPERENGINE_NOT_USED(type);
+			HYPERENGINE_NOT_USED(type_flags);
 			HYPERENGINE_NOT_USED(user_data);
 			
-			if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+			if (severity_flags >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 			{
 				HyperCore::CLogger::fatal("Vulkan Validation Error - {}", callback_data->pMessage);
 			}
-			else if (severity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+			else if (severity_flags >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
 			{
 				HyperCore::CLogger::warning("Vulkan Validation Warning - {}", callback_data->pMessage);
 			}
@@ -61,11 +57,13 @@ namespace HyperRendering
 			{
 				return false;
 			}
-			
+
+#if HYPERENGINE_DEBUG
 			if (!setup_debug_messenger())
 			{
 				return false;
 			}
+#endif
 			
 			return true;
 		}
@@ -89,27 +87,21 @@ namespace HyperRendering
 			application_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 			application_info.apiVersion = VK_API_VERSION_1_2;
 			
-			VkInstanceCreateInfo instance_create_info{};
-			instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-			instance_create_info.pApplicationInfo = &application_info;
+			std::vector<const char*> extensions = { "VK_KHR_surface", m_platform_context->get_required_extension() };
+			if (m_validation_layer_support)
+			{
+				extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+			}
 			
-			const char* surface_extensions[] = {
-				"VK_KHR_surface",
-				"VK_EXT_DEBUG_UTILS_EXTENSION_NAME",
-				m_platform_context->get_required_extension()
-			};
-			
-			instance_create_info.enabledExtensionCount = 3;
-			instance_create_info.ppEnabledExtensionNames = surface_extensions;
-			
-			instance_create_info.enabledLayerCount = 0;
-			instance_create_info.ppEnabledLayerNames = nullptr;
+			uint32_t layer_count = 0;
+			const char* const* layers = nullptr;
+			const void* next = nullptr;
 			
 			VkDebugUtilsMessengerCreateInfoEXT debug_messenger_create_info{};
 			if (m_validation_layer_support)
 			{
-				instance_create_info.ppEnabledLayerNames = s_validation_layers.data();
-				instance_create_info.enabledLayerCount = static_cast<uint32_t>(s_validation_layers.size());
+				layer_count = static_cast<uint32_t>(s_validation_layers.size());
+				layers = s_validation_layers.data();
 				
 				debug_messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 				debug_messenger_create_info.messageSeverity =
@@ -119,10 +111,18 @@ namespace HyperRendering
 					VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
 					VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 				debug_messenger_create_info.pfnUserCallback = debug_callback;
-				debug_messenger_create_info.pUserData = nullptr;
 				
-				instance_create_info.pNext = reinterpret_cast<const void*>(&debug_messenger_create_info);
+				next = reinterpret_cast<const void*>(&debug_messenger_create_info);
 			}
+			
+			VkInstanceCreateInfo instance_create_info{};
+			instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+			instance_create_info.pApplicationInfo = &application_info;
+			instance_create_info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+			instance_create_info.ppEnabledExtensionNames = extensions.data();
+			instance_create_info.enabledLayerCount = layer_count;
+			instance_create_info.ppEnabledLayerNames = layers;
+			instance_create_info.pNext = next;
 			
 			if (vkCreateInstance(&instance_create_info, nullptr, &m_instance) != VK_SUCCESS)
 			{
@@ -149,12 +149,12 @@ namespace HyperRendering
 				VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
 				VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 			debug_messenger_create_info.pfnUserCallback = debug_callback;
-			debug_messenger_create_info.pUserData = nullptr;
 			
-			PFN_vkVoidFunction vkCreateDebugUtilsMessengerEXTFunction = vkGetInstanceProcAddr(m_instance, "vkCreateDebugUtilsMessengerEXT");
+			PFN_vkVoidFunction vkCreateDebugUtilsMessengerEXTFunction = vkGetInstanceProcAddr(m_instance,"vkCreateDebugUtilsMessengerEXT");
 			PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkCreateDebugUtilsMessengerEXTFunction);
 			
-			if (vkCreateDebugUtilsMessengerEXT(m_instance, &debug_messenger_create_info, nullptr, &m_debug_messenger) != VK_SUCCESS)
+			if (vkCreateDebugUtilsMessengerEXT(m_instance, &debug_messenger_create_info, nullptr, &m_debug_messenger) !=
+			    VK_SUCCESS)
 			{
 				HyperCore::CLogger::fatal("Failed to setup vulkan debug messenger!");
 				return false;
@@ -165,11 +165,11 @@ namespace HyperRendering
 		
 		bool CContext::is_validation_layer_available()
 		{
-			uint32_t layer_count = 0;
-			vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
+			uint32_t available_layer_properties_count = 0;
+			vkEnumerateInstanceLayerProperties(&available_layer_properties_count, nullptr);
 			
-			std::vector<VkLayerProperties> available_layer_properties(layer_count);
-			vkEnumerateInstanceLayerProperties(&layer_count, available_layer_properties.data());
+			std::vector<VkLayerProperties> available_layer_properties(available_layer_properties_count);
+			vkEnumerateInstanceLayerProperties(&available_layer_properties_count, available_layer_properties.data());
 			
 			for (const char* layer_name : s_validation_layers)
 			{
