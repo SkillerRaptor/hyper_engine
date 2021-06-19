@@ -26,8 +26,8 @@ add_executable(HyperEditor ${SOURCES} ${HEADERS})
 target_include_directories(HyperEditor PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(HyperEditor PRIVATE HyperEngine)
 
-add_custom_command(
-        TARGET HyperEditor
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets)
+#add_custom_command(
+#        TARGET HyperEditor
+#        POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E copy_directory
+#        ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets)
