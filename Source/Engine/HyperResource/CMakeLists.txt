@@ -7,7 +7,7 @@
 #-------------------------------------------------------------------------------------------
 # CMake Info
 #-------------------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.10)
 
 #-------------------------------------------------------------------------------------------
 # HyperResource
@@ -27,6 +27,8 @@ set_target_properties(HyperResource PROPERTIES FOLDER HyperModules)
 target_include_directories(HyperResource PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(HyperResource PUBLIC HyperCore)
 target_link_libraries(HyperResource PUBLIC dxcompiler)
+target_link_libraries(HyperResource PUBLIC LLVMDxcSupport)
+target_link_libraries(HyperResource PUBLIC LLVMSupport)
 target_link_libraries(HyperResource PUBLIC spirv-cross-core)
 target_link_libraries(HyperResource PUBLIC spirv-cross-hlsl)
 target_link_libraries(HyperResource PUBLIC spirv-cross-glsl)
