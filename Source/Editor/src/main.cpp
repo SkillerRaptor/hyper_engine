@@ -12,6 +12,6 @@ int32_t main(int32_t argc, char** argv)
 {
 	HyperEditor::CEditor editor = HyperEditor::CEditor();
 	HyperEngine::CLauncher::launch(editor, argc, argv);
-	
+
 	return 0;
 }

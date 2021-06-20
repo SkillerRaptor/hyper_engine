@@ -9,7 +9,7 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-#include <HyperPlatform/Windows/SharedLibrary.hpp>
+#	include <HyperPlatform/Windows/SharedLibrary.hpp>
 #elif HYPERENGINE_PLATFORM_LINUX
-#include <HyperPlatform/Linux/SharedLibrary.hpp>
+#	include <HyperPlatform/Linux/SharedLibrary.hpp>
 #endif

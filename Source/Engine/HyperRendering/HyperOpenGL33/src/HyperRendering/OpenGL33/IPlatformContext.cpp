@@ -9,9 +9,9 @@
 #include <HyperRendering/OpenGL33/IPlatformContext.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-#include <HyperRendering/OpenGL33/Windows/PlatformContext.hpp>
+#	include <HyperRendering/OpenGL33/Windows/PlatformContext.hpp>
 #elif HYPERENGINE_PLATFORM_LINUX
-#include <HyperRendering/OpenGL33/Linux/PlatformContext.hpp>
+#	include <HyperRendering/OpenGL33/Linux/PlatformContext.hpp>
 #endif
 
 namespace HyperRendering::OpenGL33
@@ -26,4 +26,4 @@ namespace HyperRendering::OpenGL33
 		HYPERENGINE_ASSERT_NOT_REACHED();
 #endif
 	}
-}
+} // namespace HyperRendering::OpenGL33

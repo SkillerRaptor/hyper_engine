@@ -5,8 +5,8 @@
  */
 
 #include <HyperCore/Logger.hpp>
-#include <fmt/color.h>
 #include <fmt/chrono.h>
+#include <fmt/color.h>
 
 namespace HyperCore
 {
@@ -30,7 +30,7 @@ namespace HyperCore
 				return fmt::color::white;
 			}
 		}();
-		
+
 		const char* level_name = [&level]()
 		{
 			switch (level)
@@ -49,7 +49,12 @@ namespace HyperCore
 				return "Undefined";
 			}
 		}();
-		
-		fmt::print(fg(level_color), "[ {:%H:%M:%S} | {} ] {}\n", fmt::localtime(std::time(nullptr)), level_name, string);
+
+		fmt::print(
+			fg(level_color),
+			"[ {:%H:%M:%S} | {} ] {}\n",
+			fmt::localtime(std::time(nullptr)),
+			level_name,
+			string);
 	}
-}
+} // namespace HyperCore

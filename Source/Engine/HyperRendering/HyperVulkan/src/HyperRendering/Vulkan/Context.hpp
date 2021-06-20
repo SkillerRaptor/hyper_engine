@@ -16,32 +16,34 @@ using VkDebugUtilsMessengerEXT = struct VkDebugUtilsMessengerEXT_T*;
 namespace HyperRendering::Vulkan
 {
 	class IPlatformContext;
-	
+
 	class CContext final : public IContext
 	{
 	private:
-		static constexpr const std::array<const char*, 1> s_validation_layers = { "VK_LAYER_KHRONOS_validation" };
-		
+		static constexpr const std::array<const char*, 1> s_validation_layers = {
+			"VK_LAYER_KHRONOS_validation"
+		};
+
 	public:
 		CContext() = default;
 		virtual ~CContext() override = default;
-		
+
 		virtual bool initialize(HyperPlatform::IWindow* window) override;
 		virtual void shutdown() override;
-		
+
 		virtual void update() override;
-	
+
 	private:
 		bool create_instance();
 		bool setup_debug_messenger();
-		
+
 		static bool is_validation_layer_available();
-	
+
 	private:
 		IPlatformContext* m_platform_context{ nullptr };
-		
+
 		bool m_validation_layer_support{ false };
 		VkInstance m_instance{ nullptr };
 		VkDebugUtilsMessengerEXT m_debug_messenger{ nullptr };
 	};
-}
+} // namespace HyperRendering::Vulkan

@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: MIT
  */
- 
+
 #pragma once
 
 #include <HyperCore/Logger.hpp>
@@ -16,7 +16,7 @@ namespace HyperCore
 	public:
 		constexpr CSourceLocation() = default;
 		~CSourceLocation() = default;
-		
+
 		static constexpr CSourceLocation current(
 			const char* file = __builtin_FILE(),
 			const char* function = __builtin_FUNCTION(),
@@ -26,7 +26,7 @@ namespace HyperCore
 			location.m_file = file;
 			location.m_function = function;
 			location.m_line = line;
-			
+
 			return location;
 		}
 
@@ -34,20 +34,20 @@ namespace HyperCore
 		{
 			return m_file;
 		}
-		
+
 		constexpr const char* function_name() const noexcept
 		{
 			return m_function;
 		}
-		
+
 		constexpr uint32_t line() const noexcept
 		{
 			return m_line;
 		}
-	
+
 	private:
 		const char* m_file{ "unknown" };
 		const char* m_function{ "unknown" };
 		uint32_t m_line{ 0 };
 	};
-}
+} // namespace HyperCore

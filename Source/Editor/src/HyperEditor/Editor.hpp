@@ -16,9 +16,9 @@ namespace HyperEditor
 	public:
 		CEditor() = default;
 		virtual ~CEditor() override = default;
-		
+
 	private:
 		virtual void startup() override;
 		virtual void shutdown() override;
 	};
-}
+} // namespace HyperEditor

@@ -9,9 +9,9 @@
 #include <HyperRendering/Vulkan/IPlatformContext.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-#include <HyperRendering/Vulkan/Windows/PlatformContext.hpp>
+#	include <HyperRendering/Vulkan/Windows/PlatformContext.hpp>
 #elif HYPERENGINE_PLATFORM_LINUX
-#include <HyperRendering/Vulkan/Linux/PlatformContext.hpp>
+#	include <HyperRendering/Vulkan/Linux/PlatformContext.hpp>
 #endif
 
 namespace HyperRendering::Vulkan
@@ -26,4 +26,4 @@ namespace HyperRendering::Vulkan
 		HYPERENGINE_ASSERT_NOT_REACHED();
 #endif
 	}
-}
+} // namespace HyperRendering::Vulkan

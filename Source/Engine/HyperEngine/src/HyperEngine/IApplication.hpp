@@ -12,13 +12,13 @@ namespace HyperEngine
 	{
 	public:
 		friend class CLauncher;
-		
+
 	public:
 		IApplication() = default;
 		virtual ~IApplication() = default;
-	
+
 	protected:
 		virtual void startup() = 0;
 		virtual void shutdown() = 0;
 	};
-}
+} // namespace HyperEngine

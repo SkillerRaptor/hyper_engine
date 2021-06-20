@@ -24,8 +24,8 @@ namespace HyperRendering
 		default:
 			break;
 		}
-		
+
 		return "undefined";
 	}
-}
+} // namespace HyperRendering
 #endif

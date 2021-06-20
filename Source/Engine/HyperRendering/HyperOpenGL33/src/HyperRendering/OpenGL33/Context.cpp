@@ -15,25 +15,25 @@ namespace HyperRendering
 	{
 		return new OpenGL33::CContext();
 	}
-	
+
 	namespace OpenGL33
 	{
 		bool CContext::initialize(HyperPlatform::IWindow* window)
 		{
 			m_platform_context = IPlatformContext::construct();
 			m_platform_context->initialize(window);
-			
+
 			return true;
 		}
-		
+
 		void CContext::shutdown()
 		{
 			delete m_platform_context;
 		}
-		
+
 		void CContext::update()
 		{
 			m_platform_context->swap_buffers();
 		}
-	}
-}
+	} // namespace OpenGL33
+} // namespace HyperRendering

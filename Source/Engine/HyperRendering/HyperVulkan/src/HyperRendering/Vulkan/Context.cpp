@@ -17,7 +17,7 @@ namespace HyperRendering
 	{
 		return new Vulkan::CContext();
 	}
-	
+
 	namespace Vulkan
 	{
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
@@ -28,7 +28,7 @@ namespace HyperRendering
 		{
 			HYPERENGINE_NOT_USED(type_flags);
 			HYPERENGINE_NOT_USED(user_data);
-			
+
 			if (severity_flags >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 			{
 				HyperCore::CLogger::fatal("Vulkan Validation Error - {}", callback_data->pMessage);
@@ -37,10 +37,10 @@ namespace HyperRendering
 			{
 				HyperCore::CLogger::warning("Vulkan Validation Warning - {}", callback_data->pMessage);
 			}
-			
+
 			return VK_FALSE;
 		}
-		
+
 		bool CContext::initialize(HyperPlatform::IWindow* window)
 		{
 			m_platform_context = IPlatformContext::construct();
@@ -52,7 +52,7 @@ namespace HyperRendering
 				m_validation_layer_support = true;
 			}
 #endif
-			
+
 			if (!create_instance())
 			{
 				return false;
@@ -64,19 +64,19 @@ namespace HyperRendering
 				return false;
 			}
 #endif
-			
+
 			return true;
 		}
-		
+
 		void CContext::shutdown()
 		{
 			vkDestroyInstance(m_instance, nullptr);
 		}
-		
+
 		void CContext::update()
 		{
 		}
-		
+
 		bool CContext::create_instance()
 		{
 			VkApplicationInfo application_info{};
@@ -86,24 +86,26 @@ namespace HyperRendering
 			application_info.pEngineName = "HyperEngine";
 			application_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 			application_info.apiVersion = VK_API_VERSION_1_2;
-			
-			std::vector<const char*> extensions = { "VK_KHR_surface", m_platform_context->get_required_extension() };
+
+			std::vector<const char*> extensions = { "VK_KHR_surface",
+													m_platform_context->get_required_extension() };
 			if (m_validation_layer_support)
 			{
 				extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 			}
-			
+
 			uint32_t layer_count = 0;
 			const char* const* layers = nullptr;
 			const void* next = nullptr;
-			
+
 			VkDebugUtilsMessengerCreateInfoEXT debug_messenger_create_info{};
 			if (m_validation_layer_support)
 			{
 				layer_count = static_cast<uint32_t>(s_validation_layers.size());
 				layers = s_validation_layers.data();
-				
-				debug_messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+
+				debug_messenger_create_info.sType =
+					VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 				debug_messenger_create_info.messageSeverity =
 					VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
 					VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
@@ -111,10 +113,10 @@ namespace HyperRendering
 					VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
 					VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 				debug_messenger_create_info.pfnUserCallback = debug_callback;
-				
+
 				next = reinterpret_cast<const void*>(&debug_messenger_create_info);
 			}
-			
+
 			VkInstanceCreateInfo instance_create_info{};
 			instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 			instance_create_info.pApplicationInfo = &application_info;
@@ -123,75 +125,78 @@ namespace HyperRendering
 			instance_create_info.enabledLayerCount = layer_count;
 			instance_create_info.ppEnabledLayerNames = layers;
 			instance_create_info.pNext = next;
-			
+
 			if (vkCreateInstance(&instance_create_info, nullptr, &m_instance) != VK_SUCCESS)
 			{
 				HyperCore::CLogger::fatal("Failed to create vulkan instance!");
 				return false;
 			}
-			
+
 			return true;
 		}
-		
+
 		bool CContext::setup_debug_messenger()
 		{
 			if (!m_validation_layer_support)
 			{
 				return true;
 			}
-			
+
 			VkDebugUtilsMessengerCreateInfoEXT debug_messenger_create_info{};
 			debug_messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 			debug_messenger_create_info.messageSeverity =
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-			debug_messenger_create_info.messageType =
-				VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-				VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+			debug_messenger_create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+													  VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 			debug_messenger_create_info.pfnUserCallback = debug_callback;
-			
-			PFN_vkVoidFunction vkCreateDebugUtilsMessengerEXTFunction = vkGetInstanceProcAddr(m_instance,"vkCreateDebugUtilsMessengerEXT");
-			PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkCreateDebugUtilsMessengerEXTFunction);
-			
-			if (vkCreateDebugUtilsMessengerEXT(m_instance, &debug_messenger_create_info, nullptr, &m_debug_messenger) !=
-			    VK_SUCCESS)
+
+			PFN_vkVoidFunction vkCreateDebugUtilsMessengerEXTFunction =
+				vkGetInstanceProcAddr(m_instance, "vkCreateDebugUtilsMessengerEXT");
+			PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT =
+				reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
+					vkCreateDebugUtilsMessengerEXTFunction);
+
+			if (vkCreateDebugUtilsMessengerEXT(
+					m_instance, &debug_messenger_create_info, nullptr, &m_debug_messenger) != VK_SUCCESS)
 			{
 				HyperCore::CLogger::fatal("Failed to setup vulkan debug messenger!");
 				return false;
 			}
-			
+
 			return true;
 		}
-		
+
 		bool CContext::is_validation_layer_available()
 		{
 			uint32_t available_layer_properties_count = 0;
 			vkEnumerateInstanceLayerProperties(&available_layer_properties_count, nullptr);
-			
+
 			std::vector<VkLayerProperties> available_layer_properties(available_layer_properties_count);
-			vkEnumerateInstanceLayerProperties(&available_layer_properties_count, available_layer_properties.data());
-			
+			vkEnumerateInstanceLayerProperties(
+				&available_layer_properties_count, available_layer_properties.data());
+
 			for (const char* layer_name : s_validation_layers)
 			{
 				bool layer_found = false;
-				
+
 				for (const VkLayerProperties& layer_properties : available_layer_properties)
 				{
 					if (std::strcmp(layer_name, layer_properties.layerName) != 0)
 					{
 						continue;
 					}
-					
+
 					layer_found = true;
 				}
-				
+
 				if (!layer_found)
 				{
 					return false;
 				}
 			}
-			
+
 			return true;
 		}
-	}
-}
+	} // namespace Vulkan
+} // namespace HyperRendering

@@ -9,9 +9,9 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_LINUX
-#include <HyperPlatform/Linux/Window.hpp>
-#include <HyperRendering/OpenGL33/IPlatformContext.hpp>
-#include <GL/glx.h>
+#	include <GL/glx.h>
+#	include <HyperPlatform/Linux/Window.hpp>
+#	include <HyperRendering/OpenGL33/IPlatformContext.hpp>
 
 namespace HyperRendering::OpenGL33::Linux
 {
@@ -20,17 +20,17 @@ namespace HyperRendering::OpenGL33::Linux
 	public:
 		CPlatformContext() = default;
 		virtual ~CPlatformContext() override = default;
-		
+
 		virtual void initialize(HyperPlatform::IWindow* window) override;
 		virtual void shutdown() override;
-		
+
 		virtual void swap_buffers() const override;
-	
+
 	private:
 		HyperPlatform::Linux::CWindow* m_window{ nullptr };
-		
+
 		GLXContext m_graphics_context{ nullptr };
 		XVisualInfo* m_visual_info{ nullptr };
 	};
-}
+} // namespace HyperRendering::OpenGL33::Linux
 #endif

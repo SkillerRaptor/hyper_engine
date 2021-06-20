@@ -5,13 +5,13 @@
  */
 
 #include <HyperCore/Assertion.hpp>
-#include <HyperPlatform/PlatformDetection.hpp>
 #include <HyperPlatform/IWindow.hpp>
+#include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-#include <HyperPlatform/Windows/Window.hpp>
+#	include <HyperPlatform/Windows/Window.hpp>
 #elif HYPERENGINE_PLATFORM_LINUX
-#include <HyperPlatform/Linux/Window.hpp>
+#	include <HyperPlatform/Linux/Window.hpp>
 #endif
 
 namespace HyperPlatform
@@ -26,4 +26,4 @@ namespace HyperPlatform
 		HYPERENGINE_ASSERT_NOT_REACHED();
 #endif
 	}
-}
+} // namespace HyperPlatform

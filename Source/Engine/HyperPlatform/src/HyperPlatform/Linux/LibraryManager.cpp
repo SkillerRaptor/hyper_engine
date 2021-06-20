@@ -7,8 +7,8 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_LINUX
-#include <HyperPlatform/Linux/LibraryManager.hpp>
-#include <dlfcn.h>
+#	include <HyperPlatform/Linux/LibraryManager.hpp>
+#	include <dlfcn.h>
 
 namespace HyperPlatform::Linux
 {
@@ -20,7 +20,7 @@ namespace HyperPlatform::Linux
 		}
 		m_storage.clear();
 	}
-	
+
 	CLibraryHandle CLibraryManager::load(const std::string& path)
 	{
 		HyperCore::CSparsePoolAllocator<SLibraryData>::SizeType index = 0;
@@ -28,10 +28,10 @@ namespace HyperPlatform::Linux
 		data.magic_number = m_version++;
 		data.path = path;
 		data.library = dlopen(path.c_str(), RTLD_LAZY);
-		
+
 		return CLibraryHandle((data.magic_number << 16) | static_cast<uint32_t>(index));
 	}
-	
+
 	void CLibraryManager::unload(CLibraryHandle handle)
 	{
 		SLibraryData& data = m_storage[handle.index()];
@@ -39,11 +39,11 @@ namespace HyperPlatform::Linux
 		{
 			return;
 		}
-		
+
 		CLibraryManager::internal_unload(data);
 		m_storage.deallocate(handle.index());
 	}
-	
+
 	void* CLibraryManager::get_function_address(CLibraryHandle handle, const std::string& function)
 	{
 		SLibraryData& data = m_storage[handle.index()];
@@ -51,13 +51,13 @@ namespace HyperPlatform::Linux
 		{
 			return nullptr;
 		}
-		
+
 		return dlsym(data.library, function.c_str());
 	}
-	
+
 	void CLibraryManager::internal_unload(SLibraryData& data)
 	{
 		dlclose(data.library);
 	}
-}
+} // namespace HyperPlatform::Linux
 #endif

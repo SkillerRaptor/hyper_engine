@@ -18,12 +18,12 @@ namespace HyperRendering::Vulkan
 	public:
 		IPlatformContext() = default;
 		virtual ~IPlatformContext() = default;
-		
+
 		virtual void initialize(HyperPlatform::IWindow* window) = 0;
 		virtual void shutdown() = 0;
-		
+
 		virtual const char* get_required_extension() const = 0;
-		
+
 		static IPlatformContext* construct();
 	};
-}
+} // namespace HyperRendering::Vulkan

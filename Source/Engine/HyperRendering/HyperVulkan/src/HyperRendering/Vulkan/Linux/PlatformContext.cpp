@@ -7,7 +7,7 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_LINUX
-#include <HyperRendering/Vulkan/Linux/PlatformContext.hpp>
+#	include <HyperRendering/Vulkan/Linux/PlatformContext.hpp>
 
 namespace HyperRendering::Vulkan::Linux
 {
@@ -15,14 +15,14 @@ namespace HyperRendering::Vulkan::Linux
 	{
 		m_window = static_cast<HyperPlatform::Linux::CWindow*>(window);
 	}
-	
+
 	void CPlatformContext::shutdown()
 	{
 	}
-	
+
 	const char* CPlatformContext::get_required_extension() const
 	{
 		return "VK_KHR_xlib_surface";
 	}
-}
+} // namespace HyperRendering::Vulkan::Linux
 #endif

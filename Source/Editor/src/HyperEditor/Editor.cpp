@@ -11,8 +11,8 @@ namespace HyperEditor
 	void CEditor::startup()
 	{
 	}
-	
+
 	void CEditor::shutdown()
 	{
 	}
-}
+} // namespace HyperEditor

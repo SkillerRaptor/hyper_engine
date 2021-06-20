@@ -7,7 +7,7 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-#include <HyperRendering/Vulkan/Windows/PlatformContext.hpp>
+#	include <HyperRendering/Vulkan/Windows/PlatformContext.hpp>
 
 namespace HyperRendering::Vulkan::Windows
 {
@@ -15,14 +15,14 @@ namespace HyperRendering::Vulkan::Windows
 	{
 		m_window = static_cast<HyperPlatform::Windows::CWindow*>(window);
 	}
-	
+
 	void CPlatformContext::shutdown()
 	{
 	}
-	
+
 	const char* CPlatformContext::get_required_extension() const
 	{
 		return "VK_KHR_win32_surface";
 	}
-}
+} // namespace HyperRendering::Vulkan::Windows
 #endif

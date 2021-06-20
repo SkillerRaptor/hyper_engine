@@ -21,12 +21,12 @@ namespace HyperRendering
 	public:
 		IContext() = default;
 		virtual ~IContext() = default;
-		
+
 		virtual bool initialize(HyperPlatform::IWindow* window) = 0;
 		virtual void shutdown() = 0;
-		
+
 		virtual void update() = 0;
 	};
-	
+
 	extern "C" HYPERENGINE_API IContext* create_context();
-}
+} // namespace HyperRendering

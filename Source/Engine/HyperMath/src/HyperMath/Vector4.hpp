@@ -15,7 +15,7 @@ namespace HyperMath
 	{
 	public:
 		static_assert(std::is_arithmetic_v<T>, "Invalid template type for CVector4!");
-	
+
 	public:
 		CVector4()
 			: x(static_cast<T>(0))
@@ -24,7 +24,7 @@ namespace HyperMath
 			, w(static_cast<T>(0))
 		{
 		}
-		
+
 		explicit CVector4(T scalar)
 			: x(scalar)
 			, y(scalar)
@@ -32,7 +32,7 @@ namespace HyperMath
 			, w(scalar)
 		{
 		}
-		
+
 		CVector4(T x, T y, T z, T w)
 			: x(x)
 			, y(y)
@@ -40,12 +40,12 @@ namespace HyperMath
 			, w(w)
 		{
 		}
-	
+
 	public:
 		union
 		{
 			T data[4];
-			
+
 			struct
 			{
 				T x;
@@ -53,7 +53,7 @@ namespace HyperMath
 				T z;
 				T w;
 			};
-			
+
 			struct
 			{
 				T r;
@@ -61,7 +61,7 @@ namespace HyperMath
 				T b;
 				T a;
 			};
-			
+
 			struct
 			{
 				T s;
@@ -71,10 +71,10 @@ namespace HyperMath
 			};
 		};
 	};
-	
+
 	using CVec4 = CVector4<float>;
 	using CVec4f = CVector4<float>;
 	using CVec4d = CVector4<double>;
 	using CVec4i = CVector4<int32_t>;
 	using CVec4ui = CVector4<uint32_t>;
-}
+} // namespace HyperMath
