@@ -9,9 +9,9 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_LINUX
-#	include <GL/glx.h>
 #	include <HyperPlatform/Linux/Window.hpp>
 #	include <HyperRendering/OpenGL33/IPlatformContext.hpp>
+#	include <GL/glx.h>
 
 namespace HyperRendering::OpenGL33::Linux
 {

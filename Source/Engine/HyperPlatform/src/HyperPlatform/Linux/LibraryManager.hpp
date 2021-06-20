@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <HyperPlatform //PlatformDetection.hpp>
+#include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_LINUX
 #	include <HyperCore/Memory/SparsePoolAllocator.hpp>

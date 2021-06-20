@@ -9,9 +9,9 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-#	include <GL/gl.h>
 #	include <HyperPlatform/Windows/Window.hpp>
 #	include <HyperRendering/OpenGL33/IPlatformContext.hpp>
+#	include <GL/gl.h>
 
 namespace HyperRendering::OpenGL33::Windows
 {
