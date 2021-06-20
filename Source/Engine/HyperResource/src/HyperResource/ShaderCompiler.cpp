@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include <HyperPlatform/PlatformDetection.hpp>
 #include <HyperResource/ShaderCompiler.hpp>
 
 #ifdef HYPERENGINE_PLATFORM_WINDOWS
@@ -16,7 +17,7 @@ namespace HyperResource
 {
 	ShaderCompiler::ShaderCompiler()
 	{
-		IDxcCompiler compiler;
+		IDxcCompiler* compiler = nullptr;
 		DxcCreateInstance(CLSID_DxcCompiler, __uuidof(IDxcCompiler), (void**) &compiler);
 	}
 } // namespace HyperResource
