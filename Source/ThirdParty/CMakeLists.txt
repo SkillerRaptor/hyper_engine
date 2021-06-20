@@ -43,6 +43,39 @@ foreach (TARGET
 endforeach ()
 
 #-------------------------------------------------------------------------------------------
+# SPIRV-Cross
+#-------------------------------------------------------------------------------------------
+set(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS ON CACHE STRING "" FORCE)
+set(SPIRV_CROSS_SHARED OFF CACHE STRING "" FORCE)
+set(SPIRV_CROSS_STATIC ON CACHE STRING "" FORCE)
+set(SPIRV_CROSS_CLI OFF CACHE STRING "" FORCE)
+set(SPIRV_CROSS_ENABLE_TESTS OFF CACHE STRING "" FORCE)
+set(SPIRV_CROSS_ENABLE_GLSL ON CACHE STRING "" FORCE)
+set(SPIRV_CROSS_ENABLE_HLSL ON CACHE STRING "" FORCE)
+set(SPIRV_CROSS_ENABLE_MSL OFF CACHE STRING "" FORCE)
+set(SPIRV_CROSS_ENABLE_CPP ON CACHE STRING "" FORCE)
+set(SPIRV_CROSS_ENABLE_REFLECT ON CACHE STRING "" FORCE)
+set(SPIRV_CROSS_ENABLE_C_API ON CACHE STRING "" FORCE)
+set(SPIRV_CROSS_ENABLE_UTIL ON CACHE STRING "" FORCE)
+set(SPIRV_CROSS_SANITIZE_ADDRESS OFF CACHE STRING "" FORCE)
+set(SPIRV_CROSS_SANITIZE_MEMORY OFF CACHE STRING "" FORCE)
+set(SPIRV_CROSS_SANITIZE_THREADS OFF CACHE STRING "" FORCE)
+set(SPIRV_CROSS_SANITIZE_UNDEFINED OFF CACHE STRING "" FORCE)
+set(SPIRV_CROSS_NAMESPACE_OVERRIDE ON CACHE STRING "" FORCE)
+set(SPIRV_CROSS_FORCE_STL_TYPES OFF CACHE STRING "" FORCE)
+set(SPIRV_CROSS_SKIP_INSTALL ON CACHE STRING "" FORCE)
+set(SPIRV_CROSS_WERROR OFF CACHE STRING "" FORCE)
+set(SPIRV_CROSS_MISC_WARNINGS OFF CACHE STRING "" FORCE)
+set(SPIRV_CROSS_FORCE_PIC OFF CACHE STRING "" FORCE)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Cross)
+
+#-------------------------------------------------------------------------------------------
+# SPIRV-Reflect
+#-------------------------------------------------------------------------------------------
+add_library(spirv-reflect STATIC ${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Reflect/spirv_reflect.c ${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Reflect/spirv_reflect.h)
+set_target_properties(spirv-reflect PROPERTIES FOLDER ThirdParty)
+
+#-------------------------------------------------------------------------------------------
 # DirectXShaderCompiler
 #-------------------------------------------------------------------------------------------
 if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")

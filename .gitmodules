@@ -10,3 +10,9 @@
 [submodule "Source/ThirdParty/SPIRV-Tools"]
 	path = Source/ThirdParty/SPIRV-Tools
 	url = https://github.com/KhronosGroup/SPIRV-Tools
+[submodule "Source/ThirdParty/SPIRV-Cross"]
+	path = Source/ThirdParty/SPIRV-Cross
+	url = https://github.com/KhronosGroup/SPIRV-Cross
+[submodule "Source/ThirdParty/SPIRV-Reflect"]
+	path = Source/ThirdParty/SPIRV-Reflect
+	url = https://github.com/KhronosGroup/SPIRV-Reflect
