@@ -5,7 +5,12 @@
  */
 
 #include <HyperResource/ShaderCompiler.hpp>
-#include <dxcapi.h>
+
+#ifdef HYPERENGINE_PLATFORM_WINDOWS
+#	include <Windows.h>
+#endif
+
+#include <dxc/dxcapi.h>
 
 namespace HyperResource
 {

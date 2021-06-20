@@ -26,7 +26,14 @@ endforeach ()
 
 add_library(HyperEngine STATIC ${SOURCES} ${HEADERS})
 target_include_directories(HyperEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src ${HYPERENGINE_COMMON_PATH}/src)
-target_link_libraries(HyperEngine PUBLIC HyperAudio HyperCore HyperMath HyperNetwork HyperPhysics HyperPlatform HyperResource)
+target_include_directories(HyperEngine PUBLIC ${HYPERENGINE_COMMON_PATH}/src)
+target_link_libraries(HyperEngine PUBLIC HyperAudio)
+target_link_libraries(HyperEngine PUBLIC HyperCore)
+target_link_libraries(HyperEngine PUBLIC HyperMath)
+target_link_libraries(HyperEngine PUBLIC HyperNetwork)
+target_link_libraries(HyperEngine PUBLIC HyperPhysics)
+target_link_libraries(HyperEngine PUBLIC HyperPlatform)
+target_link_libraries(HyperEngine PUBLIC HyperResource)
 
 #-------------------------------------------------------------------------------------------
 # DirectX
