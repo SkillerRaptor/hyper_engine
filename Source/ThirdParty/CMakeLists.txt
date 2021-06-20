@@ -15,6 +15,7 @@ cmake_minimum_required(VERSION 3.15)
 set(SPIRV_HEADERS_SKIP_EXAMPLES ON CACHE BOOL "" FORCE)
 set(SPIRV_HEADERS_SKIP_INSTALL ON CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Headers)
+set_target_properties(install-headers PROPERTIES FOLDER ThirdParty)
 
 #-------------------------------------------------------------------------------------------
 # SPIRV-Tools
@@ -31,6 +32,15 @@ set(SPIRV_SKIP_EXECUTABLES ON CACHE STRING "" FORCE)
 set(SPIRV_SKIP_TESTS ON CACHE STRING "" FORCE)
 set(SPIRV_CHECK_CONTEXT ON CACHE STRING "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Tools)
+foreach (TARGET
+        "core_tables" "enum_string_mapping" "extinst_tables"
+        "spirv-tools-pkg-config" "spirv-tools-shared-pkg-config"
+        "spirv-tools-build-version" "spirv-tools-header-DebugInfo"
+        "SPIRV-Tools-link" "SPIRV-Tools-shared" "SPIRV-Tools-reduce"
+        "spirv-tools-header-OpenCLDebugInfo100" "spirv-tools-vimsyntax" "spv-tools-cldi100" "spv-tools-clspvreflection" "spv-tools-debuginfo" "spv-tools-spv-amd-gs"
+        "spv-tools-spv-amd-sb" "spv-tools-spv-amd-sevp" "spv-tools-spv-amd-stm")
+    set_target_properties(${TARGET} PROPERTIES FOLDER ThirdParty)
+endforeach ()
 
 #-------------------------------------------------------------------------------------------
 # DirectXShaderCompiler
@@ -86,6 +96,36 @@ set(SPIRV_SKIP_TESTS ON CACHE BOOL "" FORCE)
 set(CMAKE_CXX_STANDARD 14)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler)
 set(CMAKE_CXX_STANDARD 17)
+foreach (TARGET
+        "clang"
+        "clangAnalysis" "clangAST" "clangASTMatchers" "clangBasic" "clangCodeGen" "clangDriver" "clangEdit" "clangFormat" "clangFrontend"
+        "clangFrontendTool" "clangIndex" "clangLex" "clangParse" "clangRewrite" "clangRewriteFrontend" "clangSema" "clangSPIRV" "clangTooling"
+        "clangToolingCore" "libclang"
+        "dxc" "dxcompiler"
+        "ClangAttrClasses" "ClangAttrDump" "ClangAttrHasAttributeImpl" "ClangAttrImpl" "ClangAttrList" "ClangAttrParsedAttrImpl"
+        "ClangAttrParsedAttrKinds" "ClangAttrParsedAttrList" "ClangAttrParserStringSwitches" "ClangAttrPCHRead" "ClangAttrPCHWrite"
+        "ClangAttrSpellingListIndex" "ClangAttrTemplateInstantiate" "ClangAttrVisitor" "ClangCommentCommandInfo" "ClangCommentCommandList"
+        "ClangCommentHTMLNamedCharacterReferences" "ClangCommentHTMLTags" "ClangCommentHTMLTagsProperties" "ClangCommentNodes" "ClangDeclNodes"
+        "ClangDiagnosticAnalysis" "ClangDiagnosticAST" "ClangDiagnosticComment" "ClangDiagnosticCommon" "ClangDiagnosticDriver"
+        "ClangDiagnosticFrontend" "ClangDiagnosticGroups" "ClangDiagnosticIndexName" "ClangDiagnosticLex" "ClangDiagnosticParse"
+        "ClangDiagnosticSema" "ClangDiagnosticSerialization" "ClangStmtNodes"
+        "LLVMAnalysis" "LLVMAsmParser" "LLVMBitReader" "LLVMBitWriter" "LLVMCore" "LLVMDxcSupport" "LLVMDXIL" "LLVMDxilContainer"
+        "LLVMDxilPIXPasses" "LLVMDxilRootSignature" "LLVMDxrFallback" "LLVMHLSL" "LLVMInstCombine" "LLVMipa" "LLVMipo" "LLVMIRReader"
+        "LLVMLinker" "LLVMLTO" "LLVMMSSupport" "LLVMOption" "LLVMPasses" "LLVMPassPrinters" "LLVMProfileData" "LLVMScalarOpts" "LLVMSupport"
+        "LLVMTableGen" "LLVMTarget" "LLVMTransformUtils" "LLVMVectorize" "LLVMMiniz"
+        "ClangDriverOptions" "DxcEtw" "intrinsics_gen" "TablegenHLSLOptions"
+        "clang-tblgen" "llvm-tblgen" "hlsl_dxcversion_autogen" "hlsl_version_autogen" "SPIRV-Tools-static" "SPIRV-Tools-opt"
+        "GIT_COMMIT_INFO_ALWAYS_REBUILD")
+    set_target_properties(${TARGET} PROPERTIES FOLDER ThirdParty)
+endforeach ()
+
+if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
+    foreach (TARGET
+            "dxexp" "dxclib" "dxa" "dxl" "dxopt" "dxr" "dxv" "dndxc" "dxlib_sample" "dxrfallbackcompiler"
+            "d3dcompiler_dxc_bridge" "LLVMDxilDia")
+        set_target_properties(${TARGET} PROPERTIES FOLDER ThirdParty)
+    endforeach ()
+endif ()
 
 #-------------------------------------------------------------------------------------------
 # fmt
@@ -100,4 +140,5 @@ set(FMT_CUDA_TEST OFF)
 set(FMT_OS ON)
 set(FMT_MODULE OFF)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/fmt)
-set_property(TARGET fmt PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_target_properties(fmt PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(fmt PROPERTIES FOLDER ThirdParty)
