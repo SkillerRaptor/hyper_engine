@@ -9,7 +9,6 @@ jobs:
       run:
         shell: bash
     env:
-      build_type: "Release"
       conan_path: "$HOME/.local/bin"
       vulkan_sdk: "$GITHUB_WORKSPACE/vulkan_sdk/"
       vulkan_version: "1.2.131.1"
@@ -18,16 +17,32 @@ jobs:
       matrix:
         config:
           - {
-            name: "Ubuntu Clang",
-            artifact: "linux-clang.tar.xz",
+            name: "Ubuntu Clang Debug",
+            artifact: "linux-clang-debug.tar.xz",
             cc: "clang-10",
-            cxx: "clang++-10"
+            cxx: "clang++-10",
+            build_type: "Debug"
           }
           - {
-            name: "Ubuntu GCC",
-            artifact: "linux-gcc-10.tar.xz",
+            name: "Ubuntu GCC Debug",
+            artifact: "linux-gcc-debug.tar.xz",
             cc: "gcc-10",
-            cxx: "g++-10"
+            cxx: "g++-10",
+            build_type: "Debug"
+          }
+          - {
+            name: "Ubuntu Clang Release",
+            artifact: "linux-clang-release.tar.xz",
+            cc: "clang-10",
+            cxx: "clang++-10",
+            build_type: "Release"
+          }
+          - {
+            name: "Ubuntu GCC Release",
+            artifact: "linux-gcc-release.tar.xz",
+            cc: "gcc-10",
+            cxx: "g++-10",
+            build_type: "Release"
           }
     steps:
       - name: Checkout
@@ -62,11 +77,11 @@ jobs:
           export LD_LIBRARY_PATH=$VULKAN_SDK/lib:$LD_LIBRARY_PATH
           export VK_LAYER_PATH=$VULKAN_SDK/etc/explicit_layer.d
 
-          cmake . -Bbuild -DCMAKE_BUILD_TYPE=${{ env.build_type }}
+          cmake . -Bbuild -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
 
       - name: Build
         run: |
-          cmake --build build --parallel 12
+          cmake --build build --parallel $(nproc)
 
       - name: Prepare upload
         run: |
