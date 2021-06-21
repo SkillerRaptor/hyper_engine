@@ -68,6 +68,12 @@ set(SPIRV_CROSS_WERROR OFF CACHE STRING "" FORCE)
 set(SPIRV_CROSS_MISC_WARNINGS OFF CACHE STRING "" FORCE)
 set(SPIRV_CROSS_FORCE_PIC OFF CACHE STRING "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Cross)
+foreach (TARGET
+        "spirv-cross-c" "spirv-cross-core" "spirv-cross-cpp"
+        "spirv-cross-glsl" "spirv-cross-hlsl"
+        "spirv-cross-reflect" "spirv-cross-util")
+    set_target_properties(${TARGET} PROPERTIES FOLDER ThirdParty)
+endforeach ()
 
 #-------------------------------------------------------------------------------------------
 # SPIRV-Reflect
