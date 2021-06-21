@@ -47,6 +47,9 @@ namespace HyperCore
 		IEvent() = default;
 		virtual ~IEvent() = default;
 
+		friend ECategory operator|(ECategory left, ECategory right);
+		friend EType operator|(EType left, EType right);
+
 		virtual std::string name() const = 0;
 		virtual EType type() const = 0;
 		virtual ECategory category() const = 0;
