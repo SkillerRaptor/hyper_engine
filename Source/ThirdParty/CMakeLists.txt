@@ -91,7 +91,9 @@ set(LLVM_REQUIRES_RTTI ON)
 set(CLANG_CL OFF)
 set(DXC_BUILD_ARCH "x64")
 set(SPIRV_BUILD_TESTS OFF)
+set(CMAKE_CXX_STANDARD 14)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler EXCLUDE_FROM_ALL)
+set(CMAKE_CXX_STANDARD 17)
 foreach (TARGET
         "clang"
         "clangAnalysis" "clangAST" "clangASTMatchers" "clangBasic" "clangCodeGen" "clangDriver" "clangEdit" "clangFormat" "clangFrontend"
