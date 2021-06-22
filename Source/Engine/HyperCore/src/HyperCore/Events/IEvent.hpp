@@ -44,7 +44,6 @@ namespace HyperCore
 		};
 
 	public:
-		IEvent() = default;
 		virtual ~IEvent() = default;
 
 		friend ECategory operator|(ECategory left, ECategory right);

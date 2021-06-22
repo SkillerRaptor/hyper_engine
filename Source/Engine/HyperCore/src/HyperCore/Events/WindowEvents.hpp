@@ -14,7 +14,6 @@ namespace HyperCore
 	{
 	public:
 		CWindowResizeEvent(uint32_t width, uint32_t height);
-		virtual ~CWindowResizeEvent() override = default;
 
 		uint32_t width() const;
 		uint32_t height() const;
@@ -32,7 +31,6 @@ namespace HyperCore
 	{
 	public:
 		CWindowCloseEvent() = default;
-		virtual ~CWindowCloseEvent() override = default;
 
 		virtual std::string name() const override;
 		virtual IEvent::EType type() const override;
@@ -43,7 +41,6 @@ namespace HyperCore
 	{
 	public:
 		CWindowFocusEvent() = default;
-		virtual ~CWindowFocusEvent() override = default;
 
 		virtual std::string name() const override;
 		virtual IEvent::EType type() const override;
@@ -54,7 +51,6 @@ namespace HyperCore
 	{
 	public:
 		CWindowLostFocusEvent() = default;
-		virtual ~CWindowLostFocusEvent() override = default;
 
 		virtual std::string name() const override;
 		virtual IEvent::EType type() const override;
@@ -65,7 +61,6 @@ namespace HyperCore
 	{
 	public:
 		CWindowMovedEvent(uint32_t position_x, uint32_t position_y);
-		virtual ~CWindowMovedEvent() override = default;
 
 		uint32_t position_x() const;
 		uint32_t position_y() const;
