@@ -9,6 +9,11 @@
 #include <cstdint>
 #include <string>
 
+namespace HyperCore
+{
+	class CEventManager;
+}
+
 namespace HyperPlatform
 {
 	struct SWindowCreateInfo
@@ -16,6 +21,7 @@ namespace HyperPlatform
 		std::string title;
 		size_t width;
 		size_t height;
+		HyperCore::CEventManager* event_manager;
 	};
 
 	class IWindow
@@ -61,6 +67,8 @@ namespace HyperPlatform
 
 		virtual void set_height(size_t height) = 0;
 		virtual size_t height() const = 0;
+		
+		virtual HyperCore::CEventManager* event_manager() const = 0;
 
 		static IWindow* construct();
 
@@ -70,5 +78,7 @@ namespace HyperPlatform
 		bool m_visible{ true };
 		bool m_decorated{ true };
 		bool m_focused{ true };
+
+		HyperCore::CEventManager* m_event_manager{ nullptr };
 	};
 } // namespace HyperPlatform

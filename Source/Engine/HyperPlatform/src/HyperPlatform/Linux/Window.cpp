@@ -8,6 +8,8 @@
 
 #if HYPERENGINE_PLATFORM_LINUX
 #	include <HyperCore/Logger.hpp>
+#	include <HyperCore/Events/EventManager.hpp>
+#	include <HyperCore/Events/WindowEvents.hpp>
 #	include <HyperCore/Utilities/Prerequisites.hpp>
 #	include <HyperPlatform/Linux/Window.hpp>
 #	include <X11/Xutil.h>
@@ -17,6 +19,7 @@ namespace HyperPlatform::Linux
 	bool CWindow::initialize(const SWindowCreateInfo& create_info)
 	{
 		m_title = create_info.title;
+		m_event_manager = create_info.event_manager;
 
 		m_display = XOpenDisplay(nullptr);
 		if (m_display == nullptr)
@@ -54,6 +57,50 @@ namespace HyperPlatform::Linux
 
 		XEvent event{};
 		XNextEvent(m_display, &event);
+
+		switch (event.type)
+		{
+		case ClientMessage:
+		{
+			if (event.xclient.message_type == None)
+			{
+				break;
+			}
+
+			if (event.xclient.message_type ==
+				XInternAtom(m_display, "WM_PROTOCOLS", false))
+			{
+				const Atom protocol = event.xclient.data.l[0];
+				if (protocol == None)
+				{
+					break;
+				}
+
+				if (protocol ==
+					XInternAtom(m_display, "WM_DELETE_WINDOW", false))
+				{
+					m_event_manager->invoke<HyperCore::CWindowCloseEvent>();
+				}
+				else if (
+					protocol == XInternAtom(m_display, "NET_WM_PING", false))
+				{
+					XEvent reply = event;
+					reply.xclient.window = m_window;
+
+					XSendEvent(
+						m_display,
+						m_window,
+						False,
+						SubstructureNotifyMask | SubstructureRedirectMask,
+						&reply);
+				}
+
+				break;
+			}
+		}
+		default:
+			break;
+		}
 	}
 
 	void CWindow::set_title(const std::string& title)
@@ -118,7 +165,8 @@ namespace HyperPlatform::Linux
 
 	void CWindow::set_position(size_t x, size_t y)
 	{
-		XMoveWindow(m_display, m_window, static_cast<int>(x), static_cast<int>(y));
+		XMoveWindow(
+			m_display, m_window, static_cast<int>(x), static_cast<int>(y));
 		XFlush(m_display);
 	}
 
@@ -128,7 +176,8 @@ namespace HyperPlatform::Linux
 		int window_x = 0;
 		int window_y = 0;
 
-		XTranslateCoordinates(m_display, m_window, m_window, 0, 0, &window_x, &window_y, &dummy);
+		XTranslateCoordinates(
+			m_display, m_window, m_window, 0, 0, &window_x, &window_y, &dummy);
 
 		x = window_x;
 		y = window_y;
@@ -208,6 +257,11 @@ namespace HyperPlatform::Linux
 		size(width, height);
 
 		return height;
+	}
+
+	HyperCore::CEventManager* CWindow::event_manager() const
+	{
+		return m_event_manager;
 	}
 
 	void CWindow::update_normal_hints(size_t width, size_t height) const

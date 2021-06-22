@@ -20,6 +20,7 @@ namespace HyperEngine
 		create_info.title = "HyperEngine";
 		create_info.width = 1280;
 		create_info.height = 720;
+		create_info.event_manager = &m_event_manager;
 
 		m_window = HyperPlatform::IWindow::construct();
 		m_window->initialize(create_info);

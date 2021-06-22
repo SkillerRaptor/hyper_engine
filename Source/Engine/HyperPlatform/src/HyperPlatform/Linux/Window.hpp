@@ -57,6 +57,8 @@ namespace HyperPlatform::Linux
 
 		virtual void set_height(size_t height) override;
 		virtual size_t height() const override;
+		
+		virtual HyperCore::CEventManager* event_manager() const override;
 
 		Window window() const;
 		Display* display() const;

@@ -58,6 +58,8 @@ namespace HyperPlatform::Windows
 		virtual void set_height(size_t height) override;
 		virtual size_t height() const override;
 
+		virtual HyperCore::CEventManager* event_manager() const override;
+
 		HINSTANCE instance() const;
 		HWND window() const;
 		HDC handle() const;
