@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <HyperCore/Events/EventManager.hpp>
 #include <HyperPlatform/ILibraryManager.hpp>
 
 namespace HyperPlatform
@@ -38,6 +39,8 @@ namespace HyperEngine
 
 		IApplication* m_application{ nullptr };
 
+		HyperCore::CEventManager m_event_manager{};
+		
 		HyperPlatform::IWindow* m_window{ nullptr };
 		HyperPlatform::ILibraryManager* m_library_manager{ nullptr };
 		HyperPlatform::CLibraryHandle m_graphics_library{};

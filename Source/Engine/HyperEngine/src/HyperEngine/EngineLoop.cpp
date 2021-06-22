@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include <HyperCore/Events/WindowEvents.hpp>
 #include <HyperEngine/EngineLoop.hpp>
 #include <HyperPlatform/IWindow.hpp>
 #include <HyperRendering/IContext.hpp>
@@ -25,15 +26,23 @@ namespace HyperEngine
 
 		m_library_manager = HyperPlatform::ILibraryManager::construct();
 
-		m_graphics_library = m_library_manager->load(
-			HyperRendering::convert_to_library(HyperRendering::RenderingAPI::Vulkan));
+		m_graphics_library =
+			m_library_manager->load(HyperRendering::convert_to_library(
+				HyperRendering::RenderingAPI::Vulkan));
 
-		void* create_context_address =
-			m_library_manager->get_function_address(m_graphics_library, "create_context");
+		void* create_context_address = m_library_manager->get_function_address(
+			m_graphics_library, "create_context");
 		CreateContextFunction create_context =
 			reinterpret_cast<CreateContextFunction>(create_context_address);
 		m_graphics_context = create_context();
 		m_graphics_context->initialize(m_window);
+
+		m_event_manager.register_listener<HyperCore::CWindowCloseEvent>(
+			"EngineLoopAppCloseEvent",
+			[this](const HyperCore::CWindowCloseEvent&)
+			{
+				m_running = false;
+			});
 
 		m_running = true;
 	}

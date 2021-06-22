@@ -44,11 +44,11 @@ namespace HyperCore
 
 		void register_listener(
 			const std::string& name,
-			const std::function<void(const T&)>& eventListenerFunction)
+			const std::function<void(const T&)>& function)
 		{
 			for (const SEventListener<T>& event_listener : m_event_listeners)
 			{
-				if (m_event_listeners.name == name)
+				if (event_listener.name == name)
 				{
 					CLogger::error("Failed to register event listener: name "
 								   "already in use!");
@@ -58,7 +58,7 @@ namespace HyperCore
 
 			SEventListener<T> event_listener{};
 			event_listener.name = name;
-			event_listener.function = std::move(eventListenerFunction);
+			event_listener.function = std::move(function);
 			m_event_listeners.push_back(std::move(event_listener));
 		}
 
