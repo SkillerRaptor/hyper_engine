@@ -30,13 +30,14 @@ namespace HyperPlatform::Windows
 			CWindow* window =
 				reinterpret_cast<CWindow*>(create_struct->lpCreateParams);
 
-			SetWindowLongPtr(h_window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
+			SetWindowLongPtr(
+				h_window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
 			return 0;
 		}
 		case WM_CLOSE:
 		{
-			CWindow* window =
-				reinterpret_cast<CWindow*>(GetWindowLongPtr(h_window, GWLP_USERDATA));
+			CWindow* window = reinterpret_cast<CWindow*>(
+				GetWindowLongPtr(h_window, GWLP_USERDATA));
 
 			window->event_manager()->invoke<HyperCore::CWindowCloseEvent>();
 

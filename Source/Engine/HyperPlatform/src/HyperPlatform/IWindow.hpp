@@ -66,7 +66,7 @@ namespace HyperPlatform
 
 		virtual void set_height(size_t height) = 0;
 		virtual size_t height() const = 0;
-		
+
 		virtual HyperCore::CEventManager* event_manager() const = 0;
 
 		static IWindow* construct();

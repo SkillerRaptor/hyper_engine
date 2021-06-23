@@ -41,12 +41,14 @@ namespace HyperPlatform
 		return (m_handle & s_version_mask) >> 16;
 	}
 
-	bool CLibraryHandle::operator==(const CLibraryHandle& library_handle) const noexcept
+	bool CLibraryHandle::operator==(
+		const CLibraryHandle& library_handle) const noexcept
 	{
 		return m_handle == library_handle.m_handle;
 	}
 
-	bool CLibraryHandle::operator!=(const CLibraryHandle& library_handle) const noexcept
+	bool CLibraryHandle::operator!=(
+		const CLibraryHandle& library_handle) const noexcept
 	{
 		return m_handle != library_handle.m_handle;
 	}

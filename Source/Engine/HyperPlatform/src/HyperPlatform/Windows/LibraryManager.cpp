@@ -13,7 +13,9 @@ namespace HyperPlatform::Windows
 {
 	CLibraryManager::~CLibraryManager()
 	{
-		for (HyperCore::CSparsePoolAllocator<SLibraryData>::SizeType i = 0; i < m_storage.size(); ++i)
+		for (HyperCore::CSparsePoolAllocator<SLibraryData>::SizeType i = 0;
+			 i < m_storage.size();
+			 ++i)
 		{
 			internal_unload(m_storage[i]);
 		}
@@ -28,7 +30,8 @@ namespace HyperPlatform::Windows
 		data.path = path;
 		data.library = LoadLibrary(path.c_str());
 
-		return CLibraryHandle((data.magic_number << 16) | static_cast<uint32_t>(index));
+		return CLibraryHandle(
+			(data.magic_number << 16) | static_cast<uint32_t>(index));
 	}
 
 	void CLibraryManager::unload(CLibraryHandle handle)
@@ -43,7 +46,9 @@ namespace HyperPlatform::Windows
 		m_storage.deallocate(handle.index());
 	}
 
-	void* CLibraryManager::get_function_address(CLibraryHandle handle, const std::string& function)
+	void* CLibraryManager::get_function_address(
+		CLibraryHandle handle,
+		const std::string& function)
 	{
 		SLibraryData& data = m_storage[handle.index()];
 		if (data.magic_number != handle.version())
@@ -51,7 +56,8 @@ namespace HyperPlatform::Windows
 			return nullptr;
 		}
 
-		return reinterpret_cast<void*>(GetProcAddress(data.library, function.c_str()));
+		return reinterpret_cast<void*>(
+			GetProcAddress(data.library, function.c_str()));
 	}
 
 	void CLibraryManager::internal_unload(SLibraryData& data)

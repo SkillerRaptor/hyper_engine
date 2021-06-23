@@ -16,7 +16,8 @@ namespace HyperPlatform
 	{
 	public:
 		static constexpr const uint32_t s_index_mask{ HyperCore::Mask32(16) };
-		static constexpr const uint32_t s_version_mask{ ~HyperCore::Mask32(16) };
+		static constexpr const uint32_t s_version_mask{ ~HyperCore::Mask32(
+			16) };
 
 	public:
 		explicit CLibraryHandle(uint32_t handle = 0);
@@ -43,8 +44,9 @@ namespace HyperPlatform
 		virtual CLibraryHandle load(const std::string& path) = 0;
 		virtual void unload(CLibraryHandle library_handle) = 0;
 
-		virtual void*
-			get_function_address(CLibraryHandle library_handle, const std::string& function) = 0;
+		virtual void* get_function_address(
+			CLibraryHandle library_handle,
+			const std::string& function) = 0;
 
 		static ILibraryManager* construct();
 	};
