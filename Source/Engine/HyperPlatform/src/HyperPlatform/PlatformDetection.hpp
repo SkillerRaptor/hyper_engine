@@ -11,8 +11,6 @@
 #	define HYPERENGINE_PLATFORM_SSE2 1
 #elif defined(__i386) || defined(_M_IX86) || defined(__arm__)
 #	error 32-bit platforms are not supported.
-#elif defined(__aarch64__)
-#	define HYPERENGINE_PLATFORM_ARM 1
 #else
 #	define HYPERENGINE_PLATFORM_UNKNOWN_CPU 1
 #endif

@@ -27,7 +27,6 @@ namespace HyperPlatform
 	class IWindow
 	{
 	public:
-		IWindow() = default;
 		virtual ~IWindow() = default;
 
 		virtual bool initialize(const SWindowCreateInfo& create_info) = 0;

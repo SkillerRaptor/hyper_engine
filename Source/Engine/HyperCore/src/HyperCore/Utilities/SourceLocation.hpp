@@ -15,7 +15,6 @@ namespace HyperCore
 	{
 	public:
 		constexpr CSourceLocation() = default;
-		~CSourceLocation() = default;
 
 		static constexpr CSourceLocation current(
 			const char* file = __builtin_FILE(),

@@ -25,9 +25,6 @@ namespace HyperRendering::Vulkan
 		};
 
 	public:
-		CContext() = default;
-		virtual ~CContext() override = default;
-
 		virtual bool initialize(HyperPlatform::IWindow* window) override;
 		virtual void shutdown() override;
 

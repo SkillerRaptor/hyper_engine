@@ -19,7 +19,6 @@ namespace HyperRendering
 	class HYPERENGINE_API IContext
 	{
 	public:
-		IContext() = default;
 		virtual ~IContext() = default;
 
 		virtual bool initialize(HyperPlatform::IWindow* window) = 0;

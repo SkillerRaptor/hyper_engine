@@ -25,8 +25,6 @@ namespace HyperPlatform::Windows
 		{
 		case WM_CREATE:
 		{
-			int32_t count = static_cast<int32_t>(GetClassLongPtr(h_window, 0));
-
 			LPCREATESTRUCT create_struct =
 				reinterpret_cast<LPCREATESTRUCT>(second_parameter);
 			CWindow* window =

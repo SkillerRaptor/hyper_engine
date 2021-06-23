@@ -38,7 +38,6 @@ namespace HyperPlatform
 	class ILibraryManager
 	{
 	public:
-		ILibraryManager() = default;
 		virtual ~ILibraryManager() = default;
 
 		virtual CLibraryHandle load(const std::string& path) = 0;

@@ -15,9 +15,6 @@ namespace HyperRendering::OpenGL33
 	class CContext final : public IContext
 	{
 	public:
-		CContext() = default;
-		virtual ~CContext() override = default;
-
 		virtual bool initialize(HyperPlatform::IWindow* window) override;
 		virtual void shutdown() override;
 

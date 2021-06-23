@@ -18,9 +18,6 @@ namespace HyperRendering::OpenGL33::Linux
 	class CPlatformContext final : public IPlatformContext
 	{
 	public:
-		CPlatformContext() = default;
-		virtual ~CPlatformContext() override = default;
-
 		virtual void initialize(HyperPlatform::IWindow* window) override;
 		virtual void shutdown() override;
 
