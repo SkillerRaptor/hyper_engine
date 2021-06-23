@@ -10,6 +10,7 @@
 
 using VkDevice = struct VkDevice_T*;
 using VkPhysicalDevice = struct VkPhysicalDevice_T*;
+using VkQueue = struct VkQueue_T*;
 
 namespace HyperRendering::Vulkan
 {
@@ -17,7 +18,7 @@ namespace HyperRendering::Vulkan
 
 	class CGpu
 	{
-	private:
+	public:
 		struct SQueueFamilies
 		{
 			std::optional<uint32_t> graphics_family{ std::nullopt };
@@ -28,6 +29,8 @@ namespace HyperRendering::Vulkan
 	public:
 		bool select_physical_device(const CContext& context);
 
+		SQueueFamilies get_queue_families() const;
+		
 		const VkPhysicalDevice& physical_device() const;
 
 	private:
@@ -46,8 +49,15 @@ namespace HyperRendering::Vulkan
 	public:
 		bool initialize(const CContext& context);
 		void shutdown();
+		
+	private:
+		bool create_logical_device(const CContext& context);
 
 	private:
+		VkDevice m_logical_device{ nullptr };
+		
+		VkQueue m_graphics_queue{ nullptr };
+		
 		CGpu m_gpu{};
 	};
 } // namespace HyperRendering::Vulkan

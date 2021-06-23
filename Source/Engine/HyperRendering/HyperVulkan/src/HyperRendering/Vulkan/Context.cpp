@@ -240,6 +240,11 @@ namespace HyperRendering
 
 			return true;
 		}
+		
+		bool CContext::is_validation_layer_enabled() const
+		{
+			return m_validation_layer_support;
+		}
 
 		const VkInstance& CContext::instance() const
 		{

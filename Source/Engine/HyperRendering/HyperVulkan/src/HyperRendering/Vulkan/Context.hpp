@@ -20,7 +20,7 @@ namespace HyperRendering::Vulkan
 
 	class CContext final : public IContext
 	{
-	private:
+	public:
 		static constexpr const std::array<const char*, 1>
 			s_validation_layers = { "VK_LAYER_KHRONOS_validation" };
 
@@ -30,6 +30,8 @@ namespace HyperRendering::Vulkan
 
 		virtual void update() override;
 
+		bool is_validation_layer_enabled() const;
+		
 		const VkInstance& instance() const;
 
 	private:

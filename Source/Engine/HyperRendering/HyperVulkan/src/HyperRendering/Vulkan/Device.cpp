@@ -97,6 +97,11 @@ namespace HyperRendering::Vulkan
 		return queue_families;
 	}
 
+	CGpu::SQueueFamilies CGpu::get_queue_families() const
+	{
+		return find_queue_families(m_physical_device);
+	}
+
 	const VkPhysicalDevice& CGpu::physical_device() const
 	{
 		return m_physical_device;
@@ -109,10 +114,70 @@ namespace HyperRendering::Vulkan
 			return false;
 		}
 
+		if (!create_logical_device(context))
+		{
+			return false;
+		}
+
 		return true;
 	}
 
 	void CDevice::shutdown()
 	{
+		vkDestroyDevice(m_logical_device, nullptr);
+	}
+
+	bool CDevice::create_logical_device(const CContext& context)
+	{
+		CGpu::SQueueFamilies queue_families = m_gpu.get_queue_families();
+
+		float queue_priority = 1.0f;
+
+		VkDeviceQueueCreateInfo device_queue_create_info{};
+		device_queue_create_info.sType =
+			VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		device_queue_create_info.queueFamilyIndex =
+			queue_families.graphics_family.value();
+		device_queue_create_info.queueCount = 1;
+		device_queue_create_info.pQueuePriorities = &queue_priority;
+
+		VkPhysicalDeviceFeatures physical_device_features{};
+
+		uint32_t layer_count = 0;
+		const char* const* layers = nullptr;
+		
+		if(context.is_validation_layer_enabled())
+		{
+			layer_count = static_cast<uint32_t>(CContext::s_validation_layers.size());
+			layers = CContext::s_validation_layers.data();
+		}
+		
+		VkDeviceCreateInfo device_create_info{};
+		device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		device_create_info.queueCreateInfoCount = 1;
+		device_create_info.pQueueCreateInfos = &device_queue_create_info;
+		device_create_info.pEnabledFeatures = &physical_device_features;
+		device_create_info.enabledExtensionCount = 0;
+		device_create_info.ppEnabledExtensionNames = nullptr;
+		device_create_info.enabledLayerCount = layer_count;
+		device_create_info.ppEnabledLayerNames = layers;
+		
+		if (vkCreateDevice(
+				m_gpu.physical_device(),
+				&device_create_info,
+				nullptr,
+				&m_logical_device) != VK_SUCCESS)
+		{
+			HyperCore::CLogger::fatal("Failed to create logical device!");
+			return false;
+		}
+
+		vkGetDeviceQueue(
+			m_logical_device,
+			queue_families.graphics_family.value(),
+			0,
+			&m_graphics_queue);
+
+		return true;
 	}
 } // namespace HyperRendering::Vulkan
