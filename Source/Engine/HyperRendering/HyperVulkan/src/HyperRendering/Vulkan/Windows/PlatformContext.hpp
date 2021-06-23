@@ -21,6 +21,9 @@ namespace HyperRendering::Vulkan::Windows
 		virtual void shutdown() override;
 
 		virtual const char* get_required_extension() const override;
+		virtual bool create_window_surface(
+			const VkInstance& instance,
+			VkSurfaceKHR& surface) const override;
 
 	private:
 		HyperPlatform::Windows::CWindow* m_window{ nullptr };
