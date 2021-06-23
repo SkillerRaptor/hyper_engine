@@ -68,12 +68,19 @@ namespace HyperRendering
 				return false;
 			}
 #endif
+			
+			if (!m_device.initialize(*this))
+			{
+				return false;
+			}
 
 			return true;
 		}
 
 		void CContext::shutdown()
 		{
+			m_device.shutdown();
+			
 #if HYPERENGINE_DEBUG
 			if (m_validation_layer_support)
 			{
@@ -84,8 +91,9 @@ namespace HyperRendering
 					vkDestroyDebugUtilsMessengerEXT =
 						reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
 							vkDestroyDebugUtilsMessengerEXTFunction);
-				
-				vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messenger, nullptr);
+
+				vkDestroyDebugUtilsMessengerEXT(
+					m_instance, m_debug_messenger, nullptr);
 			}
 #endif
 			vkDestroyInstance(m_instance, nullptr);
@@ -231,6 +239,11 @@ namespace HyperRendering
 			}
 
 			return true;
+		}
+
+		const VkInstance& CContext::instance() const
+		{
+			return m_instance;
 		}
 	} // namespace Vulkan
 } // namespace HyperRendering

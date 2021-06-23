@@ -7,6 +7,7 @@
 #pragma once
 
 #include <HyperRendering/IContext.hpp>
+#include <HyperRendering/Vulkan/Device.hpp>
 #include <array>
 #include <vector>
 
@@ -20,15 +21,16 @@ namespace HyperRendering::Vulkan
 	class CContext final : public IContext
 	{
 	private:
-		static constexpr const std::array<const char*, 1> s_validation_layers = {
-			"VK_LAYER_KHRONOS_validation"
-		};
+		static constexpr const std::array<const char*, 1>
+			s_validation_layers = { "VK_LAYER_KHRONOS_validation" };
 
 	public:
 		virtual bool initialize(HyperPlatform::IWindow* window) override;
 		virtual void shutdown() override;
 
 		virtual void update() override;
+
+		const VkInstance& instance() const;
 
 	private:
 		bool create_instance();
@@ -42,5 +44,7 @@ namespace HyperRendering::Vulkan
 		bool m_validation_layer_support{ false };
 		VkInstance m_instance{ nullptr };
 		VkDebugUtilsMessengerEXT m_debug_messenger{ nullptr };
+		
+		CDevice m_device{};
 	};
 } // namespace HyperRendering::Vulkan
