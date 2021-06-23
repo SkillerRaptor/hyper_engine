@@ -20,10 +20,10 @@ namespace HyperRendering::Vulkan
 	{
 	public:
 		virtual ~IPlatformContext() = default;
-		
+
 		virtual void initialize(HyperPlatform::IWindow* window) = 0;
 		virtual void shutdown() = 0;
-		
+
 		virtual const char* get_required_extension() const = 0;
 		virtual bool create_window_surface(
 			const VkInstance& instance,

@@ -7,20 +7,33 @@
 #include <HyperCore/Logger.hpp>
 #include <HyperRendering/Vulkan/Context.hpp>
 #include <HyperRendering/Vulkan/Device.hpp>
+#include <set>
 #include <vulkan/vulkan.h>
 
 namespace HyperRendering::Vulkan
 {
 	bool CGpu::SQueueFamilies::complete() const
 	{
-		return graphics_family.has_value();
+		return graphics_family.has_value() && presentation_family.has_value();
 	}
 
-	bool CGpu::select_physical_device(const CContext& context)
+	bool CGpu::initialize(const CContext* context)
+	{
+		m_context = context;
+
+		if (!select_physical_device())
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CGpu::select_physical_device()
 	{
 		uint32_t physical_device_count = 0;
 		vkEnumeratePhysicalDevices(
-			context.instance(), &physical_device_count, nullptr);
+			m_context->instance(), &physical_device_count, nullptr);
 
 		if (physical_device_count == 0)
 		{
@@ -31,7 +44,7 @@ namespace HyperRendering::Vulkan
 
 		std::vector<VkPhysicalDevice> physical_devices(physical_device_count);
 		vkEnumeratePhysicalDevices(
-			context.instance(),
+			m_context->instance(),
 			&physical_device_count,
 			physical_devices.data());
 
@@ -54,7 +67,7 @@ namespace HyperRendering::Vulkan
 	}
 
 	bool CGpu::is_physical_device_suitable(
-		const VkPhysicalDevice& physical_device)
+		const VkPhysicalDevice& physical_device) const
 	{
 		CGpu::SQueueFamilies queue_families =
 			find_queue_families(physical_device);
@@ -62,7 +75,7 @@ namespace HyperRendering::Vulkan
 	}
 
 	CGpu::SQueueFamilies
-		CGpu::find_queue_families(const VkPhysicalDevice& physical_device)
+		CGpu::find_queue_families(const VkPhysicalDevice& physical_device) const
 	{
 		CGpu::SQueueFamilies queue_families{};
 
@@ -86,6 +99,18 @@ namespace HyperRendering::Vulkan
 				queue_families.graphics_family = index;
 			}
 
+			VkBool32 presentation_support = false;
+			vkGetPhysicalDeviceSurfaceSupportKHR(
+				physical_device,
+				index,
+				m_context->swap_chain().surface(),
+				&presentation_support);
+
+			if (presentation_support)
+			{
+				queue_families.presentation_family = index;
+			}
+
 			if (queue_families.complete())
 			{
 				break;
@@ -107,14 +132,16 @@ namespace HyperRendering::Vulkan
 		return m_physical_device;
 	}
 
-	bool CDevice::initialize(const CContext& context)
+	bool CDevice::initialize(const CContext* context)
 	{
-		if (!m_gpu.select_physical_device(context))
+		m_context = context;
+
+		if (!m_gpu.initialize(m_context))
 		{
 			return false;
 		}
 
-		if (!create_logical_device(context))
+		if (!create_logical_device())
 		{
 			return false;
 		}
@@ -127,26 +154,36 @@ namespace HyperRendering::Vulkan
 		vkDestroyDevice(m_logical_device, nullptr);
 	}
 
-	bool CDevice::create_logical_device(const CContext& context)
+	bool CDevice::create_logical_device()
 	{
 		CGpu::SQueueFamilies queue_families = m_gpu.get_queue_families();
 
+		std::set<uint32_t> unique_queue_families = {
+			queue_families.graphics_family.value(),
+			queue_families.presentation_family.value()
+		};
+
 		float queue_priority = 1.0f;
 
-		VkDeviceQueueCreateInfo device_queue_create_info{};
-		device_queue_create_info.sType =
-			VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		device_queue_create_info.queueFamilyIndex =
-			queue_families.graphics_family.value();
-		device_queue_create_info.queueCount = 1;
-		device_queue_create_info.pQueuePriorities = &queue_priority;
+		std::vector<VkDeviceQueueCreateInfo> device_queue_create_infos;
+		for (uint32_t queue_family : unique_queue_families)
+		{
+			VkDeviceQueueCreateInfo device_queue_create_info{};
+			device_queue_create_info.sType =
+				VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			device_queue_create_info.queueFamilyIndex = queue_family;
+			device_queue_create_info.queueCount = 1;
+			device_queue_create_info.pQueuePriorities = &queue_priority;
+
+			device_queue_create_infos.push_back(device_queue_create_info);
+		}
 
 		VkPhysicalDeviceFeatures physical_device_features{};
 
 		uint32_t layer_count = 0;
 		const char* const* layers = nullptr;
 
-		if (context.is_validation_layer_enabled())
+		if (m_context->is_validation_layer_enabled())
 		{
 			layer_count =
 				static_cast<uint32_t>(CContext::s_validation_layers.size());
@@ -155,8 +192,8 @@ namespace HyperRendering::Vulkan
 
 		VkDeviceCreateInfo device_create_info{};
 		device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		device_create_info.queueCreateInfoCount = 1;
-		device_create_info.pQueueCreateInfos = &device_queue_create_info;
+		device_create_info.queueCreateInfoCount =  static_cast<uint32_t>(device_queue_create_infos.size());
+		device_create_info.pQueueCreateInfos = device_queue_create_infos.data();
 		device_create_info.pEnabledFeatures = &physical_device_features;
 		device_create_info.enabledExtensionCount = 0;
 		device_create_info.ppEnabledExtensionNames = nullptr;
@@ -179,6 +216,12 @@ namespace HyperRendering::Vulkan
 			queue_families.graphics_family.value(),
 			0,
 			&m_graphics_queue);
+
+		vkGetDeviceQueue(
+			m_logical_device,
+			queue_families.presentation_family.value(),
+			0,
+			&m_presentation_queue);
 
 		return true;
 	}

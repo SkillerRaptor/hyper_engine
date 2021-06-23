@@ -22,42 +22,49 @@ namespace HyperRendering::Vulkan
 		struct SQueueFamilies
 		{
 			std::optional<uint32_t> graphics_family{ std::nullopt };
-			
+			std::optional<uint32_t> presentation_family{ std::nullopt };
+
 			bool complete() const;
 		};
 
 	public:
-		bool select_physical_device(const CContext& context);
+		bool initialize(const CContext* context);
 
 		SQueueFamilies get_queue_families() const;
-		
 		const VkPhysicalDevice& physical_device() const;
 
 	private:
-		static bool is_physical_device_suitable(
-			const VkPhysicalDevice& physical_device);
+		bool select_physical_device();
 
-		static SQueueFamilies
-			find_queue_families(const VkPhysicalDevice& physical_device);
+		bool is_physical_device_suitable(
+			const VkPhysicalDevice& physical_device) const;
+
+		SQueueFamilies find_queue_families(
+			const VkPhysicalDevice& physical_device) const;
 
 	private:
+		const CContext* m_context{ nullptr };
+
 		VkPhysicalDevice m_physical_device{ nullptr };
 	};
 
 	class CDevice
 	{
 	public:
-		bool initialize(const CContext& context);
+		bool initialize(const CContext* context);
 		void shutdown();
-		
-	private:
-		bool create_logical_device(const CContext& context);
 
 	private:
+		bool create_logical_device();
+
+	private:
+		const CContext* m_context{ nullptr };
+
 		VkDevice m_logical_device{ nullptr };
-		
+
 		VkQueue m_graphics_queue{ nullptr };
-		
+		VkQueue m_presentation_queue{ nullptr };
+
 		CGpu m_gpu{};
 	};
 } // namespace HyperRendering::Vulkan

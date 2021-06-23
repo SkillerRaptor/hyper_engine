@@ -69,7 +69,12 @@ namespace HyperRendering
 			}
 #endif
 
-			if (!m_device.initialize(*this))
+			if (!m_swap_chain.initialize(this))
+			{
+				return false;
+			}
+
+			if (!m_device.initialize(this))
 			{
 				return false;
 			}
@@ -80,6 +85,7 @@ namespace HyperRendering
 		void CContext::shutdown()
 		{
 			m_device.shutdown();
+			m_swap_chain.shutdown();
 
 #if HYPERENGINE_DEBUG
 			if (m_validation_layer_support)
@@ -247,9 +253,24 @@ namespace HyperRendering
 			return m_validation_layer_support;
 		}
 
+		const IPlatformContext* CContext::platform_context() const
+		{
+			return m_platform_context;
+		}
+
 		const VkInstance& CContext::instance() const
 		{
 			return m_instance;
+		
+		}
+		const CSwapChain& CContext::swap_chain() const
+		{
+			return m_swap_chain;
+		}
+		
+		const CDevice& CContext::device() const
+		{
+			return m_device;
 		}
 	} // namespace Vulkan
 } // namespace HyperRendering

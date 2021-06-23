@@ -8,6 +8,7 @@
 
 #include <HyperRendering/IContext.hpp>
 #include <HyperRendering/Vulkan/Device.hpp>
+#include <HyperRendering/Vulkan/SwapChain.hpp>
 #include <array>
 #include <vector>
 
@@ -31,8 +32,11 @@ namespace HyperRendering::Vulkan
 		virtual void update() override;
 
 		bool is_validation_layer_enabled() const;
-		
+
+		const IPlatformContext* platform_context() const;
 		const VkInstance& instance() const;
+		const CSwapChain& swap_chain() const;
+		const CDevice& device() const;
 
 	private:
 		bool create_instance();
@@ -46,7 +50,8 @@ namespace HyperRendering::Vulkan
 		bool m_validation_layer_support{ false };
 		VkInstance m_instance{ nullptr };
 		VkDebugUtilsMessengerEXT m_debug_messenger{ nullptr };
-		
+
+		CSwapChain m_swap_chain{};
 		CDevice m_device{};
 	};
 } // namespace HyperRendering::Vulkan
