@@ -32,14 +32,14 @@ namespace HyperRendering
 			if (severity_flags >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 			{
 				HyperCore::CLogger::fatal(
-					"Vulkan Validation Error - {}", callback_data->pMessage);
+					"Vulkan: {}", callback_data->pMessage);
 			}
 			else if (
 				severity_flags >=
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
 			{
 				HyperCore::CLogger::warning(
-					"Vulkan Validation Warning - {}", callback_data->pMessage);
+					"Vulkan: {}", callback_data->pMessage);
 			}
 
 			return VK_FALSE;
@@ -68,7 +68,7 @@ namespace HyperRendering
 				return false;
 			}
 #endif
-			
+
 			if (!m_device.initialize(*this))
 			{
 				return false;
@@ -80,7 +80,7 @@ namespace HyperRendering
 		void CContext::shutdown()
 		{
 			m_device.shutdown();
-			
+
 #if HYPERENGINE_DEBUG
 			if (m_validation_layer_support)
 			{
@@ -116,6 +116,7 @@ namespace HyperRendering
 			std::vector<const char*> extensions = {
 				"VK_KHR_surface", m_platform_context->get_required_extension()
 			};
+
 			if (m_validation_layer_support)
 			{
 				extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -158,7 +159,7 @@ namespace HyperRendering
 			if (vkCreateInstance(&instance_create_info, nullptr, &m_instance) !=
 				VK_SUCCESS)
 			{
-				HyperCore::CLogger::fatal("Failed to create vulkan instance!");
+				HyperCore::CLogger::fatal("Vulkan: failed to create instance!");
 				return false;
 			}
 
@@ -197,7 +198,7 @@ namespace HyperRendering
 					&m_debug_messenger) != VK_SUCCESS)
 			{
 				HyperCore::CLogger::fatal(
-					"Failed to setup vulkan debug messenger!");
+					"Vulkan: failed to setup debug messenger!");
 				return false;
 			}
 
@@ -240,7 +241,7 @@ namespace HyperRendering
 
 			return true;
 		}
-		
+
 		bool CContext::is_validation_layer_enabled() const
 		{
 			return m_validation_layer_support;

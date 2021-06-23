@@ -25,7 +25,7 @@ namespace HyperRendering::Vulkan
 		if (physical_device_count == 0)
 		{
 			HyperCore::CLogger::fatal(
-				"Failed to find GPUs with vulkan support!");
+				"Vulkan: Failed to find GPUs with vulkan support!");
 			return false;
 		}
 
@@ -46,7 +46,7 @@ namespace HyperRendering::Vulkan
 
 		if (m_physical_device == VK_NULL_HANDLE)
 		{
-			HyperCore::CLogger::fatal("Failed to find suitable vulkan GPU!");
+			HyperCore::CLogger::fatal("Vulkan: failed to find suitable GPU!");
 			return false;
 		}
 
@@ -145,13 +145,14 @@ namespace HyperRendering::Vulkan
 
 		uint32_t layer_count = 0;
 		const char* const* layers = nullptr;
-		
-		if(context.is_validation_layer_enabled())
+
+		if (context.is_validation_layer_enabled())
 		{
-			layer_count = static_cast<uint32_t>(CContext::s_validation_layers.size());
+			layer_count =
+				static_cast<uint32_t>(CContext::s_validation_layers.size());
 			layers = CContext::s_validation_layers.data();
 		}
-		
+
 		VkDeviceCreateInfo device_create_info{};
 		device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		device_create_info.queueCreateInfoCount = 1;
@@ -161,14 +162,15 @@ namespace HyperRendering::Vulkan
 		device_create_info.ppEnabledExtensionNames = nullptr;
 		device_create_info.enabledLayerCount = layer_count;
 		device_create_info.ppEnabledLayerNames = layers;
-		
+
 		if (vkCreateDevice(
 				m_gpu.physical_device(),
 				&device_create_info,
 				nullptr,
 				&m_logical_device) != VK_SUCCESS)
 		{
-			HyperCore::CLogger::fatal("Failed to create logical device!");
+			HyperCore::CLogger::fatal(
+				"Vulkan: failed to create logical device!");
 			return false;
 		}
 
