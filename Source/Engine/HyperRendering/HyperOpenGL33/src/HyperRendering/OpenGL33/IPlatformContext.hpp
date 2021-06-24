@@ -18,7 +18,7 @@ namespace HyperRendering::OpenGL33
 	public:
 		virtual ~IPlatformContext() = default;
 		
-		virtual void initialize(HyperPlatform::IWindow* window) = 0;
+		virtual bool initialize(HyperPlatform::IWindow* window) = 0;
 		virtual void shutdown() = 0;
 
 		virtual void swap_buffers() const = 0;

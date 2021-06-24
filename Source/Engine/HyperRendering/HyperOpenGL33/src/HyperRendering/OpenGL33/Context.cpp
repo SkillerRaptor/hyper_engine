@@ -21,7 +21,11 @@ namespace HyperRendering
 		bool CContext::initialize(HyperPlatform::IWindow* window)
 		{
 			m_platform_context = IPlatformContext::construct();
-			m_platform_context->initialize(window);
+
+			if (!m_platform_context->initialize(window))
+			{
+				return false;
+			}
 
 			return true;
 		}

@@ -29,7 +29,7 @@ namespace HyperEngine
 
 		m_graphics_library =
 			m_library_manager->load(HyperRendering::convert_to_library(
-				HyperRendering::RenderingAPI::Vulkan));
+				HyperRendering::RenderingAPI::OpenGL33));
 
 		void* create_context_address = m_library_manager->get_function_address(
 			m_graphics_library, "create_context");

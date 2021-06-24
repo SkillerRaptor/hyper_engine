@@ -11,7 +11,7 @@
 
 namespace HyperRendering::OpenGL33::Linux
 {
-	void CPlatformContext::initialize(HyperPlatform::IWindow* window)
+	bool CPlatformContext::initialize(HyperPlatform::IWindow* window)
 	{
 		m_window = static_cast<HyperPlatform::Linux::CWindow*>(window);
 
