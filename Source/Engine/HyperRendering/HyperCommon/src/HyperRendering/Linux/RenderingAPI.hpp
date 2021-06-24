@@ -16,11 +16,11 @@ namespace HyperRendering
 		switch (rendering_api)
 		{
 		case RenderingAPI::OpenGL33:
-			return "libHyperOpenGL33.so";
+			return "./libHyperOpenGL33.so";
 		case RenderingAPI::OpenGL46:
-			return "libHyperOpenGL46.so";
+			return "./libHyperOpenGL46.so";
 		case RenderingAPI::Vulkan:
-			return "libHyperVulkan.so";
+			return "./libHyperVulkan.so";
 		default:
 			break;
 		}
