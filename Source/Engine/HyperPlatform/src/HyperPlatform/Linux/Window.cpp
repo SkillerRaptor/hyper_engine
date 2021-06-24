@@ -27,7 +27,7 @@ namespace HyperPlatform::Linux
 			HyperCore::CLogger::fatal("Failed to connect to X display!");
 			return false;
 		}
-		
+
 		m_root_window = DefaultRootWindow(m_display);
 
 		m_screen = DefaultScreen(m_display);
@@ -42,7 +42,13 @@ namespace HyperPlatform::Linux
 			BlackPixel(m_display, m_screen),
 			BlackPixel(m_display, m_screen));
 
-		XSelectInput(m_display, m_window, ExposureMask | KeyPressMask);
+		XSelectInput(
+			m_display,
+			m_window,
+			StructureNotifyMask | KeyPressMask | KeyReleaseMask |
+				PointerMotionMask | ButtonPressMask | ButtonReleaseMask |
+				ExposureMask | FocusChangeMask | VisibilityChangeMask |
+				EnterWindowMask | LeaveWindowMask | PropertyChangeMask);
 		XMapWindow(m_display, m_window);
 
 		return true;
@@ -57,52 +63,60 @@ namespace HyperPlatform::Linux
 	{
 		// TODO: Implement poll_events()
 
-		XEvent event{};
-		XNextEvent(m_display, &event);
+		XPending(m_display);
 
-		switch (event.type)
+		while (QLength(m_display))
 		{
-		case ClientMessage:
-		{
-			if (event.xclient.message_type == None)
-			{
-				break;
-			}
+			XEvent event{};
+			XNextEvent(m_display, &event);
 
-			if (event.xclient.message_type ==
-				XInternAtom(m_display, "WM_PROTOCOLS", false))
+			switch (event.type)
 			{
-				const Atom protocol = event.xclient.data.l[0];
-				if (protocol == None)
+			case ClientMessage:
+			{
+				if (event.xclient.message_type == None)
 				{
 					break;
 				}
 
-				if (protocol ==
-					XInternAtom(m_display, "WM_DELETE_WINDOW", false))
+				if (event.xclient.message_type ==
+					XInternAtom(m_display, "WM_PROTOCOLS", false))
 				{
-					m_event_manager->invoke<HyperCore::CWindowCloseEvent>();
-				}
-				else if (
-					protocol == XInternAtom(m_display, "NET_WM_PING", false))
-				{
-					XEvent reply = event;
-					reply.xclient.window = m_window;
+					const Atom protocol = event.xclient.data.l[0];
+					if (protocol == None)
+					{
+						break;
+					}
 
-					XSendEvent(
-						m_display,
-						m_root_window,
-						False,
-						SubstructureNotifyMask | SubstructureRedirectMask,
-						&reply);
-				}
+					if (protocol ==
+						XInternAtom(m_display, "WM_DELETE_WINDOW", false))
+					{
+						m_event_manager->invoke<HyperCore::CWindowCloseEvent>();
+					}
+					else if (
+						protocol ==
+						XInternAtom(m_display, "NET_WM_PING", false))
+					{
+						XEvent reply = event;
+						reply.xclient.window = m_window;
 
+						XSendEvent(
+							m_display,
+							m_root_window,
+							False,
+							SubstructureNotifyMask | SubstructureRedirectMask,
+							&reply);
+					}
+
+					break;
+				}
+			}
+			default:
 				break;
 			}
 		}
-		default:
-			break;
-		}
+		
+		XFlush(m_display);
 	}
 
 	void CWindow::set_title(const std::string& title)
@@ -179,7 +193,14 @@ namespace HyperPlatform::Linux
 		int window_y = 0;
 
 		XTranslateCoordinates(
-			m_display, m_window, m_root_window, 0, 0, &window_x, &window_y, &dummy);
+			m_display,
+			m_window,
+			m_root_window,
+			0,
+			0,
+			&window_x,
+			&window_y,
+			&dummy);
 
 		x = window_x;
 		y = window_y;
