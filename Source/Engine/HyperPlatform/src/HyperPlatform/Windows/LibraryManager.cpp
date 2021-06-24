@@ -30,6 +30,13 @@ namespace HyperPlatform::Windows
 		data.path = path;
 		data.library = LoadLibrary(path.c_str());
 
+		if (data.library == nullptr)
+		{
+			HyperCore::CLogger::error(
+				"Failed to load dynamic library: {}!", GetLastError());
+			return CLibraryHandle(-1);
+		}
+
 		return CLibraryHandle(
 			(data.magic_number << 16) | static_cast<uint32_t>(index));
 	}
