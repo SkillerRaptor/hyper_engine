@@ -4,13 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_WINDOWS
-#	define VK_USE_PLATFORM_WIN32_KHR
-#	include <HyperCore/Logger.hpp>
-#	include <HyperRendering/Vulkan/Windows/PlatformContext.hpp>
-#	include <vulkan/vulkan.h>
+#define VK_USE_PLATFORM_WIN32_KHR
+#include <HyperCore/Logger.hpp>
+#include <HyperRendering/Vulkan/Windows/PlatformContext.hpp>
+#include <vulkan/vulkan.h>
 
 namespace HyperRendering::Vulkan::Windows
 {
@@ -42,11 +39,11 @@ namespace HyperRendering::Vulkan::Windows
 				instance, &surface_create_info, nullptr, &surface) !=
 			VK_SUCCESS)
 		{
-			HyperCore::CLogger::fatal("Vulkan: failed to create window surface!");
+			HyperCore::CLogger::fatal(
+				"Vulkan: failed to create window surface!");
 			return false;
 		}
 
 		return true;
 	}
 } // namespace HyperRendering::Vulkan::Windows
-#endif

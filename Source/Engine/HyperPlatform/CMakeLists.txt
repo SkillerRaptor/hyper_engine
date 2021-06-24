@@ -12,8 +12,38 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 # HyperPlatform
 #-------------------------------------------------------------------------------------------
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
+set(CORE_SOURCES
+        src/HyperPlatform/ILibraryManager.cpp
+        src/HyperPlatform/IWindow.cpp)
+
+set(CORE_HEADERS
+        src/HyperPlatform/ILibraryManager.hpp
+        src/HyperPlatform/IWindow.hpp
+        src/HyperPlatform/PlatformDetection.hpp
+        src/HyperPlatform/SharedLibrary.hpp)
+
+if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
+    set(PLATFORM_SOURCES
+            src/HyperPlatform/Windows/LibraryManager.cpp
+            src/HyperPlatform/Windows/Window.cpp)
+
+    set(PLATFORM_HEADERS
+            src/HyperPlatform/Windows/LibraryManager.hpp
+            src/HyperPlatform/Windows/SharedLibrary.hpp
+            src/HyperPlatform/Windows/Window.hpp)
+elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
+    set(PLATFORM_SOURCES
+            src/HyperPlatform/Linux/LibraryManager.cpp
+            src/HyperPlatform/Linux/Window.cpp)
+
+    set(PLATFORM_HEADERS
+            src/HyperPlatform/Linux/LibraryManager.hpp
+            src/HyperPlatform/Linux/SharedLibrary.hpp
+            src/HyperPlatform/Linux/Window.hpp)
+endif ()
+
+set(SOURCES ${CORE_SOURCES} ${PLATFORM_SOURCES})
+set(HEADERS ${CORE_HEADERS} ${PLATFORM_HEADERS})
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     get_filename_component(src_path "${item}" PATH)
@@ -32,7 +62,7 @@ if ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
     find_package(X11)
     target_include_directories(HyperPlatform PUBLIC ${X11_INCLUDE_DIR})
     target_link_libraries(HyperPlatform PUBLIC ${X11_LIBRARIES})
-endif()
+endif ()
 
 #-------------------------------------------------------------------------------------------
 # Graphic APIs

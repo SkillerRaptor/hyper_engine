@@ -6,11 +6,8 @@
 
 #pragma once
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_LINUX
-#	include <HyperPlatform/Linux/Window.hpp>
-#	include <HyperRendering/Vulkan/IPlatformContext.hpp>
+#include <HyperPlatform/Linux/Window.hpp>
+#include <HyperRendering/Vulkan/IPlatformContext.hpp>
 
 namespace HyperRendering::Vulkan::Linux
 {
@@ -29,4 +26,3 @@ namespace HyperRendering::Vulkan::Linux
 		HyperPlatform::Linux::CWindow* m_window{ nullptr };
 	};
 } // namespace HyperRendering::Vulkan::Linux
-#endif

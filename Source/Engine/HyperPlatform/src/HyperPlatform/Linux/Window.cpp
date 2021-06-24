@@ -4,15 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_LINUX
-#	include <HyperCore/Logger.hpp>
-#	include <HyperCore/Events/EventManager.hpp>
-#	include <HyperCore/Events/WindowEvents.hpp>
-#	include <HyperCore/Utilities/Prerequisites.hpp>
-#	include <HyperPlatform/Linux/Window.hpp>
-#	include <X11/Xutil.h>
+#include <HyperCore/Logger.hpp>
+#include <HyperCore/Events/EventManager.hpp>
+#include <HyperCore/Events/WindowEvents.hpp>
+#include <HyperCore/Utilities/Prerequisites.hpp>
+#include <HyperPlatform/Linux/Window.hpp>
+#include <X11/Xutil.h>
 
 namespace HyperPlatform::Linux
 {
@@ -115,7 +112,7 @@ namespace HyperPlatform::Linux
 				break;
 			}
 		}
-		
+
 		XFlush(m_display);
 	}
 
@@ -322,4 +319,3 @@ namespace HyperPlatform::Linux
 		return m_screen;
 	}
 } // namespace HyperPlatform::Linux
-#endif

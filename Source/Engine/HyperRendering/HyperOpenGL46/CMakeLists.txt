@@ -12,10 +12,16 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 # HyperOpenGL46
 #-------------------------------------------------------------------------------------------
-set(HYPERENGINE_COMMON_PATH ${CMAKE_SOURCE_DIR}/Source/Engine/HyperRendering/HyperCommon)
+include(${CMAKE_SOURCE_DIR}/Source/Engine/HyperRendering/HyperCommon/HyperCommon.cmake)
 
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${HYPERENGINE_COMMON_PATH}/src/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp ${HYPERENGINE_COMMON_PATH}/src/*.hpp)
+set(CORE_SOURCES
+        src/HyperRendering/OpenGL46/OpenGL46.cpp)
+
+set(CORE_HEADERS
+        "")
+
+set(SOURCES ${CORE_SOURCES} ${HYPERCOMMON_SOURCES})
+set(HEADERS ${CORE_HEADERS} ${HYPERCOMMON_HEADERS})
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     get_filename_component(src_path "${item}" PATH)
@@ -26,7 +32,7 @@ endforeach ()
 
 add_library(HyperOpenGL46 SHARED ${SOURCES} ${HEADERS})
 set_target_properties(HyperOpenGL46 PROPERTIES FOLDER HyperModules/HyperRendering)
-target_include_directories(HyperOpenGL46 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${HYPERENGINE_COMMON_PATH}/src)
+target_include_directories(HyperOpenGL46 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${HYPERCOMMON_INCLUDE})
 target_link_libraries(HyperOpenGL46 PRIVATE HyperCore HyperMath HyperPlatform)
 
 find_package(OpenGL)

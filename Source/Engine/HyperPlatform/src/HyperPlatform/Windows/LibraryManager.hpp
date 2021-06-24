@@ -6,12 +6,9 @@
 
 #pragma once
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_WINDOWS
-#	include <HyperCore/Memory/SparsePoolAllocator.hpp>
-#	include <HyperPlatform/ILibraryManager.hpp>
-#	include <Windows.h>
+#include <HyperCore/Memory/SparsePoolAllocator.hpp>
+#include <HyperPlatform/ILibraryManager.hpp>
+#include <Windows.h>
 
 namespace HyperPlatform::Windows
 {
@@ -45,4 +42,3 @@ namespace HyperPlatform::Windows
 		uint32_t m_version{ 1 };
 	};
 } // namespace HyperPlatform::Windows
-#endif

@@ -4,11 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_LINUX
-#	include <HyperPlatform/Linux/LibraryManager.hpp>
-#	include <dlfcn.h>
+#include <HyperPlatform/Linux/LibraryManager.hpp>
+#include <dlfcn.h>
 
 namespace HyperPlatform::Linux
 {
@@ -72,4 +69,3 @@ namespace HyperPlatform::Linux
 		dlclose(data.library);
 	}
 } // namespace HyperPlatform::Linux
-#endif

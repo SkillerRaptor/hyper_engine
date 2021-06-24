@@ -4,15 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_WINDOWS
-#	define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
-#	define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
-#	define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
-#	define WGL_CONTEXT_CORE_PROFILE_BIT_ARB 0x00000001
-#	include <HyperCore/Logger.hpp>
-#	include <HyperRendering/OpenGL33/Windows/PlatformContext.hpp>
+#define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
+#define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
+#define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
+#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB 0x00000001
+#include <HyperCore/Logger.hpp>
+#include <HyperRendering/OpenGL33/Windows/PlatformContext.hpp>
 
 namespace HyperRendering::OpenGL33::Windows
 {
@@ -78,8 +75,7 @@ namespace HyperRendering::OpenGL33::Windows
 			m_window->handle(), nullptr, context_attributes);
 		if (m_graphics_context == nullptr)
 		{
-			HyperCore::CLogger::error(
-				"OpenGL 3.3: failed to create context!");
+			HyperCore::CLogger::error("OpenGL 3.3: failed to create context!");
 			return false;
 		}
 
@@ -106,4 +102,3 @@ namespace HyperRendering::OpenGL33::Windows
 		SwapBuffers(m_window->handle());
 	}
 } // namespace HyperRendering::OpenGL33::Windows
-#endif

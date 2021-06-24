@@ -4,11 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_LINUX
-#	include <HyperCore/Logger.hpp>
-#	include <HyperRendering/OpenGL33/Linux/PlatformContext.hpp>
+#include <HyperCore/Logger.hpp>
+#include <HyperRendering/OpenGL33/Linux/PlatformContext.hpp>
 
 namespace HyperRendering::OpenGL33::Linux
 {
@@ -162,4 +159,3 @@ namespace HyperRendering::OpenGL33::Linux
 		glXSwapBuffers(m_window->display(), m_window->window());
 	}
 } // namespace HyperRendering::OpenGL33::Linux
-#endif

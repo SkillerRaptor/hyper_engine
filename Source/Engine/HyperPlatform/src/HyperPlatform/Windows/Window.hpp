@@ -6,11 +6,8 @@
 
 #pragma once
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_WINDOWS
-#	include <HyperPlatform/IWindow.hpp>
-#	include <Windows.h>
+#include <HyperPlatform/IWindow.hpp>
+#include <Windows.h>
 
 namespace HyperPlatform::Windows
 {
@@ -73,4 +70,3 @@ namespace HyperPlatform::Windows
 		HDC m_handle{ nullptr };
 	};
 } // namespace HyperPlatform::Windows
-#endif

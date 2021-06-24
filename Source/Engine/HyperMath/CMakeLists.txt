@@ -14,8 +14,17 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.10)
 
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
+set(SOURCES
+        src/HyperMath/HyperMath.cpp)
+
+set(HEADERS
+        src/HyperMath/Matrix2x2.hpp
+        src/HyperMath/Matrix3x3.hpp
+        src/HyperMath/Matrix4x4.hpp
+        src/HyperMath/Quaternion.hpp
+        src/HyperMath/Vector2.hpp
+        src/HyperMath/Vector3.hpp
+        src/HyperMath/Vector4.hpp)
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     get_filename_component(src_path "${item}" PATH)

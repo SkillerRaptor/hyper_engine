@@ -12,8 +12,28 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 # HyperCore
 #-------------------------------------------------------------------------------------------
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
+set(SOURCES
+        src/HyperCore/Logger.cpp
+        src/HyperCore/Events/EventManager.cpp
+        src/HyperCore/Events/IEvent.cpp
+        src/HyperCore/Events/KeyEvents.cpp
+        src/HyperCore/Events/MouseEvents.cpp
+        src/HyperCore/Events/WindowEvents.cpp)
+
+set(HEADERS
+        src/HyperCore/Assertion.hpp
+        src/HyperCore/Formatter.hpp
+        src/HyperCore/Logger.hpp
+        src/HyperCore/Containers/SparseSet.hpp
+        src/HyperCore/Events/EventManager.hpp
+        src/HyperCore/Events/EventWrapper.hpp
+        src/HyperCore/Events/IEvent.hpp
+        src/HyperCore/Events/KeyEvents.hpp
+        src/HyperCore/Events/MouseEvents.hpp
+        src/HyperCore/Events/WindowEvents.hpp
+        src/HyperCore/Memory/SparsePoolAllocator.hpp
+        src/HyperCore/Utilities/Prerequisites.hpp
+        src/HyperCore/Utilities/SourceLocation.hpp)
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     get_filename_component(src_path "${item}" PATH)

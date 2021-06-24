@@ -12,8 +12,11 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 # HyperMath
 #-------------------------------------------------------------------------------------------
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
+set(SOURCES
+        src/HyperNetwork/HyperNetwork.cpp)
+
+set(HEADERS
+        "")
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     get_filename_component(src_path "${item}" PATH)

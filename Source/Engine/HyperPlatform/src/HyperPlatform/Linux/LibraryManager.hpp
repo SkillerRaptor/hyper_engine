@@ -6,9 +6,6 @@
 
 #pragma once
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_LINUX
 #	include <HyperCore/Memory/SparsePoolAllocator.hpp>
 #	include <HyperPlatform/ILibraryManager.hpp>
 
@@ -44,4 +41,3 @@ namespace HyperPlatform::Linux
 		uint32_t m_version{ 1 };
 	};
 } // namespace HyperPlatform::Linux
-#endif

@@ -4,13 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_LINUX
-#	define VK_USE_PLATFORM_XLIB_KHR
-#	include <HyperCore/Logger.hpp>
-#	include <HyperRendering/Vulkan/Linux/PlatformContext.hpp>
-#	include <vulkan/vulkan.h>
+#define VK_USE_PLATFORM_XLIB_KHR
+#include <HyperCore/Logger.hpp>
+#include <HyperRendering/Vulkan/Linux/PlatformContext.hpp>
+#include <vulkan/vulkan.h>
 
 namespace HyperRendering::Vulkan::Linux
 {
@@ -50,4 +47,3 @@ namespace HyperRendering::Vulkan::Linux
 		return true;
 	}
 } // namespace HyperRendering::Vulkan::Linux
-#endif

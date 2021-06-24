@@ -12,8 +12,12 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 # HyperEditor
 #-------------------------------------------------------------------------------------------
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
+set(SOURCES
+        src/main.cpp
+        src/HyperEditor/Editor.cpp)
+
+set(HEADERS
+        src/HyperEditor/Editor.hpp)
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     get_filename_component(src_path "${item}" PATH)

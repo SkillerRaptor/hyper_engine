@@ -14,8 +14,14 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 set(HYPERENGINE_COMMON_PATH ${CMAKE_SOURCE_DIR}/Source/Engine/HyperRendering/HyperCommon)
 
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
+set(SOURCES
+        src/HyperEngine/EngineLoop.cpp
+        src/HyperEngine/Launcher.cpp)
+
+set(HEADERS
+        src/HyperEngine/EngineLoop.hpp
+        src/HyperEngine/IApplication.hpp
+        src/HyperEngine/Launcher.hpp)
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     get_filename_component(src_path "${item}" PATH)

@@ -4,14 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_WINDOWS
-#	include <HyperCore/Logger.hpp>
-#	include <HyperCore/Events/EventManager.hpp>
-#	include <HyperCore/Events/WindowEvents.hpp>
-#	include <HyperCore/Utilities/Prerequisites.hpp>
-#	include <HyperPlatform/Windows/Window.hpp>
+#include <HyperCore/Logger.hpp>
+#include <HyperCore/Events/EventManager.hpp>
+#include <HyperCore/Events/WindowEvents.hpp>
+#include <HyperCore/Utilities/Prerequisites.hpp>
+#include <HyperPlatform/Windows/Window.hpp>
 
 namespace HyperPlatform::Windows
 {
@@ -353,4 +350,3 @@ namespace HyperPlatform::Windows
 		return m_handle;
 	}
 } // namespace HyperPlatform::Windows
-#endif

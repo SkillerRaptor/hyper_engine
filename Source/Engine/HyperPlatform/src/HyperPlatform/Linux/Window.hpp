@@ -6,11 +6,8 @@
 
 #pragma once
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_LINUX
-#	include <HyperPlatform/IWindow.hpp>
-#	include <X11/Xlib.h>
+#include <HyperPlatform/IWindow.hpp>
+#include <X11/Xlib.h>
 
 namespace HyperPlatform::Linux
 {
@@ -57,7 +54,7 @@ namespace HyperPlatform::Linux
 
 		virtual void set_height(size_t height) override;
 		virtual size_t height() const override;
-		
+
 		virtual HyperCore::CEventManager* event_manager() const override;
 
 		Window window() const;
@@ -74,4 +71,3 @@ namespace HyperPlatform::Linux
 		int32_t m_screen{ 0 };
 	};
 } // namespace HyperPlatform::Linux
-#endif

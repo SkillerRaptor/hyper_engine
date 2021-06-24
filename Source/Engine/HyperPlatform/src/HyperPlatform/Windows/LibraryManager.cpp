@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperPlatform/PlatformDetection.hpp>
-
-#if HYPERENGINE_PLATFORM_WINDOWS
-#	include <HyperPlatform/Windows/LibraryManager.hpp>
+#include <HyperPlatform/Windows/LibraryManager.hpp>
 
 namespace HyperPlatform::Windows
 {
@@ -72,4 +69,3 @@ namespace HyperPlatform::Windows
 		FreeLibrary(data.library);
 	}
 } // namespace HyperPlatform::Windows
-#endif

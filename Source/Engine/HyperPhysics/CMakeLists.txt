@@ -12,10 +12,11 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 # HyperPhysics
 #-------------------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.10)
+set(SOURCES
+        src/HyperPhysics/HyperPhysics.cpp)
 
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
+set(HEADERS
+        "")
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     get_filename_component(src_path "${item}" PATH)

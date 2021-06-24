@@ -12,10 +12,36 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 # HyperVulkan
 #-------------------------------------------------------------------------------------------
-set(HYPERENGINE_COMMON_PATH ${CMAKE_SOURCE_DIR}/Source/Engine/HyperRendering/HyperCommon)
+include(${CMAKE_SOURCE_DIR}/Source/Engine/HyperRendering/HyperCommon/HyperCommon.cmake)
 
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${HYPERENGINE_COMMON_PATH}/src/*.cpp)
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp ${HYPERENGINE_COMMON_PATH}/src/*.hpp)
+if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
+    set(PLATFORM_SOURCES
+            src/HyperRendering/Vulkan/Windows/PlatformContext.cpp)
+
+    set(PLATFORM_HEADERS
+            src/HyperRendering/Vulkan/Windows/PlatformContext.hpp)
+elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
+    set(PLATFORM_SOURCES
+            src/HyperRendering/Vulkan/Linux/PlatformContext.cpp)
+
+    set(PLATFORM_HEADERS
+            src/HyperRendering/Vulkan/Linux/PlatformContext.hpp)
+endif ()
+
+set(CORE_SOURCES
+        src/HyperRendering/Vulkan/Context.cpp
+        src/HyperRendering/Vulkan/Device.cpp
+        src/HyperRendering/Vulkan/IPlatformContext.cpp
+        src/HyperRendering/Vulkan/SwapChain.cpp)
+
+set(CORE_HEADERS
+        src/HyperRendering/Vulkan/Context.hpp
+        src/HyperRendering/Vulkan/Device.hpp
+        src/HyperRendering/Vulkan/IPlatformContext.hpp
+        src/HyperRendering/Vulkan/SwapChain.hpp)
+
+set(SOURCES ${CORE_SOURCES} ${PLATFORM_SOURCES} ${HYPERCOMMON_SOURCES})
+set(HEADERS ${CORE_HEADERS} ${PLATFORM_HEADERS} ${HYPERCOMMON_HEADERS})
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     get_filename_component(src_path "${item}" PATH)
@@ -26,7 +52,7 @@ endforeach ()
 
 add_library(HyperVulkan SHARED ${SOURCES} ${HEADERS})
 set_target_properties(HyperVulkan PROPERTIES FOLDER HyperModules/HyperRendering)
-target_include_directories(HyperVulkan PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${HYPERENGINE_COMMON_PATH}/src)
+target_include_directories(HyperVulkan PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${HYPERCOMMON_INCLUDE})
 target_link_libraries(HyperVulkan PRIVATE HyperCore HyperMath HyperPlatform)
 
 find_package(Vulkan)
