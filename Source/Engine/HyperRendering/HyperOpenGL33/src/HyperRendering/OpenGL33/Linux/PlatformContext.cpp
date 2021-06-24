@@ -19,12 +19,34 @@ namespace HyperRendering::OpenGL33::Linux
 	{
 		m_window = static_cast<HyperPlatform::Linux::CWindow*>(window);
 
-		GLint attributes[] = {
-			GLX_RGBA, GLX_RED_SIZE,		8,	  GLX_GREEN_SIZE,
-			8,		  GLX_BLUE_SIZE,	8,	  GLX_ALPHA_SIZE,
-			8,		  GLX_DEPTH_SIZE,	24,	  GLX_STENCIL_SIZE,
-			8,		  GLX_DOUBLEBUFFER, True, None
-		};
+		GLint major_glx_version = 0;
+		GLint minor_glx_version = 0;
+		glXQueryVersion(
+			m_window->display(), &major_glx_version, &minor_glx_version);
+		if (major_glx_version <= 1 && minor_glx_version < 3)
+		{
+			HyperCore::CLogger::error(
+				"OpenGL 3.3: GLX 1.3 or greater is required!");
+			return false;
+		}
+
+		GLint attributes[] = { GLX_RENDER_TYPE,
+							   GLX_RGBA_BIT,
+							   GLX_RED_SIZE,
+							   8,
+							   GLX_GREEN_SIZE,
+							   8,
+							   GLX_BLUE_SIZE,
+							   8,
+							   GLX_ALPHA_SIZE,
+							   8,
+							   GLX_DEPTH_SIZE,
+							   24,
+							   GLX_STENCIL_SIZE,
+							   8,
+							   GLX_DOUBLEBUFFER,
+							   True,
+							   None };
 
 		int32_t frame_buffer_config_count = 0;
 		GLXFBConfig* frame_buffer_configs = glXChooseFBConfig(
@@ -118,7 +140,7 @@ namespace HyperRendering::OpenGL33::Linux
 			context_attributes);
 		glXMakeCurrent(
 			m_window->display(), m_window->window(), m_graphics_context);
-		
+
 		HyperCore::CLogger::debug("OpenGL Info:");
 		HyperCore::CLogger::debug("  Vendor: {0}", glGetString(GL_VENDOR));
 		HyperCore::CLogger::debug("  Renderer: {0}", glGetString(GL_RENDERER));
@@ -134,6 +156,9 @@ namespace HyperRendering::OpenGL33::Linux
 
 	void CPlatformContext::swap_buffers() const
 	{
+		glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
 		glXSwapBuffers(m_window->display(), m_window->window());
 	}
 } // namespace HyperRendering::OpenGL33::Linux
