@@ -69,6 +69,7 @@ namespace HyperPlatform::Linux
 
 	private:
 		Window m_window{ 0 };
+		Window m_root_window{ 0 };
 		Display* m_display{ nullptr };
 		int32_t m_screen{ 0 };
 	};

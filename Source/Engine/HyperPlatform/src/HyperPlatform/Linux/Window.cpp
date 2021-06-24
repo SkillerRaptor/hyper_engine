@@ -27,11 +27,13 @@ namespace HyperPlatform::Linux
 			HyperCore::CLogger::fatal("Failed to connect to X display!");
 			return false;
 		}
+		
+		m_root_window = DefaultRootWindow(m_display);
 
 		m_screen = DefaultScreen(m_display);
 		m_window = XCreateSimpleWindow(
 			m_display,
-			RootWindow(m_display, m_screen),
+			m_root_window,
 			0,
 			0,
 			create_info.width,
@@ -89,7 +91,7 @@ namespace HyperPlatform::Linux
 
 					XSendEvent(
 						m_display,
-						m_window,
+						m_root_window,
 						False,
 						SubstructureNotifyMask | SubstructureRedirectMask,
 						&reply);
@@ -177,7 +179,7 @@ namespace HyperPlatform::Linux
 		int window_y = 0;
 
 		XTranslateCoordinates(
-			m_display, m_window, m_window, 0, 0, &window_x, &window_y, &dummy);
+			m_display, m_window, m_root_window, 0, 0, &window_x, &window_y, &dummy);
 
 		x = window_x;
 		y = window_y;
