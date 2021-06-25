@@ -11,7 +11,7 @@
 #define HYPERENGINE_STRINGIFY_HELPER(x) #x
 #define HYPERENGINE_STRINGIFY(x) HYPERENGINE_STRINGIFY_HELPER(x)
 
-#define HYPERENGINE_NOT_USED(x) ((void) x)
+#define HYPERENGINE_NOT_USED(x) ((void) (x))
 
 namespace HyperCore
 {

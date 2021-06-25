@@ -8,8 +8,6 @@
 
 #include <HyperCore/Assertion.hpp>
 #include <HyperCore/Logger.hpp>
-#include <cstddef>
-#include <cstdint>
 
 namespace HyperCore
 {
@@ -18,12 +16,14 @@ namespace HyperCore
 	{
 	public:
 		using ValueType = T;
-		using Reference = T&;
-		using ConstReference = const T&;
-		using Pointer = T*;
-		using ConstPointer = const T*;
+		using Reference = ValueType&;
+		using ConstReference = const Reference;
+		using Pointer = ValueType*;
+		using ConstPointer = const Pointer;
 		using SizeType = size_t;
 		using DifferenceType = ptrdiff_t;
+
+		using IndexType = uint32_t;
 
 	public:
 		explicit CSparsePoolAllocator(SizeType size)
@@ -33,8 +33,8 @@ namespace HyperCore
 
 			for (SizeType i = 0; i < m_size; ++i)
 			{
-				SizeType* address = reinterpret_cast<SizeType*>(&m_data[i]);
-				*address = static_cast<SizeType>(i) + 1;
+				auto* address = reinterpret_cast<IndexType*>(&m_data[i]);
+				*address = static_cast<IndexType>(i) + 1;
 			}
 		}
 
@@ -43,13 +43,13 @@ namespace HyperCore
 			delete[] m_data;
 		}
 
-		Reference allocate(SizeType& position)
+		Reference allocate(IndexType& position)
 		{
 			HYPERENGINE_ASSERT(position < m_size);
 
 			position = static_cast<SizeType>(m_allocation_count);
 
-			SizeType* address = reinterpret_cast<SizeType*>(&m_data[position]);
+			auto* address = reinterpret_cast<IndexType*>(&m_data[position]);
 			m_next_allocation = *address;
 
 			m_data[position] = T();
@@ -58,14 +58,14 @@ namespace HyperCore
 			return m_data[position];
 		}
 
-		void deallocate(SizeType position)
+		void deallocate(IndexType position)
 		{
 			HYPERENGINE_ASSERT(position < m_size);
 
-			SizeType* address = reinterpret_cast<SizeType*>(&m_data[position]);
+			auto* address = reinterpret_cast<IndexType*>(&m_data[position]);
 			*address = m_next_allocation;
 
-			m_next_allocation = position;
+			m_next_allocation = static_cast<IndexType>(position);
 
 			m_data[position] = T();
 			--m_allocation_count;
@@ -75,8 +75,8 @@ namespace HyperCore
 		{
 			for (SizeType i = 0; i < m_size; ++i)
 			{
-				SizeType* address = reinterpret_cast<SizeType*>(&m_data[i]);
-				*address = static_cast<SizeType>(i) + 1;
+				auto* address = reinterpret_cast<IndexType*>(&m_data[i]);
+				*address = static_cast<IndexType>(i) + 1;
 			}
 
 			m_allocation_count = 0;
@@ -133,7 +133,8 @@ namespace HyperCore
 	private:
 		Pointer m_data{ nullptr };
 		SizeType m_size{ 0 };
-		SizeType m_allocation_count{ 0 };
-		SizeType m_next_allocation{ 0 };
+
+		IndexType m_allocation_count{ 0 };
+		IndexType m_next_allocation{ 0 };
 	};
 } // namespace HyperCore

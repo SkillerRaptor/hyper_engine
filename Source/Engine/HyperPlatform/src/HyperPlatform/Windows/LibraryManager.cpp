@@ -21,7 +21,7 @@ namespace HyperPlatform::Windows
 
 	CLibraryHandle CLibraryManager::load(const std::string& path)
 	{
-		HyperCore::CSparsePoolAllocator<SLibraryData>::SizeType index = 0;
+		HyperCore::CSparsePoolAllocator<SLibraryData>::IndexType index = 0;
 		SLibraryData& data = m_storage.allocate(index);
 		data.magic_number = m_version++;
 		data.path = path;

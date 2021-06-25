@@ -7,7 +7,6 @@
 #pragma once
 
 #include <HyperCore/Logger.hpp>
-#include <cstdint>
 
 namespace HyperCore
 {
