@@ -58,3 +58,6 @@ ipch/
 
 # CMake
 cmake-build-*/
+
+# Doxygen
+Doxygen/
