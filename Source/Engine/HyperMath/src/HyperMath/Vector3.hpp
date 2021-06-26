@@ -37,7 +37,151 @@ namespace HyperMath
 			, z(z)
 		{
 		}
-
+		
+		CVector3<T> operator-() const
+		{
+			CVector3<T> vector;
+			vector.x = -x;
+			vector.y = -y;
+			vector.z = -z;
+			return vector;
+		}
+		
+		CVector3<T> operator+(T value) const
+		{
+			CVector3<T> vector;
+			vector.x = x + value;
+			vector.y = y + value;
+			vector.z = z + value;
+			return vector;
+		}
+		
+		CVector3<T> operator+(const CVector3<T>& other) const
+		{
+			CVector3<T> vector;
+			vector.x = x + other.x;
+			vector.y = y + other.y;
+			vector.z = z + other.z;
+			return vector;
+		}
+		
+		CVector3<T>& operator+=(T value)
+		{
+			x += value;
+			y += value;
+			z += value;
+			return *this;
+		}
+		
+		CVector3<T>& operator+=(const CVector3<T>& other)
+		{
+			x += other.x;
+			y += other.y;
+			z += other.z;
+			return *this;
+		}
+		
+		CVector3<T> operator-(T value) const
+		{
+			CVector3<T> vector;
+			vector.x = x - value;
+			vector.y = y - value;
+			vector.z = z - value;
+			return vector;
+		}
+		
+		CVector3<T> operator-(const CVector3<T>& other) const
+		{
+			CVector3<T> vector;
+			vector.x = x - other.x;
+			vector.y = y - other.y;
+			vector.z = z - other.z;
+			return vector;
+		}
+		
+		CVector3<T>& operator-=(T value)
+		{
+			x -= value;
+			y -= value;
+			return *this;
+		}
+		
+		CVector3<T>& operator-=(const CVector3<T>& other)
+		{
+			x -= other.x;
+			y -= other.y;
+			z -= other.z;
+			return *this;
+		}
+		
+		CVector3<T> operator*(T value) const
+		{
+			CVector3<T> vector;
+			vector.x = x * value;
+			vector.y = y * value;
+			vector.z = z * value;
+			return vector;
+		}
+		
+		CVector3<T> operator*(const CVector3<T>& other) const
+		{
+			CVector3<T> vector;
+			vector.x = x * other.x;
+			vector.y = y * other.y;
+			vector.z = z * other.z;
+			return vector;
+		}
+		
+		CVector3<T>& operator*=(T value)
+		{
+			x *= value;
+			y *= value;
+			z *= value;
+			return *this;
+		}
+		
+		CVector3<T>& operator*=(const CVector3<T>& other)
+		{
+			x *= other.x;
+			y *= other.y;
+			z *= other.z;
+			return *this;
+		}
+		
+		CVector3<T> operator/(T value) const
+		{
+			CVector3<T> vector;
+			vector.x = x / value;
+			vector.y = y / value;
+			vector.z = z / value;
+			return vector;
+		}
+		
+		CVector3<T> operator/(const CVector3<T>& other) const
+		{
+			CVector3<T> vector;
+			vector.x = x / other.x;
+			vector.y = y / other.y;
+			vector.z = z / other.z;
+			return vector;
+		}
+		
+		CVector3<T>& operator/=(T value)
+		{
+			x /= value;
+			y /= value;
+			z /= value;
+			return *this;
+		}
+		
+		CVector3<T>& operator/=(const CVector3<T>& other)
+		{
+			x /= other.x;
+			y /= other.y;
+			z /= other.z;
+			return *this;
+		}
+		
 	public:
 		union
 		{

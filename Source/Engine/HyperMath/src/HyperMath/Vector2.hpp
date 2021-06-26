@@ -34,7 +34,135 @@ namespace HyperMath
 			, y(y)
 		{
 		}
-
+		
+		CVector2<T> operator-() const
+		{
+			CVector2<T> vector;
+			vector.x = -x;
+			vector.y = -y;
+			return vector;
+		}
+		
+		CVector2<T> operator+(T value) const
+		{
+			CVector2<T> vector;
+			vector.x = x + value;
+			vector.y = y + value;
+			return vector;
+		}
+		
+		CVector2<T> operator+(const CVector2<T>& other) const
+		{
+			CVector2<T> vector;
+			vector.x = x + other.x;
+			vector.y = y + other.y;
+			return vector;
+		}
+		
+		CVector2<T>& operator+=(T value)
+		{
+			x += value;
+			y += value;
+			return *this;
+		}
+		
+		CVector2<T>& operator+=(const CVector2<T>& other)
+		{
+			x += other.x;
+			y += other.y;
+			return *this;
+		}
+		
+		CVector2<T> operator-(T value) const
+		{
+			CVector2<T> vector;
+			vector.x = x - value;
+			vector.y = y - value;
+			return vector;
+		}
+		
+		CVector2<T> operator-(const CVector2<T>& other) const
+		{
+			CVector2<T> vector;
+			vector.x = x - other.x;
+			vector.y = y - other.y;
+			return vector;
+		}
+		
+		CVector2<T>& operator-=(T value)
+		{
+			x -= value;
+			y -= value;
+			return *this;
+		}
+		
+		CVector2<T>& operator-=(const CVector2<T>& other)
+		{
+			x -= other.x;
+			y -= other.y;
+			return *this;
+		}
+		
+		CVector2<T> operator*(T value) const
+		{
+			CVector2<T> vector;
+			vector.x = x * value;
+			vector.y = y * value;
+			return vector;
+		}
+		
+		CVector2<T> operator*(const CVector2<T>& other) const
+		{
+			CVector2<T> vector;
+			vector.x = x * other.x;
+			vector.y = y * other.y;
+			return vector;
+		}
+		
+		CVector2<T>& operator*=(T value)
+		{
+			x *= value;
+			y *= value;
+			return *this;
+		}
+		
+		CVector2<T>& operator*=(const CVector2<T>& other)
+		{
+			x *= other.x;
+			y *= other.y;
+			return *this;
+		}
+		
+		CVector2<T> operator/(T value) const
+		{
+			CVector2<T> vector;
+			vector.x = x / value;
+			vector.y = y / value;
+			return vector;
+		}
+		
+		CVector2<T> operator/(const CVector2<T>& other) const
+		{
+			CVector2<T> vector;
+			vector.x = x / other.x;
+			vector.y = y / other.y;
+			return vector;
+		}
+		
+		CVector2<T>& operator/=(T value)
+		{
+			x /= value;
+			y /= value;
+			return *this;
+		}
+		
+		CVector2<T>& operator/=(const CVector2<T>& other)
+		{
+			x /= other.x;
+			y /= other.y;
+			return *this;
+		}
+		
 	public:
 		union
 		{
