@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <fmt/format.h>
 #include <string>
+#include <sstream>
 
 namespace HyperCore
 {
@@ -28,7 +28,56 @@ namespace HyperCore
 				return format;
 			}
 
-			return fmt::format(format, std::forward<Args&&>(args)...);
+			std::stringstream format_stream;
+			uint32_t index = 0;
+			for (const char c : format)
+			{
+				switch (c)
+				{ //
+				case '{':
+					// TODO: Adding formatting syntax
+					break;
+				case '}':
+				{
+					format_sequence(
+						index,
+						format_stream,
+						std::make_index_sequence<args_count>(),
+						std::forward<Args&&>(args)...);
+					++index;
+					break;
+				}
+				default:
+					format_stream << c;
+					break;
+				}
+			}
+
+			return format_stream.str();
+		}
+
+	private:
+		template <typename... Args, size_t... I>
+		static void format_sequence(
+			uint32_t index,
+			std::stringstream& format_stream,
+			std::index_sequence<I...>,
+			Args&&... args)
+		{
+			(format_character(args, index, I, format_stream), ...);
+		}
+
+		template <typename T>
+		static void format_character(
+			T value,
+			size_t index,
+			size_t current_index,
+			std::stringstream& format_stream)
+		{
+			if (index == current_index)
+			{
+				format_stream << value;
+			}
 		}
 	};
 } // namespace HyperCore
