@@ -5,17 +5,17 @@
  */
 
 #include <HyperPlatform/IWindow.hpp>
-#include <HyperRendering/OpenGL33/Context.hpp>
-#include <HyperRendering/OpenGL33/IPlatformContext.hpp>
+#include <HyperRendering/OpenGL46/Context.hpp>
+#include <HyperRendering/OpenGL46/IPlatformContext.hpp>
 
 namespace HyperRendering
 {
 	HYPERENGINE_API IContext* create_context()
 	{
-		return new OpenGL33::CContext();
+		return new OpenGL46::CContext();
 	}
 
-	namespace OpenGL33
+	namespace OpenGL46
 	{
 		bool CContext::initialize(HyperPlatform::IWindow* window)
 		{
@@ -38,5 +38,5 @@ namespace HyperRendering
 		{
 			m_platform_context->swap_buffers();
 		}
-	} // namespace OpenGL33
+	} // namespace OpenGL46
 } // namespace HyperRendering

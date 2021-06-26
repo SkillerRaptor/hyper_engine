@@ -14,14 +14,30 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 include(${CMAKE_SOURCE_DIR}/Source/Engine/HyperRendering/HyperCommon/HyperCommon.cmake)
 
+if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
+    set(PLATFORM_SOURCES
+            src/HyperRendering/OpenGL46/Windows/PlatformContext.cpp)
+
+    set(PLATFORM_HEADERS
+            src/HyperRendering/OpenGL46/Windows/PlatformContext.hpp)
+elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
+    set(PLATFORM_SOURCES
+            src/HyperRendering/OpenGL46/Linux/PlatformContext.cpp)
+
+    set(PLATFORM_HEADERS
+            src/HyperRendering/OpenGL46/Linux/PlatformContext.hpp)
+endif ()
+
 set(CORE_SOURCES
-        src/HyperRendering/OpenGL46/OpenGL46.cpp)
+        src/HyperRendering/OpenGL46/Context.cpp
+        src/HyperRendering/OpenGL46/IPlatformContext.cpp)
 
 set(CORE_HEADERS
-        "")
+        src/HyperRendering/OpenGL46/Context.hpp
+        src/HyperRendering/OpenGL46/IPlatformContext.hpp)
 
-set(SOURCES ${CORE_SOURCES} ${HYPERCOMMON_SOURCES})
-set(HEADERS ${CORE_HEADERS} ${HYPERCOMMON_HEADERS})
+set(SOURCES ${CORE_SOURCES} ${PLATFORM_SOURCES} ${HYPERCOMMON_SOURCES})
+set(HEADERS ${CORE_HEADERS} ${PLATFORM_HEADERS} ${HYPERCOMMON_HEADERS})
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     get_filename_component(src_path "${item}" PATH)
