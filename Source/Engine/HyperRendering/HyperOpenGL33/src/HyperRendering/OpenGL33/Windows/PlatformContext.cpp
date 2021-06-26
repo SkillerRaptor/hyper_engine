@@ -84,9 +84,9 @@ namespace HyperRendering::OpenGL33::Windows
 		wglMakeCurrent(m_window->handle(), m_graphics_context);
 
 		HyperCore::CLogger::debug("OpenGL Info:");
-		HyperCore::CLogger::debug("  Vendor: {0}", glGetString(GL_VENDOR));
-		HyperCore::CLogger::debug("  Renderer: {0}", glGetString(GL_RENDERER));
-		HyperCore::CLogger::debug("  Version: {0}", glGetString(GL_VERSION));
+		HyperCore::CLogger::debug("  Vendor: {}", glGetString(GL_VENDOR));
+		HyperCore::CLogger::debug("  Renderer: {}", glGetString(GL_RENDERER));
+		HyperCore::CLogger::debug("  Version: {}", glGetString(GL_VERSION));
 
 		return true;
 	}
