@@ -31,24 +31,37 @@ namespace HyperCore
 
 			std::stringstream format_stream;
 			uint32_t index = 0;
+			bool formatting = false;
 			for (const char c : format)
 			{
 				switch (c)
-				{ //
+				{
 				case '{':
-					// TODO: Adding formatting syntax
+					formatting = true;
 					break;
 				case '}':
 				{
+					if (!formatting)
+					{
+						break;
+					}
+
 					format_sequence(
 						index,
 						format_stream,
 						std::make_index_sequence<args_count>(),
-						std::forward<Args&&>(args)...);
+						std::forward<Args>(args)...);
 					++index;
+
+					formatting = false;
 					break;
 				}
 				default:
+					if (formatting)
+					{
+						break;
+					}
+
 					format_stream << c;
 					break;
 				}
@@ -56,7 +69,7 @@ namespace HyperCore
 
 			return format_stream.str();
 		}
-		
+
 	private:
 		template <typename... Args, size_t... I>
 		static void format_sequence(
