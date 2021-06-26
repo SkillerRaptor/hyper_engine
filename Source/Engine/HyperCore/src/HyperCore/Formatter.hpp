@@ -8,6 +8,7 @@
 
 #include <string>
 #include <sstream>
+#include <utility>
 
 namespace HyperCore
 {
@@ -55,7 +56,7 @@ namespace HyperCore
 
 			return format_stream.str();
 		}
-
+		
 	private:
 		template <typename... Args, size_t... I>
 		static void format_sequence(
