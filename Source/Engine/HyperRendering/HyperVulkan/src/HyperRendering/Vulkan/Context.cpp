@@ -9,7 +9,6 @@
 #include <HyperPlatform/IWindow.hpp>
 #include <HyperRendering/Vulkan/Context.hpp>
 #include <HyperRendering/Vulkan/IPlatformContext.hpp>
-#include <cstring>
 #include <string>
 #include <vulkan/vulkan.h>
 
@@ -232,7 +231,7 @@ namespace HyperRendering
 				for (const VkLayerProperties& layer_properties :
 					 available_layer_properties)
 				{
-					if (std::strcmp(layer_name, layer_properties.layerName) !=
+					if (strcmp(layer_name, layer_properties.layerName) !=
 						0)
 					{
 						continue;
