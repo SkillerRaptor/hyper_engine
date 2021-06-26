@@ -9,6 +9,7 @@
 #include <HyperPlatform/IWindow.hpp>
 #include <HyperRendering/Vulkan/Context.hpp>
 #include <HyperRendering/Vulkan/IPlatformContext.hpp>
+#include <cstring>
 #include <string>
 #include <vulkan/vulkan.h>
 
