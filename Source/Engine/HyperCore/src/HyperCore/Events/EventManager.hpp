@@ -10,6 +10,7 @@
 #include <HyperCore/Events/IEvent.hpp>
 #include <HyperCore/Events/EventWrapper.hpp>
 #include <functional>
+#include <memory>
 #include <type_traits>
 #include <unordered_map>
 
@@ -47,12 +48,13 @@ namespace HyperCore
 				CEventFamilyGenerator::type<T>();
 			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
 			{
-				m_event_wrappers[event_id] = new CEventWrapper<T>();
+				m_event_wrappers[event_id] =
+					std::make_unique<CEventWrapper<T>>();
 			}
-
-			IEventWrapperBase* event_wrapper_base = m_event_wrappers[event_id];
-			CEventWrapper<T>* event_wrapper =
-				static_cast<CEventWrapper<T>*>(event_wrapper_base);
+			
+			// TODO: Event Bus
+			
+			CEventWrapper<T>* event_wrapper = get_event_wrapper<T>(event_id);
 			event_wrapper->invoke(event);
 		}
 
@@ -67,12 +69,13 @@ namespace HyperCore
 				CEventFamilyGenerator::type<T>();
 			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
 			{
-				m_event_wrappers[event_id] = new CEventWrapper<T>();
+				m_event_wrappers[event_id] =
+					std::make_unique<CEventWrapper<T>>();
 			}
-
-			IEventWrapperBase* event_wrapper_base = m_event_wrappers[event_id];
-			CEventWrapper<T>* event_wrapper =
-				static_cast<CEventWrapper<T>*>(event_wrapper_base);
+			
+			// TODO: Event Bus
+			
+			CEventWrapper<T>* event_wrapper = get_event_wrapper<T>(event_id);
 			event_wrapper->invoke(T(std::forward<Args>(args)...));
 		}
 
@@ -89,12 +92,11 @@ namespace HyperCore
 				CEventFamilyGenerator::type<T>();
 			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
 			{
-				m_event_wrappers[event_id] = new CEventWrapper<T>();
+				m_event_wrappers[event_id] =
+					std::make_unique<CEventWrapper<T>>();
 			}
 
-			IEventWrapperBase* event_wrapper_base = m_event_wrappers[event_id];
-			CEventWrapper<T>* event_wrapper =
-				static_cast<CEventWrapper<T>*>(event_wrapper_base);
+			CEventWrapper<T>* event_wrapper = get_event_wrapper<T>(event_id);
 			event_wrapper->register_listener(name, event_listener);
 		}
 
@@ -115,16 +117,26 @@ namespace HyperCore
 				return;
 			}
 
-			IEventWrapperBase* event_wrapper_base = m_event_wrappers[event_id];
-			CEventWrapper<T>* event_wrapper =
-				static_cast<CEventWrapper<T>*>(event_wrapper_base);
+			CEventWrapper<T>* event_wrapper = get_event_wrapper<T>(event_id);
 			event_wrapper->unregister_listener(name);
+		}
+
+	private:
+		template <class T>
+		CEventWrapper<T>*
+			get_event_wrapper(CEventFamilyGenerator::EventIdType event_id)
+		{
+			const std::unique_ptr<IEventWrapperBase>& event_wrapper_base =
+				m_event_wrappers[event_id];
+			CEventWrapper<T>* event_wrapper =
+				static_cast<CEventWrapper<T>*>(event_wrapper_base.get());
+			return event_wrapper;
 		}
 
 	private:
 		std::unordered_map<
 			CEventFamilyGenerator::EventIdType,
-			IEventWrapperBase*>
+			std::unique_ptr<IEventWrapperBase>>
 			m_event_wrappers{};
 	};
 } // namespace HyperCore
