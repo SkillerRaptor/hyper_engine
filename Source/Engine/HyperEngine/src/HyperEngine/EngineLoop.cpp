@@ -44,7 +44,7 @@ namespace HyperEngine
 			{
 				m_running = false;
 			});
-
+		
 		m_running = true;
 	}
 
@@ -64,6 +64,7 @@ namespace HyperEngine
 		while (m_running)
 		{
 			m_window->poll_events();
+			m_event_manager.process_next_event();
 
 			// TODO: Implement Renderer
 
