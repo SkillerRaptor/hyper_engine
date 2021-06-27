@@ -19,6 +19,8 @@ namespace HyperRendering::OpenGL46
 		virtual void shutdown() override;
 
 		virtual void update() override;
+		
+		virtual IRenderer& renderer() override;
 
 	private:
 		IPlatformContext* m_platform_context{ nullptr };

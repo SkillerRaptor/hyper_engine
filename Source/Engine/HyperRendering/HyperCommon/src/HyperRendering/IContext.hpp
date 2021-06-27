@@ -8,6 +8,7 @@
 
 #define HYPERENGINE_SHARED_EXPORT
 #include <HyperPlatform/SharedLibrary.hpp>
+#include <HyperRendering/IRenderer.hpp>
 
 namespace HyperPlatform
 {
@@ -25,6 +26,11 @@ namespace HyperRendering
 		virtual void shutdown() = 0;
 
 		virtual void update() = 0;
+		
+		virtual IRenderer& renderer() = 0;
+
+	protected:
+		IRenderer* m_renderer{};
 	};
 
 	extern "C" HYPERENGINE_API IContext* create_context();

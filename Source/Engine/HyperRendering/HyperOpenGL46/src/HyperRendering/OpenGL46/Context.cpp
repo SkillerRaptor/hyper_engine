@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include <HyperCore/Assertion.hpp>
 #include <HyperPlatform/IWindow.hpp>
 #include <HyperRendering/OpenGL46/Context.hpp>
 #include <HyperRendering/OpenGL46/IPlatformContext.hpp>
@@ -37,6 +38,12 @@ namespace HyperRendering
 		void CContext::update()
 		{
 			m_platform_context->swap_buffers();
+		}
+		
+		IRenderer& CContext::renderer()
+		{
+			HYPERENGINE_ASSERT_NOT_REACHED();
+			return *m_renderer;
 		}
 	} // namespace OpenGL46
 } // namespace HyperRendering

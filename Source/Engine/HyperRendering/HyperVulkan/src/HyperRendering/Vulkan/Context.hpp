@@ -30,6 +30,8 @@ namespace HyperRendering::Vulkan
 		virtual void shutdown() override;
 
 		virtual void update() override;
+		
+		virtual IRenderer& renderer() override;
 
 		bool is_validation_layer_enabled() const;
 

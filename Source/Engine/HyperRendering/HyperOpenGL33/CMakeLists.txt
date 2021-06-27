@@ -19,22 +19,27 @@ if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
             src/HyperRendering/OpenGL33/Windows/PlatformContext.cpp)
 
     set(PLATFORM_HEADERS
-            src/HyperRendering/OpenGL33/Windows/PlatformContext.hpp)
+            src/HyperRendering/OpenGL33/Windows/PlatformContext.hpp
+            src/HyperRendering/OpenGL33/Windows/PlatformInclude.hpp)
 elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
     set(PLATFORM_SOURCES
             src/HyperRendering/OpenGL33/Linux/PlatformContext.cpp)
 
     set(PLATFORM_HEADERS
-            src/HyperRendering/OpenGL33/Linux/PlatformContext.hpp)
+            src/HyperRendering/OpenGL33/Linux/PlatformContext.hpp
+            src/HyperRendering/OpenGL33/Linux/PlatformInclude.hpp)
 endif ()
 
 set(CORE_SOURCES
         src/HyperRendering/OpenGL33/Context.cpp
-        src/HyperRendering/OpenGL33/IPlatformContext.cpp)
+        src/HyperRendering/OpenGL33/IPlatformContext.cpp
+        src/HyperRendering/OpenGL33/Renderer.cpp)
 
 set(CORE_HEADERS
         src/HyperRendering/OpenGL33/Context.hpp
-        src/HyperRendering/OpenGL33/IPlatformContext.hpp)
+        src/HyperRendering/OpenGL33/IPlatformContext.hpp
+        src/HyperRendering/OpenGL33/PlatformInclude.hpp
+        src/HyperRendering/OpenGL33/Renderer.hpp)
 
 set(SOURCES ${CORE_SOURCES} ${PLATFORM_SOURCES} ${HYPERCOMMON_SOURCES})
 set(HEADERS ${CORE_HEADERS} ${PLATFORM_HEADERS} ${HYPERCOMMON_HEADERS})

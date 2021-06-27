@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include <HyperCore/Assertion.hpp>
 #include <HyperCore/Logger.hpp>
 #include <HyperCore/Utilities/Prerequisites.hpp>
 #include <HyperPlatform/IWindow.hpp>
@@ -253,6 +254,12 @@ namespace HyperRendering
 		bool CContext::is_validation_layer_enabled() const
 		{
 			return m_validation_layer_support;
+		}
+		
+		IRenderer& CContext::renderer()
+		{
+			HYPERENGINE_ASSERT_NOT_REACHED();
+			return *m_renderer;
 		}
 
 		const IPlatformContext* CContext::platform_context() const

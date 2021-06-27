@@ -66,7 +66,10 @@ namespace HyperEngine
 			m_window->poll_events();
 			m_event_manager.process_next_event();
 
-			// TODO: Implement Renderer
+			HyperRendering::IRenderer& renderer = m_graphics_context->renderer();
+			renderer.begin_frame({ 1.0f, 0.0f, 1.0f, 1.0f });
+			// TODO: Rendering
+			renderer.end_frame();
 
 			m_graphics_context->update();
 		}

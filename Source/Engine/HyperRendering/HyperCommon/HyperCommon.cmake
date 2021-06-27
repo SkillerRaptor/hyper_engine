@@ -29,10 +29,13 @@ elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
 endif ()
 
 set(HYPERCOMMON_SOURCES
+        ${HYPERCOMMON_PATH}/src/HyperRendering/RenderCommand.cpp
         ${HYPERCOMMON_PLATFORM_SOURCES})
 
 set(HYPERCOMMON_HEADERS
         ${HYPERCOMMON_PATH}/src/HyperRendering/IContext.hpp
+        ${HYPERCOMMON_PATH}/src/HyperRendering/IRenderer.hpp
+        ${HYPERCOMMON_PATH}/src/HyperRendering/RenderCommand.hpp
         ${HYPERCOMMON_PATH}/src/HyperRendering/RenderingAPI.hpp
         ${HYPERCOMMON_PLATFORM_HEADERS})
 
