@@ -15,7 +15,7 @@ namespace HyperMath
 	{
 	public:
 		static_assert(std::is_arithmetic_v<T>, "Invalid template type for CQuaternion!");
-	}
+	};
 
 	using CQuat = CQuaternion<float>;
 	using CQuatf = CQuaternion<float>;

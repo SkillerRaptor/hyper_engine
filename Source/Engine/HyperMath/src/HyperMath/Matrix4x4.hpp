@@ -16,7 +16,7 @@ namespace HyperMath
 	{
 	public:
 		static_assert(std::is_arithmetic_v<T>, "Invalid template type for CMatrix4x4!");
-	}
+	};
 
 	using CMat4x4 = CMatrix4x4<float>;
 	using CMat4x4f = CMatrix4x4<float>;
