@@ -88,7 +88,7 @@ namespace HyperPlatform::Linux
 					if (protocol ==
 						XInternAtom(m_display, "WM_DELETE_WINDOW", false))
 					{
-						m_event_manager->invoke<HyperCore::CWindowCloseEvent>();
+						m_event_manager->invoke<HyperCore::SWindowCloseEvent>();
 					}
 					else if (
 						protocol ==
