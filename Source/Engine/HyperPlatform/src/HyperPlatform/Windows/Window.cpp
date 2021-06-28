@@ -36,7 +36,7 @@ namespace HyperPlatform::Windows
 			CWindow* window = reinterpret_cast<CWindow*>(
 				GetWindowLongPtr(h_window, GWLP_USERDATA));
 
-			window->event_manager()->invoke<HyperCore::CWindowCloseEvent>();
+			window->event_manager()->invoke<HyperCore::SWindowCloseEvent>();
 
 			return 0;
 		}

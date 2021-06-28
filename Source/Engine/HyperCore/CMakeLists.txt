@@ -15,15 +15,13 @@ cmake_minimum_required(VERSION 3.10)
 set(SOURCES
         src/HyperCore/Logger.cpp
         src/HyperCore/Events/EventManager.cpp
-        src/HyperCore/Events/IEvent.cpp
-        src/HyperCore/Events/KeyEvents.cpp
-        src/HyperCore/Events/MouseEvents.cpp
-        src/HyperCore/Events/WindowEvents.cpp)
+        src/HyperCore/Events/Event.cpp)
 
 set(HEADERS
         src/HyperCore/Assertion.hpp
         src/HyperCore/Formatter.hpp
         src/HyperCore/Logger.hpp
+        src/HyperCore/Events/Event.hpp
         src/HyperCore/Events/EventManager.hpp
         src/HyperCore/Events/EventWrapper.hpp
         src/HyperCore/Events/IEvent.hpp

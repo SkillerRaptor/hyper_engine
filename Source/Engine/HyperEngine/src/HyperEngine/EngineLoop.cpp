@@ -38,9 +38,9 @@ namespace HyperEngine
 		m_graphics_context = create_context();
 		m_graphics_context->initialize(m_window);
 
-		m_event_manager.register_listener<HyperCore::CWindowCloseEvent>(
+		m_event_manager.register_listener<HyperCore::SWindowCloseEvent>(
 			"EngineLoopAppCloseEvent",
-			[this](const HyperCore::CWindowCloseEvent&)
+			[this](const HyperCore::SWindowCloseEvent&)
 			{
 				m_running = false;
 			});

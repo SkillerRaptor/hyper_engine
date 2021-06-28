@@ -6,71 +6,32 @@
 
 #pragma once
 
+#include <cstdint>
 #include <HyperCore/Events/IEvent.hpp>
 
 namespace HyperCore
 {
-	class CWindowResizeEvent : public IEvent
+	struct SWindowCloseEvent : public IEvent
 	{
-	public:
-		CWindowResizeEvent(uint32_t width, uint32_t height);
-
-		uint32_t width() const;
-		uint32_t height() const;
-
-		virtual std::string name() const override;
-		virtual IEvent::EType type() const override;
-		virtual IEvent::ECategory category() const override;
-
-	private:
-		uint32_t m_width;
-		uint32_t m_height;
 	};
 
-	class CWindowCloseEvent : public IEvent
+	struct SWindowResizeEvent : public IEvent
 	{
-	public:
-		CWindowCloseEvent() = default;
-
-		virtual std::string name() const override;
-		virtual IEvent::EType type() const override;
-		virtual IEvent::ECategory category() const override;
+		uint32_t width;
+		uint32_t height;
 	};
 
-	class CWindowFocusEvent : public IEvent
+	struct SWindowFocusEvent : public IEvent
 	{
-	public:
-		CWindowFocusEvent() = default;
-
-		virtual std::string name() const override;
-		virtual IEvent::EType type() const override;
-		virtual IEvent::ECategory category() const override;
 	};
 
-	class CWindowLostFocusEvent : public IEvent
+	struct SWindowLostFocusEvent : public IEvent
 	{
-	public:
-		CWindowLostFocusEvent() = default;
-
-		virtual std::string name() const override;
-		virtual IEvent::EType type() const override;
-		virtual IEvent::ECategory category() const override;
 	};
 
-	class CWindowMovedEvent : public IEvent
+	struct SWindowMovedEvent : public IEvent
 	{
-	public:
-		CWindowMovedEvent(uint32_t position_x, uint32_t position_y);
-
-		uint32_t position_x() const;
-		uint32_t position_y() const;
-
-		virtual std::string name() const override;
-		virtual IEvent::EType type() const override;
-		virtual IEvent::ECategory category() const override;
-
-	private:
-		uint32_t m_position_x;
-		uint32_t m_position_y;
+		uint32_t position_x;
+		uint32_t position_y;
 	};
 } // namespace HyperCore

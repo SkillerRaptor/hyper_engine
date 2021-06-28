@@ -6,73 +6,30 @@
 
 #pragma once
 
+#include <cstdint>
 #include <HyperCore/Events/IEvent.hpp>
 
 namespace HyperCore
 {
-	class CMouseMovedEvent : public IEvent
+	struct SMouseMovedEvent : public IEvent
 	{
-	public:
-		CMouseMovedEvent(float position_x, float position_y);
-
-		float position_x() const;
-		float position_y() const;
-
-		virtual std::string name() const override;
-		virtual IEvent::EType type() const override;
-		virtual IEvent::ECategory category() const override;
-
-	private:
-		float m_position_x;
-		float m_position_y;
+		float position_x;
+		float position_y;
 	};
 
-	class CMouseScrolledEvent : public IEvent
+	struct SMouseScrolledEvent : public IEvent
 	{
-	public:
-		CMouseScrolledEvent(float offset_x, float offset_y);
-
-		float offset_x() const;
-		float offset_y() const;
-
-		virtual std::string name() const override;
-		virtual IEvent::EType type() const override;
-		virtual IEvent::ECategory category() const override;
-
-	private:
-		float m_offset_x;
-		float m_offset_y;
+		float offset_x;
+		float offset_y;
 	};
 
-	class IMouseButtonEvent : public IEvent
+	struct SMouseButtonPressedEvent : public IEvent
 	{
-	public:
-		int32_t button() const;
-
-		virtual IEvent::ECategory category() const override;
-
-	protected:
-		explicit IMouseButtonEvent(int32_t button);
-
-	protected:
-		int32_t m_button;
+		int32_t button;
 	};
 
-	class CMouseButtonPressedEvent : public IMouseButtonEvent
+	struct SMouseButtonReleasedEvent : public IEvent
 	{
-	public:
-		explicit CMouseButtonPressedEvent(int32_t button);
-
-		virtual std::string name() const override;
-		virtual IEvent::EType type() const override;
-	};
-
-	class CMouseButtonReleasedEvent : public IMouseButtonEvent
-	{
-	public:
-		explicit CMouseButtonReleasedEvent(int32_t button);
-
-		virtual std::string name() const override;
-		virtual IEvent::EType type() const override;
+		int32_t button;
 	};
 } // namespace HyperCore

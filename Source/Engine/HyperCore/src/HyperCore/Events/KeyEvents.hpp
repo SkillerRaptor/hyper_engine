@@ -6,53 +6,24 @@
 
 #pragma once
 
+#include <cstdint>
 #include <HyperCore/Events/IEvent.hpp>
 
 namespace HyperCore
 {
-	class IKeyEvent : public IEvent
+	struct SKeyPressedEvent : public IEvent
 	{
-	public:
-		int32_t key_code() const;
-
-		virtual IEvent::ECategory category() const override;
-
-	protected:
-		explicit IKeyEvent(int32_t key_code);
-
-	protected:
-		int32_t m_key_code{ 0 };
+		int32_t key_code;
+		int32_t repeat_count;
 	};
-
-	class CKeyPressedEvent : public IKeyEvent
+	
+	struct SKeyReleasedEvent : public IEvent
 	{
-	private:
-		int32_t m_repeat_count;
-
-	public:
-		explicit CKeyPressedEvent(int32_t key_code, int32_t repeat_count);
-
-		int32_t repeat_count() const;
-
-		virtual std::string name() const override;
-		virtual IEvent::EType type() const override;
+		int32_t key_code;
 	};
-
-	class CKeyReleasedEvent : public IKeyEvent
+	
+	struct SKeyTypedEvent : public IEvent
 	{
-	public:
-		explicit CKeyReleasedEvent(int32_t key_code);
-
-		virtual std::string name() const override;
-		virtual IEvent::EType type() const override;
-	};
-
-	class CKeyTypedEvent : public IKeyEvent
-	{
-	public:
-		explicit CKeyTypedEvent(int32_t key_code);
-
-		virtual std::string name() const override;
-		virtual IEvent::EType type() const override;
+		int32_t key_code;
 	};
 } // namespace HyperCore

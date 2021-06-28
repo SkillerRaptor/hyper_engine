@@ -7,11 +7,9 @@
 #pragma once
 
 #include <HyperCore/Logger.hpp>
-#include <HyperCore/Events/IEvent.hpp>
+#include <HyperCore/Events/Event.hpp>
 #include <HyperCore/Events/EventWrapper.hpp>
-#include <HyperCore/Events/KeyEvents.hpp>
-#include <HyperCore/Events/MouseEvents.hpp>
-#include <HyperCore/Events/WindowEvents.hpp>
+#include <HyperCore/Events/IEvent.hpp>
 #include <functional>
 #include <memory>
 #include <type_traits>
@@ -47,7 +45,7 @@ namespace HyperCore
 			static_assert(
 				std::is_base_of_v<IEvent, T>,
 				"Template argument T is not base of IEvent");
-
+			
 			const CEventFamilyGenerator::EventIdType event_id =
 				CEventFamilyGenerator::type<T>();
 			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
@@ -56,7 +54,7 @@ namespace HyperCore
 					std::make_unique<CEventWrapper<T>>();
 			}
 
-			m_event_bus.push(std::make_unique<T>(event));
+			m_event_bus.emplace(event);
 		}
 
 		template <typename T, typename... Args>
@@ -65,7 +63,7 @@ namespace HyperCore
 			static_assert(
 				std::is_base_of_v<IEvent, T>,
 				"Template argument T is not base of IEvent");
-
+			
 			const CEventFamilyGenerator::EventIdType event_id =
 				CEventFamilyGenerator::type<T>();
 			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
@@ -74,7 +72,7 @@ namespace HyperCore
 					std::make_unique<CEventWrapper<T>>();
 			}
 
-			m_event_bus.push(std::make_unique<T>(std::forward<Args>(args)...));
+			m_event_bus.emplace(T(std::forward<Args>(args)...));
 		}
 
 		void process_next_event()
@@ -84,45 +82,45 @@ namespace HyperCore
 				return;
 			}
 
-			std::unique_ptr<IEvent>& event = m_event_bus.front();
+			const CEvent& event = m_event_bus.front();
 
-			switch (event->type())
+			switch (event.type())
 			{
-			case IEvent::EType::KeyPressed:
-				invoke_next_event<CKeyPressedEvent>(event);
+			case CEvent::EType::KeyPressed:
+				invoke_next_event<SKeyPressedEvent>(event.as_key_pressed_event());
 				break;
-			case IEvent::EType::KeyReleased:
-				invoke_next_event<CKeyReleasedEvent>(event);
+			case CEvent::EType::KeyReleased:
+				invoke_next_event<SKeyReleasedEvent>(event.as_key_released_event());
 				break;
-			case IEvent::EType::KeyTyped:
-				invoke_next_event<CKeyTypedEvent>(event);
+			case CEvent::EType::KeyTyped:
+				invoke_next_event<SKeyTypedEvent>(event.as_key_typed_event());
 				break;
-			case IEvent::EType::MouseMoved:
-				invoke_next_event<CMouseMovedEvent>(event);
+			case CEvent::EType::MouseMoved:
+				invoke_next_event<SMouseMovedEvent>(event.as_mouse_moved_event());
 				break;
-			case IEvent::EType::MouseScrolled:
-				invoke_next_event<CMouseScrolledEvent>(event);
+			case CEvent::EType::MouseScrolled:
+				invoke_next_event<SMouseScrolledEvent>(event.as_mouse_scrolled_event());
 				break;
-			case IEvent::EType::MouseButtonPressed:
-				invoke_next_event<CMouseButtonPressedEvent>(event);
+			case CEvent::EType::MouseButtonPressed:
+				invoke_next_event<SMouseButtonPressedEvent>(event.as_mouse_button_pressed_event());
 				break;
-			case IEvent::EType::MouseButtonReleased:
-				invoke_next_event<CMouseButtonReleasedEvent>(event);
+			case CEvent::EType::MouseButtonReleased:
+				invoke_next_event<SMouseButtonReleasedEvent>(event.as_mouse_button_released_event());
 				break;
-			case IEvent::EType::WindowClose:
-				invoke_next_event<CWindowCloseEvent>(event);
+			case CEvent::EType::WindowClose:
+				invoke_next_event<SWindowCloseEvent>(event.as_window_close_event());
 				break;
-			case IEvent::EType::WindowResize:
-				invoke_next_event<CWindowResizeEvent>(event);
+			case CEvent::EType::WindowResize:
+				invoke_next_event<SWindowResizeEvent>(event.as_window_resize_event());
 				break;
-			case IEvent::EType::WindowFocus:
-				invoke_next_event<CWindowFocusEvent>(event);
+			case CEvent::EType::WindowFocus:
+				invoke_next_event<SWindowFocusEvent>(event.as_window_focus_event());
 				break;
-			case IEvent::EType::WindowLostFocus:
-				invoke_next_event<CWindowLostFocusEvent>(event);
+			case CEvent::EType::WindowLostFocus:
+				invoke_next_event<SWindowLostFocusEvent>(event.as_window_lost_focus_event());
 				break;
-			case IEvent::EType::WindowMoved:
-				invoke_next_event<CWindowMovedEvent>(event);
+			case CEvent::EType::WindowMoved:
+				invoke_next_event<SWindowMovedEvent>(event.as_window_moved_event());
 				break;
 			default:
 				break;
@@ -186,13 +184,13 @@ namespace HyperCore
 		}
 
 		template <class T>
-		void invoke_next_event(const std::unique_ptr<IEvent>& event)
+		void invoke_next_event(const T& event)
 		{
 			const CEventFamilyGenerator::EventIdType event_id =
 				CEventFamilyGenerator::type<T>();
 
 			CEventWrapper<T>* event_wrapper = get_event_wrapper<T>(event_id);
-			event_wrapper->invoke(*static_cast<T*>(event.get()));
+			event_wrapper->invoke(event);
 		}
 
 	private:
@@ -201,6 +199,6 @@ namespace HyperCore
 			std::unique_ptr<IEventWrapperBase>>
 			m_event_wrappers{};
 
-		std::queue<std::unique_ptr<IEvent>> m_event_bus{};
+		std::queue<CEvent> m_event_bus{};
 	};
 } // namespace HyperCore
