@@ -16,3 +16,9 @@
 [submodule "Source/ThirdParty/SPIRV-Reflect"]
 	path = Source/ThirdParty/SPIRV-Reflect
 	url = https://github.com/KhronosGroup/SPIRV-Reflect
+[submodule "Source/ThirdParty/meshoptimizer"]
+	path = Source/ThirdParty/meshoptimizer
+	url = https://github.com/zeux/meshoptimizer
+[submodule "Source/ThirdParty/assimp"]
+	path = Source/ThirdParty/assimp
+	url = https://github.com/assimp/assimp

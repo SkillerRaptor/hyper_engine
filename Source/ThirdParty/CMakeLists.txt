@@ -167,17 +167,56 @@ if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
 endif ()
 
 #-------------------------------------------------------------------------------------------
+# assimp
+#-------------------------------------------------------------------------------------------
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_FRAMEWORK OFF CACHE BOOL "" FORCE)
+set(ASSIMP_DOUBLE_PRECISION OFF CACHE BOOL "" FORCE)
+set(ASSIMP_OPT_BUILD_PACKAGES OFF CACHE BOOL "" FORCE)
+set(ASSIMP_ANDROID_JNIIOSYSTEM OFF CACHE BOOL "" FORCE)
+set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ZLIB OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ASSIMP_TOOLS ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_COVERALLS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+set(ASSIMP_ERROR_MAX OFF CACHE BOOL "" FORCE)
+set(ASSIMP_ASAN OFF CACHE BOOL "" FORCE)
+set(ASSIMP_UBSAN OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INJECT_DEBUG_POSTFIX ON CACHE BOOL "" FORCE)
+set(ASSIMP_IGNORE_GIT_HASH ON CACHE BOOL "" FORCE)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/assimp)
+set_target_properties(assimp PROPERTIES FOLDER ThirdParty)
+
+#-------------------------------------------------------------------------------------------
 # fmt
 #-------------------------------------------------------------------------------------------
-set(FMT_PEDANTIC ON)
-set(FMT_WERROR OFF)
-set(FMT_DOC OFF)
-set(FMT_INSTALL OFF)
-set(FMT_TEST OFF)
-set(FMT_FUZZ OFF)
-set(FMT_CUDA_TEST OFF)
-set(FMT_OS ON)
-set(FMT_MODULE OFF)
+set(FMT_PEDANTIC ON CACHE BOOL "" FORCE)
+set(FMT_WERROR OFF CACHE BOOL "" FORCE)
+set(FMT_DOC OFF CACHE BOOL "" FORCE)
+set(FMT_INSTALL OFF CACHE BOOL "" FORCE)
+set(FMT_TEST OFF CACHE BOOL "" FORCE)
+set(FMT_FUZZ OFF CACHE BOOL "" FORCE)
+set(FMT_CUDA_TEST OFF CACHE BOOL "" FORCE)
+set(FMT_OS ON CACHE BOOL "" FORCE)
+set(FMT_MODULE OFF CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/fmt)
 set_target_properties(fmt PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(fmt PROPERTIES FOLDER ThirdParty)
+
+#-------------------------------------------------------------------------------------------
+# meshoptimizer
+#-------------------------------------------------------------------------------------------
+set(MESHOPT_BUILD_DEMO OFF CACHE BOOL "" FORCE)
+set(MESHOPT_BUILD_GLTFPACK OFF CACHE BOOL "" FORCE)
+set(MESHOPT_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/meshoptimizer)
+set_target_properties(meshoptimizer PROPERTIES FOLDER ThirdParty)
+
+#-------------------------------------------------------------------------------------------
+# stb_image
+#-------------------------------------------------------------------------------------------
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/stb_image)
+set_target_properties(stb_image PROPERTIES FOLDER ThirdParty)
