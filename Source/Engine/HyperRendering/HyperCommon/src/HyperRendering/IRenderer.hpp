@@ -23,9 +23,9 @@ namespace HyperRendering
 		virtual void command_clear(HyperMath::CVec4f clear_color) = 0;
 
 	protected:
-		virtual void handle_clear_command(const CClearCommand& clear_command) = 0;
+		virtual void handle_clear_command(const CRenderCommand::SClearCommand& clear_command) = 0;
 
 	protected:
-		std::queue<ICommand*> m_commands;
+		std::queue<CRenderCommand> m_render_commands;
 	};
 } // namespace HyperRendering

@@ -4,28 +4,30 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include <HyperCore/Assertion.hpp>
 #include <HyperRendering/RenderCommand.hpp>
 
 namespace HyperRendering
 {
-	ICommand::ICommand(ECommandType type)
-		: m_type(type)
+	CRenderCommand::CRenderCommand(CRenderCommand::SClearCommand clear_command)
+		: m_type(EType::Clear)
 	{
+		m_value.as_clear_command = clear_command;
 	}
-
-	ECommandType ICommand::type() const
+	
+	CRenderCommand::EType CRenderCommand::type() const
 	{
 		return m_type;
 	}
 
-	CClearCommand::CClearCommand(HyperMath::CVec4f clear_color)
-		: ICommand(ECommandType::Clear)
-		, m_clear_color(clear_color)
+	bool CRenderCommand::is_clear_command() const
 	{
+		return m_type == EType::Clear;
 	}
-
-	HyperMath::CVec4f CClearCommand::clear_color() const
+	
+	CRenderCommand::SClearCommand CRenderCommand::as_clear_command() const
 	{
-		return m_clear_color;
+		HYPERENGINE_ASSERT(m_type == EType::Clear);
+		return m_value.as_clear_command;
 	}
 } // namespace HyperRendering

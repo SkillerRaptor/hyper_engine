@@ -10,31 +10,35 @@
 
 namespace HyperRendering
 {
-	enum class ECommandType
-	{
-		Clear
-	};
-
-	class ICommand
+	class CRenderCommand
 	{
 	public:
-		explicit ICommand(ECommandType type);
-		virtual ~ICommand() = default;
+		enum class EType
+		{
+			Undefined,
+			Clear
+		};
 
-		ECommandType type() const;
+		struct SClearCommand
+		{
+			HyperMath::CVec4f clear_color;
+		};
 
-	private:
-		ECommandType m_type;
-	};
-
-	class CClearCommand : public ICommand
-	{
 	public:
-		CClearCommand(HyperMath::CVec4f clear_color);
-		
-		HyperMath::CVec4f clear_color() const;
+		explicit CRenderCommand(SClearCommand clear_command);
+
+		EType type() const;
+
+		bool is_clear_command() const;
+
+		SClearCommand as_clear_command() const;
 
 	private:
-		HyperMath::CVec4f m_clear_color;
+		EType m_type{ EType::Undefined };
+
+		union
+		{
+			SClearCommand as_clear_command;
+		} m_value{};
 	};
 } // namespace HyperRendering
