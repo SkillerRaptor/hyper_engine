@@ -5,11 +5,10 @@
  */
 
 #include <HyperCore/Assertion.hpp>
-#include <HyperCore/Logger.hpp>
-#include <HyperCore/Utilities/Prerequisites.hpp>
 #include <HyperPlatform/IWindow.hpp>
 #include <HyperRendering/Vulkan/Context.hpp>
 #include <HyperRendering/Vulkan/IPlatformContext.hpp>
+#include <HyperRendering/Vulkan/Renderer.hpp>
 #include <cstring>
 #include <string>
 #include <vulkan/vulkan.h>
@@ -81,6 +80,8 @@ namespace HyperRendering
 			{
 				return false;
 			}
+			
+			m_renderer = new CRenderer();
 
 			return true;
 		}
@@ -258,7 +259,6 @@ namespace HyperRendering
 		
 		IRenderer& CContext::renderer()
 		{
-			HYPERENGINE_ASSERT_NOT_REACHED();
 			return *m_renderer;
 		}
 

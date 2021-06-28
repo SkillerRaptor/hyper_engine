@@ -30,4 +30,15 @@ namespace HyperRendering
 		HYPERENGINE_ASSERT(m_type == EType::Clear);
 		return m_value.as_clear_command;
 	}
+	
+	const char* CRenderCommand::to_string() const
+	{
+		switch(m_type)
+		{
+		case EType::Clear:
+			return "clear";
+		default:
+			return "undefined";
+		}
+	}
 } // namespace HyperRendering

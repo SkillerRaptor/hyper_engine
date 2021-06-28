@@ -71,6 +71,10 @@ namespace HyperRendering::Vulkan
 	{
 		CGpu::SQueueFamilies queue_families =
 			find_queue_families(physical_device);
+
+		bool device_extensions_supported =
+			check_device_extension_support(physical_device);
+
 		return queue_families.complete();
 	}
 
@@ -120,6 +124,36 @@ namespace HyperRendering::Vulkan
 		}
 
 		return queue_families;
+	}
+
+	bool CGpu::check_device_extension_support(
+		const VkPhysicalDevice& physical_device)
+	{
+		uint32_t available_extension_properties_count = 0;
+		vkEnumerateDeviceExtensionProperties(
+			physical_device,
+			nullptr,
+			&available_extension_properties_count,
+			nullptr);
+
+		std::vector<VkExtensionProperties> available_extensions_properties(
+			available_extension_properties_count);
+		vkEnumerateDeviceExtensionProperties(
+			physical_device,
+			nullptr,
+			&available_extension_properties_count,
+			available_extensions_properties.data());
+
+		std::set<std::string> required_extensions(
+			s_device_extensions.begin(), s_device_extensions.end());
+
+		for (const VkExtensionProperties& extension_properties :
+			 available_extensions_properties)
+		{
+			required_extensions.erase(extension_properties.extensionName);
+		}
+
+		return required_extensions.empty();
 	}
 
 	CGpu::SQueueFamilies CGpu::get_queue_families() const
@@ -192,11 +226,14 @@ namespace HyperRendering::Vulkan
 
 		VkDeviceCreateInfo device_create_info{};
 		device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		device_create_info.queueCreateInfoCount =  static_cast<uint32_t>(device_queue_create_infos.size());
+		device_create_info.queueCreateInfoCount =
+			static_cast<uint32_t>(device_queue_create_infos.size());
 		device_create_info.pQueueCreateInfos = device_queue_create_infos.data();
 		device_create_info.pEnabledFeatures = &physical_device_features;
-		device_create_info.enabledExtensionCount = 0;
-		device_create_info.ppEnabledExtensionNames = nullptr;
+		device_create_info.enabledExtensionCount =
+			static_cast<uint32_t>(CGpu::s_device_extensions.size());
+		device_create_info.ppEnabledExtensionNames =
+			CGpu::s_device_extensions.data();
 		device_create_info.enabledLayerCount = layer_count;
 		device_create_info.ppEnabledLayerNames = layers;
 
@@ -224,5 +261,10 @@ namespace HyperRendering::Vulkan
 			&m_presentation_queue);
 
 		return true;
+	}
+
+	const VkDevice& CDevice::logical_device() const
+	{
+		return m_logical_device;
 	}
 } // namespace HyperRendering::Vulkan

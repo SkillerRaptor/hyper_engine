@@ -8,7 +8,7 @@
 
 #include <HyperRendering/IRenderer.hpp>
 
-namespace HyperRendering::OpenGL33
+namespace HyperRendering::Vulkan
 {
 	class CRenderer : public IRenderer
 	{
@@ -22,4 +22,4 @@ namespace HyperRendering::OpenGL33
 		virtual void handle_clear_command(
 			const CRenderCommand::SClearCommand& clear_command) override;
 	};
-} // namespace HyperRendering::OpenGL33
+} // namespace HyperRendering::Vulkan

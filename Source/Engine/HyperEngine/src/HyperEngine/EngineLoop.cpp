@@ -67,10 +67,11 @@ namespace HyperEngine
 			m_event_manager.process_next_event();
 
 			HyperRendering::IRenderer& renderer = m_graphics_context->renderer();
-			renderer.begin_frame({ 1.0f, 0.0f, 1.0f, 1.0f });
-			// TODO: Rendering
+			renderer.begin_frame();
+			renderer.command_clear({ 0.25f, 0.25f, 0.25f, 0.25f });
+			
 			renderer.end_frame();
-
+			
 			m_graphics_context->update();
 		}
 	}

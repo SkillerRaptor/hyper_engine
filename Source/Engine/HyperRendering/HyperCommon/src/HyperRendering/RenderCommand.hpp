@@ -32,6 +32,8 @@ namespace HyperRendering
 		bool is_clear_command() const;
 
 		SClearCommand as_clear_command() const;
+		
+		const char* to_string() const;
 
 	private:
 		EType m_type{ EType::Undefined };

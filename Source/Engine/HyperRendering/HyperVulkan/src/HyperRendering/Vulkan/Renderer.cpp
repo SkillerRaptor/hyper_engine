@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperRendering/OpenGL33/Renderer.hpp>
-#include <HyperRendering/OpenGL33/PlatformInclude.hpp>
+#include <HyperRendering/Vulkan/Renderer.hpp>
 
-namespace HyperRendering::OpenGL33
+namespace HyperRendering::Vulkan
 {
 	void CRenderer::begin_frame()
 	{
@@ -16,13 +15,13 @@ namespace HyperRendering::OpenGL33
 			m_render_commands.pop();
 		}
 	}
-
+	
 	void CRenderer::end_frame()
 	{
 		while (!m_render_commands.empty())
 		{
 			const CRenderCommand& render_command = m_render_commands.front();
-
+			
 			switch (render_command.type())
 			{
 			case CRenderCommand::EType::Clear:
@@ -31,25 +30,23 @@ namespace HyperRendering::OpenGL33
 			default:
 				break;
 			}
-
+			
 			m_render_commands.pop();
 		}
 	}
-
+	
 	void CRenderer::command_clear(HyperMath::CVec4f clear_color)
 	{
 		CRenderCommand::SClearCommand clear_command{};
 		clear_command.clear_color = clear_color;
-
+		
 		m_render_commands.emplace(clear_command);
 	}
-
+	
 	void CRenderer::handle_clear_command(
 		const CRenderCommand::SClearCommand& clear_command)
 	{
 		const HyperMath::CVec4f& clear_color = clear_command.clear_color;
-		glClearColor(
-			clear_color.r, clear_color.g, clear_color.b, clear_color.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
 	}
-} // namespace HyperRendering::OpenGL33
+}

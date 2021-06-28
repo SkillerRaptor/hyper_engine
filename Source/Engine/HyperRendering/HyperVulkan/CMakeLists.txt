@@ -32,12 +32,14 @@ set(CORE_SOURCES
         src/HyperRendering/Vulkan/Context.cpp
         src/HyperRendering/Vulkan/Device.cpp
         src/HyperRendering/Vulkan/IPlatformContext.cpp
+        src/HyperRendering/Vulkan/Renderer.cpp
         src/HyperRendering/Vulkan/SwapChain.cpp)
 
 set(CORE_HEADERS
         src/HyperRendering/Vulkan/Context.hpp
         src/HyperRendering/Vulkan/Device.hpp
         src/HyperRendering/Vulkan/IPlatformContext.hpp
+        src/HyperRendering/Vulkan/Renderer.hpp
         src/HyperRendering/Vulkan/SwapChain.hpp)
 
 set(SOURCES ${CORE_SOURCES} ${PLATFORM_SOURCES} ${HYPERCOMMON_SOURCES})

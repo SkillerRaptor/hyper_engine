@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <array>
 #include <optional>
 
 using VkDevice = struct VkDevice_T*;
@@ -18,6 +19,10 @@ namespace HyperRendering::Vulkan
 
 	class CGpu
 	{
+	public:
+		static constexpr const std::array<const char*, 1>
+			s_device_extensions = { "VK_KHR_swapchain" };
+
 	public:
 		struct SQueueFamilies
 		{
@@ -39,8 +44,11 @@ namespace HyperRendering::Vulkan
 		bool is_physical_device_suitable(
 			const VkPhysicalDevice& physical_device) const;
 
-		SQueueFamilies find_queue_families(
-			const VkPhysicalDevice& physical_device) const;
+		SQueueFamilies
+			find_queue_families(const VkPhysicalDevice& physical_device) const;
+		
+		static bool check_device_extension_support(
+			const VkPhysicalDevice& physical_device);
 
 	private:
 		const CContext* m_context{ nullptr };
@@ -53,6 +61,8 @@ namespace HyperRendering::Vulkan
 	public:
 		bool initialize(const CContext* context);
 		void shutdown();
+
+		const VkDevice& logical_device() const;
 
 	private:
 		bool create_logical_device();
