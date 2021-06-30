@@ -17,9 +17,9 @@ namespace HyperCore
 	public:
 		using ValueType = T;
 		using Reference = ValueType&;
-		using ConstReference = const Reference;
+		using ConstReference = const ValueType&;
 		using Pointer = ValueType*;
-		using ConstPointer = const Pointer;
+		using ConstPointer = const ValueType*;
 		using SizeType = size_t;
 		using DifferenceType = ptrdiff_t;
 
@@ -33,7 +33,7 @@ namespace HyperCore
 
 			for (SizeType i = 0; i < m_size; ++i)
 			{
-				auto* address = reinterpret_cast<IndexType*>(&m_data[i]);
+				IndexType* address = reinterpret_cast<IndexType*>(&m_data[i]);
 				*address = static_cast<IndexType>(i) + 1;
 			}
 		}
@@ -75,7 +75,7 @@ namespace HyperCore
 		{
 			for (SizeType i = 0; i < m_size; ++i)
 			{
-				auto* address = reinterpret_cast<IndexType*>(&m_data[i]);
+				IndexType* address = reinterpret_cast<IndexType*>(&m_data[i]);
 				*address = static_cast<IndexType>(i) + 1;
 			}
 

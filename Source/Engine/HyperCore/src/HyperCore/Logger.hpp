@@ -7,13 +7,13 @@
 #pragma once
 
 #include <HyperCore/Formatter.hpp>
-#include <string>
+#include <string_view>
 
 namespace HyperCore
 {
 	class CLogger
 	{
-	private:
+	public:
 		enum class ELevel
 		{
 			Info,
@@ -25,42 +25,42 @@ namespace HyperCore
 
 	public:
 		template <typename... Args>
-		static void log(ELevel level, const std::string& format, Args&&... args)
+		static void log(ELevel level, std::string_view format, Args&&... args)
 		{
 			internal_log(level, CFormatter::format(format, std::forward<Args>(args)...));
 		}
 
 		template <typename... Args>
-		static void info(const std::string& format, Args&&... args)
+		static void info(std::string_view format, Args&&... args)
 		{
 			log(ELevel::Info, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
-		static void warning(const std::string& format, Args&&... args)
+		static void warning(std::string_view format, Args&&... args)
 		{
 			log(ELevel::Warning, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
-		static void error(const std::string& format, Args&&... args)
+		static void error(std::string_view format, Args&&... args)
 		{
 			log(ELevel::Error, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
-		static void fatal(const std::string& format, Args&&... args)
+		static void fatal(std::string_view format, Args&&... args)
 		{
 			log(ELevel::Fatal, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
-		static void debug(const std::string& format, Args&&... args)
+		static void debug(std::string_view format, Args&&... args)
 		{
 			log(ELevel::Debug, format, std::forward<Args>(args)...);
 		}
 
 	private:
-		static void internal_log(ELevel level, const std::string& string);
+		static void internal_log(ELevel level, std::string_view string);
 	};
 } // namespace HyperCore

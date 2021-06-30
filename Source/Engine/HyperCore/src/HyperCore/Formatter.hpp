@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include <string>
 #include <sstream>
+#include <string>
+#include <string_view>
 #include <utility>
 
 namespace HyperCore
@@ -16,48 +17,48 @@ namespace HyperCore
 	{
 	public:
 		template <typename... Args>
-		static std::string format(const std::string& format, Args&&... args)
+		static std::string format(std::string_view format, Args&&... args)
 		{
 			if (format.empty())
 			{
-				return format;
+				return format.data();
 			}
 
 			constexpr const size_t args_count = sizeof...(Args);
 			if constexpr (args_count == 0)
 			{
-				return format;
+				return format.data();
 			}
 
+			bool is_formatting = false;
+			uint32_t argument_index = 0;
 			std::stringstream format_stream;
-			uint32_t index = 0;
-			bool formatting = false;
 			for (const char c : format)
 			{
 				switch (c)
 				{
 				case '{':
-					formatting = true;
+					is_formatting = true;
 					break;
 				case '}':
 				{
-					if (!formatting)
+					if (!is_formatting)
 					{
 						break;
 					}
 
 					format_sequence(
-						index,
+						argument_index,
 						format_stream,
 						std::make_index_sequence<args_count>(),
 						std::forward<Args>(args)...);
-					++index;
+					++argument_index;
 
-					formatting = false;
+					is_formatting = false;
 					break;
 				}
 				default:
-					if (formatting)
+					if (is_formatting)
 					{
 						break;
 					}
@@ -71,24 +72,24 @@ namespace HyperCore
 		}
 
 	private:
-		template <typename... Args, size_t... I>
+		template <size_t... I, typename... Args>
 		static void format_sequence(
-			uint32_t index,
+			uint32_t argument_index,
 			std::stringstream& format_stream,
 			std::index_sequence<I...>,
 			Args&&... args)
 		{
-			(format_character(args, index, I, format_stream), ...);
+			(format_character(argument_index, I, format_stream, args), ...);
 		}
 
 		template <typename T>
 		static void format_character(
-			T value,
-			size_t index,
-			size_t current_index,
-			std::stringstream& format_stream)
+			size_t argument_index,
+			size_t current_argument_index,
+			std::stringstream& format_stream,
+			T value)
 		{
-			if (index == current_index)
+			if (argument_index == current_argument_index)
 			{
 				format_stream << value;
 			}

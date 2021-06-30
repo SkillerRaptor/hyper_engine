@@ -27,8 +27,7 @@ namespace HyperCore
 		template <typename>
 		static EventIdType type()
 		{
-			static const EventIdType identifier =
-				CEventFamilyGenerator::identifier();
+			static const EventIdType identifier = CEventFamilyGenerator::identifier();
 			return identifier;
 		}
 
@@ -46,12 +45,10 @@ namespace HyperCore
 				std::is_base_of_v<IEvent, T>,
 				"Template argument T is not base of IEvent");
 
-			const CEventFamilyGenerator::EventIdType event_id =
-				CEventFamilyGenerator::type<T>();
+			const CEventFamilyGenerator::EventIdType event_id = CEventFamilyGenerator::type<T>();
 			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
 			{
-				m_event_wrappers[event_id] =
-					std::make_unique<CEventWrapper<T>>();
+				m_event_wrappers[event_id] = std::make_unique<CEventWrapper<T>>();
 			}
 
 			m_event_bus.emplace(event);
@@ -64,12 +61,10 @@ namespace HyperCore
 				std::is_base_of_v<IEvent, T>,
 				"Template argument T is not base of IEvent");
 
-			const CEventFamilyGenerator::EventIdType event_id =
-				CEventFamilyGenerator::type<T>();
+			const CEventFamilyGenerator::EventIdType event_id = CEventFamilyGenerator::type<T>();
 			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
 			{
-				m_event_wrappers[event_id] =
-					std::make_unique<CEventWrapper<T>>();
+				m_event_wrappers[event_id] = std::make_unique<CEventWrapper<T>>();
 			}
 
 			m_event_bus.emplace(T(std::forward<Args>(args)...));
@@ -87,51 +82,40 @@ namespace HyperCore
 			switch (event.type())
 			{
 			case CEvent::EType::KeyPressed:
-				invoke_next_event<SKeyPressedEvent>(
-					event.as_key_pressed_event());
+				invoke_next_event<SKeyPressedEvent>(event.as_key_pressed_event());
 				break;
 			case CEvent::EType::KeyReleased:
-				invoke_next_event<SKeyReleasedEvent>(
-					event.as_key_released_event());
+				invoke_next_event<SKeyReleasedEvent>(event.as_key_released_event());
 				break;
 			case CEvent::EType::KeyTyped:
 				invoke_next_event<SKeyTypedEvent>(event.as_key_typed_event());
 				break;
 			case CEvent::EType::MouseMoved:
-				invoke_next_event<SMouseMovedEvent>(
-					event.as_mouse_moved_event());
+				invoke_next_event<SMouseMovedEvent>(event.as_mouse_moved_event());
 				break;
 			case CEvent::EType::MouseScrolled:
-				invoke_next_event<SMouseScrolledEvent>(
-					event.as_mouse_scrolled_event());
+				invoke_next_event<SMouseScrolledEvent>(event.as_mouse_scrolled_event());
 				break;
 			case CEvent::EType::MouseButtonPressed:
-				invoke_next_event<SMouseButtonPressedEvent>(
-					event.as_mouse_button_pressed_event());
+				invoke_next_event<SMouseButtonPressedEvent>(event.as_mouse_button_pressed_event());
 				break;
 			case CEvent::EType::MouseButtonReleased:
-				invoke_next_event<SMouseButtonReleasedEvent>(
-					event.as_mouse_button_released_event());
+				invoke_next_event<SMouseButtonReleasedEvent>(event.as_mouse_button_released_event());
 				break;
 			case CEvent::EType::WindowClose:
-				invoke_next_event<SWindowCloseEvent>(
-					event.as_window_close_event());
+				invoke_next_event<SWindowCloseEvent>(event.as_window_close_event());
 				break;
 			case CEvent::EType::WindowResize:
-				invoke_next_event<SWindowResizeEvent>(
-					event.as_window_resize_event());
+				invoke_next_event<SWindowResizeEvent>(event.as_window_resize_event());
 				break;
 			case CEvent::EType::WindowFocus:
-				invoke_next_event<SWindowFocusEvent>(
-					event.as_window_focus_event());
+				invoke_next_event<SWindowFocusEvent>(event.as_window_focus_event());
 				break;
 			case CEvent::EType::WindowLostFocus:
-				invoke_next_event<SWindowLostFocusEvent>(
-					event.as_window_lost_focus_event());
+				invoke_next_event<SWindowLostFocusEvent>(event.as_window_lost_focus_event());
 				break;
 			case CEvent::EType::WindowMoved:
-				invoke_next_event<SWindowMovedEvent>(
-					event.as_window_moved_event());
+				invoke_next_event<SWindowMovedEvent>(event.as_window_moved_event());
 				break;
 			default:
 				break;
@@ -149,12 +133,10 @@ namespace HyperCore
 				std::is_base_of_v<IEvent, T>,
 				"Template argument T is not base of IEvent");
 
-			const CEventFamilyGenerator::EventIdType event_id =
-				CEventFamilyGenerator::type<T>();
+			const CEventFamilyGenerator::EventIdType event_id = CEventFamilyGenerator::type<T>();
 			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
 			{
-				m_event_wrappers[event_id] =
-					std::make_unique<CEventWrapper<T>>();
+				m_event_wrappers[event_id] = std::make_unique<CEventWrapper<T>>();
 			}
 
 			CEventWrapper<T>* event_wrapper = get_event_wrapper<T>(event_id);
@@ -168,8 +150,7 @@ namespace HyperCore
 				std::is_base_of_v<IEvent, T>,
 				"Template argument T is not base of IEvent");
 
-			const CEventFamilyGenerator::EventIdType event_id =
-				CEventFamilyGenerator::type<T>();
+			const CEventFamilyGenerator::EventIdType event_id = CEventFamilyGenerator::type<T>();
 			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
 			{
 				CLogger::error(
@@ -187,18 +168,15 @@ namespace HyperCore
 		CEventWrapper<T>*
 			get_event_wrapper(CEventFamilyGenerator::EventIdType event_id)
 		{
-			const std::unique_ptr<IEventWrapperBase>& event_wrapper_base =
-				m_event_wrappers[event_id];
-			CEventWrapper<T>* event_wrapper =
-				static_cast<CEventWrapper<T>*>(event_wrapper_base.get());
+			const std::unique_ptr<IEventWrapperBase>& event_wrapper_base = m_event_wrappers[event_id];
+			CEventWrapper<T>* event_wrapper = static_cast<CEventWrapper<T>*>(event_wrapper_base.get());
 			return event_wrapper;
 		}
 
 		template <class T>
 		void invoke_next_event(const T& event)
 		{
-			const CEventFamilyGenerator::EventIdType event_id =
-				CEventFamilyGenerator::type<T>();
+			const CEventFamilyGenerator::EventIdType event_id = CEventFamilyGenerator::type<T>();
 
 			CEventWrapper<T>* event_wrapper = get_event_wrapper<T>(event_id);
 			event_wrapper->invoke(event);

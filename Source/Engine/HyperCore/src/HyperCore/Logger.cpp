@@ -10,7 +10,7 @@
 
 namespace HyperCore
 {
-	void CLogger::internal_log(CLogger::ELevel level, const std::string& string)
+	void CLogger::internal_log(CLogger::ELevel level, std::string_view string)
 	{
 		const fmt::color level_color = [&level]()
 		{

@@ -23,7 +23,7 @@ namespace HyperCore
 	struct SEventListener
 	{
 		std::string name;
-		std::function<void(const T&)> function;
+		std::function<void(const T&)> callback;
 	};
 
 	template <class T>
@@ -38,36 +38,32 @@ namespace HyperCore
 		{
 			for (const SEventListener<T>& event_listener : m_event_listeners)
 			{
-				event_listener.function(event);
+				event_listener.callback(event);
 			}
 		}
 
 		void register_listener(
 			const std::string& name,
-			const std::function<void(const T&)>& function)
+			const std::function<void(const T&)>& callback)
 		{
 			for (const SEventListener<T>& event_listener : m_event_listeners)
 			{
 				if (event_listener.name == name)
 				{
-					CLogger::error("Failed to register event listener: name "
-								   "already in use!");
+					CLogger::error("Failed to register event listener: name already in use!");
 					return;
 				}
 			}
 
 			SEventListener<T> event_listener{};
 			event_listener.name = name;
-			event_listener.function = std::move(function);
+			event_listener.callback = std::move(callback);
 			m_event_listeners.push_back(std::move(event_listener));
 		}
 
 		void unregister_listener(const std::string& name)
 		{
-			for (typename std::vector<SEventListener<T>>::iterator it =
-					 m_event_listeners.begin();
-				 it != m_event_listeners.end();
-				 ++it)
+			for (typename std::vector<SEventListener<T>>::iterator it = m_event_listeners.begin(); it != m_event_listeners.end(); ++it)
 			{
 				if (it->name == name)
 				{
