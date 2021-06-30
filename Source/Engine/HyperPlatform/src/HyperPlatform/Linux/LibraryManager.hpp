@@ -6,8 +6,8 @@
 
 #pragma once
 
-#	include <HyperCore/Memory/SparsePoolAllocator.hpp>
-#	include <HyperPlatform/ILibraryManager.hpp>
+#include <HyperCore/Memory/SparsePoolAllocator.hpp>
+#include <HyperPlatform/ILibraryManager.hpp>
 
 namespace HyperPlatform::Linux
 {
@@ -16,10 +16,10 @@ namespace HyperPlatform::Linux
 	private:
 		struct SLibraryData
 		{
-			uint32_t magic_number;
+			uint32_t magic_number{ 0 };
 
 			std::string path;
-			void* library;
+			void* library{ nullptr };
 		};
 
 	public:

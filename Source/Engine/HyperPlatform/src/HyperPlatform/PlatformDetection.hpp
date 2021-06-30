@@ -19,7 +19,6 @@
 #	define HYPERENGINE_PLATFORM_DESKTOP 1
 #	define HYPERENGINE_PLATFORM_WINDOWS 1
 #	define HYPERENGINE_PLATFORM_WINAPI 1
-
 #	if !defined(_WIN64)
 #		error Unsupported Windows 64 CPU (the only supported is x86-64).
 #	endif
@@ -27,7 +26,6 @@
 #	define HYPERENGINE_PLATFORM_DESKTOP 1
 #	define HYPERENGINE_PLATFORM_LINUX 1
 #	define HYPERENGINE_PLATFORM_POSIX 1
-
 #	if !HYPERENGINE_PLATFORM_X64
 #		error Unsupported Linux CPU (the only supported are x86-64).
 #	endif

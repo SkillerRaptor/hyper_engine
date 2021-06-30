@@ -17,10 +17,10 @@ namespace HyperPlatform::Windows
 	private:
 		struct SLibraryData
 		{
-			uint32_t magic_number;
+			uint32_t magic_number{ 0 };
 
 			std::string path;
-			HINSTANCE library;
+			HINSTANCE library{ nullptr };
 		};
 
 	public:

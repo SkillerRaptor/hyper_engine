@@ -6,7 +6,6 @@
 
 #include <HyperCore/Logger.hpp>
 #include <HyperCore/Events/EventManager.hpp>
-#include <HyperCore/Events/WindowEvents.hpp>
 #include <HyperCore/Utilities/Prerequisites.hpp>
 #include <HyperPlatform/Linux/Window.hpp>
 #include <X11/Xutil.h>
@@ -42,10 +41,9 @@ namespace HyperPlatform::Linux
 		XSelectInput(
 			m_display,
 			m_window,
-			StructureNotifyMask | KeyPressMask | KeyReleaseMask |
-				PointerMotionMask | ButtonPressMask | ButtonReleaseMask |
-				ExposureMask | FocusChangeMask | VisibilityChangeMask |
-				EnterWindowMask | LeaveWindowMask | PropertyChangeMask);
+			StructureNotifyMask | KeyPressMask | KeyReleaseMask | PointerMotionMask | ButtonPressMask |
+				ButtonReleaseMask | ExposureMask | FocusChangeMask | VisibilityChangeMask | EnterWindowMask |
+				LeaveWindowMask | PropertyChangeMask);
 		XMapWindow(m_display, m_window);
 
 		return true;
@@ -76,8 +74,7 @@ namespace HyperPlatform::Linux
 					break;
 				}
 
-				if (event.xclient.message_type ==
-					XInternAtom(m_display, "WM_PROTOCOLS", false))
+				if (event.xclient.message_type == XInternAtom(m_display, "WM_PROTOCOLS", false))
 				{
 					const Atom protocol = event.xclient.data.l[0];
 					if (protocol == None)
@@ -85,24 +82,17 @@ namespace HyperPlatform::Linux
 						break;
 					}
 
-					if (protocol ==
-						XInternAtom(m_display, "WM_DELETE_WINDOW", false))
+					if (protocol == XInternAtom(m_display, "WM_DELETE_WINDOW", false))
 					{
 						m_event_manager->invoke<HyperCore::SWindowCloseEvent>();
 					}
-					else if (
-						protocol ==
-						XInternAtom(m_display, "NET_WM_PING", false))
+					else if (protocol == XInternAtom(m_display, "NET_WM_PING", false))
 					{
 						XEvent reply = event;
 						reply.xclient.window = m_window;
 
-						XSendEvent(
-							m_display,
-							m_root_window,
-							False,
-							SubstructureNotifyMask | SubstructureRedirectMask,
-							&reply);
+						static constexpr const long event_mask = SubstructureNotifyMask | SubstructureRedirectMask;
+						XSendEvent(m_display, m_root_window, False, event_mask, &reply);
 					}
 
 					break;
@@ -180,15 +170,7 @@ namespace HyperPlatform::Linux
 		int window_x = 0;
 		int window_y = 0;
 
-		XTranslateCoordinates(
-			m_display,
-			m_window,
-			m_root_window,
-			0,
-			0,
-			&window_x,
-			&window_y,
-			&dummy);
+		XTranslateCoordinates(m_display, m_window, m_root_window, 0, 0, &window_x, &window_y, &dummy);
 
 		x = window_x;
 		y = window_y;

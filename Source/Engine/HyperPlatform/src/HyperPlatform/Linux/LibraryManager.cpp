@@ -11,9 +11,7 @@ namespace HyperPlatform::Linux
 {
 	CLibraryManager::~CLibraryManager()
 	{
-		for (HyperCore::CSparsePoolAllocator<SLibraryData>::SizeType i = 0;
-			 i < m_storage.size();
-			 ++i)
+		for (HyperCore::CSparsePoolAllocator<SLibraryData>::SizeType i = 0; i < m_storage.size(); ++i)
 		{
 			internal_unload(m_storage[i]);
 		}
@@ -30,13 +28,11 @@ namespace HyperPlatform::Linux
 
 		if (data.library == nullptr)
 		{
-			HyperCore::CLogger::error(
-				"Failed to load dynamic library: {}!", dlerror());
+			HyperCore::CLogger::error("Failed to load dynamic library: {}!", dlerror());
 			return CLibraryHandle(-1);
 		}
 
-		return CLibraryHandle(
-			(data.magic_number << 16) | static_cast<uint32_t>(index));
+		return CLibraryHandle((data.magic_number << 16) | static_cast<uint32_t>(index));
 	}
 
 	void CLibraryManager::unload(CLibraryHandle handle)

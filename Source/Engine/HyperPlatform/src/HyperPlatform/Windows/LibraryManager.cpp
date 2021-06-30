@@ -10,12 +10,11 @@ namespace HyperPlatform::Windows
 {
 	CLibraryManager::~CLibraryManager()
 	{
-		for (HyperCore::CSparsePoolAllocator<SLibraryData>::SizeType i = 0;
-			 i < m_storage.size();
-			 ++i)
+		for (HyperCore::CSparsePoolAllocator<SLibraryData>::SizeType i = 0; i < m_storage.size(); ++i)
 		{
 			internal_unload(m_storage[i]);
 		}
+		
 		m_storage.clear();
 	}
 
@@ -29,13 +28,11 @@ namespace HyperPlatform::Windows
 
 		if (data.library == nullptr)
 		{
-			HyperCore::CLogger::error(
-				"Failed to load dynamic library: {}!", GetLastError());
+			HyperCore::CLogger::error("Failed to load dynamic library: {}!", GetLastError());
 			return CLibraryHandle(-1);
 		}
 
-		return CLibraryHandle(
-			(data.magic_number << 16) | static_cast<uint32_t>(index));
+		return CLibraryHandle((data.magic_number << 16) | static_cast<uint32_t>(index));
 	}
 
 	void CLibraryManager::unload(CLibraryHandle handle)
@@ -60,8 +57,7 @@ namespace HyperPlatform::Windows
 			return nullptr;
 		}
 
-		return reinterpret_cast<void*>(
-			GetProcAddress(data.library, function.c_str()));
+		return reinterpret_cast<void*>(GetProcAddress(data.library, function.c_str()));
 	}
 
 	void CLibraryManager::internal_unload(SLibraryData& data)

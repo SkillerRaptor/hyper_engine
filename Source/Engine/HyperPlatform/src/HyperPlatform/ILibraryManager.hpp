@@ -16,8 +16,7 @@ namespace HyperPlatform
 	{
 	public:
 		static constexpr const uint32_t s_index_mask{ HyperCore::Mask32(16) };
-		static constexpr const uint32_t s_version_mask{ ~HyperCore::Mask32(
-			16) };
+		static constexpr const uint32_t s_version_mask{ ~HyperCore::Mask32(16) };
 
 	public:
 		explicit CLibraryHandle(uint32_t handle = 0);
