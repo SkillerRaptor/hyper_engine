@@ -24,13 +24,10 @@ namespace HyperRendering
 	{
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
 			VkDebugUtilsMessageSeverityFlagBitsEXT severity_flags,
-			VkDebugUtilsMessageTypeFlagsEXT type_flags,
+			VkDebugUtilsMessageTypeFlagsEXT,
 			const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-			void* user_data)
+			void*)
 		{
-			HYPERENGINE_NOT_USED(type_flags);
-			HYPERENGINE_NOT_USED(user_data);
-
 			if (severity_flags >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 			{
 				HyperCore::CLogger::fatal(

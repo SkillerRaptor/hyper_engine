@@ -128,10 +128,8 @@ namespace HyperPlatform::Linux
 		return m_title;
 	}
 
-	void CWindow::set_resizable(bool resizeable)
+	void CWindow::set_resizable(bool)
 	{
-		HYPERENGINE_NOT_USED(resizeable);
-
 		// TODO: Implement set_resizable(bool resizeable)
 	}
 
@@ -140,10 +138,8 @@ namespace HyperPlatform::Linux
 		return m_resizable;
 	}
 
-	void CWindow::set_visible(bool visible)
+	void CWindow::set_visible(bool)
 	{
-		HYPERENGINE_NOT_USED(visible);
-
 		// TODO: Implement set_visible(bool visible)
 	}
 
@@ -152,10 +148,8 @@ namespace HyperPlatform::Linux
 		return m_visible;
 	}
 
-	void CWindow::set_decorated(bool decorated)
+	void CWindow::set_decorated(bool)
 	{
-		HYPERENGINE_NOT_USED(decorated);
-
 		// TODO: Implement set_decorated(bool decorated)
 	}
 
@@ -164,10 +158,8 @@ namespace HyperPlatform::Linux
 		return m_decorated;
 	}
 
-	void CWindow::set_focused(bool focused)
+	void CWindow::set_focused(bool)
 	{
-		HYPERENGINE_NOT_USED(focused);
-
 		// TODO: Implement set_focused(bool focused)
 	}
 
@@ -178,8 +170,7 @@ namespace HyperPlatform::Linux
 
 	void CWindow::set_position(size_t x, size_t y)
 	{
-		XMoveWindow(
-			m_display, m_window, static_cast<int>(x), static_cast<int>(y));
+		XMoveWindow(m_display, m_window, static_cast<int>(x), static_cast<int>(y));
 		XFlush(m_display);
 	}
 
