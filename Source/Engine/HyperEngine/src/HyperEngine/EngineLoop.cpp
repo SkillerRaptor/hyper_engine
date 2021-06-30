@@ -27,14 +27,11 @@ namespace HyperEngine
 
 		m_library_manager = HyperPlatform::ILibraryManager::construct();
 
-		m_graphics_library =
-			m_library_manager->load(HyperRendering::convert_to_library(
-				HyperRendering::RenderingAPI::OpenGL33));
+		const char* library_name = HyperRendering::convert_to_library(HyperRendering::RenderingAPI::OpenGL33);
+		m_graphics_library = m_library_manager->load(library_name);
 
-		void* create_context_address = m_library_manager->get_function_address(
-			m_graphics_library, "create_context");
-		CreateContextFunction create_context =
-			reinterpret_cast<CreateContextFunction>(create_context_address);
+		void* create_context_address = m_library_manager->get_function_address(m_graphics_library, "create_context");
+		CreateContextFunction create_context = reinterpret_cast<CreateContextFunction>(create_context_address);
 		m_graphics_context = create_context();
 		m_graphics_context->initialize(m_window);
 
@@ -44,7 +41,7 @@ namespace HyperEngine
 			{
 				m_running = false;
 			});
-		
+
 		m_running = true;
 	}
 
@@ -71,7 +68,7 @@ namespace HyperEngine
 			renderer.command_clear({ 0.25f, 0.25f, 0.25f, 0.25f });
 			
 			renderer.end_frame();
-			
+
 			m_graphics_context->update();
 		}
 	}
