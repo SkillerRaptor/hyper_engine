@@ -19,7 +19,6 @@ namespace HyperRendering::Vulkan
 		virtual void command_clear(HyperMath::CVec4f clear_color) override;
 
 	private:
-		virtual void handle_clear_command(
-			const CRenderCommand::SClearCommand& clear_command) override;
+		virtual void handle_clear_command(const CRenderCommand::SClearCommand& clear_command) override;
 	};
 } // namespace HyperRendering::Vulkan

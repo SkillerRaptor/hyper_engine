@@ -13,8 +13,7 @@
 
 namespace HyperRendering::OpenGL33::Windows
 {
-	using PFNWGLCREATECONTEXTATTRIBSARBPROC =
-		HGLRC(WINAPI*)(HDC, HGLRC, const int32_t*);
+	using PFNWGLCREATECONTEXTATTRIBSARBPROC = HGLRC(WINAPI*)(HDC, HGLRC, const int32_t*);
 
 	bool CPlatformContext::initialize(HyperPlatform::IWindow* window)
 	{
@@ -23,8 +22,7 @@ namespace HyperRendering::OpenGL33::Windows
 		PIXELFORMATDESCRIPTOR pixel_format_description{};
 		pixel_format_description.nSize = sizeof(PIXELFORMATDESCRIPTOR);
 		pixel_format_description.nVersion = 1;
-		pixel_format_description.dwFlags =
-			PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+		pixel_format_description.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 		pixel_format_description.iPixelType = PFD_TYPE_RGBA;
 		pixel_format_description.cColorBits = 32;
 		pixel_format_description.cRedBits = 8;
@@ -35,42 +33,33 @@ namespace HyperRendering::OpenGL33::Windows
 		pixel_format_description.cStencilBits = 8;
 		pixel_format_description.iLayerType = PFD_MAIN_PLANE;
 
-		int32_t pixel_format =
-			ChoosePixelFormat(m_window->handle(), &pixel_format_description);
+		int32_t pixel_format = ChoosePixelFormat(m_window->handle(), &pixel_format_description);
 		if (pixel_format == 0)
 		{
-			HyperCore::CLogger::error(
-				"OpenGL 3.3: failed to choose pixel format!");
+			HyperCore::CLogger::error("OpenGL 3.3: failed to choose pixel format!");
 			return false;
 		}
 
-		SetPixelFormat(
-			m_window->handle(), pixel_format, &pixel_format_description);
+		SetPixelFormat(m_window->handle(), pixel_format, &pixel_format_description);
 
 		HGLRC temporary_context = wglCreateContext(m_window->handle());
 		wglMakeCurrent(m_window->handle(), temporary_context);
 
-		GLint context_attributes[] = { WGL_CONTEXT_MAJOR_VERSION_ARB,
-									   3,
-									   WGL_CONTEXT_MINOR_VERSION_ARB,
-									   3,
-									   WGL_CONTEXT_PROFILE_MASK_ARB,
-									   WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-									   0 };
+		GLint context_attributes[] = {
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+			WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+			0
+		};
 
-		PROC wglCreateContextAttribsARBFunction =
-			wglGetProcAddress("wglCreateContextAttribsARB");
+		PROC wglCreateContextAttribsARBFunction = wglGetProcAddress("wglCreateContextAttribsARB");
 		if (wglCreateContextAttribsARBFunction == nullptr)
 		{
-			HyperCore::CLogger::error(
-				"OpenGL 3.3: wglCreateContextAttribsARB not found!");
+			HyperCore::CLogger::error("OpenGL 3.3: wglCreateContextAttribsARB not found!");
 			return false;
 		}
 
-		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB =
-			reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(
-				wglCreateContextAttribsARBFunction);
-
+		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglCreateContextAttribsARBFunction);
 		m_graphics_context = wglCreateContextAttribsARB(
 			m_window->handle(), nullptr, context_attributes);
 		if (m_graphics_context == nullptr)

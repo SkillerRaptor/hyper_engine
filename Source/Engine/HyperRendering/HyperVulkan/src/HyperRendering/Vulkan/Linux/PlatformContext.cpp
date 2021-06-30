@@ -30,8 +30,7 @@ namespace HyperRendering::Vulkan::Linux
 		VkSurfaceKHR& surface) const
 	{
 		VkXlibSurfaceCreateInfoKHR surface_create_info{};
-		surface_create_info.sType =
-			VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
+		surface_create_info.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
 		surface_create_info.dpy = m_window->display();
 		surface_create_info.window = m_window->window();
 

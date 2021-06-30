@@ -25,4 +25,4 @@ namespace HyperRendering::OpenGL46::Windows
 
 		HGLRC m_graphics_context{ nullptr };
 	};
-} // namespace HyperRendering::OpenGL46::Windows
+} // namespace HyperRendering::OpenGL33::Windows

@@ -26,4 +26,4 @@ namespace HyperRendering::OpenGL46::Linux
 		GLXContext m_graphics_context{ nullptr };
 		XVisualInfo* m_visual_info{ nullptr };
 	};
-} // namespace HyperRendering::OpenGL46::Linux
+} // namespace HyperRendering::OpenGL33::Linux

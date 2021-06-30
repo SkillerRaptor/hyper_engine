@@ -7,6 +7,7 @@
 #pragma once
 
 using VkSurfaceKHR = struct VkSurfaceKHR_T*;
+using VkSwapchainKHR = struct VkSwapchainKHR_T*;
 
 namespace HyperRendering::Vulkan
 {
@@ -24,5 +25,6 @@ namespace HyperRendering::Vulkan
 		const CContext* m_context{ nullptr };
 		
 		VkSurfaceKHR m_surface{ nullptr };
+		VkSwapchainKHR m_swap_chain{ nullptr };
 	};
 } // namespace HyperRendering::Vulkan

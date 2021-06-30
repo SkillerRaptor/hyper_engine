@@ -27,7 +27,7 @@ namespace HyperRendering
 	
 	CRenderCommand::SClearCommand CRenderCommand::as_clear_command() const
 	{
-		HYPERENGINE_ASSERT(m_type == EType::Clear);
+		HYPERENGINE_ASSERT(is_clear_command());
 		return m_value.as_clear_command;
 	}
 	

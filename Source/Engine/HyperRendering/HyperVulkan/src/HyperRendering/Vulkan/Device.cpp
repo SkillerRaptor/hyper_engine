@@ -32,13 +32,11 @@ namespace HyperRendering::Vulkan
 	bool CGpu::select_physical_device()
 	{
 		uint32_t physical_device_count = 0;
-		vkEnumeratePhysicalDevices(
-			m_context->instance(), &physical_device_count, nullptr);
+		vkEnumeratePhysicalDevices(m_context->instance(), &physical_device_count, nullptr);
 
 		if (physical_device_count == 0)
 		{
-			HyperCore::CLogger::fatal(
-				"Vulkan: Failed to find GPUs with vulkan support!");
+			HyperCore::CLogger::fatal("Vulkan: Failed to find GPUs with vulkan support!");
 			return false;
 		}
 
@@ -69,13 +67,11 @@ namespace HyperRendering::Vulkan
 	bool CGpu::is_physical_device_suitable(
 		const VkPhysicalDevice& physical_device) const
 	{
-		CGpu::SQueueFamilies queue_families =
-			find_queue_families(physical_device);
+		CGpu::SQueueFamilies queue_families = find_queue_families(physical_device);
 
-		bool device_extensions_supported =
-			check_device_extension_support(physical_device);
+		bool device_extensions_supported = check_device_extension_support(physical_device);
 
-		return queue_families.complete();
+		return queue_families.complete() && device_extensions_supported;
 	}
 
 	CGpu::SQueueFamilies
@@ -84,19 +80,16 @@ namespace HyperRendering::Vulkan
 		CGpu::SQueueFamilies queue_families{};
 
 		uint32_t available_queue_family_properties_count = 0;
-		vkGetPhysicalDeviceQueueFamilyProperties(
-			physical_device, &available_queue_family_properties_count, nullptr);
+		vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &available_queue_family_properties_count, nullptr);
 
-		std::vector<VkQueueFamilyProperties> available_queue_family_properties(
-			available_queue_family_properties_count);
+		std::vector<VkQueueFamilyProperties> available_queue_family_properties(available_queue_family_properties_count);
 		vkGetPhysicalDeviceQueueFamilyProperties(
 			physical_device,
 			&available_queue_family_properties_count,
 			available_queue_family_properties.data());
 
 		uint32_t index = 0;
-		for (const VkQueueFamilyProperties& queue_family_properties :
-			 available_queue_family_properties)
+		for (const VkQueueFamilyProperties& queue_family_properties : available_queue_family_properties)
 		{
 			if (queue_family_properties.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 			{
@@ -136,19 +129,16 @@ namespace HyperRendering::Vulkan
 			&available_extension_properties_count,
 			nullptr);
 
-		std::vector<VkExtensionProperties> available_extensions_properties(
-			available_extension_properties_count);
+		std::vector<VkExtensionProperties> available_extensions_properties(available_extension_properties_count);
 		vkEnumerateDeviceExtensionProperties(
 			physical_device,
 			nullptr,
 			&available_extension_properties_count,
 			available_extensions_properties.data());
 
-		std::set<std::string> required_extensions(
-			s_device_extensions.begin(), s_device_extensions.end());
+		std::set<std::string> required_extensions(s_device_extensions.begin(), s_device_extensions.end());
 
-		for (const VkExtensionProperties& extension_properties :
-			 available_extensions_properties)
+		for (const VkExtensionProperties& extension_properties : available_extensions_properties)
 		{
 			required_extensions.erase(extension_properties.extensionName);
 		}
@@ -203,8 +193,7 @@ namespace HyperRendering::Vulkan
 		for (uint32_t queue_family : unique_queue_families)
 		{
 			VkDeviceQueueCreateInfo device_queue_create_info{};
-			device_queue_create_info.sType =
-				VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			device_queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 			device_queue_create_info.queueFamilyIndex = queue_family;
 			device_queue_create_info.queueCount = 1;
 			device_queue_create_info.pQueuePriorities = &queue_priority;
@@ -219,21 +208,17 @@ namespace HyperRendering::Vulkan
 
 		if (m_context->is_validation_layer_enabled())
 		{
-			layer_count =
-				static_cast<uint32_t>(CContext::s_validation_layers.size());
+			layer_count = static_cast<uint32_t>(CContext::s_validation_layers.size());
 			layers = CContext::s_validation_layers.data();
 		}
 
 		VkDeviceCreateInfo device_create_info{};
 		device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		device_create_info.queueCreateInfoCount =
-			static_cast<uint32_t>(device_queue_create_infos.size());
+		device_create_info.queueCreateInfoCount = static_cast<uint32_t>(device_queue_create_infos.size());
 		device_create_info.pQueueCreateInfos = device_queue_create_infos.data();
 		device_create_info.pEnabledFeatures = &physical_device_features;
-		device_create_info.enabledExtensionCount =
-			static_cast<uint32_t>(CGpu::s_device_extensions.size());
-		device_create_info.ppEnabledExtensionNames =
-			CGpu::s_device_extensions.data();
+		device_create_info.enabledExtensionCount = static_cast<uint32_t>(CGpu::s_device_extensions.size());
+		device_create_info.ppEnabledExtensionNames = CGpu::s_device_extensions.data();
 		device_create_info.enabledLayerCount = layer_count;
 		device_create_info.ppEnabledLayerNames = layers;
 
@@ -243,8 +228,7 @@ namespace HyperRendering::Vulkan
 				nullptr,
 				&m_logical_device) != VK_SUCCESS)
 		{
-			HyperCore::CLogger::fatal(
-				"Vulkan: failed to create logical device!");
+			HyperCore::CLogger::fatal("Vulkan: failed to create logical device!");
 			return false;
 		}
 

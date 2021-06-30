@@ -30,8 +30,7 @@ namespace HyperRendering::Vulkan::Windows
 		VkSurfaceKHR& surface) const
 	{
 		VkWin32SurfaceCreateInfoKHR surface_create_info{};
-		surface_create_info.sType =
-			VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+		surface_create_info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 		surface_create_info.hwnd = m_window->window();
 		surface_create_info.hinstance = m_window->instance();
 

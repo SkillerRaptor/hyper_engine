@@ -48,8 +48,7 @@ namespace HyperRendering::OpenGL33
 		const CRenderCommand::SClearCommand& clear_command)
 	{
 		const HyperMath::CVec4f& clear_color = clear_command.clear_color;
-		glClearColor(
-			clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+		glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 } // namespace HyperRendering::OpenGL33

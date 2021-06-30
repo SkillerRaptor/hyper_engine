@@ -20,8 +20,7 @@ namespace HyperRendering::Vulkan
 	class CGpu
 	{
 	public:
-		static constexpr const std::array<const char*, 1>
-			s_device_extensions = { "VK_KHR_swapchain" };
+		static constexpr const std::array<const char*, 1> s_device_extensions = { "VK_KHR_swapchain" };
 
 	public:
 		struct SQueueFamilies
@@ -41,14 +40,10 @@ namespace HyperRendering::Vulkan
 	private:
 		bool select_physical_device();
 
-		bool is_physical_device_suitable(
-			const VkPhysicalDevice& physical_device) const;
+		bool is_physical_device_suitable(const VkPhysicalDevice& physical_device) const;
 
-		SQueueFamilies
-			find_queue_families(const VkPhysicalDevice& physical_device) const;
-		
-		static bool check_device_extension_support(
-			const VkPhysicalDevice& physical_device);
+		SQueueFamilies find_queue_families(const VkPhysicalDevice& physical_device) const;
+		static bool check_device_extension_support(const VkPhysicalDevice& physical_device);
 
 	private:
 		const CContext* m_context{ nullptr };

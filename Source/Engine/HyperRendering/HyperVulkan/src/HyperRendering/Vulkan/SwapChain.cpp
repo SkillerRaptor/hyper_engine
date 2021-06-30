@@ -19,8 +19,7 @@ namespace HyperRendering::Vulkan
 		if (!context->platform_context()->create_window_surface(
 				context->instance(), m_surface))
 		{
-			HyperCore::CLogger::error(
-				"Vulkan: failed to create window surface!");
+			HyperCore::CLogger::error("Vulkan: failed to create window surface!");
 			return false;
 		}
 
@@ -29,9 +28,11 @@ namespace HyperRendering::Vulkan
 
 	void CSwapChain::shutdown()
 	{
+		//vkDestroySwapchainKHR(
+		//	m_context->device().logical_device(), m_swap_chain, nullptr);
 		vkDestroySurfaceKHR(m_context->instance(), m_surface, nullptr);
 	}
-	
+
 	const VkSurfaceKHR& CSwapChain::surface() const
 	{
 		return m_surface;
