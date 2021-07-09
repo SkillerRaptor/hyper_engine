@@ -82,89 +82,19 @@ add_library(spirv-reflect STATIC ${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Reflect/spirv
 set_target_properties(spirv-reflect PROPERTIES FOLDER ThirdParty)
 
 #-------------------------------------------------------------------------------------------
-# DirectXShaderCompiler
+# glslang
 #-------------------------------------------------------------------------------------------
-if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
-    if (NOT CMAKE_GENERATOR MATCHES "Visual Studio 15 2017.*")
-        if (NOT CMAKE_GENERATOR MATCHES "Visual Studio 16 2019")
-            set(PROGRAMFILES_X86 "ProgramFiles(x86)")
-            execute_process(
-                    COMMAND "$ENV{${PROGRAMFILES_X86}}/Microsoft Visual Studio/Installer/vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-                    OUTPUT_VARIABLE VSWHERE_LATEST
-                    ERROR_QUIET
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-            find_path(
-                    DIASDK_INCLUDE_DIR dia2.h
-                    HINTS "${VS_DIA_INC_PATH}"
-                    HINTS "${VSWHERE_LATEST}/DIA SDK/include"
-                    DOC "path to DIA SDK header files")
-
-            find_library(DIASDK_GUIDS_LIBRARY NAMES diaguids.lib HINTS ${DIASDK_INCLUDE_DIR}/../lib/amd64)
-        endif ()
-    endif ()
-endif ()
-
-set(ENABLE_SPIRV_CODEGEN ON CACHE BOOL "" FORCE)
-set(CLANG_ENABLE_ARCMT OFF CACHE BOOL "" FORCE)
-set(CLANG_ENABLE_STATIC_ANALYZER OFF CACHE BOOL "" FORCE)
-set(CLANG_INCLUDE_TESTS OFF CACHE BOOL "" FORCE)
-set(LLVM_INCLUDE_TESTS OFF CACHE BOOL "" FORCE)
-set(HLSL_INCLUDE_TESTS OFF CACHE BOOL "" FORCE)
-set(HLSL_BUILD_DXILCONV OFF CACHE BOOL "" FORCE)
-set(HLSL_SUPPORT_QUERY_GIT_COMMIT_INFO ON CACHE BOOL "" FORCE)
-set(HLSL_ENABLE_DEBUG_ITERATORS ON CACHE BOOL "" FORCE)
-set(LLVM_TARGETS_TO_BUILD "None" CACHE STRING "" FORCE)
-set(LLVM_INCLUDE_DOCS OFF CACHE BOOL "" FORCE)
-set(LLVM_INCLUDE_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(LIBCLANG_BUILD_STATIC ON CACHE BOOL "" FORCE)
-set(LLVM_OPTIMIZED_TABLEGEN OFF CACHE BOOL "" FORCE)
-set(LLVM_REQUIRES_EH ON CACHE BOOL "" FORCE)
-set(LLVM_APPEND_VC_REV ON CACHE BOOL "" FORCE)
-set(LLVM_ENABLE_RTTI ON CACHE BOOL "" FORCE)
-set(LLVM_ENABLE_EH ON CACHE BOOL "" FORCE)
-set(LLVM_ENABLE_TERMINFO OFF CACHE BOOL "" FORCE)
-set(LLVM_DEFAULT_TARGET_TRIPLE "dxil-ms-dx" CACHE STRING "" FORCE)
-set(CLANG_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(LLVM_REQUIRES_RTTI ON CACHE BOOL "" FORCE)
-set(CLANG_CL OFF CACHE BOOL "" FORCE)
-set(DXC_BUILD_ARCH "x64" CACHE STRING "" FORCE)
-set(SPIRV_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(SPIRV_SKIP_EXECUTABLES ON CACHE BOOL "" FORCE)
-set(SPIRV_SKIP_TESTS ON CACHE BOOL "" FORCE)
-set(CMAKE_CXX_STANDARD 14)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/DirectXShaderCompiler)
-set(CMAKE_CXX_STANDARD 17)
-foreach (TARGET
-        "clang"
-        "clangAnalysis" "clangAST" "clangASTMatchers" "clangBasic" "clangCodeGen" "clangDriver" "clangEdit" "clangFormat" "clangFrontend"
-        "clangFrontendTool" "clangIndex" "clangLex" "clangParse" "clangRewrite" "clangRewriteFrontend" "clangSema" "clangSPIRV" "clangTooling"
-        "clangToolingCore" "libclang"
-        "dxc" "dxcompiler"
-        "ClangAttrClasses" "ClangAttrDump" "ClangAttrHasAttributeImpl" "ClangAttrImpl" "ClangAttrList" "ClangAttrParsedAttrImpl"
-        "ClangAttrParsedAttrKinds" "ClangAttrParsedAttrList" "ClangAttrParserStringSwitches" "ClangAttrPCHRead" "ClangAttrPCHWrite"
-        "ClangAttrSpellingListIndex" "ClangAttrTemplateInstantiate" "ClangAttrVisitor" "ClangCommentCommandInfo" "ClangCommentCommandList"
-        "ClangCommentHTMLNamedCharacterReferences" "ClangCommentHTMLTags" "ClangCommentHTMLTagsProperties" "ClangCommentNodes" "ClangDeclNodes"
-        "ClangDiagnosticAnalysis" "ClangDiagnosticAST" "ClangDiagnosticComment" "ClangDiagnosticCommon" "ClangDiagnosticDriver"
-        "ClangDiagnosticFrontend" "ClangDiagnosticGroups" "ClangDiagnosticIndexName" "ClangDiagnosticLex" "ClangDiagnosticParse"
-        "ClangDiagnosticSema" "ClangDiagnosticSerialization" "ClangStmtNodes"
-        "LLVMAnalysis" "LLVMAsmParser" "LLVMBitReader" "LLVMBitWriter" "LLVMCore" "LLVMDxcSupport" "LLVMDXIL" "LLVMDxilContainer"
-        "LLVMDxilPIXPasses" "LLVMDxilRootSignature" "LLVMDxrFallback" "LLVMHLSL" "LLVMInstCombine" "LLVMipa" "LLVMipo" "LLVMIRReader"
-        "LLVMLinker" "LLVMLTO" "LLVMMSSupport" "LLVMOption" "LLVMPasses" "LLVMPassPrinters" "LLVMProfileData" "LLVMScalarOpts" "LLVMSupport"
-        "LLVMTableGen" "LLVMTarget" "LLVMTransformUtils" "LLVMVectorize" "LLVMMiniz"
-        "ClangDriverOptions" "DxcEtw" "intrinsics_gen" "TablegenHLSLOptions"
-        "clang-tblgen" "llvm-tblgen" "hlsl_dxcversion_autogen" "hlsl_version_autogen" "SPIRV-Tools-static" "SPIRV-Tools-opt"
-        "GIT_COMMIT_INFO_ALWAYS_REBUILD")
-    set_target_properties(${TARGET} PROPERTIES FOLDER ThirdParty)
-endforeach ()
-
-if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
-    foreach (TARGET
-            "dxexp" "dxclib" "dxa" "dxl" "dxopt" "dxr" "dxv" "dndxc" "dxlib_sample" "dxrfallbackcompiler"
-            "d3dcompiler_dxc_bridge" "LLVMDxilDia")
-        set_target_properties(${TARGET} PROPERTIES FOLDER ThirdParty)
-    endforeach ()
-endif ()
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(BUILD_EXTERNAL OFF CACHE BOOL "" FORCE)
+set(SKIP_GLSLANG_INSTALL ON CACHE BOOL "" FORCE)
+set(ENABLE_SPVREMAPPER ON CACHE BOOL "" FORCE)
+set(ENABLE_GLSLANG_JS OFF CACHE BOOL "" FORCE)
+set(ENABLE_RTTI OFF CACHE BOOL "" FORCE)
+set(ENABLE_OPT OFF CACHE BOOL "" FORCE)
+set(ENABLE_PCH OFF CACHE BOOL "" FORCE)
+set(ENABLE_CTEST OFF CACHE BOOL "" FORCE)
+set(USE_CCACHE OFF CACHE BOOL "" FORCE)
+add_subdirectory(glslang)
 
 #-------------------------------------------------------------------------------------------
 # assimp

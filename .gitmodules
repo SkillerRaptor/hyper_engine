@@ -1,9 +1,6 @@
 [submodule "Source/ThirdParty/fmt"]
 	path = Source/ThirdParty/fmt
 	url = https://github.com/fmtlib/fmt
-[submodule "Source/ThirdParty/DirectXShaderCompiler"]
-	path = Source/ThirdParty/DirectXShaderCompiler
-	url = https://github.com/microsoft/DirectXShaderCompiler
 [submodule "Source/ThirdParty/SPIRV-Headers"]
 	path = Source/ThirdParty/SPIRV-Headers
 	url = https://github.com/KhronosGroup/SPIRV-Headers
@@ -22,3 +19,6 @@
 [submodule "Source/ThirdParty/assimp"]
 	path = Source/ThirdParty/assimp
 	url = https://github.com/assimp/assimp
+[submodule "Source/ThirdParty/glslang"]
+	path = Source/ThirdParty/glslang
+	url = https://github.com/KhronosGroup/glslang
