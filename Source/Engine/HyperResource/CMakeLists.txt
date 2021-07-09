@@ -15,7 +15,6 @@ cmake_minimum_required(VERSION 3.10)
 set(HYPERENGINE_DXC_PATH ${CMAKE_SOURCE_DIR}/Source/ThirdParty/DirectXShaderCompiler)
 
 set(SOURCES
-        src/HyperResource/HyperResource.cpp
         src/HyperResource/ShaderCompiler.cpp)
 
 set(HEADERS
