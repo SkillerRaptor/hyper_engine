@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------------------
-# Copyright (c) 2021, SkillerRaptor <skillerraptor@protonmail.com>
+# Copyright (c) 2020-2021, SkillerRaptor <skillerraptor@protonmail.com>
 #
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
@@ -15,7 +15,7 @@ cmake_minimum_required(VERSION 3.10)
 include(${CMAKE_SOURCE_DIR}/Source/Engine/HyperRendering/HyperCommon/HyperCommon.cmake)
 
 set(CORE_SOURCES
-        src/HyperRendering/DirectX12/DirectX12.cpp)
+        src/HyperRendering/DirectX12/Placeholder.cpp)
 
 set(CORE_HEADERS
         "")
