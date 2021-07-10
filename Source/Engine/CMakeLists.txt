@@ -61,3 +61,8 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperResource)
 # Engine
 #-------------------------------------------------------------------------------------------
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEngine)
+
+#-------------------------------------------------------------------------------------------
+# Test Module
+#-------------------------------------------------------------------------------------------
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperTests)

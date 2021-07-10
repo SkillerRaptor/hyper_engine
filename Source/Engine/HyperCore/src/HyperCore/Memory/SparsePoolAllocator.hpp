@@ -11,7 +11,7 @@
 
 namespace HyperCore
 {
-	template <typename T>
+	template <typename T, typename I = uint32_t>
 	class CSparsePoolAllocator
 	{
 	public:
@@ -23,10 +23,10 @@ namespace HyperCore
 		using SizeType = size_t;
 		using DifferenceType = ptrdiff_t;
 
-		using IndexType = uint32_t;
+		using IndexType = I;
 
 	public:
-		explicit CSparsePoolAllocator(SizeType size)
+		explicit CSparsePoolAllocator(SizeType size = 128)
 			: m_size(size)
 		{
 			m_data = new ValueType[m_size];
@@ -45,8 +45,6 @@ namespace HyperCore
 
 		Reference allocate(IndexType& position)
 		{
-			HYPERENGINE_ASSERT(position < m_size);
-
 			position = static_cast<SizeType>(m_allocation_count);
 
 			auto* address = reinterpret_cast<IndexType*>(&m_data[position]);
@@ -58,9 +56,13 @@ namespace HyperCore
 			return m_data[position];
 		}
 
-		void deallocate(IndexType position)
+		bool deallocate(IndexType& position)
 		{
-			HYPERENGINE_ASSERT(position < m_size);
+			if(position >= m_size)
+			{
+				HyperCore::CLogger::warning("HyperCore: SparsePoolAllocator: position out of range!");
+				return false;
+			}
 
 			auto* address = reinterpret_cast<IndexType*>(&m_data[position]);
 			*address = m_next_allocation;
@@ -69,6 +71,10 @@ namespace HyperCore
 
 			m_data[position] = T();
 			--m_allocation_count;
+			
+			position = std::numeric_limits<IndexType>::max();
+			
+			return true;
 		}
 
 		void clear()

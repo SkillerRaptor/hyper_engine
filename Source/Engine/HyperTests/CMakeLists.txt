@@ -13,7 +13,8 @@ cmake_minimum_required(VERSION 3.10)
 # HyperTests
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/HyperTests/Placeholder.cpp)
+        src/HyperTests/main.cpp
+        src/HyperTests/HyperCore/SparsePoolAllocatorTest.cpp)
 
 set(HEADERS
         "")
@@ -25,8 +26,7 @@ foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     source_group("${group_path}" FILES "${item}")
 endforeach ()
 
-add_library(HyperTests STATIC ${SOURCES} ${HEADERS})
-set_target_properties(HyperTests PROPERTIES FOLDER HyperModules)
+add_executable(HyperTests ${SOURCES} ${HEADERS})
 target_include_directories(HyperTests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(HyperTests PUBLIC HyperCore)
 target_link_libraries(HyperTests PUBLIC Catch2)
