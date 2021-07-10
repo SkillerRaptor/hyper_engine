@@ -94,7 +94,8 @@ set(ENABLE_OPT OFF CACHE BOOL "" FORCE)
 set(ENABLE_PCH OFF CACHE BOOL "" FORCE)
 set(ENABLE_CTEST OFF CACHE BOOL "" FORCE)
 set(USE_CCACHE OFF CACHE BOOL "" FORCE)
-add_subdirectory(glslang)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glslang)
+set_target_properties(glslang PROPERTIES FOLDER ThirdParty)
 
 #-------------------------------------------------------------------------------------------
 # assimp
@@ -119,6 +120,15 @@ set(ASSIMP_INJECT_DEBUG_POSTFIX ON CACHE BOOL "" FORCE)
 set(ASSIMP_IGNORE_GIT_HASH ON CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/assimp)
 set_target_properties(assimp PROPERTIES FOLDER ThirdParty)
+
+#-------------------------------------------------------------------------------------------
+# Catch2
+#-------------------------------------------------------------------------------------------
+set(CATCH_INSTALL_DOCS OFF CACHE BOOL "" FORCE)
+set(CATCH_INSTALL_EXTRAS ON CACHE BOOL "" FORCE)
+set(CATCH_DEVELOPMENT_BUILD OFF CACHE BOOL "" FORCE)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Catch2)
+set_target_properties(Catch2 PROPERTIES FOLDER ThirdParty)
 
 #-------------------------------------------------------------------------------------------
 # fmt

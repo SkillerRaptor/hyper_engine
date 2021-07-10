@@ -22,3 +22,6 @@
 [submodule "Source/ThirdParty/glslang"]
 	path = Source/ThirdParty/glslang
 	url = https://github.com/KhronosGroup/glslang
+[submodule "Source/ThirdParty/Catch2"]
+	path = Source/ThirdParty/Catch2
+	url = https://github.com/catchorg/Catch2

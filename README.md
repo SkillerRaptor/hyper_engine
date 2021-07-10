@@ -13,6 +13,7 @@ In order to build the engine, you will need to follow these steps:
 
 ## Dependencies
 - [assimp](https://github.com/assimp/assimp/blob/master/LICENSE) Copyright (c) Modified 3-clause BSD-License, assimp team 2006-2021
+- [Catch2](https://github.com/catchorg/Catch2/blob/devel/LICENSE.txt) Copyright (c) Boost Software License 1.0, Catch2 present
 - [fmt](https://github.com/fmtlib/fmt/blob/master/LICENSE.rst) Copyright (c) MIT License, Victor Zverovich 2012-present
 - [glslang](https://github.com/KhronosGroup/glslang/blob/master/LICENSE.txt) Copyright (c) MIT License, The Khronos Group Inc. 2020
 - [meshoptimizer](https://github.com/zeux/meshoptimizer/blob/master/LICENSE.md) Copyright (c) MIT License, Arseny Kapoulkine 2016-2021

@@ -52,8 +52,7 @@ endif ()
 #-------------------------------------------------------------------------------------------
 # OpenGL
 #-------------------------------------------------------------------------------------------
-find_package(OpenGL)
-if (OPENGL_FOUND)
+if (${HYPERENGINE_BUILD_OPENGL})
     add_dependencies(HyperEngine HyperOpenGL33)
     add_dependencies(HyperEngine HyperOpenGL46)
 endif ()
@@ -61,7 +60,6 @@ endif ()
 #-------------------------------------------------------------------------------------------
 # Vulkan
 #-------------------------------------------------------------------------------------------
-find_package(Vulkan)
-if (Vulkan_FOUND)
+if (${HYPERENGINE_BUILD_VULKAN})
     add_dependencies(HyperEngine HyperVulkan)
 endif ()

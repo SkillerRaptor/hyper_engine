@@ -56,7 +56,6 @@ set_target_properties(HyperOpenGL33 PROPERTIES FOLDER HyperModules/HyperRenderin
 target_include_directories(HyperOpenGL33 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${HYPERCOMMON_INCLUDE})
 target_link_libraries(HyperOpenGL33 PRIVATE HyperCore HyperMath HyperPlatform)
 
-find_package(OpenGL)
 target_include_directories(HyperOpenGL33 PRIVATE ${OPENGL_INCLUDE_DIRS})
 target_link_libraries(HyperOpenGL33 PRIVATE ${OPENGL_LIBRARIES})
 

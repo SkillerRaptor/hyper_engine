@@ -63,32 +63,3 @@ if ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
     target_include_directories(HyperPlatform PUBLIC ${X11_INCLUDE_DIR})
     target_link_libraries(HyperPlatform PUBLIC ${X11_LIBRARIES})
 endif ()
-
-#-------------------------------------------------------------------------------------------
-# Graphic APIs
-#-------------------------------------------------------------------------------------------
-
-#-------------------------------------------------------------------------------------------
-# DirectX
-#-------------------------------------------------------------------------------------------
-if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
-    target_compile_definitions(HyperPlatform PUBLIC HYPERENGINE_BUILD_DIRECTX11=1)
-    target_compile_definitions(HyperPlatform PUBLIC HYPERENGINE_BUILD_DIRECTX12=1)
-endif ()
-
-#-------------------------------------------------------------------------------------------
-# OpenGL
-#-------------------------------------------------------------------------------------------
-find_package(OpenGL)
-if (OPENGL_FOUND)
-    target_compile_definitions(HyperPlatform PUBLIC HYPERENGINE_BUILD_OPENGL33=1)
-    target_compile_definitions(HyperPlatform PUBLIC HYPERENGINE_BUILD_OPENGL46=1)
-endif ()
-
-#-------------------------------------------------------------------------------------------
-# Vulkan
-#-------------------------------------------------------------------------------------------
-find_package(Vulkan)
-if (Vulkan_FOUND)
-    target_compile_definitions(HyperPlatform PUBLIC HYPERENGINE_BUILD_VULKAN=1)
-endif ()

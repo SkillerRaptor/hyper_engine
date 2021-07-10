@@ -57,7 +57,6 @@ set_target_properties(HyperVulkan PROPERTIES FOLDER HyperModules/HyperRendering)
 target_include_directories(HyperVulkan PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${HYPERCOMMON_INCLUDE})
 target_link_libraries(HyperVulkan PRIVATE HyperCore HyperMath HyperPlatform)
 
-find_package(Vulkan)
 target_include_directories(HyperVulkan PRIVATE ${Vulkan_INCLUDE_DIRS})
 target_link_libraries(HyperVulkan PRIVATE ${Vulkan_LIBRARIES})
 

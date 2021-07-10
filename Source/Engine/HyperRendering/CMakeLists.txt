@@ -24,8 +24,7 @@ endif ()
 #-------------------------------------------------------------------------------------------
 # OpenGL
 #-------------------------------------------------------------------------------------------
-find_package(OpenGL)
-if (OPENGL_FOUND)
+if (${HYPERENGINE_BUILD_OPENGL})
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperOpenGL33)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperOpenGL46)
 endif ()
@@ -33,7 +32,6 @@ endif ()
 #-------------------------------------------------------------------------------------------
 # Vulkan
 #-------------------------------------------------------------------------------------------
-find_package(Vulkan)
-if (Vulkan_FOUND)
+if (${HYPERENGINE_BUILD_VULKAN})
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperVulkan)
 endif ()

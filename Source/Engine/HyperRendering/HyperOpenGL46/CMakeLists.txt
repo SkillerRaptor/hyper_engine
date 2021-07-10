@@ -51,7 +51,6 @@ set_target_properties(HyperOpenGL46 PROPERTIES FOLDER HyperModules/HyperRenderin
 target_include_directories(HyperOpenGL46 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${HYPERCOMMON_INCLUDE})
 target_link_libraries(HyperOpenGL46 PRIVATE HyperCore HyperMath HyperPlatform)
 
-find_package(OpenGL)
 target_include_directories(HyperOpenGL46 PRIVATE ${OPENGL_INCLUDE_DIRS})
 target_link_libraries(HyperOpenGL46 PRIVATE ${OPENGL_LIBRARIES})
 
