@@ -12,8 +12,6 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 # HyperResource
 #-------------------------------------------------------------------------------------------
-set(HYPERENGINE_DXC_PATH ${CMAKE_SOURCE_DIR}/Source/ThirdParty/DirectXShaderCompiler)
-
 set(SOURCES
         src/HyperResource/ShaderCompiler.cpp)
 
@@ -30,7 +28,6 @@ endforeach ()
 add_library(HyperResource STATIC ${SOURCES} ${HEADERS})
 set_target_properties(HyperResource PROPERTIES FOLDER HyperModules)
 target_include_directories(HyperResource PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_include_directories(HyperResource PUBLIC ${HYPERENGINE_DXC_PATH}/include)
 target_link_libraries(HyperResource PUBLIC HyperCore)
 target_link_libraries(HyperResource PUBLIC HyperPlatform)
 target_link_libraries(HyperResource PUBLIC assimp)
