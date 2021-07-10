@@ -16,15 +16,12 @@ set(HYPERENGINE_COMMON_PATH ${CMAKE_SOURCE_DIR}/Source/Engine/HyperRendering/Hyp
 
 set(SOURCES
         src/HyperEngine/EngineLoop.cpp
-        src/HyperEngine/Launcher.cpp
-        src/HyperEngine/EntitySystem/Registry.cpp)
+        src/HyperEngine/Launcher.cpp)
 
 set(HEADERS
         src/HyperEngine/EngineLoop.hpp
         src/HyperEngine/IApplication.hpp
-        src/HyperEngine/Launcher.hpp
-        src/HyperEngine/EntitySystem/Entity.hpp
-        src/HyperEngine/EntitySystem/Registry.hpp)
+        src/HyperEngine/Launcher.hpp)
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})
     get_filename_component(src_path "${item}" PATH)
