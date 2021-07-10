@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.10)
 # HyperAudio
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/HyperAudio/HyperAudio.cpp)
+        src/HyperAudio/Placeholder.cpp)
 
 set(HEADERS
         "")

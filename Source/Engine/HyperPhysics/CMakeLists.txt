@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.10)
 # HyperPhysics
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/HyperPhysics/HyperPhysics.cpp)
+        src/HyperPhysics/Placeholder.cpp)
 
 set(HEADERS
         "")

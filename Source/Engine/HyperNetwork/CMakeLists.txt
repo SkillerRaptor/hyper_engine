@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.10)
 # HyperMath
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/HyperNetwork/HyperNetwork.cpp)
+        src/HyperNetwork/Placeholder.cpp)
 
 set(HEADERS
         "")
