@@ -57,7 +57,7 @@ ipch/
 *.json
 
 # CMake
-cmake-build-*/
+/cmake-build-*/
 
 # Doxygen
-Doxygen/
+/Doxygen/
