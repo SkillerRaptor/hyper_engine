@@ -13,6 +13,24 @@ namespace HyperCore
 	class CSourceLocation
 	{
 	public:
+		constexpr CSourceLocation() = default;
+		constexpr CSourceLocation(CSourceLocation&& other) = default;
+		constexpr CSourceLocation(const CSourceLocation& other) = default;
+		~CSourceLocation() = default;
+		
+		static constexpr CSourceLocation current(
+			const char* file = __builtin_FILE(),
+			const char* function = __builtin_FUNCTION(),
+			uint32_t line = __builtin_LINE())
+		{
+			CSourceLocation location{};
+			location.m_file = file;
+			location.m_function = function;
+			location.m_line = line;
+			
+			return location;
+		}
+		
 		constexpr const char* file_name() const noexcept
 		{
 			return m_file;
@@ -26,19 +44,6 @@ namespace HyperCore
 		constexpr uint32_t line() const noexcept
 		{
 			return m_line;
-		}
-
-		static constexpr CSourceLocation current(
-			const char* file = __builtin_FILE(),
-			const char* function = __builtin_FUNCTION(),
-			uint32_t line = __builtin_LINE())
-		{
-			CSourceLocation location{};
-			location.m_file = file;
-			location.m_function = function;
-			location.m_line = line;
-
-			return location;
 		}
 
 	private:
