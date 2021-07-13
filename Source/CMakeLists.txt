@@ -18,11 +18,11 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty)
 # Flags
 #-------------------------------------------------------------------------------------------
 if ("${HYPERENGINE_COMPILER}" STREQUAL "Clang")
-    set(HYPERENGINE_WARNING_FLAGS "-Wall -Wextra -Wpedantic -fms-extensions")
+    set(HYPERENGINE_WARNING_FLAGS -Wall -Wextra -Wpedantic -fms-extensions)
 elseif ("${HYPERENGINE_COMPILER}" STREQUAL "GNU")
-    set(HYPERENGINE_WARNING_FLAGS "-Wall -Wextra -Wpedantic")
+    set(HYPERENGINE_WARNING_FLAGS -Wall -Wextra -Wpedantic)
 elseif ("${HYPERENGINE_COMPILER}" STREQUAL "MSVC")
-    set(HYPERENGINE_WARNING_FLAGS "/W4")
+    set(HYPERENGINE_WARNING_FLAGS /W4)
 endif ()
 
 #-------------------------------------------------------------------------------------------
