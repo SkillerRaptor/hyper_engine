@@ -37,9 +37,6 @@ TEST_CASE("SparsePoolAllocator allocating and deallocating item", "[SparsePoolAl
 
 	sparse_pool_allocator.deallocate(index);
 
-	REQUIRE(index == std::numeric_limits<IndexType>::max());
-	REQUIRE_FALSE(index == 0);
-
 	REQUIRE(sparse_pool_allocator.empty());
 	REQUIRE_FALSE(sparse_pool_allocator.size() == 1);
 }
@@ -69,9 +66,6 @@ TEST_CASE("SparsePoolAllocator allocating and deallocating multiple items", "[Sp
 	{
 		IndexType& index = indices[i];
 		sparse_pool_allocator.deallocate(index);
-
-		REQUIRE(index == std::numeric_limits<IndexType>::max());
-		REQUIRE_FALSE(index == 0);
 	}
 
 	REQUIRE(sparse_pool_allocator.empty());

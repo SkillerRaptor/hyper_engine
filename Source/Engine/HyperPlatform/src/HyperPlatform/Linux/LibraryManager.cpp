@@ -11,7 +11,7 @@ namespace HyperPlatform::Linux
 {
 	CLibraryManager::~CLibraryManager()
 	{
-		for (HyperCore::CSparsePoolAllocator<SLibraryData>::SizeType i = 0; i < m_storage.size(); ++i)
+		for (size_t i = 0; i < m_storage.size(); ++i)
 		{
 			internal_unload(m_storage[i]);
 		}

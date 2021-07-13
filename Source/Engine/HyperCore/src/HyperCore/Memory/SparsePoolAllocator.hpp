@@ -49,7 +49,7 @@ namespace HyperCore
 			return m_data[position];
 		}
 
-		bool deallocate(I& position)
+		bool deallocate(I position)
 		{
 			if(position >= m_size)
 			{
@@ -64,8 +64,6 @@ namespace HyperCore
 
 			m_data[position] = T();
 			--m_allocation_count;
-			
-			position = std::numeric_limits<I>::max();
 			
 			return true;
 		}
