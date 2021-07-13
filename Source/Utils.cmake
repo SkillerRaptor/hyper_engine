@@ -18,6 +18,13 @@ function(hyperengine_group_source)
     endforeach ()
 endfunction()
 
+function(hyperengine_define_executable target)
+    add_executable(${target} ${SOURCES} ${HEADERS})
+    target_compile_features(${target} PUBLIC cxx_std_17)
+    target_compile_options(${target} PRIVATE ${HYPERENGINE_WARNING_FLAGS})
+    target_include_directories(${target} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+endfunction()
+
 function(hyperengine_define_library target)
     add_library(${target} STATIC ${SOURCES} ${HEADERS})
     target_compile_features(${target} PUBLIC cxx_std_17)

@@ -10,7 +10,7 @@
 
 using namespace HyperCore;
 
-TEST_CASE("Sparse pool allocator can be created", "[SparsePoolAllocator]")
+TEST_CASE("CSparsePoolAllocator can be created", "[HyperCore::CSparsePoolAllocator]")
 {
 	static constexpr const size_t max_size = 100;
 	CSparsePoolAllocator<int64_t> sparse_pool_allocator(max_size);
@@ -20,7 +20,7 @@ TEST_CASE("Sparse pool allocator can be created", "[SparsePoolAllocator]")
 	REQUIRE(sparse_pool_allocator.max_size() == max_size);
 }
 
-TEST_CASE("SparsePoolAllocator allocating and deallocating item", "[SparsePoolAllocator]")
+TEST_CASE("CSparsePoolAllocator allocating and deallocating item", "[HyperCore::CSparsePoolAllocator]")
 {
 	CSparsePoolAllocator<int64_t> sparse_pool_allocator;
 	using IndexType = CSparsePoolAllocator<int64_t>::IndexType;
@@ -41,7 +41,7 @@ TEST_CASE("SparsePoolAllocator allocating and deallocating item", "[SparsePoolAl
 	REQUIRE_FALSE(sparse_pool_allocator.size() == 1);
 }
 
-TEST_CASE("SparsePoolAllocator allocating and deallocating multiple items", "[SparsePoolAllocator]")
+TEST_CASE("SparsePoolAllocator allocating and deallocating multiple items", "[HyperCore::SparsePoolAllocator]")
 {
 	CSparsePoolAllocator<int64_t> sparse_pool_allocator;
 	using IndexType = CSparsePoolAllocator<int64_t>::IndexType;
