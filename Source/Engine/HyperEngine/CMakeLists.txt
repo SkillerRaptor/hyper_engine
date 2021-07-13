@@ -16,7 +16,7 @@ set(HYPERENGINE_COMMON_PATH ${CMAKE_SOURCE_DIR}/Source/Engine/HyperRendering/Hyp
 
 set(SOURCES
         src/HyperEngine/EngineLoop.cpp
-        src/HyperEngine/Launcher.cpp
+        src/HyperEngine/Launcher.cpp)
 
 set(HEADERS
         include/HyperEngine/EngineLoop.hpp
