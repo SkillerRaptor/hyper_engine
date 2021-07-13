@@ -12,29 +12,19 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 # HyperMath
 #-------------------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.10)
-
 set(SOURCES
         src/HyperMath/HyperMath.cpp)
 
 set(HEADERS
-        src/HyperMath/Matrix2x2.hpp
-        src/HyperMath/Matrix3x3.hpp
-        src/HyperMath/Matrix4x4.hpp
-        src/HyperMath/Quaternion.hpp
-        src/HyperMath/Vector2.hpp
-        src/HyperMath/Vector3.hpp
-        src/HyperMath/Vector4.hpp)
+        include/HyperMath/Matrix2x2.hpp
+        include/HyperMath/Matrix3x3.hpp
+        include/HyperMath/Matrix4x4.hpp
+        include/HyperMath/Quaternion.hpp
+        include/HyperMath/Vector2.hpp
+        include/HyperMath/Vector3.hpp
+        include/HyperMath/Vector4.hpp)
 
-foreach (item IN ITEMS ${SOURCES} ${HEADERS})
-    get_filename_component(src_path "${item}" PATH)
-    string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "" group_path "${src_path}")
-    string(REPLACE ".." "\\" group_path "${group_path}")
-    source_group("${group_path}" FILES "${item}")
-endforeach ()
+hyperengine_group_source()
 
-add_library(HyperMath STATIC ${SOURCES} ${HEADERS})
-set_target_properties(HyperMath PROPERTIES FOLDER HyperModules)
-set_target_properties(HyperMath PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_include_directories(HyperMath PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+hyperengine_define_module(HyperMath)
 target_link_libraries(HyperMath PUBLIC HyperCore)

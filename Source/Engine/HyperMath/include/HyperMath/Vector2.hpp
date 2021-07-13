@@ -9,6 +9,17 @@
 #include <cstdint>
 #include <type_traits>
 
+#if HYPERENGINE_COMPILER_Clang
+#	pragma clang diagnostic push
+#	pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#elif HYPERENGINE_COMPILER_GNU
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wpedantic"
+#elif HYPERENGINE_COMPILER_MSVC
+#	pragma warning(push)
+#	pragma warning(disable : 4201)
+#endif
+
 namespace HyperMath
 {
 	template <typename T>
@@ -35,7 +46,7 @@ namespace HyperMath
 			, y(y)
 		{
 		}
-		
+
 		CVector2<T> operator-() const
 		{
 			CVector2<T> vector;
@@ -43,7 +54,7 @@ namespace HyperMath
 			vector.y = -y;
 			return vector;
 		}
-		
+
 		CVector2<T> operator+(T value) const
 		{
 			CVector2<T> vector;
@@ -51,7 +62,7 @@ namespace HyperMath
 			vector.y = y + value;
 			return vector;
 		}
-		
+
 		CVector2<T> operator+(const CVector2<T>& other) const
 		{
 			CVector2<T> vector;
@@ -59,21 +70,21 @@ namespace HyperMath
 			vector.y = y + other.y;
 			return vector;
 		}
-		
+
 		CVector2<T>& operator+=(T value)
 		{
 			x += value;
 			y += value;
 			return *this;
 		}
-		
+
 		CVector2<T>& operator+=(const CVector2<T>& other)
 		{
 			x += other.x;
 			y += other.y;
 			return *this;
 		}
-		
+
 		CVector2<T> operator-(T value) const
 		{
 			CVector2<T> vector;
@@ -81,7 +92,7 @@ namespace HyperMath
 			vector.y = y - value;
 			return vector;
 		}
-		
+
 		CVector2<T> operator-(const CVector2<T>& other) const
 		{
 			CVector2<T> vector;
@@ -89,21 +100,21 @@ namespace HyperMath
 			vector.y = y - other.y;
 			return vector;
 		}
-		
+
 		CVector2<T>& operator-=(T value)
 		{
 			x -= value;
 			y -= value;
 			return *this;
 		}
-		
+
 		CVector2<T>& operator-=(const CVector2<T>& other)
 		{
 			x -= other.x;
 			y -= other.y;
 			return *this;
 		}
-		
+
 		CVector2<T> operator*(T value) const
 		{
 			CVector2<T> vector;
@@ -111,7 +122,7 @@ namespace HyperMath
 			vector.y = y * value;
 			return vector;
 		}
-		
+
 		CVector2<T> operator*(const CVector2<T>& other) const
 		{
 			CVector2<T> vector;
@@ -119,21 +130,21 @@ namespace HyperMath
 			vector.y = y * other.y;
 			return vector;
 		}
-		
+
 		CVector2<T>& operator*=(T value)
 		{
 			x *= value;
 			y *= value;
 			return *this;
 		}
-		
+
 		CVector2<T>& operator*=(const CVector2<T>& other)
 		{
 			x *= other.x;
 			y *= other.y;
 			return *this;
 		}
-		
+
 		CVector2<T> operator/(T value) const
 		{
 			CVector2<T> vector;
@@ -141,7 +152,7 @@ namespace HyperMath
 			vector.y = y / value;
 			return vector;
 		}
-		
+
 		CVector2<T> operator/(const CVector2<T>& other) const
 		{
 			CVector2<T> vector;
@@ -149,21 +160,21 @@ namespace HyperMath
 			vector.y = y / other.y;
 			return vector;
 		}
-		
+
 		CVector2<T>& operator/=(T value)
 		{
 			x /= value;
 			y /= value;
 			return *this;
 		}
-		
+
 		CVector2<T>& operator/=(const CVector2<T>& other)
 		{
 			x /= other.x;
 			y /= other.y;
 			return *this;
 		}
-		
+
 	public:
 		union
 		{
@@ -195,3 +206,11 @@ namespace HyperMath
 	using CVec2i = CVector2<int32_t>;
 	using CVec2ui = CVector2<uint32_t>;
 } // namespace HyperMath
+
+#if HYPERENGINE_COMPILER_Clang
+#	pragma clang diagnostic pop
+#elif HYPERENGINE_COMPILER_GNU
+#	pragma GCC diagnostic pop
+#elif HYPERENGINE_COMPILER_MSVC
+#	pragma warning(pop)
+#endif

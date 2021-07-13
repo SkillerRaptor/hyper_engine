@@ -11,6 +11,5 @@ namespace HyperResource
 	class CShaderCompiler
 	{
 	public:
-		CShaderCompiler();
 	};
 } // namespace HyperResource

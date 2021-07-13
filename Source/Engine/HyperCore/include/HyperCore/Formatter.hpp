@@ -29,14 +29,14 @@ namespace HyperCore
 		{
 			if (format.empty())
 			{
-				internal_warning("CFormatter: The argument 'format' was empty!");
+				//internal_warning("CFormatter: The argument 'format' was empty!");
 				return format.data();
 			}
 
 			constexpr const size_t args_count = sizeof...(Args);
 			if constexpr (args_count == 0)
 			{
-				internal_warning("CFormatter: The arguments 'args' were 0!");
+				//internal_warning("CFormatter: The arguments 'args' were 0!");
 				return format.data();
 			}
 

@@ -8,7 +8,4 @@
 
 namespace HyperResource
 {
-	CShaderCompiler::CShaderCompiler()
-	{
-	}
 } // namespace HyperResource

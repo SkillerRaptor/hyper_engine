@@ -9,6 +9,17 @@
 #include <cstdint>
 #include <type_traits>
 
+#if HYPERENGINE_COMPILER_Clang
+#	pragma clang diagnostic push
+#	pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#elif HYPERENGINE_COMPILER_GNU
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wpedantic"
+#elif HYPERENGINE_COMPILER_MSVC
+#	pragma warning(push)
+#	pragma warning(disable : 4201)
+#endif
+
 namespace HyperMath
 {
 	template <typename T>
@@ -224,3 +235,11 @@ namespace HyperMath
 	using CVec3i = CVector3<int32_t>;
 	using CVec3ui = CVector3<uint32_t>;
 } // namespace HyperMath
+
+#if HYPERENGINE_COMPILER_Clang
+#	pragma clang diagnostic pop
+#elif HYPERENGINE_COMPILER_GNU
+#	pragma GCC diagnostic pop
+#elif HYPERENGINE_COMPILER_MSVC
+#	pragma warning(pop)
+#endif

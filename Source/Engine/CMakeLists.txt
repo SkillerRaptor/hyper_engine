@@ -51,7 +51,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperMath)
 #-------------------------------------------------------------------------------------------
 # Abstraction Modules
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperRendering)
+# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperRendering)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperResource)
 
 #-------------------------------------------------------------------------------------------
