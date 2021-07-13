@@ -52,6 +52,7 @@ endif ()
 # Flags
 #-------------------------------------------------------------------------------------------
 if ("${HYPERENGINE_COMPILER}" STREQUAL "MSVC")
+    string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP8")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_CRT_SECURE_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SCL_SECURE_NO_DEPRECATE /D_SCL_SECURE_NO_WARNINGS")

@@ -21,7 +21,7 @@ set(HEADERS
 hyperengine_group_source()
 
 hyperengine_define_module(HyperResource)
-target_link_libraries(HyperResource PUBLIC HyperCore HyperPlatform)
+target_link_libraries(HyperResource PUBLIC HyperCore)
 target_link_libraries(HyperResource PUBLIC assimp)
 target_link_libraries(HyperResource PUBLIC glslang)
 target_link_libraries(HyperResource PUBLIC meshoptimizer)

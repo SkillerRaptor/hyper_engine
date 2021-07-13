@@ -7,8 +7,7 @@
 #include <HyperCore/Events/WindowEvents.hpp>
 #include <HyperEngine/EngineLoop.hpp>
 #include <HyperPlatform/IWindow.hpp>
-// #include <HyperRendering/IContext.hpp>
-// #include <HyperRendering/RenderingAPI.hpp>
+#include <HyperResource/ShaderCompiler.hpp>
 
 namespace HyperEngine
 {
@@ -27,14 +26,6 @@ namespace HyperEngine
 
 		m_library_manager = HyperPlatform::ILibraryManager::construct();
 		
-		// const char* library_name = HyperRendering::convert_to_library(HyperRendering::RenderingAPI::OpenGL33);
-		// m_graphics_library = m_library_manager->load(library_name);
-		
-		// void* create_context_address = m_library_manager->get_function_address(m_graphics_library, "create_context");
-		// CreateContextFunction create_context = reinterpret_cast<CreateContextFunction>(create_context_address);
-		// m_graphics_context = create_context();
-		// m_graphics_context->initialize(m_window);
-
 		m_event_manager.register_listener<HyperCore::SWindowCloseEvent>(
 			"EngineLoopAppCloseEvent",
 			[this](const HyperCore::SWindowCloseEvent&)
@@ -47,8 +38,6 @@ namespace HyperEngine
 
 	void CEngineLoop::shutdown()
 	{
-		// m_graphics_context->shutdown();
-
 		m_library_manager->unload(m_graphics_library);
 		delete m_library_manager;
 
@@ -62,14 +51,6 @@ namespace HyperEngine
 		{
 			m_window->poll_events();
 			m_event_manager.process_next_event();
-			
-			// HyperRendering::IRenderer& renderer = m_graphics_context->renderer();
-			// renderer.begin_frame();
-			// renderer.command_clear({ 0.25f, 0.25f, 0.25f, 0.25f });
-			
-			// renderer.end_frame();
-			
-			// m_graphics_context->update();
 		}
 	}
 } // namespace HyperEngine

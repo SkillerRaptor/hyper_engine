@@ -6,16 +6,17 @@
 
 #pragma once
 
+#include <HyperCore/Utilities/Compilers.hpp>
 #include <cstdint>
 #include <type_traits>
 
-#if HYPERENGINE_COMPILER_Clang
+#if HYPERENGINE_COMPILER_CLANG
 #	pragma clang diagnostic push
 #	pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
-#elif HYPERENGINE_COMPILER_GNU
+#elif HYPERENGINE_COMPILER_GCC
 #	pragma GCC diagnostic push
 #	pragma GCC diagnostic ignored "-Wpedantic"
-#elif HYPERENGINE_COMPILER_MSVC
+#elif HYPERENGINE_COMPILER_VC
 #	pragma warning(push)
 #	pragma warning(disable : 4201)
 #endif
@@ -253,10 +254,10 @@ namespace HyperMath
 	using CVec4ui = CVector4<uint32_t>;
 } // namespace HyperMath
 
-#if HYPERENGINE_COMPILER_Clang
+#if HYPERENGINE_COMPILER_CLANG
 #	pragma clang diagnostic pop
-#elif HYPERENGINE_COMPILER_GNU
+#elif HYPERENGINE_COMPILER_GCC
 #	pragma GCC diagnostic pop
-#elif HYPERENGINE_COMPILER_MSVC
+#elif HYPERENGINE_COMPILER_VC
 #	pragma warning(pop)
 #endif
