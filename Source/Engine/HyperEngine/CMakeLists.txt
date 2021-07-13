@@ -35,21 +35,21 @@ target_link_libraries(HyperEngine PUBLIC HyperResource)
 # DirectX
 #-------------------------------------------------------------------------------------------
 if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
-#    add_dependencies(HyperEngine HyperDirectX11)
-#    add_dependencies(HyperEngine HyperDirectX12)
+    target_link_libraries(HyperEngine PUBLIC HyperDirectX11)
+    target_link_libraries(HyperEngine PUBLIC HyperDirectX12)
 endif ()
 
 #-------------------------------------------------------------------------------------------
 # OpenGL
 #-------------------------------------------------------------------------------------------
 if (${HYPERENGINE_BUILD_OPENGL})
-#    add_dependencies(HyperEngine HyperOpenGL33)
-#    add_dependencies(HyperEngine HyperOpenGL46)
+    target_link_libraries(HyperEngine PUBLIC HyperOpenGL33)
+    target_link_libraries(HyperEngine PUBLIC HyperOpenGL46)
 endif ()
 
 #-------------------------------------------------------------------------------------------
 # Vulkan
 #-------------------------------------------------------------------------------------------
 if (${HYPERENGINE_BUILD_VULKAN})
-#    add_dependencies(HyperEngine HyperVulkan)
+    target_link_libraries(HyperEngine PUBLIC HyperVulkan)
 endif ()

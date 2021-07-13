@@ -8,6 +8,12 @@
 #include <HyperEngine/EngineLoop.hpp>
 #include <HyperPlatform/IWindow.hpp>
 #include <HyperResource/ShaderCompiler.hpp>
+#include <HyperRendering/RenderCommand.hpp>
+#include <HyperRendering/DirectX11/Context.hpp>
+#include <HyperRendering/DirectX12/Context.hpp>
+#include <HyperRendering/OpenGL33/Context.hpp>
+#include <HyperRendering/OpenGL46/Context.hpp>
+#include <HyperRendering/Vulkan/Context.hpp>
 
 namespace HyperEngine
 {

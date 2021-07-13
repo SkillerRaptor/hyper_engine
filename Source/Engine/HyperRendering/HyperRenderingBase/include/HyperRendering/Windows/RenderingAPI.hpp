@@ -20,7 +20,7 @@ namespace HyperRendering
 		case RenderingAPI::DirectX12:
 			return "HyperDirectX12.dll";
 		case RenderingAPI::OpenGL33:
-			return "HyperOpenGL33.dll";
+			return "HyperOpenGL33d.dll";
 		case RenderingAPI::OpenGL46:
 			return "HyperOpenGL46.dll";
 		case RenderingAPI::Vulkan:
