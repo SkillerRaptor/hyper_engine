@@ -24,9 +24,30 @@ namespace HyperCore
 		};
 
 	public:
+		constexpr CLogger() = delete;
+		constexpr CLogger(CLogger&& other) = delete;
+		constexpr CLogger(const CLogger& other) = delete;
+		~CLogger() = delete;
+
+		CLogger& operator=(CLogger&& other) noexcept = delete;
+		CLogger& operator=(const CLogger& other) = delete;
+
 		template <typename... Args>
 		static void log(ELevel level, std::string_view format, Args&&... args)
 		{
+			if (format.empty())
+			{
+				internal_log(level, format);
+				return;
+			}
+
+			static constexpr const size_t args_count = sizeof...(Args);
+			if constexpr (args_count == 0)
+			{
+				internal_log(level, format);
+				return;
+			}
+
 			internal_log(level, CFormatter::format(format, std::forward<Args>(args)...));
 		}
 

@@ -7,7 +7,7 @@
 #pragma once
 
 #include <HyperCore/Logger.hpp>
-#include <HyperCore/Utilities/Prerequisites.hpp>
+#include <HyperCore/Utilities/Macros.hpp>
 #include <HyperCore/Utilities/SourceLocation.hpp>
 
 #if HYPERENGINE_DEBUG

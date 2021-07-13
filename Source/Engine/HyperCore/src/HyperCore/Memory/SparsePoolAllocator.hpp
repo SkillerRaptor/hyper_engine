@@ -16,25 +16,18 @@ namespace HyperCore
 	{
 	public:
 		using ValueType = T;
-		using Reference = ValueType&;
-		using ConstReference = const ValueType&;
-		using Pointer = ValueType*;
-		using ConstPointer = const ValueType*;
-		using SizeType = size_t;
-		using DifferenceType = ptrdiff_t;
-
 		using IndexType = I;
-
+		
 	public:
-		explicit CSparsePoolAllocator(SizeType size = 128)
+		explicit CSparsePoolAllocator(size_t size = 128)
 			: m_size(size)
 		{
-			m_data = new ValueType[m_size];
+			m_data = new T[m_size];
 
-			for (SizeType i = 0; i < m_size; ++i)
+			for (size_t i = 0; i < m_size; ++i)
 			{
-				IndexType* address = reinterpret_cast<IndexType*>(&m_data[i]);
-				*address = static_cast<IndexType>(i) + 1;
+				I* address = reinterpret_cast<I*>(&m_data[i]);
+				*address = static_cast<I>(i) + 1;
 			}
 		}
 
@@ -43,11 +36,11 @@ namespace HyperCore
 			delete[] m_data;
 		}
 
-		Reference allocate(IndexType& position)
+		T& allocate(I& position)
 		{
-			position = static_cast<SizeType>(m_allocation_count);
+			position = static_cast<size_t>(m_allocation_count);
 
-			auto* address = reinterpret_cast<IndexType*>(&m_data[position]);
+			auto* address = reinterpret_cast<I*>(&m_data[position]);
 			m_next_allocation = *address;
 
 			m_data[position] = T();
@@ -56,67 +49,67 @@ namespace HyperCore
 			return m_data[position];
 		}
 
-		bool deallocate(IndexType& position)
+		bool deallocate(I& position)
 		{
 			if(position >= m_size)
 			{
-				HyperCore::CLogger::warning("HyperCore: SparsePoolAllocator: position out of range!");
+				HyperCore::CLogger::warning("CSparsePoolAllocator: position out of range!");
 				return false;
 			}
 
-			auto* address = reinterpret_cast<IndexType*>(&m_data[position]);
+			auto* address = reinterpret_cast<I*>(&m_data[position]);
 			*address = m_next_allocation;
 
-			m_next_allocation = static_cast<IndexType>(position);
+			m_next_allocation = static_cast<I>(position);
 
 			m_data[position] = T();
 			--m_allocation_count;
 			
-			position = std::numeric_limits<IndexType>::max();
+			position = std::numeric_limits<I>::max();
 			
 			return true;
 		}
 
 		void clear()
 		{
-			for (SizeType i = 0; i < m_size; ++i)
+			for (size_t i = 0; i < m_size; ++i)
 			{
-				IndexType* address = reinterpret_cast<IndexType*>(&m_data[i]);
-				*address = static_cast<IndexType>(i) + 1;
+				I* address = reinterpret_cast<I*>(&m_data[i]);
+				*address = static_cast<I>(i) + 1;
 			}
 
 			m_allocation_count = 0;
 			m_next_allocation = 0;
 		}
 
-		constexpr Reference at(SizeType position)
+		constexpr T& at(size_t position)
 		{
 			HYPERENGINE_ASSERT(position < m_size);
 			return m_data[position];
 		}
 
-		constexpr ConstReference at(SizeType position) const
+		constexpr const T& at(size_t position) const
 		{
 			HYPERENGINE_ASSERT(position < m_size);
 			return m_data[position];
 		}
 
-		constexpr Reference operator[](SizeType position)
+		constexpr T& operator[](size_t position)
 		{
 			return m_data[position];
 		}
 
-		constexpr ConstReference operator[](SizeType position) const
+		constexpr const T& operator[](size_t position) const
 		{
 			return m_data[position];
 		}
 
-		constexpr Pointer data() noexcept
+		constexpr T* data() noexcept
 		{
 			return m_data;
 		}
 
-		constexpr ConstPointer data() const noexcept
+		constexpr const T* data() const noexcept
 		{
 			return m_data;
 		}
@@ -126,21 +119,21 @@ namespace HyperCore
 			return size() == 0;
 		}
 
-		constexpr SizeType size() const noexcept
+		constexpr size_t size() const noexcept
 		{
 			return m_allocation_count;
 		}
 
-		constexpr SizeType max_size() const noexcept
+		constexpr size_t max_size() const noexcept
 		{
 			return m_size;
 		}
 
 	private:
-		Pointer m_data{ nullptr };
-		SizeType m_size{ 0 };
+		T* m_data{ nullptr };
+		size_t m_size{ 0 };
 
-		IndexType m_allocation_count{ 0 };
-		IndexType m_next_allocation{ 0 };
+		I m_allocation_count{ 0 };
+		I m_next_allocation{ 0 };
 	};
 } // namespace HyperCore

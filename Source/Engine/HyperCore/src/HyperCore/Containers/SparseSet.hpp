@@ -16,13 +16,7 @@ namespace HyperCore
 	{
 	public:
 		using ValueType = T;
-		using Reference = ValueType&;
-		using ConstReference = const ValueType&;
-		using Pointer = ValueType*;
-		using ConstPointer = const ValueType*;
-		using SizeType = size_t;
-		using DifferenceType = ptrdiff_t;
-
+		
 	public:
 		~CSparseSet()
 		{
@@ -35,57 +29,57 @@ namespace HyperCore
 			m_packed.clear();
 		}
 
-		constexpr Reference at(SizeType position)
+		T& at(size_t position)
 		{
 			HYPERENGINE_ASSERT(position < m_size);
 			return m_packed[position];
 		}
 
-		constexpr ConstReference at(SizeType position) const
+		const T& at(size_t position) const
 		{
 			HYPERENGINE_ASSERT(position < m_size);
 			return m_packed[position];
 		}
 
-		constexpr Reference operator[](SizeType position)
+		T& operator[](size_t position)
 		{
 			return m_packed[position];
 		}
 
-		constexpr ConstReference operator[](SizeType position) const
+		const T& operator[](size_t position) const
 		{
 			return m_packed[position];
 		}
 
-		constexpr Pointer data() noexcept
+		T* data() noexcept
 		{
 			return m_data;
 		}
 
-		constexpr ConstPointer data() const noexcept
+		const T* data() const noexcept
 		{
 			return m_data;
 		}
 
-		constexpr bool empty() const noexcept
+		size_t size() const noexcept
+		{
+			return m_size;
+		}
+
+		size_t max_size() const noexcept
+		{
+			return m_size;
+		}
+
+		bool empty() const noexcept
 		{
 			return size() == 0;
 		}
 
-		constexpr SizeType size() const noexcept
-		{
-			return m_size;
-		}
-
-		constexpr SizeType max_size() const noexcept
-		{
-			return m_size;
-		}
-
 	private:
-		std::vector<ValueType> m_sparse;
-		std::vector<ValueType> m_packed;
-		SizeType m_size;
-		SizeType m_capacity;
+		std::vector<T> m_sparse;
+		std::vector<T> m_packed;
+		size_t m_size;
+		size_t m_capacity;
 	};
 } // namespace HyperCore

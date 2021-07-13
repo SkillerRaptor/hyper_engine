@@ -13,11 +13,6 @@ namespace HyperCore
 	class CSourceLocation
 	{
 	public:
-		constexpr CSourceLocation() = default;
-		constexpr CSourceLocation(CSourceLocation&& other) = default;
-		constexpr CSourceLocation(const CSourceLocation& other) = default;
-		~CSourceLocation() = default;
-		
 		static constexpr CSourceLocation current(
 			const char* file = __builtin_FILE(),
 			const char* function = __builtin_FUNCTION(),

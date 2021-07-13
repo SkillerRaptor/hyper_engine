@@ -13,6 +13,7 @@ cmake_minimum_required(VERSION 3.10)
 # HyperCore
 #-------------------------------------------------------------------------------------------
 set(SOURCES
+        src/HyperCore/Formatter.cpp
         src/HyperCore/Logger.cpp
         src/HyperCore/Events/EventManager.cpp
         src/HyperCore/Events/Event.cpp)
@@ -30,7 +31,9 @@ set(HEADERS
         src/HyperCore/Events/MouseEvents.hpp
         src/HyperCore/Events/WindowEvents.hpp
         src/HyperCore/Memory/SparsePoolAllocator.hpp
-        src/HyperCore/Utilities/Prerequisites.hpp
+        src/HyperCore/Utilities/Bits.hpp
+        src/HyperCore/Utilities/Macros.hpp
+        src/HyperCore/Utilities/Result.hpp
         src/HyperCore/Utilities/SourceLocation.hpp)
 
 foreach (item IN ITEMS ${SOURCES} ${HEADERS})

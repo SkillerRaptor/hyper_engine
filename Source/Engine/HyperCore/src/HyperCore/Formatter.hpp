@@ -16,54 +16,53 @@ namespace HyperCore
 	class CFormatter
 	{
 	public:
+		constexpr CFormatter() = delete;
+		constexpr CFormatter(CFormatter&& other) = delete;
+		constexpr CFormatter(const CFormatter& other) = delete;
+		~CFormatter() = delete;
+		
+		CFormatter& operator=(CFormatter&& other) noexcept = delete;
+		CFormatter& operator=(const CFormatter& other) = delete;
+		
 		template <typename... Args>
 		static std::string format(std::string_view format, Args&&... args)
 		{
 			if (format.empty())
 			{
+				internal_warning("CFormatter: The argument 'format' was empty!");
 				return format.data();
 			}
 
 			constexpr const size_t args_count = sizeof...(Args);
 			if constexpr (args_count == 0)
 			{
+				internal_warning("CFormatter: The arguments 'args' were 0!");
 				return format.data();
 			}
 
-			bool is_formatting = false;
 			uint32_t argument_index = 0;
 			std::stringstream format_stream;
-			for (const char c : format)
+
+			// TODO: Evaluating input
+			
+			for (size_t i = 0; i < format.size(); ++i)
 			{
-				switch (c)
+				switch (format[i])
 				{
 				case '{':
-					is_formatting = true;
 					break;
 				case '}':
 				{
-					if (!is_formatting)
-					{
-						break;
-					}
-
 					format_sequence(
 						argument_index,
 						format_stream,
 						std::make_index_sequence<args_count>(),
 						std::forward<Args>(args)...);
 					++argument_index;
-
-					is_formatting = false;
 					break;
 				}
 				default:
-					if (is_formatting)
-					{
-						break;
-					}
-
-					format_stream << c;
+					format_stream << format[i];
 					break;
 				}
 			}
@@ -94,5 +93,7 @@ namespace HyperCore
 				format_stream << value;
 			}
 		}
+		
+		static void internal_warning(std::string_view string);
 	};
 } // namespace HyperCore
