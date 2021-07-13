@@ -9,11 +9,26 @@
 #include <HyperPlatform/IWindow.hpp>
 #include <HyperResource/ShaderCompiler.hpp>
 #include <HyperRendering/RenderCommand.hpp>
-#include <HyperRendering/DirectX11/Context.hpp>
-#include <HyperRendering/DirectX12/Context.hpp>
-#include <HyperRendering/OpenGL33/Context.hpp>
-#include <HyperRendering/OpenGL46/Context.hpp>
-#include <HyperRendering/Vulkan/Context.hpp>
+
+#if HYPERENGINE_BUILD_DIRECTX11
+#	include <HyperRendering/DirectX11/Context.hpp>
+#endif
+
+#if HYPERENGINE_BUILD_DIRECTX12
+#	include <HyperRendering/DirectX12/Context.hpp>
+#endif
+
+#if HYPERENGINE_BUILD_OPENGL33
+#	include <HyperRendering/OpenGL33/Context.hpp>
+#endif
+
+#if HYPERENGINE_BUILD_OPENGL46
+#	include <HyperRendering/OpenGL46/Context.hpp>
+#endif
+
+#if HYPERENGINE_BUILD_VULKAN
+#	include <HyperRendering/Vulkan/Context.hpp>
+#endif
 
 namespace HyperEngine
 {
@@ -31,7 +46,7 @@ namespace HyperEngine
 		m_window->initialize(create_info);
 
 		m_library_manager = HyperPlatform::ILibraryManager::construct();
-		
+
 		m_event_manager.register_listener<HyperCore::SWindowCloseEvent>(
 			"EngineLoopAppCloseEvent",
 			[this](const HyperCore::SWindowCloseEvent&)
