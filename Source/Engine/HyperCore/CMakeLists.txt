@@ -20,8 +20,14 @@ set(SOURCES
 
 set(HEADERS
         include/HyperCore/Assertion.hpp
+        include/HyperCore/Compilers.hpp
         include/HyperCore/Formatter.hpp
         include/HyperCore/Logger.hpp
+        include/HyperCore/Result.hpp
+        include/HyperCore/ResultOr.hpp
+        include/HyperCore/Compiler/ClangSpecific.hpp
+        include/HyperCore/Compiler/GCCSpecific.hpp
+        include/HyperCore/Compiler/MSVCSpecific.hpp
         include/HyperCore/Events/Event.hpp
         include/HyperCore/Events/EventManager.hpp
         include/HyperCore/Events/EventWrapper.hpp
@@ -32,7 +38,6 @@ set(HEADERS
         include/HyperCore/Memory/SparsePoolAllocator.hpp
         include/HyperCore/Utilities/Bits.hpp
         include/HyperCore/Utilities/Macros.hpp
-        include/HyperCore/Utilities/Result.hpp
         include/HyperCore/Utilities/SourceLocation.hpp)
 
 hyperengine_group_source()

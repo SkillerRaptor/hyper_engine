@@ -7,9 +7,9 @@
 #pragma once
 
 #if defined(__clang__)
-#	define HYPERENGINE_COMPILER_CLANG 1
+#	include <HyperCore/Compiler/ClangSpecific.hpp>
 #elif defined(__GNUC__) || defined(__GNUG__)
-#	define HYPERENGINE_COMPILER_GCC 1
+#	include <HyperCore/Compiler/GCCSpecific.hpp>
 #elif defined(_MSC_VER)
-#	define HYPERENGINE_COMPILER_VC 1
+#	include <HyperCore/Compiler/MSVCSpecific.hpp>
 #endif
