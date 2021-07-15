@@ -22,7 +22,6 @@ set(HEADERS
         include/HyperCore/Assertion.hpp
         include/HyperCore/Formatter.hpp
         include/HyperCore/Logger.hpp
-        include/HyperCore/Containers/SparseSet.hpp
         include/HyperCore/Events/Event.hpp
         include/HyperCore/Events/EventManager.hpp
         include/HyperCore/Events/EventWrapper.hpp

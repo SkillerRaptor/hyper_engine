@@ -12,8 +12,6 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 # HyperEngine
 #-------------------------------------------------------------------------------------------
-set(HYPERENGINE_COMMON_PATH ${CMAKE_SOURCE_DIR}/Source/Engine/HyperRendering/HyperCommon)
-
 set(SOURCES
         src/HyperEngine/EngineLoop.cpp
         src/HyperEngine/Launcher.cpp)

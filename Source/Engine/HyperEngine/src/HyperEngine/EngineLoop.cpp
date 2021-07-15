@@ -7,28 +7,6 @@
 #include <HyperCore/Events/WindowEvents.hpp>
 #include <HyperEngine/EngineLoop.hpp>
 #include <HyperPlatform/IWindow.hpp>
-#include <HyperResource/ShaderCompiler.hpp>
-#include <HyperRendering/RenderCommand.hpp>
-
-#if HYPERENGINE_BUILD_DIRECTX11
-#	include <HyperRendering/DirectX11/Context.hpp>
-#endif
-
-#if HYPERENGINE_BUILD_DIRECTX12
-#	include <HyperRendering/DirectX12/Context.hpp>
-#endif
-
-#if HYPERENGINE_BUILD_OPENGL33
-#	include <HyperRendering/OpenGL33/Context.hpp>
-#endif
-
-#if HYPERENGINE_BUILD_OPENGL46
-#	include <HyperRendering/OpenGL46/Context.hpp>
-#endif
-
-#if HYPERENGINE_BUILD_VULKAN
-#	include <HyperRendering/Vulkan/Context.hpp>
-#endif
 
 namespace HyperEngine
 {
