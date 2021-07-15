@@ -10,8 +10,8 @@
 #include <cstdint>
 #include <type_traits>
 
-#pragma HYPERENGINE_COMPILER_PUSH_WARNING
-#pragma HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
+HYPERENGINE_COMPILER_PUSH_WARNING
+HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
 
 namespace HyperMath
 {
@@ -200,4 +200,4 @@ namespace HyperMath
 	using CVec2ui = CVector2<uint32_t>;
 } // namespace HyperMath
 
-#pragma HYPERENGINE_COMPILER_POP_WARNING
+HYPERENGINE_COMPILER_POP_WARNING

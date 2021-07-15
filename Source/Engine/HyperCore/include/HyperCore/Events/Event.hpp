@@ -11,8 +11,8 @@
 #include <HyperCore/Events/MouseEvents.hpp>
 #include <HyperCore/Events/WindowEvents.hpp>
 
-#pragma HYPERENGINE_COMPILER_PUSH_WARNING
-#pragma HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
+HYPERENGINE_COMPILER_PUSH_WARNING
+HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
 
 namespace HyperCore
 {
@@ -102,4 +102,4 @@ namespace HyperCore
 	};
 } // namespace HyperCore
 
-#pragma HYPERENGINE_COMPILER_POP_WARNING
+HYPERENGINE_COMPILER_POP_WARNING

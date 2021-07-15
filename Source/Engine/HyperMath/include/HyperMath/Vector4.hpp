@@ -10,8 +10,8 @@
 #include <cstdint>
 #include <type_traits>
 
-#pragma HYPERENGINE_COMPILER_PUSH_WARNING
-#pragma HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
+HYPERENGINE_COMPILER_PUSH_WARNING
+HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
 
 namespace HyperMath
 {
@@ -45,7 +45,7 @@ namespace HyperMath
 			, w(w)
 		{
 		}
-		
+
 		CVector4<T> operator-() const
 		{
 			CVector4<T> vector;
@@ -55,7 +55,7 @@ namespace HyperMath
 			vector.w = -w;
 			return vector;
 		}
-		
+
 		CVector4<T> operator+(T value) const
 		{
 			CVector4<T> vector;
@@ -65,7 +65,7 @@ namespace HyperMath
 			vector.w = w + value;
 			return vector;
 		}
-		
+
 		CVector4<T> operator+(const CVector4<T>& other) const
 		{
 			CVector4<T> vector;
@@ -75,7 +75,7 @@ namespace HyperMath
 			vector.w = w + other.w;
 			return vector;
 		}
-		
+
 		CVector4<T>& operator+=(T value)
 		{
 			x += value;
@@ -84,7 +84,7 @@ namespace HyperMath
 			w += value;
 			return *this;
 		}
-		
+
 		CVector4<T>& operator+=(const CVector4<T>& other)
 		{
 			x += other.x;
@@ -93,7 +93,7 @@ namespace HyperMath
 			w += other.w;
 			return *this;
 		}
-		
+
 		CVector4<T> operator-(T value) const
 		{
 			CVector4<T> vector;
@@ -103,7 +103,7 @@ namespace HyperMath
 			vector.w = w - value;
 			return vector;
 		}
-		
+
 		CVector4<T> operator-(const CVector4<T>& other) const
 		{
 			CVector4<T> vector;
@@ -113,7 +113,7 @@ namespace HyperMath
 			vector.w = w - other.w;
 			return vector;
 		}
-		
+
 		CVector4<T>& operator-=(T value)
 		{
 			x -= value;
@@ -122,7 +122,7 @@ namespace HyperMath
 			y -= value;
 			return *this;
 		}
-		
+
 		CVector4<T>& operator-=(const CVector4<T>& other)
 		{
 			x -= other.x;
@@ -131,7 +131,7 @@ namespace HyperMath
 			w -= other.w;
 			return *this;
 		}
-		
+
 		CVector4<T> operator*(T value) const
 		{
 			CVector4<T> vector;
@@ -141,7 +141,7 @@ namespace HyperMath
 			vector.w = w * value;
 			return vector;
 		}
-		
+
 		CVector4<T> operator*(const CVector4<T>& other) const
 		{
 			CVector4<T> vector;
@@ -151,7 +151,7 @@ namespace HyperMath
 			vector.w = w * other.w;
 			return vector;
 		}
-		
+
 		CVector4<T>& operator*=(T value)
 		{
 			x *= value;
@@ -160,7 +160,7 @@ namespace HyperMath
 			w *= value;
 			return *this;
 		}
-		
+
 		CVector4<T>& operator*=(const CVector4<T>& other)
 		{
 			x *= other.x;
@@ -169,7 +169,7 @@ namespace HyperMath
 			w *= other.w;
 			return *this;
 		}
-		
+
 		CVector4<T> operator/(T value) const
 		{
 			CVector4<T> vector;
@@ -179,7 +179,7 @@ namespace HyperMath
 			vector.w = w / value;
 			return vector;
 		}
-		
+
 		CVector4<T> operator/(const CVector4<T>& other) const
 		{
 			CVector4<T> vector;
@@ -189,7 +189,7 @@ namespace HyperMath
 			vector.w = w / other.w;
 			return vector;
 		}
-		
+
 		CVector4<T>& operator/=(T value)
 		{
 			x /= value;
@@ -198,7 +198,7 @@ namespace HyperMath
 			w /= value;
 			return *this;
 		}
-		
+
 		CVector4<T>& operator/=(const CVector4<T>& other)
 		{
 			x /= other.x;
@@ -246,4 +246,4 @@ namespace HyperMath
 	using CVec4ui = CVector4<uint32_t>;
 } // namespace HyperMath
 
-#pragma HYPERENGINE_COMPILER_POP_WARNING
+HYPERENGINE_COMPILER_POP_WARNING

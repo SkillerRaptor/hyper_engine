@@ -12,8 +12,10 @@
 
 #define HYPERENGINE_COMPILER_CLANG 1
 
-#define HYPERENGINE_COMPILER_PUSH_WARNING clang diagnostic push
-#define HYPERENGINE_COMPILER_POP_WARNING clang diagnostic pop
-#define HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT clang diagnostic ignored "-Wgnu-anonymous-struct"
+#define HYPERENGINE_COMPILER_PUSH_WARNING _Pragma("clang diagnostic push")
+#define HYPERENGINE_COMPILER_POP_WARNING _Pragma("clang diagnostic pop")
+#define HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT \
+	_Pragma("clang diagnostic ignored \"-Wgnu-anonymous-struct\"") \
+	_Pragma("clang diagnostic ignored \"-Wnested-anon-types\"")
 
 #define HYPERENGINE_ALIGN(bytes) __attribute__((aligned(bytes)))

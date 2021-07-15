@@ -6,7 +6,6 @@
 
 #include <HyperCore/Logger.hpp>
 #include <HyperCore/Events/EventManager.hpp>
-#include <HyperCore/Utilities/Prerequisites.hpp>
 #include <HyperPlatform/Linux/Window.hpp>
 #include <X11/Xutil.h>
 
