@@ -7,7 +7,7 @@
 #pragma once
 
 #if !defined(_MSC_VER)
-#	error This file should only be included on the clang compiler
+#	error This file should only be included on the vc compilers
 #endif
 
 #define HYPERENGINE_COMPILER_VC 1

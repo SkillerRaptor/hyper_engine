@@ -7,12 +7,17 @@
 #pragma once
 
 #include <HyperCore/Formatter.hpp>
+#include <HyperCore/Prerequisites.hpp>
 #include <string_view>
 
 namespace HyperCore
 {
 	class CLogger
 	{
+	public:
+		HYPERENGINE_NON_COPYABLE(CLogger);
+		HYPERENGINE_NON_MOVEABLE(CLogger);
+		
 	public:
 		enum class ELevel
 		{
@@ -25,32 +30,8 @@ namespace HyperCore
 
 	public:
 		constexpr CLogger() = delete;
-		constexpr CLogger(CLogger&& other) = delete;
-		constexpr CLogger(const CLogger& other) = delete;
 		~CLogger() = delete;
-
-		CLogger& operator=(CLogger&& other) noexcept = delete;
-		CLogger& operator=(const CLogger& other) = delete;
-
-		template <typename... Args>
-		static void log(ELevel level, std::string_view format, Args&&... args)
-		{
-			if (format.empty())
-			{
-				internal_log(level, format);
-				return;
-			}
-
-			static constexpr const size_t args_count = sizeof...(Args);
-			if constexpr (args_count == 0)
-			{
-				internal_log(level, format);
-				return;
-			}
-
-			internal_log(level, CFormatter::format(format, std::forward<Args>(args)...));
-		}
-
+		
 		template <typename... Args>
 		static void info(std::string_view format, Args&&... args)
 		{
@@ -82,6 +63,25 @@ namespace HyperCore
 		}
 
 	private:
+		template <typename... Args>
+		static void log(ELevel level, std::string_view format, Args&&... args)
+		{
+			if (format.empty())
+			{
+				internal_log(level, format);
+				return;
+			}
+			
+			static constexpr const size_t args_count = sizeof...(Args);
+			if constexpr (args_count == 0)
+			{
+				internal_log(level, format);
+				return;
+			}
+			
+			internal_log(level, CFormatter::format(format, std::forward<Args>(args)...));
+		}
+		
 		static void internal_log(ELevel level, std::string_view string);
 	};
 } // namespace HyperCore

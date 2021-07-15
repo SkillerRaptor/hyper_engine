@@ -5,8 +5,8 @@
  */
 
 #include <HyperCore/Logger.hpp>
+#include <HyperCore/Prerequisites.hpp>
 #include <HyperCore/Events/EventManager.hpp>
-#include <HyperCore/Utilities/Macros.hpp>
 #include <HyperPlatform/Windows/Window.hpp>
 
 namespace HyperPlatform::Windows

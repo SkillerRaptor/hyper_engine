@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <HyperCore/Utilities/Bits.hpp>
+#include <HyperCore/Bits.hpp>
 #include <cstdint>
 #include <string>
 

@@ -7,7 +7,7 @@
 #pragma once
 
 #if !defined(__clang__)
-#	error This file should only be included on the clang compiler
+#	error This file should only be included on clang compilers
 #endif
 
 #define HYPERENGINE_COMPILER_CLANG 1
@@ -16,4 +16,4 @@
 #define HYPERENGINE_COMPILER_POP_WARNING clang diagnostic pop
 #define HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT clang diagnostic ignored "-Wgnu-anonymous-struct"
 
-#define HYPERENGINE_ALIGN(bytes) __attribute__((algined(bytes)))
+#define HYPERENGINE_ALIGN(bytes) __attribute__((aligned(bytes)))

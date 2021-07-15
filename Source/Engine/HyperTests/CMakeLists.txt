@@ -14,7 +14,6 @@ cmake_minimum_required(VERSION 3.10)
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/HyperTests/main.cpp
-        src/HyperTests/HyperCore/SparsePoolAllocatorTest.cpp
         src/HyperTests/HyperMath/Vector2.cpp
         src/HyperTests/HyperMath/Vector3.cpp
         src/HyperTests/HyperMath/Vector4.cpp)

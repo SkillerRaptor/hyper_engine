@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <HyperCore/Prerequisites.hpp>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -16,34 +17,29 @@ namespace HyperCore
 	class CFormatter
 	{
 	public:
-		constexpr CFormatter() = delete;
-		constexpr CFormatter(CFormatter&& other) = delete;
-		constexpr CFormatter(const CFormatter& other) = delete;
-		~CFormatter() = delete;
+		HYPERENGINE_NON_COPYABLE(CFormatter);
+		HYPERENGINE_NON_MOVEABLE(CFormatter);
 		
-		CFormatter& operator=(CFormatter&& other) noexcept = delete;
-		CFormatter& operator=(const CFormatter& other) = delete;
+	public:
+		constexpr CFormatter() = delete;
+		~CFormatter() = delete;
 		
 		template <typename... Args>
 		static std::string format(std::string_view format, Args&&... args)
 		{
 			if (format.empty())
 			{
-				//internal_warning("CFormatter: The argument 'format' was empty!");
 				return format.data();
 			}
 
 			constexpr const size_t args_count = sizeof...(Args);
 			if constexpr (args_count == 0)
 			{
-				//internal_warning("CFormatter: The arguments 'args' were 0!");
 				return format.data();
 			}
 
 			uint32_t argument_index = 0;
 			std::stringstream format_stream;
-
-			// TODO: Evaluating input
 			
 			for (size_t i = 0; i < format.size(); ++i)
 			{
@@ -93,7 +89,5 @@ namespace HyperCore
 				format_stream << value;
 			}
 		}
-		
-		static void internal_warning(std::string_view string);
 	};
 } // namespace HyperCore

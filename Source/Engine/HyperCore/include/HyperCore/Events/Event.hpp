@@ -6,9 +6,13 @@
 
 #pragma once
 
+#include <HyperCore/Compilers.hpp>
 #include <HyperCore/Events/KeyEvents.hpp>
 #include <HyperCore/Events/MouseEvents.hpp>
 #include <HyperCore/Events/WindowEvents.hpp>
+
+#pragma HYPERENGINE_COMPILER_PUSH_WARNING
+#pragma HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
 
 namespace HyperCore
 {
@@ -97,3 +101,5 @@ namespace HyperCore
 		} m_value{};
 	};
 } // namespace HyperCore
+
+#pragma HYPERENGINE_COMPILER_POP_WARNING

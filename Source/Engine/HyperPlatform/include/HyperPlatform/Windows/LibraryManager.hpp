@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <HyperCore/Memory/SparsePoolAllocator.hpp>
+#include <HyperCore/Memory/SparsePool.hpp>
 #include <HyperPlatform/ILibraryManager.hpp>
 #include <Windows.h>
 
@@ -38,7 +38,7 @@ namespace HyperPlatform::Windows
 		static void internal_unload(SLibraryData& data);
 
 	private:
-		HyperCore::CSparsePoolAllocator<SLibraryData> m_storage{ 256 };
+		HyperCore::CSparsePool<SLibraryData> m_storage{ 256 };
 		uint32_t m_version{ 1 };
 	};
 } // namespace HyperPlatform::Windows

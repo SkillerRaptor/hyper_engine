@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <HyperCore/Memory/SparsePoolAllocator.hpp>
+#include <HyperCore/Memory/SparsePool.hpp>
 #include <HyperPlatform/ILibraryManager.hpp>
 
 namespace HyperPlatform::Linux
@@ -37,7 +37,7 @@ namespace HyperPlatform::Linux
 		static void internal_unload(SLibraryData& data);
 
 	private:
-		HyperCore::CSparsePoolAllocator<SLibraryData> m_storage{ 256 };
+		HyperCore::CSparsePool<SLibraryData> m_storage{ 256 };
 		uint32_t m_version{ 1 };
 	};
 } // namespace HyperPlatform::Linux

@@ -13,20 +13,22 @@ cmake_minimum_required(VERSION 3.10)
 # HyperCore
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/HyperCore/Formatter.cpp
         src/HyperCore/Logger.cpp
         src/HyperCore/Events/EventManager.cpp
         src/HyperCore/Events/Event.cpp)
 
 set(HEADERS
         include/HyperCore/Assertion.hpp
+        include/HyperCore/Bits.hpp
         include/HyperCore/Compilers.hpp
         include/HyperCore/Formatter.hpp
         include/HyperCore/Logger.hpp
+        include/HyperCore/Prerequisites.hpp
         include/HyperCore/Result.hpp
-        include/HyperCore/Compiler/ClangSpecific.hpp
-        include/HyperCore/Compiler/GCCSpecific.hpp
-        include/HyperCore/Compiler/MSVCSpecific.hpp
+        include/HyperCore/SourceLocation.hpp
+        include/HyperCore/Compilers/ClangSpecific.hpp
+        include/HyperCore/Compilers/GCCSpecific.hpp
+        include/HyperCore/Compilers/MSVCSpecific.hpp
         include/HyperCore/Events/Event.hpp
         include/HyperCore/Events/EventManager.hpp
         include/HyperCore/Events/EventWrapper.hpp
@@ -34,10 +36,8 @@ set(HEADERS
         include/HyperCore/Events/KeyEvents.hpp
         include/HyperCore/Events/MouseEvents.hpp
         include/HyperCore/Events/WindowEvents.hpp
-        include/HyperCore/Memory/SparsePoolAllocator.hpp
-        include/HyperCore/Utilities/Bits.hpp
-        include/HyperCore/Utilities/Macros.hpp
-        include/HyperCore/Utilities/SourceLocation.hpp)
+        include/HyperCore/Memory/RingBuffer.hpp
+        include/HyperCore/Memory/SparsePool.hpp)
 
 hyperengine_group_source()
 

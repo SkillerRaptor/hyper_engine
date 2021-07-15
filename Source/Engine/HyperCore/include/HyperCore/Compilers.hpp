@@ -7,9 +7,9 @@
 #pragma once
 
 #if defined(__clang__)
-#	include <HyperCore/Compiler/ClangSpecific.hpp>
+#	include <HyperCore/Compilers/ClangSpecific.hpp>
 #elif defined(__GNUC__) || defined(__GNUG__)
-#	include <HyperCore/Compiler/GCCSpecific.hpp>
+#	include <HyperCore/Compilers/GCCSpecific.hpp>
 #elif defined(_MSC_VER)
-#	include <HyperCore/Compiler/MSVCSpecific.hpp>
+#	include <HyperCore/Compilers/MSVCSpecific.hpp>
 #endif

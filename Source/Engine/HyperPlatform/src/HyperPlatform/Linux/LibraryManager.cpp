@@ -20,11 +20,11 @@ namespace HyperPlatform::Linux
 
 	CLibraryHandle CLibraryManager::load(const std::string& path)
 	{
-		HyperCore::CSparsePoolAllocator<SLibraryData>::IndexType index = 0;
-		SLibraryData& data = m_storage.allocate(index);
+		SLibraryData data{};
 		data.magic_number = m_version++;
 		data.path = path;
 		data.library = dlopen(path.c_str(), RTLD_LAZY);
+		uint64_t index = m_storage.push(data);
 
 		if (data.library == nullptr)
 		{
@@ -44,7 +44,7 @@ namespace HyperPlatform::Linux
 		}
 
 		CLibraryManager::internal_unload(data);
-		m_storage.deallocate(handle.index());
+		m_storage.remove(handle.index());
 	}
 
 	void* CLibraryManager::get_function_address(
