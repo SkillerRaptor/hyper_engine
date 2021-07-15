@@ -24,7 +24,6 @@ set(HEADERS
         include/HyperCore/Formatter.hpp
         include/HyperCore/Logger.hpp
         include/HyperCore/Result.hpp
-        include/HyperCore/ResultOr.hpp
         include/HyperCore/Compiler/ClangSpecific.hpp
         include/HyperCore/Compiler/GCCSpecific.hpp
         include/HyperCore/Compiler/MSVCSpecific.hpp
