@@ -8,6 +8,11 @@
 
 #include <HyperCore/Memory/SparsePool.hpp>
 #include <HyperPlatform/ILibraryManager.hpp>
+#include <HyperPlatform/PlatformDetection.hpp>
+
+#ifndef HYPERENGINE_PLATFORM_LINUX
+#	error This file should only be included on linux platforms
+#endif
 
 namespace HyperPlatform::Linux
 {

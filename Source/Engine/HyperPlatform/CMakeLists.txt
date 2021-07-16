@@ -17,6 +17,7 @@ set(CORE_SOURCES
         src/HyperPlatform/IWindow.cpp)
 
 set(CORE_HEADERS
+        include/HyperPlatform/FileSystem.hpp
         include/HyperPlatform/ILibraryManager.hpp
         include/HyperPlatform/IWindow.hpp
         include/HyperPlatform/PlatformDetection.hpp
@@ -24,6 +25,7 @@ set(CORE_HEADERS
 
 if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
     set(PLATFORM_SOURCES
+            src/HyperPlatform/Windows/FileSystem.cpp
             src/HyperPlatform/Windows/LibraryManager.cpp
             src/HyperPlatform/Windows/Window.cpp)
 
@@ -33,6 +35,7 @@ if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
             include/HyperPlatform/Windows/Window.hpp)
 elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
     set(PLATFORM_SOURCES
+            src/HyperPlatform/Linux/FileSystem.cpp
             src/HyperPlatform/Linux/LibraryManager.cpp
             src/HyperPlatform/Linux/Window.cpp)
 

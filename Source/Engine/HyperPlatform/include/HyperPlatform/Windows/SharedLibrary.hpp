@@ -6,6 +6,12 @@
 
 #pragma once
 
+#include <HyperPlatform/PlatformDetection.hpp>
+
+#ifndef HYPERENGINE_PLATFORM_WINDOWS
+#	error This file should only be included on windows platforms
+#endif
+
 #ifdef HYPERENGINE_SHARED_EXPORT
 #	define HYPERENGINE_API __declspec(dllexport)
 #else

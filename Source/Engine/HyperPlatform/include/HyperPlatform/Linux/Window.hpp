@@ -7,7 +7,12 @@
 #pragma once
 
 #include <HyperPlatform/IWindow.hpp>
+#include <HyperPlatform/PlatformDetection.hpp>
 #include <X11/Xlib.h>
+
+#ifndef HYPERENGINE_PLATFORM_LINUX
+#	error This file should only be included on linux platforms
+#endif
 
 namespace HyperPlatform::Linux
 {

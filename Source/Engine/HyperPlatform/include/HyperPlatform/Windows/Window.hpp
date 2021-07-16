@@ -7,7 +7,12 @@
 #pragma once
 
 #include <HyperPlatform/IWindow.hpp>
+#include <HyperPlatform/PlatformDetection.hpp>
 #include <Windows.h>
+
+#ifndef HYPERENGINE_PLATFORM_WINDOWS
+#	error This file should only be included on windows platforms
+#endif
 
 namespace HyperPlatform::Windows
 {
