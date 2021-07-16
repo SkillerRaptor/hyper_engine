@@ -12,8 +12,8 @@
 
 #define HYPERENGINE_COMPILER_VC 1
 
-#define HYPERENGINE_COMPILER_PUSH_WARNING _Pragma(warning(push))
-#define HYPERENGINE_COMPILER_POP_WARNING _Pragma(warning(pop))
-#define HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT _Pragma(warning(disable : 4201))
+#define HYPERENGINE_COMPILER_PUSH_WARNING __pragma(warning(push))
+#define HYPERENGINE_COMPILER_POP_WARNING __pragma(warning(pop))
+#define HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT __pragma(warning(disable : 4201))
 
 #define HYPERENGINE_ALIGN(bytes) __declspec(align(bytes))
