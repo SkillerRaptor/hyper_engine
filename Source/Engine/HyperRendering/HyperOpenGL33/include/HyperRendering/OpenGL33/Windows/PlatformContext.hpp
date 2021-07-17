@@ -15,7 +15,7 @@ namespace HyperRendering::OpenGL33::Windows
 	class CPlatformContext final : public IPlatformContext
 	{
 	public:
-		virtual bool initialize(HyperPlatform::IWindow* window) override;
+		virtual bool initialize(HyperPlatform::IWindow& window) override;
 		virtual void shutdown() override;
 
 		virtual void swap_buffers() const override;

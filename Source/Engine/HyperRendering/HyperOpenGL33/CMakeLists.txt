@@ -31,13 +31,13 @@ endif ()
 set(CORE_SOURCES
         src/HyperRendering/OpenGL33/Context.cpp
         src/HyperRendering/OpenGL33/IPlatformContext.cpp
-        src/HyperRendering/OpenGL33/Renderer.cpp)
+        src/HyperRendering/OpenGL33/Renderer2D.cpp)
 
 set(CORE_HEADERS
         include/HyperRendering/OpenGL33/Context.hpp
         include/HyperRendering/OpenGL33/IPlatformContext.hpp
         include/HyperRendering/OpenGL33/PlatformInclude.hpp
-        include/HyperRendering/OpenGL33/Renderer.hpp)
+        include/HyperRendering/OpenGL33/Renderer2D.hpp)
 
 set(SOURCES ${CORE_SOURCES} ${PLATFORM_SOURCES} ${HYPERCOMMON_SOURCES})
 set(HEADERS ${CORE_HEADERS} ${PLATFORM_HEADERS} ${HYPERCOMMON_HEADERS})

@@ -11,9 +11,9 @@ namespace HyperRendering::OpenGL33::Linux
 {
 	using PFNGLXCREATECONTEXTATTRIBSARBPROC = GLXContext (*)(Display*, GLXFBConfig, GLXContext, Bool, const int32_t*);
 
-	bool CPlatformContext::initialize(HyperPlatform::IWindow* window)
+	bool CPlatformContext::initialize(HyperPlatform::IWindow& window)
 	{
-		m_window = static_cast<HyperPlatform::Linux::CWindow*>(window);
+		m_window = static_cast<HyperPlatform::Linux::CWindow*>(&window);
 
 		GLint major_glx_version = 0;
 		GLint minor_glx_version = 0;

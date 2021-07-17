@@ -4,36 +4,21 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperCore/Assertion.hpp>
 #include <HyperPlatform/IWindow.hpp>
 #include <HyperRendering/DirectX12/Context.hpp>
 
-namespace HyperRendering
+namespace HyperRendering::DirectX12
 {
-	HYPERENGINE_API IContext* create_context()
+	bool CContext::initialize(HyperPlatform::IWindow&)
 	{
-		return new DirectX12::CContext();
+		return false;
 	}
 
-	namespace DirectX12
+	void CContext::shutdown()
 	{
-		bool CContext::initialize(HyperPlatform::IWindow*)
-		{
-			return false;
-		}
+	}
 
-		void CContext::shutdown()
-		{
-		}
-
-		void CContext::update()
-		{
-		}
-		
-		IRenderer& CContext::renderer()
-		{
-			HYPERENGINE_ASSERT_NOT_REACHED();
-			throw;
-		}
-	} // namespace OpenGL33
-} // namespace HyperRendering
+	void CContext::update()
+	{
+	}
+} // namespace HyperRendering::DirectX12

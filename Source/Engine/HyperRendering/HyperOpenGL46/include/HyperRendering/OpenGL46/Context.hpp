@@ -15,14 +15,9 @@ namespace HyperRendering::OpenGL46
 	class CContext final : public IContext
 	{
 	public:
-		virtual bool initialize(HyperPlatform::IWindow* window) override;
+		virtual bool initialize(HyperPlatform::IWindow& window) override;
 		virtual void shutdown() override;
 
 		virtual void update() override;
-		
-		virtual IRenderer& renderer() override;
-
-	private:
-		IPlatformContext* m_platform_context{ nullptr };
 	};
 } // namespace HyperRendering::OpenGL46

@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperCore/Assertion.hpp>
 #include <HyperPlatform/PlatformDetection.hpp>
 #include <HyperRendering/OpenGL33/IPlatformContext.hpp>
 
@@ -23,7 +22,7 @@ namespace HyperRendering::OpenGL33
 #elif HYPERENGINE_PLATFORM_LINUX
 		return new Linux::CPlatformContext();
 #else
-		HYPERENGINE_ASSERT_NOT_REACHED();
+		return nullptr;
 #endif
 	}
 } // namespace HyperRendering::OpenGL33
