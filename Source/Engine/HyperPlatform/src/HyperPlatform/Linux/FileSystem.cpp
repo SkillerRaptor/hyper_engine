@@ -8,7 +8,7 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 #include <cstdlib>
 
-#ifndef HYPERENGINE_PLATFORM_LINUX
+#if !HYPERENGINE_PLATFORM_LINUX
 #	error This file should only be compiled on linux platforms
 #endif
 

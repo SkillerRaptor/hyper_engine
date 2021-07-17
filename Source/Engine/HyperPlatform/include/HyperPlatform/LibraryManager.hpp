@@ -7,6 +7,7 @@
 #pragma once
 
 #include <HyperCore/Bits.hpp>
+#include <HyperCore/Prerequisites.hpp>
 #include <cstdint>
 #include <string>
 
@@ -35,18 +36,21 @@ namespace HyperPlatform
 		uint32_t m_handle{ 0 };
 	};
 
-	class ILibraryManager
+	class CLibraryManager
 	{
 	public:
-		virtual ~ILibraryManager() = default;
+		HYPERENGINE_NON_COPYABLE(CLibraryManager);
+		HYPERENGINE_NON_MOVEABLE(CLibraryManager);
 
-		virtual CLibraryHandle load(const std::string& path) = 0;
-		virtual void unload(CLibraryHandle library_handle) = 0;
+	public:
+		~CLibraryManager();
 
-		virtual void* get_function_address(
-			CLibraryHandle library_handle,
-			const std::string& function) = 0;
+		static CLibraryHandle load(const std::string& path);
+		static void unload(CLibraryHandle library_handle);
 
-		static ILibraryManager* construct();
+		static void* get_function_address(CLibraryHandle library_handle, const std::string& function);
+
+	private:
+		static uint32_t s_version;
 	};
 } // namespace HyperPlatform

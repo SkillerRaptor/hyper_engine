@@ -8,7 +8,7 @@
 #include <HyperPlatform/PlatformDetection.hpp>
 #include <Windows.h>
 
-#ifndef HYPERENGINE_PLATFORM_WINDOWS
+#if !HYPERENGINE_PLATFORM_WINDOWS
 #	error This file should only be compiled on linux platforms
 #endif
 

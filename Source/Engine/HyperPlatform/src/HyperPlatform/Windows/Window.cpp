@@ -5,17 +5,17 @@
  */
 
 #include <HyperCore/Logger.hpp>
-#include <HyperCore/Prerequisites.hpp>
 #include <HyperCore/Events/EventManager.hpp>
-#include <HyperPlatform/Windows/Window.hpp>
+#include <HyperPlatform/Window.hpp>
+#include <Windows.h>
 
-namespace HyperPlatform::Windows
+#if !HYPERENGINE_PLATFORM_WINDOWS
+#	error This file should only be compiled on windows platforms
+#endif
+
+namespace HyperPlatform
 {
-	LRESULT CALLBACK win_proc(
-		HWND h_window,
-		UINT message,
-		WPARAM first_parameter,
-		LPARAM second_parameter)
+	LRESULT CALLBACK win_proc(HWND h_window, UINT message, WPARAM first_parameter, LPARAM second_parameter)
 	{
 		switch (message)
 		{
@@ -24,8 +24,7 @@ namespace HyperPlatform::Windows
 			LPCREATESTRUCT create_struct = reinterpret_cast<LPCREATESTRUCT>(second_parameter);
 			CWindow* window = reinterpret_cast<CWindow*>(create_struct->lpCreateParams);
 
-			SetWindowLongPtr(
-				h_window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
+			SetWindowLongPtr(h_window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
 			return 0;
 		}
 		case WM_CLOSE:
@@ -93,8 +92,7 @@ namespace HyperPlatform::Windows
 			this);
 		if (!m_window)
 		{
-			HyperCore::CLogger::fatal(
-				"Failed to create window! Error: {}", GetLastError());
+			HyperCore::CLogger::fatal("Failed to create window! Error: {}", GetLastError());
 			return false;
 		}
 
@@ -188,14 +186,7 @@ namespace HyperPlatform::Windows
 
 		AdjustWindowRectEx(&rect, get_window_style(), false, 0);
 
-		SetWindowPos(
-			m_window,
-			nullptr,
-			rect.left,
-			rect.top,
-			0,
-			0,
-			SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+		SetWindowPos(m_window, nullptr, rect.left, rect.top, 0, 0, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 	}
 
 	void CWindow::position(size_t& x, size_t& y) const
@@ -333,4 +324,4 @@ namespace HyperPlatform::Windows
 	{
 		return m_handle;
 	}
-} // namespace HyperPlatform::Windows
+} // namespace HyperPlatform

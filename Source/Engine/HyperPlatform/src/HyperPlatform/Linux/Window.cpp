@@ -6,10 +6,15 @@
 
 #include <HyperCore/Logger.hpp>
 #include <HyperCore/Events/EventManager.hpp>
-#include <HyperPlatform/Linux/Window.hpp>
+#include <HyperPlatform/PlatformDetection.hpp>
+#include <HyperPlatform/Window.hpp>
 #include <X11/Xutil.h>
 
-namespace HyperPlatform::Linux
+#if !HYPERENGINE_PLATFORM_LINUX
+#	error This file should only be compiled on linux platforms
+#endif
+
+namespace HyperPlatform
 {
 	bool CWindow::initialize(const SWindowCreateInfo& create_info)
 	{
@@ -290,4 +295,4 @@ namespace HyperPlatform::Linux
 	{
 		return m_screen;
 	}
-} // namespace HyperPlatform::Linux
+} // namespace HyperPlatform

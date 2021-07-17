@@ -44,13 +44,7 @@ namespace HyperCore
 			static_assert(
 				std::is_base_of_v<IEvent, T>,
 				"Template argument T is not base of IEvent");
-
-			const CEventFamilyGenerator::EventIdType event_id = CEventFamilyGenerator::type<T>();
-			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
-			{
-				m_event_wrappers[event_id] = std::make_unique<CEventWrapper<T>>();
-			}
-
+			
 			m_event_bus.emplace(event);
 		}
 
@@ -153,9 +147,7 @@ namespace HyperCore
 			const CEventFamilyGenerator::EventIdType event_id = CEventFamilyGenerator::type<T>();
 			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
 			{
-				CLogger::error(
-					"Failed to unregister event listener: '{}' not registered!",
-					name);
+				CLogger::error("Failed to unregister event listener: '{}' not registered!", name);
 				return;
 			}
 
