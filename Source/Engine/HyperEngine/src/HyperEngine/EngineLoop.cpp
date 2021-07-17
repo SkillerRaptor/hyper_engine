@@ -6,7 +6,7 @@
 
 #include <HyperCore/Events/WindowEvents.hpp>
 #include <HyperEngine/EngineLoop.hpp>
-#include <HyperPlatform/IWindow.hpp>
+#include <HyperPlatform/Window.hpp>
 
 namespace HyperEngine
 {
@@ -20,8 +20,7 @@ namespace HyperEngine
 		create_info.height = 720;
 		create_info.event_manager = &m_event_manager;
 
-		m_window = HyperPlatform::IWindow::construct();
-		m_window->initialize(create_info);
+		m_window.initialize(create_info);
 		
 		m_event_manager.register_listener<HyperCore::SWindowCloseEvent>(
 			"EngineLoopAppCloseEvent",
@@ -35,15 +34,14 @@ namespace HyperEngine
 
 	void CEngineLoop::shutdown()
 	{
-		m_window->shutdown();
-		delete m_window;
+		m_window.shutdown();
 	}
 
 	void CEngineLoop::run()
 	{
 		while (m_running)
 		{
-			m_window->poll_events();
+			m_window.poll_events();
 			m_event_manager.process_next_event();
 		}
 	}

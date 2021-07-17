@@ -15,7 +15,7 @@ namespace HyperRendering::DirectX11
 	class CContext final : public IContext
 	{
 	public:
-		virtual bool initialize(HyperPlatform::IWindow& window) override;
+		virtual bool initialize(HyperPlatform::CWindow& window) override;
 		virtual void shutdown() override;
 
 		virtual void update() override;

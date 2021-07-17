@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperPlatform/IWindow.hpp>
+#include <HyperPlatform/Window.hpp>
 #include <HyperRendering/DirectX11/Context.hpp>
 
 namespace HyperRendering::DirectX11
 {
-	bool CContext::initialize(HyperPlatform::IWindow&)
+	bool CContext::initialize(HyperPlatform::CWindow&)
 	{
 		return false;
 	}

@@ -7,15 +7,11 @@
 #pragma once
 
 #include <HyperCore/Events/EventManager.hpp>
+#include <HyperPlatform/Window.hpp>
 
 namespace HyperRendering
 {
 	class IContext;
-}
-
-namespace HyperPlatform
-{
-	class IWindow;
 }
 
 namespace HyperEngine
@@ -36,6 +32,6 @@ namespace HyperEngine
 		IApplication* m_application{ nullptr };
 
 		HyperCore::CEventManager m_event_manager{};
-		HyperPlatform::IWindow* m_window{ nullptr };
+		HyperPlatform::CWindow m_window{};
 	};
 } // namespace HyperEngine

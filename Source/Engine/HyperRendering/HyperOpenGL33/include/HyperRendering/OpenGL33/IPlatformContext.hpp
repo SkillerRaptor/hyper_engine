@@ -8,7 +8,7 @@
 
 namespace HyperPlatform
 {
-	class IWindow;
+	class CWindow;
 }
 
 namespace HyperRendering::OpenGL33
@@ -18,7 +18,7 @@ namespace HyperRendering::OpenGL33
 	public:
 		virtual ~IPlatformContext() = default;
 		
-		virtual bool initialize(HyperPlatform::IWindow& window) = 0;
+		virtual bool initialize(HyperPlatform::CWindow& window) = 0;
 		virtual void shutdown() = 0;
 
 		virtual void swap_buffers() const = 0;

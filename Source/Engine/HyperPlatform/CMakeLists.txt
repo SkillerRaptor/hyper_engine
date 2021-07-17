@@ -13,15 +13,14 @@ cmake_minimum_required(VERSION 3.10)
 # HyperPlatform
 #-------------------------------------------------------------------------------------------
 set(CORE_SOURCES
-        src/HyperPlatform/LibraryManager.cpp
-        src/HyperPlatform/IWindow.cpp)
+        src/HyperPlatform/LibraryManager.cpp)
 
 set(CORE_HEADERS
         include/HyperPlatform/FileSystem.hpp
         include/HyperPlatform/LibraryManager.hpp
         include/HyperPlatform/PlatformDetection.hpp
         include/HyperPlatform/SharedLibrary.hpp
-        include/HyperPlatform/IWindow.hpp)
+        include/HyperPlatform/Window.hpp)
 
 if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
     set(PLATFORM_SOURCES
@@ -30,8 +29,7 @@ if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
             src/HyperPlatform/Windows/Window.cpp)
 
     set(PLATFORM_HEADERS
-            include/HyperPlatform/Windows/SharedLibrary.hpp
-            include/HyperPlatform/Windows/Window.hpp)
+            include/HyperPlatform/Windows/SharedLibrary.hpp)
 elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
     set(PLATFORM_SOURCES
             src/HyperPlatform/Linux/FileSystem.cpp
@@ -39,8 +37,7 @@ elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
             src/HyperPlatform/Linux/Window.cpp)
 
     set(PLATFORM_HEADERS
-            include/HyperPlatform/Linux/SharedLibrary.hpp
-            include/HyperPlatform/Linux/Window.hpp)
+            include/HyperPlatform/Linux/SharedLibrary.hpp)
 endif ()
 
 set(SOURCES ${CORE_SOURCES} ${PLATFORM_SOURCES})

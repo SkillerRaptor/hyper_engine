@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperPlatform/IWindow.hpp>
+#include <HyperPlatform/Window.hpp>
 #include <HyperRendering/OpenGL33/Context.hpp>
 #include <HyperRendering/OpenGL33/IPlatformContext.hpp>
 #include <HyperRendering/OpenGL33/Renderer2D.hpp>
 
 namespace HyperRendering::OpenGL33
 {
-	bool CContext::initialize(HyperPlatform::IWindow& window)
+	bool CContext::initialize(HyperPlatform::CWindow& window)
 	{
 		m_platform_context = IPlatformContext::construct();
 		if (m_platform_context == nullptr)

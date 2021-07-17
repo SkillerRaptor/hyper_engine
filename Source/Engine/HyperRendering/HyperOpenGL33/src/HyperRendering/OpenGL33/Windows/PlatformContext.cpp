@@ -15,9 +15,9 @@ namespace HyperRendering::OpenGL33::Windows
 {
 	using PFNWGLCREATECONTEXTATTRIBSARBPROC = HGLRC(WINAPI*)(HDC, HGLRC, const int32_t*);
 
-	bool CPlatformContext::initialize(HyperPlatform::IWindow& window)
+	bool CPlatformContext::initialize(HyperPlatform::CWindow& window)
 	{
-		m_window = static_cast<HyperPlatform::Windows::CWindow*>(&window);
+		m_window = &window;
 
 		PIXELFORMATDESCRIPTOR pixel_format_description{};
 		pixel_format_description.nSize = sizeof(PIXELFORMATDESCRIPTOR);

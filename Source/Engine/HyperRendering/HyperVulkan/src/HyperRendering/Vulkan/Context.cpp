@@ -5,7 +5,7 @@
  */
 
 #include <HyperCore/Assertion.hpp>
-#include <HyperPlatform/IWindow.hpp>
+#include <HyperPlatform/Window.hpp>
 #include <HyperRendering/Vulkan/Context.hpp>
 #include <HyperRendering/Vulkan/IPlatformContext.hpp>
 #include <HyperRendering/Vulkan/Renderer.hpp>
