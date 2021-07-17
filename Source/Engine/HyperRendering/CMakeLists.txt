@@ -34,5 +34,5 @@ endif ()
 # Vulkan
 #-------------------------------------------------------------------------------------------
 if (${HYPERENGINE_BUILD_VULKAN})
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperVulkan)
+#    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperVulkan)
 endif ()

@@ -55,6 +55,6 @@ endif ()
 # Vulkan
 #-------------------------------------------------------------------------------------------
 if (${HYPERENGINE_BUILD_VULKAN})
-    target_link_libraries(HyperEngine PUBLIC HyperVulkan)
+    # target_link_libraries(HyperEngine PUBLIC HyperVulkan)
     target_compile_definitions(HyperEngine PUBLIC HYPERENGINE_BUILD_VULKAN=1)
 endif ()
