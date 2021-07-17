@@ -9,7 +9,7 @@
 
 namespace HyperRendering::OpenGL33::Linux
 {
-	using PFNGLXCREATECONTEXTATTRIBSARBPROC = GLXContext (*)(Display*, GLXFBConfig, GLXContext, Bool, const int32_t*);
+	using CreateContextFunction = GLXContext (*)(Display*, GLXFBConfig, GLXContext, Bool, const int32_t*);
 
 	bool CPlatformContext::initialize(HyperPlatform::CWindow& window)
 	{
@@ -37,11 +37,8 @@ namespace HyperRendering::OpenGL33::Linux
 		};
 
 		int32_t frame_buffer_config_count = 0;
-		GLXFBConfig* frame_buffer_configs = glXChooseFBConfig(
-			m_window->display(),
-			m_window->screen(),
-			attributes,
-			&frame_buffer_config_count);
+		GLXFBConfig* frame_buffer_configs =
+			glXChooseFBConfig(m_window->display(), m_window->screen(), attributes, &frame_buffer_config_count);
 		if (frame_buffer_configs == nullptr)
 		{
 			HyperCore::CLogger::error("OpenGL 3.3: failed to retrieve a framebuffer config!");
@@ -55,34 +52,28 @@ namespace HyperRendering::OpenGL33::Linux
 		for (int32_t i = 0; i < frame_buffer_config_count; ++i)
 		{
 			XVisualInfo* visual_info = glXGetVisualFromFBConfig(m_window->display(), frame_buffer_configs[i]);
-			if (visual_info != nullptr)
+			if (visual_info == nullptr)
 			{
-				int32_t buffer_sampler;
-				int32_t samples;
-				glXGetFBConfigAttrib(
-					m_window->display(),
-					frame_buffer_configs[i],
-					GLX_SAMPLE_BUFFERS,
-					&buffer_sampler);
-				glXGetFBConfigAttrib(
-					m_window->display(),
-					frame_buffer_configs[i],
-					GLX_SAMPLES,
-					&samples);
+				XFree(visual_info);
+				continue;
+			}
 
-				if (best_frame_buffer_config_index < 0 ||
-					(buffer_sampler && samples > best_sampler_count))
-				{
-					best_frame_buffer_config_index = i;
-					best_sampler_count = samples;
-				}
+			int32_t buffer_sampler;
+			glXGetFBConfigAttrib(m_window->display(), frame_buffer_configs[i], GLX_SAMPLE_BUFFERS, &buffer_sampler);
 
-				if (worst_frame_buffer_config_index < 0 || !buffer_sampler ||
-					samples < worst_sampler_count)
-				{
-					worst_frame_buffer_config_index = i;
-					worst_sampler_count = samples;
-				}
+			int32_t samples;
+			glXGetFBConfigAttrib(m_window->display(), frame_buffer_configs[i], GLX_SAMPLES, &samples);
+
+			if (best_frame_buffer_config_index < 0 || (buffer_sampler && samples > best_sampler_count))
+			{
+				best_frame_buffer_config_index = i;
+				best_sampler_count = samples;
+			}
+
+			if (worst_frame_buffer_config_index < 0 || !buffer_sampler || samples < worst_sampler_count)
+			{
+				worst_frame_buffer_config_index = i;
+				worst_sampler_count = samples;
 			}
 
 			XFree(visual_info);
@@ -93,29 +84,26 @@ namespace HyperRendering::OpenGL33::Linux
 
 		m_visual_info = glXGetVisualFromFBConfig(m_window->display(), best_frame_buffer_config);
 
-		__GLXextFuncPtr glXCreateContextAttribsARBFunction = glXGetProcAddressARB(reinterpret_cast<const GLubyte*>("glXCreateContextAttribsARB"));
+		__GLXextFuncPtr glXCreateContextAttribsARBFunction =
+			glXGetProcAddressARB(reinterpret_cast<const GLubyte*>("glXCreateContextAttribsARB"));
 		if (glXCreateContextAttribsARBFunction == nullptr)
 		{
 			HyperCore::CLogger::error("OpenGL 3.3: glXCreateContextAttribsARB not found!");
 			return false;
 		}
 
-		PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB = reinterpret_cast<PFNGLXCREATECONTEXTATTRIBSARBPROC>(glXCreateContextAttribsARBFunction);
+		CreateContextFunction glXCreateContextAttribsARB =
+			reinterpret_cast<CreateContextFunction>(glXCreateContextAttribsARBFunction);
 
 		GLint context_attributes[] = {
 			GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
 			GLX_CONTEXT_MINOR_VERSION_ARB, 3,
-			GLX_CONTEXT_FLAGS_ARB,
-			GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+			GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
 			None
 		};
 
 		m_graphics_context = glXCreateContextAttribsARB(
-			m_window->display(),
-			best_frame_buffer_config,
-			nullptr,
-			GL_TRUE,
-			context_attributes);
+			m_window->display(), best_frame_buffer_config, nullptr, GL_TRUE, context_attributes);
 		glXMakeCurrent(m_window->display(), m_window->window(), m_graphics_context);
 
 		HyperCore::CLogger::debug("OpenGL Info:");

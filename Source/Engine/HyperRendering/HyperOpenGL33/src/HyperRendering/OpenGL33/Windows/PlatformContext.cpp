@@ -13,7 +13,7 @@
 
 namespace HyperRendering::OpenGL33::Windows
 {
-	using PFNWGLCREATECONTEXTATTRIBSARBPROC = HGLRC(WINAPI*)(HDC, HGLRC, const int32_t*);
+	using CreateContextFunction = HGLRC(WINAPI*)(HDC, HGLRC, const int32_t*);
 
 	bool CPlatformContext::initialize(HyperPlatform::CWindow& window)
 	{
@@ -58,8 +58,8 @@ namespace HyperRendering::OpenGL33::Windows
 			HyperCore::CLogger::error("OpenGL 3.3: wglCreateContextAttribsARB not found!");
 			return false;
 		}
-
-		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = reinterpret_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglCreateContextAttribsARBFunction);
+		
+		CreateContextFunction wglCreateContextAttribsARB = reinterpret_cast<CreateContextFunction>(wglCreateContextAttribsARBFunction);
 		m_graphics_context = wglCreateContextAttribsARB(
 			m_window->handle(), nullptr, context_attributes);
 		if (m_graphics_context == nullptr)
