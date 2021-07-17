@@ -5,25 +5,25 @@
  */
 
 #include <HyperCore/Assertion.hpp>
+#include <HyperPlatform/IWindow.hpp>
 #include <HyperPlatform/PlatformDetection.hpp>
-#include <HyperRendering/OpenGL46/IPlatformContext.hpp>
 
 #if HYPERENGINE_PLATFORM_WINDOWS
-#	include <HyperRendering/OpenGL46/Windows/PlatformContext.hpp>
+#	include <HyperPlatform/Windows/Window.hpp>
 #elif HYPERENGINE_PLATFORM_LINUX
-#	include <HyperRendering/OpenGL46/Linux/PlatformContext.hpp>
+#	include <HyperPlatform/Linux/Window.hpp>
 #endif
 
-namespace HyperRendering::OpenGL46
+namespace HyperPlatform
 {
-	IPlatformContext* IPlatformContext::construct()
+	IWindow* IWindow::construct()
 	{
 #if HYPERENGINE_PLATFORM_WINDOWS
-		return new Windows::CPlatformContext();
+		return new Windows::CWindow();
 #elif HYPERENGINE_PLATFORM_LINUX
-		return new Linux::CPlatformContext();
+		return new Linux::CWindow();
 #else
 		HYPERENGINE_ASSERT_NOT_REACHED();
 #endif
 	}
-} // namespace HyperRendering::OpenGL46
+} // namespace HyperPlatform
