@@ -17,6 +17,7 @@ namespace HyperRendering
 	public:
 		virtual ~IRenderer2D() = default;
 		
+		virtual void begin_frame() = 0;
 		virtual void begin_frame(HyperMath::CVec4f clear_color) = 0;
 		virtual void end_frame() = 0;
 		

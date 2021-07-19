@@ -13,6 +13,7 @@ namespace HyperRendering::OpenGL33
 	class CRenderer final : public IRenderer2D
 	{
 	public:
+		virtual void begin_frame() override;
 		virtual void begin_frame(HyperMath::CVec4f clear_color) override;
 		virtual void end_frame() override;
 		

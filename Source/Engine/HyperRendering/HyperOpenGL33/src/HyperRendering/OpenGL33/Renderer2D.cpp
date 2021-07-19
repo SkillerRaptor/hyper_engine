@@ -9,9 +9,14 @@
 
 namespace HyperRendering::OpenGL33
 {
+	void CRenderer::begin_frame()
+	{
+	}
+	
 	void CRenderer::begin_frame(HyperMath::CVec4f clear_color)
 	{
-	
+		glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void CRenderer::end_frame()
