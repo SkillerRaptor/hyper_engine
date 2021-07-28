@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <catch2/catch_session.hpp>
+#include <catch2/internal/catch_default_main.hpp>
 #include <cstdint>
 
 int32_t main(int32_t argc, char** argv)
