@@ -102,7 +102,7 @@ jobs:
       - name: Test
         working-directory: ${{runner.workspace}}/build
         run: |
-          ctest -C ${{ matrix.config.cmake_build_options }} --parallel $(nproc)
+          ctest -C ${{ matrix.config.build_type }} --parallel $(nproc)
 
       - name: Prepare upload
         run: |
