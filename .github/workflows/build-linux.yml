@@ -100,9 +100,9 @@ jobs:
           cmake --build build --parallel $(nproc)
 
       - name: Test
-        working-directory: ${{runner.workspace}}/build
         run: |
-          ctest -C ${{ matrix.config.build_type }} --parallel $(nproc)
+          cd build
+          ctest -C ${{ matrix.config.build_type }}
 
       - name: Prepare upload
         run: |

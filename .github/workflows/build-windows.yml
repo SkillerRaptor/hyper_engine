@@ -73,8 +73,8 @@ jobs:
           cmake --build build ${{ matrix.config.cmake_build_options }}
 
       - name: Test
-        working-directory: ${{runner.workspace}}/build
         run: |
+          cd build
           ctest -C ${{ matrix.config.build_type }}
 
       - name: Prepare upload
