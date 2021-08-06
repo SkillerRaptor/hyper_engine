@@ -32,7 +32,7 @@ namespace HyperEngine
 		m_running = true;
 	}
 
-	void CEngineLoop::shutdown()
+	CEngineLoop::~CEngineLoop()
 	{
 		m_window.shutdown();
 	}

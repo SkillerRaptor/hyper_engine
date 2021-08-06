@@ -42,9 +42,9 @@ set(CORE_HEADERS
 set(SOURCES ${CORE_SOURCES} ${PLATFORM_SOURCES} ${HYPERCOMMON_SOURCES})
 set(HEADERS ${CORE_HEADERS} ${PLATFORM_HEADERS} ${HYPERCOMMON_HEADERS})
 
-hyperengine_group_source()
+group_source()
 
-hyperengine_define_module(HyperOpenGL33)
+define_module(HyperOpenGL33)
 target_include_directories(HyperOpenGL33 PRIVATE ${OPENGL_INCLUDE_DIRS})
 target_link_libraries(HyperOpenGL33 PUBLIC HyperCore)
 target_link_libraries(HyperOpenGL33 PUBLIC HyperPlatform)

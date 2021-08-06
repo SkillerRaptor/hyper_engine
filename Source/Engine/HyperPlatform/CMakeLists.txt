@@ -43,9 +43,9 @@ endif ()
 set(SOURCES ${CORE_SOURCES} ${PLATFORM_SOURCES})
 set(HEADERS ${CORE_HEADERS} ${PLATFORM_HEADERS})
 
-hyperengine_group_source()
+group_source()
 
-hyperengine_define_module(HyperPlatform)
+define_module(HyperPlatform)
 target_link_libraries(HyperPlatform PUBLIC ${CMAKE_DL_LIBS} HyperCore)
 
 if ("${HYPERENGINE_ARCH}" STREQUAL "Linux")

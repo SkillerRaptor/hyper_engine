@@ -24,7 +24,7 @@ set(HEADERS
         include/HyperMath/Vector3.hpp
         include/HyperMath/Vector4.hpp)
 
-hyperengine_group_source()
+group_source()
 
-hyperengine_define_module(HyperMath)
+define_module(HyperMath)
 target_link_libraries(HyperMath PUBLIC HyperCore)

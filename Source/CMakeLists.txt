@@ -5,37 +5,24 @@
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# CMake Info
-#-------------------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.10)
-
-#-------------------------------------------------------------------------------------------
 # ThirdParty
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty)
+add_subdirectory(ThirdParty)
 
 #-------------------------------------------------------------------------------------------
-# Flags
+# Tests
 #-------------------------------------------------------------------------------------------
-if ("${HYPERENGINE_COMPILER}" STREQUAL "Clang")
-    set(HYPERENGINE_WARNING_FLAGS -Wall -Wextra -Wpedantic -fms-extensions)
-elseif ("${HYPERENGINE_COMPILER}" STREQUAL "GNU")
-    set(HYPERENGINE_WARNING_FLAGS -Wall -Wextra -Wpedantic)
-elseif ("${HYPERENGINE_COMPILER}" STREQUAL "MSVC")
-    set(HYPERENGINE_WARNING_FLAGS /W4)
-endif ()
+if(ENABLE_TESTING)
+    enable_testing()
+    add_subdirectory(Test)
+endif()
 
 #-------------------------------------------------------------------------------------------
-# Utilities
+# Engine
 #-------------------------------------------------------------------------------------------
-include(${CMAKE_CURRENT_SOURCE_DIR}/Utils.cmake)
+# add_subdirectory(Engine)
 
 #-------------------------------------------------------------------------------------------
-# HyperEngine
+# Editor
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Engine)
-
-#-------------------------------------------------------------------------------------------
-# HyperEditor
-#-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Editor)
+# add_subdirectory(Editor)

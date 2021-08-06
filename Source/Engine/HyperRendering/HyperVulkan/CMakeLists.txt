@@ -43,9 +43,9 @@ set(CORE_HEADERS
 set(SOURCES ${CORE_SOURCES} ${PLATFORM_SOURCES} ${HYPERCOMMON_SOURCES})
 set(HEADERS ${CORE_HEADERS} ${PLATFORM_HEADERS} ${HYPERCOMMON_HEADERS})
 
-hyperengine_group_source()
+group_source()
 
-hyperengine_define_module(HyperVulkan)
+define_module(HyperVulkan)
 target_include_directories(HyperVulkan PRIVATE ${Vulkan_INCLUDE_DIRS})
 target_link_libraries(HyperVulkan PUBLIC HyperCore)
 target_link_libraries(HyperVulkan PUBLIC HyperPlatform)

@@ -20,8 +20,8 @@ set(HEADERS
         include/HyperRendering/IRenderer2D.hpp
         include/HyperRendering/IContext.hpp)
 
-hyperengine_group_source()
+group_source()
 
-hyperengine_define_module(HyperRenderingBase)
+define_module(HyperRenderingBase)
 target_link_libraries(HyperRenderingBase PUBLIC HyperCore)
 target_link_libraries(HyperRenderingBase PUBLIC HyperMath)

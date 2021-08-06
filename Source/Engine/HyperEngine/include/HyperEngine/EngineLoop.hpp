@@ -9,11 +9,6 @@
 #include <HyperCore/Events/EventManager.hpp>
 #include <HyperPlatform/Window.hpp>
 
-namespace HyperRendering
-{
-	class IContext;
-}
-
 namespace HyperEngine
 {
 	class IApplication;
@@ -21,16 +16,15 @@ namespace HyperEngine
 	class CEngineLoop
 	{
 	public:
-		void initialize(IApplication* application);
-		void shutdown();
+		CEngineLoop(IApplication& application);
+		~CEngineLoop();
 
 		void run();
 
 	private:
+		IApplication& m_application;
 		bool m_running{ false };
-
-		IApplication* m_application{ nullptr };
-
+		
 		HyperCore::CEventManager m_event_manager{};
 		HyperPlatform::CWindow m_window{};
 	};

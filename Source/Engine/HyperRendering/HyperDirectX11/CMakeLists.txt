@@ -18,9 +18,9 @@ set(SOURCES
 set(HEADERS
         include/HyperRendering/DirectX11/Context.hpp)
 
-hyperengine_group_source()
+group_source()
 
-hyperengine_define_module(HyperDirectX11)
+define_module(HyperDirectX11)
 target_link_libraries(HyperDirectX11 PUBLIC HyperCore)
 target_link_libraries(HyperDirectX11 PUBLIC HyperPlatform)
 target_link_libraries(HyperDirectX11 PUBLIC HyperRenderingBase)

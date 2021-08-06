@@ -11,72 +11,60 @@ cmake_minimum_required(VERSION 3.10)
 project(HyperEngine LANGUAGES C CXX)
 
 #-------------------------------------------------------------------------------------------
-# Global Flags
+# Modules
+#-------------------------------------------------------------------------------------------
+include(Development/CMake/StandardProjectSettings.cmake)
+include(Development/CMake/PreventInSourceBuilds.cmake)
+
+#-------------------------------------------------------------------------------------------
+# Project Libraries
+#-------------------------------------------------------------------------------------------
+add_library(ProjectOptions INTERFACE)
+target_compile_features(ProjectOptions INTERFACE cxx_std_17)
+
+add_library(ProjectWarnings INTERFACE)
+
+#-------------------------------------------------------------------------------------------
+# Standard Settings
 #-------------------------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
-#-------------------------------------------------------------------------------------------
-# Properties
-#-------------------------------------------------------------------------------------------
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-#-------------------------------------------------------------------------------------------
-# Variables
-#-------------------------------------------------------------------------------------------
-if (WIN32)
-    set(HYPERENGINE_ARCH "Windows")
-elseif (UNIX AND NOT APPLE)
-    set(HYPERENGINE_ARCH "Linux")
-else ()
-    set(HYPERENGINE_ARCH "Undefined")
-endif ()
+include(Development/CMake/Cache.cmake)
 
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    set(HYPERENGINE_BUILD_TYPE "Debug")
-else ()
-    set(HYPERENGINE_BUILD_TYPE "Release")
-endif ()
+include(Development/CMake/CompilerWarnings.cmake)
+enable_warnings(ProjectWarnings)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(HYPERENGINE_COMPILER "Clang")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(HYPERENGINE_COMPILER "GNU")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set(HYPERENGINE_COMPILER "MSVC")
-else ()
-    set(HYPERENGINE_COMPILER "Undefined")
-endif ()
+include(Development/CMake/Sanitizers.cmake)
+enable_sanitizers(ProjectOptions)
+
+include(Development/CMake/Doxygen.cmake)
+enable_doxygen()
+
+include(Development/CMake/StaticAnalyzers.cmake)
+
+include(Development/CMake/Utils.cmake)
 
 #-------------------------------------------------------------------------------------------
-# Flags
+# Conan
 #-------------------------------------------------------------------------------------------
-if ("${HYPERENGINE_COMPILER}" STREQUAL "MSVC")
-    string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP8")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_CRT_SECURE_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SCL_SECURE_NO_DEPRECATE /D_SCL_SECURE_NO_WARNINGS")
-endif ()
+set(CONAN_LIBRARIES
+        assimp/5.0.1
+        catch2/2.13.7
+        fmt/8.0.1
+        stb/20200203)
 
-if ("${HYPERENGINE_BUILD_TYPE}" STREQUAL "Debug")
-    if ("${HYPERENGINE_COMPILER}" STREQUAL "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g")
-    elseif ("${HYPERENGINE_COMPILER}" STREQUAL "GNU")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g")
-    elseif ("${HYPERENGINE_COMPILER}" STREQUAL "MSVC")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Od /Zi")
-    endif ()
-elseif ("${HYPERENGINE_BUILD_TYPE}" STREQUAL "Release")
-    if ("${HYPERENGINE_COMPILER}" STREQUAL "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -m64 -mavx2 -mfma -ffast-math")
-    elseif ("${HYPERENGINE_COMPILER}" STREQUAL "GNU")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -m64 -mavx2 -mfma -ffast-math")
-    elseif ("${HYPERENGINE_COMPILER}" STREQUAL "MSVC")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2 /arch:AVX2 /fp:fast")
-    endif ()
-endif ()
+include(Development/CMake/Conan.cmake)
+run_conan()
+
+#-------------------------------------------------------------------------------------------
+# Options
+#-------------------------------------------------------------------------------------------
+option(ENABLE_TESTING "Enable Test Builds" ON)
 
 #-------------------------------------------------------------------------------------------
 # Source
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Source)
+add_subdirectory(Source)

@@ -10,6 +10,7 @@ jobs:
         shell: bash
     env:
       conan_path: "$HOME/.local/bin"
+      conan_user_home: "${{ github.workspace }}/conan-cache"
       vulkan_sdk: "$GITHUB_WORKSPACE/vulkan_sdk/"
       vulkan_version: "1.2.131.1"
     strategy:
@@ -50,6 +51,15 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-conan-modules
+        with:
+          path: |
+            ${{ env.conan_user_home }}
+          key: ${{ runner.os }}-${{ matrix.config.build_type }}-${{ hashFiles('CMakeLists.txt') }}-${{ hashFiles('Development/CMake/Conan.cmake') }}
+
       - name: Update environment
         run: |
           sudo apt update -qq
@@ -60,6 +70,12 @@ jobs:
             g++-10 \
             llvm-10 \
             xorg-dev
+
+      - name: Install Conan
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade pip setuptools
+          python3 -m pip install conan
 
       - name: Install Vulkan SDK
         run: |
@@ -73,7 +89,7 @@ jobs:
           export CC=${{ matrix.config.cc }}
           export CXX=${{ matrix.config.cxx }}
           export VULKAN_SDK="${{ env.vulkan_sdk }}/${{ env.vulkan_version }}/x86_64"
-          export PATH=$VULKAN_SDK/bin:$PATH
+          export PATH=$PATH:${{ env.conan_path }}:$VULKAN_SDK/bin
           export LD_LIBRARY_PATH=$VULKAN_SDK/lib:$LD_LIBRARY_PATH
           export VK_LAYER_PATH=$VULKAN_SDK/etc/explicit_layer.d
 

@@ -9,6 +9,7 @@ jobs:
       run:
         shell: cmd
     env:
+      conan_user_home: "${{ github.workspace }}/conan-cache"
       vulkan_sdk: "$GITHUB_WORKSPACE/vulkan_sdk/"
       vulkan_version: "1.2.131.1"
     strategy:
@@ -38,6 +39,21 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
+
+      - name: Cache
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-conan-modules
+        with:
+          path: |
+            ${{ env.conan_user_home }}
+          key: ${{ runner.os }}-${{ matrix.config.build_type }}-${{ hashFiles('CMakeLists.txt') }}-${{ hashFiles('Development/CMake/Conan.cmake') }}
+
+      - name: Install Conan
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade pip setuptools
+          python3 -m pip install conan
 
       - name: Install Vulkan SDK
         run: |

@@ -22,11 +22,6 @@ namespace HyperEngine
 
 	void CLauncher::launch_application(IApplication& application, int32_t argc, char** argv)
 	{
-		if (argc > 0 && argv != nullptr)
-		{
-			// TODO: Implement program argument validation and processing
-		}
-
 		CEngineLoop engine_loop;
 		engine_loop.initialize(&application);
 

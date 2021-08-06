@@ -21,9 +21,9 @@ set(HEADERS
         include/HyperEngine/IApplication.hpp
         include/HyperEngine/Launcher.hpp)
 
-hyperengine_group_source()
+group_source()
 
-hyperengine_define_library(HyperEngine)
+define_library(HyperEngine)
 target_link_libraries(HyperEngine PUBLIC HyperCore)
 target_link_libraries(HyperEngine PUBLIC HyperMath)
 target_link_libraries(HyperEngine PUBLIC HyperPlatform)

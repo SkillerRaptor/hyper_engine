@@ -18,9 +18,9 @@ set(SOURCES
 set(HEADERS
         include/HyperRendering/OpenGL46/Context.hpp)
 
-hyperengine_group_source()
+group_source()
 
-hyperengine_define_module(HyperOpenGL46)
+define_module(HyperOpenGL46)
 target_include_directories(HyperOpenGL46 PRIVATE ${OPENGL_INCLUDE_DIRS})
 target_link_libraries(HyperOpenGL46 PUBLIC HyperCore)
 target_link_libraries(HyperOpenGL46 PUBLIC HyperPlatform)

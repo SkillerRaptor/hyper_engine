@@ -39,10 +39,10 @@ set(HEADERS
         include/HyperCore/Memory/RingBuffer.hpp
         include/HyperCore/Memory/SparsePool.hpp)
 
-hyperengine_group_source()
+group_source()
 
-hyperengine_define_module(HyperCore)
-target_link_libraries(HyperCore PUBLIC fmt)
+define_module(HyperCore)
+target_link_libraries(HyperCore PUBLIC CONAN_PKG::fmt)
 
 if ("${HYPERENGINE_BUILD_TYPE}" STREQUAL "Debug")
     target_compile_definitions(HyperCore PUBLIC HYPERENGINE_DEBUG=1)
