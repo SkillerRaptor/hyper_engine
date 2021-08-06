@@ -72,6 +72,11 @@ jobs:
         run: |
           cmake --build build ${{ matrix.config.cmake_build_options }}
 
+      - name: Test
+        working-directory: ${{runner.workspace}}/build
+        run: |
+          ctest -C ${{ matrix.config.cmake_build_options }}
+
       - name: Prepare upload
         run: |
           7z a -tzip ${{ matrix.config.artifact }} build/*

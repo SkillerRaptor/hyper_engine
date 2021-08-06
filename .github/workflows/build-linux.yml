@@ -99,6 +99,11 @@ jobs:
         run: |
           cmake --build build --parallel $(nproc)
 
+      - name: Test
+        working-directory: ${{runner.workspace}}/build
+        run: |
+          ctest -C ${{ matrix.config.cmake_build_options }} --parallel $(nproc)
+
       - name: Prepare upload
         run: |
           tar cfz ${{ matrix.config.artifact }} build
