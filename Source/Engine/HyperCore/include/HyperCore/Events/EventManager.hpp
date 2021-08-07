@@ -6,18 +6,17 @@
 
 #pragma once
 
-#include <HyperCore/Logger.hpp>
-#include <HyperCore/Events/Event.hpp>
-#include <HyperCore/Events/EventWrapper.hpp>
-#include <HyperCore/Events/Event.hpp>
-#include <functional>
+#include "HyperCore/Logger.hpp"
+#include "HyperCore/Events/Event.hpp"
+#include "HyperCore/Events/EventWrapper.hpp"
+
 #include <memory>
-#include <type_traits>
 #include <unordered_map>
 #include <queue>
 
 namespace HyperCore
 {
+	// TODO: Refactoring Events
 	class EventFamilyGenerator
 	{
 	public:
@@ -145,7 +144,7 @@ namespace HyperCore
 			get_event_wrapper(EventFamilyGenerator::EventIdType event_id)
 		{
 			const std::unique_ptr<EventWrapperBase>& event_wrapper_base = m_event_wrappers[event_id];
-			EventWrapper<T>* event_wrapper = static_cast<EventWrapper<T>*>(event_wrapper_base.get());
+			auto* event_wrapper = static_cast<EventWrapper<T>*>(event_wrapper_base.get());
 			return event_wrapper;
 		}
 

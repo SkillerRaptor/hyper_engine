@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperCore/Events/EventManager.hpp>
+#include "HyperCore/Events/EventManager.hpp"
 
 namespace HyperCore
 {

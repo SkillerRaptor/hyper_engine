@@ -27,7 +27,6 @@ set(HEADERS
         include/HyperCore/Events/Event.hpp
         include/HyperCore/Events/EventManager.hpp
         include/HyperCore/Events/EventWrapper.hpp
-        include/HyperCore/Events/IEvent.hpp
         include/HyperCore/Events/KeyEvents.hpp
         include/HyperCore/Events/MouseEvents.hpp
         include/HyperCore/Events/WindowEvents.hpp
