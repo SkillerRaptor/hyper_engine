@@ -7,7 +7,7 @@
 #pragma once
 
 #include <HyperCore/Compilers.hpp>
-#include <cstdint>
+
 #include <type_traits>
 
 HYPERENGINE_COMPILER_PUSH_WARNING
@@ -15,62 +15,54 @@ HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
 
 namespace HyperMath
 {
-	template <typename T>
-	class CVector3
+	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+	class Vector3
 	{
 	public:
-		static_assert(std::is_arithmetic_v<T>, "Invalid template type for CVector3!");
+		Vector3() = default;
 
-	public:
-		CVector3()
-			: x(static_cast<T>(0))
-			, y(static_cast<T>(0))
-			, z(static_cast<T>(0))
-		{
-		}
-
-		explicit CVector3(T scalar)
+		explicit Vector3(T scalar)
 			: x(scalar)
 			, y(scalar)
 			, z(scalar)
 		{
 		}
 
-		CVector3(T x, T y, T z)
+		Vector3(T x, T y, T z)
 			: x(x)
 			, y(y)
 			, z(z)
 		{
 		}
 
-		CVector3<T> operator-() const
+		Vector3<T> operator-() const
 		{
-			CVector3<T> vector;
+			Vector3<T> vector;
 			vector.x = -x;
 			vector.y = -y;
 			vector.z = -z;
 			return vector;
 		}
 
-		CVector3<T> operator+(T value) const
+		Vector3<T> operator+(T value) const
 		{
-			CVector3<T> vector;
+			Vector3<T> vector;
 			vector.x = x + value;
 			vector.y = y + value;
 			vector.z = z + value;
 			return vector;
 		}
 
-		CVector3<T> operator+(const CVector3<T>& other) const
+		Vector3<T> operator+(const Vector3<T>& other) const
 		{
-			CVector3<T> vector;
+			Vector3<T> vector;
 			vector.x = x + other.x;
 			vector.y = y + other.y;
 			vector.z = z + other.z;
 			return vector;
 		}
 
-		CVector3<T>& operator+=(T value)
+		Vector3<T>& operator+=(T value)
 		{
 			x += value;
 			y += value;
@@ -78,7 +70,7 @@ namespace HyperMath
 			return *this;
 		}
 
-		CVector3<T>& operator+=(const CVector3<T>& other)
+		Vector3<T>& operator+=(const Vector3<T>& other)
 		{
 			x += other.x;
 			y += other.y;
@@ -86,32 +78,32 @@ namespace HyperMath
 			return *this;
 		}
 
-		CVector3<T> operator-(T value) const
+		Vector3<T> operator-(T value) const
 		{
-			CVector3<T> vector;
+			Vector3<T> vector;
 			vector.x = x - value;
 			vector.y = y - value;
 			vector.z = z - value;
 			return vector;
 		}
 
-		CVector3<T> operator-(const CVector3<T>& other) const
+		Vector3<T> operator-(const Vector3<T>& other) const
 		{
-			CVector3<T> vector;
+			Vector3<T> vector;
 			vector.x = x - other.x;
 			vector.y = y - other.y;
 			vector.z = z - other.z;
 			return vector;
 		}
 
-		CVector3<T>& operator-=(T value)
+		Vector3<T>& operator-=(T value)
 		{
 			x -= value;
 			y -= value;
 			return *this;
 		}
 
-		CVector3<T>& operator-=(const CVector3<T>& other)
+		Vector3<T>& operator-=(const Vector3<T>& other)
 		{
 			x -= other.x;
 			y -= other.y;
@@ -119,25 +111,25 @@ namespace HyperMath
 			return *this;
 		}
 
-		CVector3<T> operator*(T value) const
+		Vector3<T> operator*(T value) const
 		{
-			CVector3<T> vector;
+			Vector3<T> vector;
 			vector.x = x * value;
 			vector.y = y * value;
 			vector.z = z * value;
 			return vector;
 		}
 
-		CVector3<T> operator*(const CVector3<T>& other) const
+		Vector3<T> operator*(const Vector3<T>& other) const
 		{
-			CVector3<T> vector;
+			Vector3<T> vector;
 			vector.x = x * other.x;
 			vector.y = y * other.y;
 			vector.z = z * other.z;
 			return vector;
 		}
 
-		CVector3<T>& operator*=(T value)
+		Vector3<T>& operator*=(T value)
 		{
 			x *= value;
 			y *= value;
@@ -145,7 +137,7 @@ namespace HyperMath
 			return *this;
 		}
 
-		CVector3<T>& operator*=(const CVector3<T>& other)
+		Vector3<T>& operator*=(const Vector3<T>& other)
 		{
 			x *= other.x;
 			y *= other.y;
@@ -153,25 +145,25 @@ namespace HyperMath
 			return *this;
 		}
 
-		CVector3<T> operator/(T value) const
+		Vector3<T> operator/(T value) const
 		{
-			CVector3<T> vector;
+			Vector3<T> vector;
 			vector.x = x / value;
 			vector.y = y / value;
 			vector.z = z / value;
 			return vector;
 		}
 
-		CVector3<T> operator/(const CVector3<T>& other) const
+		Vector3<T> operator/(const Vector3<T>& other) const
 		{
-			CVector3<T> vector;
+			Vector3<T> vector;
 			vector.x = x / other.x;
 			vector.y = y / other.y;
 			vector.z = z / other.z;
 			return vector;
 		}
 
-		CVector3<T>& operator/=(T value)
+		Vector3<T>& operator/=(T value)
 		{
 			x /= value;
 			y /= value;
@@ -179,7 +171,7 @@ namespace HyperMath
 			return *this;
 		}
 
-		CVector3<T>& operator/=(const CVector3<T>& other)
+		Vector3<T>& operator/=(const Vector3<T>& other)
 		{
 			x /= other.x;
 			y /= other.y;
@@ -190,7 +182,7 @@ namespace HyperMath
 	public:
 		union
 		{
-			T data[3];
+			T data[3]{ 0 };
 
 			struct
 			{
@@ -222,11 +214,11 @@ namespace HyperMath
 		};
 	};
 
-	using CVec3 = CVector3<float>;
-	using CVec3f = CVector3<float>;
-	using CVec3d = CVector3<double>;
-	using CVec3i = CVector3<int32_t>;
-	using CVec3ui = CVector3<uint32_t>;
+	using Vec3 = Vector3<float>;
+	using Vec3f = Vector3<float>;
+	using Vec3d = Vector3<double>;
+	using Vec3i = Vector3<int>;
+	using Vec3ui = Vector3<unsigned int>;
 } // namespace HyperMath
 
 HYPERENGINE_COMPILER_POP_WARNING

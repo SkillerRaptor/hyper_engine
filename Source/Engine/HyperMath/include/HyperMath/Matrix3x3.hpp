@@ -6,21 +6,19 @@
 
 #pragma once
 
-#include <cstdint>
 #include <type_traits>
 
 namespace HyperMath
 {
-	template <typename T>
-	class CMatrix3x3
+	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+	class Matrix3x3
 	{
 	public:
-		static_assert(std::is_arithmetic_v<T>, "Invalid template type for CMatrix3x3!");
 	};
 
-	using CMat3x3 = CMatrix3x3<float>;
-	using CMat3x3f = CMatrix3x3<float>;
-	using CMat3x3d = CMatrix3x3<double>;
-	using CMat3x3i = CMatrix3x3<int32_t>;
-	using CMat3x3ui = CMatrix3x3<uint32_t>;
+	using Mat3x3 = Matrix3x3<float>;
+	using Mat3x3f = Matrix3x3<float>;
+	using Mat3x3d = Matrix3x3<double>;
+	using Mat3x3i = Matrix3x3<int>;
+	using Mat3x3ui = Matrix3x3<unsigned int>;
 } // namespace HyperMath

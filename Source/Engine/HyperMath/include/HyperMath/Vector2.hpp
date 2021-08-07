@@ -7,7 +7,7 @@
 #pragma once
 
 #include <HyperCore/Compilers.hpp>
-#include <cstdint>
+
 #include <type_traits>
 
 HYPERENGINE_COMPILER_PUSH_WARNING
@@ -15,153 +15,146 @@ HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
 
 namespace HyperMath
 {
-	template <typename T>
-	class CVector2
+	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+	class Vector2
 	{
 	public:
-		static_assert(std::is_arithmetic_v<T>, "Invalid template type for CVector2!");
+		Vector2() = default;
 
-	public:
-		CVector2()
-			: x(static_cast<T>(0))
-			, y(static_cast<T>(0))
-		{
-		}
-
-		explicit CVector2(T scalar)
+		explicit Vector2(T scalar)
 			: x(scalar)
 			, y(scalar)
 		{
 		}
 
-		CVector2(T x, T y)
+		Vector2(T x, T y)
 			: x(x)
 			, y(y)
 		{
 		}
 
-		CVector2<T> operator-() const
+		Vector2<T> operator-() const
 		{
-			CVector2<T> vector;
+			Vector2<T> vector;
 			vector.x = -x;
 			vector.y = -y;
 			return vector;
 		}
 
-		CVector2<T> operator+(T value) const
+		Vector2<T> operator+(T value) const
 		{
-			CVector2<T> vector;
+			Vector2<T> vector;
 			vector.x = x + value;
 			vector.y = y + value;
 			return vector;
 		}
 
-		CVector2<T> operator+(const CVector2<T>& other) const
+		Vector2<T> operator+(const Vector2<T>& other) const
 		{
-			CVector2<T> vector;
+			Vector2<T> vector;
 			vector.x = x + other.x;
 			vector.y = y + other.y;
 			return vector;
 		}
 
-		CVector2<T>& operator+=(T value)
+		Vector2<T>& operator+=(T value)
 		{
 			x += value;
 			y += value;
 			return *this;
 		}
 
-		CVector2<T>& operator+=(const CVector2<T>& other)
+		Vector2<T>& operator+=(const Vector2<T>& other)
 		{
 			x += other.x;
 			y += other.y;
 			return *this;
 		}
 
-		CVector2<T> operator-(T value) const
+		Vector2<T> operator-(T value) const
 		{
-			CVector2<T> vector;
+			Vector2<T> vector;
 			vector.x = x - value;
 			vector.y = y - value;
 			return vector;
 		}
 
-		CVector2<T> operator-(const CVector2<T>& other) const
+		Vector2<T> operator-(const Vector2<T>& other) const
 		{
-			CVector2<T> vector;
+			Vector2<T> vector;
 			vector.x = x - other.x;
 			vector.y = y - other.y;
 			return vector;
 		}
 
-		CVector2<T>& operator-=(T value)
+		Vector2<T>& operator-=(T value)
 		{
 			x -= value;
 			y -= value;
 			return *this;
 		}
 
-		CVector2<T>& operator-=(const CVector2<T>& other)
+		Vector2<T>& operator-=(const Vector2<T>& other)
 		{
 			x -= other.x;
 			y -= other.y;
 			return *this;
 		}
 
-		CVector2<T> operator*(T value) const
+		Vector2<T> operator*(T value) const
 		{
-			CVector2<T> vector;
+			Vector2<T> vector;
 			vector.x = x * value;
 			vector.y = y * value;
 			return vector;
 		}
 
-		CVector2<T> operator*(const CVector2<T>& other) const
+		Vector2<T> operator*(const Vector2<T>& other) const
 		{
-			CVector2<T> vector;
+			Vector2<T> vector;
 			vector.x = x * other.x;
 			vector.y = y * other.y;
 			return vector;
 		}
 
-		CVector2<T>& operator*=(T value)
+		Vector2<T>& operator*=(T value)
 		{
 			x *= value;
 			y *= value;
 			return *this;
 		}
 
-		CVector2<T>& operator*=(const CVector2<T>& other)
+		Vector2<T>& operator*=(const Vector2<T>& other)
 		{
 			x *= other.x;
 			y *= other.y;
 			return *this;
 		}
 
-		CVector2<T> operator/(T value) const
+		Vector2<T> operator/(T value) const
 		{
-			CVector2<T> vector;
+			Vector2<T> vector;
 			vector.x = x / value;
 			vector.y = y / value;
 			return vector;
 		}
 
-		CVector2<T> operator/(const CVector2<T>& other) const
+		Vector2<T> operator/(const Vector2<T>& other) const
 		{
-			CVector2<T> vector;
+			Vector2<T> vector;
 			vector.x = x / other.x;
 			vector.y = y / other.y;
 			return vector;
 		}
 
-		CVector2<T>& operator/=(T value)
+		Vector2<T>& operator/=(T value)
 		{
 			x /= value;
 			y /= value;
 			return *this;
 		}
 
-		CVector2<T>& operator/=(const CVector2<T>& other)
+		Vector2<T>& operator/=(const Vector2<T>& other)
 		{
 			x /= other.x;
 			y /= other.y;
@@ -171,7 +164,7 @@ namespace HyperMath
 	public:
 		union
 		{
-			T data[2];
+			T data[2]{ 0 };
 
 			struct
 			{
@@ -193,11 +186,11 @@ namespace HyperMath
 		};
 	};
 
-	using CVec2 = CVector2<float>;
-	using CVec2f = CVector2<float>;
-	using CVec2d = CVector2<double>;
-	using CVec2i = CVector2<int32_t>;
-	using CVec2ui = CVector2<uint32_t>;
+	using Vec2 = Vector2<float>;
+	using Vec2f = Vector2<float>;
+	using Vec2d = Vector2<double>;
+	using Vec2i = Vector2<int>;
+	using Vec2ui = Vector2<unsigned int>;
 } // namespace HyperMath
 
 HYPERENGINE_COMPILER_POP_WARNING

@@ -13,7 +13,7 @@ add_subdirectory(HyperCore)
 # Support Modules
 #-------------------------------------------------------------------------------------------
 # add_subdirectory(HyperPlatform)
-# add_subdirectory(HyperMath)
+add_subdirectory(HyperMath)
 
 #-------------------------------------------------------------------------------------------
 # Abstraction Modules

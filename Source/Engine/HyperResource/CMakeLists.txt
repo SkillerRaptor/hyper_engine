@@ -13,9 +13,10 @@ set(SOURCES
 set(HEADERS
         include/HyperResource/ShaderCompiler.hpp)
 
-group_source()
+hyperengine_group_source(${SOURCES})
+hyperengine_group_source(${HEADERS})
 
-define_module(HyperResource)
+hyperengine_define_module(HyperResource)
 target_link_libraries(HyperResource PUBLIC HyperCore)
 target_link_libraries(HyperResource PUBLIC assimp)
 target_link_libraries(HyperResource PUBLIC glslang)
