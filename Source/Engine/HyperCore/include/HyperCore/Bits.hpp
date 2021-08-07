@@ -15,7 +15,7 @@ namespace HyperCore
 	{
 		return static_cast<T>(1) << shift;
 	}
-	
+
 	template <typename T, typename = typename std::enable_if_t<std::is_integral_v<T>>>
 	static constexpr T mask(T shift) noexcept
 	{

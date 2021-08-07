@@ -14,7 +14,7 @@ namespace HyperCore
 	{
 	public:
 		template <typename... Args>
-		[[nodiscard]] static std::string format(std::string_view format, Args&&... args)
+		static std::string format(std::string_view format, Args&&... args)
 		{
 			return fmt::format(format, std::forward<Args>(args)...);
 		}

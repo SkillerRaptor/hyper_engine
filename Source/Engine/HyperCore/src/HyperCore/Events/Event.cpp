@@ -82,138 +82,138 @@ namespace HyperCore
 		m_value.as_window_moved_event = window_moved_event;
 	}
 
-	[[nodiscard]] Event::Type Event::type() const noexcept
+	Event::Type Event::type() const noexcept
 	{
 		return m_type;
 	}
 
-	[[nodiscard]] bool Event::is_key_pressed_event() const noexcept
+	bool Event::is_key_pressed_event() const noexcept
 	{
 		return m_type == Type::KeyPressed;
 	}
 
-	[[nodiscard]] bool Event::is_key_released_event() const noexcept
+	bool Event::is_key_released_event() const noexcept
 	{
 		return m_type == Type::KeyReleased;
 	}
 
-	[[nodiscard]] bool Event::is_key_typed_event() const noexcept
+	bool Event::is_key_typed_event() const noexcept
 	{
 		return m_type == Type::KeyTyped;
 	}
 
-	[[nodiscard]] bool Event::is_mouse_moved_event() const noexcept
+	bool Event::is_mouse_moved_event() const noexcept
 	{
 		return m_type == Type::MouseMoved;
 	}
 
-	[[nodiscard]] bool Event::is_mouse_scrolled_event() const noexcept
+	bool Event::is_mouse_scrolled_event() const noexcept
 	{
 		return m_type == Type::MouseScrolled;
 	}
 
-	[[nodiscard]] bool Event::is_mouse_button_pressed_event() const noexcept
+	bool Event::is_mouse_button_pressed_event() const noexcept
 	{
 		return m_type == Type::MouseButtonPressed;
 	}
 
-	[[nodiscard]] bool Event::is_mouse_button_released_event() const noexcept
+	bool Event::is_mouse_button_released_event() const noexcept
 	{
 		return m_type == Type::MouseButtonReleased;
 	}
 
-	[[nodiscard]] bool Event::is_window_close_event() const noexcept
+	bool Event::is_window_close_event() const noexcept
 	{
 		return m_type == Type::WindowClose;
 	}
 
-	[[nodiscard]] bool Event::is_window_resize_event() const noexcept
+	bool Event::is_window_resize_event() const noexcept
 	{
 		return m_type == Type::WindowResize;
 	}
 
-	[[nodiscard]] bool Event::is_window_focus_event() const noexcept
+	bool Event::is_window_focus_event() const noexcept
 	{
 		return m_type == Type::WindowFocus;
 	}
 
-	[[nodiscard]] bool Event::is_window_lost_focus_event() const noexcept
+	bool Event::is_window_lost_focus_event() const noexcept
 	{
 		return m_type == Type::WindowLostFocus;
 	}
 
-	[[nodiscard]] bool Event::is_window_moved_event() const noexcept
+	bool Event::is_window_moved_event() const noexcept
 	{
 		return m_type == Type::WindowMoved;
 	}
 
-	[[nodiscard]] KeyPressedEvent Event::as_key_pressed_event() const
+	KeyPressedEvent Event::as_key_pressed_event() const
 	{
 		HYPERENGINE_ASSERT(is_key_pressed_event());
 		return m_value.as_key_pressed_event;
 	}
 
-	[[nodiscard]] KeyReleasedEvent Event::as_key_released_event() const
+	KeyReleasedEvent Event::as_key_released_event() const
 	{
 		HYPERENGINE_ASSERT(is_key_released_event());
 		return m_value.as_key_released_event;
 	}
 
-	[[nodiscard]] KeyTypedEvent Event::as_key_typed_event() const
+	KeyTypedEvent Event::as_key_typed_event() const
 	{
 		HYPERENGINE_ASSERT(is_key_typed_event());
 		return m_value.as_key_typed_event;
 	}
 
-	[[nodiscard]] MouseMovedEvent Event::as_mouse_moved_event() const
+	MouseMovedEvent Event::as_mouse_moved_event() const
 	{
 		HYPERENGINE_ASSERT(is_mouse_moved_event());
 		return m_value.as_mouse_moved_event;
 	}
 
-	[[nodiscard]] MouseScrolledEvent Event::as_mouse_scrolled_event() const
+	MouseScrolledEvent Event::as_mouse_scrolled_event() const
 	{
 		HYPERENGINE_ASSERT(is_mouse_scrolled_event());
 		return m_value.as_mouse_scrolled_event;
 	}
 
-	[[nodiscard]] MouseButtonPressedEvent Event::as_mouse_button_pressed_event() const
+	MouseButtonPressedEvent Event::as_mouse_button_pressed_event() const
 	{
 		HYPERENGINE_ASSERT(is_mouse_button_pressed_event());
 		return m_value.as_mouse_button_pressed_event;
 	}
 
-	[[nodiscard]] MouseButtonReleasedEvent Event::as_mouse_button_released_event() const
+	MouseButtonReleasedEvent Event::as_mouse_button_released_event() const
 	{
 		HYPERENGINE_ASSERT(is_mouse_button_released_event());
 		return m_value.as_mouse_button_released_event;
 	}
 
-	[[nodiscard]] WindowCloseEvent Event::as_window_close_event() const
+	WindowCloseEvent Event::as_window_close_event() const
 	{
 		HYPERENGINE_ASSERT(is_window_close_event());
 		return m_value.as_window_close_event;
 	}
 
-	[[nodiscard]] WindowResizeEvent Event::as_window_resize_event() const
+	WindowResizeEvent Event::as_window_resize_event() const
 	{
 		HYPERENGINE_ASSERT(is_window_resize_event());
 		return m_value.as_window_resize_event;
 	}
 
-	[[nodiscard]] WindowFocusEvent Event::as_window_focus_event() const
+	WindowFocusEvent Event::as_window_focus_event() const
 	{
 		HYPERENGINE_ASSERT(is_window_focus_event());
 		return m_value.as_window_focus_event;
 	}
 
-	[[nodiscard]] WindowLostFocusEvent Event::as_window_lost_focus_event() const
+	WindowLostFocusEvent Event::as_window_lost_focus_event() const
 	{
 		HYPERENGINE_ASSERT(is_window_lost_focus_event());
 		return m_value.as_window_lost_focus_event;
 	}
 
-	[[nodiscard]] WindowMovedEvent Event::as_window_moved_event() const
+	WindowMovedEvent Event::as_window_moved_event() const
 	{
 		HYPERENGINE_ASSERT(is_window_moved_event());
 		return m_value.as_window_moved_event;

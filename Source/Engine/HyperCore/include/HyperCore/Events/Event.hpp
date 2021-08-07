@@ -53,33 +53,33 @@ namespace HyperCore
 		explicit Event(WindowLostFocusEvent window_lost_focus_event);
 		explicit Event(WindowMovedEvent window_moved_event);
 
-		[[nodiscard]] Type type() const noexcept;
+		Type type() const noexcept;
 
-		[[nodiscard]] bool is_key_pressed_event() const noexcept;
-		[[nodiscard]] bool is_key_released_event() const noexcept;
-		[[nodiscard]] bool is_key_typed_event() const noexcept;
-		[[nodiscard]] bool is_mouse_moved_event() const noexcept;
-		[[nodiscard]] bool is_mouse_scrolled_event() const noexcept;
-		[[nodiscard]] bool is_mouse_button_pressed_event() const noexcept;
-		[[nodiscard]] bool is_mouse_button_released_event() const noexcept;
-		[[nodiscard]] bool is_window_close_event() const noexcept;
-		[[nodiscard]] bool is_window_resize_event() const noexcept;
-		[[nodiscard]] bool is_window_focus_event() const noexcept;
-		[[nodiscard]] bool is_window_lost_focus_event() const noexcept;
-		[[nodiscard]] bool is_window_moved_event() const noexcept;
+		bool is_key_pressed_event() const noexcept;
+		bool is_key_released_event() const noexcept;
+		bool is_key_typed_event() const noexcept;
+		bool is_mouse_moved_event() const noexcept;
+		bool is_mouse_scrolled_event() const noexcept;
+		bool is_mouse_button_pressed_event() const noexcept;
+		bool is_mouse_button_released_event() const noexcept;
+		bool is_window_close_event() const noexcept;
+		bool is_window_resize_event() const noexcept;
+		bool is_window_focus_event() const noexcept;
+		bool is_window_lost_focus_event() const noexcept;
+		bool is_window_moved_event() const noexcept;
 
-		[[nodiscard]] KeyPressedEvent as_key_pressed_event() const;
-		[[nodiscard]] KeyReleasedEvent as_key_released_event() const;
-		[[nodiscard]] KeyTypedEvent as_key_typed_event() const;
-		[[nodiscard]] MouseMovedEvent as_mouse_moved_event() const;
-		[[nodiscard]] MouseScrolledEvent as_mouse_scrolled_event() const;
-		[[nodiscard]] MouseButtonPressedEvent as_mouse_button_pressed_event() const;
-		[[nodiscard]] MouseButtonReleasedEvent as_mouse_button_released_event() const;
-		[[nodiscard]] WindowCloseEvent as_window_close_event() const;
-		[[nodiscard]] WindowResizeEvent as_window_resize_event() const;
-		[[nodiscard]] WindowFocusEvent as_window_focus_event() const;
-		[[nodiscard]] WindowLostFocusEvent as_window_lost_focus_event() const;
-		[[nodiscard]] WindowMovedEvent as_window_moved_event() const;
+		KeyPressedEvent as_key_pressed_event() const;
+		KeyReleasedEvent as_key_released_event() const;
+		KeyTypedEvent as_key_typed_event() const;
+		MouseMovedEvent as_mouse_moved_event() const;
+		MouseScrolledEvent as_mouse_scrolled_event() const;
+		MouseButtonPressedEvent as_mouse_button_pressed_event() const;
+		MouseButtonReleasedEvent as_mouse_button_released_event() const;
+		WindowCloseEvent as_window_close_event() const;
+		WindowResizeEvent as_window_resize_event() const;
+		WindowFocusEvent as_window_focus_event() const;
+		WindowLostFocusEvent as_window_lost_focus_event() const;
+		WindowMovedEvent as_window_moved_event() const;
 
 	private:
 		Type m_type{ Type::Undefined };

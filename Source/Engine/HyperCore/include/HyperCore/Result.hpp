@@ -39,17 +39,17 @@ namespace HyperCore
 		{
 		}
 
-		[[nodiscard]] ValueType& value()
+		ValueType& value()
 		{
 			return m_result.value();
 		}
 
-		[[nodiscard]] ErrorType& error()
+		ErrorType& error()
 		{
 			return m_error.value();
 		}
 
-		[[nodiscard]] bool is_error() const noexcept
+		bool is_error() const noexcept
 		{
 			return m_error.has_value();
 		}
@@ -77,12 +77,12 @@ namespace HyperCore
 		{
 		}
 
-		[[nodiscard]] ErrorType& error()
+		ErrorType& error()
 		{
 			return m_error.value();
 		}
 
-		[[nodiscard]] bool is_error() const noexcept
+		bool is_error() const noexcept
 		{
 			return m_error.has_value();
 		}

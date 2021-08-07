@@ -128,13 +128,13 @@ namespace HyperCore
 			m_next_element = 0;
 		}
 
-		[[nodiscard]] ValueType& at(size_t position)
+		ValueType& at(size_t position)
 		{
 			HYPERENGINE_ASSERT(position < m_size);
 			return m_data[position];
 		}
 
-		[[nodiscard]] const ValueType& at(size_t position) const
+		const ValueType& at(size_t position) const
 		{
 			HYPERENGINE_ASSERT(position < m_size);
 			return m_data[position];
@@ -145,37 +145,37 @@ namespace HyperCore
 			return at(position);
 		}
 
-		[[nodiscard]] const ValueType& operator[](size_t position) const
+		const ValueType& operator[](size_t position) const
 		{
 			return at(position);
 		}
 
-		[[nodiscard]] ValueType* data() noexcept
+		ValueType* data() noexcept
 		{
 			return m_data;
 		}
 
-		[[nodiscard]] const ValueType* data() const noexcept
+		const ValueType* data() const noexcept
 		{
 			return m_data;
 		}
 
-		[[nodiscard]] size_t size() const noexcept
+		size_t size() const noexcept
 		{
 			return m_element_count;
 		}
 
-		[[nodiscard]] size_t max_size() const noexcept
+		size_t max_size() const noexcept
 		{
 			return m_size;
 		}
 
-		[[nodiscard]] size_t capacity() const noexcept
+		size_t capacity() const noexcept
 		{
 			return m_size;
 		}
 
-		[[nodiscard]] bool empty() const noexcept
+		bool empty() const noexcept
 		{
 			return size() == 0;
 		}
