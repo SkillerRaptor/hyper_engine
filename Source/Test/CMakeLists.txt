@@ -7,40 +7,34 @@
 #-------------------------------------------------------------------------------------------
 # Tests
 #-------------------------------------------------------------------------------------------
-if(CONAN_CATCH2_ROOT_DEBUG)
+if (CONAN_CATCH2_ROOT_DEBUG)
     include(${CONAN_CATCH2_ROOT_DEBUG}/lib/cmake/Catch2/Catch.cmake)
-else()
+else ()
     include(${CONAN_CATCH2_ROOT}/lib/cmake/Catch2/Catch.cmake)
-endif()
+endif ()
 
-add_library(HyperTestsMain STATIC src/main.cpp)
-target_link_libraries(HyperTestsMain PUBLIC CONAN_PKG::catch2)
-target_link_libraries(HyperTestsMain PRIVATE ProjectOptions)
+add_library(HyperTestMain STATIC src/main.cpp)
+target_link_libraries(HyperTestMain PUBLIC CONAN_PKG::catch2)
+target_link_libraries(HyperTestMain PRIVATE ProjectOptions)
 
-set(HYPERTEST_SOURCE
-        src/Test.cpp)
+set(HYPERMATH_SOURCE
+        src/HyperMath/Common.cpp
+        src/HyperMath/Constants.cpp
+        src/HyperMath/Trigonometric.cpp)
 
-add_executable(HyperTest ${HYPERTEST_SOURCE})
-target_link_libraries(HyperTest PRIVATE ProjectWarnings ProjectOptions HyperTestsMain)
-
-catch_discover_tests(
-        HyperTest
-        TEST_PREFIX "HyperTest."
-        REPORTER xml
-        OUTPUT_DIR .
-        OUTPUT_PREFIX "HyperTest."
-        OUTPUT_SUFFIX .xml)
-
-set(HYPERCONSTEXPRTEST_SOURCE
-        src/ConstexprTest.cpp)
-
-add_executable(HyperConstexprTest ${HYPERCONSTEXPRTEST_SOURCE})
-target_link_libraries(HyperConstexprTest PRIVATE ProjectWarnings ProjectOptions HyperTestsMain)
+add_executable(HyperMathTest ${HYPERMATH_SOURCE})
+target_link_libraries(
+        HyperMathTest
+        PRIVATE
+        ProjectWarnings
+        ProjectOptions
+        HyperMath
+        HyperTestMain)
 
 catch_discover_tests(
-        HyperConstexprTest
-        TEST_PREFIX "HyperConstexprTest."
+        HyperMathTest
+        TEST_PREFIX "HyperMathTest."
         REPORTER xml
         OUTPUT_DIR .
-        OUTPUT_PREFIX "HyperConstexprTest."
+        OUTPUT_PREFIX "HyperMathTest."
         OUTPUT_SUFFIX .xml)
