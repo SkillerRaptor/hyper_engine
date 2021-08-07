@@ -8,13 +8,13 @@
 
 namespace HyperEngine
 {
-	class IApplication
+	class Application
 	{
 	public:
-		friend class CLauncher;
+		friend class Launcher;
 
 	public:
-		virtual ~IApplication() = default;
+		virtual ~Application() = default;
 
 	protected:
 		virtual void startup() = 0;

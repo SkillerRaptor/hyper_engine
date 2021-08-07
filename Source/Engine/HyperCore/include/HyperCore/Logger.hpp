@@ -10,6 +10,7 @@
 #include "HyperCore/Prerequisites.hpp"
 
 #include <string_view>
+#include <tuple>
 
 namespace HyperCore
 {
@@ -18,7 +19,7 @@ namespace HyperCore
 	public:
 		HYPERENGINE_NON_COPYABLE(Logger);
 		HYPERENGINE_NON_MOVEABLE(Logger);
-		
+
 	public:
 		enum class Level
 		{
@@ -32,7 +33,7 @@ namespace HyperCore
 	public:
 		constexpr Logger() = delete;
 		~Logger() = delete;
-		
+
 		template <typename... Args>
 		static void info(std::string_view format, Args&&... args)
 		{
@@ -72,17 +73,18 @@ namespace HyperCore
 				internal_log(level, format);
 				return;
 			}
-			
-			static constexpr const size_t args_count = sizeof...(Args);
+
+			constexpr size_t args_count = sizeof...(Args);
 			if constexpr (args_count == 0)
 			{
 				internal_log(level, format);
-				return;
 			}
-			
-			internal_log(level, Formatter::format(format, std::forward<Args>(args)...));
+			else
+			{
+				internal_log(level, Formatter::format(format, std::forward<Args>(args)...));
+			}
 		}
-		
+
 		static void internal_log(Level level, std::string_view string);
 	};
 } // namespace HyperCore

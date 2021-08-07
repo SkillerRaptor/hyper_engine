@@ -29,6 +29,6 @@ function(enable_doxygen)
         set(DOXYGEN_SOURCE_BROWSER YES)
 
         find_package(Doxygen REQUIRED dot)
-        doxygen_add_docs(doxygen-docs ${PROJECT_SOURCE_DIR})
+        doxygen_add_docs(HyperDocs ${PROJECT_SOURCE_DIR})
     endif ()
 endfunction()

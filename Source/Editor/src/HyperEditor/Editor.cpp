@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperEditor/Editor.hpp>
+#include "HyperEditor/Editor.hpp"
 
 namespace HyperEditor
 {
-	void CEditor::startup()
+	void Editor::startup()
 	{
 	}
 
-	void CEditor::shutdown()
+	void Editor::shutdown()
 	{
 	}
 } // namespace HyperEditor

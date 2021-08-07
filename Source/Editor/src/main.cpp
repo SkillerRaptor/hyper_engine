@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperEditor/Editor.hpp>
-#include <HyperEngine/Launcher.hpp>
-#include <cstdint>
+#include "HyperEditor/Editor.hpp"
 
-int32_t main(int32_t argc, char** argv)
+#include <HyperEngine/Launcher.hpp>
+
+int main(int argc, char** argv)
 {
-	HyperEditor::CEditor editor = HyperEditor::CEditor();
-	HyperEngine::CLauncher::launch(editor, argc, argv);
+	HyperEditor::Editor editor;
+	HyperEngine::Launcher::launch(editor, argc, argv);
 
 	return 0;
 }

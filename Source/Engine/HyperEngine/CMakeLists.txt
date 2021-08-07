@@ -13,17 +13,20 @@ set(SOURCES
 
 set(HEADERS
         include/HyperEngine/EngineLoop.hpp
-        include/HyperEngine/IApplication.hpp
+        include/HyperEngine/Application.hpp
         include/HyperEngine/Launcher.hpp)
 
 hyperengine_group_source(${SOURCES})
 hyperengine_group_source(${HEADERS})
 
 hyperengine_define_library(HyperEngine)
-target_link_libraries(HyperEngine PUBLIC HyperCore)
-target_link_libraries(HyperEngine PUBLIC HyperMath)
-target_link_libraries(HyperEngine PUBLIC HyperPlatform)
-target_link_libraries(HyperEngine PUBLIC HyperResource)
+target_link_libraries(
+        HyperEngine
+        PUBLIC
+        HyperCore
+        HyperMath)
+        #HyperPlatform
+        #HyperResource)
 
 #-------------------------------------------------------------------------------------------
 # DirectX

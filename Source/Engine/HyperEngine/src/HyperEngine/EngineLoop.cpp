@@ -4,27 +4,20 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperCore/Events/WindowEvents.hpp>
-#include <HyperEngine/EngineLoop.hpp>
-#include <HyperPlatform/Window.hpp>
+#include "HyperEngine/EngineLoop.hpp"
+
+#include <HyperCore/Logger.hpp>
 
 namespace HyperEngine
 {
-	void CEngineLoop::initialize(IApplication* application)
+	EngineLoop::EngineLoop(Application& application)
+		: m_application(application)
 	{
-		m_application = application;
-
-		HyperPlatform::SWindowCreateInfo create_info{};
-		create_info.title = "HyperEngine";
-		create_info.width = 1280;
-		create_info.height = 720;
-		create_info.event_manager = &m_event_manager;
-
-		m_window.initialize(create_info);
+		HyperCore::Logger::debug("Test", 1, 2, 3);
 		
-		m_event_manager.register_listener<HyperCore::SWindowCloseEvent>(
+		m_event_manager.register_listener<HyperCore::WindowCloseEvent>(
 			"EngineLoopAppCloseEvent",
-			[this](const HyperCore::SWindowCloseEvent&)
+			[this](const HyperCore::WindowCloseEvent&)
 			{
 				m_running = false;
 			});
@@ -32,16 +25,10 @@ namespace HyperEngine
 		m_running = true;
 	}
 
-	CEngineLoop::~CEngineLoop()
-	{
-		m_window.shutdown();
-	}
-
-	void CEngineLoop::run()
+	void EngineLoop::run()
 	{
 		while (m_running)
 		{
-			m_window.poll_events();
 			m_event_manager.process_next_event();
 		}
 	}

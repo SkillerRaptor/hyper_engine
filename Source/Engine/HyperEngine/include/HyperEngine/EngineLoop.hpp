@@ -7,25 +7,22 @@
 #pragma once
 
 #include <HyperCore/Events/EventManager.hpp>
-#include <HyperPlatform/Window.hpp>
 
 namespace HyperEngine
 {
-	class IApplication;
+	class Application;
 
-	class CEngineLoop
+	class EngineLoop
 	{
 	public:
-		CEngineLoop(IApplication& application);
-		~CEngineLoop();
+		EngineLoop(Application& application);
 
 		void run();
 
 	private:
-		IApplication& m_application;
+		Application& m_application;
 		bool m_running{ false };
 		
-		HyperCore::CEventManager m_event_manager{};
-		HyperPlatform::CWindow m_window{};
+		HyperCore::EventManager m_event_manager{};
 	};
 } // namespace HyperEngine

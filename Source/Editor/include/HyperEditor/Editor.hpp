@@ -6,17 +6,12 @@
 
 #pragma once
 
-#include <HyperEngine/IApplication.hpp>
-#include <cstdint>
+#include <HyperEngine/Application.hpp>
 
 namespace HyperEditor
 {
-	class CEditor : public HyperEngine::IApplication
+	class Editor : public HyperEngine::Application
 	{
-	public:
-		CEditor() = default;
-		virtual ~CEditor() override = default;
-
 	private:
 		virtual void startup() override;
 		virtual void shutdown() override;

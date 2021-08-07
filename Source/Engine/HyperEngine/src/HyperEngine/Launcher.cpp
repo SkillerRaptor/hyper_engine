@@ -4,31 +4,33 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperEngine/EngineLoop.hpp>
-#include <HyperEngine/IApplication.hpp>
-#include <HyperEngine/Launcher.hpp>
+#include "HyperEngine/Launcher.hpp"
+
+#include "HyperEngine/Application.hpp"
+#include "HyperEngine/EngineLoop.hpp"
 
 namespace HyperEngine
 {
-	void CLauncher::launch(IApplication& application, int32_t argc, char** argv)
+	void Launcher::launch(Application& application, int argc, char** argv)
 	{
-		CLauncher::launch_application(application, argc, argv);
+		Launcher::launch_application(&application, argc, argv);
 	}
 
-	void CLauncher::launch(IApplication* application, int32_t argc, char** argv)
+	void Launcher::launch(Application* application, int argc, char** argv)
 	{
-		CLauncher::launch_application(*application, argc, argv);
+		Launcher::launch_application(application, argc, argv);
 	}
 
-	void CLauncher::launch_application(IApplication& application, int32_t argc, char** argv)
+	void Launcher::launch_application(Application* application, int, char**)
 	{
-		CEngineLoop engine_loop;
-		engine_loop.initialize(&application);
-
-		application.startup();
+		if (application == nullptr)
+		{
+			return;
+		}
+		
+		EngineLoop engine_loop(*application);
+		application->startup();
 		engine_loop.run();
-		application.shutdown();
-
-		engine_loop.shutdown();
+		application->shutdown();
 	}
 } // namespace HyperEngine
