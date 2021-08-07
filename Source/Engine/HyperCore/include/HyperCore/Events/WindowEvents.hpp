@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <cstdint>
-
 namespace HyperCore
 {
 	struct WindowCloseEvent
@@ -16,8 +14,8 @@ namespace HyperCore
 
 	struct WindowResizeEvent
 	{
-		uint32_t width;
-		uint32_t height;
+		int width;
+		int height;
 	};
 
 	struct WindowFocusEvent
@@ -30,7 +28,7 @@ namespace HyperCore
 
 	struct WindowMovedEvent
 	{
-		uint32_t position_x;
-		uint32_t position_y;
+		int position_x;
+		int position_y;
 	};
 } // namespace HyperCore

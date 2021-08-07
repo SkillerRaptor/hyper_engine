@@ -13,6 +13,8 @@ namespace HyperCore
 	class SourceLocation
 	{
 	public:
+		constexpr SourceLocation() = default;
+		
 		constexpr const char* file_name() const noexcept
 		{
 			return m_file;

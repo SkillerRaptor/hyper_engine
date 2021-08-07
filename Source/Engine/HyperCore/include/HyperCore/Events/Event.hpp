@@ -11,6 +11,8 @@
 #include "HyperCore/Events/MouseEvents.hpp"
 #include "HyperCore/Events/WindowEvents.hpp"
 
+#include <cstdint>
+
 HYPERENGINE_COMPILER_PUSH_WARNING
 HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
 
@@ -19,7 +21,7 @@ namespace HyperCore
 	class Event
 	{
 	public:
-		enum class Type
+		enum class Type : uint8_t
 		{
 			Undefined,
 

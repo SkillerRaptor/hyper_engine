@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <cstdint>
-
 namespace HyperCore
 {
 	struct MouseMovedEvent
@@ -24,11 +22,11 @@ namespace HyperCore
 
 	struct MouseButtonPressedEvent
 	{
-		int32_t button;
+		int button;
 	};
 
 	struct MouseButtonReleasedEvent
 	{
-		int32_t button;
+		int button;
 	};
 } // namespace HyperCore
