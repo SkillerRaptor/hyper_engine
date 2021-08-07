@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "Application.hpp"
+
 namespace HyperEngine
 {
 	class Application;

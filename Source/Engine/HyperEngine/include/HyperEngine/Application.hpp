@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace HyperEngine
 {
 	class Application
@@ -14,10 +16,16 @@ namespace HyperEngine
 		friend class Launcher;
 
 	public:
+		Application(const std::string& title);
 		virtual ~Application() = default;
+		
+		std::string title() const;
 
 	protected:
 		virtual void startup() = 0;
 		virtual void shutdown() = 0;
+
+	private:
+		std::string m_title;
 	};
 } // namespace HyperEngine

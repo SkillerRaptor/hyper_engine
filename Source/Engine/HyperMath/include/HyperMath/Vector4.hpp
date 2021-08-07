@@ -20,7 +20,7 @@ namespace HyperMath
 	{
 	public:
 		Vector4() = default;
-		
+
 		explicit Vector4(T scalar)
 			: x(scalar)
 			, y(scalar)
@@ -29,11 +29,11 @@ namespace HyperMath
 		{
 		}
 
-		Vector4(T x, T y, T z, T w)
-			: x(x)
-			, y(y)
-			, z(z)
-			, w(w)
+		Vector4(T x_value, T y_value, T z_value, T w_value)
+			: x(x_value)
+			, y(y_value)
+			, z(z_value)
+			, w(w_value)
 		{
 		}
 

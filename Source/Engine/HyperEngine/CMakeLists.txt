@@ -8,12 +8,13 @@
 # HyperEngine
 #-------------------------------------------------------------------------------------------
 set(SOURCES
+        src/HyperEngine/Application.cpp
         src/HyperEngine/EngineLoop.cpp
         src/HyperEngine/Launcher.cpp)
 
 set(HEADERS
-        include/HyperEngine/EngineLoop.hpp
         include/HyperEngine/Application.hpp
+        include/HyperEngine/EngineLoop.hpp
         include/HyperEngine/Launcher.hpp)
 
 hyperengine_group_source(${SOURCES})

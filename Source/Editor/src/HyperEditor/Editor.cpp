@@ -8,6 +8,11 @@
 
 namespace HyperEditor
 {
+	Editor::Editor()
+		: HyperEngine::Application("HyperEditor")
+	{
+	}
+	
 	void Editor::startup()
 	{
 	}
