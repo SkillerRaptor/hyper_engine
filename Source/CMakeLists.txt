@@ -13,7 +13,6 @@ add_subdirectory(ThirdParty)
 # Tests
 #-------------------------------------------------------------------------------------------
 if(ENABLE_TESTING)
-    enable_testing()
     add_subdirectory(Test)
 endif()
 
