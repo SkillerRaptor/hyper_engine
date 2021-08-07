@@ -6,7 +6,8 @@
 
 #pragma once
 
-#include <HyperCore/Assertion.hpp>
+#include "HyperCore/Assertion.hpp"
+
 #include <memory>
 
 namespace HyperCore
@@ -26,7 +27,7 @@ namespace HyperCore
 			, m_size(size)
 			, m_data(AllocatorTraits::allocate(m_allocator, m_size))
 		{
-			HYPERENGINE_ASSERT_WITH_MESSAGE(m_size > 1, "CRingBuffer: The size must be greater than 1!");
+			HYPERENGINE_ASSERT(m_size > 1);
 		}
 
 		~CRingBuffer()
@@ -118,54 +119,54 @@ namespace HyperCore
 			m_next_element = 0;
 		}
 
-		ValueType& at(size_t position)
+		[[nodiscard]] ValueType& at(size_t position)
 		{
-			HYPERENGINE_ASSERT_WITH_MESSAGE(position < m_size, "CRingBuffer: Index out of range!");
+			HYPERENGINE_ASSERT(position < m_size);
 			return m_data[position];
 		}
 
-		const ValueType& at(size_t position) const
+		[[nodiscard]] const ValueType& at(size_t position) const
 		{
-			HYPERENGINE_ASSERT_WITH_MESSAGE(position < m_size, "CRingBuffer: Index out of range!");
+			HYPERENGINE_ASSERT(position < m_size);
 			return m_data[position];
 		}
 
-		ValueType& operator[](size_t position)
+		[[nodiscard]] ValueType& operator[](size_t position)
 		{
 			return at(position);
 		}
 
-		const ValueType& operator[](size_t position) const
+		[[nodiscard]] const ValueType& operator[](size_t position) const
 		{
 			return at(position);
 		}
 
-		ValueType* data() noexcept
+		[[nodiscard]] ValueType* data() noexcept
 		{
 			return m_data;
 		}
 
-		const ValueType* data() const noexcept
+		[[nodiscard]] const ValueType* data() const noexcept
 		{
 			return m_data;
 		}
 
-		size_t size() const noexcept
+		[[nodiscard]] size_t size() const noexcept
 		{
 			return m_size;
 		}
 
-		size_t max_size() const noexcept
+		[[nodiscard]] size_t max_size() const noexcept
 		{
 			return m_size;
 		}
 
-		size_t capacity() const noexcept
+		[[nodiscard]] size_t capacity() const noexcept
 		{
 			return m_size;
 		}
 
-		bool empty() const noexcept
+		[[nodiscard]] bool empty() const noexcept
 		{
 			return size() == 0;
 		}

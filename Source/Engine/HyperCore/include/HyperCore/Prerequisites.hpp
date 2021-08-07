@@ -17,3 +17,9 @@
 #define HYPERENGINE_NON_MOVEABLE(class_name)    \
 	class_name(class_name&&) noexcept = delete; \
 	class_name& operator=(class_name&&) noexcept = delete
+
+#ifndef NDEBUG
+#	define HYPERENGINE_DEBUG 1
+#else
+#	define HYPERENGINE_RELEASE 1
+#endif

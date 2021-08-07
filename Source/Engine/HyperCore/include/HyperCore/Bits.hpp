@@ -11,14 +11,14 @@
 namespace HyperCore
 {
 	template <typename T, typename = typename std::enable_if_t<std::is_integral_v<T>>>
-	static constexpr T Bit(T shift) noexcept
+	static constexpr T bit(T shift) noexcept
 	{
 		return static_cast<T>(1) << shift;
 	}
 	
 	template <typename T, typename = typename std::enable_if_t<std::is_integral_v<T>>>
-	static constexpr T Mask(T shift) noexcept
+	static constexpr T mask(T shift) noexcept
 	{
-		return Bit<T>(shift) - static_cast<T>(1);
+		return bit<T>(shift) - static_cast<T>(1);
 	}
 } // namespace HyperCore

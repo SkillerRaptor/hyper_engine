@@ -6,56 +6,51 @@
 
 #pragma once
 
-#include <HyperCore/Logger.hpp>
+#include "HyperCore/Logger.hpp"
+
 #include <functional>
 #include <string>
 #include <vector>
 
 namespace HyperCore
 {
-	class IEventWrapperBase
+	class EventWrapperBase
 	{
 	public:
-		virtual ~IEventWrapperBase() = default;
+		virtual ~EventWrapperBase() = default;
 	};
 
 	template <typename T>
-	struct SEventListener
+	struct EventListener
 	{
 		std::string name;
 		std::function<void(const T&)> callback;
 	};
 
 	template <class T>
-	class CEventWrapper : public IEventWrapperBase
+	class EventWrapper : public EventWrapperBase
 	{
 	public:
-		static_assert(
-			std::is_base_of_v<IEvent, T>,
-			"Template argument T is not base of IEvent");
-
 		void invoke(const T& event) const
 		{
-			for (const SEventListener<T>& event_listener : m_event_listeners)
+			for (const EventListener<T>& event_listener : m_event_listeners)
 			{
 				event_listener.callback(event);
 			}
 		}
 
-		void register_listener(
-			const std::string& name,
-			const std::function<void(const T&)>& callback)
+		void register_listener(const std::string& name, const std::function<void(const T&)>& callback)
 		{
-			for (const SEventListener<T>& event_listener : m_event_listeners)
+			for (const EventListener<T>& event_listener : m_event_listeners)
 			{
 				if (event_listener.name == name)
 				{
-					CLogger::error("Failed to register event listener: name already in use!");
+					Logger::error("Failed to register event listener: name already in use!");
 					return;
 				}
 			}
 
-			SEventListener<T> event_listener{};
+			EventListener<T> event_listener{};
 			event_listener.name = name;
 			event_listener.callback = std::move(callback);
 			m_event_listeners.push_back(std::move(event_listener));
@@ -63,7 +58,9 @@ namespace HyperCore
 
 		void unregister_listener(const std::string& name)
 		{
-			for (typename std::vector<SEventListener<T>>::iterator it = m_event_listeners.begin(); it != m_event_listeners.end(); ++it)
+			for (typename std::vector<EventListener<T>>::iterator it = m_event_listeners.begin();
+				 it != m_event_listeners.end();
+				 ++it)
 			{
 				if (it->name == name)
 				{
@@ -72,12 +69,10 @@ namespace HyperCore
 				}
 			}
 
-			CLogger::error(
-				"Failed to unregister event listener: '{}' not registered!",
-				name);
+			Logger::error("Failed to unregister event listener: '{}' not registered!", name);
 		}
 
 	private:
-		std::vector<SEventListener<T>> m_event_listeners{};
+		std::vector<EventListener<T>> m_event_listeners{};
 	};
 } // namespace HyperCore

@@ -4,27 +4,28 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <HyperCore/Logger.hpp>
+#include "HyperCore/Logger.hpp"
+
 #include <fmt/chrono.h>
 #include <fmt/color.h>
 
 namespace HyperCore
 {
-	void CLogger::internal_log(CLogger::ELevel level, std::string_view string)
+	void Logger::internal_log(Logger::Level level, std::string_view string)
 	{
 		const fmt::color level_color = [&level]()
 		{
 			switch (level)
 			{
-			case CLogger::ELevel::Info:
+			case Logger::Level::Info:
 				return fmt::color::white;
-			case CLogger::ELevel::Warning:
+			case Logger::Level::Warning:
 				return fmt::color::gold;
-			case CLogger::ELevel::Error:
+			case Logger::Level::Error:
 				return fmt::color::red;
-			case CLogger::ELevel::Fatal:
+			case Logger::Level::Fatal:
 				return fmt::color::crimson;
-			case CLogger::ELevel::Debug:
+			case Logger::Level::Debug:
 				return fmt::color::gray;
 			default:
 				return fmt::color::white;
@@ -35,15 +36,15 @@ namespace HyperCore
 		{
 			switch (level)
 			{
-			case CLogger::ELevel::Info:
+			case Logger::Level::Info:
 				return "Info";
-			case CLogger::ELevel::Warning:
+			case Logger::Level::Warning:
 				return "Warning";
-			case CLogger::ELevel::Error:
+			case Logger::Level::Error:
 				return "Error";
-			case CLogger::ELevel::Fatal:
+			case Logger::Level::Fatal:
 				return "Fatal";
-			case CLogger::ELevel::Debug:
+			case Logger::Level::Debug:
 				return "Debug";
 			default:
 				return "Undefined";

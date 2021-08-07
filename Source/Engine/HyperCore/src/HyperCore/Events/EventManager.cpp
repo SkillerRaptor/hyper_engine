@@ -8,7 +8,7 @@
 
 namespace HyperCore
 {
-	CEventFamilyGenerator::EventIdType CEventFamilyGenerator::identifier()
+	EventFamilyGenerator::EventIdType EventFamilyGenerator::identifier()
 	{
 		static EventIdType identifier = 0;
 		return identifier++;

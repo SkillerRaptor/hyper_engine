@@ -5,11 +5,6 @@
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# CMake Info
-#-------------------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.10)
-
-#-------------------------------------------------------------------------------------------
 # HyperCore
 #-------------------------------------------------------------------------------------------
 set(SOURCES
@@ -39,13 +34,8 @@ set(HEADERS
         include/HyperCore/Memory/RingBuffer.hpp
         include/HyperCore/Memory/SparsePool.hpp)
 
-group_source()
+hyperengine_group_source(${SOURCES})
+hyperengine_group_source(${HEADERS})
 
-define_module(HyperCore)
+hyperengine_define_module(HyperCore)
 target_link_libraries(HyperCore PUBLIC CONAN_PKG::fmt)
-
-if ("${HYPERENGINE_BUILD_TYPE}" STREQUAL "Debug")
-    target_compile_definitions(HyperCore PUBLIC HYPERENGINE_DEBUG=1)
-else ()
-    target_compile_definitions(HyperCore PUBLIC HYPERENGINE_RELEASE=1)
-endif ()

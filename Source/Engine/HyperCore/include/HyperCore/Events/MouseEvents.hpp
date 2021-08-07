@@ -7,28 +7,27 @@
 #pragma once
 
 #include <cstdint>
-#include <HyperCore/Events/IEvent.hpp>
 
 namespace HyperCore
 {
-	struct SMouseMovedEvent : public IEvent
+	struct MouseMovedEvent
 	{
 		float position_x;
 		float position_y;
 	};
 
-	struct SMouseScrolledEvent : public IEvent
+	struct MouseScrolledEvent
 	{
 		float offset_x;
 		float offset_y;
 	};
 
-	struct SMouseButtonPressedEvent : public IEvent
+	struct MouseButtonPressedEvent
 	{
 		int32_t button;
 	};
 
-	struct SMouseButtonReleasedEvent : public IEvent
+	struct MouseButtonReleasedEvent
 	{
 		int32_t button;
 	};

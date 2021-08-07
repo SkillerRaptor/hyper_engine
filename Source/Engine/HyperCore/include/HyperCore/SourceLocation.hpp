@@ -10,30 +10,30 @@
 
 namespace HyperCore
 {
-	class CSourceLocation
+	class SourceLocation
 	{
 	public:
-		constexpr const char* file_name() const noexcept
+		[[nodiscard]] constexpr const char* file_name() const noexcept
 		{
 			return m_file;
 		}
 
-		constexpr const char* function_name() const noexcept
+		[[nodiscard]] constexpr const char* function_name() const noexcept
 		{
 			return m_function;
 		}
 
-		constexpr uint32_t line() const noexcept
+		[[nodiscard]] constexpr uint32_t line() const noexcept
 		{
 			return m_line;
 		}
 		
-		static constexpr CSourceLocation current(
+		[[nodiscard]] static constexpr SourceLocation current(
 			const char* file = __builtin_FILE(),
 			const char* function = __builtin_FUNCTION(),
-			uint32_t line = __builtin_LINE())
+			uint32_t line = __builtin_LINE()) noexcept
 		{
-			CSourceLocation location{};
+			SourceLocation location{};
 			location.m_file = file;
 			location.m_function = function;
 			location.m_line = line;

@@ -6,20 +6,20 @@
 
 #pragma once
 
-#include <HyperCore/Compilers.hpp>
-#include <HyperCore/Events/KeyEvents.hpp>
-#include <HyperCore/Events/MouseEvents.hpp>
-#include <HyperCore/Events/WindowEvents.hpp>
+#include "HyperCore/Compilers.hpp"
+#include "HyperCore/Events/KeyEvents.hpp"
+#include "HyperCore/Events/MouseEvents.hpp"
+#include "HyperCore/Events/WindowEvents.hpp"
 
 HYPERENGINE_COMPILER_PUSH_WARNING
 HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
 
 namespace HyperCore
 {
-	class CEvent
+	class Event
 	{
 	public:
-		enum class EType
+		enum class Type
 		{
 			Undefined,
 
@@ -40,64 +40,64 @@ namespace HyperCore
 		};
 
 	public:
-		explicit CEvent(SKeyPressedEvent key_pressed_event);
-		explicit CEvent(SKeyReleasedEvent key_released_event);
-		explicit CEvent(SKeyTypedEvent key_typed_event);
-		explicit CEvent(SMouseMovedEvent mouse_moved_event);
-		explicit CEvent(SMouseScrolledEvent mouse_scrolled_event);
-		explicit CEvent(SMouseButtonPressedEvent mouse_button_pressed_event);
-		explicit CEvent(SMouseButtonReleasedEvent mouse_button_released_event);
-		explicit CEvent(SWindowCloseEvent window_close_event);
-		explicit CEvent(SWindowResizeEvent window_resize_event);
-		explicit CEvent(SWindowFocusEvent window_focus_event);
-		explicit CEvent(SWindowLostFocusEvent window_lost_focus_event);
-		explicit CEvent(SWindowMovedEvent window_moved_event);
+		explicit Event(KeyPressedEvent key_pressed_event);
+		explicit Event(KeyReleasedEvent key_released_event);
+		explicit Event(KeyTypedEvent key_typed_event);
+		explicit Event(MouseMovedEvent mouse_moved_event);
+		explicit Event(MouseScrolledEvent mouse_scrolled_event);
+		explicit Event(MouseButtonPressedEvent mouse_button_pressed_event);
+		explicit Event(MouseButtonReleasedEvent mouse_button_released_event);
+		explicit Event(WindowCloseEvent window_close_event);
+		explicit Event(WindowResizeEvent window_resize_event);
+		explicit Event(WindowFocusEvent window_focus_event);
+		explicit Event(WindowLostFocusEvent window_lost_focus_event);
+		explicit Event(WindowMovedEvent window_moved_event);
 
-		EType type() const;
+		[[nodiscard]] Type type() const noexcept;
 
-		bool is_key_pressed_event() const;
-		bool is_key_released_event() const;
-		bool is_key_typed_event() const;
-		bool is_mouse_moved_event() const;
-		bool is_mouse_scrolled_event() const;
-		bool is_mouse_button_pressed_event() const;
-		bool is_mouse_button_released_event() const;
-		bool is_window_close_event() const;
-		bool is_window_resize_event() const;
-		bool is_window_focus_event() const;
-		bool is_window_lost_focus_event() const;
-		bool is_window_moved_event() const;
+		[[nodiscard]] bool is_key_pressed_event() const noexcept;
+		[[nodiscard]] bool is_key_released_event() const noexcept;
+		[[nodiscard]] bool is_key_typed_event() const noexcept;
+		[[nodiscard]] bool is_mouse_moved_event() const noexcept;
+		[[nodiscard]] bool is_mouse_scrolled_event() const noexcept;
+		[[nodiscard]] bool is_mouse_button_pressed_event() const noexcept;
+		[[nodiscard]] bool is_mouse_button_released_event() const noexcept;
+		[[nodiscard]] bool is_window_close_event() const noexcept;
+		[[nodiscard]] bool is_window_resize_event() const noexcept;
+		[[nodiscard]] bool is_window_focus_event() const noexcept;
+		[[nodiscard]] bool is_window_lost_focus_event() const noexcept;
+		[[nodiscard]] bool is_window_moved_event() const noexcept;
 
-		SKeyPressedEvent as_key_pressed_event() const;
-		SKeyReleasedEvent as_key_released_event() const;
-		SKeyTypedEvent as_key_typed_event() const;
-		SMouseMovedEvent as_mouse_moved_event() const;
-		SMouseScrolledEvent as_mouse_scrolled_event() const;
-		SMouseButtonPressedEvent as_mouse_button_pressed_event() const;
-		SMouseButtonReleasedEvent as_mouse_button_released_event() const;
-		SWindowCloseEvent as_window_close_event() const;
-		SWindowResizeEvent as_window_resize_event() const;
-		SWindowFocusEvent as_window_focus_event() const;
-		SWindowLostFocusEvent as_window_lost_focus_event() const;
-		SWindowMovedEvent as_window_moved_event() const;
+		[[nodiscard]] KeyPressedEvent as_key_pressed_event() const;
+		[[nodiscard]] KeyReleasedEvent as_key_released_event() const;
+		[[nodiscard]] KeyTypedEvent as_key_typed_event() const;
+		[[nodiscard]] MouseMovedEvent as_mouse_moved_event() const;
+		[[nodiscard]] MouseScrolledEvent as_mouse_scrolled_event() const;
+		[[nodiscard]] MouseButtonPressedEvent as_mouse_button_pressed_event() const;
+		[[nodiscard]] MouseButtonReleasedEvent as_mouse_button_released_event() const;
+		[[nodiscard]] WindowCloseEvent as_window_close_event() const;
+		[[nodiscard]] WindowResizeEvent as_window_resize_event() const;
+		[[nodiscard]] WindowFocusEvent as_window_focus_event() const;
+		[[nodiscard]] WindowLostFocusEvent as_window_lost_focus_event() const;
+		[[nodiscard]] WindowMovedEvent as_window_moved_event() const;
 
 	private:
-		EType m_type{ EType::Undefined };
+		Type m_type{ Type::Undefined };
 
 		union
 		{
-			SKeyPressedEvent as_key_pressed_event;
-			SKeyReleasedEvent as_key_released_event;
-			SKeyTypedEvent as_key_typed_event;
-			SMouseMovedEvent as_mouse_moved_event;
-			SMouseScrolledEvent as_mouse_scrolled_event;
-			SMouseButtonPressedEvent as_mouse_button_pressed_event;
-			SMouseButtonReleasedEvent as_mouse_button_released_event;
-			SWindowCloseEvent as_window_close_event;
-			SWindowResizeEvent as_window_resize_event;
-			SWindowFocusEvent as_window_focus_event;
-			SWindowLostFocusEvent as_window_lost_focus_event;
-			SWindowMovedEvent as_window_moved_event;
+			KeyPressedEvent as_key_pressed_event;
+			KeyReleasedEvent as_key_released_event;
+			KeyTypedEvent as_key_typed_event;
+			MouseMovedEvent as_mouse_moved_event;
+			MouseScrolledEvent as_mouse_scrolled_event;
+			MouseButtonPressedEvent as_mouse_button_pressed_event;
+			MouseButtonReleasedEvent as_mouse_button_released_event;
+			WindowCloseEvent as_window_close_event;
+			WindowResizeEvent as_window_resize_event;
+			WindowFocusEvent as_window_focus_event;
+			WindowLostFocusEvent as_window_lost_focus_event;
+			WindowMovedEvent as_window_moved_event;
 		} m_value{};
 	};
 } // namespace HyperCore

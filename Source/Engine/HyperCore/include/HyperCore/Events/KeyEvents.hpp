@@ -5,24 +5,22 @@
  */
 
 #pragma once
-
 #include <cstdint>
-#include <HyperCore/Events/IEvent.hpp>
 
 namespace HyperCore
 {
-	struct SKeyPressedEvent : public IEvent
+	struct KeyPressedEvent
 	{
 		int32_t key_code;
 		int32_t repeat_count;
 	};
 	
-	struct SKeyReleasedEvent : public IEvent
+	struct KeyReleasedEvent
 	{
 		int32_t key_code;
 	};
 	
-	struct SKeyTypedEvent : public IEvent
+	struct KeyTypedEvent
 	{
 		int32_t key_code;
 	};

@@ -12,44 +12,44 @@
 namespace HyperCore
 {
 	template <typename ValueT, typename ErrorT>
-	class CResult
+	class Result
 	{
 	public:
 		using ValueType = ValueT;
 		using ErrorType = ErrorT;
 
 	public:
-		CResult(ValueType&& result) noexcept
+		Result(ValueType&& result) noexcept
 			: m_result(std::move(result))
 		{
 		}
 		
-		CResult(const ValueType& result)
+		Result(const ValueType& result)
 			: m_result(result)
 		{
 		}
 		
-		CResult(ErrorType&& error) noexcept
+		Result(ErrorType&& error) noexcept
 			: m_error(std::move(error))
 		{
 		}
 		
-		CResult(const ErrorType& error)
+		Result(const ErrorType& error)
 			: m_error(error)
 		{
 		}
 
-		ValueType& value()
+		[[nodiscard]] ValueType& value()
 		{
 			return m_result.value();
 		}
 
-		ErrorType& error()
+		[[nodiscard]] ErrorType& error()
 		{
 			return m_error.value();
 		}
 
-		bool is_error() const
+		[[nodiscard]] bool is_error() const noexcept
 		{
 			return m_error.has_value();
 		}
@@ -60,29 +60,29 @@ namespace HyperCore
 	};
 
 	template <typename ErrorT>
-	class CResult<void, ErrorT>
+	class Result<void, ErrorT>
 	{
 	public:
 		using ValueType = void;
 		using ErrorType = ErrorT;
 
 	public:
-		CResult(ErrorType&& error) noexcept
+		Result(ErrorType&& error) noexcept
 			: m_error(std::move(error))
 		{
 		}
 		
-		CResult(const ErrorType& error)
+		Result(const ErrorType& error)
 			: m_error(error)
 		{
 		}
 
-		ErrorType& error()
+		[[nodiscard]] ErrorType& error()
 		{
 			return m_error.value();
 		}
 
-		bool is_error() const
+		[[nodiscard]] bool is_error() const noexcept
 		{
 			return m_error.has_value();
 		}

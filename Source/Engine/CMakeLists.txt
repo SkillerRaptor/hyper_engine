@@ -7,21 +7,21 @@
 #-------------------------------------------------------------------------------------------
 # Core Module
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperCore)
+add_subdirectory(HyperCore)
 
 #-------------------------------------------------------------------------------------------
 # Support Modules
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperPlatform)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperMath)
+# add_subdirectory(HyperPlatform)
+# add_subdirectory(HyperMath)
 
 #-------------------------------------------------------------------------------------------
 # Abstraction Modules
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperRendering)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperResource)
+# add_subdirectory(HyperRendering)
+# add_subdirectory(HyperResource)
 
 #-------------------------------------------------------------------------------------------
 # Engine
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperEngine)
+# add_subdirectory(HyperEngine)

@@ -7,29 +7,28 @@
 #pragma once
 
 #include <cstdint>
-#include <HyperCore/Events/IEvent.hpp>
 
 namespace HyperCore
 {
-	struct SWindowCloseEvent : public IEvent
+	struct WindowCloseEvent
 	{
 	};
 
-	struct SWindowResizeEvent : public IEvent
+	struct WindowResizeEvent
 	{
 		uint32_t width;
 		uint32_t height;
 	};
 
-	struct SWindowFocusEvent : public IEvent
+	struct WindowFocusEvent
 	{
 	};
 
-	struct SWindowLostFocusEvent : public IEvent
+	struct WindowLostFocusEvent
 	{
 	};
 
-	struct SWindowMovedEvent : public IEvent
+	struct WindowMovedEvent
 	{
 		uint32_t position_x;
 		uint32_t position_y;
