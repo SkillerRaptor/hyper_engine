@@ -6,10 +6,12 @@
 
 #include "HyperEngine/Application.hpp"
 
+#include <utility>
+
 namespace HyperEngine
 {
-	Application::Application(const std::string& title)
-		: m_title(title)
+	Application::Application(std::string title)
+		: m_title(std::move(title))
 	{
 	}
 	

@@ -15,8 +15,8 @@
 	class_name& operator=(const class_name&) = delete
 
 #define HYPERENGINE_NON_MOVEABLE(class_name)    \
-	class_name(class_name&&) noexcept = delete; \
-	class_name& operator=(class_name&&) noexcept = delete
+	class_name(class_name&&) = delete; \
+	class_name& operator=(class_name&&) = delete
 
 #ifndef NDEBUG
 #	define HYPERENGINE_DEBUG 1

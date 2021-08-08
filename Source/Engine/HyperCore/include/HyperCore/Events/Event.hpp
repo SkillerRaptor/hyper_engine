@@ -55,20 +55,20 @@ namespace HyperCore
 		explicit Event(WindowLostFocusEvent window_lost_focus_event);
 		explicit Event(WindowMovedEvent window_moved_event);
 
-		Type type() const noexcept;
+		Type type() const;
 
-		bool is_key_pressed_event() const noexcept;
-		bool is_key_released_event() const noexcept;
-		bool is_key_typed_event() const noexcept;
-		bool is_mouse_moved_event() const noexcept;
-		bool is_mouse_scrolled_event() const noexcept;
-		bool is_mouse_button_pressed_event() const noexcept;
-		bool is_mouse_button_released_event() const noexcept;
-		bool is_window_close_event() const noexcept;
-		bool is_window_resize_event() const noexcept;
-		bool is_window_focus_event() const noexcept;
-		bool is_window_lost_focus_event() const noexcept;
-		bool is_window_moved_event() const noexcept;
+		bool is_key_pressed_event() const;
+		bool is_key_released_event() const;
+		bool is_key_typed_event() const;
+		bool is_mouse_moved_event() const;
+		bool is_mouse_scrolled_event() const;
+		bool is_mouse_button_pressed_event() const;
+		bool is_mouse_button_released_event() const;
+		bool is_window_close_event() const;
+		bool is_window_resize_event() const;
+		bool is_window_focus_event() const;
+		bool is_window_lost_focus_event() const;
+		bool is_window_moved_event() const;
 
 		KeyPressedEvent as_key_pressed_event() const;
 		KeyReleasedEvent as_key_released_event() const;

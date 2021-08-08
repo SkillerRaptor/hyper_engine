@@ -16,7 +16,7 @@ namespace HyperEngine
 		friend class Launcher;
 
 	public:
-		Application(const std::string& title);
+		explicit Application(std::string title);
 		virtual ~Application() = default;
 		
 		std::string title() const;

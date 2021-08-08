@@ -82,67 +82,67 @@ namespace HyperCore
 		m_value.as_window_moved_event = window_moved_event;
 	}
 
-	Event::Type Event::type() const noexcept
+	Event::Type Event::type() const
 	{
 		return m_type;
 	}
 
-	bool Event::is_key_pressed_event() const noexcept
+	bool Event::is_key_pressed_event() const
 	{
 		return m_type == Type::KeyPressed;
 	}
 
-	bool Event::is_key_released_event() const noexcept
+	bool Event::is_key_released_event() const
 	{
 		return m_type == Type::KeyReleased;
 	}
 
-	bool Event::is_key_typed_event() const noexcept
+	bool Event::is_key_typed_event() const
 	{
 		return m_type == Type::KeyTyped;
 	}
 
-	bool Event::is_mouse_moved_event() const noexcept
+	bool Event::is_mouse_moved_event() const
 	{
 		return m_type == Type::MouseMoved;
 	}
 
-	bool Event::is_mouse_scrolled_event() const noexcept
+	bool Event::is_mouse_scrolled_event() const
 	{
 		return m_type == Type::MouseScrolled;
 	}
 
-	bool Event::is_mouse_button_pressed_event() const noexcept
+	bool Event::is_mouse_button_pressed_event() const
 	{
 		return m_type == Type::MouseButtonPressed;
 	}
 
-	bool Event::is_mouse_button_released_event() const noexcept
+	bool Event::is_mouse_button_released_event() const
 	{
 		return m_type == Type::MouseButtonReleased;
 	}
 
-	bool Event::is_window_close_event() const noexcept
+	bool Event::is_window_close_event() const
 	{
 		return m_type == Type::WindowClose;
 	}
 
-	bool Event::is_window_resize_event() const noexcept
+	bool Event::is_window_resize_event() const
 	{
 		return m_type == Type::WindowResize;
 	}
 
-	bool Event::is_window_focus_event() const noexcept
+	bool Event::is_window_focus_event() const
 	{
 		return m_type == Type::WindowFocus;
 	}
 
-	bool Event::is_window_lost_focus_event() const noexcept
+	bool Event::is_window_lost_focus_event() const
 	{
 		return m_type == Type::WindowLostFocus;
 	}
 
-	bool Event::is_window_moved_event() const noexcept
+	bool Event::is_window_moved_event() const
 	{
 		return m_type == Type::WindowMoved;
 	}

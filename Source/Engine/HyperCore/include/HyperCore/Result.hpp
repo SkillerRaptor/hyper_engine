@@ -19,7 +19,7 @@ namespace HyperCore
 		using ErrorType = ErrorT;
 
 	public:
-		Result(ValueType&& result) noexcept
+		Result(ValueType&& result)
 			: m_result(std::move(result))
 		{
 		}
@@ -29,7 +29,7 @@ namespace HyperCore
 		{
 		}
 		
-		Result(ErrorType&& error) noexcept
+		Result(ErrorType&& error)
 			: m_error(std::move(error))
 		{
 		}
@@ -49,7 +49,7 @@ namespace HyperCore
 			return m_error.value();
 		}
 
-		bool is_error() const noexcept
+		bool is_error() const
 		{
 			return m_error.has_value();
 		}
@@ -67,7 +67,7 @@ namespace HyperCore
 		using ErrorType = ErrorT;
 
 	public:
-		Result(ErrorType&& error) noexcept
+		Result(ErrorType&& error)
 			: m_error(std::move(error))
 		{
 		}
@@ -82,7 +82,7 @@ namespace HyperCore
 			return m_error.value();
 		}
 
-		bool is_error() const noexcept
+		bool is_error() const
 		{
 			return m_error.has_value();
 		}

@@ -150,32 +150,32 @@ namespace HyperCore
 			return at(position);
 		}
 
-		ValueType* data() noexcept
+		ValueType* data()
 		{
 			return m_data;
 		}
 
-		const ValueType* data() const noexcept
+		const ValueType* data() const
 		{
 			return m_data;
 		}
 
-		size_t size() const noexcept
+		size_t size() const
 		{
 			return m_element_count;
 		}
 
-		size_t max_size() const noexcept
+		size_t max_size() const
 		{
 			return m_size;
 		}
 
-		size_t capacity() const noexcept
+		size_t capacity() const
 		{
 			return m_size;
 		}
 
-		bool empty() const noexcept
+		bool empty() const
 		{
 			return size() == 0;
 		}

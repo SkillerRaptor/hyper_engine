@@ -15,17 +15,17 @@ namespace HyperCore
 	public:
 		constexpr SourceLocation() = default;
 		
-		constexpr const char* file_name() const noexcept
+		constexpr const char* file_name() const
 		{
 			return m_file;
 		}
 
-		constexpr const char* function_name() const noexcept
+		constexpr const char* function_name() const
 		{
 			return m_function;
 		}
 
-		constexpr uint32_t line() const noexcept
+		constexpr uint32_t line() const
 		{
 			return m_line;
 		}
@@ -33,7 +33,7 @@ namespace HyperCore
 		static constexpr SourceLocation current(
 			const char* file = __builtin_FILE(),
 			const char* function = __builtin_FUNCTION(),
-			uint32_t line = __builtin_LINE()) noexcept
+			uint32_t line = __builtin_LINE())
 		{
 			SourceLocation location{};
 			location.m_file = file;

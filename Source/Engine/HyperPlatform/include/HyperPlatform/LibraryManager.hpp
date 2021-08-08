@@ -22,15 +22,15 @@ namespace HyperPlatform
 	public:
 		explicit CLibraryHandle(uint32_t handle = 0);
 
-		uint32_t handle() const noexcept;
+		uint32_t handle() const;
 
-		bool valid() const noexcept;
+		bool valid() const;
 
-		uint16_t index() const noexcept;
-		uint16_t version() const noexcept;
+		uint16_t index() const;
+		uint16_t version() const;
 
-		bool operator==(const CLibraryHandle& library_handle) const noexcept;
-		bool operator!=(const CLibraryHandle& library_handle) const noexcept;
+		bool operator==(const CLibraryHandle& library_handle) const;
+		bool operator!=(const CLibraryHandle& library_handle) const;
 
 	private:
 		uint32_t m_handle{ 0 };
