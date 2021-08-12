@@ -19,7 +19,6 @@ target_link_libraries(HyperTestMain PRIVATE ProjectOptions)
 
 set(HYPERMATH_SOURCE
         src/HyperMath/Common.cpp
-        src/HyperMath/Constants.cpp
         src/HyperMath/Trigonometric.cpp)
 
 add_executable(HyperMathTest ${HYPERMATH_SOURCE})
