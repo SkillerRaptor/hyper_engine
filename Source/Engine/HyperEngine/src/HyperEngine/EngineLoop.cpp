@@ -12,6 +12,7 @@ namespace HyperEngine
 {
 	EngineLoop::EngineLoop(Application& application)
 		: m_application(application)
+		, m_window(m_application.title(), 1280, 720)
 	{
 		m_event_manager.register_listener<HyperCore::WindowCloseEvent>(
 			"EngineLoopAppCloseEvent",
@@ -23,10 +24,8 @@ namespace HyperEngine
 		m_running = true;
 	}
 
-	void EngineLoop::run()
+	auto EngineLoop::run() -> void
 	{
-		HyperCore::Logger::info("Starting application {}", m_application.title());
-		
 		while (m_running)
 		{
 			m_event_manager.process_next_event();

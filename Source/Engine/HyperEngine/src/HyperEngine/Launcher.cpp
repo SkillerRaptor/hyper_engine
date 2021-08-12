@@ -11,17 +11,17 @@
 
 namespace HyperEngine
 {
-	void Launcher::launch(Application& application, int argc, char** argv)
+	auto Launcher::launch(Application& application, int argc, char** argv) -> void
 	{
 		Launcher::launch_application(&application, argc, argv);
 	}
 
-	void Launcher::launch(Application* application, int argc, char** argv)
+	auto Launcher::launch(Application* application, int argc, char** argv) -> void
 	{
 		Launcher::launch_application(application, argc, argv);
 	}
 
-	void Launcher::launch_application(Application* application, int, char**)
+	auto Launcher::launch_application(Application* application, int, char**) -> void
 	{
 		if (application == nullptr)
 		{

@@ -35,7 +35,7 @@ namespace HyperMath
 		{
 		}
 
-		Vector3<T> operator-() const
+		auto operator-() const -> Vector3<T>
 		{
 			Vector3<T> vector;
 			vector.x = -x;
@@ -44,7 +44,7 @@ namespace HyperMath
 			return vector;
 		}
 
-		Vector3<T> operator+(T value) const
+		auto operator+(T value) const -> Vector3<T>
 		{
 			Vector3<T> vector;
 			vector.x = x + value;
@@ -53,7 +53,7 @@ namespace HyperMath
 			return vector;
 		}
 
-		Vector3<T> operator+(const Vector3<T>& other) const
+		auto operator+(const Vector3<T>& other) const -> Vector3<T>
 		{
 			Vector3<T> vector;
 			vector.x = x + other.x;
@@ -62,7 +62,7 @@ namespace HyperMath
 			return vector;
 		}
 
-		Vector3<T>& operator+=(T value)
+		auto operator+=(T value) -> Vector3<T>&
 		{
 			x += value;
 			y += value;
@@ -70,7 +70,7 @@ namespace HyperMath
 			return *this;
 		}
 
-		Vector3<T>& operator+=(const Vector3<T>& other)
+		auto operator+=(const Vector3<T>& other) -> Vector3<T>&
 		{
 			x += other.x;
 			y += other.y;
@@ -78,7 +78,7 @@ namespace HyperMath
 			return *this;
 		}
 
-		Vector3<T> operator-(T value) const
+		auto operator-(T value) const -> Vector3<T>
 		{
 			Vector3<T> vector;
 			vector.x = x - value;
@@ -87,7 +87,7 @@ namespace HyperMath
 			return vector;
 		}
 
-		Vector3<T> operator-(const Vector3<T>& other) const
+		auto operator-(const Vector3<T>& other) const -> Vector3<T>
 		{
 			Vector3<T> vector;
 			vector.x = x - other.x;
@@ -96,14 +96,14 @@ namespace HyperMath
 			return vector;
 		}
 
-		Vector3<T>& operator-=(T value)
+		auto operator-=(T value) -> Vector3<T>&
 		{
 			x -= value;
 			y -= value;
 			return *this;
 		}
 
-		Vector3<T>& operator-=(const Vector3<T>& other)
+		auto operator-=(const Vector3<T>& other) -> Vector3<T>&
 		{
 			x -= other.x;
 			y -= other.y;
@@ -111,7 +111,7 @@ namespace HyperMath
 			return *this;
 		}
 
-		Vector3<T> operator*(T value) const
+		auto operator*(T value) const -> Vector3<T>
 		{
 			Vector3<T> vector;
 			vector.x = x * value;
@@ -120,7 +120,7 @@ namespace HyperMath
 			return vector;
 		}
 
-		Vector3<T> operator*(const Vector3<T>& other) const
+		auto operator*(const Vector3<T>& other) const -> Vector3<T>
 		{
 			Vector3<T> vector;
 			vector.x = x * other.x;
@@ -129,7 +129,7 @@ namespace HyperMath
 			return vector;
 		}
 
-		Vector3<T>& operator*=(T value)
+		auto operator*=(T value) -> Vector3<T>&
 		{
 			x *= value;
 			y *= value;
@@ -137,7 +137,7 @@ namespace HyperMath
 			return *this;
 		}
 
-		Vector3<T>& operator*=(const Vector3<T>& other)
+		auto operator*=(const Vector3<T>& other) -> Vector3<T>&
 		{
 			x *= other.x;
 			y *= other.y;
@@ -145,7 +145,7 @@ namespace HyperMath
 			return *this;
 		}
 
-		Vector3<T> operator/(T value) const
+		auto operator/(T value) const -> Vector3<T>
 		{
 			Vector3<T> vector;
 			vector.x = x / value;
@@ -154,7 +154,7 @@ namespace HyperMath
 			return vector;
 		}
 
-		Vector3<T> operator/(const Vector3<T>& other) const
+		auto operator/(const Vector3<T>& other) const -> Vector3<T>
 		{
 			Vector3<T> vector;
 			vector.x = x / other.x;
@@ -163,7 +163,7 @@ namespace HyperMath
 			return vector;
 		}
 
-		Vector3<T>& operator/=(T value)
+		auto operator/=(T value) -> Vector3<T>&
 		{
 			x /= value;
 			y /= value;
@@ -171,7 +171,7 @@ namespace HyperMath
 			return *this;
 		}
 
-		Vector3<T>& operator/=(const Vector3<T>& other)
+		auto operator/=(const Vector3<T>& other) -> Vector3<T>&
 		{
 			x /= other.x;
 			y /= other.y;

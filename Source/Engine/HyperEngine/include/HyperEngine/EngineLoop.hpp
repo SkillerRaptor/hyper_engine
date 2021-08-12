@@ -7,6 +7,7 @@
 #pragma once
 
 #include <HyperCore/Events/EventManager.hpp>
+#include <HyperPlatform/Window.hpp>
 
 namespace HyperEngine
 {
@@ -15,14 +16,15 @@ namespace HyperEngine
 	class EngineLoop
 	{
 	public:
-		EngineLoop(Application& application);
+		explicit EngineLoop(Application& application);
 
-		void run();
+		auto run() -> void;
 
 	private:
 		Application& m_application;
 		bool m_running{ false };
 		
 		HyperCore::EventManager m_event_manager{};
+		HyperPlatform::Window m_window;
 	};
 } // namespace HyperEngine

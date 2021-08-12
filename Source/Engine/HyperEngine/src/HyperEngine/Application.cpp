@@ -15,7 +15,7 @@ namespace HyperEngine
 	{
 	}
 	
-	std::string Application::title() const
+	auto Application::title() const -> std::string
 	{
 		return m_title;
 	}

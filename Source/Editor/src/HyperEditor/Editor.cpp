@@ -13,11 +13,11 @@ namespace HyperEditor
 	{
 	}
 	
-	void Editor::startup()
+	auto Editor::startup() -> void
 	{
 	}
 
-	void Editor::shutdown()
+	auto Editor::shutdown() -> void
 	{
 	}
 } // namespace HyperEditor

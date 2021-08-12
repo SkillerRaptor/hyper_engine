@@ -25,36 +25,5 @@ target_link_libraries(
         HyperEngine
         PUBLIC
         HyperCore
-        HyperMath)
-        #HyperPlatform
-        #HyperResource)
-
-#-------------------------------------------------------------------------------------------
-# DirectX
-#-------------------------------------------------------------------------------------------
-if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
-    target_link_libraries(HyperEngine PUBLIC HyperDirectX11)
-    target_compile_definitions(HyperEngine PUBLIC HYPERENGINE_BUILD_DIRECTX11=1)
-
-    target_link_libraries(HyperEngine PUBLIC HyperDirectX12)
-    target_compile_definitions(HyperEngine PUBLIC HYPERENGINE_BUILD_DIRECTX12=1)
-endif ()
-
-#-------------------------------------------------------------------------------------------
-# OpenGL
-#-------------------------------------------------------------------------------------------
-if (${HYPERENGINE_BUILD_OPENGL})
-    target_link_libraries(HyperEngine PUBLIC HyperOpenGL33)
-    target_compile_definitions(HyperEngine PUBLIC HYPERENGINE_BUILD_OPENGL33=1)
-
-    target_link_libraries(HyperEngine PUBLIC HyperOpenGL46)
-    target_compile_definitions(HyperEngine PUBLIC HYPERENGINE_BUILD_OPENGL46=1)
-endif ()
-
-#-------------------------------------------------------------------------------------------
-# Vulkan
-#-------------------------------------------------------------------------------------------
-if (${HYPERENGINE_BUILD_VULKAN})
-    # target_link_libraries(HyperEngine PUBLIC HyperVulkan)
-    target_compile_definitions(HyperEngine PUBLIC HYPERENGINE_BUILD_VULKAN=1)
-endif ()
+        HyperMath
+        HyperPlatform)

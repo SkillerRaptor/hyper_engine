@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <cstdint>
-
 namespace HyperCore
 {
 	class SourceLocation
@@ -15,25 +13,25 @@ namespace HyperCore
 	public:
 		constexpr SourceLocation() = default;
 		
-		constexpr const char* file_name() const
+		constexpr auto file_name() const -> const char*
 		{
 			return m_file;
 		}
 
-		constexpr const char* function_name() const
+		constexpr auto function_name() const -> const char*
 		{
 			return m_function;
 		}
 
-		constexpr uint32_t line() const
+		constexpr auto line() const -> unsigned int
 		{
 			return m_line;
 		}
 		
-		static constexpr SourceLocation current(
+		static constexpr auto current(
 			const char* file = __builtin_FILE(),
 			const char* function = __builtin_FUNCTION(),
-			uint32_t line = __builtin_LINE())
+			unsigned int line = __builtin_LINE()) -> SourceLocation
 		{
 			SourceLocation location{};
 			location.m_file = file;
@@ -46,6 +44,6 @@ namespace HyperCore
 	private:
 		const char* m_file{ "unknown" };
 		const char* m_function{ "unknown" };
-		uint32_t m_line{ 0 };
+		unsigned int m_line{ 0 };
 	};
 } // namespace HyperCore

@@ -19,11 +19,11 @@ namespace HyperEngine
 		explicit Application(std::string title);
 		virtual ~Application() = default;
 		
-		std::string title() const;
+		auto title() const -> std::string;
 
 	protected:
-		virtual void startup() = 0;
-		virtual void shutdown() = 0;
+		virtual auto startup() -> void = 0;
+		virtual auto shutdown() -> void = 0;
 
 	private:
 		std::string m_title;

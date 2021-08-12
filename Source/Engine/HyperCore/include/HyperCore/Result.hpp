@@ -23,21 +23,25 @@ namespace HyperCore
 			: m_result(std::move(result))
 		{
 		}
-		
+
 		Result(const ValueType& result)
 			: m_result(result)
 		{
 		}
-		
+
 		Result(ErrorType&& error)
 			: m_error(std::move(error))
 		{
 		}
-		
+
 		Result(const ErrorType& error)
 			: m_error(error)
 		{
 		}
+
+		Result(Result&& other) = default;
+		Result(const Result& other) = default;
+		~Result() = default;
 
 		ValueType& value()
 		{
@@ -71,11 +75,16 @@ namespace HyperCore
 			: m_error(std::move(error))
 		{
 		}
-		
+
 		Result(const ErrorType& error)
 			: m_error(error)
 		{
 		}
+
+		Result() = default;
+		Result(Result&& other) = default;
+		Result(const Result& other) = default;
+		~Result() = default;
 
 		ErrorType& error()
 		{

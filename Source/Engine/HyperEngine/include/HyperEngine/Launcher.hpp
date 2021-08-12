@@ -15,10 +15,10 @@ namespace HyperEngine
 	class Launcher
 	{
 	public:
-		static void launch(Application& application, int argc = 0, char** argv = nullptr);
-		static void launch(Application* application, int argc = 0, char** argv = nullptr);
+		static auto launch(Application& application, int argc = 0, char** argv = nullptr) -> void;
+		static auto launch(Application* application, int argc = 0, char** argv = nullptr) -> void;
 
 	private:
-		static void launch_application(Application* application, int argc, char** argv);
+		static auto launch_application(Application* application, int argc, char** argv) -> void;
 	};
 } // namespace HyperEngine

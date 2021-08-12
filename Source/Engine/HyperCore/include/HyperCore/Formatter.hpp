@@ -14,7 +14,7 @@ namespace HyperCore
 	{
 	public:
 		template <typename... Args>
-		static std::string format(std::string_view format, Args&&... args)
+		static auto format(std::string_view format, Args&&... args) -> std::string
 		{
 			// TODO: Implement own formatter
 			return fmt::format(format, std::forward<Args>(args)...);

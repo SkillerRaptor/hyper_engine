@@ -10,13 +10,13 @@
 
 namespace HyperEditor
 {
-	class Editor : public HyperEngine::Application
+	class Editor final : public HyperEngine::Application
 	{
 	public:
 		Editor();
 		
 	private:
-		virtual void startup() override;
-		virtual void shutdown() override;
+		virtual auto startup() -> void override;
+		virtual auto shutdown() -> void override;
 	};
 } // namespace HyperEditor

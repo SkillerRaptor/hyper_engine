@@ -11,7 +11,7 @@
 
 namespace HyperCore
 {
-	void Logger::internal_log(Logger::Level level, std::string_view string)
+	auto Logger::internal_log(Logger::Level level, std::string_view string) -> void
 	{
 		const fmt::color level_color = [&level]()
 		{

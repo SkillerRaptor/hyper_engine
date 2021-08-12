@@ -13,13 +13,13 @@
 namespace HyperMath
 {
 	template <typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
-	static constexpr T radians(T&& degrees)
+	static constexpr auto radians(T&& degrees) -> T
 	{
 		return degrees * (Numbers::pi_v<T> / static_cast<T>(180.0L));
 	}
 	
 	template <typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
-	static constexpr T degrees(T&& radians)
+	static constexpr auto degrees(T&& radians) -> T
 	{
 		return radians * (static_cast<T>(180.0L) / Numbers::pi_v<T>);
 	}

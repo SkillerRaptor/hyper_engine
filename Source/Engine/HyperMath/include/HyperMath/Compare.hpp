@@ -11,7 +11,7 @@
 namespace HyperMath::Compare
 {
 	template <typename T, typename U>
-	static constexpr bool equal(T a, U b)
+	static constexpr auto equal(T a, U b) -> bool
 	{
 		if constexpr (std::is_signed_v<T> == std::is_signed_v<U>)
 		{
@@ -28,13 +28,13 @@ namespace HyperMath::Compare
 	}
 
 	template <typename T, typename U>
-	static constexpr bool not_equal(T a, U b)
+	static constexpr auto not_equal(T a, U b) -> bool
 	{
 		return !equal(a, b);
 	}
 
 	template <typename T, typename U>
-	static constexpr bool less(T a, U b)
+	static constexpr auto less(T a, U b) -> bool
 	{
 		if constexpr (std::is_signed_v<T> == std::is_signed_v<U>)
 		{
@@ -51,19 +51,19 @@ namespace HyperMath::Compare
 	}
 
 	template <typename T, typename U>
-	static constexpr bool greater(T a, U b)
+	static constexpr auto greater(T a, U b) -> bool
 	{
 		return cmp_less(b, a);
 	}
 
 	template <typename T, typename U>
-	static constexpr bool less_equal(T a, U b)
+	static constexpr auto less_equal(T a, U b) -> bool
 	{
 		return !greater(a, b);
 	}
 
 	template <typename T, typename U>
-	static constexpr bool greater_equal(T a, U b)
+	static constexpr auto greater_equal(T a, U b) -> bool
 	{
 		return !less(a, b);
 	}

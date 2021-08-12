@@ -8,7 +8,7 @@
 
 #include <HyperEngine/Launcher.hpp>
 
-int main(int argc, char** argv)
+auto main(int argc, char** argv) -> int
 {
 	HyperEditor::Editor editor;
 	HyperEngine::Launcher::launch(editor, argc, argv);

@@ -19,19 +19,19 @@
 namespace HyperMath
 {
 	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr T abs(T x)
+	static constexpr auto abs(T x) -> T
 	{
 		return x >= 0 ? x : -x;
 	}
 	
 	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr T min(T a, T b)
+	static constexpr auto min(T a, T b) -> T
 	{
 		return b < a ? b : a;
 	}
 	
 	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr T max(T a, T b)
+	static constexpr auto max(T a, T b) -> T
 	{
 		return a < b ? b : a;
 	}

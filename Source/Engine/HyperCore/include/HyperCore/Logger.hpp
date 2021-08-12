@@ -35,38 +35,38 @@ namespace HyperCore
 		~Logger() = delete;
 
 		template <typename... Args>
-		static void info(std::string_view format, Args&&... args)
+		static auto info(std::string_view format, Args&&... args) -> void
 		{
 			Logger::log(Level::Info, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
-		static void warning(std::string_view format, Args&&... args)
+		static auto warning(std::string_view format, Args&&... args) -> void
 		{
 			Logger::log(Level::Warning, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
-		static void error(std::string_view format, Args&&... args)
+		static auto error(std::string_view format, Args&&... args) -> void
 		{
 			Logger::log(Level::Error, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
-		static void fatal(std::string_view format, Args&&... args)
+		static auto fatal(std::string_view format, Args&&... args) -> void
 		{
 			Logger::log(Level::Fatal, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
-		static void debug(std::string_view format, Args&&... args)
+		static auto debug(std::string_view format, Args&&... args) -> void
 		{
 			Logger::log(Level::Debug, format, std::forward<Args>(args)...);
 		}
 
 	private:
 		template <typename... Args>
-		static void log(Level level, std::string_view format, Args&&... args)
+		static auto log(Level level, std::string_view format, Args&&... args) -> void
 		{
 			if (format.empty())
 			{
@@ -85,6 +85,6 @@ namespace HyperCore
 			}
 		}
 
-		static void internal_log(Level level, std::string_view string);
+		static auto internal_log(Level level, std::string_view string) -> void;
 	};
 } // namespace HyperCore

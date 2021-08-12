@@ -16,6 +16,7 @@ set(HEADERS
         include/HyperCore/Assertion.hpp
         include/HyperCore/Bits.hpp
         include/HyperCore/Compilers.hpp
+        include/HyperCore/Errors.hpp
         include/HyperCore/Formatter.hpp
         include/HyperCore/Logger.hpp
         include/HyperCore/Prerequisites.hpp
@@ -37,4 +38,7 @@ hyperengine_group_source(${SOURCES})
 hyperengine_group_source(${HEADERS})
 
 hyperengine_define_module(HyperCore)
-target_link_libraries(HyperCore PUBLIC CONAN_PKG::fmt)
+target_link_libraries(
+        HyperCore
+        PUBLIC
+        CONAN_PKG::fmt)

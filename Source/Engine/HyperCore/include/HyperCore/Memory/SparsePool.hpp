@@ -13,6 +13,10 @@
 
 namespace HyperCore
 {
+	/*
+	 * TODO: Rework SparsePool
+	 */
+	
 	template <class T, class Allocator = std::allocator<T>>
 	class CSparsePool
 	{
