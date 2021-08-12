@@ -5,6 +5,7 @@
  */
 
 #include "HyperMath/Common.hpp"
+#include "HyperMath/Compare.hpp"
 #include "HyperMath/Constants.hpp"
 #include "HyperMath/Matrix2x2.hpp"
 #include "HyperMath/Matrix3x3.hpp"

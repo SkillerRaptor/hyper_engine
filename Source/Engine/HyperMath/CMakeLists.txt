@@ -12,6 +12,7 @@ set(SOURCES
 
 set(HEADERS
         include/HyperMath/Common.hpp
+        include/HyperMath/Compare.hpp
         include/HyperMath/Constants.hpp
         include/HyperMath/Matrix2x2.hpp
         include/HyperMath/Matrix3x3.hpp
@@ -26,4 +27,7 @@ hyperengine_group_source(${SOURCES})
 hyperengine_group_source(${HEADERS})
 
 hyperengine_define_module(HyperMath)
-target_link_libraries(HyperMath PUBLIC HyperCore)
+target_link_libraries(
+        HyperMath
+        PUBLIC
+        HyperCore)
