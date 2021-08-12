@@ -64,6 +64,7 @@ jobs:
         run: |
           sudo apt update -qq
           sudo apt install -y \
+            ccache \
             clang-10 \
             cmake \
             gcc-10 \
@@ -77,6 +78,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip setuptools
           python3 -m pip install conan
+          conan profile update settings.compiler.libcxx=libstdc++11 default
 
       - name: Install Vulkan SDK
         run: |
