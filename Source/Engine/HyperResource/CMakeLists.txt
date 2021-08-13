@@ -17,10 +17,12 @@ hyperengine_group_source(${SOURCES})
 hyperengine_group_source(${HEADERS})
 
 hyperengine_define_module(HyperResource)
-target_link_libraries(HyperResource PUBLIC HyperCore)
-target_link_libraries(HyperResource PUBLIC assimp)
-target_link_libraries(HyperResource PUBLIC glslang)
-target_link_libraries(HyperResource PUBLIC meshoptimizer)
-target_link_libraries(HyperResource PUBLIC spirv-cross-core spirv-cross-hlsl spirv-cross-glsl spirv-cross-cpp spirv-reflect)
-target_link_libraries(HyperResource PUBLIC SPIRV-Tools)
-target_link_libraries(HyperResource PUBLIC stb_image)
+target_link_libraries(
+        HyperResource
+        PUBLIC
+        CONAN_PKG::assimp
+        CONAN_PKG::glslang
+        CONAN_PKG::meshoptimizer
+        CONAN_PKG::spirv-cross
+        CONAN_PKG::stb
+        HyperCore)

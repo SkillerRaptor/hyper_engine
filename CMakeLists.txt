@@ -65,7 +65,10 @@ set(CONAN_LIBRARIES
         fmt/8.0.1
         glad/0.1.34
         glfw/3.3.4
+        glslang/11.5.0
+        meshoptimizer/0.16
         stb/20200203
+        spirv-cross/20210115
         volk/1.2.170)
 
 include(Development/CMake/Conan.cmake)

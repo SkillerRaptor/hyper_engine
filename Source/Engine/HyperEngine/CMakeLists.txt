@@ -26,7 +26,8 @@ target_link_libraries(
         PUBLIC
         HyperCore
         HyperMath
-        HyperPlatform)
+        HyperPlatform
+        HyperResource)
 
 #-------------------------------------------------------------------------------------------
 # DirectX

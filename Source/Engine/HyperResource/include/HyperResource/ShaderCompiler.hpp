@@ -8,9 +8,8 @@
 
 namespace HyperResource
 {
-	class CShaderCompiler
+	class ShaderCompiler
 	{
 	public:
-		CShaderCompiler();
 	};
 } // namespace HyperResource
