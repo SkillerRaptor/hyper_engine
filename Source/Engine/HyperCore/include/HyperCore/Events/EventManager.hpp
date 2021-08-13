@@ -52,7 +52,7 @@ namespace HyperCore
 				m_event_wrappers[event_id] = std::make_unique<EventWrapper<T>>();
 			}
 
-			m_event_bus.emplace(T(std::forward<Args>(args)...));
+			m_event_bus.emplace(T{ std::forward<Args>(args)... });
 		}
 
 		void process_next_event()
@@ -110,9 +110,7 @@ namespace HyperCore
 		}
 
 		template <class T>
-		void register_listener(
-			const std::string& name,
-			const std::function<void(const T&)>& event_listener)
+		void register_listener(const std::string& name, const std::function<void(const T&)>& event_listener)
 		{
 			const EventFamilyGenerator::EventIdType event_id = EventFamilyGenerator::type<T>();
 			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
@@ -140,8 +138,7 @@ namespace HyperCore
 
 	private:
 		template <class T>
-		EventWrapper<T>*
-			get_event_wrapper(EventFamilyGenerator::EventIdType event_id)
+		EventWrapper<T>* get_event_wrapper(EventFamilyGenerator::EventIdType event_id)
 		{
 			const std::unique_ptr<EventWrapperBase>& event_wrapper_base = m_event_wrappers[event_id];
 			auto* event_wrapper = static_cast<EventWrapper<T>*>(event_wrapper_base.get());
@@ -158,10 +155,7 @@ namespace HyperCore
 		}
 
 	private:
-		std::unordered_map<
-			EventFamilyGenerator::EventIdType,
-			std::unique_ptr<EventWrapperBase>>
-			m_event_wrappers{};
+		std::unordered_map<EventFamilyGenerator::EventIdType, std::unique_ptr<EventWrapperBase>> m_event_wrappers{};
 
 		std::queue<Event> m_event_bus{};
 	};

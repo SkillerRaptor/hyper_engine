@@ -12,12 +12,13 @@
 
 namespace HyperPlatform
 {
-	Window::Window(std::string title, int width, int height, GraphicsApi graphics_api)
-		: m_title(std::move(title))
-		, m_width(width)
-		, m_height(height)
-		, m_graphics_api(graphics_api)
+	Window::Window(std::string title, int width, int height, GraphicsApi graphics_api, HyperCore::EventManager& event_manager)
+		: m_graphics_api(graphics_api)
 	{
+		m_info.title = std::move(title);
+		m_info.width = width;
+		m_info.height = height;
+		m_info.event_manager = &event_manager;
 	}
 
 	Window::~Window()
@@ -47,12 +48,33 @@ namespace HyperPlatform
 			break;
 		}
 
-		m_native_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
+		m_native_window = glfwCreateWindow(m_info.width, m_info.height, m_info.title.c_str(), nullptr, nullptr);
 		if (m_native_window == nullptr)
 		{
 			glfwTerminate();
 			return HyperCore::ConstructError::Incomplete;
 		}
+
+		glfwSetWindowUserPointer(m_native_window, &m_info);
+
+		glfwSetWindowSizeCallback(
+			m_native_window,
+			[](GLFWwindow* window, int width, int height)
+			{
+				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
+				window_info->width = width;
+				window_info->height = height;
+				
+				window_info->event_manager->invoke<HyperCore::WindowResizeEvent>(width, height);
+			});
+
+		glfwSetWindowCloseCallback(
+			m_native_window,
+			[](GLFWwindow* window)
+			{
+				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
+				window_info->event_manager->invoke<HyperCore::WindowCloseEvent>();
+			});
 
 		switch (m_graphics_api)
 		{

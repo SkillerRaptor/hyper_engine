@@ -12,7 +12,7 @@ namespace HyperEngine
 {
 	EngineLoop::EngineLoop(Application& application)
 		: m_application(application)
-		, m_window(m_application.title(), 1280, 720, m_application.graphics_api())
+		, m_window(m_application.title(), 1280, 720, m_application.graphics_api(), m_event_manager)
 	{
 	}
 	
