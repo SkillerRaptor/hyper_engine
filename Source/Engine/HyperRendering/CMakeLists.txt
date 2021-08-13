@@ -7,27 +7,26 @@
 #-------------------------------------------------------------------------------------------
 # HyperRendering
 #-------------------------------------------------------------------------------------------
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperRenderingBase)
+add_subdirectory(HyperRendering)
 
 #-------------------------------------------------------------------------------------------
 # DirectX
 #-------------------------------------------------------------------------------------------
-if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperDirectX11)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperDirectX12)
+if (HYPERENGINE_BUILD_DIRECTX)
+    # TODO: Implement DirectX11 & DirectX12
 endif ()
 
 #-------------------------------------------------------------------------------------------
 # OpenGL
 #-------------------------------------------------------------------------------------------
-if (${HYPERENGINE_BUILD_OPENGL})
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperOpenGL33)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperOpenGL46)
+if (HYPERENGINE_BUILD_OPENGL)
+    # TODO: Implement OpenGL 4.6
+    add_subdirectory(HyperOpenGL33)
 endif ()
 
 #-------------------------------------------------------------------------------------------
 # Vulkan
 #-------------------------------------------------------------------------------------------
-if (${HYPERENGINE_BUILD_VULKAN})
-#    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/HyperVulkan)
+if (HYPERENGINE_BUILD_VULKAN)
+    # TODO: Implement Vulkan
 endif ()

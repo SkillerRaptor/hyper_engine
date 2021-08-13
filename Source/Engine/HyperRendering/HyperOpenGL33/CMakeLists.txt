@@ -7,41 +7,19 @@
 #-------------------------------------------------------------------------------------------
 # HyperOpenGL33
 #-------------------------------------------------------------------------------------------
-if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
-    set(PLATFORM_SOURCES
-            src/HyperRendering/OpenGL33/Windows/PlatformContext.cpp)
+set(SOURCES
+        src/HyperOpenGL33/Context.cpp)
 
-    set(PLATFORM_HEADERS
-            include/HyperRendering/OpenGL33/Windows/PlatformContext.hpp
-            include/HyperRendering/OpenGL33/Windows/PlatformInclude.hpp)
-elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
-    set(PLATFORM_SOURCES
-            src/HyperRendering/OpenGL33/Linux/PlatformContext.cpp)
+set(HEADERS
+        include/HyperOpenGL33/Context.hpp)
 
-    set(PLATFORM_HEADERS
-            include/HyperRendering/OpenGL33/Linux/PlatformContext.hpp
-            include/HyperRendering/OpenGL33/Linux/PlatformInclude.hpp)
-endif ()
+hyperengine_group_source(${SOURCES})
+hyperengine_group_source(${HEADERS})
 
-set(CORE_SOURCES
-        src/HyperRendering/OpenGL33/Context.cpp
-        src/HyperRendering/OpenGL33/IPlatformContext.cpp
-        src/HyperRendering/OpenGL33/Renderer2D.cpp)
-
-set(CORE_HEADERS
-        include/HyperRendering/OpenGL33/Context.hpp
-        include/HyperRendering/OpenGL33/IPlatformContext.hpp
-        include/HyperRendering/OpenGL33/PlatformInclude.hpp
-        include/HyperRendering/OpenGL33/Renderer2D.hpp)
-
-set(SOURCES ${CORE_SOURCES} ${PLATFORM_SOURCES} ${HYPERCOMMON_SOURCES})
-set(HEADERS ${CORE_HEADERS} ${PLATFORM_HEADERS} ${HYPERCOMMON_HEADERS})
-
-group_source()
-
-define_module(HyperOpenGL33)
-target_include_directories(HyperOpenGL33 PRIVATE ${OPENGL_INCLUDE_DIRS})
-target_link_libraries(HyperOpenGL33 PUBLIC HyperCore)
-target_link_libraries(HyperOpenGL33 PUBLIC HyperPlatform)
-target_link_libraries(HyperOpenGL33 PUBLIC HyperRenderingBase)
-target_link_libraries(HyperOpenGL33 PRIVATE ${OPENGL_LIBRARIES})
+hyperengine_define_module(HyperOpenGL33)
+target_link_libraries(
+        HyperOpenGL33
+        PUBLIC
+        CONAN_PKG::glad
+        CONAN_PKG::glfw
+        HyperRendering)

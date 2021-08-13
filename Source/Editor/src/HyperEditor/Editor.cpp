@@ -9,10 +9,10 @@
 namespace HyperEditor
 {
 	Editor::Editor()
-		: HyperEngine::Application("HyperEditor")
+		: IApplication("HyperEditor")
 	{
 	}
-	
+
 	auto Editor::startup() -> void
 	{
 	}

@@ -10,25 +10,27 @@
 #include <HyperCore/Result.hpp>
 #include <HyperCore/Events/EventManager.hpp>
 #include <HyperPlatform/Window.hpp>
+#include <HyperRendering/IContext.hpp>
 
 namespace HyperEngine
 {
-	class Application;
+	class IApplication;
 
 	class EngineLoop
 	{
 	public:
-		explicit EngineLoop(Application& application);
+		explicit EngineLoop(IApplication& application);
 		
 		auto initialize() -> HyperCore::Result<void, HyperCore::ConstructError>;
 		
 		auto run() -> void;
 
 	private:
-		Application& m_application;
+		IApplication& m_application;
 		bool m_running{ false };
 		
 		HyperCore::EventManager m_event_manager{};
 		HyperPlatform::Window m_window;
+		HyperRendering::IContext* m_render_context{ nullptr };
 	};
 } // namespace HyperEngine

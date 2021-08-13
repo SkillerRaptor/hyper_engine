@@ -6,19 +6,17 @@
 
 #pragma once
 
-#include "Application.hpp"
+#include "HyperEngine/IApplication.hpp"
 
 namespace HyperEngine
 {
-	class Application;
-
 	class Launcher
 	{
 	public:
-		static auto launch(Application& application, int argc = 0, char** argv = nullptr) -> void;
-		static auto launch(Application* application, int argc = 0, char** argv = nullptr) -> void;
+		static auto launch(IApplication& application, int argc = 0, char** argv = nullptr) -> int;
+		static auto launch(IApplication* application, int argc = 0, char** argv = nullptr) -> int;
 
 	private:
-		static auto launch_application(Application* application, int argc, char** argv) -> void;
+		static auto launch_application(IApplication* application, int argc, char** argv) -> int;
 	};
 } // namespace HyperEngine

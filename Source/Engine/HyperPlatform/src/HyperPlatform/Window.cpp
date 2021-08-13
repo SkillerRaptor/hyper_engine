@@ -76,20 +76,16 @@ namespace HyperPlatform
 				window_info->event_manager->invoke<HyperCore::WindowCloseEvent>();
 			});
 
-		switch (m_graphics_api)
-		{
-		case GraphicsApi::OpenGL33:
-		case GraphicsApi::OpenGL46:
-			glfwMakeContextCurrent(m_native_window);
-		default:
-			break;
-		}
-
 		return {};
 	}
 
 	auto Window::poll_events() const -> void
 	{
 		glfwPollEvents();
+	}
+	
+	auto Window::native_window() const -> GLFWwindow*
+	{
+		return m_native_window;
 	}
 } // namespace HyperPlatform

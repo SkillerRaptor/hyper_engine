@@ -36,6 +36,8 @@ namespace HyperPlatform
 		auto initialize() -> HyperCore::Result<void, HyperCore::ConstructError>;
 
 		auto poll_events() const -> void;
+		
+		auto native_window() const -> GLFWwindow*;
 
 	private:
 		Info m_info{};

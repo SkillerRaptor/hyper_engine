@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include <HyperEngine/Application.hpp>
+#include <HyperEngine/IApplication.hpp>
 
 namespace HyperEditor
 {
-	class Editor final : public HyperEngine::Application
+	class Editor final : public HyperEngine::IApplication
 	{
 	public:
 		Editor();

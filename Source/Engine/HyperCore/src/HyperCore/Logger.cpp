@@ -13,7 +13,7 @@ namespace HyperCore
 {
 	auto Logger::internal_log(Logger::Level level, std::string_view string) -> void
 	{
-		const fmt::color level_color = [&level]()
+		const auto level_color = [&level]() -> fmt::color
 		{
 			switch (level)
 			{
@@ -32,7 +32,7 @@ namespace HyperCore
 			}
 		}();
 
-		const char* level_name = [&level]()
+		const auto level_name = [&level]() -> const char*
 		{
 			switch (level)
 			{

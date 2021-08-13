@@ -12,14 +12,14 @@
 
 namespace HyperEngine
 {
-	class Application
+	class IApplication
 	{
 	public:
 		friend class Launcher;
 
 	public:
-		explicit Application(std::string title, HyperPlatform::GraphicsApi graphics_api = HyperPlatform::GraphicsApi::OpenGL33);
-		virtual ~Application() = default;
+		explicit IApplication(std::string title, HyperPlatform::GraphicsApi graphics_api = HyperPlatform::GraphicsApi::OpenGL33);
+		virtual ~IApplication() = default;
 
 		auto title() const -> std::string;
 		auto graphics_api() const -> HyperPlatform::GraphicsApi;
