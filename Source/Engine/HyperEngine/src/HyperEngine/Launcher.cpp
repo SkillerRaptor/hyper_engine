@@ -27,8 +27,14 @@ namespace HyperEngine
 		{
 			return;
 		}
-		
+
 		EngineLoop engine_loop(*application);
+		auto result = engine_loop.initialize();
+		if (result.is_error())
+		{
+			return;
+		}
+
 		application->startup();
 		engine_loop.run();
 		application->shutdown();

@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <HyperCore/Errors.hpp>
+#include <HyperCore/Result.hpp>
 #include <HyperCore/Events/EventManager.hpp>
 #include <HyperPlatform/Window.hpp>
 
@@ -17,7 +19,9 @@ namespace HyperEngine
 	{
 	public:
 		explicit EngineLoop(Application& application);
-
+		
+		auto initialize() -> HyperCore::Result<void, HyperCore::ConstructError>;
+		
 		auto run() -> void;
 
 	private:

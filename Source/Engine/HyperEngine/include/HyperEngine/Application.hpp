@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <HyperPlatform/GraphicsApi.hpp>
+
 #include <string>
 
 namespace HyperEngine
@@ -16,10 +18,11 @@ namespace HyperEngine
 		friend class Launcher;
 
 	public:
-		explicit Application(std::string title);
+		explicit Application(std::string title, HyperPlatform::GraphicsApi graphics_api = HyperPlatform::GraphicsApi::OpenGL33);
 		virtual ~Application() = default;
-		
+
 		auto title() const -> std::string;
+		auto graphics_api() const -> HyperPlatform::GraphicsApi;
 
 	protected:
 		virtual auto startup() -> void = 0;
@@ -27,5 +30,6 @@ namespace HyperEngine
 
 	private:
 		std::string m_title;
+		HyperPlatform::GraphicsApi m_graphics_api{ HyperPlatform::GraphicsApi::OpenGL33 };
 	};
 } // namespace HyperEngine
