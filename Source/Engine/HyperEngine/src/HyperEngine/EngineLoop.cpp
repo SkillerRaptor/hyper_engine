@@ -43,13 +43,18 @@ namespace HyperEngine
 				return nullptr;
 			}
 		}();
-		
+
+		if (m_render_context == nullptr)
+		{
+			return HyperCore::ConstructError::UndefinedBehaviour;
+		}
+
 		auto render_context_result = m_render_context->initialize();
 		if (render_context_result.is_error())
 		{
 			return render_context_result.error();
 		}
-		
+
 		m_running = true;
 
 		return {};
@@ -62,7 +67,7 @@ namespace HyperEngine
 			m_event_manager.process_next_event();
 
 			m_render_context->update();
-			
+
 			m_window.poll_events();
 		}
 	}

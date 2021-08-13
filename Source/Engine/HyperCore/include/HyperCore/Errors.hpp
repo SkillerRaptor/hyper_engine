@@ -12,6 +12,7 @@ namespace HyperCore
 	{
 		None = 0,
 		Incomplete,
-		OutOfMemory
+		OutOfMemory,
+		UndefinedBehaviour
 	};
 } // namespace HyperCore
