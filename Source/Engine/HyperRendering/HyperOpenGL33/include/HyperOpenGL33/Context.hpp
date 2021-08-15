@@ -6,7 +6,9 @@
 
 #pragma once
 
-#include "HyperRendering/IContext.hpp"
+#include "HyperOpenGL33/Renderer2D.hpp"
+
+#include <HyperRendering/IContext.hpp>
 
 namespace HyperRendering::OpenGL33
 {
@@ -17,5 +19,8 @@ namespace HyperRendering::OpenGL33
 		
 		virtual auto initialize() -> HyperCore::Result<void, HyperCore::ConstructError> override;
 		virtual auto update() -> void override;
+		
+	private:
+		Renderer2D m_renderer2d;
 	};
 } // namespace HyperRendering::OpenGL33

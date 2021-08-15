@@ -61,7 +61,12 @@ namespace HyperCore
 		template <typename... Args>
 		static auto debug(std::string_view format, Args&&... args) -> void
 		{
+#if HYPERENGINE_DEBUG
 			Logger::log(Level::Debug, format, std::forward<Args>(args)...);
+#else
+			(void) format;
+			((void) args, ...);
+#endif
 		}
 
 	private:

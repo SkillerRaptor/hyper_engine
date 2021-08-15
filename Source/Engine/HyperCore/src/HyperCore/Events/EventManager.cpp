@@ -28,7 +28,7 @@ namespace HyperCore
 	{
 		for (auto& [id, event_wrapper_base] : m_event_wrappers)
 		{
-			deallocate(event_wrapper_base);
+			delete event_wrapper_base;
 		}
 	}
 	

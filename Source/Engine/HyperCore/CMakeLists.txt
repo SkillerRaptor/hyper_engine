@@ -20,7 +20,6 @@ set(HEADERS
         include/HyperCore/Formatter.hpp
         include/HyperCore/Hasher.hpp
         include/HyperCore/Logger.hpp
-        include/HyperCore/Memory.hpp
         include/HyperCore/Prerequisites.hpp
         include/HyperCore/Result.hpp
         include/HyperCore/SourceLocation.hpp

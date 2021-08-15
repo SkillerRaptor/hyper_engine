@@ -11,7 +11,8 @@ set(SOURCES
         src/HyperRendering/IContext.cpp)
 
 set(HEADERS
-        include/HyperRendering/IContext.hpp)
+        include/HyperRendering/IContext.hpp
+        include/HyperRendering/IRenderer2D.hpp)
 
 hyperengine_group_source(${SOURCES})
 hyperengine_group_source(${HEADERS})
@@ -21,4 +22,5 @@ target_link_libraries(
         HyperRendering
         PUBLIC
         HyperCore
+        HyperMath
         HyperPlatform)

@@ -8,7 +8,6 @@
 
 #include "HyperCore/Compilers.hpp"
 #include "HyperCore/Hasher.hpp"
-#include "HyperCore/Memory.hpp"
 #include "HyperCore/Events/Event.hpp"
 #include "HyperCore/Events/EventWrapper.hpp"
 
@@ -90,7 +89,7 @@ namespace HyperCore
 		auto register_event() -> void
 		{
 			constexpr EventIdType event_id = EventType<T>::id();
-			m_event_wrappers[event_id] = allocate<EventWrapper<T>>();
+			m_event_wrappers[event_id] = new EventWrapper<T>();
 		}
 
 		template <typename T>

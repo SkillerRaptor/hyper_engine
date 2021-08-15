@@ -20,7 +20,7 @@ namespace HyperEngine
 	
 	EngineLoop::~EngineLoop()
 	{
-		HyperCore::deallocate(m_render_context);
+		delete m_render_context;
 	}
 
 	auto EngineLoop::initialize() -> HyperCore::Result<void, HyperCore::ConstructError>
@@ -43,7 +43,7 @@ namespace HyperEngine
 			switch (m_application.graphics_api())
 			{
 			case HyperPlatform::GraphicsApi::OpenGL33:
-				return HyperCore::allocate<HyperRendering::OpenGL33::Context>(m_window);
+				return new HyperRendering::OpenGL33::Context(m_window);
 			default:
 				return nullptr;
 			}

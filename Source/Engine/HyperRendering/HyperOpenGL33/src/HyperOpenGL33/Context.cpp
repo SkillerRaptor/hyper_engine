@@ -31,8 +31,7 @@ namespace HyperRendering::OpenGL33
 	
 	auto Context::update() -> void
 	{
-		glClearColor(1.0f, 0.0f, 1.0, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		m_renderer2d.clear({ 1.0f, 0.0f, 1.0f, 1.0f });
 		
 		glfwSwapBuffers(m_window.native_window());
 	}
