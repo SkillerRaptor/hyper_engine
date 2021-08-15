@@ -57,15 +57,61 @@ namespace HyperPlatform
 
 		glfwSetWindowUserPointer(m_native_window, &m_info);
 
-		glfwSetWindowSizeCallback(
+		glfwSetKeyCallback(
 			m_native_window,
-			[](GLFWwindow* window, int width, int height)
+			[](GLFWwindow* window, int key, int, int action, int)
 			{
 				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
-				window_info->width = width;
-				window_info->height = height;
+
+				switch (action)
+				{
+				case GLFW_PRESS:
+					window_info->event_manager->invoke<HyperCore::KeyPressedEvent>(key, 0);
+					break;
+				case GLFW_RELEASE:
+					window_info->event_manager->invoke<HyperCore::KeyReleasedEvent>(key);
+					break;
+				case GLFW_REPEAT:
+					window_info->event_manager->invoke<HyperCore::KeyPressedEvent>(key, 1);
+					break;
+				default:
+					break;
+				}
+			});
+
+		glfwSetCursorPosCallback(
+			m_native_window,
+			[](GLFWwindow* window, double x, double y)
+			{
+				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
+				window_info->event_manager->invoke<HyperCore::MouseMovedEvent>(static_cast<float>(x), static_cast<float>(y));
+			});
+
+		glfwSetScrollCallback(
+			m_native_window,
+			[](GLFWwindow* window, double x, double y)
+			{
+				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
+				window_info->event_manager->invoke<HyperCore::MouseScrolledEvent>(static_cast<float>(x), static_cast<float>(y));
+			});
+
+		glfwSetMouseButtonCallback(
+			m_native_window,
+			[](GLFWwindow* window, int button, int action, int)
+			{
+				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
 				
-				window_info->event_manager->invoke<HyperCore::WindowResizeEvent>(width, height);
+				switch (action)
+				{
+				case GLFW_PRESS:
+					window_info->event_manager->invoke<HyperCore::MouseButtonPressedEvent>(button);
+					break;
+				case GLFW_RELEASE:
+					window_info->event_manager->invoke<HyperCore::MouseButtonReleasedEvent>(button);
+					break;
+				default:
+					break;
+				}
 			});
 
 		glfwSetWindowCloseCallback(
@@ -76,6 +122,52 @@ namespace HyperPlatform
 				window_info->event_manager->invoke<HyperCore::WindowCloseEvent>();
 			});
 
+		glfwSetWindowSizeCallback(
+			m_native_window,
+			[](GLFWwindow* window, int width, int height)
+			{
+				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
+				window_info->width = width;
+				window_info->height = height;
+
+				window_info->event_manager->invoke<HyperCore::WindowResizeEvent>(width, height);
+			});
+
+		glfwSetFramebufferSizeCallback(
+			m_native_window,
+			[](GLFWwindow* window, int width, int height)
+			{
+				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
+				window_info->width = width;
+				window_info->height = height;
+
+				window_info->event_manager->invoke<HyperCore::WindowFramebufferResizeEvent>(width, height);
+			});
+
+		glfwSetWindowFocusCallback(
+			m_native_window,
+			[](GLFWwindow* window, int focused)
+			{
+				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
+
+				if (focused == GLFW_TRUE)
+				{
+					window_info->event_manager->invoke<HyperCore::WindowFocusEvent>();
+				}
+				else if (focused == GLFW_FALSE)
+				{
+					window_info->event_manager->invoke<HyperCore::WindowLostFocusEvent>();
+				}
+			});
+
+		glfwSetWindowPosCallback(
+			m_native_window,
+			[](GLFWwindow* window, int x, int y)
+			{
+				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
+				window_info->event_manager->invoke<HyperCore::WindowMovedEvent>(x, y);
+			});
+
 		return {};
 	}
 
@@ -83,7 +175,7 @@ namespace HyperPlatform
 	{
 		glfwPollEvents();
 	}
-	
+
 	auto Window::native_window() const -> GLFWwindow*
 	{
 		return m_native_window;

@@ -18,6 +18,12 @@ namespace HyperCore
 		int height;
 	};
 
+	struct WindowFramebufferResizeEvent
+	{
+		int width;
+		int height;
+	};
+
 	struct WindowFocusEvent
 	{
 	};

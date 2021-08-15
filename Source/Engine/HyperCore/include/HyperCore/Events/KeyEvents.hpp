@@ -18,9 +18,4 @@ namespace HyperCore
 	{
 		int key_code;
 	};
-	
-	struct KeyTypedEvent
-	{
-		int key_code;
-	};
 } // namespace HyperCore
