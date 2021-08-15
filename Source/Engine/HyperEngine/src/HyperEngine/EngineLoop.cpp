@@ -17,7 +17,7 @@ namespace HyperEngine
 		, m_window(m_application.title(), 1280, 720, m_application.graphics_api(), m_event_manager)
 	{
 	}
-	
+
 	EngineLoop::~EngineLoop()
 	{
 		delete m_render_context;
@@ -26,18 +26,18 @@ namespace HyperEngine
 	auto EngineLoop::initialize() -> HyperCore::Result<void, HyperCore::ConstructError>
 	{
 		m_event_manager.register_listener<HyperCore::WindowCloseEvent>(
-			"EngineLoopAppCloseEvent",
+			"HyperEngine::EngineLoop::CloseEvent",
 			[this](const HyperCore::WindowCloseEvent&)
 			{
 				m_running = false;
 			});
-		
+
 		auto window_result = m_window.initialize();
 		if (window_result.is_error())
 		{
 			return window_result.error();
 		}
-		
+
 		m_render_context = [this]() -> HyperRendering::IContext*
 		{
 			switch (m_application.graphics_api())
@@ -67,10 +67,18 @@ namespace HyperEngine
 
 	auto EngineLoop::run() -> void
 	{
+		float last_time = 0.0f;
 		while (m_running)
 		{
+			float current_time = m_window.time();
+			float delta_time = last_time - current_time;
+			last_time = current_time;
+			
+			(void) delta_time;
+			
 			m_event_manager.process_next_event();
 
+			m_render_context->clear({ 0.1f, 0.1f, 0.1f,1.0f });
 			m_render_context->update();
 
 			m_window.poll_events();

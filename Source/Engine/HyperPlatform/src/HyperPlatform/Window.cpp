@@ -100,7 +100,7 @@ namespace HyperPlatform
 			[](GLFWwindow* window, int button, int action, int)
 			{
 				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
-				
+
 				switch (action)
 				{
 				case GLFW_PRESS:
@@ -174,6 +174,31 @@ namespace HyperPlatform
 	auto Window::poll_events() const -> void
 	{
 		glfwPollEvents();
+	}
+	
+	auto Window::time() const -> float
+	{
+		return static_cast<float>(glfwGetTime());
+	}
+	
+	auto Window::title() const -> std::string
+	{
+		return m_info.title;
+	}
+	
+	auto Window::width() const -> int
+	{
+		return m_info.width;
+	}
+	
+	auto Window::height() const -> int
+	{
+		return m_info.height;
+	}
+	
+	auto Window::event_manager() -> HyperCore::EventManager*
+	{
+		return m_info.event_manager;
 	}
 
 	auto Window::native_window() const -> GLFWwindow*

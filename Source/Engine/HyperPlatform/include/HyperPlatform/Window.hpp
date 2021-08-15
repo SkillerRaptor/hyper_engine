@@ -37,6 +37,12 @@ namespace HyperPlatform
 
 		auto poll_events() const -> void;
 		
+		auto time() const -> float;
+		
+		auto title() const -> std::string;
+		auto width() const -> int;
+		auto height() const -> int;
+		auto event_manager() -> HyperCore::EventManager*;
 		auto native_window() const -> GLFWwindow*;
 
 	private:

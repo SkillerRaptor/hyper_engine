@@ -19,8 +19,5 @@ namespace HyperRendering::OpenGL33
 		
 		virtual auto initialize() -> HyperCore::Result<void, HyperCore::ConstructError> override;
 		virtual auto update() -> void override;
-		
-	private:
-		Renderer2D m_renderer2d;
 	};
 } // namespace HyperRendering::OpenGL33
