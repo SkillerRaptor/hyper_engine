@@ -17,28 +17,33 @@ namespace HyperEngine
 		, m_window(m_application.title(), 1280, 720, m_application.graphics_api(), m_event_manager)
 	{
 	}
+	
+	EngineLoop::~EngineLoop()
+	{
+		HyperCore::deallocate(m_render_context);
+	}
 
 	auto EngineLoop::initialize() -> HyperCore::Result<void, HyperCore::ConstructError>
 	{
-		auto window_result = m_window.initialize();
-		if (window_result.is_error())
-		{
-			return window_result.error();
-		}
-
 		m_event_manager.register_listener<HyperCore::WindowCloseEvent>(
 			"EngineLoopAppCloseEvent",
 			[this](const HyperCore::WindowCloseEvent&)
 			{
 				m_running = false;
 			});
-
+		
+		auto window_result = m_window.initialize();
+		if (window_result.is_error())
+		{
+			return window_result.error();
+		}
+		
 		m_render_context = [this]() -> HyperRendering::IContext*
 		{
 			switch (m_application.graphics_api())
 			{
 			case HyperPlatform::GraphicsApi::OpenGL33:
-				return new HyperRendering::OpenGL33::Context(m_window);
+				return HyperCore::allocate<HyperRendering::OpenGL33::Context>(m_window);
 			default:
 				return nullptr;
 			}

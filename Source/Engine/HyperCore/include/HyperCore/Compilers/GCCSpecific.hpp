@@ -16,4 +16,6 @@
 #define HYPERENGINE_COMPILER_POP_WARNING _Pragma("GCC diagnostic pop")
 #define HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT _Pragma("GCC diagnostic ignored \"-Wpedantic\"")
 
+#define HYPERENGINE_FUNCTION_SIGNATURE __PRETTY_FUNCTION__
+
 #define HYPERENGINE_ALIGN(bytes) __attribute__((aligned(bytes)))

@@ -18,4 +18,6 @@
 	_Pragma("clang diagnostic ignored \"-Wgnu-anonymous-struct\"") \
 	_Pragma("clang diagnostic ignored \"-Wnested-anon-types\"")
 
+#define HYPERENGINE_FUNCTION_SIGNATURE __PRETTY_FUNCTION__
+
 #define HYPERENGINE_ALIGN(bytes) __attribute__((aligned(bytes)))

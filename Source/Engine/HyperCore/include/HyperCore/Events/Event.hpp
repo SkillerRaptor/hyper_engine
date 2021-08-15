@@ -18,10 +18,6 @@ HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
 
 namespace HyperCore
 {
-	/*
-	 * TODO: Rework Event System
-	 */
-	
 	class Event
 	{
 	public:

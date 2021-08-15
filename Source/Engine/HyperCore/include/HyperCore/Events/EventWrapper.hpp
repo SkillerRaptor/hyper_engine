@@ -31,21 +31,20 @@ namespace HyperCore
 	class EventWrapper : public EventWrapperBase
 	{
 	public:
-		void invoke(const T& event) const
+		auto invoke(const T& event) const -> void
 		{
-			for (const EventListener<T>& event_listener : m_event_listeners)
+			for (const auto& event_listener : m_event_listeners)
 			{
 				event_listener.callback(event);
 			}
 		}
 
-		void register_listener(const std::string& name, const std::function<void(const T&)>& callback)
+		auto register_listener(const std::string& name, const std::function<void(const T&)>& callback) -> void
 		{
-			for (const EventListener<T>& event_listener : m_event_listeners)
+			for (const auto& event_listener : m_event_listeners)
 			{
 				if (event_listener.name == name)
 				{
-					Logger::error("Failed to register event listener: name already in use!");
 					return;
 				}
 			}
@@ -53,23 +52,22 @@ namespace HyperCore
 			EventListener<T> event_listener{};
 			event_listener.name = name;
 			event_listener.callback = std::move(callback);
-			m_event_listeners.push_back(std::move(event_listener));
+			m_event_listeners.emplace_back(std::move(event_listener));
 		}
 
-		void unregister_listener(const std::string& name)
+		auto unregister_listener(const std::string& name) -> void
 		{
-			for (typename std::vector<EventListener<T>>::iterator it = m_event_listeners.begin();
-				 it != m_event_listeners.end();
-				 ++it)
+			auto it = m_event_listeners.begin();
+			while (it != m_event_listeners.end())
 			{
 				if (it->name == name)
 				{
-					m_event_listeners.erase(it);
-					return;
+					it = m_event_listeners.erase(it);
+					continue;
 				}
+				
+				++it;
 			}
-
-			Logger::error("Failed to unregister event listener: '{}' not registered!", name);
 		}
 
 	private:

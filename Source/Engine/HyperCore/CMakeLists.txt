@@ -9,8 +9,8 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/HyperCore/Logger.cpp
-        src/HyperCore/Events/EventManager.cpp
-        src/HyperCore/Events/Event.cpp)
+        src/HyperCore/Events/Event.cpp
+        src/HyperCore/Events/EventManager.cpp)
 
 set(HEADERS
         include/HyperCore/Assertion.hpp
@@ -18,7 +18,9 @@ set(HEADERS
         include/HyperCore/Compilers.hpp
         include/HyperCore/Errors.hpp
         include/HyperCore/Formatter.hpp
+        include/HyperCore/Hasher.hpp
         include/HyperCore/Logger.hpp
+        include/HyperCore/Memory.hpp
         include/HyperCore/Prerequisites.hpp
         include/HyperCore/Result.hpp
         include/HyperCore/SourceLocation.hpp
