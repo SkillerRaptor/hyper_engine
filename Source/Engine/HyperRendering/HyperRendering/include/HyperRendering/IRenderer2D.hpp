@@ -14,7 +14,5 @@ namespace HyperRendering
 	{
 	public:
 		virtual ~IRenderer2D() = default;
-		
-		virtual auto clear(const HyperMath::Vec4f& clear_color) -> void = 0;
 	};
 } // namespace HyperCore

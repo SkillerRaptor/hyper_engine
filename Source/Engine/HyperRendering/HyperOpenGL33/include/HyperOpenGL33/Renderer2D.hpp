@@ -13,6 +13,5 @@ namespace HyperRendering::OpenGL33
 	class Renderer2D : public IRenderer2D
 	{
 	public:
-		virtual auto clear(const HyperMath::Vec4f& clear_color) -> void override;
 	};
-} // namespace HyperCore
+} // namespace HyperRendering::OpenGL33

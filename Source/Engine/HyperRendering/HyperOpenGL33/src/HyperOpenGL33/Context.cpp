@@ -19,13 +19,13 @@ namespace HyperRendering::OpenGL33
 	auto Context::initialize() -> HyperCore::Result<void, HyperCore::ConstructError>
 	{
 		glfwMakeContextCurrent(m_window.native_window());
-		
+
 		if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
 		{
 			glfwDestroyWindow(m_window.native_window());
 			glfwTerminate();
 		}
-		
+
 		m_window.event_manager()->register_listener<HyperCore::WindowFramebufferResizeEvent>(
 			"HyperRendering::OpenGL33::Context::FramebufferResizeEvent",
 			[](const HyperCore::WindowFramebufferResizeEvent& event)
@@ -35,9 +35,15 @@ namespace HyperRendering::OpenGL33
 
 		return {};
 	}
-	
+
 	auto Context::update() -> void
 	{
 		glfwSwapBuffers(m_window.native_window());
+	}
+
+	auto Context::clear_implementation(const HyperMath::Vec4f& clear_color) -> void
+	{
+		glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 } // namespace HyperRendering::OpenGL33

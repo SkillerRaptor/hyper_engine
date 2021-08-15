@@ -8,11 +8,13 @@
 # HyperRenderingBase
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/HyperRendering/IContext.cpp)
+        src/HyperRendering/IContext.cpp
+        src/HyperRendering/RenderCommand.cpp)
 
 set(HEADERS
         include/HyperRendering/IContext.hpp
-        include/HyperRendering/IRenderer2D.hpp)
+        include/HyperRendering/IRenderer2D.hpp
+        include/HyperRendering/RenderCommand.hpp)
 
 hyperengine_group_source(${SOURCES})
 hyperengine_group_source(${HEADERS})

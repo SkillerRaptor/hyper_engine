@@ -78,9 +78,11 @@ namespace HyperEngine
 			
 			m_event_manager.process_next_event();
 
+			m_render_context->begin_frame();
 			m_render_context->clear({ 0.1f, 0.1f, 0.1f,1.0f });
+			m_render_context->end_frame();
+			
 			m_render_context->update();
-
 			m_window.poll_events();
 		}
 	}
