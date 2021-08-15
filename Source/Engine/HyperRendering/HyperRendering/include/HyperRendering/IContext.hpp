@@ -26,7 +26,7 @@ namespace HyperRendering
 		auto clear(const HyperMath::Vec4f& clear_color) -> void;
 		
 	protected:
-		IRenderer2D* m_renderer2d{ nullptr };
 		HyperPlatform::Window& m_window;
+		IRenderer2D* m_renderer2d{ nullptr };
 	};
 } // namespace HyperRendering
