@@ -12,7 +12,7 @@ jobs:
       conan_path: "$HOME/.local/bin"
       conan_user_home: "${{ github.workspace }}/conan-cache"
       vulkan_sdk: "$GITHUB_WORKSPACE/vulkan_sdk/"
-      vulkan_version: "1.2.131.1"
+      vulkan_version: "1.2.182.0"
     strategy:
       fail-fast: false
       matrix:
