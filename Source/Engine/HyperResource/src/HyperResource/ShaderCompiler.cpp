@@ -8,4 +8,5 @@
 
 namespace HyperResource
 {
+
 } // namespace HyperResource

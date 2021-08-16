@@ -7,11 +7,6 @@
 #-------------------------------------------------------------------------------------------
 # ThirdParty
 #-------------------------------------------------------------------------------------------
-if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
-    message(STATUS "'DirectX' found and enabled")
-    set(HYPERENGINE_BUILD_DIRECTX ON PARENT_SCOPE)
-endif ()
-
 find_package(OpenGL QUIET)
 if (OPENGL_FOUND)
     message(STATUS "'OpenGL' found and enabled")
