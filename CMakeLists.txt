@@ -69,6 +69,8 @@ set(CONAN_LIBRARIES
         meshoptimizer/0.16
         stb/20200203
         spirv-cross/20210115
+        vulkan-headers/1.2.184
+        vulkan-memory-allocator/2.3.0
         volk/1.2.170)
 
 include(Development/CMake/Conan.cmake)

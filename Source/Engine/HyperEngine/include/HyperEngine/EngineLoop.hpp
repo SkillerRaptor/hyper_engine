@@ -12,6 +12,8 @@
 #include <HyperPlatform/Window.hpp>
 #include <HyperRendering/IContext.hpp>
 
+#include <memory>
+
 namespace HyperEngine
 {
 	class IApplication;
@@ -20,7 +22,6 @@ namespace HyperEngine
 	{
 	public:
 		explicit EngineLoop(IApplication& application);
-		~EngineLoop();
 		
 		auto initialize() -> HyperCore::Result<void, HyperCore::ConstructError>;
 		
@@ -32,6 +33,6 @@ namespace HyperEngine
 		
 		HyperCore::EventManager m_event_manager{};
 		HyperPlatform::Window m_window;
-		HyperRendering::IContext* m_render_context{ nullptr };
+		std::unique_ptr<HyperRendering::IContext> m_render_context{ nullptr };
 	};
 } // namespace HyperEngine

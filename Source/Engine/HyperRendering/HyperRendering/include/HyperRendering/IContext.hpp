@@ -36,7 +36,7 @@ namespace HyperRendering
 		{
 			m_render_commands.emplace(T{ std::forward<Args>(args)... });
 		}
-
+		
 	protected:
 		HyperPlatform::Window& m_window;
 

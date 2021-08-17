@@ -9,7 +9,7 @@
 namespace HyperEditor
 {
 	Editor::Editor()
-		: IApplication("HyperEditor")
+		: IApplication("HyperEditor", HyperPlatform::GraphicsApi::Vulkan)
 	{
 	}
 

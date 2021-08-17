@@ -24,11 +24,6 @@ namespace HyperEngine
 	{
 	}
 
-	EngineLoop::~EngineLoop()
-	{
-		delete m_render_context;
-	}
-
 	auto EngineLoop::initialize() -> HyperCore::Result<void, HyperCore::ConstructError>
 	{
 		m_event_manager.register_listener<HyperCore::WindowCloseEvent>(
@@ -44,17 +39,17 @@ namespace HyperEngine
 			return window_result.error();
 		}
 
-		m_render_context = [this]() -> HyperRendering::IContext*
+		m_render_context = [this]() -> std::unique_ptr<HyperRendering::IContext>
 		{
 			switch (m_application.graphics_api())
 			{
 #if HYPERENGINE_BUILD_OPENGL
 			case HyperPlatform::GraphicsApi::OpenGL33:
-				return new HyperRendering::OpenGL33::Context(m_window);
+				return std::make_unique<HyperRendering::OpenGL33::Context>(m_window);
 #endif
 #if HYPERENGINE_BUILD_VULKAN
 			case HyperPlatform::GraphicsApi::Vulkan:
-				return new HyperRendering::Vulkan::Context(m_window);
+				return std::make_unique<HyperRendering::Vulkan::Context>(m_window);
 #endif
 			default:
 				return nullptr;
