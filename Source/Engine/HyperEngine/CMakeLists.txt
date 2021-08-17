@@ -38,6 +38,10 @@ if (HYPERENGINE_BUILD_OPENGL)
             HyperEngine
             PUBLIC
             HyperOpenGL33)
+    target_compile_definitions(
+            HyperEngine
+            PUBLIC
+            -DHYPERENGINE_BUILD_OPENGL=1)
 endif ()
 
 #-------------------------------------------------------------------------------------------
@@ -48,4 +52,8 @@ if (HYPERENGINE_BUILD_VULKAN)
             HyperEngine
             PUBLIC
             HyperVulkan)
+    target_compile_definitions(
+            HyperEngine
+            PUBLIC
+            -DHYPERENGINE_BUILD_VULKAN=1)
 endif ()

@@ -16,7 +16,7 @@ namespace HyperCore
 
 	struct WindowResizeEvent final : public IEvent
 	{
-		WindowResizeEvent(int width, int height);
+		WindowResizeEvent(int t_width, int t_height);
 		
 		int width;
 		int height;
@@ -24,7 +24,7 @@ namespace HyperCore
 
 	struct WindowFramebufferResizeEvent final : public IEvent
 	{
-		WindowFramebufferResizeEvent(int width, int height);
+		WindowFramebufferResizeEvent(int t_width, int t_height);
 		
 		int width;
 		int height;
@@ -40,7 +40,7 @@ namespace HyperCore
 
 	struct WindowMovedEvent final : public IEvent
 	{
-		WindowMovedEvent(int position_x, int position_y);
+		WindowMovedEvent(int t_position_x, int t_position_y);
 		
 		int position_x;
 		int position_y;

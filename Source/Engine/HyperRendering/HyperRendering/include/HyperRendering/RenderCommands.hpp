@@ -18,7 +18,7 @@ namespace HyperRendering
 
 	struct ClearCommand final : public IRenderCommand
 	{
-		explicit ClearCommand(const HyperMath::Vec4f& color);
+		explicit ClearCommand(const HyperMath::Vec4f& t_color);
 		
 		HyperMath::Vec4f color;
 	};

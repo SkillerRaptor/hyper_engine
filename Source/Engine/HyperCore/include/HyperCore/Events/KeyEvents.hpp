@@ -12,7 +12,7 @@ namespace HyperCore
 {
 	struct KeyPressedEvent final : public IEvent
 	{
-		KeyPressedEvent(int key_code, int repeat_count);
+		KeyPressedEvent(int t_key_code, int t_repeat_count);
 		
 		int key_code;
 		int repeat_count;
@@ -20,7 +20,7 @@ namespace HyperCore
 	
 	struct KeyReleasedEvent final : public IEvent
 	{
-		explicit KeyReleasedEvent(int key_code);
+		explicit KeyReleasedEvent(int t_key_code);
 		
 		int key_code;
 	};

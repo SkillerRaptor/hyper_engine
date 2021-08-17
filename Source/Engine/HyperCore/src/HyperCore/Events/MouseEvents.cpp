@@ -8,25 +8,25 @@
 
 namespace HyperCore
 {
-	MouseMovedEvent::MouseMovedEvent(float position_x, float position_y)
-		: position_x(position_x)
-		, position_y(position_y)
+	MouseMovedEvent::MouseMovedEvent(float t_position_x, float t_position_y)
+		: position_x(t_position_x)
+		, position_y(t_position_y)
 	{
 	}
 
-	MouseScrolledEvent::MouseScrolledEvent(float offset_x, float offset_y)
-		: offset_x(offset_x)
-		, offset_y(offset_y)
+	MouseScrolledEvent::MouseScrolledEvent(float t_offset_x, float t_offset_y)
+		: offset_x(t_offset_x)
+		, offset_y(t_offset_y)
 	{
 	}
 
-	MouseButtonPressedEvent::MouseButtonPressedEvent(int button)
-		: button(button)
+	MouseButtonPressedEvent::MouseButtonPressedEvent(int t_button)
+		: button(t_button)
 	{
 	}
 
-	MouseButtonReleasedEvent::MouseButtonReleasedEvent(int button)
-		: button(button)
+	MouseButtonReleasedEvent::MouseButtonReleasedEvent(int t_button)
+		: button(t_button)
 	{
 	}
 } // namespace HyperCore

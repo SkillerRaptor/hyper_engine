@@ -8,8 +8,13 @@
 
 #include "HyperEngine/IApplication.hpp"
 
-#include <HyperOpenGL33/Context.hpp>
-#include <HyperVulkan/Context.hpp>
+#if HYPERENGINE_BUILD_OPENGL
+#	include <HyperOpenGL33/Context.hpp>
+#endif
+
+#if HYPERENGINE_BUILD_VULKAN
+#	include <HyperVulkan/Context.hpp>
+#endif
 
 namespace HyperEngine
 {
@@ -43,10 +48,14 @@ namespace HyperEngine
 		{
 			switch (m_application.graphics_api())
 			{
+#if HYPERENGINE_BUILD_OPENGL
 			case HyperPlatform::GraphicsApi::OpenGL33:
 				return new HyperRendering::OpenGL33::Context(m_window);
+#endif
+#if HYPERENGINE_BUILD_VULKAN
 			case HyperPlatform::GraphicsApi::Vulkan:
 				return new HyperRendering::Vulkan::Context(m_window);
+#endif
 			default:
 				return nullptr;
 			}

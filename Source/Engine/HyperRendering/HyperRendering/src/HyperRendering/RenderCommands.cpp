@@ -8,8 +8,8 @@
 
 namespace HyperRendering
 {
-	ClearCommand::ClearCommand(const HyperMath::Vec4f& color)
-		: color(color)
+	ClearCommand::ClearCommand(const HyperMath::Vec4f& t_color)
+	: color(t_color)
 	{
 	}
 } // namespace HyperRendering

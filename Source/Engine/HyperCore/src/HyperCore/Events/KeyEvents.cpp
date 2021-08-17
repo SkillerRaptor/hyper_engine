@@ -8,14 +8,14 @@
 
 namespace HyperCore
 {
-	KeyPressedEvent::KeyPressedEvent(int key_code, int repeat_count)
-		: key_code(key_code)
-		, repeat_count(repeat_count)
+	KeyPressedEvent::KeyPressedEvent(int t_key_code, int t_repeat_count)
+		: key_code(t_key_code)
+		, repeat_count(t_repeat_count)
 	{
 	}
 
-	KeyReleasedEvent::KeyReleasedEvent(int key_code)
-		: key_code(key_code)
+	KeyReleasedEvent::KeyReleasedEvent(int t_key_code)
+		: key_code(t_key_code)
 	{
 	}
 } // namespace HyperCore

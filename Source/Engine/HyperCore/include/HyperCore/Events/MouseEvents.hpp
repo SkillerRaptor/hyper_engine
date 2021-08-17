@@ -12,7 +12,7 @@ namespace HyperCore
 {
 	struct MouseMovedEvent final : public IEvent
 	{
-		MouseMovedEvent(float position_x, float position_y);
+		MouseMovedEvent(float t_position_x, float t_position_y);
 		
 		float position_x;
 		float position_y;
@@ -20,7 +20,7 @@ namespace HyperCore
 
 	struct MouseScrolledEvent final : public IEvent
 	{
-		MouseScrolledEvent(float offset_x, float offset_y);
+		MouseScrolledEvent(float t_offset_x, float t_offset_y);
 		
 		float offset_x;
 		float offset_y;
@@ -28,14 +28,14 @@ namespace HyperCore
 
 	struct MouseButtonPressedEvent final : public IEvent
 	{
-		explicit MouseButtonPressedEvent(int button);
+		explicit MouseButtonPressedEvent(int t_button);
 		
 		int button;
 	};
 
 	struct MouseButtonReleasedEvent final : public IEvent
 	{
-		explicit MouseButtonReleasedEvent(int button);
+		explicit MouseButtonReleasedEvent(int t_button);
 		
 		int button;
 	};
