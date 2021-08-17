@@ -13,8 +13,8 @@ set(SOURCES
 set(HEADERS
         include/HyperResource/ShaderCompiler.hpp)
 
-hyperengine_group_source(${SOURCES})
-hyperengine_group_source(${HEADERS})
+hyperengine_group_source("${SOURCES}")
+hyperengine_group_source("${HEADERS}")
 
 hyperengine_define_module(HyperResource)
 target_link_libraries(

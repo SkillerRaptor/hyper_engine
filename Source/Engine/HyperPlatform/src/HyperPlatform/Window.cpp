@@ -52,7 +52,7 @@ namespace HyperPlatform
 		if (m_native_window == nullptr)
 		{
 			glfwTerminate();
-			return HyperCore::ConstructError::Incomplete;
+			return HyperCore::ConstructError::incomplete;
 		}
 
 		glfwSetWindowUserPointer(m_native_window, &m_info);

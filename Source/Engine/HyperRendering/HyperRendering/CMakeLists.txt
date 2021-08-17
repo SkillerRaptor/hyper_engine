@@ -16,8 +16,8 @@ set(HEADERS
         include/HyperRendering/IRenderer2D.hpp
         include/HyperRendering/RenderCommand.hpp)
 
-hyperengine_group_source(${SOURCES})
-hyperengine_group_source(${HEADERS})
+hyperengine_group_source("${SOURCES}")
+hyperengine_group_source("${HEADERS}")
 
 hyperengine_define_module(HyperRendering)
 target_link_libraries(

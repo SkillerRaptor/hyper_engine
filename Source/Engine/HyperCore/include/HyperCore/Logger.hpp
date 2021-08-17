@@ -10,7 +10,6 @@
 #include "HyperCore/Prerequisites.hpp"
 
 #include <string_view>
-#include <tuple>
 
 namespace HyperCore
 {
@@ -18,16 +17,16 @@ namespace HyperCore
 	{
 	public:
 		HYPERENGINE_NON_COPYABLE(Logger);
-		HYPERENGINE_NON_MOVEABLE(Logger);
+		HYPERENGINE_NON_MOVABLE(Logger);
 
 	public:
 		enum class Level
 		{
-			Info,
-			Warning,
-			Error,
-			Fatal,
-			Debug
+			info,
+			warning,
+			error,
+			fatal,
+			debug
 		};
 
 	public:
@@ -37,32 +36,32 @@ namespace HyperCore
 		template <typename... Args>
 		static auto info(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::Info, format, std::forward<Args>(args)...);
+			Logger::log(Level::info, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto warning(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::Warning, format, std::forward<Args>(args)...);
+			Logger::log(Level::warning, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto error(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::Error, format, std::forward<Args>(args)...);
+			Logger::log(Level::error, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto fatal(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::Fatal, format, std::forward<Args>(args)...);
+			Logger::log(Level::fatal, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto debug(std::string_view format, Args&&... args) -> void
 		{
 #if HYPERENGINE_DEBUG
-			Logger::log(Level::Debug, format, std::forward<Args>(args)...);
+			Logger::log(Level::debug, format, std::forward<Args>(args)...);
 #else
 			(void) format;
 			((void) args, ...);
@@ -71,22 +70,22 @@ namespace HyperCore
 
 	private:
 		template <typename... Args>
-		static auto log(Level level, std::string_view format, Args&&... args) -> void
+		static auto log(Level log_level, std::string_view format, Args&&... args) -> void
 		{
 			if (format.empty())
 			{
-				internal_log(level, format);
+				internal_log(log_level, format);
 				return;
 			}
 
 			constexpr size_t args_count = sizeof...(Args);
 			if constexpr (args_count == 0)
 			{
-				internal_log(level, format);
+				internal_log(log_level, format);
 			}
 			else
 			{
-				internal_log(level, Formatter::format(format, std::forward<Args>(args)...));
+				internal_log(log_level, Formatter::format(format, std::forward<Args>(args)...));
 			}
 		}
 

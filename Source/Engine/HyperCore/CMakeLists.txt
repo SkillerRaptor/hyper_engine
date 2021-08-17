@@ -8,6 +8,7 @@
 # HyperCore
 #-------------------------------------------------------------------------------------------
 set(SOURCES
+        src/HyperCore/Assertion.cpp
         src/HyperCore/Logger.cpp
         src/HyperCore/Events/Event.cpp
         src/HyperCore/Events/EventManager.cpp)
@@ -35,8 +36,8 @@ set(HEADERS
         include/HyperCore/Memory/RingBuffer.hpp
         include/HyperCore/Memory/SparsePool.hpp)
 
-hyperengine_group_source(${SOURCES})
-hyperengine_group_source(${HEADERS})
+hyperengine_group_source("${SOURCES}")
+hyperengine_group_source("${HEADERS}")
 
 hyperengine_define_module(HyperCore)
 target_link_libraries(

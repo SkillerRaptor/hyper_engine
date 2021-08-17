@@ -7,10 +7,5 @@ charset = utf-8
 
 # C++ files
 [*.{cpp,c,h,hpp}]
-indent_style = space
+indent_style = tabs
 indent_size = 4
-
-# MSBuild
-[*.{csproj,proj,projitems,shproj,fsproj,target,props}]
-indent_style = space
-indent_size = 2

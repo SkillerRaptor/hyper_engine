@@ -39,21 +39,17 @@ namespace HyperCore
 		{
 		}
 
-		Result(Result&& other) = default;
-		Result(const Result& other) = default;
-		~Result() = default;
-
-		ValueType& value()
+		auto value() -> ValueType&
 		{
 			return m_result.value();
 		}
 
-		ErrorType& error()
+		auto error() -> ErrorType&
 		{
 			return m_error.value();
 		}
 
-		bool is_error() const
+		auto is_error() const -> bool
 		{
 			return m_error.has_value();
 		}
@@ -82,16 +78,13 @@ namespace HyperCore
 		}
 
 		Result() = default;
-		Result(Result&& other) = default;
-		Result(const Result& other) = default;
-		~Result() = default;
 
-		ErrorType& error()
+		auto error() -> ErrorType&
 		{
 			return m_error.value();
 		}
 
-		bool is_error() const
+		auto is_error() const -> bool
 		{
 			return m_error.has_value();
 		}

@@ -14,8 +14,8 @@ set(HEADERS
         include/HyperPlatform/PlatformDetection.hpp
         include/HyperPlatform/Window.hpp)
 
-hyperengine_group_source(${SOURCES})
-hyperengine_group_source(${HEADERS})
+hyperengine_group_source("${SOURCES}")
+hyperengine_group_source("${HEADERS}")
 
 hyperengine_define_module(HyperPlatform)
 target_link_libraries(

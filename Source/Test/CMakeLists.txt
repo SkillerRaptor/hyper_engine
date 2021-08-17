@@ -17,8 +17,8 @@ add_library(HyperTestMain STATIC src/main.cpp)
 target_link_libraries(HyperTestMain PUBLIC CONAN_PKG::catch2)
 target_link_libraries(HyperTestMain PRIVATE ProjectOptions)
 
-macro(define_test target sources)
-    add_executable(${target} ${sources})
+macro(define_test target source)
+    add_executable(${target} ${source})
     target_link_libraries(
             ${target}
             PRIVATE
@@ -39,7 +39,7 @@ set(HYPERMATH_SOURCE
         src/HyperMath/Common.cpp
         src/HyperMath/Trigonometric.cpp)
 
-define_test(HyperMathTest ${HYPERMATH_SOURCE})
+define_test(HyperMathTest "${HYPERMATH_SOURCE}")
 target_link_libraries(
         HyperMathTest
         PRIVATE

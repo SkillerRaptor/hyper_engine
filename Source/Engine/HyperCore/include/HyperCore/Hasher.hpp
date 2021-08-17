@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <cstddef>
+#include <array>
 
 namespace HyperCore
 {
@@ -12,24 +12,25 @@ namespace HyperCore
 	{
 	public:
 		template <size_t N>
-		static constexpr unsigned int hash_crc32(const char (&string)[N])
+		static constexpr auto hash_crc_32(const char (&string)[N]) -> unsigned int
 		{
-			return crc32<N - 2>(string) ^ 0xFFFFFFFF;
+			return crc_32<N - 2>(string) ^ 0xFFFFFFFF;
 		}
 
 	private:
 		template <size_t index>
-		static constexpr unsigned int combine_crc32(const char* string, unsigned int part)
+		static constexpr auto combine_crc_32(const char* string, unsigned int part) -> unsigned int
 		{
-			return (part >> 8) ^ crc32_table[(part ^ static_cast<unsigned int>(string[index])) & 0x000000FF];
+			auto crc_32_value = s_crc32_table[(part ^ static_cast<unsigned int>(string[index])) & static_cast<unsigned int>(0x000000FF)];
+			return (part >> static_cast<unsigned int>(8)) ^ crc_32_value;
 		}
 		
 		template <size_t index>
-		static constexpr unsigned int crc32(const char* string)
+		static constexpr auto crc_32(const char* string) -> unsigned int
 		{
 			if constexpr (index != static_cast<size_t>(-1))
 			{
-				return combine_crc32<index>(string, crc32<index - 1>(string));
+				return combine_crc_32<index>(string, crc_32<index - 1>(string));
 			}
 			else
 			{
@@ -39,7 +40,7 @@ namespace HyperCore
 		}
 
 	private:
-		static constexpr unsigned int crc32_table[] = {
+		static constexpr std::array<unsigned int, 256> s_crc32_table = {
 			0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e,
 			0x97d2d988, 0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2, 0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb,
 			0xf4d4b551, 0x83d385c7, 0x136c9856, 0x646ba8c0, 0xfd62f97a, 0x8a65c9ec, 0x14015c4f, 0x63066cd9, 0xfa0f3d63, 0x8d080df5, 0x3b6e20c8,

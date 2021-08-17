@@ -26,9 +26,9 @@ namespace HyperCore
 
 	EventManager::~EventManager()
 	{
-		for (auto& [id, event_wrapper_base] : m_event_wrappers)
+		for (auto& event_wrapper : m_event_wrappers)
 		{
-			delete event_wrapper_base;
+			delete event_wrapper.second;
 		}
 	}
 
@@ -42,40 +42,40 @@ namespace HyperCore
 		const Event& event = m_event_bus.front();
 		switch (event.type)
 		{
-		case Event::Type::KeyPressed:
+		case Event::Type::key_pressed:
 			invoke_event<KeyPressedEvent>(event.value.as_key_pressed_event);
 			break;
-		case Event::Type::KeyReleased:
+		case Event::Type::key_released:
 			invoke_event<KeyReleasedEvent>(event.value.as_key_released_event);
 			break;
-		case Event::Type::MouseMoved:
+		case Event::Type::mouse_moved:
 			invoke_event<MouseMovedEvent>(event.value.as_mouse_moved_event);
 			break;
-		case Event::Type::MouseScrolled:
+		case Event::Type::mouse_scrolled:
 			invoke_event<MouseScrolledEvent>(event.value.as_mouse_scrolled_event);
 			break;
-		case Event::Type::MouseButtonPressed:
+		case Event::Type::mouse_button_pressed:
 			invoke_event<MouseButtonPressedEvent>(event.value.as_mouse_button_pressed_event);
 			break;
-		case Event::Type::MouseButtonReleased:
+		case Event::Type::mouse_button_released:
 			invoke_event<MouseButtonReleasedEvent>(event.value.as_mouse_button_released_event);
 			break;
-		case Event::Type::WindowClose:
+		case Event::Type::window_close:
 			invoke_event<WindowCloseEvent>(event.value.as_window_close_event);
 			break;
-		case Event::Type::WindowResize:
+		case Event::Type::window_resize:
 			invoke_event<WindowResizeEvent>(event.value.as_window_resize_event);
 			break;
-		case Event::Type::WindowFramebufferResize:
+		case Event::Type::window_framebuffer_resize:
 			invoke_event<WindowFramebufferResizeEvent>(event.value.as_window_framebuffer_resize_event);
 			break;
-		case Event::Type::WindowFocus:
+		case Event::Type::window_focus:
 			invoke_event<WindowFocusEvent>(event.value.as_window_focus_event);
 			break;
-		case Event::Type::WindowLostFocus:
+		case Event::Type::window_lost_focus:
 			invoke_event<WindowLostFocusEvent>(event.value.as_window_lost_focus_event);
 			break;
-		case Event::Type::WindowMoved:
+		case Event::Type::window_moved:
 			invoke_event<WindowMovedEvent>(event.value.as_window_moved_event);
 			break;
 		default:

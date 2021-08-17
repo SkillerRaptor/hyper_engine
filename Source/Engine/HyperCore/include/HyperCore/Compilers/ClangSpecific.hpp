@@ -10,8 +10,6 @@
 #	error This file should only be included on clang compilers
 #endif
 
-#define HYPERENGINE_COMPILER_CLANG 1
-
 #define HYPERENGINE_COMPILER_PUSH_WARNING _Pragma("clang diagnostic push")
 #define HYPERENGINE_COMPILER_POP_WARNING _Pragma("clang diagnostic pop")
 #define HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT \

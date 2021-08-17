@@ -17,8 +17,8 @@ set(HEADERS
         include/HyperEngine/IApplication.hpp
         include/HyperEngine/Launcher.hpp)
 
-hyperengine_group_source(${SOURCES})
-hyperengine_group_source(${HEADERS})
+hyperengine_group_source("${SOURCES}")
+hyperengine_group_source("${HEADERS}")
 
 hyperengine_define_library(HyperEngine)
 target_link_libraries(

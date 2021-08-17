@@ -8,6 +8,7 @@
 
 #include "HyperEngine/IApplication.hpp"
 
+#include <HyperMath/Trigonometric.hpp>
 #include <HyperOpenGL33/Context.hpp>
 
 namespace HyperEngine
@@ -51,7 +52,7 @@ namespace HyperEngine
 
 		if (m_render_context == nullptr)
 		{
-			return HyperCore::ConstructError::UndefinedBehaviour;
+			return HyperCore::ConstructError::undefined_behaviour;
 		}
 
 		auto render_context_result = m_render_context->initialize();
@@ -73,15 +74,15 @@ namespace HyperEngine
 			float current_time = m_window.time();
 			float delta_time = last_time - current_time;
 			last_time = current_time;
-			
+
 			(void) delta_time;
-			
+
 			m_event_manager.process_next_event();
 
 			m_render_context->begin_frame();
-			m_render_context->clear({ 0.1f, 0.1f, 0.1f,1.0f });
+			m_render_context->clear({ 0.1f, 0.1f, 0.1f, 1.0f });
 			m_render_context->end_frame();
-			
+
 			m_render_context->update();
 			m_window.poll_events();
 		}

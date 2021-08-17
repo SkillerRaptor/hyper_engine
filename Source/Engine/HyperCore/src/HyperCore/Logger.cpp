@@ -17,15 +17,15 @@ namespace HyperCore
 		{
 			switch (level)
 			{
-			case Logger::Level::Info:
+			case Logger::Level::info:
 				return fmt::color::white;
-			case Logger::Level::Warning:
+			case Logger::Level::warning:
 				return fmt::color::gold;
-			case Logger::Level::Error:
+			case Logger::Level::error:
 				return fmt::color::red;
-			case Logger::Level::Fatal:
+			case Logger::Level::fatal:
 				return fmt::color::crimson;
-			case Logger::Level::Debug:
+			case Logger::Level::debug:
 				return fmt::color::gray;
 			default:
 				return fmt::color::white;
@@ -36,15 +36,15 @@ namespace HyperCore
 		{
 			switch (level)
 			{
-			case Logger::Level::Info:
+			case Logger::Level::info:
 				return "Info";
-			case Logger::Level::Warning:
+			case Logger::Level::warning:
 				return "Warning";
-			case Logger::Level::Error:
+			case Logger::Level::error:
 				return "Error";
-			case Logger::Level::Fatal:
+			case Logger::Level::fatal:
 				return "Fatal";
-			case Logger::Level::Debug:
+			case Logger::Level::debug:
 				return "Debug";
 			default:
 				return "Undefined";

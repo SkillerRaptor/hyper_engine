@@ -8,7 +8,7 @@
 
 #include <catch2/catch.hpp>
 
-TEST_CASE("radians of degrees can be calculated with constexpr", "[HyperMath][Trigonometric][radians]")
+TEST_CASE("radians of degrees can be calculated with constexpr", "[HyperMath][radians]")
 {
 	STATIC_REQUIRE(HyperMath::radians(90.0f) == 1.57079633f);
 	STATIC_REQUIRE(HyperMath::radians(180.0f) == 3.14159265f);
@@ -16,7 +16,7 @@ TEST_CASE("radians of degrees can be calculated with constexpr", "[HyperMath][Tr
 	STATIC_REQUIRE(HyperMath::radians(360.0f) == 6.28318531f);
 }
 
-TEST_CASE("degrees of radians can be calculated with constexpr", "[HyperMath][Trigonometric][degrees]")
+TEST_CASE("degrees of radians can be calculated with constexpr", "[HyperMath][degrees]")
 {
 	STATIC_REQUIRE(HyperMath::degrees(1.57079633f) == 90.0f);
 	STATIC_REQUIRE(HyperMath::degrees(3.14159265f) == 180.0f);

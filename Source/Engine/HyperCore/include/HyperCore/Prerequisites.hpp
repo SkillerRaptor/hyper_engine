@@ -12,11 +12,11 @@
 
 #define HYPERENGINE_NON_COPYABLE(class_name) \
 	class_name(const class_name&) = delete;  \
-	class_name& operator=(const class_name&) = delete
+	auto operator=(const class_name&) -> class_name& = delete
 
-#define HYPERENGINE_NON_MOVEABLE(class_name)    \
-	class_name(class_name&&) = delete; \
-	class_name& operator=(class_name&&) = delete
+#define HYPERENGINE_NON_MOVABLE(class_name)     \
+	class_name(class_name&&) noexcept = delete; \
+	auto operator=(class_name&&) noexcept -> class_name& = delete
 
 #ifndef NDEBUG
 #	define HYPERENGINE_DEBUG 1

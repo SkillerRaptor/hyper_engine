@@ -23,22 +23,22 @@ namespace HyperCore
 	public:
 		enum class Type : uint8_t
 		{
-			Undefined,
+			undefined,
 
-			KeyPressed,
-			KeyReleased,
+			key_pressed,
+			key_released,
 
-			MouseMoved,
-			MouseScrolled,
-			MouseButtonPressed,
-			MouseButtonReleased,
+			mouse_moved,
+			mouse_scrolled,
+			mouse_button_pressed,
+			mouse_button_released,
 
-			WindowClose,
-			WindowResize,
-			WindowFramebufferResize,
-			WindowFocus,
-			WindowLostFocus,
-			WindowMoved
+			window_close,
+			window_resize,
+			window_framebuffer_resize,
+			window_focus,
+			window_lost_focus,
+			window_moved
 		};
 
 	public:
@@ -56,7 +56,7 @@ namespace HyperCore
 		explicit Event(WindowMovedEvent window_moved_event);
 
 	public:
-		Type type{ Type::Undefined };
+		Type type{ Type::undefined };
 
 		union
 		{
