@@ -19,6 +19,7 @@ set(HEADERS
         include/HyperMath/Matrix4x4.hpp
         include/HyperMath/Quaternion.hpp
         include/HyperMath/Trigonometric.hpp
+        include/HyperMath/Types.hpp
         include/HyperMath/Vector2.hpp
         include/HyperMath/Vector3.hpp
         include/HyperMath/Vector4.hpp)

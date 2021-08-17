@@ -17,23 +17,30 @@ add_library(HyperTestMain STATIC src/main.cpp)
 target_link_libraries(HyperTestMain PUBLIC CONAN_PKG::catch2)
 target_link_libraries(HyperTestMain PRIVATE ProjectOptions)
 
+macro(define_test target sources)
+    add_executable(${target} ${sources})
+    target_link_libraries(
+            ${target}
+            PRIVATE
+            ProjectWarnings
+            ProjectOptions
+            HyperTestMain)
+
+    catch_discover_tests(
+            ${target}
+            TEST_PREFIX "${target}."
+            REPORTER xml
+            OUTPUT_DIR .
+            OUTPUT_PREFIX "${target}."
+            OUTPUT_SUFFIX .xml)
+endmacro()
+
 set(HYPERMATH_SOURCE
         src/HyperMath/Common.cpp
         src/HyperMath/Trigonometric.cpp)
 
-add_executable(HyperMathTest ${HYPERMATH_SOURCE})
+define_test(HyperMathTest ${HYPERMATH_SOURCE})
 target_link_libraries(
         HyperMathTest
         PRIVATE
-        ProjectWarnings
-        ProjectOptions
-        HyperMath
-        HyperTestMain)
-
-catch_discover_tests(
-        HyperMathTest
-        TEST_PREFIX "HyperMathTest."
-        REPORTER xml
-        OUTPUT_DIR .
-        OUTPUT_PREFIX "HyperMathTest."
-        OUTPUT_SUFFIX .xml)
+        HyperMath)
