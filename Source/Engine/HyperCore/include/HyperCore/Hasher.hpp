@@ -5,6 +5,7 @@
  */
 
 #include <array>
+#include <cstddef>
 
 namespace HyperCore
 {
@@ -12,25 +13,25 @@ namespace HyperCore
 	{
 	public:
 		template <size_t N>
-		static constexpr auto hash_crc_32(const char (&string)[N]) -> unsigned int
+		static constexpr auto hash_crc32(const char (&string)[N]) -> unsigned int
 		{
-			return crc_32<N - 2>(string) ^ 0xFFFFFFFF;
+			return crc32<N - 2>(string) ^ 0xFFFFFFFF;
 		}
 
 	private:
 		template <size_t index>
-		static constexpr auto combine_crc_32(const char* string, unsigned int part) -> unsigned int
+		static constexpr auto combine_crc32(const char* string, unsigned int part) -> unsigned int
 		{
 			auto crc_32_value = s_crc32_table[(part ^ static_cast<unsigned int>(string[index])) & static_cast<unsigned int>(0x000000FF)];
 			return (part >> static_cast<unsigned int>(8)) ^ crc_32_value;
 		}
 		
 		template <size_t index>
-		static constexpr auto crc_32(const char* string) -> unsigned int
+		static constexpr auto crc32(const char* string) -> unsigned int
 		{
 			if constexpr (index != static_cast<size_t>(-1))
 			{
-				return combine_crc_32<index>(string, crc_32<index - 1>(string));
+				return combine_crc32<index>(string, crc32<index - 1>(string));
 			}
 			else
 			{
