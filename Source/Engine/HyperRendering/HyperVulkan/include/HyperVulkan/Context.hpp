@@ -8,7 +8,7 @@
 
 #include <HyperRendering/IContext.hpp>
 
-namespace HyperRendering::OpenGL33
+namespace HyperRendering::Vulkan
 {
 	class Context final : public IContext
 	{
@@ -18,4 +18,4 @@ namespace HyperRendering::OpenGL33
 		auto initialize() -> HyperCore::Result<void, HyperCore::ConstructError> override;
 		auto update() -> void override;
 	};
-} // namespace HyperRendering::OpenGL33
+} // namespace HyperRendering::Vulkan

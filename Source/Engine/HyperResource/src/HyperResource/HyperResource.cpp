@@ -3,13 +3,3 @@
  *
  * SPDX-License-Identifier: MIT
  */
-
-#pragma once
-
-namespace HyperResource
-{
-	class ShaderCompiler
-	{
-	public:
-	};
-} // namespace HyperResource

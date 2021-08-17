@@ -8,10 +8,10 @@
 # HyperResource
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/HyperResource/ShaderCompiler.cpp)
+        src/HyperResource/HyperResource.cpp)
 
 set(HEADERS
-        include/HyperResource/ShaderCompiler.hpp)
+        )
 
 hyperengine_group_source("${SOURCES}")
 hyperengine_group_source("${HEADERS}")

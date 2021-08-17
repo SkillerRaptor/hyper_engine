@@ -10,13 +10,16 @@
 
 namespace HyperCore
 {
-	auto assert(const char* expression, bool expression_value, SourceLocation current_location) -> void
+	auto assert(
+		const char* expression,
+		bool expression_value,
+		SourceLocation current_location) -> void
 	{
 		if (expression_value)
 		{
 			return;
 		}
-		
+
 		HyperCore::Logger::fatal("Assertion failed: {}", expression);
 		HyperCore::Logger::fatal(
 			"{}:{} in {}",

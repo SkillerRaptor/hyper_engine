@@ -12,7 +12,12 @@
 
 namespace HyperPlatform
 {
-	Window::Window(std::string title, int width, int height, GraphicsApi graphics_api, HyperCore::EventManager& event_manager)
+	Window::Window(
+		std::string title,
+		int width,
+		int height,
+		GraphicsApi graphics_api,
+		HyperCore::EventManager& event_manager)
 		: m_graphics_api(graphics_api)
 	{
 		m_info.title = std::move(title);
@@ -52,7 +57,7 @@ namespace HyperPlatform
 		if (m_native_window == nullptr)
 		{
 			glfwTerminate();
-			return HyperCore::ConstructError::incomplete;
+			return HyperCore::ConstructError::Incomplete;
 		}
 
 		glfwSetWindowUserPointer(m_native_window, &m_info);
@@ -175,27 +180,27 @@ namespace HyperPlatform
 	{
 		glfwPollEvents();
 	}
-	
+
 	auto Window::time() const -> float
 	{
 		return static_cast<float>(glfwGetTime());
 	}
-	
+
 	auto Window::title() const -> std::string
 	{
 		return m_info.title;
 	}
-	
+
 	auto Window::width() const -> int
 	{
 		return m_info.width;
 	}
-	
+
 	auto Window::height() const -> int
 	{
 		return m_info.height;
 	}
-	
+
 	auto Window::event_manager() -> HyperCore::EventManager*
 	{
 		return m_info.event_manager;

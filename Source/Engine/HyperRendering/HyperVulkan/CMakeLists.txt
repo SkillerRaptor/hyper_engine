@@ -5,23 +5,21 @@
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# HyperRenderingBase
+# HyperVulkan
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/HyperRendering/IContext.cpp
-        src/HyperRendering/RenderCommands.cpp)
+        src/HyperVulkan/Context.cpp)
 
 set(HEADERS
-        include/HyperRendering/IContext.hpp
-        include/HyperRendering/RenderCommands.hpp)
+        include/HyperVulkan/Context.hpp)
 
 hyperengine_group_source("${SOURCES}")
 hyperengine_group_source("${HEADERS}")
 
-hyperengine_define_module(HyperRendering)
+hyperengine_define_module(HyperVulkan)
 target_link_libraries(
-        HyperRendering
+        HyperVulkan
         PUBLIC
-        HyperCore
-        HyperMath
-        HyperPlatform)
+        CONAN_PKG::glfw
+        CONAN_PKG::volk
+        HyperRendering)

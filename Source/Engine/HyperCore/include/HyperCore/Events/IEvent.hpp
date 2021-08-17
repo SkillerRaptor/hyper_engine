@@ -6,13 +6,12 @@
 
 #pragma once
 
-#include <HyperMath/Vector4.hpp>
+#include <cstdint>
 
-namespace HyperRendering
+namespace HyperCore
 {
-	class IRenderer2D
+	struct IEvent
 	{
-	public:
-		virtual ~IRenderer2D() = default;
+		IEvent() = default;
 	};
 } // namespace HyperCore

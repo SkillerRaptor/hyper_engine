@@ -10,9 +10,9 @@ namespace HyperCore
 {
 	enum class ConstructError
 	{
-		none = 0,
-		incomplete,
-		out_of_memory,
-		undefined_behaviour
+		None = 0,
+		Incomplete,
+		OutOfMemory,
+		UndefinedBehaviour
 	};
 } // namespace HyperCore

@@ -13,7 +13,7 @@ add_subdirectory(HyperRendering)
 # OpenGL
 #-------------------------------------------------------------------------------------------
 if (HYPERENGINE_BUILD_OPENGL)
-    # TODO: Implement OpenGL 4.6
+    # TODO(SkillerRaptor): Implementing OpenGL 4.6
     add_subdirectory(HyperOpenGL33)
 endif ()
 
@@ -21,5 +21,5 @@ endif ()
 # Vulkan
 #-------------------------------------------------------------------------------------------
 if (HYPERENGINE_BUILD_VULKAN)
-    # TODO: Implement Vulkan
+    add_subdirectory(HyperVulkan)
 endif ()

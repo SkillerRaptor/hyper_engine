@@ -6,34 +6,42 @@
 
 #pragma once
 
+#include "HyperCore/Events/IEvent.hpp"
+
 namespace HyperCore
 {
-	struct WindowCloseEvent
+	struct WindowCloseEvent final : public IEvent
 	{
 	};
 
-	struct WindowResizeEvent
+	struct WindowResizeEvent final : public IEvent
 	{
+		WindowResizeEvent(int width, int height);
+		
 		int width;
 		int height;
 	};
 
-	struct WindowFramebufferResizeEvent
+	struct WindowFramebufferResizeEvent final : public IEvent
 	{
+		WindowFramebufferResizeEvent(int width, int height);
+		
 		int width;
 		int height;
 	};
 
-	struct WindowFocusEvent
+	struct WindowFocusEvent final : public IEvent
 	{
 	};
 
-	struct WindowLostFocusEvent
+	struct WindowLostFocusEvent final : public IEvent
 	{
 	};
 
-	struct WindowMovedEvent
+	struct WindowMovedEvent final : public IEvent
 	{
+		WindowMovedEvent(int position_x, int position_y);
+		
 		int position_x;
 		int position_y;
 	};

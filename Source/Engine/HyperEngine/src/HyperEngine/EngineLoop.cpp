@@ -8,8 +8,8 @@
 
 #include "HyperEngine/IApplication.hpp"
 
-#include <HyperMath/Trigonometric.hpp>
 #include <HyperOpenGL33/Context.hpp>
+#include <HyperVulkan/Context.hpp>
 
 namespace HyperEngine
 {
@@ -45,6 +45,8 @@ namespace HyperEngine
 			{
 			case HyperPlatform::GraphicsApi::OpenGL33:
 				return new HyperRendering::OpenGL33::Context(m_window);
+			case HyperPlatform::GraphicsApi::Vulkan:
+				return new HyperRendering::Vulkan::Context(m_window);
 			default:
 				return nullptr;
 			}
@@ -52,7 +54,7 @@ namespace HyperEngine
 
 		if (m_render_context == nullptr)
 		{
-			return HyperCore::ConstructError::undefined_behaviour;
+			return HyperCore::ConstructError::UndefinedBehaviour;
 		}
 
 		auto render_context_result = m_render_context->initialize();
@@ -80,7 +82,7 @@ namespace HyperEngine
 			m_event_manager.process_next_event();
 
 			m_render_context->begin_frame();
-			m_render_context->clear({ 0.1f, 0.1f, 0.1f, 1.0f });
+			m_render_context->submit_command<HyperRendering::ClearCommand>(HyperMath::Vec4f{ 0.1f, 0.1f, 0.1f, 1.0f });
 			m_render_context->end_frame();
 
 			m_render_context->update();

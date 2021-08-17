@@ -6,11 +6,12 @@
 
 #include "HyperRendering/IContext.hpp"
 
+#include <HyperCore/Assertion.hpp>
+
 namespace HyperRendering
 {
-	IContext::IContext(HyperPlatform::Window& window, IRenderer2D* renderer2d)
+	IContext::IContext(HyperPlatform::Window& window)
 		: m_window(window)
-		, m_renderer2d(renderer2d)
 	{
 	}
 
@@ -26,25 +27,22 @@ namespace HyperRendering
 	{
 		while (!m_render_commands.empty())
 		{
-			auto render_command = m_render_commands.front();
-			m_render_commands.pop();
+			const auto& render_command = m_render_commands.front();
 
-			switch (render_command.type)
-			{
-			case RenderCommand::Type::Clear:
-			{
-				auto clear_command = render_command.value.as_clear_command;
-				clear_implementation(clear_command.color);
-				break;
-			}
-			default:
-				break;
-			}
+			std::visit([](auto&& converted_event)
+			   {
+				   using T = std::decay_t<decltype(converted_event)>;
+				   if constexpr (std::is_same_v<T, ClearCommand>)
+				   {
+					   // TODO(SkillerRaptor): Implementing clear command
+				   }
+				   else
+				   {
+					   HYPERENGINE_ASSERT_NOT_REACHED();
+				   }
+			   }, render_command);
+
+			m_render_commands.pop();
 		}
-	}
-	
-	auto IContext::clear(const HyperMath::Vec4f& clear_color) -> void
-	{
-		queue_command<ClearCommand>(clear_color);
 	}
 } // namespace HyperRendering

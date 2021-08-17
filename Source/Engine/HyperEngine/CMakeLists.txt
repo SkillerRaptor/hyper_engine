@@ -33,7 +33,7 @@ target_link_libraries(
 # OpenGL
 #-------------------------------------------------------------------------------------------
 if (HYPERENGINE_BUILD_OPENGL)
-    # TODO: Implement OpenGL 4.6
+    # TODO(SkillerRaptor): Implementing OpenGL 4.6
     target_link_libraries(
             HyperEngine
             PUBLIC
@@ -44,5 +44,8 @@ endif ()
 # Vulkan
 #-------------------------------------------------------------------------------------------
 if (HYPERENGINE_BUILD_VULKAN)
-    # TODO: Implement Vulkan
+    target_link_libraries(
+            HyperEngine
+            PUBLIC
+            HyperVulkan)
 endif ()

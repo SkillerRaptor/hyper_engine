@@ -19,5 +19,8 @@
 
 namespace HyperCore
 {
-	auto assert(const char* expression, bool expression_value, SourceLocation current_location = SourceLocation::current()) -> void;
+	auto assert(
+		const char* expression,
+		bool expression_value,
+		SourceLocation current_location = SourceLocation::current()) -> void;
 } // namespace HyperCore

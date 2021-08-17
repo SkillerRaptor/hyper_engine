@@ -6,16 +6,22 @@
 
 #pragma once
 
+#include "HyperCore/Events/IEvent.hpp"
+
 namespace HyperCore
 {
-	struct KeyPressedEvent
+	struct KeyPressedEvent final : public IEvent
 	{
+		KeyPressedEvent(int key_code, int repeat_count);
+		
 		int key_code;
 		int repeat_count;
 	};
 	
-	struct KeyReleasedEvent
+	struct KeyReleasedEvent final : public IEvent
 	{
+		explicit KeyReleasedEvent(int key_code);
+		
 		int key_code;
 	};
 } // namespace HyperCore
