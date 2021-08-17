@@ -8,6 +8,8 @@
 
 #include "HyperMath/Types.hpp"
 
+#include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <type_traits>
 
@@ -58,7 +60,7 @@ namespace HyperMath
 		}
 
 		auto x_whole = static_cast<int64_t>(x);
-		auto remainder = (x > static_cast<T>(0)) && (x > x_whole);
+		auto remainder = (x > static_cast<T>(0)) && (x > static_cast<T>(x_whole));
 		
 		return static_cast<T>(x_whole + remainder);
 	}
@@ -82,7 +84,7 @@ namespace HyperMath
 		}
 
 		auto x_whole = static_cast<int64_t>(x);
-		auto remainder = (x < static_cast<T>(0)) && (x < x_whole);
+		auto remainder = (x < static_cast<T>(0)) && (x < static_cast<T>(x_whole));
 
 		return static_cast<T>(x_whole - remainder);
 	}
@@ -96,13 +98,13 @@ namespace HyperMath
 
 			int sign = 1;
 
-			U first = a;
-			U second = b;
+			U first = static_cast<U>(a);
+			U second = static_cast<U>(b);
 			if (a > b)
 			{
 				sign = -1;
-				first = b;
-				second = a;
+				first = static_cast<U>(b);
+				second = static_cast<U>(a);
 			}
 
 			return a + sign * static_cast<T>(static_cast<U>(second - first) / 2);
@@ -144,7 +146,7 @@ namespace HyperMath
 		T value = 1;
 
 		size_t counter = 0;
-		while (counter < n)
+		while (counter < static_cast<size_t>(n))
 		{
 			value *= static_cast<T>(counter + 1);
 			++counter;
@@ -164,7 +166,7 @@ namespace HyperMath
 		T value = 1;
 
 		size_t counter = 0;
-		while (counter < n)
+		while (counter < static_cast<size_t>(n))
 		{
 			value *= x;
 			++counter;
