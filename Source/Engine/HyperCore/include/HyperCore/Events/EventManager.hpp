@@ -25,7 +25,7 @@ namespace HyperCore
 	public:
 		static constexpr auto id() -> EventIdType
 		{
-			constexpr EventIdType value = Hasher::hash_crc_32(HYPERENGINE_FUNCTION_SIGNATURE);
+			constexpr EventIdType value = Hasher::hash_crc32(HYPERENGINE_FUNCTION_SIGNATURE);
 			return value;
 		}
 	};
