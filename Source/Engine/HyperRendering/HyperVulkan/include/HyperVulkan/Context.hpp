@@ -16,14 +16,14 @@ namespace HyperRendering::Vulkan
 	{
 	public:
 		explicit Context(HyperPlatform::Window& window);
-		~Context();
+		~Context() override;
 
 		auto initialize() -> HyperCore::Result<void, HyperCore::ConstructError> override;
 		auto update() -> void override;
 
 	private:
-		auto get_instance_extensions(const char**& extensions, uint32_t extension_count) const -> void;
-	
+		auto get_instance_extensions(const char**& extensions, uint32_t& extension_count) const -> void;
+
 	private:
 		VkInstance m_instance{ nullptr };
 	};

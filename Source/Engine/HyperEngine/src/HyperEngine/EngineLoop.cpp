@@ -68,7 +68,7 @@ namespace HyperEngine
 		}
 
 		m_running = true;
-
+		
 		return {};
 	}
 

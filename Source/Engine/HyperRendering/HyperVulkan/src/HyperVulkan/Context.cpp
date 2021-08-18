@@ -64,7 +64,7 @@ namespace HyperRendering::Vulkan
 	{
 	}
 	
-	auto Context::get_instance_extensions(const char**& extensions, uint32_t extension_count) const -> void
+	auto Context::get_instance_extensions(const char**& extensions, uint32_t& extension_count) const -> void
 	{
 		extensions = glfwGetRequiredInstanceExtensions(&extension_count);
 	}

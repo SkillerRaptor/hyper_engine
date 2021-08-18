@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
-Checks: '-*,bugprone-*,cert-*,clang-analyzer-*,concurrency-*,google-*,hicpp-*,misc-*,modernize-*,mpi-*,performance-*,portability-*,readability-identifier-naming,-cppcoreguidelines-special-member-functions, -hicpp-special-member-functions,-misc-non-private-member-variables-in-classes,-modernize-use-nodiscard'
+Checks: '-*,bugprone-*,cert-*,clang-analyzer-*,concurrency-*,google-*,hicpp-*,misc-*,modernize-*,mpi-*,performance-*,portability-*,readability-identifier-naming,-cppcoreguidelines-special-member-functions,-hicpp-signed-bitwise,-hicpp-special-member-functions,-misc-non-private-member-variables-in-classes,-modernize-use-nodiscard,'
 
 CheckOptions:
   - key: readability-identifier-naming.ClassCase
