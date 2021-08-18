@@ -6,9 +6,6 @@
 
 #include "HyperOpenGL33/Context.hpp"
 
-#include <HyperCore/Events/EventManager.hpp>
-#include <HyperPlatform/Window.hpp>
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -19,7 +16,7 @@ namespace HyperRendering::OpenGL33
 	{
 	}
 
-	auto Context::initialize() -> HyperCore::Result<void, HyperCore::ConstructError>
+	auto Context::initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
 	{
 		glfwMakeContextCurrent(m_window.native_window());
 
@@ -27,7 +24,7 @@ namespace HyperRendering::OpenGL33
 		{
 			glfwDestroyWindow(m_window.native_window());
 			glfwTerminate();
-			return HyperCore::ConstructError::Incomplete;
+			return HyperCore::Errors::ConstructError::Incomplete;
 		}
 
 		m_window.event_manager()->register_listener<HyperCore::WindowFramebufferResizeEvent>(

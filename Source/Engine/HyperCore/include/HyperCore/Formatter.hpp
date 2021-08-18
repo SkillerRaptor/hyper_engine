@@ -6,12 +6,17 @@
 
 #pragma once
 
+#include "HyperCore/Prerequisites.hpp"
+
 #include <fmt/format.h>
 
 namespace HyperCore
 {
 	class Formatter
 	{
+	public:
+		HYPERENGINE_SINGLETON(Formatter);
+
 	public:
 		template <typename... Args>
 		static auto format(std::string_view format, Args&&... args) -> std::string

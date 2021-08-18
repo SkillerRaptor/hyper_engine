@@ -16,62 +16,65 @@ namespace HyperCore
 	class Logger
 	{
 	public:
-		HYPERENGINE_NON_COPYABLE(Logger);
-		HYPERENGINE_NON_MOVABLE(Logger);
+		HYPERENGINE_SINGLETON(Logger);
 
 	public:
 		enum class Level
 		{
-			info,
-			warning,
-			error,
-			fatal,
-			debug
+			Info = 0,
+			Warning,
+			Error,
+			Fatal,
+			Debug,
+			Trace
 		};
 
 	public:
-		constexpr Logger() = delete;
-		~Logger() = delete;
-
 		template <typename... Args>
 		static auto info(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::info, format, std::forward<Args>(args)...);
+			Logger::log(Level::Info, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto warning(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::warning, format, std::forward<Args>(args)...);
+			Logger::log(Level::Warning, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto error(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::error, format, std::forward<Args>(args)...);
+			Logger::log(Level::Error, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto fatal(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::fatal, format, std::forward<Args>(args)...);
+			Logger::log(Level::Fatal, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto debug(std::string_view format, Args&&... args) -> void
 		{
-#if HYPERENGINE_DEBUG
-			Logger::log(Level::debug, format, std::forward<Args>(args)...);
-#else
-			(void) format;
-			((void) args, ...);
-#endif
+			Logger::log(Level::Debug, format, std::forward<Args>(args)...);
+		}
+
+		template <typename... Args>
+		static auto trace(std::string_view format, Args&&... args) -> void
+		{
+			Logger::log(Level::Trace, format, std::forward<Args>(args)...);
 		}
 
 	private:
 		template <typename... Args>
 		static auto log(Level log_level, std::string_view format, Args&&... args) -> void
 		{
+			if (log_level > s_log_level)
+			{
+				return;
+			}
+			
 			if (format.empty())
 			{
 				internal_log(log_level, format);
@@ -90,5 +93,8 @@ namespace HyperCore
 		}
 
 		static auto internal_log(Level level, std::string_view string) -> void;
+		
+	private:
+		static Level s_log_level;
 	};
 } // namespace HyperCore

@@ -38,7 +38,7 @@ namespace HyperPlatform
 			HyperCore::EventManager& event_manager);
 		~Window();
 
-		auto initialize() -> HyperCore::Result<void, HyperCore::ConstructError>;
+		auto initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;
 
 		auto poll_events() const -> void;
 		

@@ -18,7 +18,7 @@ namespace HyperRendering::Vulkan
 		explicit Context(HyperPlatform::Window& window);
 		~Context() override;
 
-		auto initialize() -> HyperCore::Result<void, HyperCore::ConstructError> override;
+		auto initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError> override;
 		auto update() -> void override;
 
 	private:

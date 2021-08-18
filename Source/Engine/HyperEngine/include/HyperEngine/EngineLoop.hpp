@@ -23,7 +23,7 @@ namespace HyperEngine
 	public:
 		explicit EngineLoop(IApplication& application);
 		
-		auto initialize() -> HyperCore::Result<void, HyperCore::ConstructError>;
+		auto initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;
 		
 		auto run() -> void;
 

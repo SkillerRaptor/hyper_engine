@@ -11,19 +11,17 @@ namespace HyperCore
 	class SourceLocation
 	{
 	public:
-		constexpr SourceLocation() = default;
-		
-		constexpr auto file_name() const -> const char*
+		constexpr auto file_name() const noexcept -> const char*
 		{
 			return m_file;
 		}
 
-		constexpr auto function_name() const -> const char*
+		constexpr auto function_name() const noexcept -> const char*
 		{
 			return m_function;
 		}
 
-		constexpr auto line() const -> unsigned int
+		constexpr auto line() const noexcept -> unsigned int
 		{
 			return m_line;
 		}
@@ -40,6 +38,9 @@ namespace HyperCore
 			
 			return location;
 		}
+		
+	private:
+		constexpr SourceLocation() = default;
 	
 	private:
 		const char* m_file{ "unknown" };

@@ -21,12 +21,12 @@ namespace HyperRendering::Vulkan
 		vkDestroyInstance(m_instance, nullptr);
 	}
 	
-	auto Context::initialize() -> HyperCore::Result<void, HyperCore::ConstructError>
+	auto Context::initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
 	{
 		if (volkInitialize() != VK_SUCCESS)
 		{
 			HyperCore::Logger::error("Failed to load vulkan!");
-			return HyperCore::ConstructError::Incomplete;
+			return HyperCore::Errors::ConstructError::Incomplete;
 		}
 
 		VkApplicationInfo application_info{};
@@ -52,7 +52,7 @@ namespace HyperRendering::Vulkan
 		if (vkCreateInstance(&instance_create_info, nullptr, &m_instance) != VK_SUCCESS)
 		{
 			HyperCore::Logger::error("Failed to create instance!");
-			return HyperCore::ConstructError::Incomplete;
+			return HyperCore::Errors::ConstructError::Incomplete;
 		}
 
 		volkLoadInstance(m_instance);

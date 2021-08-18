@@ -32,7 +32,7 @@ namespace HyperPlatform
 		glfwTerminate();
 	}
 
-	auto Window::initialize() -> HyperCore::Result<void, HyperCore::ConstructError>
+	auto Window::initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
 	{
 		glfwInit();
 
@@ -57,7 +57,7 @@ namespace HyperPlatform
 		if (m_native_window == nullptr)
 		{
 			glfwTerminate();
-			return HyperCore::ConstructError::Incomplete;
+			return HyperCore::Errors::ConstructError::Incomplete;
 		}
 
 		glfwSetWindowUserPointer(m_native_window, &m_info);

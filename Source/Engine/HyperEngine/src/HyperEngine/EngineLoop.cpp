@@ -24,7 +24,7 @@ namespace HyperEngine
 	{
 	}
 
-	auto EngineLoop::initialize() -> HyperCore::Result<void, HyperCore::ConstructError>
+	auto EngineLoop::initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
 	{
 		m_event_manager.register_listener<HyperCore::WindowCloseEvent>(
 			"HyperEngine::EngineLoop::CloseEvent",
@@ -58,7 +58,7 @@ namespace HyperEngine
 
 		if (m_render_context == nullptr)
 		{
-			return HyperCore::ConstructError::UndefinedBehaviour;
+			return HyperCore::Errors::ConstructError::UndefinedBehaviour;
 		}
 
 		auto render_context_result = m_render_context->initialize();
