@@ -60,7 +60,6 @@ endif ()
 # Conan
 #-------------------------------------------------------------------------------------------
 set(CONAN_LIBRARIES
-        assimp/5.0.1
         catch2/2.13.7
         fmt/8.0.1
         glad/0.1.34
@@ -69,6 +68,8 @@ set(CONAN_LIBRARIES
         meshoptimizer/0.16
         stb/20200203
         spirv-cross/20210115
+        tinygltf/2.5.0
+        tinyobjloader/1.0.6
         vulkan-headers/1.2.184
         vulkan-memory-allocator/2.3.0
         volk/1.2.170)

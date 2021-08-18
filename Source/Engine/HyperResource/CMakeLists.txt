@@ -20,9 +20,10 @@ hyperengine_define_module(HyperResource)
 target_link_libraries(
         HyperResource
         PUBLIC
-        CONAN_PKG::assimp
         CONAN_PKG::glslang
         CONAN_PKG::meshoptimizer
         CONAN_PKG::spirv-cross
         CONAN_PKG::stb
+        CONAN_PKG::tinygltf
+        CONAN_PKG::tinyobjloader
         HyperCore)
