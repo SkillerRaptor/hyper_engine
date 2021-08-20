@@ -50,6 +50,7 @@ namespace HyperPlatform
 			break;
 		default:
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 			break;
 		}
 

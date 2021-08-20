@@ -7,13 +7,17 @@
 #include "HyperVulkan/Device.hpp"
 
 #include "HyperVulkan/Context.hpp"
+#include "HyperVulkan/Surface.hpp"
 
 #include <volk.h>
 
+#include <set>
+
 namespace HyperRendering::Vulkan
 {
-	Device::Device(Context& context)
+	Device::Device(Context& context, Surface& surface)
 		: m_context(context)
+		, m_surface(surface)
 	{
 	}
 
@@ -24,7 +28,7 @@ namespace HyperRendering::Vulkan
 		{
 			return physical_device_result;
 		}
-		
+
 		auto device_result = create_device();
 		if (device_result.is_error())
 		{
@@ -77,20 +81,31 @@ namespace HyperRendering::Vulkan
 	auto Device::create_device() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
 	{
 		auto queue_family_indices = find_queue_families(m_physical_device);
-		auto queue_priority = 1.0F;
 
-		VkDeviceQueueCreateInfo device_queue_create_info{};
-		device_queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		device_queue_create_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
-		device_queue_create_info.pQueuePriorities = &queue_priority;
-		device_queue_create_info.queueCount = 1;
+		std::vector<VkDeviceQueueCreateInfo> device_queue_create_infos;
+		std::set<uint32_t> unique_queue_families = {
+			queue_family_indices.graphics_family.value(),
+			queue_family_indices.presentation_family.value()
+		};
+
+		auto queue_priority = 1.0F;
+		for (auto queue_family : unique_queue_families)
+		{
+			VkDeviceQueueCreateInfo device_queue_create_info{};
+			device_queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			device_queue_create_info.queueFamilyIndex = queue_family;
+			device_queue_create_info.pQueuePriorities = &queue_priority;
+			device_queue_create_info.queueCount = 1;
+			
+			device_queue_create_infos.push_back(device_queue_create_info);
+		}
 
 		VkPhysicalDeviceFeatures physical_device_features{};
 
 		VkDeviceCreateInfo device_create_info{};
 		device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		device_create_info.pQueueCreateInfos = &device_queue_create_info;
-		device_create_info.queueCreateInfoCount = 1;
+		device_create_info.pQueueCreateInfos = device_queue_create_infos.data();
+		device_create_info.queueCreateInfoCount = static_cast<uint32_t>(device_queue_create_infos.size());
 		device_create_info.pEnabledFeatures = &physical_device_features;
 		device_create_info.ppEnabledExtensionNames = nullptr;
 		device_create_info.enabledExtensionCount = 0;
@@ -107,7 +122,10 @@ namespace HyperRendering::Vulkan
 		}
 
 		vkGetDeviceQueue(m_device, queue_family_indices.graphics_family.value(), 0, &m_graphics_queue);
-		
+		vkGetDeviceQueue(m_device, queue_family_indices.presentation_family.value(), 0, &m_presentation_queue);
+
+		volkLoadDevice(m_device);
+
 		HyperCore::Logger::debug("Vulkan device was created");
 
 		return {};
@@ -137,6 +155,14 @@ namespace HyperRendering::Vulkan
 				queue_family_indices.graphics_family = i;
 			}
 
+			VkBool32 presentation_support = false;
+			vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, m_surface.surface(), &presentation_support);
+
+			if (presentation_support)
+			{
+				queue_family_indices.presentation_family = i;
+			}
+
 			if (queue_family_indices.is_complete())
 			{
 				break;
@@ -150,6 +176,6 @@ namespace HyperRendering::Vulkan
 
 	auto Device::QueueFamilyIndices::is_complete() const -> bool
 	{
-		return graphics_family.has_value();
+		return graphics_family.has_value() && presentation_family.has_value();
 	}
 } // namespace HyperRendering::Vulkan

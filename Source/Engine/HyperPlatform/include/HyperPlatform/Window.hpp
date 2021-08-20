@@ -46,7 +46,7 @@ namespace HyperPlatform
 
 	private:
 		Info m_info{};
-		GraphicsApi m_graphics_api{ GraphicsApi::OpenGL33 };
+		GraphicsApi m_graphics_api{ GraphicsApi::Vulkan };
 
 		GLFWwindow* m_native_window{ nullptr };
 	};

@@ -34,7 +34,8 @@ namespace HyperRendering::Vulkan
 
 	Context::Context(HyperPlatform::Window& window)
 		: IContext(window)
-		, m_device(*this)
+		, m_device(*this, m_surface)
+		, m_surface(*this)
 	{
 	}
 
@@ -70,6 +71,12 @@ namespace HyperRendering::Vulkan
 		}
 #endif
 		
+		auto surface_result = m_surface.initialize();
+		if (surface_result.is_error())
+		{
+			return surface_result;
+		}
+		
 		auto device_result = m_device.initialize();
 		if (device_result.is_error())
 		{
@@ -84,12 +91,13 @@ namespace HyperRendering::Vulkan
 	auto Context::terminate() -> void
 	{
 		m_device.terminate();
+		m_surface.terminate();
 		
 #if HYPERENGINE_DEBUG
 		vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messenger, nullptr);
 		HyperCore::Logger::debug("Vulkan debug messenger was destroyed");
 #endif
-
+		
 		vkDestroyInstance(m_instance, nullptr);
 		HyperCore::Logger::debug("Vulkan instance was destroyed");
 		

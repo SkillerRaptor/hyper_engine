@@ -7,6 +7,7 @@
 #pragma once
 
 #include "HyperVulkan/Device.hpp"
+#include "HyperVulkan/Surface.hpp"
 
 #include <HyperRendering/IContext.hpp>
 
@@ -45,5 +46,6 @@ namespace HyperRendering::Vulkan
 		VkDebugUtilsMessengerEXT m_debug_messenger{ nullptr };
 		
 		Device m_device;
+		Surface m_surface;
 	};
 } // namespace HyperRendering::Vulkan

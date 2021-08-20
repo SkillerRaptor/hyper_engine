@@ -45,4 +45,9 @@ namespace HyperRendering
 			m_render_commands.pop();
 		}
 	}
+	
+	auto IContext::window() const -> HyperPlatform::Window&
+	{
+		return m_window;
+	}
 } // namespace HyperRendering

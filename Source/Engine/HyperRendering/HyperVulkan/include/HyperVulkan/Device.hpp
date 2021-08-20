@@ -19,6 +19,7 @@ using VkQueue = struct VkQueue_T*;
 namespace HyperRendering::Vulkan
 {
 	class Context;
+	class Surface;
 
 	class Device
 	{
@@ -26,12 +27,13 @@ namespace HyperRendering::Vulkan
 		struct QueueFamilyIndices
 		{
 			std::optional<uint32_t> graphics_family;
+			std::optional<uint32_t> presentation_family;
 			
 			auto is_complete() const -> bool;
 		};
 
 	public:
-		explicit Device(Context& context);
+		explicit Device(Context& context, Surface& surface);
 
 		auto initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;
 		auto terminate() -> void;
@@ -45,9 +47,12 @@ namespace HyperRendering::Vulkan
 
 	private:
 		Context& m_context;
+		Surface& m_surface;
 
 		VkPhysicalDevice m_physical_device{ nullptr };
 		VkDevice m_device{ nullptr };
+		
 		VkQueue m_graphics_queue{ nullptr };
+		VkQueue m_presentation_queue{ nullptr };
 	};
 } // namespace HyperRendering::Vulkan
