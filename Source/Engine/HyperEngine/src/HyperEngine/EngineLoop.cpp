@@ -20,7 +20,7 @@ namespace HyperEngine
 {
 	EngineLoop::EngineLoop(IApplication& application)
 		: m_application(application)
-		, m_window(m_application.title(), 1280, 720, m_application.graphics_api(), m_event_manager)
+		, m_window(m_application.title(), 1280, 720, m_event_manager)
 	{
 	}
 
@@ -36,6 +36,7 @@ namespace HyperEngine
 		auto window_result = m_window.initialize();
 		if (window_result.is_error())
 		{
+			HyperCore::Logger::fatal("Failed to initialize window!");
 			return window_result.error();
 		}
 
@@ -74,11 +75,11 @@ namespace HyperEngine
 
 	auto EngineLoop::run() -> void
 	{
-		float last_time = 0.0f;
+		auto last_time = 0.0F;
 		while (m_running)
 		{
-			float current_time = m_window.time();
-			float delta_time = last_time - current_time;
+			auto current_time = m_window.time();
+			auto delta_time = last_time - current_time;
 			last_time = current_time;
 
 			(void) delta_time;
@@ -86,7 +87,7 @@ namespace HyperEngine
 			m_event_manager.process_next_event();
 
 			m_render_context->begin_frame();
-			m_render_context->submit_command<HyperRendering::ClearCommand>(HyperMath::Vec4f{ 0.1f, 0.1f, 0.1f, 1.0f });
+			m_render_context->submit_command<HyperRendering::ClearCommand>(HyperMath::Vec4f{ 0.1F, 0.1F, 0.1F, 1.0F });
 			m_render_context->end_frame();
 
 			m_render_context->update();

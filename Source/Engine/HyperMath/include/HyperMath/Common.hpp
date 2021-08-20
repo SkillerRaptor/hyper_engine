@@ -24,25 +24,25 @@
 namespace HyperMath
 {
 	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto min(T a, T b) -> T
+	static constexpr auto min(T a, T b) noexcept -> T
 	{
 		return b < a ? b : a;
 	}
 
 	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto max(T a, T b) -> T
+	static constexpr auto max(T a, T b) noexcept -> T
 	{
 		return a < b ? b : a;
 	}
 
 	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto abs(T x) -> T
+	static constexpr auto abs(T x) noexcept -> T
 	{
 		return x >= 0 ? x : -x;
 	}
 
 	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto ceil(T x) -> T
+	static constexpr auto ceil(T x) noexcept -> T
 	{
 		if (is_nan(x))
 		{
@@ -61,12 +61,12 @@ namespace HyperMath
 
 		auto x_whole = static_cast<int64_t>(x);
 		auto remainder = (x > static_cast<T>(0)) && (x > static_cast<T>(x_whole));
-		
+
 		return static_cast<T>(x_whole + remainder);
 	}
 
 	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto floor(T x) -> T
+	static constexpr auto floor(T x) noexcept -> T
 	{
 		if (is_nan(x))
 		{
@@ -90,7 +90,7 @@ namespace HyperMath
 	}
 
 	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto midpoint(T a, T b) -> T
+	static constexpr auto midpoint(T a, T b) noexcept -> T
 	{
 		if constexpr (std::is_integral_v<T>)
 		{
@@ -136,14 +136,14 @@ namespace HyperMath
 	}
 
 	template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-	static constexpr auto factorial(T n) -> T
+	static constexpr auto factorial(T n) noexcept -> T
 	{
 		if (n <= 1)
 		{
 			return 1;
 		}
 
-		T value = 1;
+		auto value = T(1);
 
 		size_t counter = 0;
 		while (counter < static_cast<size_t>(n))
@@ -156,14 +156,14 @@ namespace HyperMath
 	}
 
 	template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-	static constexpr auto pow(T x, T n) -> T
+	static constexpr auto pow(T x, T n) noexcept -> T
 	{
 		if (n <= 0)
 		{
 			return 1;
 		}
 
-		T value = 1;
+		auto value = T(1);
 
 		size_t counter = 0;
 		while (counter < static_cast<size_t>(n))

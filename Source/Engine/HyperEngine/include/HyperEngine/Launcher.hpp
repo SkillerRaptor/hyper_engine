@@ -8,15 +8,21 @@
 
 #include "HyperEngine/IApplication.hpp"
 
+#include <type_traits>
+
 namespace HyperEngine
 {
 	class Launcher
 	{
 	public:
-		static auto launch(IApplication& application, int argc = 0, char** argv = nullptr) -> int;
-		static auto launch(IApplication* application, int argc = 0, char** argv = nullptr) -> int;
+		template <typename T, typename... Args, typename = std::enable_if_t<std::is_base_of_v<IApplication, T>>>
+		static auto launch(Args&&... args) -> int
+		{
+			auto application = T(std::forward<Args>(args)...);
+			return launch_application(application);
+		}
 
 	private:
-		static auto launch_application(IApplication* application, int argc, char** argv) -> int;
+		static auto launch_application(IApplication& application) -> int;
 	};
 } // namespace HyperEngine

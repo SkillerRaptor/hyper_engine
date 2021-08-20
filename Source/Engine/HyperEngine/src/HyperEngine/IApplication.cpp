@@ -10,9 +10,8 @@
 
 namespace HyperEngine
 {
-	IApplication::IApplication(std::string title, HyperPlatform::GraphicsApi graphics_api)
+	IApplication::IApplication(std::string title)
 		: m_title(std::move(title))
-		, m_graphics_api(graphics_api)
 	{
 	}
 

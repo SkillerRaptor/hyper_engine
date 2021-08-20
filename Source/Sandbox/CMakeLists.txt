@@ -5,17 +5,17 @@
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# HyperEditor
+# Sandbox
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/main.cpp
-        src/HyperEditor/Editor.cpp)
+        src/Sandbox.cpp)
 
 set(HEADERS
-        include/HyperEditor/Editor.hpp)
+        include/Sandbox.hpp)
 
 hyperengine_group_files("${SOURCES}")
 hyperengine_group_files("${HEADERS}")
 
-hyperengine_define_executable(HyperEditor)
-target_link_libraries(HyperEditor PRIVATE HyperEngine)
+hyperengine_define_executable(Sandbox)
+target_link_libraries(Sandbox PRIVATE HyperEngine)

@@ -36,8 +36,8 @@ set(HEADERS
         include/HyperCore/Events/MouseEvents.hpp
         include/HyperCore/Events/WindowEvents.hpp)
 
-hyperengine_group_source("${SOURCES}")
-hyperengine_group_source("${HEADERS}")
+hyperengine_group_files("${SOURCES}")
+hyperengine_group_files("${HEADERS}")
 
 hyperengine_define_module(HyperCore)
 target_link_libraries(

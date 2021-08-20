@@ -24,8 +24,8 @@ set(HEADERS
         include/HyperMath/Vector3.hpp
         include/HyperMath/Vector4.hpp)
 
-hyperengine_group_source("${SOURCES}")
-hyperengine_group_source("${HEADERS}")
+hyperengine_group_files("${SOURCES}")
+hyperengine_group_files("${HEADERS}")
 
 hyperengine_define_module(HyperMath)
 target_link_libraries(

@@ -12,13 +12,7 @@
 
 namespace HyperPlatform
 {
-	Window::Window(
-		std::string title,
-		int width,
-		int height,
-		GraphicsApi graphics_api,
-		HyperCore::EventManager& event_manager)
-		: m_graphics_api(graphics_api)
+	Window::Window(std::string title, int width, int height, HyperCore::EventManager& event_manager)
 	{
 		m_info.title = std::move(title);
 		m_info.width = width;

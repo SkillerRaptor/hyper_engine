@@ -14,9 +14,9 @@ namespace HyperEditor
 	{
 	public:
 		Editor();
-		
+
 	private:
-		virtual auto startup() -> void override;
-		virtual auto shutdown() -> void override;
+		auto startup() -> void override;
+		auto shutdown() -> void override;
 	};
 } // namespace HyperEditor

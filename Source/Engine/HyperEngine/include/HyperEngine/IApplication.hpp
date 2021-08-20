@@ -18,7 +18,7 @@ namespace HyperEngine
 		friend class Launcher;
 
 	public:
-		explicit IApplication(std::string title, HyperPlatform::GraphicsApi graphics_api = HyperPlatform::GraphicsApi::OpenGL33);
+		explicit IApplication(std::string title);
 		virtual ~IApplication() = default;
 
 		auto title() const -> std::string;

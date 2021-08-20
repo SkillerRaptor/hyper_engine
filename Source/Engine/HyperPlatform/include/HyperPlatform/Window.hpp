@@ -30,12 +30,7 @@ namespace HyperPlatform
 		};
 
 	public:
-		Window(
-			std::string title,
-			int width,
-			int height,
-			GraphicsApi graphics_api,
-			HyperCore::EventManager& event_manager);
+		Window(std::string title, int width, int height, HyperCore::EventManager& event_manager);
 		~Window();
 
 		auto initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;

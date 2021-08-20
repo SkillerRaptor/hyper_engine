@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "HyperEditor/Editor.hpp"
+#include "Sandbox.hpp"
 
 #include <HyperEngine/Launcher.hpp>
 
 auto main() -> int
 {
-	 return HyperEngine::Launcher::launch<HyperEditor::Editor>();
+	 return HyperEngine::Launcher::launch<Sandbox>();
 }

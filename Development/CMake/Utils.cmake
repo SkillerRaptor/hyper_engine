@@ -7,8 +7,8 @@
 #-------------------------------------------------------------------------------------------
 # Utils
 #-------------------------------------------------------------------------------------------
-macro(hyperengine_group_source source)
-    foreach (item IN ITEMS ${source})
+macro(hyperengine_group_files files)
+    foreach (item IN ITEMS ${files})
         get_filename_component(src_path "${item}" PATH)
         string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "" group_path "${src_path}")
         string(REPLACE ".." "\\" group_path "${group_path}")
