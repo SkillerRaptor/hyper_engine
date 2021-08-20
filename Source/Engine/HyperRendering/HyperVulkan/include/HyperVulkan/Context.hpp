@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "HyperVulkan/Device.hpp"
+
 #include <HyperRendering/IContext.hpp>
 
 #include <vector>
@@ -22,10 +24,14 @@ namespace HyperRendering::Vulkan
 
 	public:
 		explicit Context(HyperPlatform::Window& window);
-		~Context() override;
 
 		auto initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError> override;
+		auto terminate() -> void override;
 		auto update() -> void override;
+		
+		auto instance() const -> VkInstance;
+		
+		static auto validation_layers() -> std::array<const char*, 1>;
 
 	private:
 		auto create_instance() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;
@@ -37,5 +43,7 @@ namespace HyperRendering::Vulkan
 	private:
 		VkInstance m_instance{ nullptr };
 		VkDebugUtilsMessengerEXT m_debug_messenger{ nullptr };
+		
+		Device m_device;
 	};
 } // namespace HyperRendering::Vulkan

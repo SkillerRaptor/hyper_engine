@@ -16,6 +16,7 @@ namespace HyperRendering::OpenGL33
 		explicit Context(HyperPlatform::Window& window);
 
 		auto initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError> override;
+		auto terminate() -> void override;
 		auto update() -> void override;
 	};
 } // namespace HyperRendering::OpenGL33

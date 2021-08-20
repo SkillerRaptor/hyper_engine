@@ -26,6 +26,7 @@ namespace HyperRendering
 		virtual ~IContext() = default;
 
 		virtual auto initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError> = 0;
+		virtual auto terminate() -> void = 0;
 		virtual auto update() -> void = 0;
 
 		auto begin_frame() -> void;

@@ -73,6 +73,11 @@ namespace HyperEngine
 		
 		return {};
 	}
+	
+	auto EngineLoop::terminate() -> void
+	{
+		m_render_context->terminate();
+	}
 
 	auto EngineLoop::run() -> void
 	{

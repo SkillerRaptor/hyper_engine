@@ -42,6 +42,10 @@ namespace HyperRendering::OpenGL33
 		
 		return {};
 	}
+	
+	auto Context::terminate() -> void
+	{
+	}
 
 	auto Context::update() -> void
 	{

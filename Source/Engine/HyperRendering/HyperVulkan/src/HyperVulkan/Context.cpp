@@ -13,10 +13,13 @@ namespace HyperRendering::Vulkan
 {
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT severity_flags,
-		VkDebugUtilsMessageTypeFlagsEXT,
+		VkDebugUtilsMessageTypeFlagsEXT type_flags,
 		const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-		void*)
+		void* user_data)
 	{
+		HYPERENGINE_VARIABLE_NOT_USED(type_flags);
+		HYPERENGINE_VARIABLE_NOT_USED(user_data);
+		
 		if (severity_flags >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 		{
 			HyperCore::Logger::fatal("Vulkan Validation Layer: {}", callback_data->pMessage);
@@ -31,30 +34,24 @@ namespace HyperRendering::Vulkan
 
 	Context::Context(HyperPlatform::Window& window)
 		: IContext(window)
+		, m_device(*this)
 	{
-	}
-
-	Context::~Context()
-	{
-#if HYPERENGINE_DEBUG
-		vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messenger, nullptr);
-#endif
-
-		vkDestroyInstance(m_instance, nullptr);
 	}
 
 	auto Context::initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
 	{
 		if (volkInitialize() != VK_SUCCESS)
 		{
-			HyperCore::Logger::error("Failed to initialize volk!");
+			HyperCore::Logger::error("Failed to initialize volk");
 			return HyperCore::Errors::ConstructError::Incomplete;
 		}
+		
+		HyperCore::Logger::debug("Volk was initialized");
 
 #if HYPERENGINE_DEBUG
 		if (!are_validation_layers_supported())
 		{
-			HyperCore::Logger::error("Failed to find requested validation layer!");
+			HyperCore::Logger::error("Failed to find requested validation layer");
 			return HyperCore::Errors::ConstructError::Incomplete;
 		}
 #endif
@@ -72,8 +69,31 @@ namespace HyperRendering::Vulkan
 			return debug_messenger_result;
 		}
 #endif
+		
+		auto device_result = m_device.initialize();
+		if (device_result.is_error())
+		{
+			return device_result;
+		}
+		
+		HyperCore::Logger::info("Successfully created Vulkan context");
 
 		return {};
+	}
+	
+	auto Context::terminate() -> void
+	{
+		m_device.terminate();
+		
+#if HYPERENGINE_DEBUG
+		vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messenger, nullptr);
+		HyperCore::Logger::debug("Vulkan debug messenger was destroyed");
+#endif
+
+		vkDestroyInstance(m_instance, nullptr);
+		HyperCore::Logger::debug("Vulkan instance was destroyed");
+		
+		HyperCore::Logger::info("Successfully destroyed Vulkan context");
 	}
 
 	auto Context::update() -> void
@@ -105,12 +125,6 @@ namespace HyperRendering::Vulkan
 		instance_create_info.ppEnabledLayerNames = s_validation_layers.data();
 		instance_create_info.enabledLayerCount = static_cast<uint32_t>(s_validation_layers.size());
 		
-		std::array<VkValidationFeatureEnableEXT, 1> enabled_validation_features = { VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT };
-		VkValidationFeaturesEXT validation_features{};
-		validation_features.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
-		validation_features.enabledValidationFeatureCount = static_cast<uint32_t>(enabled_validation_features.size());
-		validation_features.pEnabledValidationFeatures = enabled_validation_features.data();
-		
 		VkDebugUtilsMessengerCreateInfoEXT debug_messenger_create_info{};
 		debug_messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 		debug_messenger_create_info.messageSeverity =
@@ -122,18 +136,19 @@ namespace HyperRendering::Vulkan
 			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
 			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 		debug_messenger_create_info.pfnUserCallback = debug_callback;
-		debug_messenger_create_info.pNext = &validation_features;
 		
 		instance_create_info.pNext = &debug_messenger_create_info;
 #endif
 
 		if (vkCreateInstance(&instance_create_info, nullptr, &m_instance) != VK_SUCCESS)
 		{
-			HyperCore::Logger::error("Failed to create VkInstance!");
+			HyperCore::Logger::error("Failed to create Vulkan instance");
 			return HyperCore::Errors::ConstructError::Incomplete;
 		}
 
 		volkLoadInstance(m_instance);
+		
+		HyperCore::Logger::debug("Vulkan instance was created");
 
 		return {};
 	}
@@ -154,9 +169,11 @@ namespace HyperRendering::Vulkan
 
 		if (vkCreateDebugUtilsMessengerEXT(m_instance, &debug_messenger_create_info, nullptr, &m_debug_messenger) != VK_SUCCESS)
 		{
-			HyperCore::Logger::error("Failed to create VkDebugUtilsMessengerEXT!");
+			HyperCore::Logger::error("Failed to create Vulkan debug messenger");
 			return HyperCore::Errors::ConstructError::Incomplete;
 		}
+		
+		HyperCore::Logger::debug("Vulkan debug messenger was created");
 
 		return {};
 	}
@@ -206,5 +223,15 @@ namespace HyperRendering::Vulkan
 		}
 
 		return true;
+	}
+	
+	auto Context::instance() const -> VkInstance
+	{
+		return m_instance;
+	}
+	
+	auto Context::validation_layers() -> std::array<const char*, 1>
+	{
+		return s_validation_layers;
 	}
 } // namespace HyperRendering::Vulkan
