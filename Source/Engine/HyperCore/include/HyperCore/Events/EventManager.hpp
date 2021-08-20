@@ -75,6 +75,8 @@ namespace HyperCore
 
 			auto* event_wrapper = get_event_wrapper<T>(event_id);
 			event_wrapper->register_listener(name, event_listener);
+			
+			HyperCore::Logger::debug("Registered event listener with name '{}'", name);
 		}
 
 		template <typename T, typename = std::enable_if_t<std::is_base_of_v<IEvent, T>>>
@@ -88,6 +90,8 @@ namespace HyperCore
 
 			auto* event_wrapper = get_event_wrapper<T>(event_id);
 			event_wrapper->unregister_listener(name);
+			
+			HyperCore::Logger::debug("Unregistered event listener with name '{}'", name);
 		}
 
 		auto process_next_event() -> void;

@@ -30,9 +30,11 @@ namespace HyperPlatform
 	{
 		if (glfwInit() == GLFW_FALSE)
 		{
-			HyperCore::Logger::fatal("Failed to initialize GLFW!");
+			HyperCore::Logger::fatal("Failed to initialize GLFW");
 			return HyperCore::Errors::ConstructError::Incomplete;
 		}
+		
+		HyperCore::Logger::debug("GLFW was initialized");
 
 		switch (m_graphics_api)
 		{
@@ -56,7 +58,7 @@ namespace HyperPlatform
 		{
 			glfwTerminate();
 			
-			HyperCore::Logger::fatal("Failed to create GLFW window!");
+			HyperCore::Logger::fatal("Failed to create GLFW window");
 			return HyperCore::Errors::ConstructError::Incomplete;
 		}
 
@@ -172,6 +174,8 @@ namespace HyperPlatform
 				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
 				window_info->event_manager->invoke<HyperCore::WindowMovedEvent>(x, y);
 			});
+		
+		HyperCore::Logger::info("Successfully created window");
 
 		return {};
 	}

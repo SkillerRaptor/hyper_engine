@@ -25,9 +25,11 @@ namespace HyperRendering::OpenGL33
 			glfwDestroyWindow(m_window.native_window());
 			glfwTerminate();
 		
-			HyperCore::Logger::fatal("Failed to initialize GLAD!");
+			HyperCore::Logger::fatal("Failed to initialize GLAD");
 			return HyperCore::Errors::ConstructError::Incomplete;
 		}
+		
+		HyperCore::Logger::debug("GLAD was initialized");
 
 		m_window.event_manager()->register_listener<HyperCore::WindowFramebufferResizeEvent>(
 			"HyperRendering::OpenGL33::Context::FramebufferResizeEvent",
@@ -35,7 +37,9 @@ namespace HyperRendering::OpenGL33
 			{
 				glViewport(0, 0, event.width, event.height);
 			});
-
+		
+		HyperCore::Logger::info("Successfully created OpenGL 3.3 context");
+		
 		return {};
 	}
 
