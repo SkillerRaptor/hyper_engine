@@ -25,7 +25,7 @@ namespace HyperCore
 		{
 			return m_line;
 		}
-		
+
 		static constexpr auto current(
 			const char* file = __builtin_FILE(),
 			const char* function = __builtin_FUNCTION(),
@@ -35,13 +35,13 @@ namespace HyperCore
 			location.m_file = file;
 			location.m_function = function;
 			location.m_line = line;
-			
+
 			return location;
 		}
-		
+
 	private:
 		constexpr SourceLocation() = default;
-	
+
 	private:
 		const char* m_file{ "unknown" };
 		const char* m_function{ "unknown" };

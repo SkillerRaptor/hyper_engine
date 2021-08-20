@@ -28,7 +28,11 @@ namespace HyperPlatform
 
 	auto Window::initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
 	{
-		glfwInit();
+		if (glfwInit() == GLFW_FALSE)
+		{
+			HyperCore::Logger::fatal("Failed to initialize GLFW!");
+			return HyperCore::Errors::ConstructError::Incomplete;
+		}
 
 		switch (m_graphics_api)
 		{
@@ -51,6 +55,8 @@ namespace HyperPlatform
 		if (m_native_window == nullptr)
 		{
 			glfwTerminate();
+			
+			HyperCore::Logger::fatal("Failed to create GLFW window!");
 			return HyperCore::Errors::ConstructError::Incomplete;
 		}
 

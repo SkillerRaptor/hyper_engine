@@ -19,7 +19,14 @@ namespace HyperCore
 		template <size_t N>
 		static constexpr auto hash_crc_32(const char (&string)[N]) -> unsigned int
 		{
-			return crc_32<N - 2>(string) ^ 0xFFFFFFFF;
+			if constexpr (N >= 2)
+			{
+				return crc_32<N - 2>(string) ^ 0xFFFFFFFF;
+			}
+			else
+			{
+				return 0;
+			}
 		}
 
 	private:

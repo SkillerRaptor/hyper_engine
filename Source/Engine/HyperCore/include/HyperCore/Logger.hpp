@@ -74,7 +74,7 @@ namespace HyperCore
 			{
 				return;
 			}
-			
+
 			if (format.empty())
 			{
 				internal_log(log_level, format);
@@ -93,7 +93,7 @@ namespace HyperCore
 		}
 
 		static auto internal_log(Level level, std::string_view string) -> void;
-		
+
 	private:
 		static Level s_log_level;
 	};

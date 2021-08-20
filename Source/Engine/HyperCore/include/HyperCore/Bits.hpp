@@ -13,6 +13,11 @@ namespace HyperCore::Bits
 	template <typename T, typename = typename std::enable_if_t<std::is_integral_v<T>>>
 	static constexpr auto bit(T shift) noexcept -> T
 	{
+		if (shift < 0)
+		{
+			return 0;
+		}
+		
 		using U = std::make_unsigned_t<T>;
 		return static_cast<U>(1) << shift;
 	}
@@ -20,6 +25,11 @@ namespace HyperCore::Bits
 	template <typename T, typename = typename std::enable_if_t<std::is_integral_v<T>>>
 	static constexpr auto mask(T shift) noexcept -> T
 	{
+		if (shift < 0)
+		{
+			return 0;
+		}
+		
 		using U = std::make_unsigned_t<T>;
 		return bit(shift) - static_cast<U>(1);
 	}

@@ -68,7 +68,7 @@ namespace HyperCore
 
 	public:
 		Result() = default;
-		
+
 		Result(ErrorType&& error)
 			: m_error(std::move(error))
 		{

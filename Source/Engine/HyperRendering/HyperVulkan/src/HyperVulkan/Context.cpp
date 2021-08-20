@@ -25,7 +25,7 @@ namespace HyperRendering::Vulkan
 	{
 		if (volkInitialize() != VK_SUCCESS)
 		{
-			HyperCore::Logger::error("Failed to load vulkan!");
+			HyperCore::Logger::error("Failed to initialize volk!");
 			return HyperCore::Errors::ConstructError::Incomplete;
 		}
 
@@ -51,7 +51,7 @@ namespace HyperRendering::Vulkan
 		
 		if (vkCreateInstance(&instance_create_info, nullptr, &m_instance) != VK_SUCCESS)
 		{
-			HyperCore::Logger::error("Failed to create instance!");
+			HyperCore::Logger::error("Failed to create VkInstance!");
 			return HyperCore::Errors::ConstructError::Incomplete;
 		}
 

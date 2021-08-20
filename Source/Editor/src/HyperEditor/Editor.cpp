@@ -11,6 +11,7 @@ namespace HyperEditor
 	Editor::Editor()
 		: IApplication("HyperEditor")
 	{
+		set_graphics_api(HyperPlatform::GraphicsApi::Vulkan);
 	}
 
 	auto Editor::startup() -> void

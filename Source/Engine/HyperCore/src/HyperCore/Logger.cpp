@@ -16,7 +16,7 @@ namespace HyperCore
 #else
 	Logger::Level Logger::s_log_level{ Level::Fatal };
 #endif
-	
+
 	auto Logger::internal_log(Logger::Level level, std::string_view string) -> void
 	{
 		const auto level_color = [&level]() -> fmt::color

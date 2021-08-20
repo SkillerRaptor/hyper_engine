@@ -21,7 +21,10 @@ namespace HyperEngine
 		explicit IApplication(std::string title);
 		virtual ~IApplication() = default;
 
+		auto set_title(std::string title) -> void;
 		auto title() const -> std::string;
+		
+		auto set_graphics_api(HyperPlatform::GraphicsApi graphics_api) -> void;
 		auto graphics_api() const -> HyperPlatform::GraphicsApi;
 
 	protected:

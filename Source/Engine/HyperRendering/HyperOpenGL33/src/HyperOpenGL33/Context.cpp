@@ -24,6 +24,8 @@ namespace HyperRendering::OpenGL33
 		{
 			glfwDestroyWindow(m_window.native_window());
 			glfwTerminate();
+		
+			HyperCore::Logger::fatal("Failed to initialize GLAD!");
 			return HyperCore::Errors::ConstructError::Incomplete;
 		}
 

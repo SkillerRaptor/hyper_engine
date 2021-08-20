@@ -36,7 +36,7 @@ namespace HyperEngine
 		auto window_result = m_window.initialize();
 		if (window_result.is_error())
 		{
-			HyperCore::Logger::fatal("Failed to initialize window!");
+			HyperCore::Logger::fatal("Failed to create window!");
 			return window_result.error();
 		}
 
@@ -59,6 +59,7 @@ namespace HyperEngine
 
 		if (m_render_context == nullptr)
 		{
+			HyperCore::Logger::fatal("Failed to create render context for specified graphics api!");
 			return HyperCore::Errors::ConstructError::UndefinedBehaviour;
 		}
 

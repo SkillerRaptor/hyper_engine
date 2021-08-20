@@ -22,6 +22,12 @@ namespace HyperCore
 		static auto format(std::string_view format, Args&&... args) -> std::string
 		{
 			// TODO(SkillerRaptor): Replacing fmt::format with own implementation
+			
+			if (format.empty())
+			{
+				return format.data();
+			}
+			
 			return fmt::format(format, std::forward<Args>(args)...);
 		}
 	};
