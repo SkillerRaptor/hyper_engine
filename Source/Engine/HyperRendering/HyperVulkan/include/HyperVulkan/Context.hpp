@@ -8,12 +8,18 @@
 
 #include <HyperRendering/IContext.hpp>
 
+#include <vector>
+
 using VkInstance = struct VkInstance_T*;
+using VkDebugUtilsMessengerEXT = struct VkDebugUtilsMessengerEXT_T*;
 
 namespace HyperRendering::Vulkan
 {
 	class Context final : public IContext
 	{
+	private:
+		static constexpr std::array<const char*, 1> s_validation_layers = { "VK_LAYER_KHRONOS_validation" };
+
 	public:
 		explicit Context(HyperPlatform::Window& window);
 		~Context() override;
@@ -22,9 +28,14 @@ namespace HyperRendering::Vulkan
 		auto update() -> void override;
 
 	private:
-		auto get_instance_extensions(const char**& extensions, uint32_t& extension_count) const -> void;
+		auto create_instance() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;
+		auto create_debug_messenger() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;
+		
+		auto get_required_extensions() const -> std::vector<const char*>;
+		auto are_validation_layers_supported() const -> bool;
 
 	private:
 		VkInstance m_instance{ nullptr };
+		VkDebugUtilsMessengerEXT m_debug_messenger{ nullptr };
 	};
 } // namespace HyperRendering::Vulkan

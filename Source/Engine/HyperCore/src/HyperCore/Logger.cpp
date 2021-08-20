@@ -56,9 +56,9 @@ namespace HyperCore
 				return "Undefined";
 			}
 		}();
-
+		
 		fmt::print(
-			fg(level_color),
+			fmt::fg(level_color),
 			"[ {:%H:%M:%S} | {} ] {}\n",
 			fmt::localtime(std::time(nullptr)),
 			level_name,
