@@ -9,6 +9,7 @@
 #include <HyperCore/Errors.hpp>
 #include <HyperCore/Result.hpp>
 
+#include <cstdint>
 #include <optional>
 
 using VkPhysicalDevice = struct VkPhysicalDevice_T*;
