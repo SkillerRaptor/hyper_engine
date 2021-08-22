@@ -25,6 +25,35 @@ namespace HyperRendering::Vulkan
 
 	auto Swapchain::initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
 	{
+		auto swapchain_result = create_swapchain();
+		if (swapchain_result.is_error())
+		{
+			return swapchain_result;
+		}
+
+		auto image_views_result = create_image_views();
+		if (image_views_result.is_error())
+		{
+			return image_views_result;
+		}
+
+		return {};
+	}
+
+	auto Swapchain::terminate() -> void
+	{
+		for (size_t i = m_swapchain_image_views.size() - 1; i < m_swapchain_image_views.size(); --i)
+		{
+			vkDestroyImageView(m_context.device()->device(), m_swapchain_image_views[i], nullptr);
+			HyperCore::Logger::debug("Vulkan image view #{} was destroyed", i);
+		}
+
+		vkDestroySwapchainKHR(m_context.device()->device(), m_swapchain, nullptr);
+		HyperCore::Logger::debug("Vulkan swapchain was destroyed");
+	}
+
+	auto Swapchain::create_swapchain() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
+	{
 		auto swapchain_support_details = query_swap_chain_support(m_context.device()->physical_device());
 
 		auto extent = choose_swap_extent(swapchain_support_details.surface_capabilities);
@@ -38,7 +67,7 @@ namespace HyperRendering::Vulkan
 
 		auto queue_family_indices = m_context.device()->find_queue_families(m_context.device()->physical_device());
 		std::array<uint32_t, 2> queue_family_indices_array = { queue_family_indices.graphics_family.value(), queue_family_indices.presentation_family.value() };
-		
+
 		VkSwapchainCreateInfoKHR swapchain_create_info{};
 		swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		swapchain_create_info.surface = m_context.surface()->surface();
@@ -56,26 +85,26 @@ namespace HyperRendering::Vulkan
 		swapchain_create_info.presentMode = surface_presentation_mode;
 		swapchain_create_info.clipped = VK_TRUE;
 		swapchain_create_info.oldSwapchain = VK_NULL_HANDLE;
-		
+
 		if (queue_family_indices.graphics_family != queue_family_indices.presentation_family)
 		{
 			swapchain_create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 			swapchain_create_info.pQueueFamilyIndices = queue_family_indices_array.data();
 			swapchain_create_info.queueFamilyIndexCount = static_cast<uint32_t>(queue_family_indices_array.size());
 		}
-		
+
 		if (vkCreateSwapchainKHR(m_context.device()->device(), &swapchain_create_info, nullptr, &m_swapchain) != VK_SUCCESS)
 		{
 			HyperCore::Logger::fatal("Failed to create Vulkan swapchain");
 			return HyperCore::Errors::ConstructError::Incomplete;
 		}
-		
+
 		m_swapchain_image_format = surface_format.format;
 		m_swapchain_extent = extent;
-		
+
 		uint32_t swapchain_image_count = 0;
 		vkGetSwapchainImagesKHR(m_context.device()->device(), m_swapchain, &swapchain_image_count, nullptr);
-		
+
 		m_swapchain_images.resize(swapchain_image_count);
 		vkGetSwapchainImagesKHR(m_context.device()->device(), m_swapchain, &swapchain_image_count, m_swapchain_images.data());
 
@@ -84,9 +113,37 @@ namespace HyperRendering::Vulkan
 		return {};
 	}
 
-	auto Swapchain::terminate() -> void
+	auto Swapchain::create_image_views() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
 	{
-		vkDestroySwapchainKHR(m_context.device()->device(), m_swapchain, nullptr);
+		m_swapchain_image_views.resize(m_swapchain_images.size());
+
+		for (size_t i = 0; i < m_swapchain_images.size(); ++i)
+		{
+			VkImageViewCreateInfo image_view_create_info{};
+			image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			image_view_create_info.image = m_swapchain_images[i];
+			image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			image_view_create_info.format = m_swapchain_image_format;
+			image_view_create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+			image_view_create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+			image_view_create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+			image_view_create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			image_view_create_info.subresourceRange.baseMipLevel = 0;
+			image_view_create_info.subresourceRange.levelCount = 1;
+			image_view_create_info.subresourceRange.baseArrayLayer = 0;
+			image_view_create_info.subresourceRange.layerCount = 1;
+
+			if (vkCreateImageView(m_context.device()->device(), &image_view_create_info, nullptr, &m_swapchain_image_views[i]) != VK_SUCCESS)
+			{
+				HyperCore::Logger::fatal("Failed to create Vulkan image view #{}", i);
+				return HyperCore::Errors::ConstructError::Incomplete;
+			}
+
+			HyperCore::Logger::debug("Vulkan image view #{} was created", i);
+		}
+
+		return {};
 	}
 
 	auto Swapchain::query_swap_chain_support(VkPhysicalDevice physical_device) const -> Swapchain::SwapchainSupportDetails
@@ -197,7 +254,7 @@ namespace HyperRendering::Vulkan
 	{
 		return m_swapchain;
 	}
-	
+
 	auto Swapchain::swap_chain_images() const -> const std::vector<VkImage>&
 	{
 		return m_swapchain_images;

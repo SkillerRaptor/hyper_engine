@@ -39,6 +39,9 @@ namespace HyperRendering::Vulkan
 		auto swap_chain_images() const -> const std::vector<VkImage>&;
 
 	private:
+		auto create_swapchain() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;
+		auto create_image_views() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;
+		
 		auto choose_swap_extent(const VkSurfaceCapabilitiesKHR& surface_capabilities) const -> VkExtent2D;
 		auto choose_swap_surface_format(const std::vector<VkSurfaceFormatKHR>& available_surface_formats) const -> VkSurfaceFormatKHR;
 		auto choose_swap_presentation_mode(const std::vector<VkPresentModeKHR>& available_surface_presentation_modes) const -> VkPresentModeKHR;
@@ -49,6 +52,8 @@ namespace HyperRendering::Vulkan
 		VkSwapchainKHR m_swapchain{ VK_NULL_HANDLE };
 		VkFormat m_swapchain_image_format{};
 		VkExtent2D m_swapchain_extent{};
+		
 		std::vector<VkImage> m_swapchain_images{};
+		std::vector<VkImageView> m_swapchain_image_views{};
 	};
 } // namespace HyperRendering::Vulkan
