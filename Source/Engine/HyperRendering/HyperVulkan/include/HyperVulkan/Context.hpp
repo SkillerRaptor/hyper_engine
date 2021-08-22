@@ -6,46 +6,38 @@
 
 #pragma once
 
-#include "HyperVulkan/Device.hpp"
-#include "HyperVulkan/Surface.hpp"
-
 #include <HyperRendering/IContext.hpp>
 
-#include <vector>
-
-using VkInstance = struct VkInstance_T*;
-using VkDebugUtilsMessengerEXT = struct VkDebugUtilsMessengerEXT_T*;
+#include <memory>
 
 namespace HyperRendering::Vulkan
 {
+	class Device;
+	class Instance;
+	class Surface;
+	class Swapchain;
+
 	class Context final : public IContext
 	{
 	private:
-		static constexpr std::array<const char*, 1> s_validation_layers = { "VK_LAYER_KHRONOS_validation" };
-
 	public:
 		explicit Context(HyperPlatform::Window& window);
+		~Context() override;
 
 		auto initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError> override;
 		auto terminate() -> void override;
+
 		auto update() -> void override;
-		
-		auto instance() const -> VkInstance;
-		
-		static auto validation_layers() -> std::array<const char*, 1>;
+
+		auto device() const -> const std::unique_ptr<Device>&;
+		auto instance() const -> const std::unique_ptr<Instance>&;
+		auto surface() const -> const std::unique_ptr<Surface>&;
+		auto swap_chain() const -> const std::unique_ptr<Swapchain>&;
 
 	private:
-		auto create_instance() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;
-		auto create_debug_messenger() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;
-		
-		auto get_required_extensions() const -> std::vector<const char*>;
-		auto are_validation_layers_supported() const -> bool;
-
-	private:
-		VkInstance m_instance{ nullptr };
-		VkDebugUtilsMessengerEXT m_debug_messenger{ nullptr };
-		
-		Device m_device;
-		Surface m_surface;
+		std::unique_ptr<Device> m_device{ nullptr };
+		std::unique_ptr<Instance> m_instance{ nullptr };
+		std::unique_ptr<Surface> m_surface{ nullptr };
+		std::unique_ptr<Swapchain> m_swap_chain{ nullptr };
 	};
 } // namespace HyperRendering::Vulkan

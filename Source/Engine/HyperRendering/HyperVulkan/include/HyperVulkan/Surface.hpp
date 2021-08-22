@@ -9,7 +9,7 @@
 #include <HyperCore/Errors.hpp>
 #include <HyperCore/Result.hpp>
 
-using VkSurfaceKHR = struct VkSurfaceKHR_T*;
+#include <volk.h>
 
 namespace HyperRendering::Vulkan
 {
@@ -28,6 +28,6 @@ namespace HyperRendering::Vulkan
 	private:
 		Context& m_context;
 		
-		VkSurfaceKHR m_surface{ nullptr };
+		VkSurfaceKHR m_surface{ VK_NULL_HANDLE };
 	};
 } // namespace HyperRendering::Vulkan

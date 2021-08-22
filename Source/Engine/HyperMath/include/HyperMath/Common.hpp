@@ -66,6 +66,18 @@ namespace HyperMath
 	}
 
 	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+	static constexpr auto clamp(T value, T low, T high) noexcept -> T
+	{
+		return HyperMath::min(HyperMath::max(value, low), high);
+	}
+
+	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+	static constexpr auto saturate(T value) noexcept -> T
+	{
+		return HyperMath::clamp(value, static_cast<T>(0.0F), static_cast<T>(1.0F));
+	}
+
+	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 	static constexpr auto floor(T x) noexcept -> T
 	{
 		if (is_nan(x))

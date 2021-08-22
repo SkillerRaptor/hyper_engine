@@ -7,8 +7,8 @@
 #include "HyperVulkan/Surface.hpp"
 
 #include "HyperVulkan/Context.hpp"
+#include "HyperVulkan/Instance.hpp"
 
-#include <volk.h>
 #include <GLFW/glfw3.h>
 
 namespace HyperRendering::Vulkan
@@ -20,7 +20,7 @@ namespace HyperRendering::Vulkan
 
 	auto Surface::initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
 	{
-		if (glfwCreateWindowSurface(m_context.instance(), m_context.window().native_window(), nullptr, &m_surface) != VK_SUCCESS)
+		if (glfwCreateWindowSurface(m_context.instance()->instance(), m_context.window().native_window(), nullptr, &m_surface) != VK_SUCCESS)
 		{
 			HyperCore::Logger::fatal("Failed to create vulkan window surface");
 			return HyperCore::Errors::ConstructError::Incomplete;
@@ -33,7 +33,7 @@ namespace HyperRendering::Vulkan
 
 	auto Surface::terminate() -> void
 	{
-		vkDestroySurfaceKHR(m_context.instance(), m_surface, nullptr);
+		vkDestroySurfaceKHR(m_context.instance()->instance(), m_surface, nullptr);
 		HyperCore::Logger::debug("Vulkan window surface was destroyed");
 	}
 	

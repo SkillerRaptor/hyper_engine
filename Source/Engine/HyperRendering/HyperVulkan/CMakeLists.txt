@@ -10,12 +10,16 @@
 set(SOURCES
         src/HyperVulkan/Context.cpp
         src/HyperVulkan/Device.cpp
-        src/HyperVulkan/Surface.cpp)
+        src/HyperVulkan/Instance.cpp
+        src/HyperVulkan/Surface.cpp
+        src/HyperVulkan/Swapchain.cpp)
 
 set(HEADERS
         include/HyperVulkan/Context.hpp
         include/HyperVulkan/Device.hpp
-        include/HyperVulkan/Surface.hpp)
+        include/HyperVulkan/Instance.hpp
+        include/HyperVulkan/Surface.hpp
+        include/HyperVulkan/Swapchain.hpp)
 
 hyperengine_group_files("${SOURCES}")
 hyperengine_group_files("${HEADERS}")

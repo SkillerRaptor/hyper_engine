@@ -7,17 +7,16 @@
 #include "HyperVulkan/Device.hpp"
 
 #include "HyperVulkan/Context.hpp"
+#include "HyperVulkan/Instance.hpp"
 #include "HyperVulkan/Surface.hpp"
-
-#include <volk.h>
+#include "HyperVulkan/Swapchain.hpp"
 
 #include <set>
 
 namespace HyperRendering::Vulkan
 {
-	Device::Device(Context& context, Surface& surface)
+	Device::Device(Context& context)
 		: m_context(context)
-		, m_surface(surface)
 	{
 	}
 
@@ -47,7 +46,7 @@ namespace HyperRendering::Vulkan
 	auto Device::pick_physical_device() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
 	{
 		uint32_t available_physical_device_count = 0;
-		vkEnumeratePhysicalDevices(m_context.instance(), &available_physical_device_count, nullptr);
+		vkEnumeratePhysicalDevices(m_context.instance()->instance(), &available_physical_device_count, nullptr);
 
 		if (available_physical_device_count == 0)
 		{
@@ -56,7 +55,7 @@ namespace HyperRendering::Vulkan
 		}
 
 		std::vector<VkPhysicalDevice> available_physical_devices(available_physical_device_count);
-		vkEnumeratePhysicalDevices(m_context.instance(), &available_physical_device_count, available_physical_devices.data());
+		vkEnumeratePhysicalDevices(m_context.instance()->instance(), &available_physical_device_count, available_physical_devices.data());
 
 		for (const auto& physical_device : available_physical_devices)
 		{
@@ -96,7 +95,7 @@ namespace HyperRendering::Vulkan
 			device_queue_create_info.queueFamilyIndex = queue_family;
 			device_queue_create_info.pQueuePriorities = &queue_priority;
 			device_queue_create_info.queueCount = 1;
-			
+
 			device_queue_create_infos.push_back(device_queue_create_info);
 		}
 
@@ -104,15 +103,15 @@ namespace HyperRendering::Vulkan
 
 		VkDeviceCreateInfo device_create_info{};
 		device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		device_create_info.pEnabledFeatures = &physical_device_features;
 		device_create_info.pQueueCreateInfos = device_queue_create_infos.data();
 		device_create_info.queueCreateInfoCount = static_cast<uint32_t>(device_queue_create_infos.size());
-		device_create_info.pEnabledFeatures = &physical_device_features;
-		device_create_info.ppEnabledExtensionNames = nullptr;
-		device_create_info.enabledExtensionCount = 0;
+		device_create_info.ppEnabledExtensionNames = s_device_extensions.data();
+		device_create_info.enabledExtensionCount = static_cast<uint32_t>(s_device_extensions.size());
 
 #if HYPERENGINE_DEBUG
-		device_create_info.ppEnabledLayerNames = Context::validation_layers().data();
-		device_create_info.enabledLayerCount = static_cast<uint32_t>(Context::validation_layers().size());
+		device_create_info.ppEnabledLayerNames = Instance::s_validation_layers.data();
+		device_create_info.enabledLayerCount = static_cast<uint32_t>(Instance::s_validation_layers.size());
 #endif
 
 		if (vkCreateDevice(m_physical_device, &device_create_info, nullptr, &m_device) != VK_SUCCESS)
@@ -131,10 +130,37 @@ namespace HyperRendering::Vulkan
 		return {};
 	}
 
+	auto Device::check_physical_device_extension_support(VkPhysicalDevice physical_device) const -> bool
+	{
+		uint32_t available_device_extension_count = 0;
+		vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &available_device_extension_count, nullptr);
+
+		std::vector<VkExtensionProperties> available_device_extensions(available_device_extension_count);
+		vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &available_device_extension_count, available_device_extensions.data());
+
+		std::set<std::string> required_extensions(s_device_extensions.begin(), s_device_extensions.end());
+
+		for (const auto& device_extension : available_device_extensions)
+		{
+			required_extensions.erase(device_extension.extensionName);
+		}
+
+		return required_extensions.empty();
+	}
+
 	auto Device::is_physical_device_suitable(VkPhysicalDevice physical_device) const -> bool
 	{
 		auto queue_family_indices = find_queue_families(physical_device);
-		return queue_family_indices.is_complete();
+		auto are_extensions_supported = check_physical_device_extension_support(physical_device);
+
+		bool is_swapchain_supported = false;
+		if (are_extensions_supported)
+		{
+			auto swapchain_support_details = m_context.swap_chain()->query_swap_chain_support(physical_device);
+			is_swapchain_supported = !swapchain_support_details.surface_formats.empty() && !swapchain_support_details.surface_presentation_modes.empty();
+		}
+
+		return queue_family_indices.is_complete() && are_extensions_supported && is_swapchain_supported;
 	}
 
 	auto Device::find_queue_families(VkPhysicalDevice physical_device) const -> Device::QueueFamilyIndices
@@ -156,7 +182,7 @@ namespace HyperRendering::Vulkan
 			}
 
 			VkBool32 presentation_support = false;
-			vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, m_surface.surface(), &presentation_support);
+			vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, m_context.surface()->surface(), &presentation_support);
 
 			if (presentation_support)
 			{
@@ -172,6 +198,26 @@ namespace HyperRendering::Vulkan
 		}
 
 		return queue_family_indices;
+	}
+
+	auto Device::physical_device() const -> VkPhysicalDevice
+	{
+		return m_physical_device;
+	}
+
+	auto Device::device() const -> VkDevice
+	{
+		return m_device;
+	}
+	
+	auto Device::graphics_queue() const -> VkQueue
+	{
+		return m_graphics_queue;
+	}
+	
+	auto Device::presentation_queue() const -> VkQueue
+	{
+		return m_presentation_queue;
 	}
 
 	auto Device::QueueFamilyIndices::is_complete() const -> bool
