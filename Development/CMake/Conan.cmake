@@ -24,6 +24,8 @@ macro(run_conan)
     conan_cmake_run(
             REQUIRES
             ${CONAN_LIBRARIES}
+            OPTIONS
+            ${CONAN_OPTIONS}
             BASIC_SETUP
             CMAKE_TARGETS
             BUILD

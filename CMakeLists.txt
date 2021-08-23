@@ -34,6 +34,9 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 include(Development/CMake/Cache.cmake)
 
+include(Development/CMake/CompilerSettings.cmake)
+enable_settings(ProjectOptions)
+
 include(Development/CMake/CompilerWarnings.cmake)
 enable_warnings(ProjectWarnings)
 
@@ -66,13 +69,18 @@ set(CONAN_LIBRARIES
         glfw/3.3.4
         glslang/11.5.0
         meshoptimizer/0.16
-        stb/20200203
         spirv-cross/20210115
+        spirv-tools/2021.2
+        stb/20200203
         tinygltf/2.5.0
         tinyobjloader/1.0.6
         vulkan-headers/1.2.184
         vulkan-memory-allocator/2.3.0
         volk/1.2.170)
+
+set(CONAN_OPTIONS
+        glad:gl_profile=core
+        spirv-cross:build_executable=False)
 
 include(Development/CMake/Conan.cmake)
 run_conan()
