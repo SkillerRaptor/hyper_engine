@@ -10,6 +10,7 @@
 set(SOURCES
         src/HyperVulkan/Context.cpp
         src/HyperVulkan/Device.cpp
+        src/HyperVulkan/GraphicsPipeline.cpp
         src/HyperVulkan/Instance.cpp
         src/HyperVulkan/Surface.cpp
         src/HyperVulkan/Swapchain.cpp)
@@ -17,6 +18,7 @@ set(SOURCES
 set(HEADERS
         include/HyperVulkan/Context.hpp
         include/HyperVulkan/Device.hpp
+        include/HyperVulkan/GraphicsPipeline.hpp
         include/HyperVulkan/Instance.hpp
         include/HyperVulkan/Surface.hpp
         include/HyperVulkan/Swapchain.hpp)
@@ -29,5 +31,6 @@ target_link_libraries(
         HyperVulkan
         PUBLIC
         CONAN_PKG::glfw
+        CONAN_PKG::vulkan-memory-allocator
         CONAN_PKG::volk
         HyperRendering)
