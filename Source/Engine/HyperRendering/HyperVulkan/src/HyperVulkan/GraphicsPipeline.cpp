@@ -13,6 +13,7 @@ namespace HyperRendering::Vulkan
 	GraphicsPipeline::GraphicsPipeline(Context& context)
 		: m_context(context)
 	{
+		HYPERENGINE_VARIABLE_NOT_USED(m_context);
 	}
 
 	auto GraphicsPipeline::initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
