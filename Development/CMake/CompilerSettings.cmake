@@ -42,7 +42,7 @@ function(enable_settings project_name)
 
     if (ENABLE_EXCEPTIONS)
         set(MSVC_SETTINGS
-                /EH)
+                /EHscr)
 
         set(CLANG_SETTINGS
                 -fexceptions)
@@ -51,7 +51,7 @@ function(enable_settings project_name)
                 -fexceptions)
     else ()
         set(MSVC_SETTINGS
-                /EH-)
+                /EHscr-)
 
         set(CLANG_SETTINGS
                 -fno-exceptions)
