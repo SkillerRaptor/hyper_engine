@@ -6,11 +6,9 @@
 
 #pragma once
 
-#include <HyperCore/Errors.hpp>
 #include <HyperCore/Result.hpp>
 #include <HyperCore/Events/EventManager.hpp>
 #include <HyperPlatform/Window.hpp>
-#include <HyperRendering/IContext.hpp>
 
 #include <memory>
 
@@ -23,7 +21,7 @@ namespace HyperEngine
 	public:
 		explicit EngineLoop(IApplication& application);
 		
-		auto initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;
+		auto initialize() -> HyperCore::InitializeResult;
 		auto terminate() -> void;
 		
 		auto run() -> void;
@@ -34,6 +32,5 @@ namespace HyperEngine
 		
 		HyperCore::EventManager m_event_manager{};
 		HyperPlatform::Window m_window;
-		std::unique_ptr<HyperRendering::IContext> m_render_context{ nullptr };
 	};
 } // namespace HyperEngine

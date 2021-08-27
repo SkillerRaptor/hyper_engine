@@ -8,14 +8,6 @@
 
 #include "HyperEngine/IApplication.hpp"
 
-#if HYPERENGINE_BUILD_OPENGL
-#	include <HyperOpenGL33/Context.hpp>
-#endif
-
-#if HYPERENGINE_BUILD_VULKAN
-#	include <HyperVulkan/Context.hpp>
-#endif
-
 namespace HyperEngine
 {
 	EngineLoop::EngineLoop(IApplication& application)
@@ -24,7 +16,7 @@ namespace HyperEngine
 	{
 	}
 
-	auto EngineLoop::initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
+	auto EngineLoop::initialize() -> HyperCore::InitializeResult
 	{
 		m_event_manager.register_listener<HyperCore::WindowCloseEvent>(
 			"HyperEngine::EngineLoop::CloseEvent",
@@ -40,43 +32,13 @@ namespace HyperEngine
 			return window_result.error();
 		}
 
-		m_render_context = [this]() -> std::unique_ptr<HyperRendering::IContext>
-		{
-			switch (m_application.graphics_api())
-			{
-#if HYPERENGINE_BUILD_OPENGL
-			case HyperPlatform::GraphicsApi::OpenGL33:
-				return std::make_unique<HyperRendering::OpenGL33::Context>(m_window);
-#endif
-#if HYPERENGINE_BUILD_VULKAN
-			case HyperPlatform::GraphicsApi::Vulkan:
-				return std::make_unique<HyperRendering::Vulkan::Context>(m_window);
-#endif
-			default:
-				return nullptr;
-			}
-		}();
-
-		if (m_render_context == nullptr)
-		{
-			HyperCore::Logger::fatal("Failed to create render context for specified graphics api");
-			return HyperCore::Errors::ConstructError::UndefinedBehaviour;
-		}
-
-		auto render_context_result = m_render_context->initialize();
-		if (render_context_result.is_error())
-		{
-			return render_context_result.error();
-		}
-
 		m_running = true;
-		
+
 		return {};
 	}
-	
+
 	auto EngineLoop::terminate() -> void
 	{
-		m_render_context->terminate();
 	}
 
 	auto EngineLoop::run() -> void
@@ -91,12 +53,7 @@ namespace HyperEngine
 			(void) delta_time;
 
 			m_event_manager.process_next_event();
-
-			m_render_context->begin_frame();
-			m_render_context->submit_command<HyperRendering::ClearCommand>(HyperMath::Vec4f{ 0.1F, 0.1F, 0.1F, 1.0F });
-			m_render_context->end_frame();
-
-			m_render_context->update();
+			
 			m_window.poll_events();
 		}
 	}
