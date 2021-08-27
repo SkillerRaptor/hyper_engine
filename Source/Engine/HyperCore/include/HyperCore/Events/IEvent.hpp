@@ -10,8 +10,9 @@
 
 namespace HyperCore
 {
-	struct IEvent
+	class IEvent
 	{
-		IEvent() = default;
+	public:
+		virtual ~IEvent() = default;
 	};
 } // namespace HyperCore

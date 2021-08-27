@@ -22,6 +22,7 @@ namespace HyperCore::Errors
 	enum class RuntimeError
 	{
 		None = 0,
+		OutOfBounds,
 		Uninitialized,
 		UndefinedBehaviour
 	};

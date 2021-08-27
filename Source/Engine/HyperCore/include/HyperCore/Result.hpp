@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "HyperCore/Errors.hpp"
+
 #include <optional>
 #include <utility>
 
@@ -19,22 +21,22 @@ namespace HyperCore
 		using ErrorType = ErrorT;
 
 	public:
-		Result(ValueType&& result)
+		Result(ValueType&& result) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
 			: m_result(std::move(result))
 		{
 		}
 
-		Result(const ValueType& result)
+		Result(const ValueType& result) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
 			: m_result(result)
 		{
 		}
 
-		Result(ErrorType&& error)
+		Result(ErrorType&& error) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
 			: m_error(std::move(error))
 		{
 		}
 
-		Result(const ErrorType& error)
+		Result(const ErrorType& error) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
 			: m_error(error)
 		{
 		}
@@ -69,12 +71,12 @@ namespace HyperCore
 	public:
 		Result() = default;
 
-		Result(ErrorType&& error)
+		Result(ErrorType&& error) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
 			: m_error(std::move(error))
 		{
 		}
 
-		Result(const ErrorType& error)
+		Result(const ErrorType& error) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
 			: m_error(error)
 		{
 		}
@@ -92,4 +94,8 @@ namespace HyperCore
 	private:
 		std::optional<ErrorType> m_error{};
 	};
+	
+	using InitializeResult = Result<void, Errors::ConstructError>;
+	using RuntimeResult = Result<void, Errors::RuntimeError>;
+	
 } // namespace HyperCore
