@@ -27,33 +27,5 @@ target_link_libraries(
         HyperCore
         HyperMath
         HyperPlatform
+#       HyperRendering
         HyperResource)
-
-#-------------------------------------------------------------------------------------------
-# OpenGL
-#-------------------------------------------------------------------------------------------
-if (HYPERENGINE_BUILD_OPENGL)
-    # TODO(SkillerRaptor): Implementing OpenGL 4.6
-    target_link_libraries(
-            HyperEngine
-            PUBLIC
-            HyperOpenGL33)
-    target_compile_definitions(
-            HyperEngine
-            PUBLIC
-            -DHYPERENGINE_BUILD_OPENGL=1)
-endif ()
-
-#-------------------------------------------------------------------------------------------
-# Vulkan
-#-------------------------------------------------------------------------------------------
-if (HYPERENGINE_BUILD_VULKAN)
-    target_link_libraries(
-            HyperEngine
-            PUBLIC
-            HyperVulkan)
-    target_compile_definitions(
-            HyperEngine
-            PUBLIC
-            -DHYPERENGINE_BUILD_VULKAN=1)
-endif ()
