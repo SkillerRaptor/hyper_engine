@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <HyperCore/JobSystem.hpp>
 #include <HyperCore/Result.hpp>
 #include <HyperCore/Events/EventManager.hpp>
 #include <HyperPlatform/Window.hpp>
@@ -31,6 +32,7 @@ namespace HyperEngine
 		bool m_running{ false };
 		
 		HyperCore::EventManager m_event_manager{};
+		HyperCore::JobSystem m_job_system{};
 		HyperPlatform::Window m_window;
 	};
 } // namespace HyperEngine

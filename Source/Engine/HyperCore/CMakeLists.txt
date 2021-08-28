@@ -9,6 +9,7 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/HyperCore/Assertion.cpp
+        src/HyperCore/JobSystem.cpp
         src/HyperCore/Logger.cpp
         src/HyperCore/Events/EventManager.cpp)
 
@@ -19,6 +20,7 @@ set(HEADERS
         include/HyperCore/Errors.hpp
         include/HyperCore/Formatter.hpp
         include/HyperCore/Hasher.hpp
+        include/HyperCore/JobSystem.hpp
         include/HyperCore/Logger.hpp
         include/HyperCore/Prerequisites.hpp
         include/HyperCore/Result.hpp
@@ -31,7 +33,8 @@ set(HEADERS
         include/HyperCore/Events/EventType.hpp
         include/HyperCore/Events/KeyEvents.hpp
         include/HyperCore/Events/MouseEvents.hpp
-        include/HyperCore/Events/WindowEvents.hpp)
+        include/HyperCore/Events/WindowEvents.hpp
+        include/HyperCore/Memory/RingBuffer.hpp)
 
 hyperengine_group_files("${SOURCES}")
 hyperengine_group_files("${HEADERS}")
