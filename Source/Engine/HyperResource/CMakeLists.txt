@@ -23,6 +23,7 @@ target_link_libraries(
         CONAN_PKG::glslang
         CONAN_PKG::meshoptimizer
         CONAN_PKG::spirv-cross
+        CONAN_PKG::spirv-tools
         CONAN_PKG::stb
         CONAN_PKG::tinygltf
         CONAN_PKG::tinyobjloader

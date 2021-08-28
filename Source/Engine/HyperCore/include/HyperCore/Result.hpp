@@ -97,5 +97,4 @@ namespace HyperCore
 
 	using InitializeResult = Result<void, ConstructError>;
 	using RuntimeResult = Result<void, RuntimeError>;
-
 } // namespace HyperCore
