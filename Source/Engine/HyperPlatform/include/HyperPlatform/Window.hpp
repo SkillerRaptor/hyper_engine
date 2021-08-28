@@ -8,16 +8,23 @@
 
 #include "HyperPlatform/GraphicsApi.hpp"
 
-#include <HyperCore/Errors.hpp>
 #include <HyperCore/Result.hpp>
 #include <HyperCore/Events/EventManager.hpp>
 
+#include <cstdint>
 #include <string>
 
 struct GLFWwindow;
 
 namespace HyperPlatform
 {
+	struct WindowInfo
+	{
+		std::string title;
+		HyperCore::EventManager& event_manager;
+		GraphicsApi graphics_api;
+	};
+	
 	class Window
 	{
 	private:
@@ -30,10 +37,10 @@ namespace HyperPlatform
 		};
 
 	public:
-		Window(std::string title, int width, int height, HyperCore::EventManager& event_manager);
+		Window(const WindowInfo& t_window_info);
 		~Window();
 
-		auto initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>;
+		auto initialize() -> HyperCore::InitializeResult;
 
 		auto poll_events() const -> void;
 		

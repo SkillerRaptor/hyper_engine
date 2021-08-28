@@ -12,12 +12,13 @@
 
 namespace HyperPlatform
 {
-	Window::Window(std::string title, int width, int height, HyperCore::EventManager& event_manager)
+	Window::Window(const WindowInfo& t_window_info)
 	{
-		m_info.title = std::move(title);
-		m_info.width = width;
-		m_info.height = height;
-		m_info.event_manager = &event_manager;
+		m_info.title = t_window_info.title;
+		m_info.width = 1280;
+		m_info.height = 720;
+		m_info.event_manager = &t_window_info.event_manager;
+		m_graphics_api = t_window_info.graphics_api;
 	}
 
 	Window::~Window()
@@ -26,14 +27,14 @@ namespace HyperPlatform
 		glfwTerminate();
 	}
 
-	auto Window::initialize() -> HyperCore::Result<void, HyperCore::Errors::ConstructError>
+	auto Window::initialize() -> HyperCore::InitializeResult
 	{
 		if (glfwInit() == GLFW_FALSE)
 		{
 			HyperCore::Logger::fatal("Failed to initialize GLFW");
-			return HyperCore::Errors::ConstructError::Incomplete;
+			return HyperCore::ConstructError::Incomplete;
 		}
-		
+
 		HyperCore::Logger::debug("GLFW was initialized");
 
 		switch (m_graphics_api)
@@ -58,9 +59,9 @@ namespace HyperPlatform
 		if (m_native_window == nullptr)
 		{
 			glfwTerminate();
-			
+
 			HyperCore::Logger::fatal("Failed to create GLFW window");
-			return HyperCore::Errors::ConstructError::Incomplete;
+			return HyperCore::ConstructError::Incomplete;
 		}
 
 		glfwSetWindowUserPointer(m_native_window, &m_info);
@@ -175,7 +176,7 @@ namespace HyperPlatform
 				auto window_info = reinterpret_cast<Info*>(glfwGetWindowUserPointer(window));
 				window_info->event_manager->invoke<HyperCore::WindowMovedEvent>(x, y);
 			});
-		
+
 		HyperCore::Logger::info("Successfully created window");
 
 		return {};

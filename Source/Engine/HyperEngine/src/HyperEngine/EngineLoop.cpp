@@ -12,14 +12,13 @@ namespace HyperEngine
 {
 	EngineLoop::EngineLoop(IApplication& application)
 		: m_application(application)
-		, m_window(m_application.title(), 1280, 720, m_event_manager)
+		, m_window({ m_application.title(), m_event_manager, m_application.graphics_api() })
 	{
 	}
 
 	auto EngineLoop::initialize() -> HyperCore::InitializeResult
 	{
 		m_event_manager.register_listener<HyperCore::WindowCloseEvent>(
-			"HyperEngine::EngineLoop::CloseEvent",
 			[this](const HyperCore::WindowCloseEvent&)
 			{
 				m_running = false;
@@ -52,8 +51,7 @@ namespace HyperEngine
 
 			(void) delta_time;
 
-			m_event_manager.process_next_event();
-			
+			m_event_manager.process_events();
 			m_window.poll_events();
 		}
 	}
