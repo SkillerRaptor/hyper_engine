@@ -10,7 +10,7 @@
 #include "HyperCore/SourceLocation.hpp"
 
 #if HYPERENGINE_DEBUG
-#	define HYPERENGINE_ASSERT(expression) ::HyperCore::Internal::assert(HYPERENGINE_STRINGIFY(expression), (expression))
+#	define HYPERENGINE_ASSERT(expression) ::HyperCore::Detail::assert(HYPERENGINE_STRINGIFY(expression), (expression))
 #	define HYPERENGINE_ASSERT_NOT_REACHED() HYPERENGINE_ASSERT(false)
 #else
 #	define HYPERENGINE_ASSERT(expression)
