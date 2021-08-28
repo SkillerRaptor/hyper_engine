@@ -18,4 +18,7 @@ hyperengine_group_files("${SOURCES}")
 hyperengine_group_files("${HEADERS}")
 
 hyperengine_define_executable(Sandbox)
-target_link_libraries(Sandbox PRIVATE HyperEngine)
+target_link_libraries(
+        Sandbox
+        PRIVATE
+        HyperEngine)

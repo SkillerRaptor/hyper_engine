@@ -14,8 +14,14 @@ else ()
 endif ()
 
 add_library(HyperTestMain STATIC src/main.cpp)
-target_link_libraries(HyperTestMain PUBLIC CONAN_PKG::catch2)
-target_link_libraries(HyperTestMain PRIVATE ProjectOptions)
+target_link_libraries(
+        HyperTestMain
+        PUBLIC
+        CONAN_PKG::catch2)
+target_link_libraries(
+        HyperTestMain
+        PRIVATE
+        ProjectOptions)
 
 macro(define_test target source)
     add_executable(${target} ${source})
