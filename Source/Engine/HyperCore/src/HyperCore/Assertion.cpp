@@ -8,7 +8,7 @@
 
 #include "HyperCore/Logger.hpp"
 
-namespace HyperCore
+namespace HyperCore::Detail
 {
 	auto assert(
 		const char* expression,
@@ -28,4 +28,4 @@ namespace HyperCore
 			current_location.function_name());
 		std::abort();
 	}
-} // namespace HyperCore
+} // namespace HyperCore::Detail

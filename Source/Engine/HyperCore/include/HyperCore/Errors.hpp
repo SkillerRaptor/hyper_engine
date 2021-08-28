@@ -6,7 +6,7 @@
 
 #pragma once
 
-namespace HyperCore::Errors
+namespace HyperCore
 {
 	enum class ConstructError
 	{
@@ -26,4 +26,4 @@ namespace HyperCore::Errors
 		Uninitialized,
 		UndefinedBehaviour
 	};
-} // namespace HyperCore::Errors
+} // namespace HyperCore

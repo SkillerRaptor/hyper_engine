@@ -9,6 +9,7 @@
 #include "HyperCore/Formatter.hpp"
 #include "HyperCore/Prerequisites.hpp"
 
+#include <cstdint>
 #include <string_view>
 
 namespace HyperCore
@@ -16,10 +17,7 @@ namespace HyperCore
 	class Logger
 	{
 	public:
-		HYPERENGINE_SINGLETON(Logger);
-
-	public:
-		enum class Level
+		enum class Level : uint8_t
 		{
 			Info = 0,
 			Warning,
@@ -33,40 +31,42 @@ namespace HyperCore
 		template <typename... Args>
 		static auto info(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::Info, format, std::forward<Args>(args)...);
+			log(Level::Info, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto warning(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::Warning, format, std::forward<Args>(args)...);
+			log(Level::Warning, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto error(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::Error, format, std::forward<Args>(args)...);
+			log(Level::Error, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto fatal(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::Fatal, format, std::forward<Args>(args)...);
+			log(Level::Fatal, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto debug(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::Debug, format, std::forward<Args>(args)...);
+			log(Level::Debug, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto trace(std::string_view format, Args&&... args) -> void
 		{
-			Logger::log(Level::Trace, format, std::forward<Args>(args)...);
+			log(Level::Trace, format, std::forward<Args>(args)...);
 		}
 
 	private:
+		static auto internal_log(Level level, std::string_view string) -> void;
+
 		template <typename... Args>
 		static auto log(Level log_level, std::string_view format, Args&&... args) -> void
 		{
@@ -91,8 +91,6 @@ namespace HyperCore
 				internal_log(log_level, Formatter::format(format, std::forward<Args>(args)...));
 			}
 		}
-
-		static auto internal_log(Level level, std::string_view string) -> void;
 
 	private:
 		static Level s_log_level;

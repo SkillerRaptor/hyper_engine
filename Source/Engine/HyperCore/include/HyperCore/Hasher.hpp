@@ -10,48 +10,13 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 
-namespace HyperCore
+namespace HyperCore::Hasher
 {
-	class Hasher
+	namespace Detail
 	{
-	public:
-		template <size_t N>
-		static constexpr auto hash_crc_32(const char (&string)[N]) -> unsigned int
-		{
-			if constexpr (N >= 2)
-			{
-				return crc_32<N - 2>(string) ^ 0xFFFFFFFF;
-			}
-			else
-			{
-				return 0;
-			}
-		}
-
-	private:
-		template <size_t index>
-		static constexpr auto combine_crc_32(const char* string, unsigned int part) -> unsigned int
-		{
-			return (part >> 8) ^ s_crc_32_table[(part ^ static_cast<unsigned int>(string[index])) & 0x000000FF];
-		}
-
-		template <size_t index>
-		static constexpr auto crc_32(const char* string) -> unsigned int
-		{
-			if constexpr (index != static_cast<size_t>(-1))
-			{
-				return combine_crc_32<index>(string, crc_32<index - 1>(string));
-			}
-			else
-			{
-				HYPERENGINE_VARIABLE_NOT_USED(string);
-				return 0xFFFFFFFF;
-			}
-		}
-
-	private:
-		static constexpr std::array<unsigned int, 256> s_crc_32_table = {
+		static constexpr std::array<uint32_t, 256> g_crc_32_table = {
 			0x00000000,
 			0x77073096,
 			0xee0e612c,
@@ -309,5 +274,38 @@ namespace HyperCore
 			0x5a05df1b,
 			0x2d02ef8d
 		};
-	};
-} // namespace HyperCore
+
+		template <size_t index>
+		static constexpr auto combine_crc_32(const char* string, uint32_t part) -> uint32_t
+		{
+			return (part >> 8) ^ g_crc_32_table[(part ^ static_cast<uint32_t>(string[index])) & 0x000000FF];
+		}
+
+		template <size_t index>
+		static constexpr auto crc_32(const char* string) -> uint32_t
+		{
+			if constexpr (index != static_cast<size_t>(-1))
+			{
+				return combine_crc_32<index>(string, crc_32<index - 1>(string));
+			}
+			else
+			{
+				HYPERENGINE_VARIABLE_NOT_USED(string);
+				return 0xFFFFFFFF;
+			}
+		}
+	} // namespace Detail
+
+	template <size_t N>
+	static constexpr auto hash_crc_32(const char (&string)[N]) -> uint32_t
+	{
+		if constexpr (N >= 2)
+		{
+			return Detail::crc_32<N - 2>(string) ^ 0xFFFFFFFF;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+} // namespace HyperCore::Hasher

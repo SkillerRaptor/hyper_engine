@@ -21,23 +21,23 @@ namespace HyperCore
 		using ErrorType = ErrorT;
 
 	public:
-		Result(ValueType&& result) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
-			: m_result(std::move(result))
+		Result(ValueType&& t_result)
+			: m_result(std::move(t_result))
 		{
 		}
 
-		Result(const ValueType& result) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
-			: m_result(result)
+		Result(const ValueType& t_result)
+			: m_result(t_result)
 		{
 		}
 
-		Result(ErrorType&& error) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
-			: m_error(std::move(error))
+		Result(ErrorType&& t_error)
+			: m_error(std::move(t_error))
 		{
 		}
 
-		Result(const ErrorType& error) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
-			: m_error(error)
+		Result(const ErrorType& t_error)
+			: m_error(t_error)
 		{
 		}
 
@@ -69,15 +69,15 @@ namespace HyperCore
 		using ErrorType = ErrorT;
 
 	public:
-		Result() = default;
+		constexpr Result() = default;
 
-		Result(ErrorType&& error) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
-			: m_error(std::move(error))
+		Result(ErrorType&& t_error)
+			: m_error(std::move(t_error))
 		{
 		}
 
-		Result(const ErrorType& error) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
-			: m_error(error)
+		Result(const ErrorType& t_error)
+			: m_error(t_error)
 		{
 		}
 
@@ -94,8 +94,8 @@ namespace HyperCore
 	private:
 		std::optional<ErrorType> m_error{};
 	};
-	
-	using InitializeResult = Result<void, Errors::ConstructError>;
-	using RuntimeResult = Result<void, Errors::RuntimeError>;
-	
+
+	using InitializeResult = Result<void, ConstructError>;
+	using RuntimeResult = Result<void, RuntimeError>;
+
 } // namespace HyperCore

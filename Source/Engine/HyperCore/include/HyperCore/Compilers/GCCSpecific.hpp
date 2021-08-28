@@ -10,6 +10,8 @@
 #	error This file should only be included on gcc compilers
 #endif
 
+#define HYPERENGINE_COMPILER_GNU 1
+
 #define HYPERENGINE_COMPILER_PUSH_WARNING _Pragma("GCC diagnostic push")
 #define HYPERENGINE_COMPILER_POP_WARNING _Pragma("GCC diagnostic pop")
 #define HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT _Pragma("GCC diagnostic ignored \"-Wpedantic\"")

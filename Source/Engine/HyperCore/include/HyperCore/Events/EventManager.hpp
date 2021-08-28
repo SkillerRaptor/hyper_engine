@@ -6,122 +6,69 @@
 
 #pragma once
 
-#include "HyperCore/Compilers.hpp"
-#include "HyperCore/Hasher.hpp"
-#include "HyperCore/Events/EventWrapper.hpp"
-#include "HyperCore/Events/IEvent.hpp"
+#include "HyperCore/Logger.hpp"
+#include "HyperCore/Events/EventType.hpp"
+#include "HyperCore/Events/EventCallback.hpp"
 #include "HyperCore/Events/KeyEvents.hpp"
 #include "HyperCore/Events/MouseEvents.hpp"
 #include "HyperCore/Events/WindowEvents.hpp"
 
+#include <cstdint>
+#include <functional>
+#include <memory>
 #include <unordered_map>
 #include <queue>
-#include <variant>
 
 namespace HyperCore
 {
-	using EventIdType = unsigned int;
-	using EventVariant = std::variant<
-		KeyPressedEvent,
-		KeyReleasedEvent,
-		MouseMovedEvent,
-		MouseScrolledEvent,
-		MouseButtonPressedEvent,
-		MouseButtonReleasedEvent,
-		WindowCloseEvent,
-		WindowResizeEvent,
-		WindowFramebufferResizeEvent,
-		WindowFocusEvent,
-		WindowLostFocusEvent,
-		WindowMovedEvent>;
-
-	template <typename T>
-	class EventType
-	{
-	public:
-		static constexpr auto id() -> EventIdType
-		{
-			constexpr EventIdType value = Hasher::hash_crc_32(HYPERENGINE_FUNCTION_SIGNATURE);
-			return value;
-		}
-	};
-
 	class EventManager
 	{
 	public:
-		EventManager();
+		using ListenerId = uint64_t;
+		
+	public:
 		~EventManager();
-
-		template <typename T, typename = std::enable_if_t<std::is_base_of_v<IEvent, T>>>
-		auto invoke(const T& event) -> void
+		
+		template <typename T>
+		auto register_listener(const std::function<void(const T&)>& listener) -> ListenerId
 		{
-			m_event_bus.emplace(event);
+			constexpr auto event_id = EventType<T>::id();
+			if (m_event_callbacks.find(event_id) == m_event_callbacks.end())
+			{
+				m_event_callbacks[event_id] = std::make_unique<EventCallback<T>>();
+			}
+			
+			auto event_callback = static_cast<EventCallback<T>*>(m_event_callbacks[event_id].get());
+			auto event_listener_id = event_callback->register_listener(listener);
+			
+			ListenerId listener_id = (static_cast<ListenerId>(event_id) << 32) | event_listener_id;
+			
+			HyperCore::Logger::debug("Registered event listener with id #{}", listener_id);
+			
+			return listener_id;
 		}
+		
+		auto unregister_listener(ListenerId id) -> bool;
 
-		template <typename T, typename... Args, typename = std::enable_if_t<std::is_base_of_v<IEvent, T>>>
+		template <typename T, typename... Args>
 		auto invoke(Args&&... args) -> void
 		{
-			m_event_bus.emplace(T{ std::forward<Args>(args)... });
-		}
-
-		template <typename T, typename = std::enable_if_t<std::is_base_of_v<IEvent, T>>>
-		auto register_listener(const std::string& name, const std::function<void(const T&)>& event_listener) -> void
-		{
-			constexpr EventIdType event_id = EventType<T>::id();
-			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
+			constexpr auto event_id = EventType<T>::id();
+			if (m_event_callbacks.find(event_id) == m_event_callbacks.end())
 			{
 				return;
 			}
-
-			auto* event_wrapper = get_event_wrapper<T>(event_id);
-			event_wrapper->register_listener(name, event_listener);
 			
-			HyperCore::Logger::debug("Registered event listener with name '{}'", name);
-		}
-
-		template <typename T, typename = std::enable_if_t<std::is_base_of_v<IEvent, T>>>
-		auto unregister_listener(const std::string& name) -> void
-		{
-			constexpr EventIdType event_id = EventType<T>::id();
-			if (m_event_wrappers.find(event_id) == m_event_wrappers.end())
-			{
-				return;
-			}
-
-			auto* event_wrapper = get_event_wrapper<T>(event_id);
-			event_wrapper->unregister_listener(name);
+			auto event_callback = static_cast<EventCallback<T>*>(m_event_callbacks.at(event_id).get());
+			event_callback->push(std::forward<Args>(args)...);
 			
-			HyperCore::Logger::debug("Unregistered event listener with name '{}'", name);
+			m_event_queue.push(event_id);
 		}
 
-		auto process_next_event() -> void;
-
+		auto process_events() -> void;
+		
 	private:
-		template <typename T, typename = std::enable_if_t<std::is_base_of_v<IEvent, T>>>
-		auto get_event_wrapper(EventIdType event_id) -> EventWrapper<T>*
-		{
-			auto* event_wrapper_base = m_event_wrappers[event_id];
-			auto* event_wrapper = static_cast<EventWrapper<T>*>(event_wrapper_base);
-			return event_wrapper;
-		}
-
-		template <typename T, typename = std::enable_if_t<std::is_base_of_v<IEvent, T>>>
-		auto register_event() -> void
-		{
-			constexpr EventIdType event_id = EventType<T>::id();
-			m_event_wrappers[event_id] = new EventWrapper<T>();
-		}
-
-		template <typename T, typename = std::enable_if_t<std::is_base_of_v<IEvent, T>>>
-		auto invoke_event(const T& event) -> void
-		{
-			constexpr EventIdType event_id = EventType<T>::id();
-			auto* event_wrapper = get_event_wrapper<T>(event_id);
-			event_wrapper->invoke(event);
-		}
-
-	private:
-		std::unordered_map<EventIdType, EventWrapperBase*> m_event_wrappers{};
-		std::queue<EventVariant> m_event_bus{};
+		std::unordered_map<uint32_t, std::unique_ptr<IEventCallback>> m_event_callbacks{};
+		std::queue<uint32_t> m_event_queue{};
 	};
 } // namespace HyperCore

@@ -12,26 +12,26 @@
 namespace HyperCore
 {
 #if HYPERENGINE_DEBUG
-	Logger::Level Logger::s_log_level{ Level::Trace };
+	Logger::Level Logger::s_log_level{ Logger::Level::Trace };
 #else
-	Logger::Level Logger::s_log_level{ Level::Fatal };
+	Logger::Level Logger::s_log_level{ Logger::Level::Fatal };
 #endif
 
-	auto Logger::internal_log(Logger::Level level, std::string_view string) -> void
+	auto Logger::internal_log(Level level, std::string_view string) -> void
 	{
 		const auto level_color = [&level]() -> fmt::color
 		{
 			switch (level)
 			{
-			case Logger::Level::Info:
+			case Level::Info:
 				return fmt::color::white;
-			case Logger::Level::Warning:
+			case Level::Warning:
 				return fmt::color::gold;
-			case Logger::Level::Error:
+			case Level::Error:
 				return fmt::color::red;
-			case Logger::Level::Fatal:
+			case Level::Fatal:
 				return fmt::color::crimson;
-			case Logger::Level::Debug:
+			case Level::Debug:
 				return fmt::color::gray;
 			default:
 				return fmt::color::white;
@@ -42,21 +42,21 @@ namespace HyperCore
 		{
 			switch (level)
 			{
-			case Logger::Level::Info:
+			case Level::Info:
 				return "Info";
-			case Logger::Level::Warning:
+			case Level::Warning:
 				return "Warning";
-			case Logger::Level::Error:
+			case Level::Error:
 				return "Error";
-			case Logger::Level::Fatal:
+			case Level::Fatal:
 				return "Fatal";
-			case Logger::Level::Debug:
+			case Level::Debug:
 				return "Debug";
 			default:
 				return "Undefined";
 			}
 		}();
-		
+
 		fmt::print(
 			fmt::fg(level_color),
 			"[ {:%H:%M:%S} | {} ] {}\n",

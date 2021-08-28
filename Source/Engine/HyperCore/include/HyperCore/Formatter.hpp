@@ -10,25 +10,17 @@
 
 #include <fmt/format.h>
 
-namespace HyperCore
+namespace HyperCore::Formatter
 {
-	class Formatter
+	template <typename... Args>
+	static auto format(std::string_view format, Args&&... args) -> std::string
 	{
-	public:
-		HYPERENGINE_SINGLETON(Formatter);
-
-	public:
-		template <typename... Args>
-		static auto format(std::string_view format, Args&&... args) -> std::string
+		if (format.empty())
 		{
-			// TODO(SkillerRaptor): Replacing fmt::format with own implementation
-			
-			if (format.empty())
-			{
-				return format.data();
-			}
-			
-			return fmt::format(format, std::forward<Args>(args)...);
+			return format.data();
 		}
-	};
-} // namespace HyperCore
+
+		// TODO(SkillerRaptor): Replacing fmt::format with own implementation
+		return fmt::format(format, std::forward<Args>(args)...);
+	}
+} // namespace HyperCore::Formatter

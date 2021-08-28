@@ -6,37 +6,29 @@
 
 #pragma once
 
-#include "HyperCore/Events/IEvent.hpp"
+#include <cstdint>
 
 namespace HyperCore
 {
-	struct MouseMovedEvent final : public IEvent
+	struct MouseMovedEvent
 	{
-		MouseMovedEvent(float t_position_x, float t_position_y);
-		
 		float position_x;
 		float position_y;
 	};
 
-	struct MouseScrolledEvent final : public IEvent
+	struct MouseScrolledEvent
 	{
-		MouseScrolledEvent(float t_offset_x, float t_offset_y);
-		
 		float offset_x;
 		float offset_y;
 	};
 
-	struct MouseButtonPressedEvent final : public IEvent
+	struct MouseButtonPressedEvent
 	{
-		explicit MouseButtonPressedEvent(int t_button);
-		
-		int button;
+		int32_t button;
 	};
 
-	struct MouseButtonReleasedEvent final : public IEvent
+	struct MouseButtonReleasedEvent
 	{
-		explicit MouseButtonReleasedEvent(int t_button);
-		
-		int button;
+		int32_t button;
 	};
 } // namespace HyperCore

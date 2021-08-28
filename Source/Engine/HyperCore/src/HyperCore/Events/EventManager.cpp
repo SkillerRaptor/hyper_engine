@@ -8,44 +8,43 @@
 
 namespace HyperCore
 {
-	EventManager::EventManager()
-	{
-		register_event<KeyPressedEvent>();
-		register_event<KeyReleasedEvent>();
-		register_event<MouseMovedEvent>();
-		register_event<MouseScrolledEvent>();
-		register_event<MouseButtonPressedEvent>();
-		register_event<MouseButtonReleasedEvent>();
-		register_event<WindowCloseEvent>();
-		register_event<WindowResizeEvent>();
-		register_event<WindowFramebufferResizeEvent>();
-		register_event<WindowFocusEvent>();
-		register_event<WindowLostFocusEvent>();
-		register_event<WindowMovedEvent>();
-	}
-
 	EventManager::~EventManager()
 	{
-		for (auto& event_wrapper : m_event_wrappers)
+		for (auto& event_pair : m_event_callbacks)
 		{
-			delete event_wrapper.second;
+			auto& event_callback = event_pair.second;
+			event_callback->unregister_all_listeners();
 		}
 	}
 
-	void EventManager::process_next_event()
+	auto EventManager::process_events() -> void
 	{
-		if (m_event_bus.empty())
+		if (m_event_queue.empty())
 		{
 			return;
 		}
 
-		const auto& event = m_event_bus.front();
-		std::visit([this](auto&& converted_event)
-		   {
-			   using T = std::decay_t<decltype(converted_event)>;
-			   invoke_event<T>(converted_event);
-		   }, event);
+		const auto& event_id = m_event_queue.front();
 
-		m_event_bus.pop();
+		const auto& event_callback = m_event_callbacks[event_id];
+		event_callback->invoke_next();
+
+		m_event_queue.pop();
+	}
+
+	auto EventManager::unregister_listener(EventManager::ListenerId id) -> bool
+	{
+		auto event_id = static_cast<uint32_t>(id >> 32);
+		if (m_event_callbacks.find(event_id) == m_event_callbacks.end())
+		{
+			return false;
+		}
+
+		auto event_callback = m_event_callbacks[event_id].get();
+		event_callback->unregister_listener(static_cast<uint32_t>(id));
+
+		HyperCore::Logger::debug("Unregistered event listener with id #{}", id);
+
+		return true;
 	}
 } // namespace HyperCore

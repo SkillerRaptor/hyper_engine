@@ -17,7 +17,7 @@ namespace HyperCore::Bits
 		{
 			return 0;
 		}
-		
+
 		using U = std::make_unsigned_t<T>;
 		return static_cast<U>(1) << shift;
 	}
@@ -29,7 +29,7 @@ namespace HyperCore::Bits
 		{
 			return 0;
 		}
-		
+
 		using U = std::make_unsigned_t<T>;
 		return bit(shift) - static_cast<U>(1);
 	}
