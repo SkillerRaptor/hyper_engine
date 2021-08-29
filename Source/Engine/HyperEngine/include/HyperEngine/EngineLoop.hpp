@@ -8,6 +8,7 @@
 
 #include <HyperCore/JobSystem.hpp>
 #include <HyperCore/Result.hpp>
+#include <HyperGame/EntitySystem/Registry.hpp>
 #include <HyperGame/Events/EventManager.hpp>
 #include <HyperPlatform/Window.hpp>
 
@@ -36,6 +37,7 @@ namespace HyperEngine
 		
 		HyperCore::JobSystem m_job_system{};
 		HyperGame::EventManager m_event_manager{};
+		HyperGame::Registry m_registry{};
 		HyperPlatform::Window m_window;
 	};
 } // namespace HyperEngine

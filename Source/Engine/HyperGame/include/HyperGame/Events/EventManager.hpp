@@ -14,6 +14,7 @@
 #include "HyperGame/Events/WindowEvents.hpp"
 
 #include <HyperCore/Logger.hpp>
+#include <HyperCore/TypeTraits.hpp>
 
 #include <cstdint>
 #include <functional>
@@ -29,7 +30,7 @@ namespace HyperGame
 	public:
 		~EventManager();
 
-		template <typename T, typename = std::enable_if_t<std::is_standard_layout_v<T> && std::is_trivial_v<T>>>
+		template <typename T, typename = std::enable_if_t<HyperCore::IsDataStruct<T>::value>>
 		auto register_listener(const std::function<void(const T&)>& listener) -> Listener
 		{
 			constexpr auto event_id = EventType<T>::id();
@@ -50,7 +51,7 @@ namespace HyperGame
 
 		auto unregister_listener(Listener id) -> bool;
 
-		template <typename T, typename... Args, typename = std::enable_if_t<std::is_standard_layout_v<T> && std::is_trivial_v<T>>>
+		template <typename T, typename... Args, typename = std::enable_if_t<HyperCore::IsDataStruct<T>::value>>
 		auto invoke(Args&&... args) -> void
 		{
 			constexpr auto event_id = EventType<T>::id();

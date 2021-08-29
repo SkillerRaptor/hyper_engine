@@ -8,6 +8,8 @@
 
 #include "HyperEngine/IApplication.hpp"
 
+#include <HyperGame/EntitySystem/Components.hpp>
+
 namespace HyperEngine
 {
 	EngineLoop::EngineLoop(IApplication& application)

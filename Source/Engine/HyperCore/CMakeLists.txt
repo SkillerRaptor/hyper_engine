@@ -24,6 +24,7 @@ set(HEADERS
         include/HyperCore/Prerequisites.hpp
         include/HyperCore/Result.hpp
         include/HyperCore/SourceLocation.hpp
+        include/HyperCore/TypeTraits.hpp
         include/HyperCore/Compilers/ClangSpecific.hpp
         include/HyperCore/Compilers/GCCSpecific.hpp
         include/HyperCore/Compilers/MSVCSpecific.hpp

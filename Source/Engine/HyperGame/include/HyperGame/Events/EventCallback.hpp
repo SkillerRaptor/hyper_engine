@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <HyperCore/TypeTraits.hpp>
+
 #include <cstdint>
 #include <functional>
 #include <unordered_map>
@@ -24,7 +26,7 @@ namespace HyperGame
 		virtual auto invoke_next() -> void = 0;
 	};
 
-	template <typename T>
+	template <typename T, typename = std::enable_if_t<HyperCore::IsDataStruct<T>::value>>
 	class EventCallback : public IEventCallback
 	{
 	public:
