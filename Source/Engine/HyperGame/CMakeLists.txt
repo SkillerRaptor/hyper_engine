@@ -11,6 +11,7 @@ set(SOURCES
         src/HyperGame/Events/EventManager.cpp)
 
 set(HEADERS
+        include/HyperGame/MouseButton.hpp
         include/HyperGame/Events/EventCallback.hpp
         include/HyperGame/Events/EventManager.hpp
         include/HyperGame/Events/EventType.hpp

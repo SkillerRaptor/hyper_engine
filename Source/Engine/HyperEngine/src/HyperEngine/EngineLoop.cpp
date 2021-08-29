@@ -21,8 +21,10 @@ namespace HyperEngine
 		initialize_event_callbacks();
 
 		m_event_manager.register_listener<HyperGame::WindowCloseEvent>(
-			[this](const HyperGame::WindowCloseEvent&)
+			[this](const HyperGame::WindowCloseEvent& window_close_event)
 			{
+				HYPERENGINE_VARIABLE_NOT_USED(window_close_event);
+
 				m_running = false;
 			});
 
@@ -67,13 +69,13 @@ namespace HyperEngine
 		m_window.set_mouse_button_pressed_callback(
 			[this](int32_t button)
 			{
-				m_event_manager.invoke<HyperGame::MouseButtonPressedEvent>(button);
+				m_event_manager.invoke<HyperGame::MouseButtonPressedEvent>(static_cast<HyperGame::MouseButton>(button));
 			});
 
 		m_window.set_mouse_button_released_callback(
 			[this](int32_t button)
 			{
-				m_event_manager.invoke<HyperGame::MouseButtonReleasedEvent>(button);
+				m_event_manager.invoke<HyperGame::MouseButtonReleasedEvent>(static_cast<HyperGame::MouseButton>(button));
 			});
 
 		m_window.set_window_close_callback(

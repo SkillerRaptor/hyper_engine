@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "HyperGame/MouseButton.hpp"
+
 #include <cstdint>
 
 namespace HyperGame
@@ -24,11 +26,11 @@ namespace HyperGame
 
 	struct MouseButtonPressedEvent
 	{
-		int32_t button;
+		MouseButton button;
 	};
 
 	struct MouseButtonReleasedEvent
 	{
-		int32_t button;
+		MouseButton button;
 	};
 } // namespace HyperGame

@@ -34,8 +34,8 @@ namespace HyperEngine
 		IApplication& m_application;
 		bool m_running{ false };
 		
-		HyperGame::EventManager m_event_manager{};
 		HyperCore::JobSystem m_job_system{};
+		HyperGame::EventManager m_event_manager{};
 		HyperPlatform::Window m_window;
 	};
 } // namespace HyperEngine
