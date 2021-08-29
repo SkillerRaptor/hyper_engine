@@ -6,8 +6,6 @@
 
 #include "HyperCore/JobSystem.hpp"
 
-#include "HyperCore/Logger.hpp"
-
 #include <algorithm>
 
 namespace HyperCore
@@ -85,7 +83,7 @@ namespace HyperCore
 	
 		for (uint32_t group_index = 0; group_index < group_count; ++group_index)
 		{
-			auto job_function = [&]()
+			auto job_function = [group_index, group_size, job_count, job]()
 			{
 				const uint32_t group_job_offset = group_index * group_size;
 				const uint32_t group_job_end = std::min(group_job_offset + group_size, job_count);

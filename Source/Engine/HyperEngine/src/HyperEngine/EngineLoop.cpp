@@ -8,8 +8,6 @@
 
 #include "HyperEngine/IApplication.hpp"
 
-#include <chrono>
-
 namespace HyperEngine
 {
 	EngineLoop::EngineLoop(IApplication& application)
