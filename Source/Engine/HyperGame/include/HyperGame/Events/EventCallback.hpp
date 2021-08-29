@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <queue>
 
-namespace HyperCore
+namespace HyperGame
 {
 	class IEventCallback
 	{
@@ -74,4 +74,4 @@ namespace HyperCore
 
 		std::queue<T> m_event_bus{};
 	};
-} // namespace HyperCore
+} // namespace HyperGame

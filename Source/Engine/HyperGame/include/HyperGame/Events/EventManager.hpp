@@ -6,12 +6,13 @@
 
 #pragma once
 
-#include "HyperCore/Logger.hpp"
-#include "HyperCore/Events/EventType.hpp"
-#include "HyperCore/Events/EventCallback.hpp"
-#include "HyperCore/Events/KeyEvents.hpp"
-#include "HyperCore/Events/MouseEvents.hpp"
-#include "HyperCore/Events/WindowEvents.hpp"
+#include "HyperGame/Events/EventType.hpp"
+#include "HyperGame/Events/EventCallback.hpp"
+#include "HyperGame/Events/KeyEvents.hpp"
+#include "HyperGame/Events/MouseEvents.hpp"
+#include "HyperGame/Events/WindowEvents.hpp"
+
+#include <HyperCore/Logger.hpp>
 
 #include <cstdint>
 #include <functional>
@@ -20,7 +21,7 @@
 #include <queue>
 #include <type_traits>
 
-namespace HyperCore
+namespace HyperGame
 {
 	class EventManager
 	{
@@ -72,4 +73,4 @@ namespace HyperCore
 		std::unordered_map<uint32_t, std::unique_ptr<IEventCallback>> m_event_callbacks{};
 		std::queue<uint32_t> m_event_queue{};
 	};
-} // namespace HyperCore
+} // namespace HyperGame

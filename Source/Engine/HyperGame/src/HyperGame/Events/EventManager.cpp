@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "HyperCore/Events/EventManager.hpp"
+#include "HyperGame/Events/EventManager.hpp"
 
-namespace HyperCore
+namespace HyperGame
 {
 	EventManager::~EventManager()
 	{
@@ -47,4 +47,4 @@ namespace HyperCore
 
 		return true;
 	}
-} // namespace HyperCore
+} // namespace HyperGame

@@ -10,8 +10,7 @@
 set(SOURCES
         src/HyperCore/Assertion.cpp
         src/HyperCore/JobSystem.cpp
-        src/HyperCore/Logger.cpp
-        src/HyperCore/Events/EventManager.cpp)
+        src/HyperCore/Logger.cpp)
 
 set(HEADERS
         include/HyperCore/Assertion.hpp
@@ -28,12 +27,6 @@ set(HEADERS
         include/HyperCore/Compilers/ClangSpecific.hpp
         include/HyperCore/Compilers/GCCSpecific.hpp
         include/HyperCore/Compilers/MSVCSpecific.hpp
-        include/HyperCore/Events/EventCallback.hpp
-        include/HyperCore/Events/EventManager.hpp
-        include/HyperCore/Events/EventType.hpp
-        include/HyperCore/Events/KeyEvents.hpp
-        include/HyperCore/Events/MouseEvents.hpp
-        include/HyperCore/Events/WindowEvents.hpp
         include/HyperCore/Memory/RingBuffer.hpp)
 
 hyperengine_group_files("${SOURCES}")

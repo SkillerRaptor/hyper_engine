@@ -8,16 +8,16 @@
 
 #include <cstdint>
 
-namespace HyperCore
+namespace HyperGame
 {
 	struct KeyPressedEvent
 	{
 		int32_t key_code;
 		int32_t repeat_count;
 	};
-	
+
 	struct KeyReleasedEvent
 	{
 		int32_t key_code;
 	};
-} // namespace HyperCore
+} // namespace HyperGame

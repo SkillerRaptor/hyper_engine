@@ -8,7 +8,7 @@
 
 #include <HyperCore/JobSystem.hpp>
 #include <HyperCore/Result.hpp>
-#include <HyperCore/Events/EventManager.hpp>
+#include <HyperGame/Events/EventManager.hpp>
 #include <HyperPlatform/Window.hpp>
 
 #include <memory>
@@ -28,10 +28,13 @@ namespace HyperEngine
 		auto run() -> void;
 
 	private:
+		auto initialize_event_callbacks() -> void;
+		
+	private:
 		IApplication& m_application;
 		bool m_running{ false };
 		
-		HyperCore::EventManager m_event_manager{};
+		HyperGame::EventManager m_event_manager{};
 		HyperCore::JobSystem m_job_system{};
 		HyperPlatform::Window m_window;
 	};

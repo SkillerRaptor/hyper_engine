@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include "HyperCore/Compilers.hpp"
-#include "HyperCore/Hasher.hpp"
+#include <HyperCore/Compilers.hpp>
+#include <HyperCore/Hasher.hpp>
 
 #include <cstdint>
 
-namespace HyperCore
+namespace HyperGame
 {
 	template <typename T>
 	class EventType
@@ -19,8 +19,8 @@ namespace HyperCore
 	public:
 		static constexpr auto id() -> uint32_t
 		{
-			constexpr auto value = Hasher::hash_crc_32(HYPERENGINE_FUNCTION_SIGNATURE);
+			constexpr auto value = HyperCore::Hasher::hash_crc_32(HYPERENGINE_FUNCTION_SIGNATURE);
 			return value;
 		}
 	};
-} // namespace HyperCore
+} // namespace HyperGame

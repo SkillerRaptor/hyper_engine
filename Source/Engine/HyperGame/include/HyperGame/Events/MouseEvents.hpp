@@ -8,7 +8,7 @@
 
 #include <cstdint>
 
-namespace HyperCore
+namespace HyperGame
 {
 	struct MouseMovedEvent
 	{
@@ -31,4 +31,4 @@ namespace HyperCore
 	{
 		int32_t button;
 	};
-} // namespace HyperCore
+} // namespace HyperGame

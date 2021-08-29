@@ -5,28 +5,25 @@
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# HyperEngine
+# HyperGame
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/HyperEngine/EngineLoop.cpp
-        src/HyperEngine/IApplication.cpp
-        src/HyperEngine/Launcher.cpp)
+        src/HyperGame/Events/EventManager.cpp)
 
 set(HEADERS
-        include/HyperEngine/EngineLoop.hpp
-        include/HyperEngine/IApplication.hpp
-        include/HyperEngine/Launcher.hpp)
+        include/HyperGame/Events/EventCallback.hpp
+        include/HyperGame/Events/EventManager.hpp
+        include/HyperGame/Events/EventType.hpp
+        include/HyperGame/Events/KeyEvents.hpp
+        include/HyperGame/Events/MouseEvents.hpp
+        include/HyperGame/Events/WindowEvents.hpp)
 
 hyperengine_group_files("${SOURCES}")
 hyperengine_group_files("${HEADERS}")
 
-hyperengine_define_library(HyperEngine)
+hyperengine_define_module(HyperGame)
 target_link_libraries(
-        HyperEngine
+        HyperGame
         PUBLIC
         HyperCore
-        HyperGame
-        HyperMath
-        HyperPlatform
-#       HyperRendering
-        HyperResource)
+        HyperMath)
