@@ -25,7 +25,7 @@ namespace HyperGame
 		const auto entity_id = static_cast<EntityTraits::IdType>(entity & EntityTraits::entity_mask);
 		const auto entity_version = static_cast<EntityTraits::VersionType>(entity >> EntityTraits::entity_shift) + 1U;
 		const auto version_shift = static_cast<EntityTraits::EntityType>(entity_version) << EntityTraits::entity_shift;
-		m_entities[entity_id] = static_cast<EntityTraits::EntityType>(m_available_entity | version_shift);
+		m_entities[entity_id] = m_available_entity | version_shift;
 		m_available_entity = static_cast<EntityTraits::EntityType>(entity_id);
 
 		return true;
@@ -44,7 +44,7 @@ namespace HyperGame
 
 	auto Registry::generate_identifier() -> Entity
 	{
-		const auto entity = static_cast<EntityTraits::EntityType>(m_entities.size());
+		const auto entity = m_entities.size();
 		HYPERENGINE_ASSERT(entity < EntityTraits::entity_mask);
 
 		const auto entity_id = entity & EntityTraits::entity_mask;
@@ -59,7 +59,7 @@ namespace HyperGame
 
 		const auto current_entity_id = m_available_entity & EntityTraits::entity_mask;
 		m_available_entity = m_entities[current_entity_id] & EntityTraits::entity_mask;
-		m_entities[current_entity_id] = static_cast<EntityTraits::EntityType>((current_entity_id & EntityTraits::entity_mask) | (m_entities[current_entity_id] & version_mask));
+		m_entities[current_entity_id] = (current_entity_id & EntityTraits::entity_mask) | (m_entities[current_entity_id] & version_mask);
 		
 		return m_entities[current_entity_id];
 	}

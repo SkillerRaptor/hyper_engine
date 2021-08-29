@@ -9,6 +9,7 @@
 #include <HyperCore/Prerequisites.hpp>
 
 #include <cstdint>
+#include <cstddef>
 
 namespace HyperGame
 {
