@@ -15,6 +15,7 @@ set(HEADERS
         include/HyperGame/Events/EventManager.hpp
         include/HyperGame/Events/EventType.hpp
         include/HyperGame/Events/KeyEvents.hpp
+        include/HyperGame/Events/Listener.hpp
         include/HyperGame/Events/MouseEvents.hpp
         include/HyperGame/Events/WindowEvents.hpp)
 

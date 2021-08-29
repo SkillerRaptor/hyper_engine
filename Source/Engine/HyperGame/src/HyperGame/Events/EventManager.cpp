@@ -32,16 +32,16 @@ namespace HyperGame
 		m_event_queue.pop();
 	}
 
-	auto EventManager::unregister_listener(EventManager::ListenerId id) -> bool
+	auto EventManager::unregister_listener(Listener id) -> bool
 	{
-		auto event_id = static_cast<uint32_t>(id >> 32);
+		auto event_id = static_cast<ListenerTraits::EventType>(id >> ListenerTraits::listener_shift);
 		if (m_event_callbacks.find(event_id) == m_event_callbacks.end())
 		{
 			return false;
 		}
 
 		auto event_callback = m_event_callbacks[event_id].get();
-		event_callback->unregister_listener(static_cast<uint32_t>(id));
+		event_callback->unregister_listener(static_cast<ListenerTraits::InternalListenerType>(id));
 
 		HyperCore::Logger::debug("Unregistered event listener with id #{}", id);
 
