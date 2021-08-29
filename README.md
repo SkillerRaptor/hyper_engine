@@ -1,10 +1,10 @@
 <img src="./Development/Images/Branding.png" align="right" width="150"/>
 
 # HyperEngine
-[![Build Windows](https://img.shields.io/github/workflow/status/SkillerRaptor/HyperEngine/build-windows?style=flatflat-square&label=Build%20Windows&logo=github)](https://github.com/SkillerRaptor/HyperEngine/blob/master/.github/workflows/build-windows.yml)
-[![Build Linux](https://img.shields.io/github/workflow/status/SkillerRaptor/HyperEngine/build-linux?style=flatflat-square&label=Build%20Linux&logo=github)](https://github.com/SkillerRaptor/HyperEngine/blob/master/.github/workflows/build-linux.yml)
-[![Support Server](https://img.shields.io/discord/674880770137128970.svg?&style=flatflat-square&label=Discord&logo=discord)](https://discord.gg/tYu9yYY)
-[![License](https://img.shields.io/badge/license-MIT-yellow?style=flatflat-square)](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE)
+[![Build Windows](https://img.shields.io/github/workflow/status/SkillerRaptor/HyperEngine/build-windows?style=flat&label=Build%20Windows&logo=github)](https://github.com/SkillerRaptor/HyperEngine/blob/master/.github/workflows/build-windows.yml)
+[![Build Linux](https://img.shields.io/github/workflow/status/SkillerRaptor/HyperEngine/build-linux?style=flat&label=Build%20Linux&logo=github)](https://github.com/SkillerRaptor/HyperEngine/blob/master/.github/workflows/build-linux.yml)
+[![Support Server](https://img.shields.io/discord/674880770137128970.svg?&style=flat&label=Discord&logo=discord)](https://discord.gg/tYu9yYY)
+[![License](https://img.shields.io/badge/license-MIT-yellow?style=flat)](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE)
 
 ## Installing & Building
 In order to build the engine, you will need to follow these steps:
@@ -33,4 +33,4 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 Please make sure to update tests as appropriate.
 
 ## License
-The HyperEngine is distributed under the [MIT](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE) license.
+HyperEngine is distributed under the [MIT](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE) license.
