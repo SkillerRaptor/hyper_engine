@@ -9,9 +9,8 @@
 namespace HyperEditor
 {
 	Editor::Editor()
-		: IApplication("HyperEditor")
+		: IApplication("HyperEditor", HyperPlatform::GraphicsApi::OpenGL)
 	{
-		set_graphics_api(HyperPlatform::GraphicsApi::Vulkan);
 	}
 
 	auto Editor::startup() -> void

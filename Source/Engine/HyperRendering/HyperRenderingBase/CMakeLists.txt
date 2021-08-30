@@ -5,21 +5,22 @@
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# HyperOpenGL33
+# HyperRenderingBase
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/HyperOpenGL33/Context.cpp)
+        src/HyperRenderingBase/IGraphicsContext.cpp)
 
 set(HEADERS
-        include/HyperOpenGL33/Context.hpp)
+        include/HyperRenderingBase/IGraphicsContext.hpp
+        include/HyperRenderingBase/Resources.hpp)
 
 hyperengine_group_files("${SOURCES}")
 hyperengine_group_files("${HEADERS}")
 
-hyperengine_define_module(HyperOpenGL33)
+hyperengine_define_module(HyperRenderingBase)
 target_link_libraries(
-        HyperOpenGL33
+        HyperRenderingBase
         PUBLIC
-        CONAN_PKG::glad
-        CONAN_PKG::glfw
-        HyperRendering)
+        HyperCore
+        HyperGame
+        HyperPlatform)

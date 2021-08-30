@@ -5,15 +5,13 @@
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# HyperRenderingBase
+# HyperRendering
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/HyperRendering/IContext.cpp
-        src/HyperRendering/RenderCommands.cpp)
+        src/HyperRendering/RenderEngine.cpp)
 
 set(HEADERS
-        include/HyperRendering/IContext.hpp
-        include/HyperRendering/RenderCommands.hpp)
+        include/HyperRendering/RenderEngine.hpp)
 
 hyperengine_group_files("${SOURCES}")
 hyperengine_group_files("${HEADERS}")
@@ -23,5 +21,32 @@ target_link_libraries(
         HyperRendering
         PUBLIC
         HyperCore
-        HyperMath
-        HyperPlatform)
+        HyperMath)
+
+#-------------------------------------------------------------------------------------------
+# HyperOpenGL
+#-------------------------------------------------------------------------------------------
+if (HYPERENGINE_BUILD_OPENGL)
+    target_link_libraries(
+            HyperRendering
+            PUBLIC
+            HyperOpenGL)
+    target_compile_definitions(
+            HyperRendering
+            PUBLIC
+            -DHYPERENGINE_BUILD_OPENGL=1)
+endif ()
+
+#-------------------------------------------------------------------------------------------
+# HyperVulkan
+#-------------------------------------------------------------------------------------------
+if (HYPERENGINE_BUILD_VULKAN)
+    target_link_libraries(
+            HyperRendering
+            PUBLIC
+            HyperVulkan)
+    target_compile_definitions(
+            HyperRendering
+            PUBLIC
+            -DHYPERENGINE_BUILD_VULKAN=1)
+endif ()

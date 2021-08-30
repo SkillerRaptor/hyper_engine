@@ -5,22 +5,21 @@
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# HyperVulkan
+# HyperOpenGL
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        )
+        src/HyperOpenGL/GraphicsContext.cpp)
 
 set(HEADERS
-        )
+        include/HyperOpenGL/GraphicsContext.hpp)
 
 hyperengine_group_files("${SOURCES}")
 hyperengine_group_files("${HEADERS}")
 
-hyperengine_define_module(HyperVulkan)
+hyperengine_define_module(HyperOpenGL)
 target_link_libraries(
-        HyperVulkan
+        HyperOpenGL
         PUBLIC
+        CONAN_PKG::glad
         CONAN_PKG::glfw
-        CONAN_PKG::vulkan-memory-allocator
-        CONAN_PKG::volk
         HyperRenderingBase)

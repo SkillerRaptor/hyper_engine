@@ -28,5 +28,5 @@ target_link_libraries(
         HyperGame
         HyperMath
         HyperPlatform
-#       HyperRendering
+        HyperRendering
         HyperResource)

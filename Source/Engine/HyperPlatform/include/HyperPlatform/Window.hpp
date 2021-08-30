@@ -72,6 +72,7 @@ namespace HyperPlatform
 		auto set_window_lost_focus_callback(const std::function<void()>& window_lost_focus_callback) -> void;
 		auto set_window_moved_callback(const std::function<void(int32_t, int32_t)>& window_moved_callback) -> void;
 
+		auto graphics_api() const -> GraphicsApi;
 		auto native_window() const -> GLFWwindow*;
 
 	private:

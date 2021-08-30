@@ -8,13 +8,12 @@
 
 #include "HyperEngine/IApplication.hpp"
 
-#include <HyperGame/EntitySystem/Components.hpp>
-
 namespace HyperEngine
 {
 	EngineLoop::EngineLoop(IApplication& application)
 		: m_application(application)
 		, m_window(m_application.title(), m_application.graphics_api())
+		, m_render_engine(m_event_manager, m_window)
 	{
 	}
 
@@ -29,12 +28,19 @@ namespace HyperEngine
 
 				m_running = false;
 			});
-
+		
 		auto window_result = m_window.initialize();
 		if (window_result.is_error())
 		{
 			HyperCore::Logger::fatal("Failed to create window");
 			return window_result.error();
+		}
+		
+		auto render_engine_result = m_render_engine.initialize();
+		if (render_engine_result.is_error())
+		{
+			HyperCore::Logger::fatal("Failed to create render engine");
+			return render_engine_result.error();
 		}
 
 		m_running = true;
@@ -117,10 +123,6 @@ namespace HyperEngine
 			});
 	}
 
-	auto EngineLoop::terminate() -> void
-	{
-	}
-
 	auto EngineLoop::run() -> void
 	{
 		auto last_time = 0.0F;
@@ -130,7 +132,9 @@ namespace HyperEngine
 			auto delta_time = last_time - current_time;
 			last_time = current_time;
 
-			(void) delta_time;
+			HYPERENGINE_VARIABLE_NOT_USED(delta_time);
+			
+			m_render_engine.update();
 
 			m_event_manager.process_events();
 			m_window.poll_events();

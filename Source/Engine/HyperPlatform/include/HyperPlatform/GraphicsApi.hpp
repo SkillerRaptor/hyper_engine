@@ -12,8 +12,7 @@ namespace HyperPlatform
 {
 	enum class GraphicsApi : uint8_t
 	{
-		OpenGL33,
-		OpenGL46,
+		OpenGL,
 		Vulkan
 	};
 }

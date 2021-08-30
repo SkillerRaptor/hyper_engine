@@ -23,8 +23,6 @@ namespace HyperEngine
 		engine_loop.run();
 		application.shutdown();
 		
-		engine_loop.terminate();
-		
 		return 0;
 	}
 } // namespace HyperEngine
