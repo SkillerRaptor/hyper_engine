@@ -32,14 +32,14 @@ namespace HyperEngine
 		auto window_result = m_window.initialize();
 		if (window_result.is_error())
 		{
-			HyperCore::Logger::fatal("Failed to create window");
+			HyperCore::Logger::fatal("Failed to create window - {}", window_result.error());
 			return window_result.error();
 		}
 		
 		auto render_engine_result = m_render_engine.initialize();
 		if (render_engine_result.is_error())
 		{
-			HyperCore::Logger::fatal("Failed to create render engine");
+			HyperCore::Logger::fatal("Failed to create render engine - {}", render_engine_result.error());
 			return render_engine_result.error();
 		}
 

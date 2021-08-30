@@ -10,6 +10,10 @@
 #	include "HyperOpenGL/GraphicsContext.hpp"
 #endif
 
+#if HYPERENGINE_BUILD_VULKAN
+#	include "HyperVulkan/GraphicsContext.hpp"
+#endif
+
 namespace HyperRendering
 {
 	RenderEngine::RenderEngine(HyperGame::EventManager& t_event_manager, HyperPlatform::Window& t_window)
@@ -26,7 +30,7 @@ namespace HyperRendering
 			m_graphics_context = std::make_unique<HyperOpenGL::GraphicsContext>(m_event_manager, m_window);
 			break;
 		case HyperPlatform::GraphicsApi::Vulkan:
-			m_graphics_context = nullptr;
+			m_graphics_context = std::make_unique<HyperVulkan::GraphicsContext>(m_event_manager, m_window);
 			break;
 		default:
 			break;
@@ -38,8 +42,13 @@ namespace HyperRendering
 			return HyperCore::ConstructError::OutOfMemory;
 		}
 		
-		m_graphics_context->initialize();
-
+		auto graphics_context_result = m_graphics_context->initialize();
+		if (graphics_context_result.is_error())
+		{
+			HyperCore::Logger::fatal("Failed to initialize graphics context - {}", graphics_context_result.error());
+			return graphics_context_result.error();
+		}
+		
 		return {};
 	}
 

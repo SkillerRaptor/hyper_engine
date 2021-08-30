@@ -9,6 +9,7 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/HyperCore/Assertion.cpp
+        src/HyperCore/Errors.cpp
         src/HyperCore/JobSystem.cpp
         src/HyperCore/Logger.cpp)
 

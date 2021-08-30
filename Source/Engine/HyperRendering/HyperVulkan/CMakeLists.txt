@@ -8,10 +8,10 @@
 # HyperVulkan
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        )
+        src/HyperVulkan/GraphicsContext.cpp)
 
 set(HEADERS
-        )
+        include/HyperVulkan/GraphicsContext.hpp)
 
 hyperengine_group_files("${SOURCES}")
 hyperengine_group_files("${HEADERS}")

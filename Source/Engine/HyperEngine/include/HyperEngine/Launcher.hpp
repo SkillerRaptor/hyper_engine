@@ -15,6 +15,12 @@ namespace HyperEngine
 	class Launcher
 	{
 	public:
+		template <typename T, typename = std::enable_if_t<std::is_base_of_v<IApplication, T>>>
+		static auto launch(T& application) -> int
+		{
+			return launch_application(application);
+		}
+		
 		template <typename T, typename... Args, typename = std::enable_if_t<std::is_base_of_v<IApplication, T>>>
 		static auto launch(Args&&... args) -> int
 		{

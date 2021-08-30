@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <fmt/ostream.h>
+
 namespace HyperCore
 {
 	enum class ConstructError
@@ -26,4 +28,7 @@ namespace HyperCore
 		Uninitialized,
 		UndefinedBehaviour
 	};
+	
+	auto operator<<(std::ostream& ostream, const ConstructError& construct_error) -> std::ostream&;
+	auto operator<<(std::ostream& ostream, const RuntimeError& runtime_error) -> std::ostream&;
 } // namespace HyperCore

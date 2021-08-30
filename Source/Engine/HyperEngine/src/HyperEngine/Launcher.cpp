@@ -16,6 +16,7 @@ namespace HyperEngine
 		auto result = engine_loop.initialize();
 		if (result.is_error())
 		{
+			HyperCore::Logger::fatal("Failed to initialize engine loop - {}", result.error());
 			return EXIT_FAILURE;
 		}
 

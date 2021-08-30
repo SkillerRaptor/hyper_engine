@@ -17,6 +17,11 @@ namespace HyperRendering::HyperOpenGL
 		: IGraphicsContext(t_event_manager, t_window)
 	{
 	}
+	
+	GraphicsContext::~GraphicsContext()
+	{
+		HyperCore::Logger::info("Successfully destroyed OpenGL context");
+	}
 
 	auto GraphicsContext::initialize() -> HyperCore::InitializeResult
 	{
@@ -46,8 +51,6 @@ namespace HyperRendering::HyperOpenGL
 
 	auto GraphicsContext::update() -> void
 	{
-		glClearColor(1.0F, 0.0F, 1.0F, 1.0F);
-		glClear(GL_COLOR_BUFFER_BIT);
 		glfwSwapBuffers(m_window.native_window());
 	}
 } // namespace HyperRendering::HyperOpenGL

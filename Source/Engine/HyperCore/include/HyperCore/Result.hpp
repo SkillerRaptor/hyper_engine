@@ -45,8 +45,18 @@ namespace HyperCore
 		{
 			return m_result.value();
 		}
+		
+		auto value() const -> const ValueType&
+		{
+			return m_result.value();
+		}
 
 		auto error() -> ErrorType&
+		{
+			return m_error.value();
+		}
+		
+		auto error() const -> const ErrorType&
 		{
 			return m_error.value();
 		}
@@ -82,6 +92,11 @@ namespace HyperCore
 		}
 
 		auto error() -> ErrorType&
+		{
+			return m_error.value();
+		}
+		
+		auto error() const -> const ErrorType&
 		{
 			return m_error.value();
 		}
