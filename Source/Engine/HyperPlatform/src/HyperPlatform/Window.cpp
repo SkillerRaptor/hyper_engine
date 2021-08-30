@@ -28,6 +28,8 @@ namespace HyperPlatform
 	{
 		glfwDestroyWindow(m_native_window);
 		glfwTerminate();
+		
+		HyperCore::Logger::info("Successfully destroyed window");
 	}
 
 	auto Window::initialize() -> HyperCore::InitializeResult

@@ -6,6 +6,10 @@
 
 #pragma once
 
+#include "HyperGame/Events/EventType.hpp"
+#include "HyperGame/Events/Listener.hpp"
+
+#include <HyperCore/Logger.hpp>
 #include <HyperCore/TypeTraits.hpp>
 
 #include <cstdint>
@@ -50,7 +54,16 @@ namespace HyperGame
 
 		auto unregister_all_listeners() -> void override
 		{
-			m_event_listeners.clear();
+			constexpr auto event_id = EventType<T>::id();
+			for (auto it = m_event_listeners.begin(); it != m_event_listeners.end(); )
+			{
+				auto& event_pair = *it;
+				auto listener_id = event_pair.first;
+				it = m_event_listeners.erase(it);
+				
+				auto event_listener_id = static_cast<ListenerTraits::ListenerType>(event_id) << ListenerTraits::listener_shift | listener_id;
+				HyperCore::Logger::debug("Unregistered event listener with id #{}", event_listener_id);
+			}
 		}
 
 		template <typename... Args>
