@@ -6,15 +6,17 @@
 
 #include "HyperCore/Logger.hpp"
 
+#include "HyperCore/Prerequisites.hpp"
+
 #include <fmt/chrono.h>
 #include <fmt/color.h>
 
 namespace HyperCore
 {
 #if HYPERENGINE_DEBUG
-	Logger::Level Logger::s_log_level{ Logger::Level::Trace };
+	Logger::Level Logger::s_log_level = Logger::Level::Trace;
 #else
-	Logger::Level Logger::s_log_level{ Logger::Level::Fatal };
+	Logger::Level Logger::s_log_level = Logger::Level::Fatal;
 #endif
 
 	auto Logger::internal_log(Level level, std::string_view string) -> void

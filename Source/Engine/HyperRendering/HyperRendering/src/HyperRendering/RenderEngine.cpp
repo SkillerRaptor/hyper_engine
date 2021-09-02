@@ -22,34 +22,37 @@ namespace HyperRendering
 	{
 	}
 
-	auto RenderEngine::initialize() -> HyperCore::InitializeResult
+	auto RenderEngine::initialize() -> bool
 	{
 		switch (m_window.graphics_api())
 		{
+#if HYPERENGINE_BUILD_OPENGL
 		case HyperPlatform::GraphicsApi::OpenGL:
 			m_graphics_context = std::make_unique<HyperOpenGL::GraphicsContext>(m_event_manager, m_window);
 			break;
+#endif
+#if HYPERENGINE_BUILD_VULKAN
 		case HyperPlatform::GraphicsApi::Vulkan:
 			m_graphics_context = std::make_unique<HyperVulkan::GraphicsContext>(m_event_manager, m_window);
 			break;
+#endif
 		default:
 			break;
 		}
 
 		if (m_graphics_context == nullptr)
 		{
-			HyperCore::Logger::fatal("Failed to create graphics context");
-			return HyperCore::ConstructError::OutOfMemory;
+			HyperCore::Logger::fatal("RenderEngine::initialize(): Failed to create graphics context");
+			return false;
 		}
 		
-		auto graphics_context_result = m_graphics_context->initialize();
-		if (graphics_context_result.is_error())
+		if (!m_graphics_context->initialize())
 		{
-			HyperCore::Logger::fatal("Failed to initialize graphics context - {}", graphics_context_result.error());
-			return graphics_context_result.error();
+			HyperCore::Logger::fatal("RenderEngine::initialize(): Failed to initialize graphics context");
+			return false;
 		}
 		
-		return {};
+		return true;
 	}
 
 	auto RenderEngine::update() -> void

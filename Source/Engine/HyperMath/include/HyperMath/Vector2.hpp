@@ -15,9 +15,12 @@ HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
 
 namespace HyperMath
 {
-	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+	template <typename T>
 	class Vector2
 	{
+	public:
+		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
+		
 	public:
 		Vector2() = default;
 

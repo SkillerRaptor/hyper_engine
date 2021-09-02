@@ -7,9 +7,8 @@
 #pragma once
 
 #include <HyperCore/JobSystem.hpp>
-#include <HyperCore/Result.hpp>
 #include <HyperGame/EntitySystem/Registry.hpp>
-#include <HyperGame/Events/EventManager.hpp>
+#include <HyperGame/EventSystem/EventManager.hpp>
 #include <HyperPlatform/Window.hpp>
 #include <HyperRendering/RenderEngine.hpp>
 
@@ -24,7 +23,7 @@ namespace HyperEngine
 	public:
 		explicit EngineLoop(IApplication& application);
 		
-		auto initialize() -> HyperCore::InitializeResult;
+		auto initialize() -> bool;
 		
 		auto run() -> void;
 

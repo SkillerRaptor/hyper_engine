@@ -17,12 +17,18 @@ namespace HyperRendering::HyperVulkan
 
 	GraphicsContext::~GraphicsContext()
 	{
+		auto successfully = true;
+
 		if (m_validation_layers_enabled)
 		{
 			if (m_debug_messenger != VK_NULL_HANDLE)
 			{
 				vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messenger, nullptr);
 				HyperCore::Logger::debug("Vulkan debug messenger was destroyed");
+			}
+			else
+			{
+				successfully = false;
 			}
 		}
 
@@ -31,16 +37,23 @@ namespace HyperRendering::HyperVulkan
 			vkDestroyInstance(m_instance, nullptr);
 			HyperCore::Logger::debug("Vulkan instance was destroyed");
 		}
+		else
+		{
+			successfully = false;
+		}
 
-		HyperCore::Logger::info("Successfully destroyed Vulkan context");
+		if (successfully)
+		{
+			HyperCore::Logger::info("Successfully destroyed Vulkan context");
+		}
 	}
 
-	auto GraphicsContext::initialize() -> HyperCore::InitializeResult
+	auto GraphicsContext::initialize() -> bool
 	{
 		if (volkInitialize() != VK_SUCCESS)
 		{
-			HyperCore::Logger::error("Failed to initialize volk");
-			return HyperCore::ConstructError::Incomplete;
+			HyperCore::Logger::error("GraphicsContext::initialize(): Failed to initialize volk");
+			return false;
 		}
 
 		HyperCore::Logger::debug("Volk was initialized");
@@ -53,33 +66,31 @@ namespace HyperRendering::HyperVulkan
 		}
 #endif
 
-		const auto instance_result = create_instance();
-		if (instance_result.is_error())
+		if (!create_instance())
 		{
-			HyperCore::Logger::error("Failed to create vulkan instance - {}", instance_result.error());
-			return instance_result.error();
+			HyperCore::Logger::error("GraphicsContext::initialize(): Failed to create vulkan instance");
+			return false;
 		}
 
 		if (m_validation_layers_enabled)
 		{
-			const auto debug_messenger_result = create_debug_messenger();
-			if (debug_messenger_result.is_error())
+			if (!create_debug_messenger())
 			{
-				HyperCore::Logger::error("Failed to create vulkan debug messenger - {}", debug_messenger_result.error());
-				return debug_messenger_result.error();
+				HyperCore::Logger::error("GraphicsContext::initialize(): Failed to create vulkan debug messenger");
+				return false;
 			}
 		}
 
 		HyperCore::Logger::info("Successfully created Vulkan context");
 
-		return {};
+		return true;
 	}
 
 	auto GraphicsContext::update() -> void
 	{
 	}
 
-	auto GraphicsContext::create_instance() -> HyperCore::InitializeResult
+	auto GraphicsContext::create_instance() -> bool
 	{
 		VkApplicationInfo application_info{};
 		application_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -122,18 +133,18 @@ namespace HyperRendering::HyperVulkan
 
 		if (vkCreateInstance(&instance_create_info, nullptr, &m_instance) != VK_SUCCESS)
 		{
-			HyperCore::Logger::error("Failed to create Vulkan instance");
-			return HyperCore::ConstructError::Incomplete;
+			HyperCore::Logger::error("GraphicsContext::create_instance(): Failed to create Vulkan instance");
+			return false;
 		}
 
 		volkLoadInstance(m_instance);
 
 		HyperCore::Logger::debug("Vulkan instance was created");
 
-		return {};
+		return true;
 	}
 
-	auto GraphicsContext::create_debug_messenger() -> HyperCore::InitializeResult
+	auto GraphicsContext::create_debug_messenger() -> bool
 	{
 		VkDebugUtilsMessengerCreateInfoEXT debug_messenger_create_info{};
 		debug_messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -149,13 +160,13 @@ namespace HyperRendering::HyperVulkan
 
 		if (vkCreateDebugUtilsMessengerEXT(m_instance, &debug_messenger_create_info, nullptr, &m_debug_messenger) != VK_SUCCESS)
 		{
-			HyperCore::Logger::error("Failed to create Vulkan debug messenger");
-			return HyperCore::ConstructError::Incomplete;
+			HyperCore::Logger::error("GraphicsContext::create_debug_messenger(): Failed to create Vulkan debug messenger");
+			return false;
 		}
 
 		HyperCore::Logger::debug("Vulkan debug messenger was created");
 
-		return {};
+		return true;
 	}
 
 	auto GraphicsContext::validation_layers_supported() const -> bool
@@ -205,7 +216,7 @@ namespace HyperRendering::HyperVulkan
 
 		return required_extensions;
 	}
-	
+
 	auto GraphicsContext::debug_callback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT severity_flags,
 		VkDebugUtilsMessageTypeFlagsEXT type_flags,
@@ -214,7 +225,7 @@ namespace HyperRendering::HyperVulkan
 	{
 		HYPERENGINE_VARIABLE_NOT_USED(type_flags);
 		HYPERENGINE_VARIABLE_NOT_USED(user_data);
-		
+
 		if (severity_flags >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 		{
 			HyperCore::Logger::fatal("{}", callback_data->pMessage);
@@ -227,7 +238,7 @@ namespace HyperRendering::HyperVulkan
 		{
 			HyperCore::Logger::trace("{}", callback_data->pMessage);
 		}
-		
+
 		return VK_FALSE;
 	}
 } // namespace HyperRendering::HyperVulkan

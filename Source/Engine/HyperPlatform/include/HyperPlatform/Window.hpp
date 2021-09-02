@@ -8,8 +8,6 @@
 
 #include "HyperPlatform/GraphicsApi.hpp"
 
-#include <HyperCore/Result.hpp>
-
 #include <cstdint>
 #include <functional>
 #include <string>
@@ -45,7 +43,7 @@ namespace HyperPlatform
 		Window(std::string t_title, GraphicsApi t_graphics_api);
 		~Window();
 
-		auto initialize() -> HyperCore::InitializeResult;
+		auto initialize() -> bool;
 
 		auto poll_events() const -> void;
 		auto time() const -> float;

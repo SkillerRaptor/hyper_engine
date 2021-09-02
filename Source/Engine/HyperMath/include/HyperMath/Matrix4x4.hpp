@@ -11,10 +11,11 @@
 
 namespace HyperMath
 {
-	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+	template <typename T>
 	class Matrix4x4
 	{
 	public:
+		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
 	};
 
 	using Mat4x4 = Matrix4x4<float>;

@@ -17,7 +17,7 @@ namespace HyperEngine
 	{
 	}
 
-	auto EngineLoop::initialize() -> HyperCore::InitializeResult
+	auto EngineLoop::initialize() ->bool
 	{
 		initialize_event_callbacks();
 
@@ -28,24 +28,22 @@ namespace HyperEngine
 
 				m_running = false;
 			});
-		
-		auto window_result = m_window.initialize();
-		if (window_result.is_error())
+
+		if (!m_window.initialize())
 		{
-			HyperCore::Logger::fatal("Failed to create window - {}", window_result.error());
-			return window_result.error();
+			HyperCore::Logger::fatal("EngineLoop::initialize(): Failed to create window");
+			return false;
 		}
-		
-		auto render_engine_result = m_render_engine.initialize();
-		if (render_engine_result.is_error())
+
+		if (!m_render_engine.initialize())
 		{
-			HyperCore::Logger::fatal("Failed to create render engine - {}", render_engine_result.error());
-			return render_engine_result.error();
+			HyperCore::Logger::fatal("EngineLoop::initialize(): Failed to create render engine");
+			return false;
 		}
 
 		m_running = true;
 
-		return {};
+		return true;
 	}
 
 	auto EngineLoop::initialize_event_callbacks() -> void
@@ -133,7 +131,7 @@ namespace HyperEngine
 			last_time = current_time;
 
 			HYPERENGINE_VARIABLE_NOT_USED(delta_time);
-			
+
 			m_render_engine.update();
 
 			m_event_manager.process_events();

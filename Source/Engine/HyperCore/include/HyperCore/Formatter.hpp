@@ -13,8 +13,14 @@
 namespace HyperCore::Formatter
 {
 	template <typename... Args>
-	static auto format(std::string_view format, Args&&... args) -> std::string
+	auto format(std::string_view format, Args&&... args) -> std::string
 	{
+		constexpr size_t args_count = sizeof...(args);
+		if constexpr (args_count == 0)
+		{
+			return format.data();
+		}
+
 		if (format.empty())
 		{
 			return format.data();

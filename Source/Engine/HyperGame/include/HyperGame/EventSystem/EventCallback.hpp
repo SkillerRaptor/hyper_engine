@@ -6,11 +6,10 @@
 
 #pragma once
 
-#include "HyperGame/Events/EventType.hpp"
-#include "HyperGame/Events/Listener.hpp"
+#include "HyperGame/EventSystem/EventType.hpp"
+#include "HyperGame/EventSystem/Listener.hpp"
 
 #include <HyperCore/Logger.hpp>
-#include <HyperCore/TypeTraits.hpp>
 
 #include <cstdint>
 #include <functional>
@@ -30,7 +29,7 @@ namespace HyperGame
 		virtual auto invoke_next() -> void = 0;
 	};
 
-	template <typename T, typename = std::enable_if_t<HyperCore::IsDataStruct<T>::value>>
+	template <typename T>
 	class EventCallback : public IEventCallback
 	{
 	public:

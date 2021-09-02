@@ -15,21 +15,25 @@
 
 namespace HyperMath
 {
-	template <typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
-	static constexpr auto radians(T&& degrees) noexcept -> T
+	template <typename T>
+	constexpr auto radians(T&& degrees) noexcept -> T
 	{
+		static_assert(std::is_floating_point<T>::value, "'T' is not a floating value!");
 		return degrees * (Numbers::g_pi_v<T> / static_cast<T>(180.0L));
 	}
 
-	template <typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
-	static constexpr auto degrees(T&& radians) noexcept -> T
+	template <typename T>
+	constexpr auto degrees(T&& radians) noexcept -> T
 	{
+		static_assert(std::is_floating_point<T>::value, "'T' is not a floating value!");
 		return radians * (static_cast<T>(180.0L) / Numbers::g_pi_v<T>);
 	}
 
-	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto lerp(T a, T b, T interpolation) noexcept -> T
+	template <typename T>
+	constexpr auto lerp(T a, T b, T interpolation) noexcept -> T
 	{
+		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
+		
 		if ((a <= 0 && b >= 0) || (a >= 0 && b <= 0))
 		{
 			return interpolation * b + (1 - interpolation) * a;

@@ -26,18 +26,31 @@ namespace HyperPlatform
 
 	Window::~Window()
 	{
-		glfwDestroyWindow(m_native_window);
+		auto successfully = true;
+
+		if (m_native_window != nullptr)
+		{
+			glfwDestroyWindow(m_native_window);
+		}
+		else
+		{
+			successfully = false;
+		}
+
 		glfwTerminate();
-		
-		HyperCore::Logger::info("Successfully destroyed window");
+
+		if (successfully)
+		{
+			HyperCore::Logger::info("Successfully destroyed window");
+		}
 	}
 
-	auto Window::initialize() -> HyperCore::InitializeResult
+	auto Window::initialize() -> bool
 	{
 		if (glfwInit() == GLFW_FALSE)
 		{
-			HyperCore::Logger::fatal("Failed to initialize GLFW");
-			return HyperCore::ConstructError::Incomplete;
+			HyperCore::Logger::fatal("Window::initialize(): Failed to initialize GLFW");
+			return false;
 		}
 
 		HyperCore::Logger::debug("GLFW was initialized");
@@ -60,8 +73,8 @@ namespace HyperPlatform
 		{
 			glfwTerminate();
 
-			HyperCore::Logger::fatal("Failed to create GLFW window");
-			return HyperCore::ConstructError::Incomplete;
+			HyperCore::Logger::fatal("Window::initialize(): Failed to create GLFW window");
+			return false;
 		}
 
 		glfwSetWindowUserPointer(m_native_window, &m_info);
@@ -182,7 +195,7 @@ namespace HyperPlatform
 
 		HyperCore::Logger::info("Successfully created window");
 
-		return {};
+		return true;
 	}
 
 	auto Window::initialize_callbacks() -> void

@@ -6,6 +6,8 @@
 
 #include "HyperCore/JobSystem.hpp"
 
+#include "HyperCore/Logger.hpp"
+
 #include <algorithm>
 
 namespace HyperCore
@@ -20,6 +22,8 @@ namespace HyperCore
 
 		for (uint32_t worker_id = 0; worker_id < m_worker_count; ++worker_id)
 		{
+			HyperCore::Logger::debug("Starting worker thread #{}", worker_id);
+			
 			std::thread worker(
 				[this]()
 				{
@@ -48,9 +52,13 @@ namespace HyperCore
 		m_running_flag.store(false);
 		m_wake_condition.notify_all();
 
+		size_t worker_id = 0;
 		for (auto& worker_thread : m_worker_threads)
 		{
+			HyperCore::Logger::debug("Stopping worker thread #{}", worker_id);
+			
 			worker_thread.join();
+			++worker_id;
 		}
 	}
 
@@ -70,11 +78,13 @@ namespace HyperCore
 	{
 		if (job_count == 0)
 		{
+			HyperCore::Logger::fatal("JobSystem::dispatch(): Failed to dispatch job with a job count of 0");
 			return;
 		}
 
 		if (group_size == 0)
 		{
+			HyperCore::Logger::fatal("JobSystem::dispatch(): Failed to dispatch job with a group count of 0");
 			return;
 		}
 

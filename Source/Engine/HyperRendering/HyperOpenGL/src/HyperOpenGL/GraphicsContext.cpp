@@ -23,7 +23,7 @@ namespace HyperRendering::HyperOpenGL
 		HyperCore::Logger::info("Successfully destroyed OpenGL context");
 	}
 
-	auto GraphicsContext::initialize() -> HyperCore::InitializeResult
+	auto GraphicsContext::initialize() -> bool
 	{
 		glfwMakeContextCurrent(m_window.native_window());
 
@@ -32,8 +32,8 @@ namespace HyperRendering::HyperOpenGL
 			glfwDestroyWindow(m_window.native_window());
 			glfwTerminate();
 
-			HyperCore::Logger::fatal("Failed to initialize GLAD");
-			return HyperCore::ConstructError::Incomplete;
+			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to initialize GLAD");
+			return false;
 		}
 
 		HyperCore::Logger::debug("GLAD was initialized");
@@ -46,7 +46,7 @@ namespace HyperRendering::HyperOpenGL
 
 		HyperCore::Logger::info("Successfully created OpenGL context");
 
-		return {};
+		return true;
 	}
 
 	auto GraphicsContext::update() -> void

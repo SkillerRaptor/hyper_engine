@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "HyperGame/Events/EventManager.hpp"
+#include "HyperGame/EventSystem/EventManager.hpp"
 
 namespace HyperGame
 {

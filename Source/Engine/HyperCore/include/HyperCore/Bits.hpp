@@ -8,29 +8,35 @@
 
 #include <type_traits>
 
-namespace HyperCore::Bits
+namespace HyperCore
 {
-	template <typename T, typename = typename std::enable_if_t<std::is_integral_v<T>>>
-	static constexpr auto bit(T shift) noexcept -> T
+	template <typename T>
+	constexpr auto bit(T shift) noexcept -> T
 	{
-		if (shift < 0)
+		static_assert(std::is_integral<T>::value, "'T' is not an integral value!");
+		static_assert(std::is_unsigned<T>::value, "'T' is not an unsigned value!");
+
+		if (shift <= 0)
 		{
-			return 0;
+			return 1;
 		}
 
-		using U = std::make_unsigned_t<T>;
+		using U = std::make_unsigned<T>::type;
 		return static_cast<U>(1) << shift;
 	}
 
-	template <typename T, typename = typename std::enable_if_t<std::is_integral_v<T>>>
-	static constexpr auto mask(T shift) noexcept -> T
+	template <typename T>
+	constexpr auto mask(T shift) noexcept -> T
 	{
-		if (shift < 0)
+		static_assert(std::is_integral<T>::value, "'T' is not an integral value!");
+		static_assert(std::is_unsigned<T>::value, "'T' is not an unsigned value!");
+
+		if (shift <= 0)
 		{
-			return 0;
+			return 1;
 		}
 
-		using U = std::make_unsigned_t<T>;
+		using U = std::make_unsigned<T>::type;
 		return bit(shift) - static_cast<U>(1);
 	}
-} // namespace HyperCore::Bits
+} // namespace HyperCore

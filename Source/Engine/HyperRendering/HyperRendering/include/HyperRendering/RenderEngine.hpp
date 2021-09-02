@@ -18,7 +18,7 @@ namespace HyperRendering
 	public:
 		RenderEngine(HyperGame::EventManager& t_event_manager, HyperPlatform::Window& t_window);
 
-		auto initialize() -> HyperCore::InitializeResult;
+		auto initialize() -> bool;
 
 		auto update() -> void;
 

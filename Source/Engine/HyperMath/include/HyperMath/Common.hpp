@@ -23,27 +23,32 @@
 
 namespace HyperMath
 {
-	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto min(T a, T b) noexcept -> T
+	template <typename T>
+	constexpr auto min(T a, T b) noexcept -> T
 	{
+		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
 		return b < a ? b : a;
 	}
 
-	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto max(T a, T b) noexcept -> T
+	template <typename T>
+	constexpr auto max(T a, T b) noexcept -> T
 	{
+		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
 		return a < b ? b : a;
 	}
 
-	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto abs(T x) noexcept -> T
+	template <typename T>
+	constexpr auto abs(T x) noexcept -> T
 	{
+		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
 		return x >= 0 ? x : -x;
 	}
 
-	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto ceil(T x) noexcept -> T
+	template <typename T>
+	constexpr auto ceil(T x) noexcept -> T
 	{
+		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
+		
 		if (is_nan(x))
 		{
 			return std::numeric_limits<T>::quiet_NaN();
@@ -65,21 +70,25 @@ namespace HyperMath
 		return static_cast<T>(x_whole + remainder);
 	}
 
-	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto clamp(T value, T low, T high) noexcept -> T
+	template <typename T>
+	constexpr auto clamp(T value, T low, T high) noexcept -> T
 	{
+		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
 		return HyperMath::min(HyperMath::max(value, low), high);
 	}
 
-	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto saturate(T value) noexcept -> T
+	template <typename T>
+	constexpr auto saturate(T value) noexcept -> T
 	{
+		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
 		return HyperMath::clamp(value, static_cast<T>(0.0F), static_cast<T>(1.0F));
 	}
 
-	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto floor(T x) noexcept -> T
+	template <typename T>
+	constexpr auto floor(T x) noexcept -> T
 	{
+		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
+		
 		if (is_nan(x))
 		{
 			return std::numeric_limits<T>::quiet_NaN();
@@ -101,9 +110,11 @@ namespace HyperMath
 		return static_cast<T>(x_whole - remainder);
 	}
 
-	template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-	static constexpr auto midpoint(T a, T b) noexcept -> T
+	template <typename T>
+	constexpr auto midpoint(T a, T b) noexcept -> T
 	{
+		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
+		
 		if constexpr (std::is_integral_v<T>)
 		{
 			using U = std::make_unsigned_t<T>;
@@ -147,9 +158,11 @@ namespace HyperMath
 		}
 	}
 
-	template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-	static constexpr auto factorial(T n) noexcept -> T
+	template <typename T>
+	constexpr auto factorial(T n) noexcept -> T
 	{
+		static_assert(std::is_integral<T>::value, "'T' is not an integral value!");
+		
 		if (n <= 1)
 		{
 			return 1;
@@ -167,9 +180,11 @@ namespace HyperMath
 		return value;
 	}
 
-	template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-	static constexpr auto pow(T x, T n) noexcept -> T
+	template <typename T>
+	constexpr auto pow(T x, T n) noexcept -> T
 	{
+		static_assert(std::is_integral<T>::value, "'T' is not an integral value!");
+		
 		if (n <= 0)
 		{
 			return 1;

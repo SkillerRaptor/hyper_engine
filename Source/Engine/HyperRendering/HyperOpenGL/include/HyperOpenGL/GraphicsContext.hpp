@@ -16,7 +16,7 @@ namespace HyperRendering::HyperOpenGL
 		GraphicsContext(HyperGame::EventManager& t_event_manager, HyperPlatform::Window& t_window);
 		~GraphicsContext() override;
 		
-		auto initialize() -> HyperCore::InitializeResult override;
+		auto initialize() -> bool override;
 
 		auto update() -> void override;
 	};

@@ -8,8 +8,7 @@
 
 #include "HyperRenderingBase/Resources.hpp"
 
-#include <HyperCore/Result.hpp>
-#include <HyperGame/Events/EventManager.hpp>
+#include <HyperGame/EventSystem/EventManager.hpp>
 #include <HyperPlatform/Window.hpp>
 
 namespace HyperRendering
@@ -20,7 +19,7 @@ namespace HyperRendering
 		IGraphicsContext(HyperGame::EventManager& t_event_manager, HyperPlatform::Window& t_window);
 		virtual ~IGraphicsContext() = default;
 		
-		virtual auto initialize() -> HyperCore::InitializeResult = 0;
+		virtual auto initialize() -> bool = 0;
 		
 		virtual auto update() -> void = 0;
 

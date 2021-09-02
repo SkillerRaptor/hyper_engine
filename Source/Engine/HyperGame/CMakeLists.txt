@@ -9,7 +9,7 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/HyperGame/EntitySystem/Registry.cpp
-        src/HyperGame/Events/EventManager.cpp)
+        src/HyperGame/EventSystem/EventManager.cpp)
 
 set(HEADERS
         include/HyperGame/MouseButton.hpp
@@ -19,13 +19,13 @@ set(HEADERS
         include/HyperGame/EntitySystem/Entity.hpp
         include/HyperGame/EntitySystem/Registry.hpp
         include/HyperGame/EntitySystem/Components/TagComponent.hpp
-        include/HyperGame/Events/EventCallback.hpp
-        include/HyperGame/Events/EventManager.hpp
-        include/HyperGame/Events/EventType.hpp
-        include/HyperGame/Events/KeyEvents.hpp
-        include/HyperGame/Events/Listener.hpp
-        include/HyperGame/Events/MouseEvents.hpp
-        include/HyperGame/Events/WindowEvents.hpp)
+        include/HyperGame/EventSystem/EventCallback.hpp
+        include/HyperGame/EventSystem/EventManager.hpp
+        include/HyperGame/EventSystem/EventType.hpp
+        include/HyperGame/EventSystem/Listener.hpp
+        include/HyperGame/EventSystem/Events/KeyEvents.hpp
+        include/HyperGame/EventSystem/Events/MouseEvents.hpp
+        include/HyperGame/EventSystem/Events/WindowEvents.hpp)
 
 hyperengine_group_files("${SOURCES}")
 hyperengine_group_files("${HEADERS}")

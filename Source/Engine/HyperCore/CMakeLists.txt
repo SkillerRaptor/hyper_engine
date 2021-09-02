@@ -9,7 +9,6 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/HyperCore/Assertion.cpp
-        src/HyperCore/Errors.cpp
         src/HyperCore/JobSystem.cpp
         src/HyperCore/Logger.cpp)
 
@@ -17,15 +16,12 @@ set(HEADERS
         include/HyperCore/Assertion.hpp
         include/HyperCore/Bits.hpp
         include/HyperCore/Compilers.hpp
-        include/HyperCore/Errors.hpp
         include/HyperCore/Formatter.hpp
         include/HyperCore/Hasher.hpp
         include/HyperCore/JobSystem.hpp
         include/HyperCore/Logger.hpp
         include/HyperCore/Prerequisites.hpp
-        include/HyperCore/Result.hpp
         include/HyperCore/SourceLocation.hpp
-        include/HyperCore/TypeTraits.hpp
         include/HyperCore/Compilers/ClangSpecific.hpp
         include/HyperCore/Compilers/GCCSpecific.hpp
         include/HyperCore/Compilers/MSVCSpecific.hpp

@@ -25,9 +25,3 @@
 #define HYPERENGINE_NON_COPYABLE(class_name) \
 	class_name(const class_name&) = delete;  \
 	auto operator=(const class_name&) -> class_name& = delete
-
-#define HYPERENGINE_SINGLETON(class_name) \
-	class_name() = delete;                \
-	~class_name() = delete;               \
-	HYPERENGINE_NON_MOVABLE(class_name);  \
-	HYPERENGINE_NON_COPYABLE(class_name)

@@ -6,15 +6,14 @@
 
 #pragma once
 
-#include "HyperGame/Events/EventType.hpp"
-#include "HyperGame/Events/EventCallback.hpp"
-#include "HyperGame/Events/KeyEvents.hpp"
-#include "HyperGame/Events/Listener.hpp"
-#include "HyperGame/Events/MouseEvents.hpp"
-#include "HyperGame/Events/WindowEvents.hpp"
+#include "HyperGame/EventSystem/EventType.hpp"
+#include "HyperGame/EventSystem/EventCallback.hpp"
+#include "HyperGame/EventSystem/Listener.hpp"
+#include "HyperGame/EventSystem/Events/KeyEvents.hpp"
+#include "HyperGame/EventSystem/Events/MouseEvents.hpp"
+#include "HyperGame/EventSystem/Events/WindowEvents.hpp"
 
 #include <HyperCore/Logger.hpp>
-#include <HyperCore/TypeTraits.hpp>
 
 #include <cstdint>
 #include <functional>
@@ -30,7 +29,7 @@ namespace HyperGame
 	public:
 		~EventManager();
 
-		template <typename T, typename = std::enable_if_t<HyperCore::IsDataStruct<T>::value>>
+		template <typename T>
 		auto register_listener(const std::function<void(const T&)>& listener) -> Listener
 		{
 			constexpr auto event_id = EventType<T>::id();
@@ -51,7 +50,7 @@ namespace HyperGame
 
 		auto unregister_listener(Listener id) -> bool;
 
-		template <typename T, typename... Args, typename = std::enable_if_t<HyperCore::IsDataStruct<T>::value>>
+		template <typename T, typename... Args>
 		auto invoke(Args&&... args) -> void
 		{
 			constexpr auto event_id = EventType<T>::id();

@@ -23,13 +23,13 @@ namespace HyperRendering::HyperVulkan
 		GraphicsContext(HyperGame::EventManager& t_event_manager, HyperPlatform::Window& t_window);
 		~GraphicsContext() override;
 		
-		auto initialize() -> HyperCore::InitializeResult override;
+		auto initialize() -> bool override;
 
 		auto update() -> void override;
 
 	private:
-		auto create_instance() -> HyperCore::InitializeResult;
-		auto create_debug_messenger() -> HyperCore::InitializeResult;
+		auto create_instance() -> bool;
+		auto create_debug_messenger() -> bool;
 
 		auto validation_layers_supported() const -> bool;
 		auto get_required_extensions() const -> std::vector<const char*>;

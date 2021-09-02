@@ -13,10 +13,9 @@ namespace HyperEngine
 	auto Launcher::launch_application(IApplication& application) -> int
 	{
 		auto engine_loop = EngineLoop(application);
-		auto result = engine_loop.initialize();
-		if (result.is_error())
+		if (!engine_loop.initialize())
 		{
-			HyperCore::Logger::fatal("Failed to initialize engine loop - {}", result.error());
+			HyperCore::Logger::fatal("Launcher::launch_application(): Failed to initialize engine loop");
 			return EXIT_FAILURE;
 		}
 

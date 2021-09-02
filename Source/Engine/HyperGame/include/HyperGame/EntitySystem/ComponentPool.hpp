@@ -10,7 +10,6 @@
 
 #include <HyperCore/Assertion.hpp>
 #include <HyperCore/Logger.hpp>
-#include <HyperCore/TypeTraits.hpp>
 
 #include <unordered_map>
 
@@ -22,7 +21,7 @@ namespace HyperGame
 		virtual ~IComponentPool() = default;
 	};
 
-	template <typename T, typename = std::enable_if_t<HyperCore::IsDataStruct<T>::value>>
+	template <typename T>
 	class ComponentPool : public IComponentPool
 	{
 	public:

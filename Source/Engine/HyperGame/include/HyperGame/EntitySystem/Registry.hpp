@@ -12,7 +12,6 @@
 
 #include <HyperCore/Assertion.hpp>
 #include <HyperCore/Logger.hpp>
-#include <HyperCore/TypeTraits.hpp>
 
 #include <memory>
 #include <unordered_map>
@@ -28,7 +27,7 @@ namespace HyperGame
 
 		auto valid_entity(Entity entity) -> bool;
 
-		template <typename T, typename... Args, typename = std::enable_if_t<HyperCore::IsDataStruct<T>::value>>
+		template <typename T, typename... Args>
 		auto add_component(Entity entity, Args&&... args) -> T&
 		{
 			constexpr auto component_id = ComponentType<T>::id();
@@ -49,7 +48,7 @@ namespace HyperGame
 			return component;
 		}
 
-		template <typename T, typename = std::enable_if_t<HyperCore::IsDataStruct<T>::value>>
+		template <typename T>
 		auto remove_component(Entity entity) -> bool
 		{
 			if (!has_component<T>(entity))
@@ -65,7 +64,7 @@ namespace HyperGame
 			return true;
 		}
 
-		template <typename T, typename = std::enable_if_t<HyperCore::IsDataStruct<T>::value>>
+		template <typename T>
 		auto has_component(Entity entity) -> bool
 		{
 			constexpr auto event_id = ComponentType<T>::id();
@@ -80,7 +79,7 @@ namespace HyperGame
 			return component_pool->has_component(entity);
 		}
 
-		template <typename T, typename = std::enable_if_t<HyperCore::IsDataStruct<T>::value>>
+		template <typename T>
 		auto get_component(Entity entity) -> T&
 		{
 			if (!has_component<T>(entity))
