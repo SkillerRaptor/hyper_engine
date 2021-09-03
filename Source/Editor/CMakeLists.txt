@@ -15,6 +15,7 @@ set(HEADERS
         include/HyperEditor/Editor.hpp)
 
 hyperengine_define_executable(HyperEditor)
+hyperengine_set_startup(HyperEditor)
 target_link_libraries(HyperEditor PRIVATE HyperEngine)
 
 if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")

@@ -13,23 +13,24 @@ else ()
     include(${CONAN_CATCH2_ROOT}/lib/cmake/Catch2/Catch.cmake)
 endif ()
 
-add_library(HyperTestMain STATIC src/main.cpp)
+set(SOURCES
+        src/main.cpp)
+
+hyperengine_define_library(HyperTestMain)
+hyperengine_set_folder(HyperTestMain HyperTests)
 target_link_libraries(
         HyperTestMain
         PUBLIC
         CONAN_PKG::catch2)
-target_link_libraries(
-        HyperTestMain
-        PRIVATE
-        ProjectOptions)
 
 macro(define_test target source)
-    add_executable(${target} ${source})
+    set(SOURCES "${source}")
+
+    hyperengine_define_executable("${target}")
+    hyperengine_set_folder("${target}" HyperTests)
     target_link_libraries(
             ${target}
             PRIVATE
-            ProjectWarnings
-            ProjectOptions
             HyperTestMain)
 
     catch_discover_tests(

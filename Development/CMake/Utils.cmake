@@ -39,6 +39,10 @@ function(hyperengine_set_folder target folder)
     set_target_properties(${target} PROPERTIES FOLDER ${folder})
 endfunction()
 
+function(hyperengine_set_startup target)
+    set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" PROPERTY VS_STARTUP_PROJECT ${target})
+endfunction()
+
 function(hyperengine_define_module target)
     hyperengine_define_library(${target})
     hyperengine_set_folder(${target} HyperModules)
