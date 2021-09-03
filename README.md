@@ -18,6 +18,7 @@ In order to build the engine, you will need to follow these steps:
 - [fmt](https://github.com/fmtlib/fmt/blob/master/LICENSE.rst) Copyright (c) MIT License, Victor Zverovich 2012-present
 - [glad](https://github.com/Dav1dde/glad/blob/master/LICENSE) Copyright (c) MIT License, David Herberth 2013-2021
 - [glfw](https://github.com/glfw/glfw/blob/master/LICENSE.md) Copyright (c) zlib License, Marcus Geelnard 2002-2006 & Camilla Löwy 2006-2019
+- [glslang](https://github.com/KhronosGroup/glslang/blob/master/LICENSE.txt) Copyright (c) MIT License, The Khronos Group Inc. 2020
 - [Vulkan-Headers](https://github.com/KhronosGroup/Vulkan-Headers/blob/master/LICENSE.txt) Copyright (c) Apache License 2.0, The Khronos Group Inc. 2019-2021
 - [VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/blob/master/LICENSE.txt) Copyright (c) MIT, Advanced Micro Devices 2017-2021
 - [volk](https://github.com/zeux/volk/blob/master/LICENSE.md) Copyright (c) MIT, Arseny Kapoulkine 2018-2019

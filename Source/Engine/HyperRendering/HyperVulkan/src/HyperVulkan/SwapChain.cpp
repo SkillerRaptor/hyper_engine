@@ -229,4 +229,14 @@ namespace HyperRendering::HyperVulkan
 
 		return available_surface_presentation_modes[0];
 	}
+	
+	auto SwapChain::image_format() -> VkFormat&
+	{
+		return m_swap_chain_image_format;
+	}
+	
+	auto SwapChain::extent() -> VkExtent2D&
+	{
+		return m_swap_chain_extent;
+	}
 } // namespace HyperRendering::HyperVulkan

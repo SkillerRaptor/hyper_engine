@@ -67,6 +67,7 @@ set(CONAN_LIBRARIES
         fmt/8.0.1
         glad/0.1.34
         glfw/3.3.4
+        glslang/11.5.0
         vulkan-headers/1.2.184
         vulkan-memory-allocator/2.3.0
         volk/1.2.170)

@@ -48,9 +48,16 @@ function(hyperengine_define_module target)
     hyperengine_set_folder(${target} HyperModules)
 endfunction()
 
-function(hyperengine_copy_post_build target file)
+function(hyperengine_copy_file_post_build target file)
     add_custom_command(
             TARGET ${target}
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${file}" $<TARGET_FILE_DIR:${target}>)
+endfunction()
+
+function(hyperengine_copy_folder_post_build target source destination)
+    add_custom_command(
+            TARGET ${target}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${source} ${destination})
 endfunction()

@@ -140,7 +140,7 @@ namespace HyperRendering::HyperVulkan
 
 		return true;
 	}
-	
+
 	auto Device::check_physical_device_extension_support(VkPhysicalDevice physical_device) const -> bool
 	{
 		uint32_t available_device_extension_count = 0;
@@ -171,24 +171,24 @@ namespace HyperRendering::HyperVulkan
 			auto surface_present_modes = get_surface_present_modes(physical_device);
 			swapchain_supported = !surface_formats.empty() && !surface_present_modes.empty();
 		}
-		
+
 		return queue_family_indices.is_complete() && extensions_supported && swapchain_supported;
 	}
-	
-	auto Device::physical_device() const -> const VkPhysicalDevice&
+
+	auto Device::physical_device() -> VkPhysicalDevice&
 	{
 		return m_physical_device;
 	}
-	
-	auto Device::device() const -> const VkDevice&
+
+	auto Device::device() -> VkDevice&
 	{
 		return m_device;
 	}
-	
+
 	auto Device::find_queue_families(VkPhysicalDevice physical_device) const -> Device::QueueFamilyIndices
 	{
 		Device::QueueFamilyIndices queue_family_indices;
-		
+
 		uint32_t available_queue_family_properties_count = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &available_queue_family_properties_count, nullptr);
 

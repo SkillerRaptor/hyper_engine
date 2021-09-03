@@ -14,6 +14,7 @@ namespace HyperRendering::HyperVulkan
 		: IGraphicsContext(t_event_manager, t_window)
 		, m_device(m_instance, m_surface)
 		, m_swap_chain(m_window, m_device, m_surface)
+		, m_graphics_pipeline(m_device.device(), m_swap_chain)
 	{
 	}
 
@@ -60,6 +61,11 @@ namespace HyperRendering::HyperVulkan
 
 			return true;
 		};
+		
+		if (!m_graphics_pipeline.destroy())
+		{
+			return;
+		}
 
 		if (!m_swap_chain.destroy())
 		{
@@ -135,6 +141,12 @@ namespace HyperRendering::HyperVulkan
 		if (!m_swap_chain.initialize())
 		{
 			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create swap chain");
+			return false;
+		}
+		
+		if (!m_graphics_pipeline.initialize())
+		{
+			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create graphics pipeline");
 			return false;
 		}
 

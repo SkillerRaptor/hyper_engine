@@ -23,6 +23,9 @@ namespace HyperRendering::HyperVulkan
 
 		auto initialize() -> bool;
 		auto destroy() -> bool;
+		
+		auto image_format() -> VkFormat&;
+		auto extent() -> VkExtent2D&;
 
 	private:
 		auto create_swap_chain() -> bool;

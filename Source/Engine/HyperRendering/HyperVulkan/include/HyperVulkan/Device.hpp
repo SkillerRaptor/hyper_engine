@@ -35,12 +35,12 @@ namespace HyperRendering::HyperVulkan
 
 		auto initialize() -> bool;
 		auto destroy() -> bool;
-		
-		auto physical_device() const -> const VkPhysicalDevice&;
-		auto device() const -> const VkDevice&;
-		
+
+		auto physical_device() -> VkPhysicalDevice&;
+		auto device() -> VkDevice&;
+
 		auto find_queue_families(VkPhysicalDevice physical_device) const -> QueueFamilyIndices;
-		
+
 		auto get_surface_capabilities(VkPhysicalDevice physical_device) const -> VkSurfaceCapabilitiesKHR;
 		auto get_surface_formats(VkPhysicalDevice physical_device) const -> std::vector<VkSurfaceFormatKHR>;
 		auto get_surface_present_modes(VkPhysicalDevice physical_device) const -> std::vector<VkPresentModeKHR>;

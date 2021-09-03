@@ -24,4 +24,5 @@ elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
     set(DISCORD_GAME_SDK "${CMAKE_SOURCE_DIR}/Source/ThirdParty/DiscordGameSDK/lib/discord_game_sdk.so")
 endif ()
 
-hyperengine_copy_post_build(HyperEditor "${DISCORD_GAME_SDK}")
+hyperengine_copy_file_post_build(HyperEditor ${DISCORD_GAME_SDK})
+hyperengine_copy_folder_post_build(HyperEditor ${CMAKE_CURRENT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:HyperEditor>/assets)

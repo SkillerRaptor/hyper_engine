@@ -24,6 +24,7 @@ namespace HyperEngine
 	{
 	public:
 		explicit EngineLoop(IApplication& application);
+		~EngineLoop();
 		
 		auto initialize() -> bool;
 		

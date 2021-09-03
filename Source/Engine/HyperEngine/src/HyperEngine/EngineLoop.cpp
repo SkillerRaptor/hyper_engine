@@ -8,6 +8,8 @@
 
 #include "HyperEngine/IApplication.hpp"
 
+#include <HyperResource/ShaderCompiler.hpp>
+
 namespace HyperEngine
 {
 	EngineLoop::EngineLoop(IApplication& application)
@@ -15,6 +17,11 @@ namespace HyperEngine
 		, m_window(m_application.title(), m_application.graphics_api())
 		, m_render_engine(m_event_manager, m_window)
 	{
+	}
+	
+	EngineLoop::~EngineLoop()
+	{
+		HyperResource::ShaderCompiler::terminate();
 	}
 
 	auto EngineLoop::initialize() -> bool
@@ -34,6 +41,12 @@ namespace HyperEngine
 		if (!m_window.initialize())
 		{
 			HyperCore::Logger::fatal("EngineLoop::initialize(): Failed to create window");
+			return false;
+		}
+		
+		if (!HyperResource::ShaderCompiler::initialize())
+		{
+			HyperCore::Logger::fatal("EngineLoop::initialize(): Failed to initialize shader compiler");
 			return false;
 		}
 

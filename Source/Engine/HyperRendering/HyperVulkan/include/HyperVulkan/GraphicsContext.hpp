@@ -7,6 +7,7 @@
 #pragma once
 
 #include "HyperVulkan/Device.hpp"
+#include "HyperVulkan/GraphicsPipeline.hpp"
 #include "HyperVulkan/SwapChain.hpp"
 
 #include <HyperRenderingBase/IGraphicsContext.hpp>
@@ -57,5 +58,6 @@ namespace HyperRendering::HyperVulkan
 
 		Device m_device;
 		SwapChain m_swap_chain;
+		GraphicsPipeline m_graphics_pipeline;
 	};
 } // namespace HyperRendering::HyperVulkan

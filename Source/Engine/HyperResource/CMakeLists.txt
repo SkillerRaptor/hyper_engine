@@ -8,13 +8,14 @@
 # HyperResource
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/HyperResource/HyperResource.cpp)
+        src/HyperResource/ShaderCompiler.cpp)
 
 set(HEADERS
-        )
+        include/HyperResource/ShaderCompiler.hpp)
 
 hyperengine_define_module(HyperResource)
 target_link_libraries(
         HyperResource
         PUBLIC
+        CONAN_PKG::glslang
         HyperCore)
