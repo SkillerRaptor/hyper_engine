@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "HyperVulkan/Device.hpp"
+
 #include <HyperRenderingBase/IGraphicsContext.hpp>
 
 #include <volk.h>
@@ -41,13 +43,15 @@ namespace HyperRendering::HyperVulkan
 			void* user_data) -> VkBool32;
 		
 	private:
-		VkInstance m_instance{ VK_NULL_HANDLE };
-		VkDebugUtilsMessengerEXT m_debug_messenger{ VK_NULL_HANDLE };
-
 #if HYPERENGINE_DEBUG
 		bool m_validation_layers_enabled{ true };
 #else
 		bool m_validation_layers_enabled{ false };
 #endif
+		
+		VkInstance m_instance{ VK_NULL_HANDLE };
+		VkDebugUtilsMessengerEXT m_debug_messenger{ VK_NULL_HANDLE };
+
+		Device m_device;
 	};
 } // namespace HyperRendering::HyperVulkan

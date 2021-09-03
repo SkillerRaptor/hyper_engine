@@ -12,11 +12,14 @@ namespace HyperRendering::HyperVulkan
 {
 	GraphicsContext::GraphicsContext(HyperGame::EventManager& t_event_manager, HyperPlatform::Window& t_window)
 		: IGraphicsContext(t_event_manager, t_window)
+		, m_device(m_instance)
 	{
 	}
 
 	GraphicsContext::~GraphicsContext()
 	{
+		m_device.terminate();
+		
 		auto destroy_debug_messenger = [this]() -> bool
 		{
 			if (m_validation_layers_enabled)
@@ -50,7 +53,7 @@ namespace HyperRendering::HyperVulkan
 		{
 			return;
 		}
-		
+
 		if (!destroy_instance())
 		{
 			return;
@@ -63,23 +66,21 @@ namespace HyperRendering::HyperVulkan
 	{
 		if (volkInitialize() != VK_SUCCESS)
 		{
-			HyperCore::Logger::error("GraphicsContext::initialize(): Failed to initialize volk");
+			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to initialize volk");
 			return false;
 		}
 
 		HyperCore::Logger::debug("Volk was initialized");
 
-#if HYPERENGINE_DEBUG
-		if (!validation_layers_supported())
+		if (m_validation_layers_enabled && !validation_layers_supported())
 		{
 			HyperCore::Logger::warning("Vulkan validation layer were requested, but are not supported!");
 			m_validation_layers_enabled = false;
 		}
-#endif
 
 		if (!create_instance())
 		{
-			HyperCore::Logger::error("GraphicsContext::initialize(): Failed to create vulkan instance");
+			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create vulkan instance");
 			return false;
 		}
 
@@ -87,9 +88,15 @@ namespace HyperRendering::HyperVulkan
 		{
 			if (!create_debug_messenger())
 			{
-				HyperCore::Logger::error("GraphicsContext::initialize(): Failed to create vulkan debug messenger");
+				HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create vulkan debug messenger");
 				return false;
 			}
+		}
+
+		if (!m_device.initialize())
+		{
+			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create device");
+			return false;
 		}
 
 		HyperCore::Logger::info("Successfully created Vulkan context");
@@ -130,7 +137,6 @@ namespace HyperRendering::HyperVulkan
 
 			debug_messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 			debug_messenger_create_info.messageSeverity =
-				VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 			debug_messenger_create_info.messageType =
@@ -144,7 +150,7 @@ namespace HyperRendering::HyperVulkan
 
 		if (vkCreateInstance(&instance_create_info, nullptr, &m_instance) != VK_SUCCESS)
 		{
-			HyperCore::Logger::error("GraphicsContext::create_instance(): Failed to create Vulkan instance");
+			HyperCore::Logger::fatal("GraphicsContext::create_instance(): Failed to create Vulkan instance");
 			return false;
 		}
 
@@ -160,7 +166,6 @@ namespace HyperRendering::HyperVulkan
 		VkDebugUtilsMessengerCreateInfoEXT debug_messenger_create_info{};
 		debug_messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 		debug_messenger_create_info.messageSeverity =
-			VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
 			VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
 			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 		debug_messenger_create_info.messageType =
@@ -171,7 +176,7 @@ namespace HyperRendering::HyperVulkan
 
 		if (vkCreateDebugUtilsMessengerEXT(m_instance, &debug_messenger_create_info, nullptr, &m_debug_messenger) != VK_SUCCESS)
 		{
-			HyperCore::Logger::error("GraphicsContext::create_debug_messenger(): Failed to create Vulkan debug messenger");
+			HyperCore::Logger::fatal("GraphicsContext::create_debug_messenger(): Failed to create Vulkan debug messenger");
 			return false;
 		}
 
@@ -240,15 +245,11 @@ namespace HyperRendering::HyperVulkan
 
 		if (severity_flags >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 		{
-			HyperCore::Logger::fatal("{}", callback_data->pMessage);
+			HyperCore::Logger::fatal("GraphicsContext::debug_callback(): {}", callback_data->pMessage);
 		}
 		else if (severity_flags >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
 		{
-			HyperCore::Logger::warning("{}", callback_data->pMessage);
-		}
-		else if (severity_flags >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
-		{
-			HyperCore::Logger::trace("{}", callback_data->pMessage);
+			HyperCore::Logger::warning("GraphicsContext::debug_callback(): {}", callback_data->pMessage);
 		}
 
 		return VK_FALSE;

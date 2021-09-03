@@ -89,21 +89,19 @@ namespace HyperEngine
 			activity,
 			[](discord::Result result)
 			{
-				if (result == discord::Result::Ok)
-				{
-					HyperCore::Logger::info("Successfully updated activity");
-				}
-				else
-				{
-					HyperCore::Logger::error("Failed to update activity");
-				}
+				HYPERENGINE_VARIABLE_NOT_USED(result);
 			});
+
+		m_successful = true;
 
 		HyperCore::Logger::info("Successfully instantiated discord presence");
 	}
 
 	auto DiscordPresence::update() -> void
 	{
-		m_core->RunCallbacks();
+		if (m_successful)
+		{
+			m_core->RunCallbacks();
+		}
 	}
 } // namespace HyperEngine

@@ -21,14 +21,15 @@ namespace HyperEngine
 	public:
 		DiscordPresence();
 		~DiscordPresence();
-		
+
 		auto initialize() -> void;
 
 		auto update() -> void;
 
 	private:
 		std::chrono::system_clock::time_point m_start_time{};
-		
+		bool m_successful{ false };
+
 		discord::Core* m_core{ nullptr };
 		discord::User m_user{};
 	};
