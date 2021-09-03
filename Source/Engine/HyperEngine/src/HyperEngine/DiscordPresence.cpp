@@ -33,12 +33,12 @@ namespace HyperEngine
 		}
 	}
 
-	auto DiscordPresence::initialize() -> bool
+	auto DiscordPresence::initialize() -> void
 	{
 		if (discord::Core::Create(s_client_id, DiscordCreateFlags_NoRequireDiscord, &m_core) != discord::Result::Ok)
 		{
-			HyperCore::Logger::fatal("DiscordPresence::initialize(): Failed to instantiate discord core");
-			return false;
+			HyperCore::Logger::warning("Cannot instantiate discord core");
+			return;
 		}
 
 		m_core->SetLogHook(
@@ -93,8 +93,6 @@ namespace HyperEngine
 			});
 
 		HyperCore::Logger::info("Successfully instantiated discord presence");
-
-		return true;
 	}
 
 	auto DiscordPresence::update() -> void

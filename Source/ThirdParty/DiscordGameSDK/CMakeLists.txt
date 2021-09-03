@@ -48,15 +48,18 @@ if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
             DiscordAPI
             PROPERTIES
             IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/discord_game_sdk.dll"
-            IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/discord_game_sdk.dll.lib")
+            IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/discord_game_sdk.dll.lib"
+            INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include")
 elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/lib/discord_game_sdk.so" "${CMAKE_BINARY_DIR}" COPYONLY)
     set_target_properties(
             DiscordAPI
             PROPERTIES
-            IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/lib/discord_game_sdk.so")
+            IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/discord_game_sdk.so"
+            INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include")
 endif ()
 
 add_library(DiscordGameSDK ${SOURCES} ${HEADERS})
-target_include_directories(DiscordGameSDK PUBLIC SYSTEM include)
+target_include_directories(DiscordGameSDK PUBLIC include)
 target_link_libraries(DiscordGameSDK PUBLIC DiscordAPI)
 hyperengine_set_folder(DiscordGameSDK ThirdParty)

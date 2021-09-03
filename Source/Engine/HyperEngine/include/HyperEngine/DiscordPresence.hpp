@@ -22,7 +22,7 @@ namespace HyperEngine
 		DiscordPresence();
 		~DiscordPresence();
 		
-		auto initialize() -> bool;
+		auto initialize() -> void;
 
 		auto update() -> void;
 

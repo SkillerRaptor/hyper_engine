@@ -44,11 +44,7 @@ function(hyperengine_define_module target)
     hyperengine_set_folder(${target} HyperModules)
 endfunction()
 
-function(hyperengine_copy_shared target file)
-    if (NOT "${HYPERENGINE_ARCH}" STREQUAL "Windows")
-        return()
-    endif ()
-
+function(hyperengine_copy_post_build target file)
     add_custom_command(
             TARGET ${target}
             POST_BUILD

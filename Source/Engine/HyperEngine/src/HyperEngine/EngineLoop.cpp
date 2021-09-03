@@ -19,11 +19,7 @@ namespace HyperEngine
 
 	auto EngineLoop::initialize() -> bool
 	{
-		if (!m_discord_presence.initialize())
-		{
-			HyperCore::Logger::fatal("EngineLoop::initialize(): Failed to create discord presence");
-			return false;
-		}
+		m_discord_presence.initialize();
 
 		initialize_event_callbacks();
 
