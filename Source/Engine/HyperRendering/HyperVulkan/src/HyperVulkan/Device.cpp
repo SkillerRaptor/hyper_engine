@@ -140,11 +140,55 @@ namespace HyperRendering::HyperVulkan
 
 		return true;
 	}
+	
+	auto Device::check_physical_device_extension_support(VkPhysicalDevice physical_device) const -> bool
+	{
+		uint32_t available_device_extension_count = 0;
+		vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &available_device_extension_count, nullptr);
 
+		std::vector<VkExtensionProperties> available_device_extensions(available_device_extension_count);
+		vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &available_device_extension_count, available_device_extensions.data());
+
+		std::set<std::string> required_extensions(s_device_extensions.begin(), s_device_extensions.end());
+
+		for (const auto& device_extension : available_device_extensions)
+		{
+			required_extensions.erase(device_extension.extensionName);
+		}
+
+		return required_extensions.empty();
+	}
+
+	auto Device::is_physical_device_suitable(VkPhysicalDevice physical_device) const -> bool
+	{
+		auto queue_family_indices = find_queue_families(physical_device);
+		auto extensions_supported = check_physical_device_extension_support(physical_device);
+
+		auto swapchain_supported = false;
+		if (extensions_supported)
+		{
+			auto surface_formats = get_surface_formats(physical_device);
+			auto surface_present_modes = get_surface_present_modes(physical_device);
+			swapchain_supported = !surface_formats.empty() && !surface_present_modes.empty();
+		}
+		
+		return queue_family_indices.is_complete() && extensions_supported && swapchain_supported;
+	}
+	
+	auto Device::physical_device() const -> const VkPhysicalDevice&
+	{
+		return m_physical_device;
+	}
+	
+	auto Device::device() const -> const VkDevice&
+	{
+		return m_device;
+	}
+	
 	auto Device::find_queue_families(VkPhysicalDevice physical_device) const -> Device::QueueFamilyIndices
 	{
 		Device::QueueFamilyIndices queue_family_indices;
-
+		
 		uint32_t available_queue_family_properties_count = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &available_queue_family_properties_count, nullptr);
 
@@ -178,10 +222,63 @@ namespace HyperRendering::HyperVulkan
 		return queue_family_indices;
 	}
 
-	auto Device::is_physical_device_suitable(VkPhysicalDevice physical_device) const -> bool
+	auto Device::get_surface_capabilities(VkPhysicalDevice physical_device) const -> VkSurfaceCapabilitiesKHR
 	{
-		auto queue_family_indices = find_queue_families(physical_device);
-		return queue_family_indices.is_complete();
+		VkSurfaceCapabilitiesKHR surface_capabilities{};
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+			physical_device,
+			m_surface,
+			&surface_capabilities);
+
+		return surface_capabilities;
+	}
+
+	auto Device::get_surface_formats(VkPhysicalDevice physical_device) const -> std::vector<VkSurfaceFormatKHR>
+	{
+		std::vector<VkSurfaceFormatKHR> surface_formats;
+
+		uint32_t surface_format_count = 0;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(
+			physical_device,
+			m_surface,
+			&surface_format_count,
+			nullptr);
+
+		if (surface_format_count != 0)
+		{
+			surface_formats.resize(surface_format_count);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(
+				physical_device,
+				m_surface,
+				&surface_format_count,
+				surface_formats.data());
+		}
+
+		return surface_formats;
+	}
+
+	auto Device::get_surface_present_modes(VkPhysicalDevice physical_device) const -> std::vector<VkPresentModeKHR>
+	{
+		std::vector<VkPresentModeKHR> surface_present_modes;
+
+		uint32_t surface_present_mode_count;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(
+			physical_device,
+			m_surface,
+			&surface_present_mode_count,
+			nullptr);
+
+		if (surface_present_mode_count != 0)
+		{
+			surface_present_modes.resize(surface_present_mode_count);
+			vkGetPhysicalDeviceSurfacePresentModesKHR(
+				physical_device,
+				m_surface,
+				&surface_present_mode_count,
+				surface_present_modes.data());
+		}
+
+		return surface_present_modes;
 	}
 
 	auto Device::QueueFamilyIndices::is_complete() const -> bool

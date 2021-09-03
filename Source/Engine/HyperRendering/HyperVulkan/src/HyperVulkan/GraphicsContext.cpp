@@ -13,6 +13,7 @@ namespace HyperRendering::HyperVulkan
 	GraphicsContext::GraphicsContext(HyperGame::EventManager& t_event_manager, HyperPlatform::Window& t_window)
 		: IGraphicsContext(t_event_manager, t_window)
 		, m_device(m_instance, m_surface)
+		, m_swap_chain(m_window, m_device, m_surface)
 	{
 	}
 
@@ -27,7 +28,7 @@ namespace HyperRendering::HyperVulkan
 
 			vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 			HyperCore::Logger::debug("Vulkan surface was destroyed");
-			
+
 			return true;
 		};
 
@@ -59,6 +60,11 @@ namespace HyperRendering::HyperVulkan
 
 			return true;
 		};
+
+		if (!m_swap_chain.destroy())
+		{
+			return;
+		}
 
 		if (!m_device.destroy())
 		{
@@ -123,6 +129,12 @@ namespace HyperRendering::HyperVulkan
 		if (!m_device.initialize())
 		{
 			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create device");
+			return false;
+		}
+
+		if (!m_swap_chain.initialize())
+		{
+			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create swap chain");
 			return false;
 		}
 

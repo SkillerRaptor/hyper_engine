@@ -7,6 +7,7 @@
 #pragma once
 
 #include "HyperVulkan/Device.hpp"
+#include "HyperVulkan/SwapChain.hpp"
 
 #include <HyperRenderingBase/IGraphicsContext.hpp>
 
@@ -55,5 +56,6 @@ namespace HyperRendering::HyperVulkan
 		VkSurfaceKHR m_surface{ VK_NULL_HANDLE };
 
 		Device m_device;
+		SwapChain m_swap_chain;
 	};
 } // namespace HyperRendering::HyperVulkan

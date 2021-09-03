@@ -9,11 +9,13 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/HyperVulkan/Device.cpp
-        src/HyperVulkan/GraphicsContext.cpp)
+        src/HyperVulkan/GraphicsContext.cpp
+        src/HyperVulkan/SwapChain.cpp)
 
 set(HEADERS
         include/HyperVulkan/Device.hpp
-        include/HyperVulkan/GraphicsContext.hpp)
+        include/HyperVulkan/GraphicsContext.hpp
+        include/HyperVulkan/SwapChain.hpp)
 
 hyperengine_define_module(HyperVulkan)
 target_link_libraries(
