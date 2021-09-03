@@ -13,9 +13,6 @@ set(SOURCES
 set(HEADERS
         )
 
-hyperengine_group_files("${SOURCES}")
-hyperengine_group_files("${HEADERS}")
-
 hyperengine_define_module(HyperResource)
 target_link_libraries(
         HyperResource

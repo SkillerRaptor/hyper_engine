@@ -14,8 +14,6 @@ set(SOURCES
 set(HEADERS
         include/Sandbox.hpp)
 
-hyperengine_group_files("${SOURCES}")
-hyperengine_group_files("${HEADERS}")
 
 hyperengine_define_executable(Sandbox)
 target_link_libraries(

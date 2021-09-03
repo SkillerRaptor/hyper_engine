@@ -8,13 +8,12 @@
 # HyperVulkan
 #-------------------------------------------------------------------------------------------
 set(SOURCES
+        src/HyperVulkan/Device.cpp
         src/HyperVulkan/GraphicsContext.cpp)
 
 set(HEADERS
+        include/HyperVulkan/Device.hpp
         include/HyperVulkan/GraphicsContext.hpp)
-
-hyperengine_group_files("${SOURCES}")
-hyperengine_group_files("${HEADERS}")
 
 hyperengine_define_module(HyperVulkan)
 target_link_libraries(

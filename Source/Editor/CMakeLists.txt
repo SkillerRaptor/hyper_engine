@@ -14,8 +14,7 @@ set(SOURCES
 set(HEADERS
         include/HyperEditor/Editor.hpp)
 
-hyperengine_group_files("${SOURCES}")
-hyperengine_group_files("${HEADERS}")
-
 hyperengine_define_executable(HyperEditor)
 target_link_libraries(HyperEditor PRIVATE HyperEngine)
+
+hyperengine_copy_shared(HyperEditor ${CMAKE_SOURCE_DIR}/Source/ThirdParty/DiscordGameSDK/lib/discord_game_sdk.dll)

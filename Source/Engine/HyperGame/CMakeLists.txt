@@ -27,9 +27,6 @@ set(HEADERS
         include/HyperGame/EventSystem/Events/MouseEvents.hpp
         include/HyperGame/EventSystem/Events/WindowEvents.hpp)
 
-hyperengine_group_files("${SOURCES}")
-hyperengine_group_files("${HEADERS}")
-
 hyperengine_define_module(HyperGame)
 target_link_libraries(
         HyperGame

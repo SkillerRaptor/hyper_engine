@@ -13,9 +13,6 @@ set(SOURCES
 set(HEADERS
         include/HyperOpenGL/GraphicsContext.hpp)
 
-hyperengine_group_files("${SOURCES}")
-hyperengine_group_files("${HEADERS}")
-
 hyperengine_define_module(HyperOpenGL)
 target_link_libraries(
         HyperOpenGL

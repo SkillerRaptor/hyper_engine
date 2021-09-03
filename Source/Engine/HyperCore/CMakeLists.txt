@@ -27,9 +27,6 @@ set(HEADERS
         include/HyperCore/Compilers/MSVCSpecific.hpp
         include/HyperCore/Memory/RingBuffer.hpp)
 
-hyperengine_group_files("${SOURCES}")
-hyperengine_group_files("${HEADERS}")
-
 hyperengine_define_module(HyperCore)
 target_link_libraries(
         HyperCore
