@@ -31,6 +31,12 @@ namespace HyperRendering::HyperVulkan
 			return false;
 		}
 
+		if (!create_framebuffers())
+		{
+			HyperCore::Logger::fatal("GraphicsPipeline::initialize(): Failed to create framebuffers");
+			return false;
+		}
+
 		return true;
 	}
 
@@ -42,13 +48,13 @@ namespace HyperRendering::HyperVulkan
 			{
 				return false;
 			}
-			
+
 			vkDestroyPipeline(m_device, m_graphics_pipeline, nullptr);
 			HyperCore::Logger::debug("Vulkan graphics pipeline was destroyed");
 
 			return true;
 		};
-		
+
 		auto destroy_pipeline_layout = [this]() -> bool
 		{
 			if (m_pipeline_layout == VK_NULL_HANDLE)
@@ -61,20 +67,41 @@ namespace HyperRendering::HyperVulkan
 
 			return true;
 		};
-		
+
 		auto destroy_render_pass = [this]() -> bool
 		{
 			if (m_render_pass == VK_NULL_HANDLE)
 			{
 				return false;
 			}
-			
+
 			vkDestroyRenderPass(m_device, m_render_pass, nullptr);
 			HyperCore::Logger::debug("Vulkan render pass was destroyed");
-			
+
 			return true;
 		};
-		
+
+		auto destroy_framebuffers = [this]() -> bool
+		{
+			for (size_t i = 0; i < m_swap_chain_framebuffers.size(); ++i)
+			{
+				if (m_swap_chain_framebuffers[i] == VK_NULL_HANDLE)
+				{
+					return false;
+				}
+
+				vkDestroyFramebuffer(m_device, m_swap_chain_framebuffers[i], nullptr);
+				HyperCore::Logger::debug("Vulkan framebuffer #{} was destroyed", i);
+			}
+
+			return true;
+		};
+
+		if (!destroy_framebuffers())
+		{
+			return false;
+		}
+
 		if (!destroy_pipeline())
 		{
 			return false;
@@ -84,7 +111,7 @@ namespace HyperRendering::HyperVulkan
 		{
 			return false;
 		}
-		
+
 		if (!destroy_render_pass())
 		{
 			return false;
@@ -104,31 +131,31 @@ namespace HyperRendering::HyperVulkan
 		color_attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		color_attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		color_attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		
+
 		VkAttachmentReference color_attachment_reference{};
 		color_attachment_reference.attachment = 0;
 		color_attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		
+
 		VkSubpassDescription subpass_description{};
 		subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 		subpass_description.pColorAttachments = &color_attachment_reference;
 		subpass_description.colorAttachmentCount = 1;
-		
+
 		VkRenderPassCreateInfo render_pass_create_info{};
 		render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		render_pass_create_info.pAttachments = &color_attachment_description;
 		render_pass_create_info.attachmentCount = 1;
 		render_pass_create_info.pSubpasses = &subpass_description;
 		render_pass_create_info.subpassCount = 1;
-		
+
 		if (vkCreateRenderPass(m_device, &render_pass_create_info, nullptr, &m_render_pass) != VK_SUCCESS)
 		{
 			HyperCore::Logger::fatal("GraphicsPipeline::create_render_pass(): Failed to create Vulkan render pass");
 			return false;
 		}
-		
+
 		HyperCore::Logger::debug("Vulkan render pass was created");
-		
+
 		return true;
 	}
 
@@ -263,7 +290,7 @@ namespace HyperRendering::HyperVulkan
 		}
 
 		HyperCore::Logger::debug("Vulkan pipeline layout was created");
-		
+
 		VkGraphicsPipelineCreateInfo graphics_pipeline_create_info{};
 		graphics_pipeline_create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		graphics_pipeline_create_info.pStages = pipeline_shader_stages;
@@ -281,20 +308,51 @@ namespace HyperRendering::HyperVulkan
 		graphics_pipeline_create_info.subpass = 0;
 		graphics_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
 		graphics_pipeline_create_info.basePipelineIndex = -1;
-		
+
 		if (vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, nullptr, &m_graphics_pipeline) != VK_SUCCESS)
 		{
 			HyperCore::Logger::fatal("GraphicsPipeline::create_pipeline(): Failed to create Vulkan graphics pipeline");
 			return false;
 		}
-		
+
 		HyperCore::Logger::debug("Vulkan graphics pipeline was created");
-		
+
 		vkDestroyShaderModule(m_device, vertex_shader_module, nullptr);
 		HyperCore::Logger::debug("Vulkan vertex shader module was destroyed");
 
 		vkDestroyShaderModule(m_device, fragment_shader_module, nullptr);
 		HyperCore::Logger::debug("Vulkan fragment shader module was destroyed");
+
+		return true;
+	}
+
+	auto GraphicsPipeline::create_framebuffers() -> bool
+	{
+		m_swap_chain_framebuffers.resize(m_swap_chain.image_views().size());
+
+		for (size_t i = 0; i < m_swap_chain.image_views().size(); ++i)
+		{
+			VkImageView attachments[] = {
+				m_swap_chain.image_views()[i]
+			};
+
+			VkFramebufferCreateInfo framebuffer_create_info{};
+			framebuffer_create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebuffer_create_info.renderPass = m_render_pass;
+			framebuffer_create_info.pAttachments = attachments;
+			framebuffer_create_info.attachmentCount = 1;
+			framebuffer_create_info.width = m_swap_chain.extent().width;
+			framebuffer_create_info.height = m_swap_chain.extent().height;
+			framebuffer_create_info.layers = 1;
+
+			if (vkCreateFramebuffer(m_device, &framebuffer_create_info, nullptr, &m_swap_chain_framebuffers[i]) != VK_SUCCESS)
+			{
+				HyperCore::Logger::fatal("GraphicsPipeline::create_framebuffers(): Failed to create Vulkan framebuffer #{}", i);
+				return false;
+			}
+			
+			HyperCore::Logger::debug("Vulkan framebuffer #{} was created", i);
+		}
 
 		return true;
 	}

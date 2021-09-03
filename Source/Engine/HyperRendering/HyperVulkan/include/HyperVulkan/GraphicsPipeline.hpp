@@ -25,6 +25,7 @@ namespace HyperRendering::HyperVulkan
 	private:
 		auto create_render_pass() -> bool;
 		auto create_pipeline() -> bool;
+		auto create_framebuffers() -> bool;
 
 		auto create_shader_module(const std::vector<uint32_t>& bytes) -> VkShaderModule;
 
@@ -35,5 +36,7 @@ namespace HyperRendering::HyperVulkan
 		VkRenderPass m_render_pass{ VK_NULL_HANDLE };
 		VkPipelineLayout m_pipeline_layout{ VK_NULL_HANDLE };
 		VkPipeline m_graphics_pipeline{ VK_NULL_HANDLE };
+		
+		std::vector<VkFramebuffer> m_swap_chain_framebuffers;
 	};
 } // namespace HyperRendering::HyperVulkan

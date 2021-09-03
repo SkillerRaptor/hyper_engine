@@ -167,6 +167,8 @@ namespace HyperRendering::HyperVulkan
 				HyperCore::Logger::fatal("SwapChain::create_image_views(): Failed to create Vulkan image view #{}", i);
 				return false;
 			}
+			
+			HyperCore::Logger::debug("Vulkan image view #{} was created", i);
 		}
 
 		return true;
@@ -238,5 +240,15 @@ namespace HyperRendering::HyperVulkan
 	auto SwapChain::extent() -> VkExtent2D&
 	{
 		return m_swap_chain_extent;
+	}
+	
+	auto SwapChain::images() -> std::vector<VkImage>&
+	{
+		return m_swap_chain_images;
+	}
+
+	auto SwapChain::image_views() -> std::vector<VkImageView>&
+	{
+		return m_swap_chain_image_views;
 	}
 } // namespace HyperRendering::HyperVulkan

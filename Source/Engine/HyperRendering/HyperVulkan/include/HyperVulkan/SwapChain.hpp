@@ -26,6 +26,9 @@ namespace HyperRendering::HyperVulkan
 		
 		auto image_format() -> VkFormat&;
 		auto extent() -> VkExtent2D&;
+		
+		auto images() -> std::vector<VkImage>&;
+		auto image_views() -> std::vector<VkImageView>&;
 
 	private:
 		auto create_swap_chain() -> bool;
