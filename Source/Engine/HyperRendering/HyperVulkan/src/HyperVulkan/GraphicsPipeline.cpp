@@ -276,16 +276,6 @@ namespace HyperRendering::HyperVulkan
 		pipeline_color_blend_state_create_info.blendConstants[2] = 0.0F;
 		pipeline_color_blend_state_create_info.blendConstants[3] = 0.0F;
 
-		VkDynamicState dynamic_states[] = {
-			VK_DYNAMIC_STATE_VIEWPORT,
-			VK_DYNAMIC_STATE_LINE_WIDTH
-		};
-
-		VkPipelineDynamicStateCreateInfo pipeline_dynamic_state_create_info{};
-		pipeline_dynamic_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-		pipeline_dynamic_state_create_info.pDynamicStates = dynamic_states;
-		pipeline_dynamic_state_create_info.dynamicStateCount = 2;
-
 		VkPipelineLayoutCreateInfo pipeline_layout_create_info{};
 		pipeline_layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipeline_layout_create_info.pSetLayouts = nullptr;
