@@ -17,8 +17,14 @@ namespace HyperEngine
 	{
 	}
 
-	auto EngineLoop::initialize() ->bool
+	auto EngineLoop::initialize() -> bool
 	{
+		if (!m_discord_presence.initialize())
+		{
+			HyperCore::Logger::fatal("EngineLoop::initialize(): Failed to create discord presence");
+			return false;
+		}
+
 		initialize_event_callbacks();
 
 		m_event_manager.register_listener<HyperGame::WindowCloseEvent>(
@@ -131,6 +137,8 @@ namespace HyperEngine
 			last_time = current_time;
 
 			HYPERENGINE_VARIABLE_NOT_USED(delta_time);
+
+			m_discord_presence.update();
 
 			m_render_engine.update();
 

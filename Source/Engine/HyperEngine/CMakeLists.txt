@@ -8,22 +8,22 @@
 # HyperEngine
 #-------------------------------------------------------------------------------------------
 set(SOURCES
+        src/HyperEngine/DiscordPresence.cpp
         src/HyperEngine/EngineLoop.cpp
         src/HyperEngine/IApplication.cpp
         src/HyperEngine/Launcher.cpp)
 
 set(HEADERS
+        include/HyperEngine/DiscordPresence.hpp
         include/HyperEngine/EngineLoop.hpp
         include/HyperEngine/IApplication.hpp
         include/HyperEngine/Launcher.hpp)
-
-hyperengine_group_files("${SOURCES}")
-hyperengine_group_files("${HEADERS}")
 
 hyperengine_define_library(HyperEngine)
 target_link_libraries(
         HyperEngine
         PUBLIC
+        DiscordGameSDK
         HyperCore
         HyperGame
         HyperMath

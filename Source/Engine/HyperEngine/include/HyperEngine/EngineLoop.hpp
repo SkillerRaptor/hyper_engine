@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "HyperEngine/DiscordPresence.hpp"
+
 #include <HyperCore/JobSystem.hpp>
 #include <HyperGame/EntitySystem/Registry.hpp>
 #include <HyperGame/EventSystem/EventManager.hpp>
@@ -33,6 +35,8 @@ namespace HyperEngine
 	private:
 		IApplication& m_application;
 		bool m_running{ false };
+
+		DiscordPresence m_discord_presence{};
 		
 		HyperCore::JobSystem m_job_system{};
 		HyperGame::EventManager m_event_manager{};

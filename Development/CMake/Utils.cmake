@@ -17,19 +17,40 @@ function(hyperengine_group_files files)
 endfunction()
 
 function(hyperengine_define_executable target)
+    hyperengine_group_files("${SOURCES}")
+    hyperengine_group_files("${HEADERS}")
+
     add_executable(${target} ${SOURCES} ${HEADERS})
     target_link_libraries(${target} PRIVATE ProjectOptions ProjectWarnings)
     target_include_directories(${target} PUBLIC include)
 endfunction()
 
 function(hyperengine_define_library target)
+    hyperengine_group_files("${SOURCES}")
+    hyperengine_group_files("${HEADERS}")
+
     add_library(${target} STATIC ${SOURCES} ${HEADERS})
     target_compile_features(${target} PUBLIC cxx_std_17)
     target_link_libraries(${target} PRIVATE ProjectOptions ProjectWarnings)
     target_include_directories(${target} PUBLIC include)
 endfunction()
 
+function(hyperengine_set_folder target folder)
+    set_target_properties(${target} PROPERTIES FOLDER ${folder})
+endfunction()
+
 function(hyperengine_define_module target)
     hyperengine_define_library(${target})
-    set_target_properties(${target} PROPERTIES FOLDER HyperModules)
+    hyperengine_set_folder(${target} HyperModules)
+endfunction()
+
+function(hyperengine_copy_shared target file)
+    if (NOT "${HYPERENGINE_ARCH}" STREQUAL "Windows")
+        return()
+    endif ()
+
+    add_custom_command(
+            TARGET ${target}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${file}" $<TARGET_FILE_DIR:${target}>)
 endfunction()
