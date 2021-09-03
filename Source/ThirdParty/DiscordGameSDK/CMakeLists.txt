@@ -57,6 +57,6 @@ elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
 endif ()
 
 add_library(DiscordGameSDK ${SOURCES} ${HEADERS})
-target_include_directories(DiscordGameSDK PUBLIC include)
+target_include_directories(DiscordGameSDK PUBLIC SYSTEM include)
 target_link_libraries(DiscordGameSDK PUBLIC DiscordAPI)
 hyperengine_set_folder(DiscordGameSDK ThirdParty)
