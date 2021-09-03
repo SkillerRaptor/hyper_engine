@@ -141,12 +141,22 @@ namespace HyperRendering::HyperVulkan
 		subpass_description.pColorAttachments = &color_attachment_reference;
 		subpass_description.colorAttachmentCount = 1;
 
+		VkSubpassDependency subpass_dependency{};
+		subpass_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+		subpass_dependency.dstSubpass = 0;
+		subpass_dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		subpass_dependency.srcAccessMask = 0;
+		subpass_dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		subpass_dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
 		VkRenderPassCreateInfo render_pass_create_info{};
 		render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		render_pass_create_info.pAttachments = &color_attachment_description;
 		render_pass_create_info.attachmentCount = 1;
 		render_pass_create_info.pSubpasses = &subpass_description;
 		render_pass_create_info.subpassCount = 1;
+		render_pass_create_info.pDependencies = &subpass_dependency;
+		render_pass_create_info.dependencyCount = 1;
 
 		if (vkCreateRenderPass(m_device, &render_pass_create_info, nullptr, &m_render_pass) != VK_SUCCESS)
 		{
@@ -350,7 +360,7 @@ namespace HyperRendering::HyperVulkan
 				HyperCore::Logger::fatal("GraphicsPipeline::create_framebuffers(): Failed to create Vulkan framebuffer #{}", i);
 				return false;
 			}
-			
+
 			HyperCore::Logger::debug("Vulkan framebuffer #{} was created", i);
 		}
 
@@ -374,5 +384,20 @@ namespace HyperRendering::HyperVulkan
 		HyperCore::Logger::debug("Vulkan shader module was created");
 
 		return shader_module;
+	}
+
+	auto GraphicsPipeline::render_pass() -> VkRenderPass&
+	{
+		return m_render_pass;
+	}
+
+	auto GraphicsPipeline::graphics_pipeline() -> VkPipeline&
+	{
+		return m_graphics_pipeline;
+	}
+
+	auto GraphicsPipeline::swap_chain_framebuffers() -> std::vector<VkFramebuffer>&
+	{
+		return m_swap_chain_framebuffers;
 	}
 } // namespace HyperRendering::HyperVulkan

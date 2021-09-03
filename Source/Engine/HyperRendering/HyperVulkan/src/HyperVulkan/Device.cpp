@@ -280,6 +280,16 @@ namespace HyperRendering::HyperVulkan
 
 		return surface_present_modes;
 	}
+	
+	auto Device::graphics_queue() -> VkQueue&
+	{
+		return m_graphics_queue;
+	}
+	
+	auto Device::present_queue() -> VkQueue&
+	{
+		return m_present_queue;
+	}
 
 	auto Device::QueueFamilyIndices::is_complete() const -> bool
 	{

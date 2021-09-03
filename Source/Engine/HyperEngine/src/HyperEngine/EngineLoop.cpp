@@ -148,11 +148,11 @@ namespace HyperEngine
 			HYPERENGINE_VARIABLE_NOT_USED(delta_time);
 
 			m_discord_presence.update();
+			m_window.poll_events();
 
 			m_render_engine.update();
 
 			m_event_manager.process_events();
-			m_window.poll_events();
 		}
 	}
 } // namespace HyperEngine

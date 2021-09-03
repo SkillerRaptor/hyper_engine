@@ -232,6 +232,11 @@ namespace HyperRendering::HyperVulkan
 		return available_surface_presentation_modes[0];
 	}
 	
+	auto SwapChain::swap_chain() -> VkSwapchainKHR&
+	{
+		return m_swap_chain;
+	}
+	
 	auto SwapChain::image_format() -> VkFormat&
 	{
 		return m_swap_chain_image_format;

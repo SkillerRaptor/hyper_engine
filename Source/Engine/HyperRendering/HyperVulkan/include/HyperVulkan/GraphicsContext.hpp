@@ -35,6 +35,10 @@ namespace HyperRendering::HyperVulkan
 		auto create_instance() -> bool;
 		auto create_debug_messenger() -> bool;
 		auto create_surface() -> bool;
+		auto create_command_pool() -> bool;
+		auto create_command_buffers() -> bool;
+		auto record_command_buffers() -> bool;
+		auto create_semaphores() -> bool;
 
 		auto validation_layers_supported() const -> bool;
 		auto get_required_extensions() const -> std::vector<const char*>;
@@ -55,6 +59,12 @@ namespace HyperRendering::HyperVulkan
 		VkInstance m_instance{ VK_NULL_HANDLE };
 		VkDebugUtilsMessengerEXT m_debug_messenger{ VK_NULL_HANDLE };
 		VkSurfaceKHR m_surface{ VK_NULL_HANDLE };
+		
+		VkCommandPool m_command_pool{ VK_NULL_HANDLE };
+		std::vector<VkCommandBuffer> m_commands_buffers;
+		
+		VkSemaphore m_image_available_semaphore{ VK_NULL_HANDLE };
+		VkSemaphore m_render_finished_semaphore{ VK_NULL_HANDLE };
 
 		Device m_device;
 		SwapChain m_swap_chain;

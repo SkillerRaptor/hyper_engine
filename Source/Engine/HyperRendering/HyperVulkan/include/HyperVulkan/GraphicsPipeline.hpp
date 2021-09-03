@@ -21,6 +21,11 @@ namespace HyperRendering::HyperVulkan
 
 		auto initialize() -> bool;
 		auto destroy() -> bool;
+		
+		auto render_pass() -> VkRenderPass&;
+		auto graphics_pipeline() -> VkPipeline&;
+		
+		auto swap_chain_framebuffers() -> std::vector<VkFramebuffer>&;
 
 	private:
 		auto create_render_pass() -> bool;

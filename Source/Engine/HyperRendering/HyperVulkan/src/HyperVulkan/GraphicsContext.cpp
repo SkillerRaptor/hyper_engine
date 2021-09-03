@@ -20,6 +20,40 @@ namespace HyperRendering::HyperVulkan
 
 	GraphicsContext::~GraphicsContext()
 	{
+		auto destroy_semaphores = [this]() -> bool
+		{
+			if (m_image_available_semaphore == VK_NULL_HANDLE)
+			{
+				return false;
+			}
+
+			vkDestroySemaphore(m_device.device(), m_image_available_semaphore, nullptr);
+			HyperCore::Logger::debug("Vulkan image available semaphore was destroyed");
+			
+			if (m_render_finished_semaphore == VK_NULL_HANDLE)
+			{
+				return false;
+			}
+
+			vkDestroySemaphore(m_device.device(), m_render_finished_semaphore, nullptr);
+			HyperCore::Logger::debug("Vulkan render finished semaphore was destroyed");
+
+			return true;
+		};
+
+		auto destroy_command_pool = [this]() -> bool
+		{
+			if (m_command_pool == VK_NULL_HANDLE)
+			{
+				return false;
+			}
+
+			vkDestroyCommandPool(m_device.device(), m_command_pool, nullptr);
+			HyperCore::Logger::debug("Vulkan command pool was destroyed");
+
+			return true;
+		};
+
 		auto destroy_surface = [this]() -> bool
 		{
 			if (m_surface == VK_NULL_HANDLE)
@@ -62,6 +96,18 @@ namespace HyperRendering::HyperVulkan
 			return true;
 		};
 		
+		vkDeviceWaitIdle(m_device.device());
+		
+		if (!destroy_semaphores())
+		{
+			return;
+		}
+
+		if (!destroy_command_pool())
+		{
+			return;
+		}
+
 		if (!m_graphics_pipeline.destroy())
 		{
 			return;
@@ -143,10 +189,34 @@ namespace HyperRendering::HyperVulkan
 			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create swap chain");
 			return false;
 		}
-		
+
 		if (!m_graphics_pipeline.initialize())
 		{
 			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create graphics pipeline");
+			return false;
+		}
+
+		if (!create_command_pool())
+		{
+			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create command pool");
+			return false;
+		}
+
+		if (!create_command_buffers())
+		{
+			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create command buffers");
+			return false;
+		}
+
+		if (!record_command_buffers())
+		{
+			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to record command buffers");
+			return false;
+		}
+
+		if (!create_semaphores())
+		{
+			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create command buffers");
 			return false;
 		}
 
@@ -157,6 +227,41 @@ namespace HyperRendering::HyperVulkan
 
 	auto GraphicsContext::update() -> void
 	{
+		uint32_t next_image_index = 0;
+		vkAcquireNextImageKHR(m_device.device(), m_swap_chain.swap_chain(), UINT64_MAX, m_image_available_semaphore, VK_NULL_HANDLE, &next_image_index);
+		
+		VkSemaphore wait_semaphores[] = { m_image_available_semaphore };
+		VkSemaphore signal_semaphores[] = { m_render_finished_semaphore };
+		VkPipelineStageFlags pipeline_wait_flags[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		
+		VkSubmitInfo submit_info{};
+		submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submit_info.pWaitSemaphores = wait_semaphores;
+		submit_info.waitSemaphoreCount = 1;
+		submit_info.pWaitDstStageMask = pipeline_wait_flags;
+		submit_info.pCommandBuffers = &m_commands_buffers[next_image_index];
+		submit_info.commandBufferCount = 1;
+		submit_info.pSignalSemaphores = signal_semaphores;
+		submit_info.signalSemaphoreCount = 1;
+		
+		if (vkQueueSubmit(m_device.graphics_queue(), 1, &submit_info, VK_NULL_HANDLE) != VK_SUCCESS)
+		{
+			HyperCore::Logger::fatal("QUEUE SUBMIT FAILED!");
+		}
+		
+		VkPresentInfoKHR present_info{};
+		present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		present_info.pWaitSemaphores = signal_semaphores;
+		present_info.waitSemaphoreCount = 1;
+		
+		VkSwapchainKHR swap_chains[] = { m_swap_chain.swap_chain() };
+		present_info.pSwapchains = swap_chains;
+		present_info.swapchainCount = 1;
+		present_info.pImageIndices = &next_image_index;
+		present_info.pResults = nullptr;
+		
+		vkQueuePresentKHR(m_device.present_queue(), &present_info);
+		vkQueueWaitIdle(m_device.present_queue());
 	}
 
 	auto GraphicsContext::create_instance() -> bool
@@ -249,6 +354,114 @@ namespace HyperRendering::HyperVulkan
 		return true;
 	}
 
+	auto GraphicsContext::create_command_pool() -> bool
+	{
+		auto queue_family_indices = m_device.find_queue_families(m_device.physical_device());
+
+		VkCommandPoolCreateInfo command_pool_create_info{};
+		command_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		command_pool_create_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
+		command_pool_create_info.flags = 0;
+
+		if (vkCreateCommandPool(m_device.device(), &command_pool_create_info, nullptr, &m_command_pool) != VK_SUCCESS)
+		{
+			HyperCore::Logger::fatal("GraphicsContext::create_command_pool(): Failed to create Vulkan command pool");
+			return false;
+		}
+
+		HyperCore::Logger::debug("Vulkan command pool was created");
+
+		return true;
+	}
+
+	auto GraphicsContext::create_command_buffers() -> bool
+	{
+		m_commands_buffers.resize(m_graphics_pipeline.swap_chain_framebuffers().size());
+
+		VkCommandBufferAllocateInfo command_buffer_allocate_info{};
+		command_buffer_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		command_buffer_allocate_info.commandPool = m_command_pool;
+		command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		command_buffer_allocate_info.commandBufferCount = static_cast<uint32_t>(m_commands_buffers.size());
+
+		if (vkAllocateCommandBuffers(m_device.device(), &command_buffer_allocate_info, m_commands_buffers.data()) != VK_SUCCESS)
+		{
+			HyperCore::Logger::fatal("GraphicsContext::create_command_buffers(): Failed to create Vulkan command buffers");
+			return false;
+		}
+
+		HyperCore::Logger::debug("Vulkan command buffers were created");
+
+		return true;
+	}
+
+	auto GraphicsContext::record_command_buffers() -> bool
+	{
+		for (size_t i = 0; i < m_commands_buffers.size(); ++i)
+		{
+			VkCommandBufferBeginInfo command_buffer_begin_info{};
+			command_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+			command_buffer_begin_info.flags = 0;
+			command_buffer_begin_info.pInheritanceInfo = nullptr;
+
+			if (vkBeginCommandBuffer(m_commands_buffers[i], &command_buffer_begin_info) != VK_SUCCESS)
+			{
+				HyperCore::Logger::fatal("GraphicsContext::record_command_buffers(): Failed to begin recording Vulkan command buffer #{}", i);
+				return false;
+			}
+
+			VkRenderPassBeginInfo render_pass_begin_info{};
+			render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			render_pass_begin_info.renderPass = m_graphics_pipeline.render_pass();
+			render_pass_begin_info.framebuffer = m_graphics_pipeline.swap_chain_framebuffers()[i];
+			render_pass_begin_info.renderArea.offset = { 0, 0 };
+			render_pass_begin_info.renderArea.extent = m_swap_chain.extent();
+
+			VkClearValue clear_color_value = { { { 0.0F, 0.0F, 0.0F, 1.0F } } };
+			render_pass_begin_info.pClearValues = &clear_color_value;
+			render_pass_begin_info.clearValueCount = 1;
+
+			vkCmdBeginRenderPass(m_commands_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+			vkCmdBindPipeline(m_commands_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphics_pipeline.graphics_pipeline());
+			vkCmdDraw(m_commands_buffers[i], 3, 1, 0, 0);
+			vkCmdEndRenderPass(m_commands_buffers[i]);
+
+			if (vkEndCommandBuffer(m_commands_buffers[i]) != VK_SUCCESS)
+			{
+				HyperCore::Logger::fatal("GraphicsContext::record_command_buffers(): Failed to end recording Vulkan command buffer #{}", i);
+				return false;
+			}
+
+			HyperCore::Logger::debug("Vulkan command buffer #{} was recorded", i);
+		}
+
+		return true;
+	}
+
+	auto GraphicsContext::create_semaphores() -> bool
+	{
+		VkSemaphoreCreateInfo semaphore_create_info{};
+		semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+		if (vkCreateSemaphore(m_device.device(), &semaphore_create_info, nullptr, &m_image_available_semaphore) != VK_SUCCESS)
+		{
+			HyperCore::Logger::fatal("GraphicsContext::create_semaphores(): Failed to create Vulkan image available semaphore");
+			return false;
+		}
+
+		HyperCore::Logger::debug("Vulkan image available semaphore was created");
+
+		if (vkCreateSemaphore(m_device.device(), &semaphore_create_info, nullptr, &m_render_finished_semaphore) != VK_SUCCESS)
+		{
+			HyperCore::Logger::fatal("GraphicsContext::create_semaphores(): Failed to create Vulkan render finished semaphore");
+			return false;
+		}
+
+		HyperCore::Logger::debug("Vulkan render finished semaphore was created");
+
+		return true;
+	}
+
 	auto GraphicsContext::validation_layers_supported() const -> bool
 	{
 		uint32_t available_layer_count = 0;
@@ -301,7 +514,8 @@ namespace HyperRendering::HyperVulkan
 		VkDebugUtilsMessageSeverityFlagBitsEXT severity_flags,
 		VkDebugUtilsMessageTypeFlagsEXT type_flags,
 		const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-		void* user_data) -> VkBool32
+		void* user_data)
+		-> VkBool32
 	{
 		HYPERENGINE_VARIABLE_NOT_USED(type_flags);
 		HYPERENGINE_VARIABLE_NOT_USED(user_data);

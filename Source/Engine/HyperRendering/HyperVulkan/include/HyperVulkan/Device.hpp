@@ -38,6 +38,9 @@ namespace HyperRendering::HyperVulkan
 
 		auto physical_device() -> VkPhysicalDevice&;
 		auto device() -> VkDevice&;
+		
+		auto graphics_queue() -> VkQueue&;
+		auto present_queue() -> VkQueue&;
 
 		auto find_queue_families(VkPhysicalDevice physical_device) const -> QueueFamilyIndices;
 
