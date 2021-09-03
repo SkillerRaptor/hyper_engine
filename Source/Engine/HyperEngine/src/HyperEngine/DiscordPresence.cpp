@@ -17,20 +17,25 @@ namespace HyperEngine
 
 	DiscordPresence::~DiscordPresence()
 	{
-		auto success = true;
-		if (m_core != nullptr)
+		auto destroy_core = [this]() -> bool
 		{
+			if (m_core == nullptr)
+			{
+				return false;
+			}
+
 			delete m_core;
-		}
-		else
+			HyperCore::Logger::debug("Discord core was destroyed");
+
+			return true;
+		};
+
+		if (!destroy_core())
 		{
-			success = false;
+			return;
 		}
 
-		if (success)
-		{
-			HyperCore::Logger::info("Successfully destroyed discord presence");
-		}
+		HyperCore::Logger::info("Successfully destroyed discord presence");
 	}
 
 	auto DiscordPresence::initialize() -> void
@@ -40,6 +45,8 @@ namespace HyperEngine
 			HyperCore::Logger::warning("Cannot instantiate discord core");
 			return;
 		}
+
+		HyperCore::Logger::debug("Discord core was instantiated");
 
 		m_core->SetLogHook(
 			discord::LogLevel::Debug,
@@ -70,7 +77,7 @@ namespace HyperEngine
 				m_core->UserManager().GetCurrentUser(&m_user);
 				HyperCore::Logger::info("Successfully connected to user {}#{}", m_user.GetUsername(), m_user.GetDiscriminator());
 			});
-		
+
 		discord::Activity activity{};
 		activity.SetDetails("No Scene");
 		activity.SetType(discord::ActivityType::Playing);

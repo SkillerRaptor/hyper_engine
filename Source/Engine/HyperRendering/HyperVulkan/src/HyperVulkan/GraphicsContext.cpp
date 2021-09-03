@@ -17,35 +17,46 @@ namespace HyperRendering::HyperVulkan
 
 	GraphicsContext::~GraphicsContext()
 	{
-		auto successfully = true;
-
-		if (m_validation_layers_enabled)
+		auto destroy_debug_messenger = [this]() -> bool
 		{
-			if (m_debug_messenger != VK_NULL_HANDLE)
+			if (m_validation_layers_enabled)
 			{
+				if (m_debug_messenger == VK_NULL_HANDLE)
+				{
+					return false;
+				}
+
 				vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messenger, nullptr);
 				HyperCore::Logger::debug("Vulkan debug messenger was destroyed");
 			}
-			else
-			{
-				successfully = false;
-			}
-		}
 
-		if (m_instance != VK_NULL_HANDLE)
+			return true;
+		};
+
+		auto destroy_instance = [this]() -> bool
 		{
+			if (m_instance == VK_NULL_HANDLE)
+			{
+				return false;
+			}
+
 			vkDestroyInstance(m_instance, nullptr);
 			HyperCore::Logger::debug("Vulkan instance was destroyed");
-		}
-		else
+
+			return true;
+		};
+
+		if (!destroy_debug_messenger())
 		{
-			successfully = false;
+			return;
+		}
+		
+		if (!destroy_instance())
+		{
+			return;
 		}
 
-		if (successfully)
-		{
-			HyperCore::Logger::info("Successfully destroyed Vulkan context");
-		}
+		HyperCore::Logger::info("Successfully destroyed Vulkan context");
 	}
 
 	auto GraphicsContext::initialize() -> bool
@@ -221,7 +232,8 @@ namespace HyperRendering::HyperVulkan
 		VkDebugUtilsMessageSeverityFlagBitsEXT severity_flags,
 		VkDebugUtilsMessageTypeFlagsEXT type_flags,
 		const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-		void* user_data) -> VkBool32
+		void* user_data)
+		-> VkBool32
 	{
 		HYPERENGINE_VARIABLE_NOT_USED(type_flags);
 		HYPERENGINE_VARIABLE_NOT_USED(user_data);
