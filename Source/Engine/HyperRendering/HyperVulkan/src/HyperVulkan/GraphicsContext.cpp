@@ -12,14 +12,25 @@ namespace HyperRendering::HyperVulkan
 {
 	GraphicsContext::GraphicsContext(HyperGame::EventManager& t_event_manager, HyperPlatform::Window& t_window)
 		: IGraphicsContext(t_event_manager, t_window)
-		, m_device(m_instance)
+		, m_device(m_instance, m_surface)
 	{
 	}
 
 	GraphicsContext::~GraphicsContext()
 	{
-		m_device.terminate();
-		
+		auto destroy_surface = [this]() -> bool
+		{
+			if (m_surface == VK_NULL_HANDLE)
+			{
+				return false;
+			}
+
+			vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+			HyperCore::Logger::debug("Vulkan surface was destroyed");
+			
+			return true;
+		};
+
 		auto destroy_debug_messenger = [this]() -> bool
 		{
 			if (m_validation_layers_enabled)
@@ -48,6 +59,16 @@ namespace HyperRendering::HyperVulkan
 
 			return true;
 		};
+
+		if (!m_device.destroy())
+		{
+			return;
+		}
+
+		if (!destroy_surface())
+		{
+			return;
+		}
 
 		if (!destroy_debug_messenger())
 		{
@@ -91,6 +112,12 @@ namespace HyperRendering::HyperVulkan
 				HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create vulkan debug messenger");
 				return false;
 			}
+		}
+
+		if (!create_surface())
+		{
+			HyperCore::Logger::fatal("GraphicsContext::initialize(): Failed to create vulkan surface");
+			return false;
 		}
 
 		if (!m_device.initialize())
@@ -185,6 +212,19 @@ namespace HyperRendering::HyperVulkan
 		return true;
 	}
 
+	auto GraphicsContext::create_surface() -> bool
+	{
+		if (glfwCreateWindowSurface(m_instance, m_window.native_window(), nullptr, &m_surface) != VK_SUCCESS)
+		{
+			HyperCore::Logger::fatal("GraphicsContext::create_surface(): Failed to create Vulkan surface");
+			return false;
+		}
+
+		HyperCore::Logger::debug("Vulkan surface was created");
+
+		return true;
+	}
+
 	auto GraphicsContext::validation_layers_supported() const -> bool
 	{
 		uint32_t available_layer_count = 0;
@@ -237,8 +277,7 @@ namespace HyperRendering::HyperVulkan
 		VkDebugUtilsMessageSeverityFlagBitsEXT severity_flags,
 		VkDebugUtilsMessageTypeFlagsEXT type_flags,
 		const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-		void* user_data)
-		-> VkBool32
+		void* user_data) -> VkBool32
 	{
 		HYPERENGINE_VARIABLE_NOT_USED(type_flags);
 		HYPERENGINE_VARIABLE_NOT_USED(user_data);
