@@ -10,8 +10,9 @@
 
 namespace HyperEngine
 {
-	DiscordPresence::DiscordPresence()
-		: m_start_time(std::chrono::system_clock::now())
+	DiscordPresence::DiscordPresence(std::string application_name)
+		: m_application_name(std::move(application_name))
+		, m_start_time(std::chrono::system_clock::now())
 	{
 	}
 
@@ -79,7 +80,17 @@ namespace HyperEngine
 			});
 
 		discord::Activity activity{};
-		activity.SetDetails("No Scene");
+
+		if (m_application_name == "HyperEditor")
+		{
+			activity.SetDetails("No Scene");
+			activity.SetState(("Editing " + m_application_name).c_str());
+		}
+		else
+		{
+			activity.SetState(("Playing " + m_application_name).c_str());
+		}
+
 		activity.SetType(discord::ActivityType::Playing);
 		activity.SetInstance(false);
 		activity.GetTimestamps().SetStart(std::chrono::duration_cast<std::chrono::seconds>(m_start_time.time_since_epoch()).count());

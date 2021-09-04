@@ -14,6 +14,7 @@ namespace HyperEngine
 {
 	EngineLoop::EngineLoop(IApplication& application)
 		: m_application(application)
+		, m_discord_presence(m_application.title())
 		, m_window(m_application.title(), m_application.graphics_api())
 		, m_render_engine(m_event_manager, m_window)
 	{

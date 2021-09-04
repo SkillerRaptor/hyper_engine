@@ -19,7 +19,7 @@ namespace HyperEngine
 		static constexpr int64_t s_client_id = 883067332560289892;
 
 	public:
-		DiscordPresence();
+		explicit DiscordPresence(std::string application_name);
 		~DiscordPresence();
 
 		auto initialize() -> void;
@@ -27,6 +27,7 @@ namespace HyperEngine
 		auto update() -> void;
 
 	private:
+		std::string m_application_name;
 		std::chrono::system_clock::time_point m_start_time{};
 		bool m_successful{ false };
 
