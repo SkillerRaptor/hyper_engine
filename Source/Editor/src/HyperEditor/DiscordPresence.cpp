@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "HyperEngine/DiscordPresence.hpp"
+#include "HyperEditor/DiscordPresence.hpp"
 
 #include <HyperCore/Logger.hpp>
 
-namespace HyperEngine
+namespace HyperEditor
 {
 	DiscordPresence::DiscordPresence(std::string application_name)
 		: m_application_name(std::move(application_name))
@@ -81,15 +81,8 @@ namespace HyperEngine
 
 		discord::Activity activity{};
 
-		if (m_application_name == "HyperEditor")
-		{
-			activity.SetDetails("No Scene");
-			activity.SetState(("Editing " + m_application_name).c_str());
-		}
-		else
-		{
-			activity.SetState(("Playing " + m_application_name).c_str());
-		}
+		activity.SetDetails("No Scene");
+		activity.SetState(("Editing " + m_application_name).c_str());
 
 		activity.SetType(discord::ActivityType::Playing);
 		activity.SetInstance(false);
@@ -115,4 +108,4 @@ namespace HyperEngine
 			m_core->RunCallbacks();
 		}
 	}
-} // namespace HyperEngine
+} // namespace HyperEditor

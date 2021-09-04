@@ -36,8 +36,6 @@ namespace HyperEngine
 	private:
 		IApplication& m_application;
 		bool m_running{ false };
-
-		DiscordPresence m_discord_presence;
 		
 		HyperCore::JobSystem m_job_system{};
 		HyperGame::EventManager m_event_manager{};

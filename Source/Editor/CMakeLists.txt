@@ -9,15 +9,21 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/main.cpp
+        src/HyperEditor/DiscordPresence.cpp
         src/HyperEditor/Editor.cpp)
 
 set(HEADERS
+        include/HyperEditor/DiscordPresence.hpp
         include/HyperEditor/Editor.hpp)
 
 hyperengine_define_executable(HyperEditor)
 hyperengine_set_startup(HyperEditor)
 hyperengine_set_working_directory(HyperEditor)
-target_link_libraries(HyperEditor PRIVATE HyperEngine)
+target_link_libraries(
+        HyperEditor
+        PRIVATE
+        DiscordGameSDK
+        HyperEngine)
 
 if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
     set(DISCORD_GAME_SDK "${CMAKE_SOURCE_DIR}/Source/ThirdParty/DiscordGameSDK/lib/discord_game_sdk.dll")

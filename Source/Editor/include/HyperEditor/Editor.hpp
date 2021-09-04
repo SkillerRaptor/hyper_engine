@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "HyperEditor/DiscordPresence.hpp"
+
 #include <HyperEngine/IApplication.hpp>
 
 namespace HyperEditor
@@ -18,5 +20,10 @@ namespace HyperEditor
 	private:
 		auto startup() -> void override;
 		auto shutdown() -> void override;
+		
+		auto update() -> void override;
+		
+	private:
+		DiscordPresence m_discord_presence{ "HyperEditor" };
 	};
 } // namespace HyperEditor

@@ -14,7 +14,6 @@ namespace HyperEngine
 {
 	EngineLoop::EngineLoop(IApplication& application)
 		: m_application(application)
-		, m_discord_presence(m_application.title())
 		, m_window(m_application.title(), m_application.graphics_api())
 		, m_render_engine(m_event_manager, m_window)
 	{
@@ -27,8 +26,6 @@ namespace HyperEngine
 
 	auto EngineLoop::initialize() -> bool
 	{
-		m_discord_presence.initialize();
-
 		initialize_event_callbacks();
 
 		m_event_manager.register_listener<HyperGame::WindowCloseEvent>(
@@ -148,9 +145,9 @@ namespace HyperEngine
 
 			HYPERENGINE_VARIABLE_NOT_USED(delta_time);
 
-			m_discord_presence.update();
 			m_window.poll_events();
 
+			m_application.update();
 			m_render_engine.update();
 
 			m_event_manager.process_events();

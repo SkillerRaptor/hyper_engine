@@ -15,6 +15,18 @@ namespace HyperEngine
 		, m_graphics_api(t_graphics_api)
 	{
 	}
+	
+	auto IApplication::startup() -> void
+	{
+	}
+	
+	auto IApplication::shutdown() -> void
+	{
+	}
+	
+	auto IApplication::update() -> void
+	{
+	}
 
 	auto IApplication::title() const -> std::string
 	{

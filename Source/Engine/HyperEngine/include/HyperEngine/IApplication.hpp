@@ -15,18 +15,16 @@ namespace HyperEngine
 	class IApplication
 	{
 	public:
-		friend class Launcher;
-
-	public:
 		IApplication(std::string title, HyperPlatform::GraphicsApi t_graphics_api = HyperPlatform::GraphicsApi::OpenGL);
 		virtual ~IApplication() = default;
 
+		virtual auto startup() -> void;
+		virtual auto shutdown() -> void;
+
+		virtual auto update() -> void;
+
 		auto title() const -> std::string;
 		auto graphics_api() const -> HyperPlatform::GraphicsApi;
-
-	protected:
-		virtual auto startup() -> void = 0;
-		virtual auto shutdown() -> void = 0;
 
 	private:
 		std::string m_title;

@@ -12,7 +12,7 @@
 #include <chrono>
 #include <string>
 
-namespace HyperEngine
+namespace HyperEditor
 {
 	class DiscordPresence
 	{
@@ -30,9 +30,10 @@ namespace HyperEngine
 	private:
 		std::string m_application_name;
 		std::chrono::system_clock::time_point m_start_time{};
+		
 		bool m_successful{ false };
 
 		discord::Core* m_core{ nullptr };
 		discord::User m_user{};
 	};
-} // namespace HyperEngine
+} // namespace HyperEditor

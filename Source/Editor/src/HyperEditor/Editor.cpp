@@ -15,9 +15,15 @@ namespace HyperEditor
 
 	auto Editor::startup() -> void
 	{
+		m_discord_presence.initialize();
 	}
 
 	auto Editor::shutdown() -> void
 	{
+	}
+	
+	auto Editor::update() -> void
+	{
+		m_discord_presence.update();
 	}
 } // namespace HyperEditor
