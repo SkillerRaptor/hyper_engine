@@ -71,7 +71,7 @@ cmake .. -D CMAKE_BUILD_TYPE=Debug
 cmake --build .
 ```
 
-5. Run the engine to check if everything was build successfully.
+5. Run the engine in the Binary/ folder to check if everything was built successfully.
 
 ## Screenshots
 

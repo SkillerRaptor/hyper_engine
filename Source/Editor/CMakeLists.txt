@@ -26,3 +26,7 @@ endif ()
 
 hyperengine_copy_file_post_build(HyperEditor ${DISCORD_GAME_SDK})
 hyperengine_copy_folder_post_build(HyperEditor ${CMAKE_CURRENT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:HyperEditor>/assets)
+
+hyperengine_move_target(HyperEditor HyperEditor)
+hyperengine_move_file(HyperEditor ${DISCORD_GAME_SDK} HyperEditor)
+hyperengine_move_folder(HyperEditor ${CMAKE_CURRENT_SOURCE_DIR}/assets HyperEditor/assets)

@@ -48,6 +48,10 @@ function(hyperengine_define_module target)
     hyperengine_set_folder(${target} HyperModules)
 endfunction()
 
+function(hyperengine_make_directory directory)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${directory})
+endfunction()
+
 function(hyperengine_copy_file_post_build target file)
     add_custom_command(
             TARGET ${target}
@@ -60,4 +64,27 @@ function(hyperengine_copy_folder_post_build target source destination)
             TARGET ${target}
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${source} ${destination})
+endfunction()
+
+function(hyperengine_move_target target destination)
+    hyperengine_make_directory(Binary/${destination})
+    add_custom_command(
+            TARGET ${target}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${CMAKE_BINARY_DIR}/Binary/${destination}/)
+endfunction()
+
+function(hyperengine_move_file target file destination)
+    hyperengine_make_directory(Binary/${destination})
+    add_custom_command(
+            TARGET ${target}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy ${file} ${CMAKE_BINARY_DIR}/Binary/${destination}/)
+endfunction()
+
+function(hyperengine_move_folder target folder destination)
+    add_custom_command(
+            TARGET ${target}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${folder} ${CMAKE_BINARY_DIR}/Binary/${destination})
 endfunction()

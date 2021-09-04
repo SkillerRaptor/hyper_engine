@@ -5,7 +5,7 @@
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# Compiler Warnings
+# Compiler Settings
 #-------------------------------------------------------------------------------------------
 function(enable_settings project_name)
     option(ENABLE_RTTI "Enable Run-time type information" OFF)
@@ -14,10 +14,19 @@ function(enable_settings project_name)
     set(MSVC_SETTINGS
             )
 
+    set(MSVC_LINK_SETTINGS
+            /ignore:4099)
+
     set(CLANG_SETTINGS
             )
 
+    set(CLANG_LINK_SETTINGS
+            )
+
     set(GCC_SETTINGS
+            )
+
+    set(GCC_LINK_SETTINGS
             )
 
     if (ENABLE_RTTI)
@@ -62,13 +71,17 @@ function(enable_settings project_name)
 
     if (MSVC)
         set(PROJECT_SETTINGS ${MSVC_SETTINGS})
+        set(PROJECT_LINK_SETTINGS ${MSVC_LINK_SETTINGS})
     elseif (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
         set(PROJECT_SETTINGS ${CLANG_SETTINGS})
+        set(PROJECT_LINK_SETTINGS ${CLANG_LINK_SETTINGS})
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set(PROJECT_SETTINGS ${GCC_SETTINGS})
+        set(PROJECT_LINK_SETTINGS ${GCC_LINK_SETTINGS})
     else ()
         message(AUTHOR_WARNING "No compiler settings set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
     endif ()
 
     target_compile_options(${project_name} INTERFACE ${PROJECT_SETTINGS})
+    target_link_options(${project_name} INTERFACE ${PROJECT_LINK_SETTINGS})
 endfunction()

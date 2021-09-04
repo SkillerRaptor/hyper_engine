@@ -14,9 +14,10 @@ set(SOURCES
 set(HEADERS
         include/Sandbox.hpp)
 
-
 hyperengine_define_executable(Sandbox)
 target_link_libraries(
         Sandbox
         PRIVATE
         HyperEngine)
+
+hyperengine_move_target(Sandbox Sandbox)

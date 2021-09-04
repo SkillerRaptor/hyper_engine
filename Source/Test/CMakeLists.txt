@@ -26,12 +26,14 @@ target_link_libraries(
 macro(define_test target source)
     set(SOURCES "${source}")
 
-    hyperengine_define_executable("${target}")
-    hyperengine_set_folder("${target}" HyperTests)
+    hyperengine_define_executable(${target})
+    hyperengine_set_folder(${target} HyperTests)
     target_link_libraries(
             ${target}
             PRIVATE
             HyperTestMain)
+
+    hyperengine_move_target(${target} Tests)
 
     catch_discover_tests(
             ${target}
