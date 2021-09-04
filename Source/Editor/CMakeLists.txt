@@ -21,7 +21,7 @@ target_link_libraries(HyperEditor PRIVATE HyperEngine)
 if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
     set(DISCORD_GAME_SDK "${CMAKE_SOURCE_DIR}/Source/ThirdParty/DiscordGameSDK/lib/discord_game_sdk.dll")
 elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
-    set(DISCORD_GAME_SDK "${CMAKE_SOURCE_DIR}/Source/ThirdParty/DiscordGameSDK/lib/discord_game_sdk.so")
+    set(DISCORD_GAME_SDK "${CMAKE_SOURCE_DIR}/Source/ThirdParty/DiscordGameSDK/lib/libdiscord_game_sdk.so")
 endif ()
 
 hyperengine_copy_file_post_build(HyperEditor ${DISCORD_GAME_SDK})
