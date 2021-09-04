@@ -37,6 +37,13 @@ namespace HyperRendering
 			break;
 #endif
 		default:
+#if HYPERENGINE_BUILD_VULKAN
+			m_graphics_context = std::make_unique<HyperVulkan::GraphicsContext>(m_event_manager, m_window);
+			HyperCore::Logger::warning("Specified graphics api is not supported. Using Vulkan as graphics api");
+#elif HYPERENGINE_BUILD_OPENGL
+			m_graphics_context = std::make_unique<HyperOpenGL::GraphicsContext>(m_event_manager, m_window);
+			HyperCore::Logger::warning("Specified graphics api is not supported. Using OpenGL as graphics api");
+#endif
 			break;
 		}
 
@@ -45,13 +52,13 @@ namespace HyperRendering
 			HyperCore::Logger::fatal("RenderEngine::initialize(): Failed to create graphics context");
 			return false;
 		}
-		
+
 		if (!m_graphics_context->initialize())
 		{
 			HyperCore::Logger::fatal("RenderEngine::initialize(): Failed to initialize graphics context");
 			return false;
 		}
-		
+
 		return true;
 	}
 
