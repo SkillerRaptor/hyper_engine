@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include "HyperEngine/DiscordPresence.hpp"
-
 #include <HyperCore/JobSystem.hpp>
 #include <HyperGame/EntitySystem/Registry.hpp>
 #include <HyperGame/EventSystem/EventManager.hpp>
