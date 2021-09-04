@@ -10,6 +10,7 @@
 
 #include <cstdint>
 #include <chrono>
+#include <string>
 
 namespace HyperEngine
 {
