@@ -21,3 +21,4 @@ target_link_libraries(
         HyperEngine)
 
 hyperengine_move_target(Sandbox Sandbox)
+hyperengine_set_working_directory(Sandbox)

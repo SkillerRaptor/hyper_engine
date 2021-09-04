@@ -30,17 +30,47 @@ function(hyperengine_define_library target)
     hyperengine_group_files("${HEADERS}")
 
     add_library(${target} STATIC ${SOURCES} ${HEADERS})
-    target_compile_features(${target} PUBLIC cxx_std_17)
-    target_link_libraries(${target} PRIVATE ProjectOptions ProjectWarnings)
-    target_include_directories(${target} PUBLIC include)
+    target_compile_features(${target}
+            PUBLIC
+            cxx_std_17)
+    target_link_libraries(
+            ${target}
+            PRIVATE
+            ProjectOptions
+            ProjectWarnings)
+    target_include_directories(
+            ${target}
+            PUBLIC
+            include)
 endfunction()
 
 function(hyperengine_set_folder target folder)
-    set_target_properties(${target} PROPERTIES FOLDER ${folder})
+    set_target_properties(
+            ${target}
+            PROPERTIES
+            FOLDER ${folder})
 endfunction()
 
 function(hyperengine_set_startup target)
-    set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" PROPERTY VS_STARTUP_PROJECT ${target})
+    if (NOT "${HYPERENGINE_ARCH}" STREQUAL "Windows")
+        return()
+    endif ()
+
+    set_property(
+            DIRECTORY ${CMAKE_SOURCE_DIR}
+            PROPERTY
+            VS_STARTUP_PROJECT ${target})
+endfunction()
+
+function(hyperengine_set_working_directory target)
+    if (NOT "${HYPERENGINE_ARCH}" STREQUAL "Windows")
+        return()
+    endif ()
+
+    set_target_properties(
+            ${target}
+            PROPERTIES
+            VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:${target}>)
 endfunction()
 
 function(hyperengine_define_module target)
