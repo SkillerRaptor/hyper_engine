@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <cstdint>
+#include <cstddef>
 
-namespace HyperCore
+namespace HyperEngine
 {
 	class SourceLocation
 	{
@@ -23,7 +23,7 @@ namespace HyperCore
 			return m_function;
 		}
 
-		constexpr auto line() const noexcept -> uint32_t
+		constexpr auto line() const noexcept -> size_t
 		{
 			return m_line;
 		}
@@ -31,7 +31,7 @@ namespace HyperCore
 		static constexpr auto current(
 			const char* file = __builtin_FILE(),
 			const char* function = __builtin_FUNCTION(),
-			uint32_t line = __builtin_LINE()) noexcept -> SourceLocation
+			const size_t line = __builtin_LINE()) noexcept -> SourceLocation
 		{
 			SourceLocation location{};
 			location.m_file = file;
@@ -47,6 +47,6 @@ namespace HyperCore
 	private:
 		const char* m_file{ "unknown" };
 		const char* m_function{ "unknown" };
-		uint32_t m_line{ 0 };
+		size_t m_line{ 0 };
 	};
-} // namespace HyperCore
+} // namespace HyperEngine

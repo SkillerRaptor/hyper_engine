@@ -8,7 +8,7 @@
 
 <br />
 
-HyperEngine is an modern multi-platform 2D & 3D game engine written in C++.
+HyperEngine is a modern multi-platform 2D & 3D game engine written in C++.
 The engine is focused on testing new designs in form of rendering or performance.
 
 This repository contains the source code of the HyperEngine.
@@ -77,7 +77,6 @@ cmake --build .
 
 ## Dependencies
 - [Catch2](https://github.com/catchorg/Catch2/blob/devel/LICENSE.txt) Copyright (c) Boost Software License 1.0, Catch2 present
-- [DiscordGameSDK](https://discord.com/developers/docs/game-sdk/sdk-starter-guide) Copyright (c) MIT License, Discord Inc. present
 - [fmt](https://github.com/fmtlib/fmt/blob/master/LICENSE.rst) Copyright (c) MIT License, Victor Zverovich 2012-present
 - [glad](https://github.com/Dav1dde/glad/blob/master/LICENSE) Copyright (c) MIT License, David Herberth 2013-2021
 - [glfw](https://github.com/glfw/glfw/blob/master/LICENSE.md) Copyright (c) zlib License, Marcus Geelnard 2002-2006 & Camilla Löwy 2006-2019

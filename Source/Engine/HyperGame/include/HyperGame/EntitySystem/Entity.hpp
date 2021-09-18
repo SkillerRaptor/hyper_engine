@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <cstddef>
 
-namespace HyperGame
+namespace HyperEngine
 {
 	using Entity = uint64_t;
 
@@ -20,12 +20,12 @@ namespace HyperGame
 		using EntityType = uint64_t;
 		using IdType = uint32_t;
 		using VersionType = uint32_t;
-		
+
 		static constexpr size_t entity_mask{ 0xFFFFFFFF };
 		static constexpr size_t version_mask{ 0xFFFFFFFF };
 		static constexpr size_t entity_shift{ 32U };
 	};
-	
+
 	class NullEntity
 	{
 	public:
@@ -33,16 +33,18 @@ namespace HyperGame
 		{
 			return Entity{ EntityTraits::entity_mask };
 		}
-		
+
 		constexpr auto operator==(const NullEntity& other) const noexcept -> bool
 		{
 			HYPERENGINE_VARIABLE_NOT_USED(other);
+
 			return true;
 		}
 
 		constexpr auto operator!=(const NullEntity& other) const noexcept -> bool
 		{
 			HYPERENGINE_VARIABLE_NOT_USED(other);
+
 			return false;
 		}
 
@@ -66,6 +68,6 @@ namespace HyperGame
 	{
 		return !(other == entity);
 	}
-	
+
 	constexpr NullEntity g_null_entity{};
-} // namespace HyperGame
+} // namespace HyperEngine

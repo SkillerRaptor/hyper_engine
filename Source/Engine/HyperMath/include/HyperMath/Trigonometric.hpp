@@ -6,34 +6,34 @@
 
 #pragma once
 
-#include "HyperMath/Common.hpp"
 #include "HyperMath/Constants.hpp"
-#include "HyperMath/Types.hpp"
 
 #include <limits>
 #include <type_traits>
 
-namespace HyperMath
+namespace HyperEngine
 {
-	template <typename T>
-	constexpr auto radians(T&& degrees) noexcept -> T
+	template <class T>
+	constexpr auto radians(const T degrees) noexcept -> T
 	{
-		static_assert(std::is_floating_point<T>::value, "'T' is not a floating value!");
-		return degrees * (Numbers::g_pi_v<T> / static_cast<T>(180.0L));
+		static_assert(std::is_floating_point_v<T>, "'T' is not a floating point value!");
+
+		return degrees * (Constants::pi_v<T> / static_cast<T>(180.0L));
 	}
 
-	template <typename T>
-	constexpr auto degrees(T&& radians) noexcept -> T
+	template <class T>
+	constexpr auto degrees(const T radians) noexcept -> T
 	{
-		static_assert(std::is_floating_point<T>::value, "'T' is not a floating value!");
-		return radians * (static_cast<T>(180.0L) / Numbers::g_pi_v<T>);
+		static_assert(std::is_floating_point_v<T>, "'T' is not a floating point value!");
+
+		return radians * (static_cast<T>(180.0L) / Constants::pi_v<T>);
 	}
 
-	template <typename T>
-	constexpr auto lerp(T a, T b, T interpolation) noexcept -> T
+	template <class T>
+	constexpr auto lerp(const T a, const T b, const T interpolation) noexcept -> T
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		
+		static_assert(std::is_floating_point_v<T>, "'T' is not a floating point value!");
+
 		if ((a <= 0 && b >= 0) || (a >= 0 && b <= 0))
 		{
 			return interpolation * b + (1 - interpolation) * a;
@@ -44,7 +44,10 @@ namespace HyperMath
 			return b;
 		}
 
-		const T x = a + interpolation * (b - a);
-		return (interpolation > 1) == (b > a) ? (b < x ? x : b) : (b > x ? x : b);
+		const bool interpolated = (interpolation > 1) == (b > a);
+		const T value = a + interpolation * (b - a);
+		const T first_value = (b < value) ? value : b;
+		const T second_value = (b > value) ? value : b;
+		return interpolated ? first_value : second_value;
 	}
-} // namespace HyperMath
+} // namespace HyperEngine

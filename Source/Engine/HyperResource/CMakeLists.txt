@@ -8,12 +8,14 @@
 # HyperResource
 #-------------------------------------------------------------------------------------------
 set(SOURCES
+        src/HyperResource/ResourceModule.cpp
         src/HyperResource/ShaderCompiler.cpp)
 
 set(HEADERS
+        include/HyperResource/ResourceModule.hpp
         include/HyperResource/ShaderCompiler.hpp)
 
-hyperengine_define_module(HyperResource)
+hyperengine_create_module(HyperResource)
 target_link_libraries(
         HyperResource
         PUBLIC

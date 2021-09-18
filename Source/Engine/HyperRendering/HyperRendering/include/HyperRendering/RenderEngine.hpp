@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <HyperPlatform/GraphicsApi.hpp>
+#include <HyperPlatform/RendererType.hpp>
 #include <HyperRenderingBase/IGraphicsContext.hpp>
 
 #include <memory>

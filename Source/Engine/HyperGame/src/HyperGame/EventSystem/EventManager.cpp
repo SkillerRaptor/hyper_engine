@@ -6,7 +6,7 @@
 
 #include "HyperGame/EventSystem/EventManager.hpp"
 
-namespace HyperGame
+namespace HyperEngine
 {
 	EventManager::~EventManager()
 	{
@@ -43,8 +43,8 @@ namespace HyperGame
 		auto event_callback = m_event_callbacks[event_id].get();
 		event_callback->unregister_listener(static_cast<ListenerTraits::InternalListenerType>(id));
 
-		HyperCore::Logger::debug("Unregistered event listener with id #{}", id);
+		Logger::debug("Unregistered event listener with id #{}", id);
 
 		return true;
 	}
-} // namespace HyperGame
+} // namespace HyperEngine

@@ -7,14 +7,15 @@
 #include "HyperPlatform/Window.hpp"
 
 #include <HyperCore/Logger.hpp>
+#include <HyperCore/Prerequisites.hpp>
 
 #include <GLFW/glfw3.h>
 
 #include <utility>
 
-namespace HyperPlatform
+namespace HyperEngine
 {
-	Window::Window(std::string t_title, GraphicsApi t_graphics_api)
+	Window::Window(std::string t_title, RendererType t_graphics_api)
 	{
 		m_info.title = std::move(t_title);
 		m_info.width = 1280;
@@ -34,7 +35,7 @@ namespace HyperPlatform
 			}
 
 			glfwDestroyWindow(m_native_window);
-			HyperCore::Logger::debug("GLFW window was destroyed");
+			Logger::debug("GLFW window was destroyed");
 
 			return true;
 		};
@@ -46,22 +47,22 @@ namespace HyperPlatform
 			return;
 		}
 
-		HyperCore::Logger::info("Successfully destroyed window");
+		Logger::info("Successfully destroyed window");
 	}
 
 	auto Window::initialize() -> bool
 	{
 		if (glfwInit() == GLFW_FALSE)
 		{
-			HyperCore::Logger::fatal("Window::initialize(): Failed to initialize GLFW");
+			Logger::fatal("Window::initialize(): Failed to initialize GLFW");
 			return false;
 		}
 
-		HyperCore::Logger::debug("GLFW was initialized");
+		Logger::debug("GLFW was initialized");
 
 		switch (m_graphics_api)
 		{
-		case GraphicsApi::OpenGL:
+		case RendererType::OpenGL:
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -77,11 +78,11 @@ namespace HyperPlatform
 		{
 			glfwTerminate();
 
-			HyperCore::Logger::fatal("Window::initialize(): Failed to create GLFW window");
+			Logger::fatal("Window::initialize(): Failed to create GLFW window");
 			return false;
 		}
 
-		HyperCore::Logger::debug("GLFW window was created");
+		Logger::debug("GLFW window was created");
 
 		glfwSetWindowUserPointer(m_native_window, &m_info);
 
@@ -199,7 +200,7 @@ namespace HyperPlatform
 				window_info->window_moved_callback(x, y);
 			});
 
-		HyperCore::Logger::info("Successfully created window");
+		Logger::info("Successfully created window");
 
 		return true;
 	}
@@ -313,67 +314,67 @@ namespace HyperPlatform
 		return m_info.height;
 	}
 
-	auto Window::set_key_pressed_callback(const std::function<void(int32_t, bool)>& key_pressed_callback) -> void
+	auto Window::set_key_pressed_callback(const Callback<int32_t, bool>& key_pressed_callback) -> void
 	{
 		m_info.key_pressed_callback = key_pressed_callback;
 	}
 
-	auto Window::set_key_released_callback(const std::function<void(int32_t)>& key_released_callback) -> void
+	auto Window::set_key_released_callback(const Callback<int32_t>& key_released_callback) -> void
 	{
 		m_info.key_released_callback = key_released_callback;
 	}
 
-	auto Window::set_mouse_moved_callback(const std::function<void(float, float)>& mouse_moved_callback) -> void
+	auto Window::set_mouse_moved_callback(const Callback<float, float>& mouse_moved_callback) -> void
 	{
 		m_info.mouse_moved_callback = mouse_moved_callback;
 	}
 
-	auto Window::set_mouse_scrolled_callback(const std::function<void(float, float)>& mouse_scrolled_callback) -> void
+	auto Window::set_mouse_scrolled_callback(const Callback<float, float>& mouse_scrolled_callback) -> void
 	{
 		m_info.mouse_scrolled_callback = mouse_scrolled_callback;
 	}
 
-	auto Window::set_mouse_button_pressed_callback(const std::function<void(int32_t)>& mouse_button_pressed_callback) -> void
+	auto Window::set_mouse_button_pressed_callback(const Callback<int32_t>& mouse_button_pressed_callback) -> void
 	{
 		m_info.mouse_button_pressed_callback = mouse_button_pressed_callback;
 	}
 
-	auto Window::set_mouse_button_released_callback(const std::function<void(int32_t)>& mouse_button_released_callback) -> void
+	auto Window::set_mouse_button_released_callback(const Callback<int32_t>& mouse_button_released_callback) -> void
 	{
 		m_info.mouse_button_released_callback = mouse_button_released_callback;
 	}
 
-	auto Window::set_window_close_callback(const std::function<void()>& window_close_callback) -> void
+	auto Window::set_window_close_callback(const Callback<>& window_close_callback) -> void
 	{
 		m_info.window_close_callback = window_close_callback;
 	}
 
-	auto Window::set_window_resize_callback(const std::function<void(int32_t, int32_t)>& window_resize_callback) -> void
+	auto Window::set_window_resize_callback(const Callback<int32_t, int32_t>& window_resize_callback) -> void
 	{
 		m_info.window_resize_callback = window_resize_callback;
 	}
 
-	auto Window::set_window_framebuffer_resize_callback(const std::function<void(int32_t, int32_t)>& window_framebuffer_resize_callback) -> void
+	auto Window::set_window_framebuffer_resize_callback(const Callback<int32_t, int32_t>& window_framebuffer_resize_callback) -> void
 	{
 		m_info.window_framebuffer_resize_callback = window_framebuffer_resize_callback;
 	}
 
-	auto Window::set_window_focus_callback(const std::function<void()>& window_focus_callback) -> void
+	auto Window::set_window_focus_callback(const Callback<>& window_focus_callback) -> void
 	{
 		m_info.window_focus_callback = window_focus_callback;
 	}
 
-	auto Window::set_window_lost_focus_callback(const std::function<void()>& window_lost_focus_callback) -> void
+	auto Window::set_window_lost_focus_callback(const Callback<>& window_lost_focus_callback) -> void
 	{
 		m_info.window_lost_focus_callback = window_lost_focus_callback;
 	}
 
-	auto Window::set_window_moved_callback(const std::function<void(int32_t, int32_t)>& window_moved_callback) -> void
+	auto Window::set_window_moved_callback(const Callback<int32_t, int32_t>& window_moved_callback) -> void
 	{
 		m_info.window_moved_callback = window_moved_callback;
 	}
 
-	auto Window::graphics_api() const -> GraphicsApi
+	auto Window::graphics_api() const -> RendererType
 	{
 		return m_graphics_api;
 	}
@@ -382,4 +383,4 @@ namespace HyperPlatform
 	{
 		return m_native_window;
 	}
-} // namespace HyperPlatform
+} // namespace HyperEngine

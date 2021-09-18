@@ -6,21 +6,24 @@
 
 #pragma once
 
+#include <HyperCore/Assertion.hpp>
 #include <HyperCore/Compilers.hpp>
 
+#include <cstdint>
+#include <initializer_list>
+#include <memory>
 #include <type_traits>
 
-HYPERENGINE_COMPILER_PUSH_WARNING
-HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
+HYPERENGINE_DISABLE_WARNING_ANONYMOUS_STRUCT()
 
-namespace HyperMath
+namespace HyperEngine
 {
-	template <typename T>
+	template <class T>
 	class Vector4
 	{
 	public:
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
 	public:
 		Vector4() = default;
 
@@ -30,6 +33,13 @@ namespace HyperMath
 			, z(scalar)
 			, w(scalar)
 		{
+		}
+
+		Vector4(std::initializer_list<T> initializer_list)
+		{
+			HYPERENGINE_ASSERT(initializer_list.size() <= 4);
+
+			std::uninitialized_copy(initializer_list.begin(), initializer_list.end(), data);
 		}
 
 		Vector4(T x_value, T y_value, T z_value, T w_value)
@@ -236,8 +246,8 @@ namespace HyperMath
 	using Vec4 = Vector4<float>;
 	using Vec4f = Vector4<float>;
 	using Vec4d = Vector4<double>;
-	using Vec4i = Vector4<int>;
-	using Vec4ui = Vector4<unsigned int>;
-} // namespace HyperMath
+	using Vec4i = Vector4<int32_t>;
+	using Vec4ui = Vector4<uint32_t>;
+} // namespace HyperEngine
 
-HYPERENGINE_COMPILER_POP_WARNING
+HYPERENGINE_RESTORE_WARNING_ANONYMOUS_STRUCT()

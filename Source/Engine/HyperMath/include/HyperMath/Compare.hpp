@@ -8,13 +8,13 @@
 
 #include <type_traits>
 
-namespace HyperMath::Compare
+namespace HyperEngine
 {
-	template <typename T, typename U>
-	constexpr auto equal(T a, U b) noexcept -> bool
+	template <class T, class U>
+	constexpr auto equal(const T a, const U b) noexcept -> bool
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
 		if constexpr (std::is_signed_v<T> == std::is_signed_v<U>)
 		{
 			return a == b;
@@ -29,18 +29,19 @@ namespace HyperMath::Compare
 		}
 	}
 
-	template <typename T, typename U>
-	constexpr auto not_equal(T a, U b) noexcept -> bool
+	template <class T, class U>
+	constexpr auto not_equal(const T a, const U b) noexcept -> bool
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
 		return !equal(a, b);
 	}
 
-	template <typename T, typename U>
-	constexpr auto less(T a, U b) noexcept -> bool
+	template <class T, class U>
+	constexpr auto less(const T a, const U b) noexcept -> bool
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
 		if constexpr (std::is_signed_v<T> == std::is_signed_v<U>)
 		{
 			return a < b;
@@ -55,24 +56,27 @@ namespace HyperMath::Compare
 		}
 	}
 
-	template <typename T, typename U>
-	constexpr auto greater(T a, U b) noexcept -> bool
+	template <class T, class U>
+	constexpr auto greater(const T a, const U b) noexcept -> bool
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		return cmp_less(b, a);
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
+		return less(b, a);
 	}
 
-	template <typename T, typename U>
-	constexpr auto less_equal(T a, U b) noexcept -> bool
+	template <class T, class U>
+	constexpr auto less_equal(const T a, const U b) noexcept -> bool
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
 		return !greater(a, b);
 	}
 
-	template <typename T, typename U>
-	constexpr auto greater_equal(T a, U b) noexcept -> bool
+	template <class T, class U>
+	constexpr auto greater_equal(const T a, const U b) noexcept -> bool
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
 		return !less(a, b);
 	}
-} // namespace HyperMath::Compare
+} // namespace HyperEngine

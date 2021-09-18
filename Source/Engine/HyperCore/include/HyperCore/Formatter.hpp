@@ -6,27 +6,33 @@
 
 #pragma once
 
-#include "HyperCore/Prerequisites.hpp"
+#include "HyperCore/Assertion.hpp"
 
 #include <fmt/format.h>
 
-namespace HyperCore::Formatter
+namespace HyperEngine
 {
-	template <typename... Args>
-	auto format(std::string_view format, Args&&... args) -> std::string
+	class Formatter
 	{
-		constexpr size_t args_count = sizeof...(args);
-		if constexpr (args_count == 0)
+	public:
+		template <typename... Args>
+		static auto format(const std::string_view format, Args&&... args) -> std::string
 		{
-			return format.data();
-		}
+			HYPERENGINE_ASSERT(!format.empty());
 
-		if (format.empty())
-		{
-			return format.data();
-		}
+			constexpr size_t args_count = sizeof...(args);
+			if constexpr (args_count == 0)
+			{
+				return format.data();
+			}
 
-		// TODO(SkillerRaptor): Replacing fmt::format with own implementation
-		return fmt::format(format, std::forward<Args>(args)...);
-	}
-} // namespace HyperCore::Formatter
+			if (format.empty())
+			{
+				return format.data();
+			}
+
+			// TODO(SkillerRaptor): Replacing fmt::format with own implementation
+			return fmt::format(format, std::forward<Args>(args)...);
+		}
+	};
+} // namespace HyperEngine

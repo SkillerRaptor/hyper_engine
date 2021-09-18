@@ -6,14 +6,6 @@
 
 #pragma once
 
-#include <HyperCore/JobSystem.hpp>
-#include <HyperGame/EntitySystem/Registry.hpp>
-#include <HyperGame/EventSystem/EventManager.hpp>
-#include <HyperPlatform/Window.hpp>
-#include <HyperRendering/RenderEngine.hpp>
-
-#include <memory>
-
 namespace HyperEngine
 {
 	class IApplication;
@@ -27,19 +19,9 @@ namespace HyperEngine
 		auto initialize() -> bool;
 		
 		auto run() -> void;
-
-	private:
-		auto initialize_event_callbacks() -> void;
 		
 	private:
 		IApplication& m_application;
 		bool m_running{ false };
-		
-		HyperCore::JobSystem m_job_system{};
-		HyperGame::EventManager m_event_manager{};
-		HyperPlatform::Window m_window;
-		
-		HyperGame::Registry m_registry{};
-		HyperRendering::RenderEngine m_render_engine;
 	};
 } // namespace HyperEngine

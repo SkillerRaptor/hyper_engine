@@ -11,7 +11,7 @@
 
 #include <cstdint>
 
-namespace HyperGame
+namespace HyperEngine
 {
 	template <typename T>
 	class EventType
@@ -19,8 +19,8 @@ namespace HyperGame
 	public:
 		static constexpr auto id() -> uint32_t
 		{
-			constexpr auto value = HyperCore::Hasher::hash_crc_32(HYPERENGINE_FUNCTION_SIGNATURE);
+			constexpr uint32_t value = Hasher::hash_fnv_32(HYPERENGINE_FUNCTION_SIGNATURE);
 			return value;
 		}
 	};
-} // namespace HyperGame
+} // namespace HyperEngine

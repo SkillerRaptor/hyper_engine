@@ -8,7 +8,7 @@
 
 #include <cstdint>
 
-namespace HyperGame
+namespace HyperEngine
 {
 	struct WindowCloseEvent
 	{
@@ -39,4 +39,4 @@ namespace HyperGame
 		int position_x;
 		int position_y;
 	};
-} // namespace HyperGame
+} // namespace HyperEngine

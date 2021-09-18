@@ -12,4 +12,6 @@
 #	include "HyperCore/Compilers/GCCSpecific.hpp"
 #elif defined(_MSC_VER)
 #	include "HyperCore/Compilers/MSVCSpecific.hpp"
+#else
+#	error Unsupported compiler was used.
 #endif

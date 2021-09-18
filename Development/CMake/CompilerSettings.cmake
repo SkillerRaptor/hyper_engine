@@ -31,41 +31,53 @@ function(enable_settings project_name)
 
     if (ENABLE_RTTI)
         set(MSVC_SETTINGS
+                ${MSVC_SETTINGS}
                 /GR)
 
         set(CLANG_SETTINGS
+                ${CLANG_SETTINGS}
                 -frtti)
 
         set(GCC_SETTINGS
+                ${GCC_SETTINGS}
                 -frtti)
     else ()
         set(MSVC_SETTINGS
+                ${MSVC_SETTINGS}
                 /GR-)
 
         set(CLANG_SETTINGS
+                ${CLANG_SETTINGS}
                 -fno-rtti)
 
         set(GCC_SETTINGS
+                ${GCC_SETTINGS}
                 -fno-rtti)
     endif ()
 
     if (ENABLE_EXCEPTIONS)
         set(MSVC_SETTINGS
+                ${MSVC_SETTINGS}
                 /EHscr)
 
         set(CLANG_SETTINGS
+                ${CLANG_SETTINGS}
                 -fexceptions)
 
         set(GCC_SETTINGS
+                ${GCC_SETTINGS}
                 -fexceptions)
     else ()
         set(MSVC_SETTINGS
+                ${MSVC_SETTINGS}
                 /EHscr-)
 
         set(CLANG_SETTINGS
+                ${CLANG_SETTINGS}
                 -fno-exceptions)
 
         set(GCC_SETTINGS
+                ${GCC_SETTINGS}
                 -fno-exceptions)
     endif ()
 
@@ -82,6 +94,12 @@ function(enable_settings project_name)
         message(AUTHOR_WARNING "No compiler settings set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
     endif ()
 
-    target_compile_options(${project_name} INTERFACE ${PROJECT_SETTINGS})
-    target_link_options(${project_name} INTERFACE ${PROJECT_LINK_SETTINGS})
+    target_compile_options(
+            ${project_name}
+            INTERFACE
+            ${PROJECT_SETTINGS})
+    target_link_options(
+            ${project_name}
+            INTERFACE
+            ${PROJECT_LINK_SETTINGS})
 endfunction()

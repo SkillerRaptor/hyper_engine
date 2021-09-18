@@ -6,20 +6,21 @@
 
 #pragma once
 
+#include <cstdint>
 #include <type_traits>
 
-namespace HyperMath
+namespace HyperEngine
 {
-	template <typename T>
+	template <class T>
 	class Quaternion
 	{
 	public:
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 	};
 
 	using Quat = Quaternion<float>;
 	using Quatf = Quaternion<float>;
 	using Quatd = Quaternion<double>;
-	using Quati = Quaternion<int>;
-	using Quatui = Quaternion<unsigned int>;
-} // namespace HyperMath
+	using Quati = Quaternion<int32_t>;
+	using Quatui = Quaternion<uint32_t>;
+} // namespace HyperEngine

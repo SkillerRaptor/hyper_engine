@@ -14,7 +14,7 @@ set(HEADERS
         include/HyperRenderingBase/IGraphicsContext.hpp
         include/HyperRenderingBase/Resources.hpp)
 
-hyperengine_define_module(HyperRenderingBase)
+hyperengine_create_module(HyperRenderingBase)
 target_link_libraries(
         HyperRenderingBase
         PUBLIC

@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2020-2021, SkillerRaptor <skillerraptor@protonmail.com>
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
 #version 450
 
 layout (location = 0) out vec4 v_output_color;

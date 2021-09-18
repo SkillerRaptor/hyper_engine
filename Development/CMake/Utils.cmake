@@ -25,7 +25,7 @@ function(hyperengine_define_executable target)
     target_include_directories(${target} PUBLIC include)
 endfunction()
 
-function(hyperengine_define_library target)
+function(hyperengine_create_library target)
     hyperengine_group_files("${SOURCES}")
     hyperengine_group_files("${HEADERS}")
 
@@ -73,8 +73,8 @@ function(hyperengine_set_working_directory target)
             VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:${target}>)
 endfunction()
 
-function(hyperengine_define_module target)
-    hyperengine_define_library(${target})
+function(hyperengine_create_module target)
+    hyperengine_create_library(${target})
     hyperengine_set_folder(${target} HyperModules)
 endfunction()
 

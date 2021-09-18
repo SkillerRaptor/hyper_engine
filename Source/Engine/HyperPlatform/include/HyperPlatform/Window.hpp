@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "HyperPlatform/GraphicsApi.hpp"
+#include "HyperPlatform/RendererType.hpp"
 
 #include <cstdint>
 #include <functional>
@@ -14,10 +14,14 @@
 
 struct GLFWwindow;
 
-namespace HyperPlatform
+namespace HyperEngine
 {
 	class Window
 	{
+	public:
+		template <class... Args>
+		using Callback = std::function<void(Args...)>;
+
 	private:
 		struct Info
 		{
@@ -25,22 +29,22 @@ namespace HyperPlatform
 			int32_t width{ 0 };
 			int32_t height{ 0 };
 
-			std::function<void(int32_t, bool)> key_pressed_callback{};
-			std::function<void(int32_t)> key_released_callback{};
-			std::function<void(float, float)> mouse_moved_callback{};
-			std::function<void(float, float)> mouse_scrolled_callback{};
-			std::function<void(int32_t)> mouse_button_pressed_callback{};
-			std::function<void(int32_t)> mouse_button_released_callback{};
-			std::function<void()> window_close_callback{};
-			std::function<void(int32_t, int32_t)> window_resize_callback{};
-			std::function<void(int32_t, int32_t)> window_framebuffer_resize_callback{};
-			std::function<void()> window_focus_callback{};
-			std::function<void()> window_lost_focus_callback{};
-			std::function<void(int32_t, int32_t)> window_moved_callback{};
+			Callback<int32_t, bool> key_pressed_callback{};
+			Callback<int32_t> key_released_callback{};
+			Callback<float, float> mouse_moved_callback{};
+			Callback<float, float> mouse_scrolled_callback{};
+			Callback<int32_t> mouse_button_pressed_callback{};
+			Callback<int32_t> mouse_button_released_callback{};
+			Callback<> window_close_callback{};
+			Callback<int32_t, int32_t> window_resize_callback{};
+			Callback<int32_t, int32_t> window_framebuffer_resize_callback{};
+			Callback<> window_focus_callback{};
+			Callback<> window_lost_focus_callback{};
+			Callback<int32_t, int32_t> window_moved_callback{};
 		};
 
 	public:
-		Window(std::string t_title, GraphicsApi t_graphics_api);
+		Window(std::string t_title, RendererType t_graphics_api);
 		~Window();
 
 		auto initialize() -> bool;
@@ -57,20 +61,20 @@ namespace HyperPlatform
 		auto set_height(int32_t height) -> void;
 		auto height() const -> int32_t;
 
-		auto set_key_pressed_callback(const std::function<void(int32_t, bool)>& key_pressed_callback) -> void;
-		auto set_key_released_callback(const std::function<void(int32_t)>& key_released_callback) -> void;
-		auto set_mouse_moved_callback(const std::function<void(float, float)>& mouse_moved_callback) -> void;
-		auto set_mouse_scrolled_callback(const std::function<void(float, float)>& mouse_scrolled_callback) -> void;
-		auto set_mouse_button_pressed_callback(const std::function<void(int32_t)>& mouse_button_pressed_callback) -> void;
-		auto set_mouse_button_released_callback(const std::function<void(int32_t)>& mouse_button_released_callback) -> void;
-		auto set_window_close_callback(const std::function<void()>& window_close_callback) -> void;
-		auto set_window_resize_callback(const std::function<void(int32_t, int32_t)>& window_resize_callback) -> void;
-		auto set_window_framebuffer_resize_callback(const std::function<void(int32_t, int32_t)>& window_framebuffer_resize_callback) -> void;
-		auto set_window_focus_callback(const std::function<void()>& window_focus_callback) -> void;
-		auto set_window_lost_focus_callback(const std::function<void()>& window_lost_focus_callback) -> void;
-		auto set_window_moved_callback(const std::function<void(int32_t, int32_t)>& window_moved_callback) -> void;
+		auto set_key_pressed_callback(const Callback<int32_t, bool>& key_pressed_callback) -> void;
+		auto set_key_released_callback(const Callback<int32_t>& key_released_callback) -> void;
+		auto set_mouse_moved_callback(const Callback<float, float>& mouse_moved_callback) -> void;
+		auto set_mouse_scrolled_callback(const Callback<float, float>& mouse_scrolled_callback) -> void;
+		auto set_mouse_button_pressed_callback(const Callback<int32_t>& mouse_button_pressed_callback) -> void;
+		auto set_mouse_button_released_callback(const Callback<int32_t>& mouse_button_released_callback) -> void;
+		auto set_window_close_callback(const Callback<>& window_close_callback) -> void;
+		auto set_window_resize_callback(const Callback<int32_t, int32_t>& window_resize_callback) -> void;
+		auto set_window_framebuffer_resize_callback(const Callback<int32_t, int32_t>& window_framebuffer_resize_callback) -> void;
+		auto set_window_focus_callback(const Callback<>& window_focus_callback) -> void;
+		auto set_window_lost_focus_callback(const Callback<>& window_lost_focus_callback) -> void;
+		auto set_window_moved_callback(const Callback<int32_t, int32_t>& window_moved_callback) -> void;
 
-		auto graphics_api() const -> GraphicsApi;
+		auto graphics_api() const -> RendererType;
 		auto native_window() const -> GLFWwindow*;
 
 	private:
@@ -78,8 +82,8 @@ namespace HyperPlatform
 
 	private:
 		Info m_info{};
-		GraphicsApi m_graphics_api{ GraphicsApi::Vulkan };
+		RendererType m_graphics_api{};
 
 		GLFWwindow* m_native_window{ nullptr };
 	};
-} // namespace HyperPlatform
+} // namespace HyperEngine

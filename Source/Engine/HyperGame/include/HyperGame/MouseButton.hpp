@@ -6,7 +6,7 @@
 
 #pragma once
 
-namespace HyperGame
+namespace HyperEngine
 {
 	enum class MouseButton : uint8_t
 	{
@@ -14,4 +14,4 @@ namespace HyperGame
 		Right,
 		Middle
 	};
-} // namespace HyperGame
+} // namespace HyperEngine

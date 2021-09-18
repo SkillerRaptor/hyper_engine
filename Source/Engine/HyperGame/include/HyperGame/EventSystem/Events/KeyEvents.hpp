@@ -8,7 +8,7 @@
 
 #include <cstdint>
 
-namespace HyperGame
+namespace HyperEngine
 {
 	struct KeyPressedEvent
 	{
@@ -20,4 +20,4 @@ namespace HyperGame
 	{
 		int32_t key_code;
 	};
-} // namespace HyperGame
+} // namespace HyperEngine

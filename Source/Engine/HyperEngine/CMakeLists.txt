@@ -17,7 +17,7 @@ set(HEADERS
         include/HyperEngine/IApplication.hpp
         include/HyperEngine/Launcher.hpp)
 
-hyperengine_define_library(HyperEngine)
+hyperengine_create_library(HyperEngine)
 target_link_libraries(
         HyperEngine
         PUBLIC
@@ -25,5 +25,5 @@ target_link_libraries(
         HyperGame
         HyperMath
         HyperPlatform
-        HyperRendering
+        # HyperRendering
         HyperResource)

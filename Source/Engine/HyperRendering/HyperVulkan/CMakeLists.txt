@@ -19,7 +19,7 @@ set(HEADERS
         include/HyperVulkan/GraphicsPipeline.hpp
         include/HyperVulkan/SwapChain.hpp)
 
-hyperengine_define_module(HyperVulkan)
+hyperengine_create_module(HyperVulkan)
 target_link_libraries(
         HyperVulkan
         PUBLIC

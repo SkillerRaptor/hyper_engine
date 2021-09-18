@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace HyperGame
+namespace HyperEngine
 {
 	struct MouseMovedEvent
 	{
@@ -33,4 +33,4 @@ namespace HyperGame
 	{
 		MouseButton button;
 	};
-} // namespace HyperGame
+} // namespace HyperEngine

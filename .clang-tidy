@@ -26,9 +26,11 @@ Checks: '
   -hicpp-avoid-c-arrays,
   -hicpp-explicit-conversions,
   -hicpp-no-array-decay,
+  -hicpp-use-auto,
   -hicpp-signed-bitwise,
   -hicpp-special-member-functions,
   -modernize-avoid-c-arrays,
+  -modernize-use-auto,
   -modernize-use-nodiscard,
   -misc-non-private-member-variables-in-classes'
 
@@ -41,6 +43,8 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.FunctionCase
     value: snake_case
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: aNy_CasE
   - key: readability-identifier-naming.MemberCase
     value: snake_case
   - key: readability-identifier-naming.NamespaceCase

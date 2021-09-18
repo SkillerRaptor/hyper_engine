@@ -8,24 +8,22 @@
 
 #include "HyperCore/Logger.hpp"
 
-namespace HyperCore::Detail
+namespace HyperEngine
 {
-	auto assert(
-		const char* expression,
-		bool expression_value,
-		SourceLocation current_location) -> void
+	auto assert(const char* expression, const bool expression_value, const SourceLocation current_location) -> void
 	{
 		if (expression_value)
 		{
 			return;
 		}
-
-		HyperCore::Logger::fatal("Assertion failed: {}", expression);
-		HyperCore::Logger::fatal(
+		
+		Logger::fatal("Assertion failed: {}", expression);
+		Logger::fatal(
 			"{}:{} in {}",
 			current_location.file_name(),
 			current_location.line(),
 			current_location.function_name());
+
 		std::abort();
 	}
-} // namespace HyperCore::Detail
+} // namespace HyperEngine

@@ -13,7 +13,7 @@
 
 #include <unordered_map>
 
-namespace HyperGame
+namespace HyperEngine
 {
 	class IComponentPool
 	{
@@ -30,10 +30,10 @@ namespace HyperGame
 		{
 			if (has_component(entity))
 			{
-				HyperCore::Logger::fatal("Failed to add component to entity, which already has the component");
+				Logger::fatal("Failed to add component to entity, which already has the component");
 				HYPERENGINE_ASSERT_NOT_REACHED();
 			}
-			
+
 			m_components[entity] = T{ std::forward<Args>(args)... };
 			return m_components[entity];
 		}
@@ -42,10 +42,10 @@ namespace HyperGame
 		{
 			if (!has_component(entity))
 			{
-				HyperCore::Logger::fatal("Failed to remove component from entity, which doesn't has the component");
+				Logger::fatal("Failed to remove component from entity, which doesn't has the component");
 				HYPERENGINE_ASSERT_NOT_REACHED();
 			}
-			
+
 			m_components.erase(entity);
 		}
 
@@ -58,14 +58,14 @@ namespace HyperGame
 		{
 			if (!has_component(entity))
 			{
-				HyperCore::Logger::fatal("Failed to get component from entity, which doesn't has the component");
+				Logger::fatal("Failed to get component from entity, which doesn't has the component");
 				HYPERENGINE_ASSERT_NOT_REACHED();
 			}
-			
+
 			return m_components[entity];
 		}
 
 	private:
 		std::unordered_map<Entity, T> m_components{};
 	};
-} // namespace HyperGame
+} // namespace HyperEngine

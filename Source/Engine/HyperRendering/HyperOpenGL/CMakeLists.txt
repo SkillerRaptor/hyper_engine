@@ -13,7 +13,7 @@ set(SOURCES
 set(HEADERS
         include/HyperOpenGL/GraphicsContext.hpp)
 
-hyperengine_define_module(HyperOpenGL)
+hyperengine_create_module(HyperOpenGL)
 target_link_libraries(
         HyperOpenGL
         PUBLIC

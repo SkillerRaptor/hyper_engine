@@ -10,12 +10,6 @@
 
 namespace HyperEngine
 {
-	IApplication::IApplication(std::string t_title, HyperPlatform::GraphicsApi t_graphics_api)
-		: m_title(std::move(t_title))
-		, m_graphics_api(t_graphics_api)
-	{
-	}
-	
 	auto IApplication::startup() -> void
 	{
 	}
@@ -26,15 +20,5 @@ namespace HyperEngine
 	
 	auto IApplication::update() -> void
 	{
-	}
-
-	auto IApplication::title() const -> std::string
-	{
-		return m_title;
-	}
-
-	auto IApplication::graphics_api() const -> HyperPlatform::GraphicsApi
-	{
-		return m_graphics_api;
 	}
 } // namespace HyperEngine

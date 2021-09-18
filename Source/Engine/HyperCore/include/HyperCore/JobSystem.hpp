@@ -6,7 +6,8 @@
 
 #pragma once
 
-#include "HyperCore/Memory/RingBuffer.hpp"
+#include "HyperCore/Prerequisites.hpp"
+#include "HyperCore/Containers/RingBuffer.hpp"
 
 #include <atomic>
 #include <condition_variable>
@@ -14,39 +15,42 @@
 #include <thread>
 #include <vector>
 
-namespace HyperCore
+namespace HyperEngine
 {
 	class JobSystem
 	{
 	public:
+		HYPERENGINE_MAKE_SINGLETON(JobSystem);
+
+	public:
 		struct DispatcherArgs
 		{
-			uint32_t job_index;
-			uint32_t group_index;
+			size_t job_index;
+			size_t group_index;
 		};
 
 	public:
-		JobSystem();
-		~JobSystem();
+		static auto initialize() -> bool;
+		static auto terminate() -> void;
 
-		auto execute(const std::function<void()>& job) -> void;
-		auto dispatch(uint32_t job_count, uint32_t group_size, const std::function<void(DispatcherArgs)>& job) -> void;
+		static auto execute(const std::function<void()>& job) -> void;
+		static auto dispatch(const size_t job_count, const size_t group_size, const std::function<void(DispatcherArgs)>& job) -> void;
 
-		auto busy() const -> bool;
-		auto wait() -> void;
+		static auto busy() -> bool;
+		static auto wait() -> void;
 
 	private:
-		uint32_t m_worker_count{ 0 };
+		static size_t s_worker_count;
 
-		RingBuffer<std::function<void()>, 256> m_job_pool{};
+		static RingBuffer<std::function<void()>, 256> s_job_pool;
 
-		std::mutex m_wake_mutex{};
-		std::condition_variable m_wake_condition{};
+		static std::mutex s_wake_mutex;
+		static std::condition_variable s_wake_condition;
 
-		uint64_t m_current_label{ 0 };
-		std::atomic<uint64_t> m_finished_label{};
+		static size_t s_current_label;
+		static std::atomic<uint64_t> s_finished_label;
 
-		std::atomic<bool> m_running_flag{};
-		std::vector<std::thread> m_worker_threads;
+		static std::atomic<bool> s_running_flag;
+		static std::vector<std::thread> s_worker_threads;
 	};
-} // namespace HyperCore
+} // namespace HyperEngine

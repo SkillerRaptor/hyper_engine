@@ -8,13 +8,16 @@
 # HyperPlatform
 #-------------------------------------------------------------------------------------------
 set(SOURCES
+        src/HyperPlatform/PlatformModule.cpp
         src/HyperPlatform/Window.cpp)
 
 set(HEADERS
+        include/HyperPlatform/RendererType.hpp
         include/HyperPlatform/PlatformDetection.hpp
+        include/HyperPlatform/PlatformModule.hpp
         include/HyperPlatform/Window.hpp)
 
-hyperengine_define_module(HyperPlatform)
+hyperengine_create_module(HyperPlatform)
 target_link_libraries(
         HyperPlatform
         PUBLIC

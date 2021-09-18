@@ -11,7 +11,7 @@ jobs:
     env:
       conan_user_home: "${{ github.workspace }}/conan-cache"
       vulkan_sdk: "$GITHUB_WORKSPACE/vulkan_sdk/"
-      vulkan_version: "1.2.182.0"
+      vulkan_version: "1.2.189.1"
     strategy:
       fail-fast: false
       matrix:

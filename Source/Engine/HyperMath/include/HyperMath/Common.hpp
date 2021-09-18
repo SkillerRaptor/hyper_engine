@@ -21,34 +21,37 @@
 #	undef max
 #endif
 
-namespace HyperMath
+namespace HyperEngine
 {
-	template <typename T>
-	constexpr auto min(T a, T b) noexcept -> T
+	template <class T>
+	constexpr auto min(const T a, const T b) noexcept -> T
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		return b < a ? b : a;
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
+		return (b < a) ? b : a;
 	}
 
-	template <typename T>
-	constexpr auto max(T a, T b) noexcept -> T
+	template <class T>
+	constexpr auto max(const T a, const T b) noexcept -> T
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		return a < b ? b : a;
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
+		return (a < b) ? b : a;
 	}
 
-	template <typename T>
-	constexpr auto abs(T x) noexcept -> T
+	template <class T>
+	constexpr auto abs(const T x) noexcept -> T
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		return x >= 0 ? x : -x;
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
+		return (x >= 0) ? x : -x;
 	}
 
-	template <typename T>
-	constexpr auto ceil(T x) noexcept -> T
+	template <class T>
+	constexpr auto ceil(const T x) noexcept -> T
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
 		if (is_nan(x))
 		{
 			return std::numeric_limits<T>::quiet_NaN();
@@ -64,31 +67,32 @@ namespace HyperMath
 			return x;
 		}
 
-		auto x_whole = static_cast<int64_t>(x);
-		auto remainder = (x > static_cast<T>(0)) && (x > static_cast<T>(x_whole));
-
+		const int64_t x_whole = static_cast<int64_t>(x);
+		const bool remainder = (x > static_cast<T>(0)) && (x > static_cast<T>(x_whole));
 		return static_cast<T>(x_whole + remainder);
 	}
 
-	template <typename T>
-	constexpr auto clamp(T value, T low, T high) noexcept -> T
+	template <class T>
+	constexpr auto clamp(const T value, const T low, const T high) noexcept -> T
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		return HyperMath::min(HyperMath::max(value, low), high);
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
+		return min(max(value, low), high);
 	}
 
-	template <typename T>
-	constexpr auto saturate(T value) noexcept -> T
+	template <class T>
+	constexpr auto saturate(const T value) noexcept -> T
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		return HyperMath::clamp(value, static_cast<T>(0.0F), static_cast<T>(1.0F));
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
+		return clamp(value, static_cast<T>(0.0F), static_cast<T>(1.0F));
 	}
 
-	template <typename T>
-	constexpr auto floor(T x) noexcept -> T
+	template <class T>
+	constexpr auto floor(const T x) noexcept -> T
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
 		if (is_nan(x))
 		{
 			return std::numeric_limits<T>::quiet_NaN();
@@ -104,40 +108,31 @@ namespace HyperMath
 			return x;
 		}
 
-		auto x_whole = static_cast<int64_t>(x);
-		auto remainder = (x < static_cast<T>(0)) && (x < static_cast<T>(x_whole));
-
+		const int64_t x_whole = static_cast<int64_t>(x);
+		const bool remainder = (x < static_cast<T>(0)) && (x < static_cast<T>(x_whole));
 		return static_cast<T>(x_whole - remainder);
 	}
 
-	template <typename T>
-	constexpr auto midpoint(T a, T b) noexcept -> T
+	template <class T>
+	constexpr auto midpoint(const T a, const T b) noexcept -> T
 	{
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
 		if constexpr (std::is_integral_v<T>)
 		{
-			using U = std::make_unsigned_t<T>;
+			using UnsignedT = std::make_unsigned_t<T>;
 
-			int sign = 1;
-
-			U first = static_cast<U>(a);
-			U second = static_cast<U>(b);
-			if (a > b)
-			{
-				sign = -1;
-				first = static_cast<U>(b);
-				second = static_cast<U>(a);
-			}
-
-			return a + sign * static_cast<T>(static_cast<U>(second - first) / 2);
+			const int sign = (a > b) ? -1 : 1;
+			const UnsignedT first = static_cast<UnsignedT>((a > b) ? b : a);
+			const UnsignedT second = static_cast<UnsignedT>((a > b) ? a : b);
+			return a + sign * static_cast<T>(static_cast<UnsignedT>(second - first) / 2);
 		}
 		else
 		{
 			constexpr T low = std::numeric_limits<T>::min() * 2;
 			constexpr T high = std::numeric_limits<T>::max() / 2;
-			const T absolute_a = HyperMath::abs(a);
-			const T absolute_b = HyperMath::abs(b);
+			const T absolute_a = abs(a);
+			const T absolute_b = abs(b);
 
 			if (absolute_a <= high && absolute_b <= high)
 			{
@@ -146,29 +141,29 @@ namespace HyperMath
 
 			if (absolute_a < low)
 			{
-				return a + b / 2;
+				return (b / 2) + a;
 			}
 
 			if (absolute_b < low)
 			{
-				return a / 2 + b;
+				return (a / 2) + b;
 			}
 
-			return a / 2 + b / 2;
+			return (a / 2) + (b / 2);
 		}
 	}
 
-	template <typename T>
+	template <class T>
 	constexpr auto factorial(T n) noexcept -> T
 	{
-		static_assert(std::is_integral<T>::value, "'T' is not an integral value!");
-		
+		static_assert(std::is_integral_v<T>, "'T' is not an integral value!");
+
 		if (n <= 1)
 		{
 			return 1;
 		}
 
-		auto value = T(1);
+		T value = static_cast<T>(1);
 
 		size_t counter = 0;
 		while (counter < static_cast<size_t>(n))
@@ -180,17 +175,17 @@ namespace HyperMath
 		return value;
 	}
 
-	template <typename T>
+	template <class T>
 	constexpr auto pow(T x, T n) noexcept -> T
 	{
-		static_assert(std::is_integral<T>::value, "'T' is not an integral value!");
-		
+		static_assert(std::is_integral_v<T>, "'T' is not an integral value!");
+
 		if (n <= 0)
 		{
 			return 1;
 		}
 
-		auto value = T(1);
+		T value = static_cast<T>(1);
 
 		size_t counter = 0;
 		while (counter < static_cast<size_t>(n))
@@ -201,4 +196,4 @@ namespace HyperMath
 
 		return value;
 	}
-} // namespace HyperMath
+} // namespace HyperEngine

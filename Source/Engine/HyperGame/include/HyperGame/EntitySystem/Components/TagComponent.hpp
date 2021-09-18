@@ -8,10 +8,10 @@
 
 #include <string>
 
-namespace HyperGame
+namespace HyperEngine
 {
 	struct TagComponent
 	{
 		std::string tag;
 	};
-} // namespace HyperGame
+} // namespace HyperEngine

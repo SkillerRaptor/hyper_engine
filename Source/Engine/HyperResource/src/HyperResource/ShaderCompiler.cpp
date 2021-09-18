@@ -14,7 +14,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace HyperResource
+namespace HyperEngine
 {
 	bool ShaderCompiler::s_initialized{ false };
 
@@ -22,13 +22,13 @@ namespace HyperResource
 	{
 		if (!glslang::InitializeProcess())
 		{
-			HyperCore::Logger::fatal("ShaderCompiler::initialize(): Failed to initialize glslang process");
+			Logger::fatal("ShaderCompiler::initialize(): Failed to initialize glslang");
 			return false;
 		}
 
 		s_initialized = true;
 
-		HyperCore::Logger::info("Successfully initialized shader compiler");
+		Logger::debug("Shader Compiler was successfully initialized");
 
 		return true;
 	}
@@ -42,15 +42,15 @@ namespace HyperResource
 
 		glslang::FinalizeProcess();
 
-		HyperCore::Logger::info("Successfully destroyed shader compiler");
+		Logger::debug("Shader Compiler was successfully terminated");
 	}
 
+	// TODO(SkillerRaptor): Refactoring compile_shader_to_spirv()
 	auto ShaderCompiler::compile_shader_to_spirv(const std::string& shader_path) -> std::vector<uint32_t>
 	{
 		std::ifstream input_stream(shader_path);
 		if (!input_stream.is_open())
 		{
-			// TODO(SkillerRaptor): Handling error
 			return {};
 		}
 
@@ -197,7 +197,6 @@ namespace HyperResource
 				&preprocessed_glsl,
 				includer))
 		{
-			// TODO(SkillerRaptor): Handling error
 			return {};
 		}
 
@@ -206,7 +205,6 @@ namespace HyperResource
 
 		if (!shader.parse(&built_in_resource, 120, false, messages))
 		{
-			// TODO(SkillerRaptor): Handling error
 			return {};
 		}
 
@@ -214,7 +212,6 @@ namespace HyperResource
 		program.addShader(&shader);
 		if (!program.link(messages))
 		{
-			// TODO(SkillerRaptor): Handling error
 			return {};
 		}
 
@@ -227,4 +224,4 @@ namespace HyperResource
 
 		return shader_bytes;
 	}
-} // namespace HyperResource
+} // namespace HyperEngine

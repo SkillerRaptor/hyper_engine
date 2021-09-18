@@ -8,14 +8,14 @@
 
 #include <HyperCore/Assertion.hpp>
 
-namespace HyperGame
+namespace HyperEngine
 {
-	auto HyperGame::Registry::create_entity() -> Entity
+	auto Registry::create_entity() -> Entity
 	{
 		return m_available_entity == g_null_entity ? generate_identifier() : recycle_identifier();
 	}
 
-	auto HyperGame::Registry::destroy_entity(Entity entity) -> bool
+	auto Registry::destroy_entity(Entity entity) -> bool
 	{
 		if (!valid_entity(entity))
 		{
@@ -31,7 +31,7 @@ namespace HyperGame
 		return true;
 	}
 
-	auto HyperGame::Registry::valid_entity(Entity entity) -> bool
+	auto Registry::valid_entity(Entity entity) -> bool
 	{
 		const size_t index = entity & EntityTraits::entity_mask;
 		if (index >= m_entities.size())
@@ -60,7 +60,7 @@ namespace HyperGame
 		const auto current_entity_id = m_available_entity & EntityTraits::entity_mask;
 		m_available_entity = m_entities[current_entity_id] & EntityTraits::entity_mask;
 		m_entities[current_entity_id] = (current_entity_id & EntityTraits::entity_mask) | (m_entities[current_entity_id] & version_mask);
-		
+
 		return m_entities[current_entity_id];
 	}
-} // namespace HyperGame
+} // namespace HyperEngine

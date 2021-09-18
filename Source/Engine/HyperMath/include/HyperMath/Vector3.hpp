@@ -6,21 +6,24 @@
 
 #pragma once
 
+#include <HyperCore/Assertion.hpp>
 #include <HyperCore/Compilers.hpp>
 
+#include <cstdint>
+#include <initializer_list>
+#include <memory>
 #include <type_traits>
 
-HYPERENGINE_COMPILER_PUSH_WARNING
-HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT
+HYPERENGINE_DISABLE_WARNING_ANONYMOUS_STRUCT()
 
-namespace HyperMath
+namespace HyperEngine
 {
-	template <typename T>
+	template <class T>
 	class Vector3
 	{
 	public:
-		static_assert(std::is_arithmetic<T>::value, "'T' is not an arithmetic value!");
-		
+		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
+
 	public:
 		Vector3() = default;
 
@@ -29,6 +32,13 @@ namespace HyperMath
 			, y(scalar)
 			, z(scalar)
 		{
+		}
+
+		Vector3(std::initializer_list<T> initializer_list)
+		{
+			HYPERENGINE_ASSERT(initializer_list.size() <= 3);
+
+			std::uninitialized_copy(initializer_list.begin(), initializer_list.end(), data);
 		}
 
 		Vector3(T x_value, T y_value, T z_value)
@@ -220,8 +230,8 @@ namespace HyperMath
 	using Vec3 = Vector3<float>;
 	using Vec3f = Vector3<float>;
 	using Vec3d = Vector3<double>;
-	using Vec3i = Vector3<int>;
-	using Vec3ui = Vector3<unsigned int>;
-} // namespace HyperMath
+	using Vec3i = Vector3<int32_t>;
+	using Vec3ui = Vector3<uint32_t>;
+} // namespace HyperEngine
 
-HYPERENGINE_COMPILER_POP_WARNING
+HYPERENGINE_RESTORE_WARNING_ANONYMOUS_STRUCT()

@@ -10,125 +10,148 @@
 
 #include <algorithm>
 
-namespace HyperCore
+namespace HyperEngine
 {
-	JobSystem::JobSystem()
+	size_t JobSystem::s_worker_count{ 0 };
+
+	RingBuffer<std::function<void()>, 256> JobSystem::s_job_pool{};
+
+	std::mutex JobSystem::s_wake_mutex{};
+	std::condition_variable JobSystem::s_wake_condition{};
+
+	size_t JobSystem::s_current_label{ 0 };
+	std::atomic<uint64_t> JobSystem::s_finished_label{};
+
+	std::atomic<bool> JobSystem::s_running_flag{};
+	std::vector<std::thread> JobSystem::s_worker_threads{};
+
+	auto JobSystem::initialize() -> bool
 	{
-		m_finished_label.store(0);
-		m_running_flag.store(true);
+		s_finished_label.store(0);
+		s_running_flag.store(true);
 
-		auto core_count = std::thread::hardware_concurrency();
-		m_worker_count = std::max(1U, core_count);
+		const size_t core_count = std::thread::hardware_concurrency();
+		s_worker_count = std::max(static_cast<size_t>(1), core_count);
 
-		for (uint32_t worker_id = 0; worker_id < m_worker_count; ++worker_id)
+		for (size_t i = 0; i < s_worker_count; ++i)
 		{
-			HyperCore::Logger::debug("Starting worker thread #{}", worker_id);
-			
+			Logger::debug("Starting worker thread #{}", i);
+
 			std::thread worker(
-				[this]()
+				[]()
 				{
 					std::function<void()> job;
 
-					while (m_running_flag.load())
+					while (s_running_flag.load())
 					{
-						if (!m_job_pool.pop_front(job))
+						if (!s_job_pool.pop_front(job))
 						{
-							std::unique_lock<std::mutex> lock(m_wake_mutex);
-							m_wake_condition.wait(lock);
+							std::unique_lock<std::mutex> lock(s_wake_mutex);
+							s_wake_condition.wait(lock);
 							continue;
 						}
 
 						job();
-						m_finished_label.fetch_add(1);
+						s_finished_label.fetch_add(1);
 					}
 				});
 
-			m_worker_threads.push_back(std::move(worker));
+			s_worker_threads.push_back(std::move(worker));
 		}
+
+		Logger::debug("JobSystem was successfully initialized");
+
+		return true;
 	}
 
-	JobSystem::~JobSystem()
+	auto JobSystem::terminate() -> void
 	{
-		m_running_flag.store(false);
-		m_wake_condition.notify_all();
+		s_running_flag.store(false);
+		s_wake_condition.notify_all();
 
 		size_t worker_id = 0;
-		for (auto& worker_thread : m_worker_threads)
+		for (std::thread& worker_thread : s_worker_threads)
 		{
-			HyperCore::Logger::debug("Stopping worker thread #{}", worker_id);
-			
+			Logger::debug("Stopping worker thread #{}", worker_id);
+
 			worker_thread.join();
 			++worker_id;
 		}
+
+		Logger::debug("JobSystem was successfully terminated");
 	}
 
 	auto JobSystem::execute(const std::function<void()>& job) -> void
 	{
-		m_current_label += 1;
-		while (!m_job_pool.push_back(job))
+		s_current_label += 1;
+		while (!s_job_pool.push_back(job))
 		{
-			m_wake_condition.notify_one();
+			s_wake_condition.notify_one();
 			std::this_thread::yield();
 		}
 
-		m_wake_condition.notify_one();
+		s_wake_condition.notify_one();
+
+		Logger::debug("Executing job with label id '{}'", s_current_label);
 	}
 
-	auto JobSystem::dispatch(uint32_t job_count, uint32_t group_size, const std::function<void(DispatcherArgs)>& job) -> void
+	auto JobSystem::dispatch(const size_t job_count, const size_t group_size, const std::function<void(DispatcherArgs)>& job) -> void
 	{
 		if (job_count == 0)
 		{
-			HyperCore::Logger::fatal("JobSystem::dispatch(): Failed to dispatch job with a job count of 0");
+			Logger::fatal("JobSystem::dispatch(): Failed to dispatch job with a job count of 0");
 			return;
 		}
 
 		if (group_size == 0)
 		{
-			HyperCore::Logger::fatal("JobSystem::dispatch(): Failed to dispatch job with a group count of 0");
+			Logger::fatal("JobSystem::dispatch(): Failed to dispatch job with a group count of 0");
 			return;
 		}
 
-		const uint32_t group_count = (job_count + group_size - 1) / group_size;
-		m_current_label += group_count;
-	
-		for (uint32_t group_index = 0; group_index < group_count; ++group_index)
+		const size_t group_count = (job_count + group_size - 1) / group_size;
+		s_current_label += group_count;
+
+		for (size_t group_index = 0; group_index < group_count; ++group_index)
 		{
 			auto job_function = [group_index, group_size, job_count, job]()
 			{
-				const uint32_t group_job_offset = group_index * group_size;
-				const uint32_t group_job_end = std::min(group_job_offset + group_size, job_count);
- 
+				const size_t group_job_offset = group_index * group_size;
+				const size_t group_job_end = std::min(group_job_offset + group_size, job_count);
+
 				DispatcherArgs dispatcher_args{};
 				dispatcher_args.group_index = group_index;
-				
-				for (uint32_t i = group_job_offset; i < group_job_end; ++i)
+
+				for (size_t i = group_job_offset; i < group_job_end; ++i)
 				{
 					dispatcher_args.job_index = i;
 					job(dispatcher_args);
 				}
 			};
-			
-			while (!m_job_pool.push_back(job_function))
+
+			while (!s_job_pool.push_back(job_function))
 			{
-				m_wake_condition.notify_one();
+				s_wake_condition.notify_one();
 				std::this_thread::yield();
 			}
-			
-			m_wake_condition.notify_one();
+
+			s_wake_condition.notify_one();
+
+			Logger::debug("Executing job with label id '{}'", s_current_label - group_index);
 		}
 	}
 
-	auto JobSystem::busy() const -> bool
+	auto JobSystem::busy() -> bool
 	{
-		return m_finished_label.load() < m_current_label;
+		return s_finished_label.load() < s_current_label;
 	}
 
 	auto JobSystem::wait() -> void
 	{
 		while (busy())
 		{
-			m_wake_condition.notify_one();
+			s_wake_condition.notify_one();
 			std::this_thread::yield();
 		}
 	}
-} // namespace HyperCore
+} // namespace HyperEngine

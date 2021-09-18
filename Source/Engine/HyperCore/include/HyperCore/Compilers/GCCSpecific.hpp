@@ -7,15 +7,26 @@
 #pragma once
 
 #if !defined(__GNUC__) && !defined(__GNUG__)
-#	error This file should only be included on gcc compilers
+#	error This file should only be included in g++ compiler
 #endif
 
 #define HYPERENGINE_COMPILER_GNU 1
 
-#define HYPERENGINE_COMPILER_PUSH_WARNING _Pragma("GCC diagnostic push")
-#define HYPERENGINE_COMPILER_POP_WARNING _Pragma("GCC diagnostic pop")
-#define HYPERENGINE_COMPILER_PUSH_ANONYMOUS_STRUCT _Pragma("GCC diagnostic ignored \"-Wpedantic\"")
+#define HYPERENGINE_DISABLE_WARNINGS() _Pragma("clang diagnostic push")
+#define HYPERENGINE_RESTORE_WARNINGS() _Pragma("clang diagnostic pop")
 
-#define HYPERENGINE_FUNCTION_SIGNATURE __PRETTY_FUNCTION__
+#define HYPERENGINE_DISABLE_WARNING_ANONYMOUS_STRUCT() \
+	HYPERENGINE_DISABLE_WARNINGS()                     \
+	_Pragma("GCC diagnostic ignored \"-Wpedantic\"")
+
+#define HYPERENGINE_RESTORE_WARNING_ANONYMOUS_STRUCT() \
+	HYPERENGINE_RESTORE_WARNINGS()
+
+#define HYPERENGINE_SHARED_EXPORT __attribute__((visibility("default")))
+#define HYPERENGINE_SHARED_IMPORT __attribute__((visibility("hidden")))
 
 #define HYPERENGINE_ALIGN(bytes) __attribute__((aligned(bytes)))
+#define HYPERENGINE_FORCE_INLINE __attribute__((noinline))
+#define HYPERENGINE_NO_INLINE __attribute__((always_inline))
+
+#define HYPERENGINE_FUNCTION_SIGNATURE __PRETTY_FUNCTION__

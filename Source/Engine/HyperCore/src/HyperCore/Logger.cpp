@@ -11,7 +11,7 @@
 #include <fmt/chrono.h>
 #include <fmt/color.h>
 
-namespace HyperCore
+namespace HyperEngine
 {
 #if HYPERENGINE_DEBUG
 	Logger::Level Logger::s_log_level = Logger::Level::Trace;
@@ -19,7 +19,7 @@ namespace HyperCore
 	Logger::Level Logger::s_log_level = Logger::Level::Fatal;
 #endif
 
-	auto Logger::internal_log(Level level, std::string_view string) -> void
+	auto Logger::internal_log(const Level level, const std::string_view string) -> void
 	{
 		const auto level_color = [&level]() -> fmt::color
 		{
@@ -60,10 +60,19 @@ namespace HyperCore
 		}();
 
 		fmt::print(
-			fmt::fg(level_color),
-			"[ {:%H:%M:%S} | {} ] {}\n",
-			fmt::localtime(std::time(nullptr)),
-			level_name,
+			"{} | {}: {}\n",
+			fmt::format(fmt::fg(fmt::color::dark_gray), "{:%H:%M:%S}", fmt::localtime(std::time(nullptr))),
+			fmt::format(fmt::fg(level_color), level_name),
 			string);
 	}
-} // namespace HyperCore
+	
+	auto Logger::set_level(const Logger::Level log_level) -> void
+	{
+		s_log_level = log_level;
+	}
+	
+	auto Logger::level() -> Logger::Level
+	{
+		return s_log_level;
+	}
+} // namespace HyperEngine

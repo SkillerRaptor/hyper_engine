@@ -17,7 +17,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace HyperGame
+namespace HyperEngine
 {
 	class Registry
 	{
@@ -35,16 +35,16 @@ namespace HyperGame
 			{
 				m_component_pools[component_id] = std::make_unique<ComponentPool<T>>();
 			}
-			
+
 			if (has_component<T>(entity))
 			{
-				HyperCore::Logger::fatal("Failed to add component to entity, which already has the component");
+				Logger::fatal("Failed to add component to entity, which already has the component");
 				HYPERENGINE_ASSERT_NOT_REACHED();
 			}
-			
+
 			auto component_pool = static_cast<ComponentPool<T>*>(m_component_pools[component_id].get());
 			auto& component = component_pool->add_component(entity, std::forward<Args>(args)...);
-			
+
 			return component;
 		}
 
@@ -53,12 +53,12 @@ namespace HyperGame
 		{
 			if (!has_component<T>(entity))
 			{
-				HyperCore::Logger::fatal("Failed to remove component from entity, which doesn't has the component");
+				Logger::fatal("Failed to remove component from entity, which doesn't has the component");
 				HYPERENGINE_ASSERT_NOT_REACHED();
 			}
-			
+
 			constexpr auto component_id = ComponentType<T>::id();
-			
+
 			auto component_pool = static_cast<ComponentPool<T>*>(m_component_pools[component_id].get());
 			component_pool->remove_component(entity);
 			return true;
@@ -72,9 +72,9 @@ namespace HyperGame
 			{
 				return false;
 			}
-			
+
 			constexpr auto component_id = ComponentType<T>::id();
-			
+
 			auto component_pool = static_cast<ComponentPool<T>*>(m_component_pools[component_id].get());
 			return component_pool->has_component(entity);
 		}
@@ -84,12 +84,12 @@ namespace HyperGame
 		{
 			if (!has_component<T>(entity))
 			{
-				HyperCore::Logger::fatal("Failed to get component from entity, which doesn't has the component");
+				Logger::fatal("Failed to get component from entity, which doesn't has the component");
 				HYPERENGINE_ASSERT_NOT_REACHED();
 			}
-			
+
 			constexpr auto component_id = ComponentType<T>::id();
-			
+
 			auto component_pool = static_cast<ComponentPool<T>*>(m_component_pools[component_id].get());
 			return component_pool->get_component(entity);
 		}
@@ -101,7 +101,7 @@ namespace HyperGame
 	private:
 		std::vector<Entity> m_entities{};
 		Entity m_available_entity{ g_null_entity };
-		
+
 		std::unordered_map<uint32_t, std::unique_ptr<IComponentPool>> m_component_pools{};
 	};
-} // namespace HyperGame
+} // namespace HyperEngine

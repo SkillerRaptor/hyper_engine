@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace HyperResource
+namespace HyperEngine
 {
 	class ShaderCompiler
 	{
@@ -18,8 +18,8 @@ namespace HyperResource
 		static auto terminate() -> void;
 
 		static auto compile_shader_to_spirv(const std::string& shader_path) -> std::vector<uint32_t>;
-		
+
 	private:
 		static bool s_initialized;
 	};
-} // namespace HyperResource
+} // namespace HyperEngine

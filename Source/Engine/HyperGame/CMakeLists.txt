@@ -8,10 +8,12 @@
 # HyperGame
 #-------------------------------------------------------------------------------------------
 set(SOURCES
+        src/HyperGame/GameModule.cpp
         src/HyperGame/EntitySystem/Registry.cpp
         src/HyperGame/EventSystem/EventManager.cpp)
 
 set(HEADERS
+        include/HyperGame/GameModule.hpp
         include/HyperGame/MouseButton.hpp
         include/HyperGame/EntitySystem/ComponentPool.hpp
         include/HyperGame/EntitySystem/Components.hpp
@@ -27,7 +29,7 @@ set(HEADERS
         include/HyperGame/EventSystem/Events/MouseEvents.hpp
         include/HyperGame/EventSystem/Events/WindowEvents.hpp)
 
-hyperengine_define_module(HyperGame)
+hyperengine_create_module(HyperGame)
 target_link_libraries(
         HyperGame
         PUBLIC

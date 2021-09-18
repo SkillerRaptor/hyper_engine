@@ -9,11 +9,9 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/main.cpp
-        src/HyperEditor/DiscordPresence.cpp
         src/HyperEditor/Editor.cpp)
 
 set(HEADERS
-        include/HyperEditor/DiscordPresence.hpp
         include/HyperEditor/Editor.hpp)
 
 hyperengine_define_executable(HyperEditor)
@@ -22,18 +20,9 @@ hyperengine_set_working_directory(HyperEditor)
 target_link_libraries(
         HyperEditor
         PRIVATE
-        DiscordGameSDK
         HyperEngine)
 
-if ("${HYPERENGINE_ARCH}" STREQUAL "Windows")
-    set(DISCORD_GAME_SDK "${CMAKE_SOURCE_DIR}/Source/ThirdParty/DiscordGameSDK/lib/discord_game_sdk.dll")
-elseif ("${HYPERENGINE_ARCH}" STREQUAL "Linux")
-    set(DISCORD_GAME_SDK "${CMAKE_SOURCE_DIR}/Source/ThirdParty/DiscordGameSDK/lib/libdiscord_game_sdk.so")
-endif ()
-
-hyperengine_copy_file_post_build(HyperEditor ${DISCORD_GAME_SDK})
 hyperengine_copy_folder_post_build(HyperEditor ${CMAKE_CURRENT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:HyperEditor>/assets)
 
 hyperengine_move_target(HyperEditor HyperEditor)
-hyperengine_move_file(HyperEditor ${DISCORD_GAME_SDK} HyperEditor)
 hyperengine_move_folder(HyperEditor ${CMAKE_CURRENT_SOURCE_DIR}/assets HyperEditor/assets)

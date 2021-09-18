@@ -13,7 +13,7 @@ set(SOURCES
 set(HEADERS
         include/HyperRendering/RenderEngine.hpp)
 
-hyperengine_define_module(HyperRendering)
+hyperengine_create_module(HyperRendering)
 target_link_libraries(
         HyperRendering
         PUBLIC

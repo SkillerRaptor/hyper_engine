@@ -27,12 +27,12 @@ namespace HyperRendering
 		switch (m_window.graphics_api())
 		{
 #if HYPERENGINE_BUILD_OPENGL
-		case HyperPlatform::GraphicsApi::OpenGL:
+		case HyperPlatform::RendererType::OpenGL:
 			m_graphics_context = std::make_unique<HyperOpenGL::GraphicsContext>(m_event_manager, m_window);
 			break;
 #endif
 #if HYPERENGINE_BUILD_VULKAN
-		case HyperPlatform::GraphicsApi::Vulkan:
+		case HyperPlatform::RendererType::Vulkan:
 			m_graphics_context = std::make_unique<HyperVulkan::GraphicsContext>(m_event_manager, m_window);
 			break;
 #endif

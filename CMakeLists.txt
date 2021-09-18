@@ -14,7 +14,6 @@ project(HyperEngine LANGUAGES C CXX)
 # Modules
 #-------------------------------------------------------------------------------------------
 include(Development/CMake/StandardProjectSettings.cmake)
-include(Development/CMake/PreventInSourceBuilds.cmake)
 
 #-------------------------------------------------------------------------------------------
 # Project Libraries
@@ -27,11 +26,6 @@ add_library(ProjectWarnings INTERFACE)
 #-------------------------------------------------------------------------------------------
 # Standard Settings
 #-------------------------------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
 include(Development/CMake/Cache.cmake)
 
 include(Development/CMake/CompilerSettings.cmake)
@@ -68,9 +62,9 @@ set(CONAN_LIBRARIES
         glad/0.1.34
         glfw/3.3.4
         glslang/11.5.0
-        vulkan-headers/1.2.184
+        vulkan-headers/1.2.190
         vulkan-memory-allocator/2.3.0
-        volk/1.2.170)
+        volk/1.2.190)
 
 set(CONAN_OPTIONS
         glad:gl_profile=core)
@@ -82,18 +76,6 @@ run_conan()
 # Binaries
 #-------------------------------------------------------------------------------------------
 hyperengine_make_directory(Binary)
-
-#-------------------------------------------------------------------------------------------
-# Options
-#-------------------------------------------------------------------------------------------
-option(ENABLE_TESTING "Enable Test Builds" ON)
-
-#-------------------------------------------------------------------------------------------
-# Tests
-#-------------------------------------------------------------------------------------------
-if (ENABLE_TESTING)
-    enable_testing()
-endif ()
 
 #-------------------------------------------------------------------------------------------
 # Source
