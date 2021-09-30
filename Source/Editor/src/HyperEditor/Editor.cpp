@@ -8,10 +8,6 @@
 
 namespace HyperEditor
 {
-	Editor::Editor()
-	{
-	}
-
 	auto Editor::startup() -> void
 	{
 	}
@@ -19,7 +15,7 @@ namespace HyperEditor
 	auto Editor::shutdown() -> void
 	{
 	}
-	
+
 	auto Editor::update() -> void
 	{
 	}

@@ -12,9 +12,6 @@ namespace HyperEditor
 {
 	class Editor final : public HyperEngine::IApplication
 	{
-	public:
-		Editor();
-
 	private:
 		auto startup() -> void override;
 		auto shutdown() -> void override;

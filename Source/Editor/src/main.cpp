@@ -10,5 +10,5 @@
 
 auto main() -> int
 {
-	 return HyperEngine::Launcher::launch<HyperEditor::Editor>();
+	return HyperEngine::CLauncher::launch<HyperEditor::Editor>();
 }
