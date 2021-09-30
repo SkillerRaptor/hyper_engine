@@ -7,7 +7,6 @@
 #include "HyperEngine/EngineLoop.hpp"
 
 #include "HyperEngine/IApplication.hpp"
-#include "HyperEngine/Core/Assertion.hpp"
 
 namespace HyperEngine
 {
