@@ -21,7 +21,7 @@ namespace HyperEngine
 		CEngineLoop engine_loop{};
 		if (!engine_loop.create(engine_loop_description))
 		{
-			CLogger::fatal("CLauncher::launch_application(): Failed to create the engine loop");
+			CLogger::fatal("CLauncher::launch_application(): Failed to create engine loop");
 			return EXIT_FAILURE;
 		}
 

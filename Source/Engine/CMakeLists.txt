@@ -11,7 +11,8 @@ set(SOURCES
         src/HyperEngine/EngineLoop.cpp
         src/HyperEngine/IApplication.cpp
         src/HyperEngine/Launcher.cpp
-        src/HyperEngine/Core/Logger.cpp)
+        src/HyperEngine/Core/Logger.cpp
+        src/HyperEngine/Platform/Window.cpp)
 
 set(HEADERS
         include/HyperEngine/EngineLoop.hpp
@@ -21,6 +22,7 @@ set(HEADERS
         include/HyperEngine/Core/Assertion.hpp
         include/HyperEngine/Core/Bits.hpp
         include/HyperEngine/Core/Compilers.hpp
+        include/HyperEngine/Core/RenderingApi.hpp
         include/HyperEngine/Core/Hasher.hpp
         include/HyperEngine/Core/Logger.hpp
         include/HyperEngine/Core/Platform.hpp
@@ -31,6 +33,7 @@ set(HEADERS
         include/HyperEngine/Core/Compilers/MSVCSpecific.hpp
         include/HyperEngine/Core/Platform/LinuxSpecific.hpp
         include/HyperEngine/Core/Platform/WindowsSpecific.hpp
+        include/HyperEngine/Platform/Window.hpp
         include/HyperEngine/Math/Common.hpp
         include/HyperEngine/Math/Compare.hpp
         include/HyperEngine/Math/Constants.hpp
@@ -55,3 +58,17 @@ target_link_libraries(
         CONAN_PKG::vulkan-headers
         CONAN_PKG::vulkan-memory-allocator
         CONAN_PKG::volk)
+
+if (HYPERENGINE_BUILD_OPENGL)
+    target_compile_definitions(
+            HyperEngine
+            PRIVATE
+            HYPERENGINE_BUILD_OPENGL=1)
+endif ()
+
+if (HYPERENGINE_BUILD_VULKAN)
+    target_compile_definitions(
+            HyperEngine
+            PRIVATE
+            HYPERENGINE_BUILD_VULKAN=1)
+endif ()

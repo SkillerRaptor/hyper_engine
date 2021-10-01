@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "HyperEngine/Platform/Window.hpp"
+
 namespace HyperEngine
 {
 	class IApplication;
@@ -25,6 +27,9 @@ namespace HyperEngine
 
 	private:
 		IApplication* m_application{ nullptr };
+		
+		CWindow m_window{};
+		
 		bool m_running{ false };
 	};
 } // namespace HyperEngine
