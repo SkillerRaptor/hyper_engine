@@ -47,6 +47,7 @@ namespace HyperEngine
 		}
 
 		IContext::SDescription native_context_description{};
+		native_context_description.debug_mode = description.debug_mode;
 
 		if (!m_native_context->create(native_context_description))
 		{

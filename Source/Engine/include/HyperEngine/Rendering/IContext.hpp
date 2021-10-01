@@ -13,11 +13,12 @@ namespace HyperEngine
 	public:
 		struct SDescription
 		{
+			bool debug_mode{ false };
 		};
 
 	public:
 		virtual ~IContext() = default;
-		
+
 		virtual auto create(const SDescription& description) -> bool = 0;
 	};
 } // namespace HyperEngine

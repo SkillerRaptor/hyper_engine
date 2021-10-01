@@ -18,6 +18,7 @@ namespace HyperEngine
 		struct SDescription
 		{
 			ERenderingApi rendering_api{ ERenderingApi::None };
+			bool debug_mode{ false };
 		};
 
 	public:
@@ -27,6 +28,7 @@ namespace HyperEngine
 
 	private:
 		ERenderingApi m_rendering_api{ ERenderingApi::None };
+		
 		IContext* m_native_context{ nullptr };
 	};
 } // namespace HyperEngine

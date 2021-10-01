@@ -30,20 +30,16 @@ namespace HyperEngine::Vulkan
 
 	auto CContext::create(const CContext::SDescription& description) -> bool
 	{
-		HYPERENGINE_VARIABLE_NOT_USED(description);
-
 		if (volkInitialize() != VK_SUCCESS)
 		{
 			CLogger::fatal("CContext::create(): Failed to initialize volk");
 			return false;
 		}
 
-#if HYPERENGINE_DEBUG
-		if (check_validation_layers_support())
+		if (description.debug_mode && check_validation_layers_support())
 		{
 			m_validation_layers_enabled = true;
 		}
-#endif
 
 		if (!create_instance())
 		{
@@ -70,36 +66,31 @@ namespace HyperEngine::Vulkan
 		application_info.pEngineName = "HyperEngine";
 		application_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 		application_info.apiVersion = VK_API_VERSION_1_2;
-
+		
+		VkDebugUtilsMessengerCreateInfoEXT debug_messenger_create_info{};
+		debug_messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+		debug_messenger_create_info.pNext = nullptr;
+		debug_messenger_create_info.flags = 0;
+		debug_messenger_create_info.messageSeverity =
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+		debug_messenger_create_info.messageType =
+			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+		debug_messenger_create_info.pfnUserCallback = debug_callback;
+		debug_messenger_create_info.pUserData = nullptr;
+		
 		std::vector<const char*> required_extensions = request_required_extensions();
 
 		VkInstanceCreateInfo instance_create_info{};
 		instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-		instance_create_info.pNext = nullptr;
+		instance_create_info.pNext = m_validation_layers_enabled ? &debug_messenger_create_info : nullptr;
 		instance_create_info.flags = 0;
 		instance_create_info.pApplicationInfo = &application_info;
-		instance_create_info.enabledLayerCount = 0;
-		instance_create_info.ppEnabledLayerNames = nullptr;
+		instance_create_info.enabledLayerCount = static_cast<uint32_t>(m_validation_layers_enabled ? s_validation_layers.size() : 0);
+		instance_create_info.ppEnabledLayerNames = m_validation_layers_enabled ? s_validation_layers.data() : nullptr;
 		instance_create_info.enabledExtensionCount = static_cast<uint32_t>(required_extensions.size());
 		instance_create_info.ppEnabledExtensionNames = required_extensions.data();
-
-		VkDebugUtilsMessengerCreateInfoEXT debug_messenger_create_info{};
-		if (m_validation_layers_enabled)
-		{
-			debug_messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-			debug_messenger_create_info.messageSeverity =
-				VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-				VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-			debug_messenger_create_info.messageType =
-				VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-				VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-				VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-			debug_messenger_create_info.pfnUserCallback = debug_callback;
-
-			instance_create_info.pNext = &debug_messenger_create_info;
-			instance_create_info.enabledLayerCount = static_cast<uint32_t>(s_validation_layers.size());
-			instance_create_info.ppEnabledLayerNames = s_validation_layers.data();
-		}
 
 		if (vkCreateInstance(&instance_create_info, nullptr, &m_instance) != VK_SUCCESS)
 		{
@@ -116,14 +107,16 @@ namespace HyperEngine::Vulkan
 	{
 		VkDebugUtilsMessengerCreateInfoEXT debug_messenger_create_info{};
 		debug_messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+		debug_messenger_create_info.pNext = nullptr;
+		debug_messenger_create_info.flags = 0;
 		debug_messenger_create_info.messageSeverity =
 			VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
 			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 		debug_messenger_create_info.messageType =
-			VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
 			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
 			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 		debug_messenger_create_info.pfnUserCallback = debug_callback;
+		debug_messenger_create_info.pUserData = nullptr;
 
 		if (vkCreateDebugUtilsMessengerEXT(m_instance, &debug_messenger_create_info, nullptr, &m_debug_messenger) != VK_SUCCESS)
 		{

@@ -40,6 +40,12 @@ namespace HyperEngine
 		
 		CRenderContext::SDescription render_context_description{};
 		render_context_description.rendering_api = m_rendering_api;
+
+#if HYPERENGINE_DEBUG
+		render_context_description.debug_mode = true;
+#else
+		render_context_description.debug_mode = false;
+#endif
 		
 		if (!m_render_context.create(render_context_description))
 		{

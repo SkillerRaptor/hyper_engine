@@ -30,10 +30,10 @@ namespace HyperEngine
 	private:
 		IApplication* m_application{ nullptr };
 		
-		ERenderingApi m_rendering_api{ ERenderingApi::None };
+		bool m_running{ false };
+		
 		CWindow m_window{};
 		CRenderContext m_render_context{};
-		
-		bool m_running{ false };
+		ERenderingApi m_rendering_api{ ERenderingApi::None };
 	};
 } // namespace HyperEngine

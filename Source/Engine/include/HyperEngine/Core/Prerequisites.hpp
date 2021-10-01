@@ -6,6 +6,10 @@
 
 #pragma once
 
+#if !defined(_DEBUG) && !defined(ADEBUG) && !defined(NDEBUG)
+#   define NDEBUG
+#endif
+
 #ifndef NDEBUG
 #	define HYPERENGINE_DEBUG 1
 #else
