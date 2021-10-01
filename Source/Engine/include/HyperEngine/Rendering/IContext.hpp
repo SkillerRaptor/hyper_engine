@@ -8,18 +8,16 @@
 
 namespace HyperEngine
 {
-	enum class ERenderingApi
+	class IContext
 	{
-		None = 0,
-		OpenGL,
-		Vulkan,
+	public:
+		struct SDescription
+		{
+		};
 
-#if HYPERENGINE_BUILD_VULKAN
-		Current = Vulkan
-#elif HYPERENGINE_BUILD_OPENGL
-		Current = OpenGL
-#else
-		Current = None
-#endif
+	public:
+		virtual ~IContext() = default;
+		
+		virtual auto create(const SDescription& description) -> bool = 0;
 	};
 } // namespace HyperEngine

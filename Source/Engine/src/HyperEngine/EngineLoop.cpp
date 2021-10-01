@@ -20,11 +20,13 @@ namespace HyperEngine
 		}
 
 		m_application = description.application;
+		m_rendering_api = ERenderingApi::Current;
 
 		CWindow::SDescription window_description{};
 		window_description.title = "HyperEditor";
 		window_description.width = 1280;
 		window_description.height = 720;
+		window_description.rendering_api = m_rendering_api;
 		window_description.window_close_callback = [this]()
 		{
 			m_running = false;
@@ -33,6 +35,15 @@ namespace HyperEngine
 		if (!m_window.create(window_description))
 		{
 			CLogger::fatal("CEngineLoop::create(): Failed to create window");
+			return false;
+		}
+		
+		CRenderContext::SDescription render_context_description{};
+		render_context_description.rendering_api = m_rendering_api;
+		
+		if (!m_render_context.create(render_context_description))
+		{
+			CLogger::fatal("CEngineLoop::create(): Failed to create render context");
 			return false;
 		}
 

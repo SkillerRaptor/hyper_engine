@@ -24,8 +24,8 @@ namespace HyperEngine
 			std::string title;
 			size_t width{ 0 };
 			size_t height{ 0 };
-			
-			RenderingApi rendering_api{ RenderingApi::None };
+
+			ERenderingApi rendering_api{ ERenderingApi::None };
 			
 			std::function<void(int32_t, bool)> key_pressed_callback{};
 			std::function<void(int32_t)> key_released_callback{};

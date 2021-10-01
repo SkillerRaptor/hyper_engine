@@ -6,7 +6,9 @@
 
 #pragma once
 
+#include "HyperEngine/Core/RenderingApi.hpp"
 #include "HyperEngine/Platform/Window.hpp"
+#include "HyperEngine/Rendering/RenderContext.hpp"
 
 namespace HyperEngine
 {
@@ -28,7 +30,9 @@ namespace HyperEngine
 	private:
 		IApplication* m_application{ nullptr };
 		
+		ERenderingApi m_rendering_api{ ERenderingApi::None };
 		CWindow m_window{};
+		CRenderContext m_render_context{};
 		
 		bool m_running{ false };
 	};

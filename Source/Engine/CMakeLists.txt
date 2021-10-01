@@ -7,14 +7,15 @@
 #-------------------------------------------------------------------------------------------
 # HyperEngine
 #-------------------------------------------------------------------------------------------
-set(SOURCES
+set(ENGINE_SOURCES
         src/HyperEngine/EngineLoop.cpp
         src/HyperEngine/IApplication.cpp
         src/HyperEngine/Launcher.cpp
         src/HyperEngine/Core/Logger.cpp
-        src/HyperEngine/Platform/Window.cpp)
+        src/HyperEngine/Platform/Window.cpp
+        src/HyperEngine/Rendering/RenderContext.cpp)
 
-set(HEADERS
+set(ENGINE_HEADERS
         include/HyperEngine/EngineLoop.hpp
         include/HyperEngine/IApplication.hpp
         include/HyperEngine/Launcher.hpp
@@ -34,6 +35,8 @@ set(HEADERS
         include/HyperEngine/Core/Platform/LinuxSpecific.hpp
         include/HyperEngine/Core/Platform/WindowsSpecific.hpp
         include/HyperEngine/Platform/Window.hpp
+        include/HyperEngine/Rendering/IContext.hpp
+        include/HyperEngine/Rendering/RenderContext.hpp
         include/HyperEngine/Math/Common.hpp
         include/HyperEngine/Math/Compare.hpp
         include/HyperEngine/Math/Constants.hpp
@@ -47,23 +50,49 @@ set(HEADERS
         include/HyperEngine/Math/Vector3.hpp
         include/HyperEngine/Math/Vector4.hpp)
 
+if (HYPERENGINE_BUILD_OPENGL)
+    set(OPENGL_SOURCES
+            )
+
+    set(OPENGL_HEADERS
+            )
+endif ()
+
+if (HYPERENGINE_BUILD_VULKAN)
+    set(VULKAN_SOURCES
+            src/HyperEngine/Rendering/Vulkan/Context.cpp)
+
+    set(VULKAN_HEADERS
+            include/HyperEngine/Rendering/Vulkan/Context.hpp)
+endif ()
+
+set(SOURCES
+        ${ENGINE_SOURCES}
+        ${OPENGL_SOURCES}
+        ${VULKAN_SOURCES})
+
+set(HEADERS
+        ${ENGINE_HEADERS}
+        ${OPENGL_HEADERS}
+        ${VULKAN_HEADERS})
+
 hyperengine_create_library(HyperEngine)
 target_link_libraries(
         HyperEngine
         PUBLIC
         CONAN_PKG::fmt
-        CONAN_PKG::glad
         CONAN_PKG::glfw
-        CONAN_PKG::glslang
-        CONAN_PKG::vulkan-headers
-        CONAN_PKG::vulkan-memory-allocator
-        CONAN_PKG::volk)
+        CONAN_PKG::glslang)
 
 if (HYPERENGINE_BUILD_OPENGL)
     target_compile_definitions(
             HyperEngine
             PRIVATE
             HYPERENGINE_BUILD_OPENGL=1)
+    target_link_libraries(
+            HyperEngine
+            PUBLIC
+            CONAN_PKG::glad)
 endif ()
 
 if (HYPERENGINE_BUILD_VULKAN)
@@ -71,4 +100,10 @@ if (HYPERENGINE_BUILD_VULKAN)
             HyperEngine
             PRIVATE
             HYPERENGINE_BUILD_VULKAN=1)
+    target_link_libraries(
+            HyperEngine
+            PUBLIC
+            CONAN_PKG::vulkan-headers
+            CONAN_PKG::vulkan-memory-allocator
+            CONAN_PKG::volk)
 endif ()
