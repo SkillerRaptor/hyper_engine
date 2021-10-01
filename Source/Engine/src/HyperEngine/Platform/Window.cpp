@@ -128,8 +128,8 @@ namespace HyperEngine
 			[](GLFWwindow* window, int32_t width, int32_t height)
 			{
 				SInfo* window_info = reinterpret_cast<SInfo*>(glfwGetWindowUserPointer(window));
-				window_info->width = width;
-				window_info->height = height;
+				window_info->width = static_cast<size_t>(width);
+				window_info->height = static_cast<size_t>(height);
 
 				if (window_info->window_resize_callback != nullptr)
 				{
@@ -142,8 +142,6 @@ namespace HyperEngine
 			[](GLFWwindow* window, int32_t width, int32_t height)
 			{
 				SInfo* window_info = reinterpret_cast<SInfo*>(glfwGetWindowUserPointer(window));
-				window_info->width = width;
-				window_info->height = height;
 
 				if (window_info->window_framebuffer_resize_callback != nullptr)
 				{
