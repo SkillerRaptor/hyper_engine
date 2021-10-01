@@ -58,6 +58,7 @@ jobs:
         with:
           path: |
             ${{ env.conan_user_home }}
+            ~/.cache/pip
           key: ${{ runner.os }}-${{ matrix.config.build_type }}-${{ hashFiles('CMakeLists.txt') }}-${{ hashFiles('Development/CMake/Conan.cmake') }}
 
       - name: Update environment
@@ -76,8 +77,14 @@ jobs:
       - name: Install Conan
         shell: bash
         run: |
-          python3 -m pip install --upgrade pip setuptools
-          python3 -m pip install conan
+          pip3 install wheel setuptools gcovr
+          pip3 install conan --upgrade
+
+      - name: Install / Configure dependencies
+        shell: bash
+        run: |
+          sudo update-alternatives --install /usr/bin/conan conan $HOME/.local/bin/conan 100
+          sudo update-alternatives --config conan
 
       - name: Install Vulkan SDK
         run: |
