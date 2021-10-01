@@ -31,7 +31,7 @@ namespace HyperEngine
 			CLogger::fatal("CWindow::create(): The description height is 0");
 			return false;
 		}
-		
+
 		if (description.rendering_api == ERenderingApi::None)
 		{
 			CLogger::fatal("CWindow::create(): The description rendering api is not specified");
@@ -55,20 +55,24 @@ namespace HyperEngine
 		m_info.window_moved_callback = description.window_moved_callback;
 
 		glfwInit();
-		
+
 		switch (description.rendering_api)
 		{
+#if HYPERENGINE_BUILD_OPENGL
 		case ERenderingApi::OpenGL:
 			CLogger::fatal("CWindow::create(): The OpenGL window is not implemented yet");
 			return false;
+#endif
+#if HYPERENGINE_BUILD_VULKAN
 		case ERenderingApi::Vulkan:
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			break;
+#endif
 		default:
-			CLogger::fatal("CWindow::create(): Failed to identify rendering api");
+			CLogger::fatal("CWindow::create(): The specified rendering api is not available");
 			return false;
 		}
-		
+
 		m_native_window = glfwCreateWindow(static_cast<int>(m_info.width), static_cast<int>(m_info.height), m_title.c_str(), nullptr, nullptr);
 		if (m_native_window == nullptr)
 		{
@@ -81,7 +85,7 @@ namespace HyperEngine
 
 		return true;
 	}
-	
+
 	auto CWindow::create_callbacks() -> void
 	{
 		glfwSetCursorPosCallback(

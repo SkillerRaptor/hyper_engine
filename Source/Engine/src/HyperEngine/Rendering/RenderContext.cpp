@@ -31,14 +31,18 @@ namespace HyperEngine
 
 		switch (m_rendering_api)
 		{
+#if HYPERENGINE_BUILD_OPENGL
 		case ERenderingApi::OpenGL:
 			CLogger::fatal("CRenderContext::create(): The OpenGL context is not implemented yet");
 			return false;
+#endif
+#if HYPERENGINE_BUILD_VULKAN
 		case ERenderingApi::Vulkan:
 			m_native_context = new Vulkan::CContext();
 			break;
+#endif
 		default:
-			CLogger::fatal("CRenderContext::create(): Failed to identify rendering api");
+			CLogger::fatal("CRenderContext::create(): The specified rendering api is not available");
 			return false;
 		}
 
