@@ -75,7 +75,6 @@ cmake --build .
 ## Screenshots
 
 ## Dependencies
-- [Catch2](https://github.com/catchorg/Catch2/blob/devel/LICENSE.txt) Copyright (c) Boost Software License 1.0, Catch2 present
 - [fmt](https://github.com/fmtlib/fmt/blob/master/LICENSE.rst) Copyright (c) MIT License, Victor Zverovich 2012-present
 - [glad](https://github.com/Dav1dde/glad/blob/master/LICENSE) Copyright (c) MIT License, David Herberth 2013-2021
 - [glfw](https://github.com/glfw/glfw/blob/master/LICENSE.md) Copyright (c) zlib License, Marcus Geelnard 2002-2006 & Camilla Löwy 2006-2019
