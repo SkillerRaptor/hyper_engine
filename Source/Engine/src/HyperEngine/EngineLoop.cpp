@@ -39,6 +39,7 @@ namespace HyperEngine
 		}
 		
 		CRenderContext::SDescription render_context_description{};
+		render_context_description.window = m_window.native_window();
 		render_context_description.rendering_api = m_rendering_api;
 		render_context_description.debug_mode = false;
 

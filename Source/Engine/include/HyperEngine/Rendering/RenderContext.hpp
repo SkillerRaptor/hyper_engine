@@ -8,6 +8,8 @@
 
 #include "HyperEngine/Core/RenderingApi.hpp"
 
+struct GLFWwindow;
+
 namespace HyperEngine
 {
 	class IContext;
@@ -17,6 +19,8 @@ namespace HyperEngine
 	public:
 		struct SDescription
 		{
+			GLFWwindow* window{ nullptr };
+			
 			ERenderingApi rendering_api{ ERenderingApi::None };
 			bool debug_mode{ false };
 		};

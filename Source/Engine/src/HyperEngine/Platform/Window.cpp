@@ -244,6 +244,11 @@ namespace HyperEngine
 		return m_info.height;
 	}
 
+	auto CWindow::native_window() noexcept -> GLFWwindow*
+	{
+		return m_native_window;
+	}
+
 	auto CWindow::current_time() const noexcept -> float
 	{
 		return static_cast<float>(glfwGetTime());

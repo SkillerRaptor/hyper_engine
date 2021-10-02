@@ -8,11 +8,12 @@
 
 #include "HyperEngine/Core/Logger.hpp"
 
+#include <set>
 #include <vector>
 
 namespace HyperEngine::Vulkan
 {
-	CDevice::~CDevice()
+	auto CDevice::destroy() -> void
 	{
 		if (m_device != VK_NULL_HANDLE)
 		{
@@ -28,7 +29,14 @@ namespace HyperEngine::Vulkan
 			return false;
 		}
 
+		if (description.surface == VK_NULL_HANDLE)
+		{
+			CLogger::fatal("CDevice::create(): The description vulkan surface is null");
+			return false;
+		}
+
 		m_instance = description.instance;
+		m_surface = description.surface;
 
 		if (!select_physical_device())
 		{
@@ -80,15 +88,27 @@ namespace HyperEngine::Vulkan
 	auto CDevice::create_logical_device() -> bool
 	{
 		const SQueueFamilies queue_families = find_queue_families(m_physical_device);
-		const float queue_priority = 1.0F;
 
-		VkDeviceQueueCreateInfo device_queue_create_info{};
-		device_queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		device_queue_create_info.pNext = nullptr;
-		device_queue_create_info.flags = 0;
-		device_queue_create_info.queueFamilyIndex = queue_families.graphics_family.value();
-		device_queue_create_info.queueCount = 1;
-		device_queue_create_info.pQueuePriorities = &queue_priority;
+		std::vector<VkDeviceQueueCreateInfo> device_queue_create_infos{};
+
+		const float queue_priority = 1.0F;
+		const std::set<uint32_t> unique_queue_families = {
+			queue_families.graphics_family.value(),
+			queue_families.present_family.value()
+		};
+		
+		for (uint32_t queue_family : unique_queue_families)
+		{
+			VkDeviceQueueCreateInfo device_queue_create_info{};
+			device_queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			device_queue_create_info.pNext = nullptr;
+			device_queue_create_info.flags = 0;
+			device_queue_create_info.queueFamilyIndex = queue_family;
+			device_queue_create_info.queueCount = 1;
+			device_queue_create_info.pQueuePriorities = &queue_priority;
+			
+			device_queue_create_infos.emplace_back(device_queue_create_info);
+		}
 
 		VkPhysicalDeviceFeatures physical_device_features{};
 		physical_device_features.robustBufferAccess = VK_FALSE;
@@ -151,8 +171,8 @@ namespace HyperEngine::Vulkan
 		device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		device_create_info.pNext = nullptr;
 		device_create_info.flags = 0;
-		device_create_info.queueCreateInfoCount = 1;
-		device_create_info.pQueueCreateInfos = &device_queue_create_info;
+		device_create_info.queueCreateInfoCount = static_cast<uint32_t>(device_queue_create_infos.size());
+		device_create_info.pQueueCreateInfos = device_queue_create_infos.data();
 		device_create_info.enabledLayerCount = 0;
 		device_create_info.ppEnabledLayerNames = nullptr;
 		device_create_info.enabledExtensionCount = 0;
@@ -164,8 +184,9 @@ namespace HyperEngine::Vulkan
 			CLogger::fatal("CDevice::create_logical_device(): Failed to create vulkan logical device");
 			return false;
 		}
-		
+
 		vkGetDeviceQueue(m_device, queue_families.graphics_family.value(), 0, &m_queues.graphics_queue);
+		vkGetDeviceQueue(m_device, queue_families.present_family.value(), 0, &m_queues.present_queue);
 
 		return true;
 	}
@@ -174,7 +195,7 @@ namespace HyperEngine::Vulkan
 	{
 		const CDevice::SQueueFamilies queue_families = find_queue_families(physical_device);
 
-		return queue_families.graphics_family.has_value();
+		return queue_families.graphics_family.has_value() && queue_families.present_family.has_value();
 	}
 
 	auto CDevice::find_queue_families(VkPhysicalDevice physical_device) const -> CDevice::SQueueFamilies
@@ -200,7 +221,15 @@ namespace HyperEngine::Vulkan
 				queue_families.graphics_family = i;
 			}
 
-			if (queue_families.graphics_family.has_value())
+			VkBool32 present_queue_support = false;
+			vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, m_surface, &present_queue_support);
+
+			if (present_queue_support)
+			{
+				queue_families.present_family = i;
+			}
+
+			if (queue_families.graphics_family.has_value() && queue_families.present_family.has_value())
 			{
 				return queue_families;
 			}

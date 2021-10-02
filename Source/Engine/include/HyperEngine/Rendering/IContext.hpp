@@ -6,6 +6,8 @@
 
 #pragma once
 
+struct GLFWwindow;
+
 namespace HyperEngine
 {
 	class IContext
@@ -13,6 +15,8 @@ namespace HyperEngine
 	public:
 		struct SDescription
 		{
+			GLFWwindow* window{ nullptr };
+			
 			bool debug_mode{ false };
 		};
 

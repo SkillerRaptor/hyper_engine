@@ -75,6 +75,7 @@ namespace HyperEngine
 		auto set_height(size_t height) -> void;
 		[[nodiscard]] auto height() const noexcept -> size_t;
 		
+		[[nodiscard]] auto native_window() noexcept -> GLFWwindow*;
 		[[nodiscard]] auto current_time() const noexcept -> float;
 
 	private:
