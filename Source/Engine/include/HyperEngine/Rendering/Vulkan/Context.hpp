@@ -10,6 +10,7 @@
 #include "HyperEngine/Rendering/IContext.hpp"
 #include "HyperEngine/Rendering/Vulkan/Device.hpp"
 #include "HyperEngine/Rendering/Vulkan/Surface.hpp"
+#include "HyperEngine/Rendering/Vulkan/Swapchain.hpp"
 
 #include <volk.h>
 
@@ -20,7 +21,7 @@ namespace HyperEngine::Vulkan
 {
 	class CContext : public IContext
 	{
-	public:
+	private:
 		static constexpr std::array<const char*, 1> s_validation_layers = { "VK_LAYER_KHRONOS_validation" };
 
 	public:
@@ -43,6 +44,7 @@ namespace HyperEngine::Vulkan
 
 		CSurface m_surface{};
 		CDevice m_device{};
+		CSwapchain m_swapchain{};
 
 		bool m_validation_layers_enabled{ false };
 	};

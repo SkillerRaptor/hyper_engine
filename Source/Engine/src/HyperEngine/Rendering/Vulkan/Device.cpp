@@ -96,7 +96,7 @@ namespace HyperEngine::Vulkan
 			queue_families.graphics_family.value(),
 			queue_families.present_family.value()
 		};
-		
+
 		for (uint32_t queue_family : unique_queue_families)
 		{
 			VkDeviceQueueCreateInfo device_queue_create_info{};
@@ -106,7 +106,7 @@ namespace HyperEngine::Vulkan
 			device_queue_create_info.queueFamilyIndex = queue_family;
 			device_queue_create_info.queueCount = 1;
 			device_queue_create_info.pQueuePriorities = &queue_priority;
-			
+
 			device_queue_create_infos.emplace_back(device_queue_create_info);
 		}
 
@@ -175,8 +175,8 @@ namespace HyperEngine::Vulkan
 		device_create_info.pQueueCreateInfos = device_queue_create_infos.data();
 		device_create_info.enabledLayerCount = 0;
 		device_create_info.ppEnabledLayerNames = nullptr;
-		device_create_info.enabledExtensionCount = 0;
-		device_create_info.ppEnabledExtensionNames = nullptr;
+		device_create_info.enabledExtensionCount = static_cast<uint32_t>(s_device_extensions.size());
+		device_create_info.ppEnabledExtensionNames = s_device_extensions.data();
 		device_create_info.pEnabledFeatures = &physical_device_features;
 
 		if (vkCreateDevice(m_physical_device, &device_create_info, nullptr, &m_device) != VK_SUCCESS)
@@ -194,8 +194,21 @@ namespace HyperEngine::Vulkan
 	auto CDevice::is_physical_device_suitable(VkPhysicalDevice physical_device) const -> bool
 	{
 		const CDevice::SQueueFamilies queue_families = find_queue_families(physical_device);
+		const bool extensions_supported = check_device_extension_support(physical_device);
 
-		return queue_families.graphics_family.has_value() && queue_families.present_family.has_value();
+		bool swapchain_compatible = false;
+		if (extensions_supported)
+		{
+			const SSwapchainSupportDetails swapchain_support_details = query_swapchain_support(physical_device);
+			swapchain_compatible =
+				!swapchain_support_details.surface_formats.empty() &&
+				!swapchain_support_details.present_modes.empty();
+		}
+
+		return queue_families.graphics_family.has_value() &&
+			   queue_families.present_family.has_value() &&
+			   extensions_supported &&
+			   swapchain_compatible;
 	}
 
 	auto CDevice::find_queue_families(VkPhysicalDevice physical_device) const -> CDevice::SQueueFamilies
@@ -238,5 +251,60 @@ namespace HyperEngine::Vulkan
 		}
 
 		return queue_families;
+	}
+
+	auto CDevice::check_device_extension_support(VkPhysicalDevice physical_device) const -> bool
+	{
+		uint32_t available_extension_properties_count = 0;
+		vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &available_extension_properties_count, nullptr);
+
+		std::vector<VkExtensionProperties> available_extension_properties(available_extension_properties_count);
+		vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &available_extension_properties_count, available_extension_properties.data());
+
+		std::set<std::string> required_extensions{ s_device_extensions.begin(), s_device_extensions.end() };
+
+		for (const VkExtensionProperties& extension : available_extension_properties)
+		{
+			required_extensions.erase(extension.extensionName);
+		}
+
+		return required_extensions.empty();
+	}
+
+	auto CDevice::query_swapchain_support(VkPhysicalDevice physical_device) const -> CDevice::SSwapchainSupportDetails
+	{
+		CDevice::SSwapchainSupportDetails swapchain_support_details{};
+
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, m_surface, &swapchain_support_details.surface_capabilities);
+
+		uint32_t available_surface_format_count = 0;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, m_surface, &available_surface_format_count, nullptr);
+
+		if (available_surface_format_count != 0)
+		{
+			swapchain_support_details.surface_formats.resize(available_surface_format_count);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, m_surface, &available_surface_format_count, swapchain_support_details.surface_formats.data());
+		}
+
+		uint32_t available_surface_present_modes_count = 0;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, m_surface, &available_surface_present_modes_count, nullptr);
+
+		if (available_surface_present_modes_count != 0)
+		{
+			swapchain_support_details.present_modes.resize(available_surface_present_modes_count);
+			vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, m_surface, &available_surface_present_modes_count, swapchain_support_details.present_modes.data());
+		}
+
+		return swapchain_support_details;
+	}
+	
+	auto CDevice::physical_device() const noexcept -> VkPhysicalDevice
+	{
+		return m_physical_device;
+	}
+	
+	auto CDevice::device() const noexcept -> VkDevice
+	{
+		return m_device;
 	}
 } // namespace HyperEngine::Vulkan

@@ -15,6 +15,7 @@ namespace HyperEngine::Vulkan
 {
 	CContext::~CContext()
 	{
+		m_swapchain.destroy();
 		m_device.destroy();
 		m_surface.destroy();
 		
@@ -82,6 +83,19 @@ namespace HyperEngine::Vulkan
 		if (!m_device.create(device_description))
 		{
 			CLogger::fatal("CContext::create(): Failed to create device");
+			return false;
+		}
+		
+		CSwapchain::SDescription swapchain_description{};
+		swapchain_description.device = m_device.device();
+		swapchain_description.surface = m_surface.surface();
+		swapchain_description.window = m_window;
+		swapchain_description.swapchain_support_details = m_device.query_swapchain_support(m_device.physical_device());
+		swapchain_description.queue_families = m_device.find_queue_families(m_device.physical_device());
+		
+		if (!m_swapchain.create(swapchain_description))
+		{
+			CLogger::fatal("CContext::create(): Failed to create swapchain");
 			return false;
 		}
 
