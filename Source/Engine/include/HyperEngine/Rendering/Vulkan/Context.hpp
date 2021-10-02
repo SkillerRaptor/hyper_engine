@@ -33,12 +33,6 @@ namespace HyperEngine::Vulkan
 		auto check_validation_layers_support() const -> bool;
 		auto request_required_extensions() -> std::vector<const char*>;
 		
-		static VKAPI_ATTR auto VKAPI_CALL debug_callback(
-			VkDebugUtilsMessageSeverityFlagBitsEXT severity_flags,
-			VkDebugUtilsMessageTypeFlagsEXT type_flags,
-			const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-			void* user_data) -> VkBool32;
-		
 	private:
 		VkInstance m_instance{ VK_NULL_HANDLE };
 		VkDebugUtilsMessengerEXT m_debug_messenger{ VK_NULL_HANDLE };

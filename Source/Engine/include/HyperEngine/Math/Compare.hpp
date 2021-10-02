@@ -11,7 +11,7 @@
 namespace HyperEngine
 {
 	template <typename T, typename U>
-	constexpr auto equal(const T a, const U b) noexcept -> bool
+	[[nodiscard]] constexpr auto equal(const T a, const U b) noexcept -> bool
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -30,7 +30,7 @@ namespace HyperEngine
 	}
 
 	template <typename T, typename U>
-	constexpr auto not_equal(const T a, const U b) noexcept -> bool
+	[[nodiscard]] constexpr auto not_equal(const T a, const U b) noexcept -> bool
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -38,7 +38,7 @@ namespace HyperEngine
 	}
 
 	template <typename T, typename U>
-	constexpr auto less(const T a, const U b) noexcept -> bool
+	[[nodiscard]] constexpr auto less(const T a, const U b) noexcept -> bool
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -57,7 +57,7 @@ namespace HyperEngine
 	}
 
 	template <typename T, typename U>
-	constexpr auto greater(const T a, const U b) noexcept -> bool
+	[[nodiscard]] constexpr auto greater(const T a, const U b) noexcept -> bool
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -65,7 +65,7 @@ namespace HyperEngine
 	}
 
 	template <typename T, typename U>
-	constexpr auto less_equal(const T a, const U b) noexcept -> bool
+	[[nodiscard]] constexpr auto less_equal(const T a, const U b) noexcept -> bool
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -73,7 +73,7 @@ namespace HyperEngine
 	}
 
 	template <typename T, typename U>
-	constexpr auto greater_equal(const T a, const U b) noexcept -> bool
+	[[nodiscard]] constexpr auto greater_equal(const T a, const U b) noexcept -> bool
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 

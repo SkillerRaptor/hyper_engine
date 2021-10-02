@@ -14,7 +14,7 @@
 namespace HyperEngine
 {
 	template <typename T>
-	constexpr auto align(const T value, const size_t align) noexcept -> T
+	[[nodiscard]] constexpr auto align(const T value, const size_t align) noexcept -> T
 	{
 		static_assert(std::is_unsigned_v<T>, "'T' is not an unsigned integral value!");
 
@@ -25,7 +25,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto is_aligned(const T value, const size_t align) noexcept -> bool
+	[[nodiscard]] constexpr auto is_aligned(const T value, const size_t align) noexcept -> bool
 	{
 		static_assert(std::is_unsigned_v<T>, "'T' is not an unsigned integral value!");
 

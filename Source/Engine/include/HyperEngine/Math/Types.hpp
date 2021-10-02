@@ -12,7 +12,7 @@
 namespace HyperEngine
 {
 	template <typename T>
-	constexpr auto is_even(const T x) noexcept -> bool
+	[[nodiscard]] constexpr auto is_even(const T x) noexcept -> bool
 	{
 		static_assert(std::is_integral_v<T>, "'T' is not an integral value!");
 
@@ -20,7 +20,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto is_odd(const T x) noexcept -> bool
+	[[nodiscard]] constexpr auto is_odd(const T x) noexcept -> bool
 	{
 		static_assert(std::is_integral_v<T>, "'T' is not an integral value!");
 
@@ -28,7 +28,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto is_nan(const T x) noexcept -> bool
+	[[nodiscard]] constexpr auto is_nan(const T x) noexcept -> bool
 	{
 		static_assert(std::is_floating_point_v<T>, "'T' is not a floating point value!");
 
@@ -36,7 +36,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto is_positive_infinite(const T x) noexcept -> bool
+	[[nodiscard]] constexpr auto is_positive_infinite(const T x) noexcept -> bool
 	{
 		static_assert(std::is_floating_point_v<T>, "'T' is not a floating point value!");
 
@@ -44,7 +44,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto is_negative_infinite(const T x) noexcept -> bool
+	[[nodiscard]] constexpr auto is_negative_infinite(const T x) noexcept -> bool
 	{
 		static_assert(std::is_floating_point_v<T>, "'T' is not a floating point value!");
 
@@ -52,7 +52,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto is_infinite(const T x) noexcept -> bool
+	[[nodiscard]] constexpr auto is_infinite(const T x) noexcept -> bool
 	{
 		static_assert(std::is_floating_point_v<T>, "'T' is not a floating point value!");
 
@@ -60,7 +60,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto is_finite(const T x) noexcept -> bool
+	[[nodiscard]] constexpr auto is_finite(const T x) noexcept -> bool
 	{
 		static_assert(std::is_floating_point_v<T>, "'T' is not a floating point value!");
 

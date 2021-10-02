@@ -7,6 +7,7 @@
 #include "HyperEngine/Rendering/Vulkan/Context.hpp"
 
 #include "HyperEngine/Core/Logger.hpp"
+#include "HyperEngine/Rendering/Vulkan/Debug.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -66,7 +67,7 @@ namespace HyperEngine::Vulkan
 		application_info.pEngineName = "HyperEngine";
 		application_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 		application_info.apiVersion = VK_API_VERSION_1_2;
-		
+
 		VkDebugUtilsMessengerCreateInfoEXT debug_messenger_create_info{};
 		debug_messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 		debug_messenger_create_info.pNext = nullptr;
@@ -79,8 +80,8 @@ namespace HyperEngine::Vulkan
 			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 		debug_messenger_create_info.pfnUserCallback = debug_callback;
 		debug_messenger_create_info.pUserData = nullptr;
-		
-		std::vector<const char*> required_extensions = request_required_extensions();
+
+		const std::vector<const char*> required_extensions = request_required_extensions();
 
 		VkInstanceCreateInfo instance_create_info{};
 		instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -132,6 +133,11 @@ namespace HyperEngine::Vulkan
 		uint32_t available_layer_count = 0;
 		vkEnumerateInstanceLayerProperties(&available_layer_count, nullptr);
 
+		if (available_layer_count == 0)
+		{
+			return false;
+		}
+
 		std::vector<VkLayerProperties> available_layer_properties(available_layer_count);
 		vkEnumerateInstanceLayerProperties(&available_layer_count, available_layer_properties.data());
 
@@ -172,25 +178,5 @@ namespace HyperEngine::Vulkan
 		}
 
 		return required_extensions;
-	}
-
-	auto CContext::debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT severity_flags, VkDebugUtilsMessageTypeFlagsEXT type_flags, const VkDebugUtilsMessengerCallbackDataEXT* callback_data, void* user_data) -> VkBool32
-	{
-		HYPERENGINE_VARIABLE_NOT_USED(type_flags);
-		HYPERENGINE_VARIABLE_NOT_USED(user_data);
-
-		switch (severity_flags)
-		{
-		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-			CLogger::warning("{}", callback_data->pMessage);
-			break;
-		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-			CLogger::error("{}", callback_data->pMessage);
-			break;
-		default:
-			break;
-		}
-
-		return VK_FALSE;
 	}
 } // namespace HyperEngine::Vulkan

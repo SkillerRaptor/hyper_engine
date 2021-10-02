@@ -13,22 +13,22 @@ namespace HyperEngine
 	class CSourceLocation
 	{
 	public:
-		constexpr auto file_name() const noexcept -> const char*
+		[[nodiscard]] constexpr auto file_name() const noexcept -> const char*
 		{
 			return m_file;
 		}
 
-		constexpr auto function_name() const noexcept -> const char*
+		[[nodiscard]] constexpr auto function_name() const noexcept -> const char*
 		{
 			return m_function;
 		}
 
-		constexpr auto line() const noexcept -> size_t
+		[[nodiscard]] constexpr auto line() const noexcept -> size_t
 		{
 			return m_line;
 		}
 
-		static constexpr auto current(
+		[[nodiscard]] static constexpr auto current(
 			const char* file = __builtin_FILE(),
 			const char* function = __builtin_FUNCTION(),
 			const size_t line = __builtin_LINE()) noexcept -> CSourceLocation

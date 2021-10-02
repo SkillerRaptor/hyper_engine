@@ -14,7 +14,7 @@
 namespace HyperEngine
 {
 	template <typename T>
-	constexpr auto radians(const T degrees) noexcept -> T
+	[[nodiscard]] constexpr auto radians(const T degrees) noexcept -> T
 	{
 		static_assert(std::is_floating_point_v<T>, "'T' is not a floating point value!");
 
@@ -22,7 +22,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto degrees(const T radians) noexcept -> T
+	[[nodiscard]] constexpr auto degrees(const T radians) noexcept -> T
 	{
 		static_assert(std::is_floating_point_v<T>, "'T' is not a floating point value!");
 
@@ -30,7 +30,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto lerp(const T a, const T b, const T interpolation) noexcept -> T
+	[[nodiscard]] constexpr auto lerp(const T a, const T b, const T interpolation) noexcept -> T
 	{
 		static_assert(std::is_floating_point_v<T>, "'T' is not a floating point value!");
 

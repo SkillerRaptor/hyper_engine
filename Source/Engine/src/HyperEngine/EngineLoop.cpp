@@ -40,11 +40,10 @@ namespace HyperEngine
 		
 		CRenderContext::SDescription render_context_description{};
 		render_context_description.rendering_api = m_rendering_api;
+		render_context_description.debug_mode = false;
 
 #if HYPERENGINE_DEBUG
 		render_context_description.debug_mode = true;
-#else
-		render_context_description.debug_mode = false;
 #endif
 		
 		if (!m_render_context.create(render_context_description))
@@ -63,8 +62,8 @@ namespace HyperEngine
 		float last_time = 0.0F;
 		while (m_running)
 		{
-			float current_time = m_window.current_time();
-			float delta_time = current_time - last_time;
+			const float current_time = m_window.current_time();
+			const float delta_time = current_time - last_time;
 			last_time = current_time;
 
 			m_window.update();

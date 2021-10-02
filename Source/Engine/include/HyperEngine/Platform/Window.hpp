@@ -67,15 +67,15 @@ namespace HyperEngine
 		auto update() -> void;
 		
 		auto set_title(std::string title) -> void;
-		auto title() const -> std::string;
+		[[nodiscard]] auto title() const -> std::string;
 		
 		auto set_width(size_t width) -> void;
-		auto width() const -> size_t;
+		[[nodiscard]] auto width() const noexcept -> size_t;
 		
 		auto set_height(size_t height) -> void;
-		auto height() const -> size_t;
+		[[nodiscard]] auto height() const noexcept -> size_t;
 		
-		auto current_time() const -> float;
+		[[nodiscard]] auto current_time() const noexcept -> float;
 
 	private:
 		auto create_callbacks() -> void;

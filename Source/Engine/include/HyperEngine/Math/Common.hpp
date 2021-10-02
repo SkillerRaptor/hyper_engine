@@ -24,7 +24,7 @@
 namespace HyperEngine
 {
 	template <typename T>
-	constexpr auto min(const T a, const T b) noexcept -> T
+	[[nodiscard]] constexpr auto min(const T a, const T b) noexcept -> T
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -32,7 +32,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto max(const T a, const T b) noexcept -> T
+	[[nodiscard]] constexpr auto max(const T a, const T b) noexcept -> T
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -40,7 +40,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto abs(const T x) noexcept -> T
+	[[nodiscard]] constexpr auto abs(const T x) noexcept -> T
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -48,7 +48,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto ceil(const T x) noexcept -> T
+	[[nodiscard]] constexpr auto ceil(const T x) noexcept -> T
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -73,7 +73,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto clamp(const T value, const T low, const T high) noexcept -> T
+	[[nodiscard]] constexpr auto clamp(const T value, const T low, const T high) noexcept -> T
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -81,7 +81,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto saturate(const T value) noexcept -> T
+	[[nodiscard]] constexpr auto saturate(const T value) noexcept -> T
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -89,7 +89,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto floor(const T x) noexcept -> T
+	[[nodiscard]] constexpr auto floor(const T x) noexcept -> T
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -114,7 +114,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto midpoint(const T a, const T b) noexcept -> T
+	[[nodiscard]] constexpr auto midpoint(const T a, const T b) noexcept -> T
 	{
 		static_assert(std::is_arithmetic_v<T>, "'T' is not an arithmetic value!");
 
@@ -154,7 +154,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto factorial(T n) noexcept -> T
+	[[nodiscard]] constexpr auto factorial(T n) noexcept -> T
 	{
 		static_assert(std::is_integral_v<T>, "'T' is not an integral value!");
 
@@ -176,7 +176,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto pow(T x, T n) noexcept -> T
+	[[nodiscard]] constexpr auto pow(T x, T n) noexcept -> T
 	{
 		static_assert(std::is_integral_v<T>, "'T' is not an integral value!");
 

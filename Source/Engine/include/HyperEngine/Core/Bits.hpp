@@ -14,7 +14,7 @@
 namespace HyperEngine
 {
 	template <typename T>
-	constexpr auto bit(const T shift) noexcept -> T
+	[[nodiscard]] constexpr auto bit(const T shift) noexcept -> T
 	{
 		static_assert(std::is_unsigned_v<T>, "'T' is not an unsigned integral value!");
 
@@ -24,7 +24,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	constexpr auto mask(const T shift) noexcept -> T
+	[[nodiscard]] constexpr auto mask(const T shift) noexcept -> T
 	{
 		static_assert(std::is_unsigned_v<T>, "'T' is not an unsigned integral value!");
 

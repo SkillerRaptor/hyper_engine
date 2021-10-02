@@ -27,8 +27,8 @@ namespace HyperEngine
 		static constexpr uint64_t s_fnv_prime_64{ 0x00000100000001B3 };
 
 	public:
-		template <class T>
-		static constexpr auto hash_fnv_32(const T& string) -> uint32_t
+		template <typename T>
+		[[nodiscard]] static constexpr auto hash_fnv_32(const T& string) noexcept -> uint32_t
 		{
 			uint32_t result = s_fnv_basis_32;
 
@@ -42,13 +42,13 @@ namespace HyperEngine
 		}
 
 		template <size_t N>
-		static constexpr auto hash_fnv_32(const char (&string)[N]) -> uint32_t
+		[[nodiscard]] static constexpr auto hash_fnv_32(const char (&string)[N]) -> uint32_t
 		{
 			return hash_fnv_32(std::string_view(string));
 		}
 
-		template <class T>
-		static constexpr auto hash_fnv_64(const T& string) -> uint64_t
+		template <typename T>
+		[[nodiscard]] static constexpr auto hash_fnv_64(const T& string) noexcept -> uint64_t
 		{
 			uint64_t result = s_fnv_basis_64;
 
@@ -62,7 +62,7 @@ namespace HyperEngine
 		}
 
 		template <size_t N>
-		static constexpr auto hash_fnv_64(const char (&string)[N]) -> uint64_t
+		[[nodiscard]] static constexpr auto hash_fnv_64(const char (&string)[N]) -> uint64_t
 		{
 			return hash_fnv_64(std::string_view(string));
 		}

@@ -228,7 +228,7 @@ namespace HyperEngine
 		glfwSetWindowSize(m_native_window, static_cast<int>(m_info.width), static_cast<int>(m_info.height));
 	}
 
-	auto CWindow::width() const -> size_t
+	auto CWindow::width() const noexcept -> size_t
 	{
 		return m_info.width;
 	}
@@ -239,12 +239,12 @@ namespace HyperEngine
 		glfwSetWindowSize(m_native_window, static_cast<int>(m_info.width), static_cast<int>(m_info.height));
 	}
 
-	auto CWindow::height() const -> size_t
+	auto CWindow::height() const noexcept -> size_t
 	{
 		return m_info.height;
 	}
 
-	auto CWindow::current_time() const -> float
+	auto CWindow::current_time() const noexcept -> float
 	{
 		return static_cast<float>(glfwGetTime());
 	}
