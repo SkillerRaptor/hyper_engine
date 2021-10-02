@@ -130,22 +130,22 @@ namespace HyperEngine::Vulkan
 
 	auto CContext::check_validation_layers_support() const -> bool
 	{
-		uint32_t available_layer_count = 0;
-		vkEnumerateInstanceLayerProperties(&available_layer_count, nullptr);
+		uint32_t instance_layer_properties_count = 0;
+		vkEnumerateInstanceLayerProperties(&instance_layer_properties_count, nullptr);
 
-		if (available_layer_count == 0)
+		if (instance_layer_properties_count == 0)
 		{
 			return false;
 		}
 
-		std::vector<VkLayerProperties> available_layer_properties(available_layer_count);
-		vkEnumerateInstanceLayerProperties(&available_layer_count, available_layer_properties.data());
+		std::vector<VkLayerProperties> instance_layer_properties(instance_layer_properties_count);
+		vkEnumerateInstanceLayerProperties(&instance_layer_properties_count, instance_layer_properties.data());
 
 		for (const char* validation_layer : s_validation_layers)
 		{
 			bool layer_found = false;
 
-			for (const VkLayerProperties& layer_properties : available_layer_properties)
+			for (const VkLayerProperties& layer_properties : instance_layer_properties)
 			{
 				if (strcmp(validation_layer, layer_properties.layerName) != 0)
 				{

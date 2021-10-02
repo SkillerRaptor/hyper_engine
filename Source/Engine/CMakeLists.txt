@@ -61,11 +61,13 @@ endif ()
 if (HYPERENGINE_BUILD_VULKAN)
     set(VULKAN_SOURCES
             src/HyperEngine/Rendering/Vulkan/Context.cpp
-            src/HyperEngine/Rendering/Vulkan/Debug.cpp)
+            src/HyperEngine/Rendering/Vulkan/Debug.cpp
+            src/HyperEngine/Rendering/Vulkan/Device.cpp)
 
     set(VULKAN_HEADERS
             include/HyperEngine/Rendering/Vulkan/Context.hpp
-            include/HyperEngine/Rendering/Vulkan/Debug.hpp)
+            include/HyperEngine/Rendering/Vulkan/Debug.hpp
+            include/HyperEngine/Rendering/Vulkan/Device.hpp)
 endif ()
 
 set(SOURCES
