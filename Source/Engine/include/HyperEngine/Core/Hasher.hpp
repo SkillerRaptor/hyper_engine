@@ -19,7 +19,7 @@ namespace HyperEngine
 	{
 	public:
 		HYPERENGINE_MAKE_SINGLETON(CHasher);
-		
+
 	private:
 		static constexpr uint32_t s_fnv_basis_32{ 0x811C9DC5 };
 		static constexpr uint32_t s_fnv_prime_32{ 0x01000193 };

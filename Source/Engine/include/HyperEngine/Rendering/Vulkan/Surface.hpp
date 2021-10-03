@@ -24,7 +24,7 @@ namespace HyperEngine::Vulkan
 	public:
 		auto create(const SDescription& description) -> bool;
 		auto destroy() -> void;
-		
+
 		[[nodiscard]] auto surface() const noexcept -> VkSurfaceKHR;
 
 	private:

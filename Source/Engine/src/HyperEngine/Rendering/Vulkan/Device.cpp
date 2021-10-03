@@ -297,12 +297,12 @@ namespace HyperEngine::Vulkan
 
 		return swapchain_support_details;
 	}
-	
+
 	auto CDevice::physical_device() const noexcept -> VkPhysicalDevice
 	{
 		return m_physical_device;
 	}
-	
+
 	auto CDevice::device() const noexcept -> VkDevice
 	{
 		return m_device;

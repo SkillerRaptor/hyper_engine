@@ -26,7 +26,7 @@ namespace HyperEngine
 			size_t height{ 0 };
 
 			ERenderingApi rendering_api{ ERenderingApi::None };
-			
+
 			std::function<void(int32_t, bool)> key_pressed_callback{};
 			std::function<void(int32_t)> key_released_callback{};
 			std::function<void(float, float)> mouse_moved_callback{};
@@ -46,7 +46,7 @@ namespace HyperEngine
 		{
 			size_t width{ 0 };
 			size_t height{ 0 };
-			
+
 			std::function<void(int32_t, bool)> key_pressed_callback{};
 			std::function<void(int32_t)> key_released_callback{};
 			std::function<void(float, float)> mouse_moved_callback{};
@@ -63,28 +63,28 @@ namespace HyperEngine
 
 	public:
 		auto create(const SDescription& description) -> bool;
-		
+
 		auto update() -> void;
-		
+
 		auto set_title(std::string title) -> void;
 		[[nodiscard]] auto title() const -> std::string;
-		
+
 		auto set_width(size_t width) -> void;
 		[[nodiscard]] auto width() const noexcept -> size_t;
-		
+
 		auto set_height(size_t height) -> void;
 		[[nodiscard]] auto height() const noexcept -> size_t;
-		
+
 		[[nodiscard]] auto native_window() noexcept -> GLFWwindow*;
 		[[nodiscard]] auto current_time() const noexcept -> float;
 
 	private:
 		auto create_callbacks() -> void;
-		
+
 	private:
 		std::string m_title;
 		SInfo m_info{};
-		
+
 		GLFWwindow* m_native_window{ nullptr };
 	};
 } // namespace HyperEngine

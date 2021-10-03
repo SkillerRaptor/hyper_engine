@@ -11,11 +11,11 @@ namespace HyperEngine
 	auto IApplication::startup() -> void
 	{
 	}
-	
+
 	auto IApplication::shutdown() -> void
 	{
 	}
-	
+
 	auto IApplication::update() -> void
 	{
 	}

@@ -17,7 +17,7 @@ namespace HyperEngine
 	{
 		CEngineLoop::SDescription engine_loop_description{};
 		engine_loop_description.application = &application;
-		
+
 		CEngineLoop engine_loop{};
 		if (!engine_loop.create(engine_loop_description))
 		{

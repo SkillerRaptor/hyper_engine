@@ -37,7 +37,7 @@ namespace HyperEngine
 			CLogger::fatal("CEngineLoop::create(): Failed to create window");
 			return false;
 		}
-		
+
 		CRenderContext::SDescription render_context_description{};
 		render_context_description.window = m_window.native_window();
 		render_context_description.rendering_api = m_rendering_api;
@@ -46,7 +46,7 @@ namespace HyperEngine
 #if HYPERENGINE_DEBUG
 		render_context_description.debug_mode = true;
 #endif
-		
+
 		if (!m_render_context.create(render_context_description))
 		{
 			CLogger::fatal("CEngineLoop::create(): Failed to create render context");

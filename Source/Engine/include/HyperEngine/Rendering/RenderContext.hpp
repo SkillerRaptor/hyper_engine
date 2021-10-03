@@ -20,7 +20,7 @@ namespace HyperEngine
 		struct SDescription
 		{
 			GLFWwindow* window{ nullptr };
-			
+
 			ERenderingApi rendering_api{ ERenderingApi::None };
 			bool debug_mode{ false };
 		};
@@ -32,7 +32,7 @@ namespace HyperEngine
 
 	private:
 		ERenderingApi m_rendering_api{ ERenderingApi::None };
-		
+
 		IContext* m_native_context{ nullptr };
 	};
 } // namespace HyperEngine

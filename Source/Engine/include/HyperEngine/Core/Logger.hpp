@@ -55,13 +55,13 @@ namespace HyperEngine
 		{
 			log(Level::Fatal, format, std::forward<Args>(args)...);
 		}
-		
+
 		template <typename... Args>
 		static auto debug(const std::string_view format, Args&&... args) -> void
 		{
 			log(Level::Debug, format, std::forward<Args>(args)...);
 		}
-		
+
 		template <typename... Args>
 		static auto trace(const std::string_view format, Args&&... args) -> void
 		{

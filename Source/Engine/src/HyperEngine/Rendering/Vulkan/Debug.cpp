@@ -18,7 +18,7 @@ namespace HyperEngine::Vulkan
 	{
 		HYPERENGINE_VARIABLE_NOT_USED(type_flags);
 		HYPERENGINE_VARIABLE_NOT_USED(user_data);
-		
+
 		switch (severity_flags)
 		{
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
@@ -30,7 +30,7 @@ namespace HyperEngine::Vulkan
 		default:
 			break;
 		}
-		
+
 		return VK_FALSE;
 	}
 } // namespace HyperEngine::Vulkan

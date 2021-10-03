@@ -7,7 +7,7 @@
 #pragma once
 
 #if !defined(_DEBUG) && !defined(ADEBUG) && !defined(NDEBUG)
-#   define NDEBUG
+#	define NDEBUG
 #endif
 
 #ifndef NDEBUG

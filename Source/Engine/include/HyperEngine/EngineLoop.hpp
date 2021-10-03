@@ -29,9 +29,9 @@ namespace HyperEngine
 
 	private:
 		IApplication* m_application{ nullptr };
-		
+
 		bool m_running{ false };
-		
+
 		CWindow m_window{};
 		CRenderContext m_render_context{};
 		ERenderingApi m_rendering_api{ ERenderingApi::None };

@@ -16,7 +16,7 @@ namespace HyperEngine
 #else
 	CLogger::Level CLogger::s_log_level = CLogger::Level::Fatal;
 #endif
-	
+
 	auto CLogger::internal_log(const CLogger::Level level, const std::string_view string) -> void
 	{
 		const auto level_color = [&level]() -> fmt::color
@@ -36,7 +36,7 @@ namespace HyperEngine
 				return fmt::color::white;
 			}
 		}();
-		
+
 		const auto level_name = [&level]() -> const char*
 		{
 			switch (level)
@@ -62,12 +62,12 @@ namespace HyperEngine
 			fmt::format(fmt::fg(level_color), level_name),
 			string);
 	}
-	
+
 	auto CLogger::set_level(const CLogger::Level log_level) -> void
 	{
 		s_log_level = log_level;
 	}
-	
+
 	auto CLogger::level() -> CLogger::Level
 	{
 		return s_log_level;
