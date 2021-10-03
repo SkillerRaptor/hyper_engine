@@ -35,6 +35,9 @@ namespace HyperEngine::Vulkan
 	private:
 		auto create_instance() -> bool;
 		auto create_debug_messenger() -> bool;
+		
+		auto create_fence() -> bool;
+		auto create_semaphores() -> bool;
 
 		auto check_validation_layers_support() const -> bool;
 		auto request_required_extensions() -> std::vector<const char*>;
@@ -51,6 +54,10 @@ namespace HyperEngine::Vulkan
 		CCommandBuffer m_command_buffer{};
 		CRenderPass m_render_pass{};
 		std::vector<CFrameBuffer> m_frame_buffers{};
+		
+		VkFence m_render_fence{ VK_NULL_HANDLE };
+		VkSemaphore m_render_semaphore{ VK_NULL_HANDLE };
+		VkSemaphore m_present_semaphore{ VK_NULL_HANDLE };
 
 		bool m_validation_layers_enabled{ false };
 	};

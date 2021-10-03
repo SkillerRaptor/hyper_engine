@@ -15,6 +15,21 @@ namespace HyperEngine::Vulkan
 {
 	CContext::~CContext()
 	{
+		if (m_present_semaphore != VK_NULL_HANDLE)
+		{
+			vkDestroySemaphore(m_device.device(), m_present_semaphore, nullptr);
+		}
+
+		if (m_render_semaphore != VK_NULL_HANDLE)
+		{
+			vkDestroySemaphore(m_device.device(), m_render_semaphore, nullptr);
+		}
+
+		if (m_render_fence != VK_NULL_HANDLE)
+		{
+			vkDestroyFence(m_device.device(), m_render_fence, nullptr);
+		}
+
 		for (CFrameBuffer& frame_buffer : m_frame_buffers)
 		{
 			frame_buffer.destroy();
@@ -143,6 +158,18 @@ namespace HyperEngine::Vulkan
 			}
 		}
 
+		if (!create_fence())
+		{
+			CLogger::fatal("CContext::create(): Failed to create vulkan fence");
+			return false;
+		}
+
+		if (!create_semaphores())
+		{
+			CLogger::fatal("CContext::create(): Failed to create vulkan semaphores");
+			return false;
+		}
+
 		return true;
 	}
 
@@ -211,6 +238,44 @@ namespace HyperEngine::Vulkan
 		if (vkCreateDebugUtilsMessengerEXT(m_instance, &debug_messenger_create_info, nullptr, &m_debug_messenger) != VK_SUCCESS)
 		{
 			CLogger::fatal("CContext::create_debug_messenger(): Failed to create vulkan debug messenger");
+			return false;
+		}
+
+		return true;
+	}
+
+	auto CContext::create_fence() -> bool
+	{
+		VkFenceCreateInfo fence_create_info{};
+		fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fence_create_info.pNext = nullptr;
+		fence_create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+		if (vkCreateFence(m_device.device(), &fence_create_info, nullptr, &m_render_fence))
+		{
+			CLogger::fatal("CContext::create_fence(): Failed to create vulkan fence");
+			return false;
+		}
+
+		return true;
+	}
+
+	auto CContext::create_semaphores() -> bool
+	{
+		VkSemaphoreCreateInfo semaphore_create_info{};
+		semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+		semaphore_create_info.pNext = nullptr;
+		semaphore_create_info.flags = 0;
+
+		if (vkCreateSemaphore(m_device.device(), &semaphore_create_info, nullptr, &m_render_semaphore))
+		{
+			CLogger::fatal("CContext::create_semaphores(): Failed to create vulkan render semaphore");
+			return false;
+		}
+
+		if (vkCreateSemaphore(m_device.device(), &semaphore_create_info, nullptr, &m_present_semaphore))
+		{
+			CLogger::fatal("CContext::create_semaphores(): Failed to create vulkan present semaphore");
 			return false;
 		}
 
