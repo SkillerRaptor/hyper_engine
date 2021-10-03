@@ -64,6 +64,7 @@ if (HYPERENGINE_BUILD_VULKAN)
             src/HyperEngine/Rendering/Vulkan/Context.cpp
             src/HyperEngine/Rendering/Vulkan/Debug.cpp
             src/HyperEngine/Rendering/Vulkan/Device.cpp
+            src/HyperEngine/Rendering/Vulkan/RenderPass.cpp
             src/HyperEngine/Rendering/Vulkan/Surface.cpp
             src/HyperEngine/Rendering/Vulkan/Swapchain.cpp)
 
@@ -72,6 +73,7 @@ if (HYPERENGINE_BUILD_VULKAN)
             include/HyperEngine/Rendering/Vulkan/Context.hpp
             include/HyperEngine/Rendering/Vulkan/Debug.hpp
             include/HyperEngine/Rendering/Vulkan/Device.hpp
+            include/HyperEngine/Rendering/Vulkan/RenderPass.hpp
             include/HyperEngine/Rendering/Vulkan/Surface.hpp
             include/HyperEngine/Rendering/Vulkan/Swapchain.hpp)
 endif ()

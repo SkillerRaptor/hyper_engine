@@ -210,4 +210,14 @@ namespace HyperEngine::Vulkan
 
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
+
+	auto CSwapchain::image_format() const noexcept -> VkFormat
+	{
+		return m_image_format;
+	}
+
+	auto CSwapchain::extent() const noexcept -> VkExtent2D
+	{
+		return m_extent;
+	}
 } // namespace HyperEngine::Vulkan

@@ -10,6 +10,7 @@
 #include "HyperEngine/Rendering/IContext.hpp"
 #include "HyperEngine/Rendering/Vulkan/CommandBuffer.hpp"
 #include "HyperEngine/Rendering/Vulkan/Device.hpp"
+#include "HyperEngine/Rendering/Vulkan/RenderPass.hpp"
 #include "HyperEngine/Rendering/Vulkan/Surface.hpp"
 #include "HyperEngine/Rendering/Vulkan/Swapchain.hpp"
 
@@ -47,6 +48,7 @@ namespace HyperEngine::Vulkan
 		CDevice m_device{};
 		CSwapchain m_swapchain{};
 		CCommandBuffer m_command_buffer{};
+		CRenderPass m_render_pass{};
 
 		bool m_validation_layers_enabled{ false };
 	};

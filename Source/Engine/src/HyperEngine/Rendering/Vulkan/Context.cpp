@@ -15,6 +15,7 @@ namespace HyperEngine::Vulkan
 {
 	CContext::~CContext()
 	{
+		m_render_pass.destroy();
 		m_command_buffer.destroy();
 		m_swapchain.destroy();
 		m_device.destroy();
@@ -107,6 +108,16 @@ namespace HyperEngine::Vulkan
 		if (!m_command_buffer.create(command_buffer_description))
 		{
 			CLogger::fatal("CContext::create(): Failed to create command buffer");
+			return false;
+		}
+
+		CRenderPass::SDescription render_pass_description{};
+		render_pass_description.device = m_device.device();
+		render_pass_description.swapchain_image_format = m_swapchain.image_format();
+
+		if (!m_render_pass.create(render_pass_description))
+		{
+			CLogger::fatal("CContext::create(): Failed to create render pass");
 			return false;
 		}
 
