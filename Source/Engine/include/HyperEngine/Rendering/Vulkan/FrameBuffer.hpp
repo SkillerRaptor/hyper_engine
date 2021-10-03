@@ -10,25 +10,24 @@
 
 namespace HyperEngine::Vulkan
 {
-	class CRenderPass
+	class CFrameBuffer
 	{
 	public:
 		struct SDescription
 		{
 			VkDevice device{ VK_NULL_HANDLE };
-
-			VkFormat swapchain_image_format{};
+			VkRenderPass render_pass{ VK_NULL_HANDLE };
+			VkImageView swapchain_image_view{ VK_NULL_HANDLE };
+			VkExtent2D swapchain_extent{};
 		};
 
 	public:
 		auto create(const SDescription& description) -> bool;
 		auto destroy() -> void;
 
-		[[nodiscard]] auto render_pass() const noexcept -> VkRenderPass;
-
 	private:
 		VkDevice m_device{ VK_NULL_HANDLE };
 
-		VkRenderPass m_render_pass{ VK_NULL_HANDLE };
+		VkFramebuffer m_framebuffer{ VK_NULL_HANDLE };
 	};
 } // namespace HyperEngine::Vulkan

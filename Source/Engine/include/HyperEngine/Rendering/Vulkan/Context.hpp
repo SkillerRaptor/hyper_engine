@@ -10,6 +10,7 @@
 #include "HyperEngine/Rendering/IContext.hpp"
 #include "HyperEngine/Rendering/Vulkan/CommandBuffer.hpp"
 #include "HyperEngine/Rendering/Vulkan/Device.hpp"
+#include "HyperEngine/Rendering/Vulkan/FrameBuffer.hpp"
 #include "HyperEngine/Rendering/Vulkan/RenderPass.hpp"
 #include "HyperEngine/Rendering/Vulkan/Surface.hpp"
 #include "HyperEngine/Rendering/Vulkan/Swapchain.hpp"
@@ -49,6 +50,7 @@ namespace HyperEngine::Vulkan
 		CSwapchain m_swapchain{};
 		CCommandBuffer m_command_buffer{};
 		CRenderPass m_render_pass{};
+		std::vector<CFrameBuffer> m_frame_buffers{};
 
 		bool m_validation_layers_enabled{ false };
 	};

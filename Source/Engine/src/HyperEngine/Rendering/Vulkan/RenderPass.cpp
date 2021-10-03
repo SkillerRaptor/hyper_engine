@@ -14,7 +14,7 @@ namespace HyperEngine::Vulkan
 	{
 		if (description.device == VK_NULL_HANDLE)
 		{
-			CLogger::fatal("CSwapchain::create(): The description vulkan device is null");
+			CLogger::fatal("CRenderPass::create(): The description vulkan device is null");
 			return false;
 		}
 
@@ -73,5 +73,10 @@ namespace HyperEngine::Vulkan
 		{
 			vkDestroyRenderPass(m_device, m_render_pass, nullptr);
 		}
+	}
+
+	auto CRenderPass::render_pass() const noexcept -> VkRenderPass
+	{
+		return m_render_pass;
 	}
 } // namespace HyperEngine::Vulkan

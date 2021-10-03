@@ -220,4 +220,13 @@ namespace HyperEngine::Vulkan
 	{
 		return m_extent;
 	}
+	auto CSwapchain::images() const -> std::vector<VkImage>
+	{
+		return m_images;
+	}
+
+	auto CSwapchain::image_views() const -> std::vector<VkImageView>
+	{
+		return m_image_views;
+	}
 } // namespace HyperEngine::Vulkan

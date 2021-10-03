@@ -15,6 +15,11 @@ namespace HyperEngine::Vulkan
 {
 	CContext::~CContext()
 	{
+		for (CFrameBuffer& frame_buffer : m_frame_buffers)
+		{
+			frame_buffer.destroy();
+		}
+
 		m_render_pass.destroy();
 		m_command_buffer.destroy();
 		m_swapchain.destroy();
@@ -119,6 +124,23 @@ namespace HyperEngine::Vulkan
 		{
 			CLogger::fatal("CContext::create(): Failed to create render pass");
 			return false;
+		}
+
+		const std::vector<VkImageView> swapchain_image_views = m_swapchain.image_views();
+		for (size_t i = 0; i < swapchain_image_views.size(); ++i)
+		{
+			CFrameBuffer::SDescription frame_buffer_description{};
+			frame_buffer_description.device = m_device.device();
+			frame_buffer_description.render_pass = m_render_pass.render_pass();
+			frame_buffer_description.swapchain_image_view = swapchain_image_views[i];
+			frame_buffer_description.swapchain_extent = m_swapchain.extent();
+
+			CFrameBuffer& frame_buffer = m_frame_buffers.emplace_back();
+			if (!frame_buffer.create(frame_buffer_description))
+			{
+				CLogger::fatal("CContext::create(): Failed to create frame buffer #{}", i);
+				return false;
+			}
 		}
 
 		return true;

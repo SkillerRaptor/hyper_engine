@@ -37,6 +37,9 @@ namespace HyperEngine::Vulkan
 		[[nodiscard]] auto image_format() const noexcept -> VkFormat;
 		[[nodiscard]] auto extent() const noexcept -> VkExtent2D;
 
+		[[nodiscard]] auto images() const -> std::vector<VkImage>;
+		[[nodiscard]] auto image_views() const -> std::vector<VkImageView>;
+
 	private:
 		auto create_swapchain() -> bool;
 		auto create_image_views() -> bool;
