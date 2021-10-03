@@ -60,6 +60,7 @@ endif ()
 
 if (HYPERENGINE_BUILD_VULKAN)
     set(VULKAN_SOURCES
+            src/HyperEngine/Rendering/Vulkan/CommandBuffer.cpp
             src/HyperEngine/Rendering/Vulkan/Context.cpp
             src/HyperEngine/Rendering/Vulkan/Debug.cpp
             src/HyperEngine/Rendering/Vulkan/Device.cpp
@@ -67,6 +68,7 @@ if (HYPERENGINE_BUILD_VULKAN)
             src/HyperEngine/Rendering/Vulkan/Swapchain.cpp)
 
     set(VULKAN_HEADERS
+            include/HyperEngine/Rendering/Vulkan/CommandBuffer.hpp
             include/HyperEngine/Rendering/Vulkan/Context.hpp
             include/HyperEngine/Rendering/Vulkan/Debug.hpp
             include/HyperEngine/Rendering/Vulkan/Device.hpp

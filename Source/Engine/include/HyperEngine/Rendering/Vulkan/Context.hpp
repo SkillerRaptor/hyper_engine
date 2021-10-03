@@ -8,6 +8,7 @@
 
 #include "HyperEngine/Core/Prerequisites.hpp"
 #include "HyperEngine/Rendering/IContext.hpp"
+#include "HyperEngine/Rendering/Vulkan/CommandBuffer.hpp"
 #include "HyperEngine/Rendering/Vulkan/Device.hpp"
 #include "HyperEngine/Rendering/Vulkan/Surface.hpp"
 #include "HyperEngine/Rendering/Vulkan/Swapchain.hpp"
@@ -45,6 +46,7 @@ namespace HyperEngine::Vulkan
 		CSurface m_surface{};
 		CDevice m_device{};
 		CSwapchain m_swapchain{};
+		CCommandBuffer m_command_buffer{};
 
 		bool m_validation_layers_enabled{ false };
 	};

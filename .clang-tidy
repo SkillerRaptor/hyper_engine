@@ -37,8 +37,16 @@ Checks: '
 CheckOptions:
   - key: readability-identifier-naming.ClassCase
     value: CamelCase
+  - key: readability-identifier-naming.ClassPrefix
+    value: C
+  - key: readability-identifier-naming.ClassHungarianPrefix
+    value: On
   - key: readability-identifier-naming.EnumCase
     value: CamelCase
+  - key: readability-identifier-naming.EnumPrefix
+    value: E
+  - key: readability-identifier-naming.EnumHungarianPrefix
+    value: On
   - key: readability-identifier-naming.EnumConstantCase
     value: CamelCase
   - key: readability-identifier-naming.FunctionCase
@@ -51,6 +59,10 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.StructCase
     value: CamelCase
+  - key: readability-identifier-naming.StructPrefix
+    value: S
+  - key: readability-identifier-naming.StructHungarianPrefix
+    value: On
   - key: readability-identifier-naming.TypeAliasCase
     value: CamelCase
   - key: readability-identifier-naming.TypedefCase
