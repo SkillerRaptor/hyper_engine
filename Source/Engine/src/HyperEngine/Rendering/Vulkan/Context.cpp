@@ -18,7 +18,7 @@ namespace HyperEngine::Vulkan
 		m_swapchain.destroy();
 		m_device.destroy();
 		m_surface.destroy();
-		
+
 		if (m_validation_layers_enabled)
 		{
 			if (m_debug_messenger != VK_NULL_HANDLE)
@@ -40,9 +40,9 @@ namespace HyperEngine::Vulkan
 			CLogger::fatal("CContext::create(): The description window is null");
 			return false;
 		}
-		
+
 		m_window = description.window;
-		
+
 		if (volkInitialize() != VK_SUCCESS)
 		{
 			CLogger::fatal("CContext::create(): Failed to initialize volk");
@@ -60,39 +60,39 @@ namespace HyperEngine::Vulkan
 			return false;
 		}
 
-		if (!create_debug_messenger())
+		if (m_validation_layers_enabled && !create_debug_messenger())
 		{
 			CLogger::fatal("CContext::create(): Failed to create vulkan debug messenger");
 			return false;
 		}
-		
+
 		CSurface::SDescription surface_description{};
 		surface_description.instance = m_instance;
 		surface_description.window = m_window;
-		
-		if(!m_surface.create(surface_description))
+
+		if (!m_surface.create(surface_description))
 		{
 			CLogger::fatal("CContext::create(): Failed to create surface");
 			return false;
 		}
-		
+
 		CDevice::SDescription device_description{};
 		device_description.instance = m_instance;
 		device_description.surface = m_surface.surface();
-		
+
 		if (!m_device.create(device_description))
 		{
 			CLogger::fatal("CContext::create(): Failed to create device");
 			return false;
 		}
-		
+
 		CSwapchain::SDescription swapchain_description{};
 		swapchain_description.device = m_device.device();
 		swapchain_description.surface = m_surface.surface();
 		swapchain_description.window = m_window;
 		swapchain_description.swapchain_support_details = m_device.query_swapchain_support(m_device.physical_device());
 		swapchain_description.queue_families = m_device.find_queue_families(m_device.physical_device());
-		
+
 		if (!m_swapchain.create(swapchain_description))
 		{
 			CLogger::fatal("CContext::create(): Failed to create swapchain");

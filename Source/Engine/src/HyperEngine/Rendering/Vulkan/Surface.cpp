@@ -25,11 +25,11 @@ namespace HyperEngine::Vulkan
 			CLogger::fatal("CSurface::create(): The description window is null");
 			return false;
 		}
-		
+
 		m_instance = description.instance;
 
 		if (glfwCreateWindowSurface(m_instance, description.window, nullptr, &m_surface) != VK_SUCCESS)
-		{
+		{ 
 			CLogger::fatal("CSurface::create(): Failed to create vulkan window surface");
 			return false;
 		}
@@ -39,9 +39,12 @@ namespace HyperEngine::Vulkan
 
 	auto CSurface::destroy() -> void
 	{
-		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+		if (m_surface != VK_NULL_HANDLE)
+		{
+			vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+		}
 	}
-	
+
 	auto CSurface::surface() const noexcept -> VkSurfaceKHR
 	{
 		return m_surface;
