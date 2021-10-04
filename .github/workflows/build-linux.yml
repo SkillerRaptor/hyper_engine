@@ -106,6 +106,7 @@ jobs:
             cmake \
             gcc-10 \
             g++-10 \
+            gcovr \
             llvm-10 \
             libgl1-mesa-dev \
             xorg-dev
@@ -148,6 +149,10 @@ jobs:
         run: |
           cd build
           ctest -C ${{ matrix.config.build_type }}
+
+      - name: Coverage
+        run: |
+          gcovr -j $(nproc) --delete --root . --print-summary --xml-pretty --xml coverage.xml .
 
       - name: Prepare upload
         run: |
