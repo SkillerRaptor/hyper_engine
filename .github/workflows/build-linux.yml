@@ -22,28 +22,64 @@ jobs:
             artifact: "linux-clang-debug.tar.xz",
             cc: "clang-10",
             cxx: "clang++-10",
-            build_type: "Debug"
+            build_type: "Debug",
+            build_options: ""
           }
           - {
             name: "Ubuntu GCC Debug",
             artifact: "linux-gcc-debug.tar.xz",
             cc: "gcc-10",
             cxx: "g++-10",
-            build_type: "Debug"
+            build_type: "Debug",
+            build_options: ""
+          }
+          - {
+            name: "Ubuntu Clang Debug Sanitizers",
+            artifact: "linux-clang-debug-sanitizers.tar.xz",
+            cc: "clang-10",
+            cxx: "clang++-10",
+            build_type: "Debug",
+            build_options: "-D ENABLE_COVERAGE=ON -D ENABLE_SANITIZER_ADDRESS=ON -D ENABLE_SANITIZER_LEAK=ON -D ENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON -D ENABLE_SANITIZER_MEMORY=ON"
+          }
+          - {
+            name: "Ubuntu GCC Debug Sanitizers",
+            artifact: "linux-gcc-debug-sanitizers.tar.xz",
+            cc: "gcc-10",
+            cxx: "g++-10",
+            build_type: "Debug",
+            build_options: "-D ENABLE_COVERAGE=ON -D ENABLE_SANITIZER_ADDRESS=ON -D ENABLE_SANITIZER_LEAK=ON -D ENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON -D ENABLE_SANITIZER_MEMORY=ON"
           }
           - {
             name: "Ubuntu Clang Release",
             artifact: "linux-clang-release.tar.xz",
             cc: "clang-10",
             cxx: "clang++-10",
-            build_type: "Release"
+            build_type: "Release",
+            build_options: ""
           }
           - {
             name: "Ubuntu GCC Release",
             artifact: "linux-gcc-release.tar.xz",
             cc: "gcc-10",
             cxx: "g++-10",
-            build_type: "Release"
+            build_type: "Release",
+            build_options: ""
+          }
+          - {
+            name: "Ubuntu Clang Release Sanitizers",
+            artifact: "linux-clang-release-sanitizers.tar.xz",
+            cc: "clang-10",
+            cxx: "clang++-10",
+            build_type: "Release",
+            build_options: "-D ENABLE_COVERAGE=ON -D ENABLE_SANITIZER_ADDRESS=ON -D ENABLE_SANITIZER_LEAK=ON -D ENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON -D ENABLE_SANITIZER_MEMORY=ON"
+          }
+          - {
+            name: "Ubuntu GCC Release Sanitizers",
+            artifact: "linux-gcc-release-sanitizers.tar.xz",
+            cc: "gcc-10",
+            cxx: "g++-10",
+            build_type: "Release",
+            build_options: "-D ENABLE_COVERAGE=ON -D ENABLE_SANITIZER_ADDRESS=ON -D ENABLE_SANITIZER_LEAK=ON -D ENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON -D ENABLE_SANITIZER_MEMORY=ON"
           }
     steps:
       - name: Checkout
@@ -102,7 +138,7 @@ jobs:
           export LD_LIBRARY_PATH=$VULKAN_SDK/lib:$LD_LIBRARY_PATH
           export VK_LAYER_PATH=$VULKAN_SDK/etc/explicit_layer.d
 
-          cmake . -Bbuild -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+          cmake . -B build -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }} ${{ matrix.config.build_options }}
 
       - name: Build
         run: |

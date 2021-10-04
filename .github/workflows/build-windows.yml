@@ -66,7 +66,7 @@ jobs:
           set CXX=${{ matrix.config.cxx }}
           set PATH=%PATH%;${{ env.vulkan_sdk }}\;${{ env.vulkan_sdk }}\Bin\
 
-          cmake . -Bbuild -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+          cmake . -B build -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
 
       - name: Build
         run: |
