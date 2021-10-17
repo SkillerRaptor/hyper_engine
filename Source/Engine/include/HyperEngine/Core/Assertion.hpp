@@ -19,7 +19,7 @@
 		{                                                                                                          \
 			if (!(condition))                                                                                      \
 			{                                                                                                      \
-				constexpr HyperEngine::CSourceLocation current_location = HyperEngine::CSourceLocation::current(); \
+				const HyperEngine::CSourceLocation current_location = HyperEngine::CSourceLocation::current(); \
 				HyperEngine::CLogger::fatal("Assertion failed: {}", HYPERENGINE_STRINGIFY(condition));             \
 				HyperEngine::CLogger::fatal(                                                                       \
 					"{}:{} in {}",                                                                                 \
