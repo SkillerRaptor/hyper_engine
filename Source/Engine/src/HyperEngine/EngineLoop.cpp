@@ -72,7 +72,19 @@ namespace HyperEngine
 
 			m_window.set_title("HyperEditor - " + std::to_string(delta_time) + "s");
 
+			if (!m_render_context.begin_frame())
+			{
+				CLogger::fatal("CEngineLoop::run(): Failed to begin frame");
+				break;
+			}
+
 			// TODO(SkillerRaptor): Rendering
+
+			if (!m_render_context.end_frame())
+			{
+				CLogger::fatal("CEngineLoop::run(): Failed to end frame");
+				break;
+			}
 		}
 	}
 } // namespace HyperEngine

@@ -36,6 +36,7 @@ set(ENGINE_HEADERS
         include/HyperEngine/Core/Platform/WindowsSpecific.hpp
         include/HyperEngine/Platform/Window.hpp
         include/HyperEngine/Rendering/IContext.hpp
+        include/HyperEngine/Rendering/IRenderer.hpp
         include/HyperEngine/Rendering/RenderContext.hpp
         include/HyperEngine/Math/Common.hpp
         include/HyperEngine/Math/Compare.hpp
@@ -64,8 +65,11 @@ if (HYPERENGINE_BUILD_VULKAN)
             src/HyperEngine/Rendering/Vulkan/Context.cpp
             src/HyperEngine/Rendering/Vulkan/Debug.cpp
             src/HyperEngine/Rendering/Vulkan/Device.cpp
+            src/HyperEngine/Rendering/Vulkan/Fence.cpp
             src/HyperEngine/Rendering/Vulkan/FrameBuffer.cpp
+            src/HyperEngine/Rendering/Vulkan/Renderer.cpp
             src/HyperEngine/Rendering/Vulkan/RenderPass.cpp
+            src/HyperEngine/Rendering/Vulkan/Semaphore.cpp
             src/HyperEngine/Rendering/Vulkan/Surface.cpp
             src/HyperEngine/Rendering/Vulkan/Swapchain.cpp)
 
@@ -74,8 +78,11 @@ if (HYPERENGINE_BUILD_VULKAN)
             include/HyperEngine/Rendering/Vulkan/Context.hpp
             include/HyperEngine/Rendering/Vulkan/Debug.hpp
             include/HyperEngine/Rendering/Vulkan/Device.hpp
+            include/HyperEngine/Rendering/Vulkan/Fence.hpp
             include/HyperEngine/Rendering/Vulkan/FrameBuffer.hpp
+            include/HyperEngine/Rendering/Vulkan/Renderer.hpp
             include/HyperEngine/Rendering/Vulkan/RenderPass.hpp
+            include/HyperEngine/Rendering/Vulkan/Semaphore.hpp
             include/HyperEngine/Rendering/Vulkan/Surface.hpp
             include/HyperEngine/Rendering/Vulkan/Swapchain.hpp)
 endif ()

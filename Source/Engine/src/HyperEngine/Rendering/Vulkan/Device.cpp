@@ -6,34 +6,17 @@
 
 #include "HyperEngine/Rendering/Vulkan/Device.hpp"
 
-#include "HyperEngine/Core/Logger.hpp"
+#include "HyperEngine/Core/Assertion.hpp"
 
 #include <set>
 #include <vector>
 
 namespace HyperEngine::Vulkan
 {
-	auto CDevice::destroy() -> void
-	{
-		if (m_device != VK_NULL_HANDLE)
-		{
-			vkDestroyDevice(m_device, nullptr);
-		}
-	}
-
 	auto CDevice::create(const CDevice::SDescription& description) -> bool
 	{
-		if (description.instance == VK_NULL_HANDLE)
-		{
-			CLogger::fatal("CDevice::create(): The description vulkan instance is null");
-			return false;
-		}
-
-		if (description.surface == VK_NULL_HANDLE)
-		{
-			CLogger::fatal("CDevice::create(): The description vulkan surface is null");
-			return false;
-		}
+		HYPERENGINE_ASSERT_IS_NOT_EQUAL(description.instance, VK_NULL_HANDLE);
+		HYPERENGINE_ASSERT_IS_NOT_EQUAL(description.surface, VK_NULL_HANDLE);
 
 		m_instance = description.instance;
 		m_surface = description.surface;
@@ -46,11 +29,19 @@ namespace HyperEngine::Vulkan
 
 		if (!create_logical_device())
 		{
-			CLogger::fatal("CDevice::create(): Failed to create vulkan logical device");
+			CLogger::fatal("CDevice::create(): Failed to create logical device");
 			return false;
 		}
 
 		return true;
+	}
+
+	auto CDevice::destroy() -> void
+	{
+		if (m_device != VK_NULL_HANDLE)
+		{
+			vkDestroyDevice(m_device, nullptr);
+		}
 	}
 
 	auto CDevice::select_physical_device() -> bool
@@ -181,9 +172,11 @@ namespace HyperEngine::Vulkan
 
 		if (vkCreateDevice(m_physical_device, &device_create_info, nullptr, &m_device) != VK_SUCCESS)
 		{
-			CLogger::fatal("CDevice::create_logical_device(): Failed to create vulkan logical device");
+			CLogger::fatal("CDevice::create_logical_device(): Failed to create logical device");
 			return false;
 		}
+
+		volkLoadDevice(m_device);
 
 		vkGetDeviceQueue(m_device, queue_families.graphics_family.value(), 0, &m_queues.graphics_queue);
 		vkGetDeviceQueue(m_device, queue_families.present_family.value(), 0, &m_queues.present_queue);
@@ -297,13 +290,18 @@ namespace HyperEngine::Vulkan
 
 		return swapchain_support_details;
 	}
+	
+	auto CDevice::queues() const noexcept -> const CDevice::SQueues&
+	{
+		return m_queues;
+	}
 
-	auto CDevice::physical_device() const noexcept -> VkPhysicalDevice
+	auto CDevice::physical_device() const noexcept -> const VkPhysicalDevice&
 	{
 		return m_physical_device;
 	}
 
-	auto CDevice::device() const noexcept -> VkDevice
+	auto CDevice::device() const noexcept -> const VkDevice&
 	{
 		return m_device;
 	}

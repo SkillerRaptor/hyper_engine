@@ -13,6 +13,7 @@ struct GLFWwindow;
 namespace HyperEngine
 {
 	class IContext;
+	class IRenderer;
 
 	class CRenderContext
 	{
@@ -30,9 +31,13 @@ namespace HyperEngine
 
 		auto create(const SDescription& description) -> bool;
 
+		auto begin_frame() -> bool;
+		auto end_frame() -> bool;
+		
 	private:
 		ERenderingApi m_rendering_api{ ERenderingApi::None };
 
 		IContext* m_native_context{ nullptr };
+		IRenderer* m_native_renderer{ nullptr };
 	};
 } // namespace HyperEngine

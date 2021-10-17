@@ -6,7 +6,7 @@
 
 #include "HyperEngine/Rendering/Vulkan/Context.hpp"
 
-#include "HyperEngine/Core/Logger.hpp"
+#include "HyperEngine/Core/Assertion.hpp"
 #include "HyperEngine/Rendering/Vulkan/Debug.hpp"
 
 #include <GLFW/glfw3.h>
@@ -15,20 +15,9 @@ namespace HyperEngine::Vulkan
 {
 	CContext::~CContext()
 	{
-		if (m_present_semaphore != VK_NULL_HANDLE)
-		{
-			vkDestroySemaphore(m_device.device(), m_present_semaphore, nullptr);
-		}
-
-		if (m_render_semaphore != VK_NULL_HANDLE)
-		{
-			vkDestroySemaphore(m_device.device(), m_render_semaphore, nullptr);
-		}
-
-		if (m_render_fence != VK_NULL_HANDLE)
-		{
-			vkDestroyFence(m_device.device(), m_render_fence, nullptr);
-		}
+		m_render_semaphore.destroy();
+		m_present_semaphore.destroy();
+		m_render_fence.destroy();
 
 		for (CFrameBuffer& frame_buffer : m_frame_buffers)
 		{
@@ -41,12 +30,9 @@ namespace HyperEngine::Vulkan
 		m_device.destroy();
 		m_surface.destroy();
 
-		if (m_validation_layers_enabled)
+		if (m_validation_layers_enabled && m_debug_messenger != VK_NULL_HANDLE)
 		{
-			if (m_debug_messenger != VK_NULL_HANDLE)
-			{
-				vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messenger, nullptr);
-			}
+			vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messenger, nullptr);
 		}
 
 		if (m_instance != VK_NULL_HANDLE)
@@ -57,11 +43,7 @@ namespace HyperEngine::Vulkan
 
 	auto CContext::create(const CContext::SDescription& description) -> bool
 	{
-		if (description.window == nullptr)
-		{
-			CLogger::fatal("CContext::create(): The description window is null");
-			return false;
-		}
+		HYPERENGINE_ASSERT_IS_NOT_NULL(description.window);
 
 		m_window = description.window;
 
@@ -78,19 +60,19 @@ namespace HyperEngine::Vulkan
 
 		if (!create_instance())
 		{
-			CLogger::fatal("CContext::create(): Failed to create vulkan instance");
+			CLogger::fatal("CContext::create(): Failed to create instance");
 			return false;
 		}
 
 		if (m_validation_layers_enabled && !create_debug_messenger())
 		{
-			CLogger::fatal("CContext::create(): Failed to create vulkan debug messenger");
+			CLogger::fatal("CContext::create(): Failed to create debug messenger");
 			return false;
 		}
 
 		CSurface::SDescription surface_description{};
-		surface_description.instance = m_instance;
 		surface_description.window = m_window;
+		surface_description.instance = m_instance;
 
 		if (!m_surface.create(surface_description))
 		{
@@ -108,12 +90,18 @@ namespace HyperEngine::Vulkan
 			return false;
 		}
 
+		int32_t width = 0;
+		int32_t height = 0;
+		glfwGetFramebufferSize(m_window, &width, &height);
+
 		CSwapchain::SDescription swapchain_description{};
+		swapchain_description.window = m_window;
 		swapchain_description.device = m_device.device();
 		swapchain_description.surface = m_surface.surface();
-		swapchain_description.window = m_window;
 		swapchain_description.swapchain_support_details = m_device.query_swapchain_support(m_device.physical_device());
 		swapchain_description.queue_families = m_device.find_queue_families(m_device.physical_device());
+		swapchain_description.window_width = static_cast<uint32_t>(width);
+		swapchain_description.window_height = static_cast<uint32_t>(height);
 
 		if (!m_swapchain.create(swapchain_description))
 		{
@@ -123,7 +111,9 @@ namespace HyperEngine::Vulkan
 
 		CCommandBuffer::SDescription command_buffer_description{};
 		command_buffer_description.device = m_device.device();
-		command_buffer_description.queue_families = m_device.find_queue_families(m_device.physical_device());
+		command_buffer_description.pool_usage = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		command_buffer_description.buffer_level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		command_buffer_description.queue_family_index = m_device.find_queue_families(m_device.physical_device()).graphics_family;
 
 		if (!m_command_buffer.create(command_buffer_description))
 		{
@@ -133,7 +123,7 @@ namespace HyperEngine::Vulkan
 
 		CRenderPass::SDescription render_pass_description{};
 		render_pass_description.device = m_device.device();
-		render_pass_description.swapchain_image_format = m_swapchain.image_format();
+		render_pass_description.image_format = m_swapchain.image_format();
 
 		if (!m_render_pass.create(render_pass_description))
 		{
@@ -146,9 +136,10 @@ namespace HyperEngine::Vulkan
 		{
 			CFrameBuffer::SDescription frame_buffer_description{};
 			frame_buffer_description.device = m_device.device();
+			frame_buffer_description.image_attachment = swapchain_image_views[i];
 			frame_buffer_description.render_pass = m_render_pass.render_pass();
-			frame_buffer_description.swapchain_image_view = swapchain_image_views[i];
-			frame_buffer_description.swapchain_extent = m_swapchain.extent();
+			frame_buffer_description.width = m_swapchain.extent().width;
+			frame_buffer_description.height = m_swapchain.extent().height;
 
 			CFrameBuffer& frame_buffer = m_frame_buffers.emplace_back();
 			if (!frame_buffer.create(frame_buffer_description))
@@ -158,15 +149,27 @@ namespace HyperEngine::Vulkan
 			}
 		}
 
-		if (!create_fence())
+		CFence::SDescription fence_description{};
+		fence_description.device = m_device.device();
+
+		if (!m_render_fence.create(fence_description))
 		{
-			CLogger::fatal("CContext::create(): Failed to create vulkan fence");
+			CLogger::fatal("CContext::create(): Failed to create render fence");
 			return false;
 		}
 
-		if (!create_semaphores())
+		CSemaphore::SDescription semaphore_description{};
+		semaphore_description.device = m_device.device();
+
+		if (!m_render_semaphore.create(semaphore_description))
 		{
-			CLogger::fatal("CContext::create(): Failed to create vulkan semaphores");
+			CLogger::fatal("CContext::create(): Failed to create render semaphore");
+			return false;
+		}
+
+		if (!m_present_semaphore.create(semaphore_description))
+		{
+			CLogger::fatal("CContext::create(): Failed to create present semaphore");
 			return false;
 		}
 
@@ -211,7 +214,7 @@ namespace HyperEngine::Vulkan
 
 		if (vkCreateInstance(&instance_create_info, nullptr, &m_instance) != VK_SUCCESS)
 		{
-			CLogger::fatal("CContext::create_instance(): Failed to create vulkan instance");
+			CLogger::fatal("CContext::create_instance(): Failed to create instance");
 			return false;
 		}
 
@@ -237,45 +240,7 @@ namespace HyperEngine::Vulkan
 
 		if (vkCreateDebugUtilsMessengerEXT(m_instance, &debug_messenger_create_info, nullptr, &m_debug_messenger) != VK_SUCCESS)
 		{
-			CLogger::fatal("CContext::create_debug_messenger(): Failed to create vulkan debug messenger");
-			return false;
-		}
-
-		return true;
-	}
-
-	auto CContext::create_fence() -> bool
-	{
-		VkFenceCreateInfo fence_create_info{};
-		fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-		fence_create_info.pNext = nullptr;
-		fence_create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-		if (vkCreateFence(m_device.device(), &fence_create_info, nullptr, &m_render_fence))
-		{
-			CLogger::fatal("CContext::create_fence(): Failed to create vulkan fence");
-			return false;
-		}
-
-		return true;
-	}
-
-	auto CContext::create_semaphores() -> bool
-	{
-		VkSemaphoreCreateInfo semaphore_create_info{};
-		semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-		semaphore_create_info.pNext = nullptr;
-		semaphore_create_info.flags = 0;
-
-		if (vkCreateSemaphore(m_device.device(), &semaphore_create_info, nullptr, &m_render_semaphore))
-		{
-			CLogger::fatal("CContext::create_semaphores(): Failed to create vulkan render semaphore");
-			return false;
-		}
-
-		if (vkCreateSemaphore(m_device.device(), &semaphore_create_info, nullptr, &m_present_semaphore))
-		{
-			CLogger::fatal("CContext::create_semaphores(): Failed to create vulkan present semaphore");
+			CLogger::fatal("CContext::create_debug_messenger(): Failed to create debug messenger");
 			return false;
 		}
 
@@ -332,5 +297,45 @@ namespace HyperEngine::Vulkan
 		}
 
 		return required_extensions;
+	}
+	
+	auto CContext::graphics_queue() const noexcept -> const VkQueue&
+	{
+		return m_device.queues().graphics_queue;
+	}
+
+	auto CContext::command_buffer() const noexcept -> const CCommandBuffer&
+	{
+		return m_command_buffer;
+	}
+	
+	auto CContext::frame_buffers() const noexcept -> const std::vector<CFrameBuffer>&
+	{
+		return m_frame_buffers;
+	}
+
+	auto CContext::swapchain() const noexcept -> const CSwapchain&
+	{
+		return m_swapchain;
+	}
+
+	auto CContext::render_pass() const noexcept -> const CRenderPass&
+	{
+		return m_render_pass;
+	}
+
+	auto CContext::render_fence() const noexcept -> const CFence&
+	{
+		return m_render_fence;
+	}
+
+	auto CContext::render_semaphore() const noexcept -> const CSemaphore&
+	{
+		return m_render_semaphore;
+	}
+
+	auto CContext::present_semaphre() const noexcept -> const CSemaphore&
+	{
+		return m_present_semaphore;
 	}
 } // namespace HyperEngine::Vulkan

@@ -37,7 +37,7 @@
 
 #define HYPERENGINE_ASSERT_IS_EQUAL(expected, actual) HYPERENGINE_ASSERT((expected) == (actual))
 #define HYPERENGINE_ASSERT_IS_NOT_EQUAL(expected, actual) HYPERENGINE_ASSERT((expected) != (actual))
-#define HYPERENGINE_ASSERT_IS_TRUE(condition) HYPERENGINE_ASSERT((condition)
-#define HYPERENGINE_ASSERT_IS_FALSE(condition) HYPERENGINE_ASSERT(!(condition)
+#define HYPERENGINE_ASSERT_IS_TRUE(condition) HYPERENGINE_ASSERT((condition))
+#define HYPERENGINE_ASSERT_IS_FALSE(condition) HYPERENGINE_ASSERT(!(condition))
 #define HYPERENGINE_ASSERT_IS_NULL(ptr) HYPERENGINE_ASSERT((ptr) == nullptr)
 #define HYPERENGINE_ASSERT_IS_NOT_NULL(ptr) HYPERENGINE_ASSERT((ptr) != nullptr)

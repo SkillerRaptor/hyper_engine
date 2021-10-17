@@ -6,8 +6,9 @@
 
 #include "HyperEngine/Rendering/Vulkan/Swapchain.hpp"
 
-#include "HyperEngine/Core/Logger.hpp"
+#include "HyperEngine/Core/Assertion.hpp"
 #include "HyperEngine/Math/Common.hpp"
+#include "HyperEngine/Rendering/Vulkan/Semaphore.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -17,52 +18,43 @@ namespace HyperEngine::Vulkan
 {
 	auto CSwapchain::create(const SDescription& description) -> bool
 	{
-		if (description.device == VK_NULL_HANDLE)
-		{
-			CLogger::fatal("CSwapchain::create(): The description vulkan device is null");
-			return false;
-		}
-
-		if (description.surface == VK_NULL_HANDLE)
-		{
-			CLogger::fatal("CSwapchain::create(): The description vulkan surface is null");
-			return false;
-		}
-
-		if (description.window == nullptr)
-		{
-			CLogger::fatal("CSwapchain::create(): The description window is null");
-			return false;
-		}
+		HYPERENGINE_ASSERT_IS_NOT_NULL(description.window);
+		HYPERENGINE_ASSERT_IS_NOT_EQUAL(description.device, VK_NULL_HANDLE);
+		HYPERENGINE_ASSERT_IS_NOT_EQUAL(description.surface, VK_NULL_HANDLE);
+		HYPERENGINE_ASSERT_IS_NOT_EQUAL(description.window_width, 0);
+		HYPERENGINE_ASSERT_IS_NOT_EQUAL(description.window_height, 0);
 
 		m_device = description.device;
-		m_surface = description.surface;
-		m_window = description.window;
 
-		m_swapchain_support_details = description.swapchain_support_details;
-		m_queue_families = description.queue_families;
-
-		if (!create_swapchain())
+		if (!create_swapchain(
+				description.surface,
+				description.swapchain_support_details,
+				description.queue_families,
+				description.window_width,
+				description.window_height))
 		{
-			CLogger::fatal("CSwapchain::create(): Failed to create vulkan swapchain");
+			CLogger::fatal("CSwapchain::create(): Failed to create swapchain");
 			return false;
 		}
 
 		if (!create_image_views())
 		{
-			CLogger::fatal("CSwapchain::create(): Failed to create vulkan image views");
+			CLogger::fatal("CSwapchain::create(): Failed to create image views");
 			return false;
 		}
 
 		return true;
 	}
 
-	auto CSwapchain::create_swapchain() -> bool
+	auto CSwapchain::create_swapchain(
+		VkSurfaceKHR surface,
+		const CDevice::SSwapchainSupportDetails& swapchain_support_details,
+		const CDevice::SQueueFamilies& queue_families,
+		const uint32_t window_width,
+		const uint32_t window_height) -> bool
 	{
-		const CDevice::SSwapchainSupportDetails& swapchain_support_details = m_swapchain_support_details;
-
 		const VkSurfaceCapabilitiesKHR& surface_capabilities = swapchain_support_details.surface_capabilities;
-		const VkExtent2D extent = choose_extent(surface_capabilities);
+		const VkExtent2D extent = choose_extent(surface_capabilities, window_width, window_height);
 
 		const std::vector<VkSurfaceFormatKHR>& surface_formats = swapchain_support_details.surface_formats;
 		const VkSurfaceFormatKHR surface_format = choose_surface_format(surface_formats);
@@ -71,8 +63,6 @@ namespace HyperEngine::Vulkan
 		const VkPresentModeKHR present_mode = choose_present_mode(present_modes);
 
 		const uint32_t min_image_count = min(surface_capabilities.minImageCount + 1, surface_capabilities.maxImageCount);
-
-		const CDevice::SQueueFamilies& queue_families = m_queue_families;
 
 		const bool unique_families = queue_families.graphics_family.value() != queue_families.present_family.value();
 		const std::array<uint32_t, 2> queue_families_array = {
@@ -84,7 +74,7 @@ namespace HyperEngine::Vulkan
 		swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		swapchain_create_info.pNext = nullptr;
 		swapchain_create_info.flags = 0;
-		swapchain_create_info.surface = m_surface;
+		swapchain_create_info.surface = surface;
 		swapchain_create_info.minImageCount = min_image_count;
 		swapchain_create_info.imageFormat = surface_format.format;
 		swapchain_create_info.imageColorSpace = surface_format.colorSpace;
@@ -102,7 +92,7 @@ namespace HyperEngine::Vulkan
 
 		if (vkCreateSwapchainKHR(m_device, &swapchain_create_info, nullptr, &m_swapchain) != VK_SUCCESS)
 		{
-			CLogger::fatal("CSwapchain::create_swapchain(): Failed to create vulkan swapchain");
+			CLogger::fatal("CSwapchain::create_swapchain(): Failed to create swapchain");
 			return false;
 		}
 
@@ -143,7 +133,7 @@ namespace HyperEngine::Vulkan
 
 			if (vkCreateImageView(m_device, &image_view_create_info, nullptr, &m_image_views[i]) != VK_SUCCESS)
 			{
-				CLogger::fatal("CSwapchain::create_swapchain(): Failed to create vulkan image view #{}", i);
+				CLogger::fatal("CSwapchain::create_swapchain(): Failed to create image view #{}", i);
 				return false;
 			}
 		}
@@ -167,25 +157,36 @@ namespace HyperEngine::Vulkan
 		}
 	}
 
-	auto CSwapchain::choose_extent(const VkSurfaceCapabilitiesKHR& surface_capabilities) const -> VkExtent2D
+	auto CSwapchain::acquire_next_image(const CSemaphore& present_semaphore, uint32_t& image_index) const -> bool
+	{
+		if (vkAcquireNextImageKHR(m_device, m_swapchain, 1000000000, present_semaphore.semaphore(), nullptr, &image_index) != VK_SUCCESS)
+		{
+			CLogger::fatal("CSwapchain::acquire_next_image(): Failed to acquire next image");
+			return false;
+		}
+
+		return true;
+	}
+
+	auto CSwapchain::choose_extent(
+		const VkSurfaceCapabilitiesKHR& surface_capabilities,
+		const uint32_t width,
+		const uint32_t height) const -> VkExtent2D
 	{
 		if (surface_capabilities.currentExtent.width != UINT32_MAX || surface_capabilities.currentExtent.height != UINT32_MAX)
 		{
 			return surface_capabilities.currentExtent;
 		}
 
-		int32_t width = 0;
-		int32_t height = 0;
-		glfwGetFramebufferSize(m_window, &width, &height);
-
 		VkExtent2D extent{};
-		extent.width = clamp(static_cast<uint32_t>(width), surface_capabilities.minImageExtent.width, surface_capabilities.maxImageExtent.width);
-		extent.height = clamp(static_cast<uint32_t>(height), surface_capabilities.minImageExtent.height, surface_capabilities.maxImageExtent.height);
+		extent.width = clamp(width, surface_capabilities.minImageExtent.width, surface_capabilities.maxImageExtent.width);
+		extent.height = clamp(height, surface_capabilities.minImageExtent.height, surface_capabilities.maxImageExtent.height);
 
 		return extent;
 	}
 
-	auto CSwapchain::choose_surface_format(const std::vector<VkSurfaceFormatKHR>& available_surface_formats) const -> VkSurfaceFormatKHR
+	auto CSwapchain::choose_surface_format(
+		const std::vector<VkSurfaceFormatKHR>& available_surface_formats) const -> VkSurfaceFormatKHR
 	{
 		for (const VkSurfaceFormatKHR& surface_format : available_surface_formats)
 		{
@@ -198,7 +199,8 @@ namespace HyperEngine::Vulkan
 		return available_surface_formats[0];
 	}
 
-	auto CSwapchain::choose_present_mode(const std::vector<VkPresentModeKHR>& available_present_modes) const -> VkPresentModeKHR
+	auto CSwapchain::choose_present_mode(
+		const std::vector<VkPresentModeKHR>& available_present_modes) const -> VkPresentModeKHR
 	{
 		for (const VkPresentModeKHR& present_mode : available_present_modes)
 		{
@@ -211,15 +213,6 @@ namespace HyperEngine::Vulkan
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
-	auto CSwapchain::image_format() const noexcept -> VkFormat
-	{
-		return m_image_format;
-	}
-
-	auto CSwapchain::extent() const noexcept -> VkExtent2D
-	{
-		return m_extent;
-	}
 	auto CSwapchain::images() const -> std::vector<VkImage>
 	{
 		return m_images;
@@ -228,5 +221,20 @@ namespace HyperEngine::Vulkan
 	auto CSwapchain::image_views() const -> std::vector<VkImageView>
 	{
 		return m_image_views;
+	}
+
+	auto CSwapchain::extent() const noexcept -> VkExtent2D
+	{
+		return m_extent;
+	}
+
+	auto CSwapchain::image_format() const noexcept -> VkFormat
+	{
+		return m_image_format;
+	}
+
+	auto CSwapchain::swapchain() const noexcept -> const VkSwapchainKHR&
+	{
+		return m_swapchain;
 	}
 } // namespace HyperEngine::Vulkan

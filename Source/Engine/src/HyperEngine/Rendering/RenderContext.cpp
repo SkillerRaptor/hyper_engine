@@ -6,10 +6,11 @@
 
 #include "HyperEngine/Rendering/RenderContext.hpp"
 
-#include "HyperEngine/Core/Logger.hpp"
+#include "HyperEngine/Core/Assertion.hpp"
 
 #if HYPERENGINE_BUILD_VULKAN
 #	include "HyperEngine/Rendering/Vulkan/Context.hpp"
+#	include "HyperEngine/Rendering/Vulkan/Renderer.hpp"
 #endif
 
 namespace HyperEngine
@@ -21,6 +22,8 @@ namespace HyperEngine
 
 	auto CRenderContext::create(const CRenderContext::SDescription& description) -> bool
 	{
+		HYPERENGINE_ASSERT_IS_NOT_NULL(description.window);
+		
 		if (description.rendering_api == ERenderingApi::None)
 		{
 			CLogger::fatal("CRenderContext::create(): The description rendering api is not specified");
@@ -33,12 +36,13 @@ namespace HyperEngine
 		{
 #if HYPERENGINE_BUILD_OPENGL
 		case ERenderingApi::OpenGL:
-			CLogger::fatal("CRenderContext::create(): The OpenGL context is not implemented yet");
+			CLogger::fatal("CRenderContext::create(): The OpenGL context & renderer is not implemented yet");
 			return false;
 #endif
 #if HYPERENGINE_BUILD_VULKAN
 		case ERenderingApi::Vulkan:
 			m_native_context = new Vulkan::CContext();
+			m_native_renderer = new Vulkan::CRenderer();
 			break;
 #endif
 		default:
@@ -55,7 +59,26 @@ namespace HyperEngine
 			CLogger::fatal("CRenderContext::create(): Failed to create native context");
 			return false;
 		}
+		
+		IRenderer::SDescription native_renderer_description{};
+		native_renderer_description.context = m_native_context;
+
+		if (!m_native_renderer->create(native_renderer_description))
+		{
+			CLogger::fatal("CRenderContext::create(): Failed to create native renderer");
+			return false;
+		}
 
 		return true;
+	}
+	
+	auto CRenderContext::begin_frame() -> bool
+	{
+		return m_native_renderer->begin_frame();
+	}
+	
+	auto CRenderContext::end_frame() -> bool
+	{
+		return m_native_renderer->end_frame();
 	}
 } // namespace HyperEngine

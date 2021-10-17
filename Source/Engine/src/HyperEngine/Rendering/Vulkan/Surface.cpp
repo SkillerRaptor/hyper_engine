@@ -6,7 +6,7 @@
 
 #include "HyperEngine/Rendering/Vulkan/Surface.hpp"
 
-#include "HyperEngine/Core/Logger.hpp"
+#include "HyperEngine/Core/Assertion.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -14,23 +14,14 @@ namespace HyperEngine::Vulkan
 {
 	auto CSurface::create(const CSurface::SDescription& description) -> bool
 	{
-		if (description.instance == VK_NULL_HANDLE)
-		{
-			CLogger::fatal("CSurface::create(): The description vulkan instance is null");
-			return false;
-		}
-
-		if (description.window == nullptr)
-		{
-			CLogger::fatal("CSurface::create(): The description window is null");
-			return false;
-		}
+		HYPERENGINE_ASSERT_IS_NOT_NULL(description.window);
+		HYPERENGINE_ASSERT_IS_NOT_EQUAL(description.instance, VK_NULL_HANDLE);
 
 		m_instance = description.instance;
 
 		if (glfwCreateWindowSurface(m_instance, description.window, nullptr, &m_surface) != VK_SUCCESS)
 		{
-			CLogger::fatal("CSurface::create(): Failed to create vulkan window surface");
+			CLogger::fatal("CSurface::create(): Failed to create surface");
 			return false;
 		}
 
@@ -45,7 +36,7 @@ namespace HyperEngine::Vulkan
 		}
 	}
 
-	auto CSurface::surface() const noexcept -> VkSurfaceKHR
+	auto CSurface::surface() const noexcept -> const VkSurfaceKHR&
 	{
 		return m_surface;
 	}

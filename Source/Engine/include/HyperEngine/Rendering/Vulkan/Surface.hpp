@@ -17,18 +17,20 @@ namespace HyperEngine::Vulkan
 	public:
 		struct SDescription
 		{
-			VkInstance instance{ VK_NULL_HANDLE };
 			GLFWwindow* window{ nullptr };
+
+			VkInstance instance{ VK_NULL_HANDLE };
 		};
 
 	public:
 		auto create(const SDescription& description) -> bool;
 		auto destroy() -> void;
 
-		[[nodiscard]] auto surface() const noexcept -> VkSurfaceKHR;
+		[[nodiscard]] auto surface() const noexcept -> const VkSurfaceKHR&;
 
 	private:
 		VkInstance m_instance{ VK_NULL_HANDLE };
+
 		VkSurfaceKHR m_surface{ VK_NULL_HANDLE };
 	};
 } // namespace HyperEngine::Vulkan

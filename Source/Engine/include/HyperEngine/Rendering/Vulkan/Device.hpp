@@ -52,8 +52,10 @@ namespace HyperEngine::Vulkan
 		[[nodiscard]] auto find_queue_families(VkPhysicalDevice physical_device) const -> SQueueFamilies;
 		[[nodiscard]] auto query_swapchain_support(VkPhysicalDevice physical_device) const -> SSwapchainSupportDetails;
 
-		[[nodiscard]] auto physical_device() const noexcept -> VkPhysicalDevice;
-		[[nodiscard]] auto device() const noexcept -> VkDevice;
+		[[nodiscard]] auto queues() const noexcept -> const SQueues&;
+
+		[[nodiscard]] auto physical_device() const noexcept -> const VkPhysicalDevice&;
+		[[nodiscard]] auto device() const noexcept -> const VkDevice&;
 
 	private:
 		auto select_physical_device() -> bool;
