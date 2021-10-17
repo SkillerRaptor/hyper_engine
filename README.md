@@ -30,6 +30,9 @@ In order to build the engine, you will need the following things installed:
 - Vulkan SDK
 
 ### Installation
+The shown commands are for linux only.
+If you want to install it for windows, then you have to use the installers online.
+
 1. Download CMake
 ```shell
 sudo apt install cmake
@@ -70,7 +73,7 @@ cmake .. -D CMAKE_BUILD_TYPE=Debug
 cmake --build .
 ```
 
-5. Run the engine in the Binary/ folder to check if everything was built successfully.
+5. Run the engine to check if everything was built successfully.
 
 ## Screenshots
 
