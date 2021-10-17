@@ -65,6 +65,8 @@ namespace HyperEngine
 		auto create(const SDescription& description) -> bool;
 
 		auto update() -> void;
+		
+		[[nodiscard]] auto current_time() const noexcept -> float;
 
 		auto set_title(std::string title) -> void;
 		[[nodiscard]] auto title() const -> std::string;
@@ -76,15 +78,14 @@ namespace HyperEngine
 		[[nodiscard]] auto height() const noexcept -> size_t;
 
 		[[nodiscard]] auto native_window() noexcept -> GLFWwindow*;
-		[[nodiscard]] auto current_time() const noexcept -> float;
 
 	private:
 		auto create_callbacks() -> void;
 
 	private:
 		std::string m_title;
-		SInfo m_info{};
+		SInfo m_info = {};
 
-		GLFWwindow* m_native_window{ nullptr };
+		GLFWwindow* m_native_window = { nullptr };
 	};
 } // namespace HyperEngine

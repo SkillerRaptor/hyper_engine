@@ -24,7 +24,7 @@ namespace HyperEngine::Vulkan
 
 	private:
 		CContext* m_context{ nullptr };
-		
+
 		uint32_t m_current_swapchain_index{ 0 };
 	};
 } // namespace HyperEngine::Vulkan

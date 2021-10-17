@@ -21,10 +21,10 @@ namespace HyperEngine
 		HYPERENGINE_MAKE_SINGLETON(CHasher);
 
 	private:
-		static constexpr uint32_t s_fnv_basis_32{ 0x811C9DC5 };
-		static constexpr uint32_t s_fnv_prime_32{ 0x01000193 };
-		static constexpr uint64_t s_fnv_basis_64{ 0xCBF29CE484222325 };
-		static constexpr uint64_t s_fnv_prime_64{ 0x00000100000001B3 };
+		static constexpr uint32_t s_fnv_basis_32 = { 0x811C9DC5 };
+		static constexpr uint32_t s_fnv_prime_32 = { 0x01000193 };
+		static constexpr uint64_t s_fnv_basis_64 = { 0xCBF29CE484222325 };
+		static constexpr uint64_t s_fnv_prime_64 = { 0x00000100000001B3 };
 
 	public:
 		template <typename T>
@@ -32,17 +32,17 @@ namespace HyperEngine
 		{
 			uint32_t result = s_fnv_basis_32;
 
-			for (const char c : string)
+			for (const char character : string)
 			{
 				result *= s_fnv_prime_32;
-				result ^= static_cast<uint32_t>(c);
+				result ^= static_cast<uint32_t>(character);
 			}
 
 			return result;
 		}
 
 		template <size_t N>
-		[[nodiscard]] static constexpr auto hash_fnv_32(const char (&string)[N]) -> uint32_t
+		[[nodiscard]] static constexpr auto hash_fnv_32(const char (&string)[N]) noexcept -> uint32_t
 		{
 			return hash_fnv_32(std::string_view(string));
 		}
@@ -52,17 +52,17 @@ namespace HyperEngine
 		{
 			uint64_t result = s_fnv_basis_64;
 
-			for (const char c : string)
+			for (const char character : string)
 			{
 				result *= s_fnv_prime_64;
-				result ^= static_cast<uint64_t>(c);
+				result ^= static_cast<uint64_t>(character);
 			}
 
 			return result;
 		}
 
 		template <size_t N>
-		[[nodiscard]] static constexpr auto hash_fnv_64(const char (&string)[N]) -> uint64_t
+		[[nodiscard]] static constexpr auto hash_fnv_64(const char (&string)[N]) noexcept -> uint64_t
 		{
 			return hash_fnv_64(std::string_view(string));
 		}

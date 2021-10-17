@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "Types.hpp"
+#include "HyperEngine/Math/Types.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -154,7 +154,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	[[nodiscard]] constexpr auto factorial(T n) noexcept -> T
+	[[nodiscard]] constexpr auto factorial(const T n) noexcept -> T
 	{
 		static_assert(std::is_integral_v<T>, "'T' is not an integral value!");
 
@@ -176,7 +176,7 @@ namespace HyperEngine
 	}
 
 	template <typename T>
-	[[nodiscard]] constexpr auto pow(T x, T n) noexcept -> T
+	[[nodiscard]] constexpr auto pow(const T x, const T n) noexcept -> T
 	{
 		static_assert(std::is_integral_v<T>, "'T' is not an integral value!");
 

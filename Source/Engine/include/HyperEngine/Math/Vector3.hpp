@@ -25,14 +25,14 @@ namespace HyperEngine
 	public:
 		CVector3() = default;
 
-		explicit CVector3(T t_scalar)
+		explicit CVector3(const T t_scalar)
 			: x(t_scalar)
 			, y(t_scalar)
 			, z(t_scalar)
 		{
 		}
 
-		CVector3(T t_x, T t_y, T t_z)
+		CVector3(const T t_x, const T t_y, const T t_z)
 			: x(t_x)
 			, y(t_y)
 			, z(t_z)
@@ -48,7 +48,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator+(T value) const -> CVector3<T>
+		auto operator+(const T value) const -> CVector3<T>
 		{
 			CVector3<T> vector;
 			vector.x = x + value;
@@ -66,7 +66,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator+=(T value) -> CVector3<T>&
+		auto operator+=(const T value) -> CVector3<T>&
 		{
 			x += value;
 			y += value;
@@ -82,7 +82,7 @@ namespace HyperEngine
 			return *this;
 		}
 
-		auto operator-(T value) const -> CVector3<T>
+		auto operator-(const T value) const -> CVector3<T>
 		{
 			CVector3<T> vector;
 			vector.x = x - value;
@@ -100,7 +100,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator-=(T value) -> CVector3<T>&
+		auto operator-=(const T value) -> CVector3<T>&
 		{
 			x -= value;
 			y -= value;
@@ -115,7 +115,7 @@ namespace HyperEngine
 			return *this;
 		}
 
-		auto operator*(T value) const -> CVector3<T>
+		auto operator*(const T value) const -> CVector3<T>
 		{
 			CVector3<T> vector;
 			vector.x = x * value;
@@ -133,7 +133,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator*=(T value) -> CVector3<T>&
+		auto operator*=(const T value) -> CVector3<T>&
 		{
 			x *= value;
 			y *= value;
@@ -149,7 +149,7 @@ namespace HyperEngine
 			return *this;
 		}
 
-		auto operator/(T value) const -> CVector3<T>
+		auto operator/(const T value) const -> CVector3<T>
 		{
 			CVector3<T> vector;
 			vector.x = x / value;
@@ -167,7 +167,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator/=(T value) -> CVector3<T>&
+		auto operator/=(const T value) -> CVector3<T>&
 		{
 			x /= value;
 			y /= value;
@@ -186,7 +186,7 @@ namespace HyperEngine
 	public:
 		union
 		{
-			T data[3]{ 0 };
+			T data[3] = { 0 };
 
 			struct
 			{

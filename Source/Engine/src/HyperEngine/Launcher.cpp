@@ -15,10 +15,10 @@ namespace HyperEngine
 {
 	auto CLauncher::launch_application(IApplication& application) -> int
 	{
-		CEngineLoop::SDescription engine_loop_description{};
+		CEngineLoop::SDescription engine_loop_description = {};
 		engine_loop_description.application = &application;
 
-		CEngineLoop engine_loop{};
+		CEngineLoop engine_loop = {};
 		if (!engine_loop.create(engine_loop_description))
 		{
 			CLogger::fatal("CLauncher::launch_application(): Failed to create engine loop");

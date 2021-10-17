@@ -25,13 +25,13 @@ namespace HyperEngine
 	public:
 		CVector2() = default;
 
-		explicit CVector2(T t_scalar)
+		explicit CVector2(const T t_scalar)
 			: x(t_scalar)
 			, y(t_scalar)
 		{
 		}
 
-		CVector2(T t_x, T t_y)
+		CVector2(const T t_x, const T t_y)
 			: x(t_x)
 			, y(t_y)
 		{
@@ -45,7 +45,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator+(T value) const -> CVector2<T>
+		auto operator+(const T value) const -> CVector2<T>
 		{
 			CVector2<T> vector;
 			vector.x = x + value;
@@ -61,7 +61,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator+=(T value) -> CVector2<T>&
+		auto operator+=(const T value) -> CVector2<T>&
 		{
 			x += value;
 			y += value;
@@ -75,7 +75,7 @@ namespace HyperEngine
 			return *this;
 		}
 
-		auto operator-(T value) const -> CVector2<T>
+		auto operator-(const T value) const -> CVector2<T>
 		{
 			CVector2<T> vector;
 			vector.x = x - value;
@@ -91,7 +91,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator-=(T value) -> CVector2<T>&
+		auto operator-=(const T value) -> CVector2<T>&
 		{
 			x -= value;
 			y -= value;
@@ -105,7 +105,7 @@ namespace HyperEngine
 			return *this;
 		}
 
-		auto operator*(T value) const -> CVector2<T>
+		auto operator*(const T value) const -> CVector2<T>
 		{
 			CVector2<T> vector;
 			vector.x = x * value;
@@ -121,7 +121,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator*=(T value) -> CVector2<T>&
+		auto operator*=(const T value) -> CVector2<T>&
 		{
 			x *= value;
 			y *= value;
@@ -135,7 +135,7 @@ namespace HyperEngine
 			return *this;
 		}
 
-		auto operator/(T value) const -> CVector2<T>
+		auto operator/(const T value) const -> CVector2<T>
 		{
 			CVector2<T> vector;
 			vector.x = x / value;
@@ -151,7 +151,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator/=(T value) -> CVector2<T>&
+		auto operator/=(const T value) -> CVector2<T>&
 		{
 			x /= value;
 			y /= value;
@@ -168,7 +168,7 @@ namespace HyperEngine
 	public:
 		union
 		{
-			T data[2]{ 0 };
+			T data[2] = { 0 };
 
 			struct
 			{

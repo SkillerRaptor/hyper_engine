@@ -18,6 +18,7 @@ namespace HyperEngine
 	{
 		static_assert(std::is_unsigned_v<T>, "'T' is not an unsigned integral value!");
 
+		HYPERENGINE_ASSERT_IS_NOT_EQUAL(align, 0);
 		HYPERENGINE_ASSERT_IS_EQUAL(align & (align - 1), 0);
 
 		const size_t size = (static_cast<size_t>(value) + (align - 1)) & ~(align - 1);
@@ -29,6 +30,7 @@ namespace HyperEngine
 	{
 		static_assert(std::is_unsigned_v<T>, "'T' is not an unsigned integral value!");
 
+		HYPERENGINE_ASSERT_IS_NOT_EQUAL(align, 0);
 		HYPERENGINE_ASSERT_IS_EQUAL(align & (align - 1), 0);
 
 		const size_t size = static_cast<size_t>(value) & (align - 1);

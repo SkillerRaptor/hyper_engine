@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "Constants.hpp"
+#include "HyperEngine/Math/Constants.hpp"
 
 #include <limits>
 #include <type_traits>

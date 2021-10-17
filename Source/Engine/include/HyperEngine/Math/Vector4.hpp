@@ -25,7 +25,7 @@ namespace HyperEngine
 	public:
 		CVector4() = default;
 
-		explicit CVector4(T t_scalar)
+		explicit CVector4(const T t_scalar)
 			: x(t_scalar)
 			, y(t_scalar)
 			, z(t_scalar)
@@ -33,7 +33,7 @@ namespace HyperEngine
 		{
 		}
 
-		CVector4(T t_x, T t_y, T t_z, T t_w)
+		CVector4(const T t_x, const T t_y, const T t_z, const T t_w)
 			: x(t_x)
 			, y(t_y)
 			, z(t_z)
@@ -51,7 +51,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator+(T value) const -> CVector4<T>
+		auto operator+(const T value) const -> CVector4<T>
 		{
 			CVector4<T> vector;
 			vector.x = x + value;
@@ -71,7 +71,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator+=(T value) -> CVector4<T>&
+		auto operator+=(const T value) -> CVector4<T>&
 		{
 			x += value;
 			y += value;
@@ -89,7 +89,7 @@ namespace HyperEngine
 			return *this;
 		}
 
-		auto operator-(T value) const -> CVector4<T>
+		auto operator-(const T value) const -> CVector4<T>
 		{
 			CVector4<T> vector;
 			vector.x = x - value;
@@ -109,7 +109,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator-=(T value) -> CVector4<T>&
+		auto operator-=(const T value) -> CVector4<T>&
 		{
 			x -= value;
 			y -= value;
@@ -127,7 +127,7 @@ namespace HyperEngine
 			return *this;
 		}
 
-		auto operator*(T value) const -> CVector4<T>
+		auto operator*(const T value) const -> CVector4<T>
 		{
 			CVector4<T> vector;
 			vector.x = x * value;
@@ -147,7 +147,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator*=(T value) -> CVector4<T>&
+		auto operator*=(const T value) -> CVector4<T>&
 		{
 			x *= value;
 			y *= value;
@@ -165,7 +165,7 @@ namespace HyperEngine
 			return *this;
 		}
 
-		auto operator/(T value) const -> CVector4<T>
+		auto operator/(const T value) const -> CVector4<T>
 		{
 			CVector4<T> vector;
 			vector.x = x / value;
@@ -185,7 +185,7 @@ namespace HyperEngine
 			return vector;
 		}
 
-		auto operator/=(T value) -> CVector4<T>&
+		auto operator/=(const T value) -> CVector4<T>&
 		{
 			x /= value;
 			y /= value;
@@ -194,11 +194,6 @@ namespace HyperEngine
 			return *this;
 		}
 
-		/**
-		 *
-		 * @param other
-		 * @return
-		 */
 		auto operator/=(const CVector4<T>& other) -> CVector4<T>&
 		{
 			x /= other.x;
@@ -211,7 +206,7 @@ namespace HyperEngine
 	public:
 		union
 		{
-			T data[4]{ 0 };
+			T data[4] = { 0 };
 
 			struct
 			{

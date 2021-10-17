@@ -23,12 +23,7 @@ namespace HyperEngine
 	auto CRenderContext::create(const CRenderContext::SDescription& description) -> bool
 	{
 		HYPERENGINE_ASSERT_IS_NOT_NULL(description.window);
-		
-		if (description.rendering_api == ERenderingApi::None)
-		{
-			CLogger::fatal("CRenderContext::create(): The description rendering api is not specified");
-			return false;
-		}
+		HYPERENGINE_ASSERT_IS_NOT_EQUAL(description.rendering_api, ERenderingApi::None);
 
 		m_rendering_api = description.rendering_api;
 
@@ -50,19 +45,17 @@ namespace HyperEngine
 			return false;
 		}
 
-		IContext::SDescription native_context_description{};
+		IContext::SDescription native_context_description = {};
 		native_context_description.window = description.window;
 		native_context_description.debug_mode = description.debug_mode;
-
 		if (!m_native_context->create(native_context_description))
 		{
 			CLogger::fatal("CRenderContext::create(): Failed to create native context");
 			return false;
 		}
-		
-		IRenderer::SDescription native_renderer_description{};
-		native_renderer_description.context = m_native_context;
 
+		IRenderer::SDescription native_renderer_description = {};
+		native_renderer_description.context = m_native_context;
 		if (!m_native_renderer->create(native_renderer_description))
 		{
 			CLogger::fatal("CRenderContext::create(): Failed to create native renderer");
@@ -71,12 +64,12 @@ namespace HyperEngine
 
 		return true;
 	}
-	
+
 	auto CRenderContext::begin_frame() -> bool
 	{
 		return m_native_renderer->begin_frame();
 	}
-	
+
 	auto CRenderContext::end_frame() -> bool
 	{
 		return m_native_renderer->end_frame();

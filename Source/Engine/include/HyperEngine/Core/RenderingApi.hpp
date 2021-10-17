@@ -6,20 +6,22 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace HyperEngine
 {
-	enum class ERenderingApi
+	enum class ERenderingApi : uint8_t
 	{
 		None = 0,
 		OpenGL,
 		Vulkan,
 
 #if HYPERENGINE_BUILD_VULKAN
-		Current = Vulkan
+		Best = Vulkan
 #elif HYPERENGINE_BUILD_OPENGL
-		Current = OpenGL
+		Best = OpenGL
 #else
-		Current = None
+		Best = None
 #endif
 	};
 } // namespace HyperEngine

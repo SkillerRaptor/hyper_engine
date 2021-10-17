@@ -18,7 +18,7 @@ namespace HyperEngine
 	{
 		static_assert(std::is_unsigned_v<T>, "'T' is not an unsigned integral value!");
 
-		HYPERENGINE_ASSERT_IS_NOT_EQUAL(shift, 0, "The value of 'shift' is 0");
+		HYPERENGINE_ASSERT_IS_NOT_EQUAL(shift, 0);
 
 		return static_cast<T>(1) << shift;
 	}
@@ -28,7 +28,7 @@ namespace HyperEngine
 	{
 		static_assert(std::is_unsigned_v<T>, "'T' is not an unsigned integral value!");
 
-		HYPERENGINE_ASSERT_IS_NOT_EQUAL(shift, 0, "The value of 'shift' is 0");
+		HYPERENGINE_ASSERT_IS_NOT_EQUAL(shift, 0);
 
 		return bit<T>(shift) - static_cast<T>(1);
 	}

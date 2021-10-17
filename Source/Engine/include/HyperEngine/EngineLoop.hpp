@@ -28,12 +28,12 @@ namespace HyperEngine
 		auto run() -> void;
 
 	private:
-		IApplication* m_application{ nullptr };
+		IApplication* m_application = { nullptr };
 
-		bool m_running{ false };
+		bool m_running = { false };
 
-		CWindow m_window{};
-		CRenderContext m_render_context{};
-		ERenderingApi m_rendering_api{ ERenderingApi::None };
+		CWindow m_window = {};
+		CRenderContext m_render_context = {};
+		ERenderingApi m_rendering_api = { ERenderingApi::None };
 	};
 } // namespace HyperEngine

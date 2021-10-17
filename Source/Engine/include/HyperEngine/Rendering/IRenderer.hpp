@@ -15,7 +15,7 @@ namespace HyperEngine
 	public:
 		struct SDescription
 		{
-			IContext* context{ nullptr };
+			IContext* context = { nullptr };
 		};
 
 	public:

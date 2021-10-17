@@ -33,7 +33,7 @@ namespace HyperEngine::Vulkan
 		~CContext() override;
 
 		auto create(const SDescription& description) -> bool override;
-		
+
 		[[nodiscard]] auto graphics_queue() const noexcept -> const VkQueue&;
 
 		[[nodiscard]] auto command_buffer() const noexcept -> const CCommandBuffer&;

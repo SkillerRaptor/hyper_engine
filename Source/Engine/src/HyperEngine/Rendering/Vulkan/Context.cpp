@@ -298,7 +298,7 @@ namespace HyperEngine::Vulkan
 
 		return required_extensions;
 	}
-	
+
 	auto CContext::graphics_queue() const noexcept -> const VkQueue&
 	{
 		return m_device.queues().graphics_queue;
@@ -308,7 +308,7 @@ namespace HyperEngine::Vulkan
 	{
 		return m_command_buffer;
 	}
-	
+
 	auto CContext::frame_buffers() const noexcept -> const std::vector<CFrameBuffer>&
 	{
 		return m_frame_buffers;

@@ -33,7 +33,7 @@ namespace HyperEngine
 			const char* function = __builtin_FUNCTION(),
 			const size_t line = __builtin_LINE()) noexcept -> CSourceLocation
 		{
-			CSourceLocation location{};
+			CSourceLocation location = {};
 			location.m_file = file;
 			location.m_function = function;
 			location.m_line = line;
@@ -45,8 +45,8 @@ namespace HyperEngine
 		constexpr CSourceLocation() = default;
 
 	private:
-		const char* m_file{ "unknown" };
-		const char* m_function{ "unknown" };
-		size_t m_line{ 0 };
+		const char* m_file = { "unknown" };
+		const char* m_function = { "unknown" };
+		size_t m_line = { 0 };
 	};
 } // namespace HyperEngine

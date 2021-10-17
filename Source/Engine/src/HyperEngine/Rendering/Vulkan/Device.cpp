@@ -290,7 +290,7 @@ namespace HyperEngine::Vulkan
 
 		return swapchain_support_details;
 	}
-	
+
 	auto CDevice::queues() const noexcept -> const CDevice::SQueues&
 	{
 		return m_queues;

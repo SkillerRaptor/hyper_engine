@@ -15,9 +15,9 @@ namespace HyperEngine
 	public:
 		struct SDescription
 		{
-			GLFWwindow* window{ nullptr };
+			GLFWwindow* window = { nullptr };
 
-			bool debug_mode{ false };
+			bool debug_mode = { false };
 		};
 
 	public:

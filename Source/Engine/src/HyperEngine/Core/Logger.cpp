@@ -12,25 +12,25 @@
 namespace HyperEngine
 {
 #if HYPERENGINE_DEBUG
-	CLogger::Level CLogger::s_log_level = CLogger::Level::Trace;
+	CLogger::ELevel CLogger::s_log_level = CLogger::ELevel::Trace;
 #else
-	CLogger::Level CLogger::s_log_level = CLogger::Level::Fatal;
+	CLogger::ELevel CLogger::s_log_level = CLogger::ELevel::Fatal;
 #endif
 
-	auto CLogger::internal_log(const CLogger::Level level, const std::string_view string) -> void
+	auto CLogger::internal_log(const CLogger::ELevel level, const std::string_view string) -> void
 	{
 		const auto level_color = [&level]() -> fmt::color
 		{
 			switch (level)
 			{
-			case Level::Info:
+			case ELevel::Info:
 				return fmt::color::white;
-			case Level::Warning:
+			case ELevel::Warning:
 				return fmt::color::gold;
-			case Level::Error:
-			case Level::Fatal:
+			case ELevel::Error:
+			case ELevel::Fatal:
 				return fmt::color::crimson;
-			case Level::Debug:
+			case ELevel::Debug:
 				return fmt::color::gray;
 			default:
 				return fmt::color::white;
@@ -41,15 +41,15 @@ namespace HyperEngine
 		{
 			switch (level)
 			{
-			case Level::Info:
+			case ELevel::Info:
 				return "Info";
-			case Level::Warning:
+			case ELevel::Warning:
 				return "Warning";
-			case Level::Error:
+			case ELevel::Error:
 				return "Error";
-			case Level::Fatal:
+			case ELevel::Fatal:
 				return "Fatal";
-			case Level::Debug:
+			case ELevel::Debug:
 				return "Debug";
 			default:
 				return "Undefined";
@@ -63,12 +63,12 @@ namespace HyperEngine
 			string);
 	}
 
-	auto CLogger::set_level(const CLogger::Level log_level) -> void
+	auto CLogger::set_level(const CLogger::ELevel log_level) -> void
 	{
 		s_log_level = log_level;
 	}
 
-	auto CLogger::level() -> CLogger::Level
+	auto CLogger::level() -> CLogger::ELevel
 	{
 		return s_log_level;
 	}

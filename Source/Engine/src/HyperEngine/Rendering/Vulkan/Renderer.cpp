@@ -79,9 +79,9 @@ namespace HyperEngine::Vulkan
 			CLogger::fatal("CRenderer::end_frame(): Failed to end command buffer");
 			return false;
 		}
-		
+
 		const VkPipelineStageFlags pipeline_stage_flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		
+
 		VkSubmitInfo submit_info{};
 		submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submit_info.pNext = nullptr;

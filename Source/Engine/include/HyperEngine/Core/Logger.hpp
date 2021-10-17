@@ -21,7 +21,7 @@ namespace HyperEngine
 		HYPERENGINE_MAKE_SINGLETON(CLogger);
 
 	public:
-		enum class Level : uint8_t
+		enum class ELevel : uint8_t
 		{
 			Info = 0,
 			Warning,
@@ -35,47 +35,47 @@ namespace HyperEngine
 		template <typename... Args>
 		static auto info(const std::string_view format, Args&&... args) -> void
 		{
-			log(Level::Info, format, std::forward<Args>(args)...);
+			log(ELevel::Info, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto warning(const std::string_view format, Args&&... args) -> void
 		{
-			log(Level::Warning, format, std::forward<Args>(args)...);
+			log(ELevel::Warning, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto error(const std::string_view format, Args&&... args) -> void
 		{
-			log(Level::Error, format, std::forward<Args>(args)...);
+			log(ELevel::Error, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto fatal(const std::string_view format, Args&&... args) -> void
 		{
-			log(Level::Fatal, format, std::forward<Args>(args)...);
+			log(ELevel::Fatal, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto debug(const std::string_view format, Args&&... args) -> void
 		{
-			log(Level::Debug, format, std::forward<Args>(args)...);
+			log(ELevel::Debug, format, std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
 		static auto trace(const std::string_view format, Args&&... args) -> void
 		{
-			log(Level::Trace, format, std::forward<Args>(args)...);
+			log(ELevel::Trace, format, std::forward<Args>(args)...);
 		}
 
-		static auto set_level(const Level log_level) -> void;
-		static auto level() -> Level;
+		static auto set_level(const ELevel log_level) -> void;
+		static auto level() -> ELevel;
 
 	private:
-		static auto internal_log(const Level level, const std::string_view string) -> void;
+		static auto internal_log(const ELevel level, const std::string_view string) -> void;
 
 		template <typename... Args>
-		static auto log(const Level log_level, const std::string_view format, Args&&... args) -> void
+		static auto log(const ELevel log_level, const std::string_view format, Args&&... args) -> void
 		{
 			if (log_level > s_log_level)
 			{
@@ -94,6 +94,6 @@ namespace HyperEngine
 		}
 
 	private:
-		static Level s_log_level;
+		static ELevel s_log_level;
 	};
 } // namespace HyperEngine

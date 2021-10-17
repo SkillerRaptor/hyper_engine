@@ -15,7 +15,7 @@ namespace HyperEngine::Vulkan
 	class CCommandBuffer;
 	class CFrameBuffer;
 	class CSwapchain;
-	
+
 	class CRenderPass
 	{
 	public:
