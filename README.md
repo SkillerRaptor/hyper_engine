@@ -15,7 +15,6 @@ Anyone is welcome to contribute or use the source of the HyperEngine.
 
 ## Contents
 - [Getting Started](#getting-started)
-- [Screenshots](#screenshots)
 - [Dependencies](#dependencies)
 - [Contributing](#contributing)
 - [License](#license)
@@ -30,8 +29,8 @@ In order to build the engine, you will need the following things installed:
 - Vulkan SDK
 
 ### Installation
-The shown commands are for linux only.
-If you want to install it for windows, then you have to use the installers online.
+The commands shown in this section are Linux specific.
+If you want to install it on Windows, then you have to use the associated installer.
 
 1. Download CMake
 ```shell
@@ -74,8 +73,6 @@ cmake --build .
 ```
 
 5. Run the engine to check if everything was built successfully.
-
-## Screenshots
 
 ## Dependencies
 - [fmt](https://github.com/fmtlib/fmt/blob/master/LICENSE.rst) Copyright (c) MIT License, Victor Zverovich 2012-present
