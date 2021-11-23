@@ -1,0 +1,9 @@
+[submodule "Source/ThirdParty/volk"]
+	path = Source/ThirdParty/volk
+	url = https://github.com/zeux/volk
+[submodule "Source/ThirdParty/Vulkan-Headers"]
+	path = Source/ThirdParty/Vulkan-Headers
+	url = https://github.com/KhronosGroup/Vulkan-Headers
+[submodule "Source/ThirdParty/glfw"]
+	path = Source/ThirdParty/glfw
+	url = https://github.com/glfw/glfw

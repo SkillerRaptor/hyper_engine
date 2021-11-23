@@ -10,59 +10,45 @@
 Checks: '
   -*,
   bugprone-*,
-  cert-*,
+  -bugprone-exception-escape,
   clang-analyzer-*,
+  clang-diagnostic-*,
   concurrency-*,
+  -concurrency-mt-unsafe,
   google-*,
-  hicpp-*,
-  misc-*,
-  modernize-*,
-  mpi-*,
-  performance-*,
-  portability-*,
-  readability-identifier-naming,
-  -cppcoreguidelines-special-member-functions,
+  llvm-*,
+  -google-build-using-namespace,
   -google-explicit-constructor,
-  -hicpp-avoid-c-arrays,
-  -hicpp-explicit-conversions,
-  -hicpp-no-array-decay,
-  -hicpp-use-auto,
-  -hicpp-signed-bitwise,
-  -hicpp-special-member-functions,
+  misc-*,
+  -misc-unused-parameters,
+  -misc-non-private-member-variables-in-classes,
+  -misc-no-recursion,
+  modernize-*,
   -modernize-avoid-c-arrays,
   -modernize-use-auto,
   -modernize-use-nodiscard,
-  -misc-non-private-member-variables-in-classes'
+  -modernize-use-trailing-return-type,
+  performance-*,
+  portability-*,
+  readability-identifier-naming'
 
 CheckOptions:
   - key: readability-identifier-naming.ClassCase
     value: CamelCase
-  - key: readability-identifier-naming.ClassPrefix
-    value: C
-  - key: readability-identifier-naming.ClassHungarianPrefix
-    value: On
   - key: readability-identifier-naming.EnumCase
     value: CamelCase
-  - key: readability-identifier-naming.EnumPrefix
-    value: E
-  - key: readability-identifier-naming.EnumHungarianPrefix
-    value: On
   - key: readability-identifier-naming.EnumConstantCase
     value: CamelCase
   - key: readability-identifier-naming.FunctionCase
     value: snake_case
   - key: readability-identifier-naming.MacroDefinitionCase
-    value: aNy_CasE
+    value: UPPER_CASE
   - key: readability-identifier-naming.MemberCase
     value: snake_case
   - key: readability-identifier-naming.NamespaceCase
     value: CamelCase
   - key: readability-identifier-naming.StructCase
     value: CamelCase
-  - key: readability-identifier-naming.StructPrefix
-    value: S
-  - key: readability-identifier-naming.StructHungarianPrefix
-    value: On
   - key: readability-identifier-naming.TypeAliasCase
     value: CamelCase
   - key: readability-identifier-naming.TypedefCase

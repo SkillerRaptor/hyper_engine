@@ -7,21 +7,26 @@
 #-------------------------------------------------------------------------------------------
 # ThirdParty
 #-------------------------------------------------------------------------------------------
+set(BUILD_SHARED_LIBS OFF)
 
 #-------------------------------------------------------------------------------------------
-# OpenGL
+# GLFW
 #-------------------------------------------------------------------------------------------
-find_package(OpenGL QUIET)
-if (OPENGL_FOUND)
-    message(STATUS "'OpenGL' found and enabled")
-    set(HYPERENGINE_BUILD_OPENGL ON PARENT_SCOPE)
-endif ()
+set(GLFW_BUILD_EXAMPLES OFF)
+set(GLFW_BUILD_TESTS OFF)
+set(GLFW_BUILD_DOCS OFF)
+set(GLFW_INSTALL OFF)
+add_subdirectory(glfw)
 
 #-------------------------------------------------------------------------------------------
-# Vulkan
+# Vulkan-Headers
 #-------------------------------------------------------------------------------------------
-find_package(Vulkan QUIET)
-if (Vulkan_FOUND)
-    message(STATUS "'Vulkan' found and enabled")
-    set(HYPERENGINE_BUILD_VULKAN ON PARENT_SCOPE)
-endif ()
+add_subdirectory(Vulkan-Headers)
+
+#-------------------------------------------------------------------------------------------
+# volk
+#-------------------------------------------------------------------------------------------
+set(VOLK_STATIC_DEFINES ON)
+set(VOLK_PULL_IN_VULKAN OFF)
+set(VOLK_INSTALL OFF)
+add_subdirectory(volk)

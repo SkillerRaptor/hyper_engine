@@ -19,7 +19,7 @@ include(Development/CMake/StandardProjectSettings.cmake)
 # Project Libraries
 #-------------------------------------------------------------------------------------------
 add_library(ProjectOptions INTERFACE)
-target_compile_features(ProjectOptions INTERFACE cxx_std_17)
+target_compile_features(ProjectOptions INTERFACE cxx_std_20)
 
 add_library(ProjectWarnings INTERFACE)
 
@@ -27,9 +27,6 @@ add_library(ProjectWarnings INTERFACE)
 # Standard Settings
 #-------------------------------------------------------------------------------------------
 include(Development/CMake/Cache.cmake)
-
-include(Development/CMake/CompilerSettings.cmake)
-enable_settings(ProjectOptions)
 
 include(Development/CMake/CompilerWarnings.cmake)
 enable_warnings(ProjectWarnings)
@@ -52,24 +49,6 @@ if (WIN32)
 elseif (UNIX AND NOT APPLE)
     set(HYPERENGINE_ARCH "Linux")
 endif ()
-
-#-------------------------------------------------------------------------------------------
-# Conan
-#-------------------------------------------------------------------------------------------
-set(CONAN_LIBRARIES
-        fmt/8.0.1
-        glad/0.1.34
-        glfw/3.3.4
-        glslang/11.5.0
-        vulkan-headers/1.2.190
-        vulkan-memory-allocator/2.3.0
-        volk/1.2.190)
-
-set(CONAN_OPTIONS
-        glad:gl_profile=core)
-
-include(Development/CMake/Conan.cmake)
-run_conan()
 
 #-------------------------------------------------------------------------------------------
 # Source

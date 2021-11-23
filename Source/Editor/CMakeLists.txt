@@ -8,11 +8,10 @@
 # HyperEditor
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/main.cpp
-        src/HyperEditor/Editor.cpp)
+        src/main.cpp)
 
 set(HEADERS
-        include/HyperEditor/Editor.hpp)
+        )
 
 hyperengine_create_executable(HyperEditor)
 target_link_libraries(

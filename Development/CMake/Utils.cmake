@@ -29,7 +29,7 @@ function(hyperengine_create_executable target)
     target_include_directories(
             ${target}
             PUBLIC
-            ${CMAKE_CURRENT_SOURCE_DIR}/include)
+            include)
 endfunction()
 
 function(hyperengine_create_library target)
@@ -45,5 +45,5 @@ function(hyperengine_create_library target)
     target_include_directories(
             ${target}
             PUBLIC
-            ${CMAKE_CURRENT_SOURCE_DIR}/include)
+            include)
 endfunction()

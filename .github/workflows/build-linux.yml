@@ -9,9 +9,7 @@ jobs:
       run:
         shell: bash
     env:
-      conan_path: "$HOME/.local/bin"
-      conan_user_home: "${{ github.workspace }}/conan-cache"
-      vulkan_sdk: "$GITHUB_WORKSPACE/vulkan_sdk/"
+      vulkan_sdk: "${{ github.workspace }}/vulkan_sdk"
       vulkan_version: "1.2.189.0"
     strategy:
       fail-fast: false
@@ -20,66 +18,30 @@ jobs:
           - {
             name: "Ubuntu Clang Debug",
             artifact: "linux-clang-debug.tar.xz",
-            cc: "clang-10",
-            cxx: "clang++-10",
-            build_type: "Debug",
-            build_options: ""
+            cc: "clang-12",
+            cxx: "clang++-12",
+            build_type: "Debug"
           }
           - {
             name: "Ubuntu GCC Debug",
             artifact: "linux-gcc-debug.tar.xz",
             cc: "gcc-10",
             cxx: "g++-10",
-            build_type: "Debug",
-            build_options: ""
-          }
-          - {
-            name: "Ubuntu Clang Debug Sanitizers",
-            artifact: "linux-clang-debug-sanitizers.tar.xz",
-            cc: "clang-10",
-            cxx: "clang++-10",
-            build_type: "Debug",
-            build_options: "-D ENABLE_COVERAGE=ON -D ENABLE_SANITIZER_ADDRESS=ON -D ENABLE_SANITIZER_LEAK=ON -D ENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON -D ENABLE_SANITIZER_MEMORY=ON"
-          }
-          - {
-            name: "Ubuntu GCC Debug Sanitizers",
-            artifact: "linux-gcc-debug-sanitizers.tar.xz",
-            cc: "gcc-10",
-            cxx: "g++-10",
-            build_type: "Debug",
-            build_options: "-D ENABLE_COVERAGE=ON -D ENABLE_SANITIZER_ADDRESS=ON -D ENABLE_SANITIZER_LEAK=ON -D ENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON -D ENABLE_SANITIZER_MEMORY=ON"
+            build_type: "Debug"
           }
           - {
             name: "Ubuntu Clang Release",
             artifact: "linux-clang-release.tar.xz",
-            cc: "clang-10",
-            cxx: "clang++-10",
-            build_type: "Release",
-            build_options: ""
+            cc: "clang-12",
+            cxx: "clang++-12",
+            build_type: "Release"
           }
           - {
             name: "Ubuntu GCC Release",
             artifact: "linux-gcc-release.tar.xz",
             cc: "gcc-10",
             cxx: "g++-10",
-            build_type: "Release",
-            build_options: ""
-          }
-          - {
-            name: "Ubuntu Clang Release Sanitizers",
-            artifact: "linux-clang-release-sanitizers.tar.xz",
-            cc: "clang-10",
-            cxx: "clang++-10",
-            build_type: "Release",
-            build_options: "-D ENABLE_COVERAGE=ON -D ENABLE_SANITIZER_ADDRESS=ON -D ENABLE_SANITIZER_LEAK=ON -D ENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON -D ENABLE_SANITIZER_MEMORY=ON"
-          }
-          - {
-            name: "Ubuntu GCC Release Sanitizers",
-            artifact: "linux-gcc-release-sanitizers.tar.xz",
-            cc: "gcc-10",
-            cxx: "g++-10",
-            build_type: "Release",
-            build_options: "-D ENABLE_COVERAGE=ON -D ENABLE_SANITIZER_ADDRESS=ON -D ENABLE_SANITIZER_LEAK=ON -D ENABLE_SANITIZER_UNDEFINED_BEHAVIOR=ON -D ENABLE_SANITIZER_MEMORY=ON"
+            build_type: "Release"
           }
     steps:
       - name: Checkout
@@ -87,41 +49,16 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Cache
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-conan-modules
-        with:
-          path: |
-            ${{ env.conan_user_home }}
-            ~/.cache/pip
-          key: ${{ runner.os }}-${{ matrix.config.build_type }}-${{ hashFiles('CMakeLists.txt') }}-${{ hashFiles('Development/CMake/Conan.cmake') }}
-
       - name: Update environment
         run: |
           sudo apt update -qq
           sudo apt install -y \
-            ccache \
-            clang-10 \
+            clang-12 \
             cmake \
             gcc-10 \
             g++-10 \
-            gcovr \
-            llvm-10 \
             libgl1-mesa-dev \
             xorg-dev
-
-      - name: Install Conan
-        shell: bash
-        run: |
-          pip3 install wheel setuptools gcovr
-          pip3 install conan --upgrade
-
-      - name: Install / Configure dependencies
-        shell: bash
-        run: |
-          sudo update-alternatives --install /usr/bin/conan conan $HOME/.local/bin/conan 100
-          sudo update-alternatives --config conan
 
       - name: Install Vulkan SDK
         run: |
@@ -135,7 +72,7 @@ jobs:
           export CC=${{ matrix.config.cc }}
           export CXX=${{ matrix.config.cxx }}
           export VULKAN_SDK="${{ env.vulkan_sdk }}/${{ env.vulkan_version }}/x86_64"
-          export PATH=$PATH:${{ env.conan_path }}:$VULKAN_SDK/bin
+          export PATH=$PATH:$VULKAN_SDK/bin
           export LD_LIBRARY_PATH=$VULKAN_SDK/lib:$LD_LIBRARY_PATH
           export VK_LAYER_PATH=$VULKAN_SDK/etc/explicit_layer.d
 
@@ -149,10 +86,6 @@ jobs:
         run: |
           cd build
           ctest -C ${{ matrix.config.build_type }}
-
-      - name: Coverage
-        run: |
-          gcovr -j $(nproc) --delete --root . --print-summary --xml-pretty --xml coverage.xml .
 
       - name: Prepare upload
         run: |
