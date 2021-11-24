@@ -27,6 +27,6 @@ add_subdirectory(Vulkan-Headers)
 # volk
 #-------------------------------------------------------------------------------------------
 set(VOLK_STATIC_DEFINES ON)
-set(VOLK_PULL_IN_VULKAN OFF)
+set(VOLK_PULL_IN_VULKAN ON)
 set(VOLK_INSTALL OFF)
 add_subdirectory(volk)

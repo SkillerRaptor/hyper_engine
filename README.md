@@ -3,8 +3,6 @@
 [![Build Linux](https://img.shields.io/github/workflow/status/SkillerRaptor/HyperEngine/build-linux?style=flat&label=Build%20Linux&logo=github)](https://github.com/SkillerRaptor/HyperEngine/blob/master/.github/workflows/build-linux.yml)
 [![License](https://img.shields.io/badge/license-MIT-yellow?style=flat)](https://github.com/SkillerRaptor/HyperEngine/blob/master/LICENSE)
 
-<br />
-
 HyperEngine is a modern multi-platform 2D & 3D game engine written in C++20.
 The engine is focused on testing new designs in form of rendering or performance.
 
