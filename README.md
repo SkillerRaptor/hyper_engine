@@ -29,7 +29,7 @@ git clone ttps://github.com/SkillerRaptor/HyperEngine
 cd HyperEngine
 ```
 
-2. Create a folder in which the CMake project files will be generated in.
+2. create a folder in which the CMake project files will be generated in.
 ```shell
 mkdir build
 cd build

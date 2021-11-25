@@ -39,8 +39,6 @@ enable_doxygen()
 
 include(Development/CMake/StaticAnalyzers.cmake)
 
-include(Development/CMake/Utils.cmake)
-
 #-------------------------------------------------------------------------------------------
 # Variables
 #-------------------------------------------------------------------------------------------
