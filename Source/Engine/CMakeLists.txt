@@ -16,7 +16,9 @@ set(HEADERS
         include/HyperEngine/EngineLoop.hpp
         include/HyperEngine/Error.hpp
         include/HyperEngine/Expected.hpp
+        include/HyperEngine/Formatter.hpp
         include/HyperEngine/Launcher.hpp
+        include/HyperEngine/Logger.hpp
         include/HyperEngine/Prerequisites.hpp)
 
 add_library(HyperEngine STATIC ${SOURCES} ${HEADERS})

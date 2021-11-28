@@ -8,18 +8,17 @@
 
 #include "HyperEngine/Application.hpp"
 #include "HyperEngine/EngineLoop.hpp"
+#include "HyperEngine/Logger.hpp"
 
 #include <type_traits>
 
 namespace HyperEngine
 {
-	template <typename T>
-	concept IsApplication = std::is_base_of_v<Application, T>;
-
 	class Launcher
 	{
 	public:
-		template <IsApplication T, typename... Args>
+		template <typename T, typename... Args>
+		requires std::is_base_of_v<Application, T>
 		static int launch(Args &&...args)
 		{
 			T application(std::forward<Args>(args)...);
@@ -27,6 +26,7 @@ namespace HyperEngine
 			Expected<EngineLoop> engine_loop = EngineLoop::create(application);
 			if (engine_loop.is_error())
 			{
+				Logger::error("{}\n", engine_loop.error());
 				return EXIT_FAILURE;
 			}
 

@@ -13,3 +13,8 @@
 #else
 #	define HYPERENGINE_DEBUG 1
 #endif
+
+#define HYPERENGINE_UNUSED_VARIABLE(x) (void) (x)
+#define HYPERENGINE_UNUSED_VARIADIC(x) (HYPERENGINE_UNUSED_VARIABLE(x), ...)
+
+#define HYPERENGINE_UNREACHABLE() std::abort()

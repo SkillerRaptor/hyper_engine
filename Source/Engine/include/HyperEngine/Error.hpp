@@ -7,6 +7,7 @@
 #pragma once
 
 #include <optional>
+#include <ostream>
 #include <string>
 
 namespace HyperEngine
@@ -16,33 +17,26 @@ namespace HyperEngine
 	class Error
 	{
 	public:
-		explicit Error(std::string string);
-		~Error();
+		std::string error() const;
 
-		Error(const Error &other) = delete;
-		Error(Error &&other) noexcept;
+		bool is_error() const noexcept;
 
-		Error &operator=(const Error &other) = delete;
-		Error &operator=(Error &&other) noexcept;
-
-		std::string string() const noexcept;
-
-		bool is_error();
+		operator bool() const noexcept;
 
 		static ErrorSuccess success();
 
 	protected:
 		Error() = default;
 
-	private:
-		void assert_is_checked();
+		explicit Error(std::string error);
 
 	private:
-		bool m_checked = false;
-		std::optional<std::string> m_string = {};
+		std::optional<std::string> m_error = {};
 	};
 
 	class ErrorSuccess final : public Error
 	{
 	};
+
+	std::ostream &operator<<(std::ostream &ostream, const Error &error);
 } // namespace HyperEngine

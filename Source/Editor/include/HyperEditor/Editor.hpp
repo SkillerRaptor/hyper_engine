@@ -10,7 +10,7 @@
 
 namespace HyperEditor
 {
-	class Editor : public HyperEngine::Application
+	class Editor final : public HyperEngine::Application
 	{
 	public:
 	};

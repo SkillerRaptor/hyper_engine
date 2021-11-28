@@ -6,13 +6,15 @@
 
 #include "HyperEngine/EngineLoop.hpp"
 
+#include "HyperEngine/Prerequisites.hpp"
+
 namespace HyperEngine
 {
 	EngineLoop::EngineLoop(Application &application, Error &error)
 		: m_application(application)
 	{
-		(void) m_application;
-		(void) error;
+		HYPERENGINE_UNUSED_VARIABLE(m_application);
+		HYPERENGINE_UNUSED_VARIABLE(error);
 	}
 
 	void EngineLoop::run()

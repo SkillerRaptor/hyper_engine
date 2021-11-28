@@ -9,12 +9,11 @@
 #include "HyperEngine/Error.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <optional>
 
 namespace HyperEngine
 {
-	template <typename T>
+	template <typename T, typename ErrorT = Error>
 	class Expected
 	{
 	public:
@@ -28,102 +27,118 @@ namespace HyperEngine
 		{
 		}
 
-		Expected(Error &&error)
+		Expected(const ErrorT &error)
+			: m_error(error)
+		{
+		}
+
+		Expected(ErrorT &&error)
 			: m_error(std::move(error))
 		{
 		}
 
-		Expected(const Expected &other) = delete;
-		Expected(Expected &&other) noexcept
-		{
-			m_checked = true;
-			m_value = std::move(other.m_value);
-			m_error = std::move(other.m_error);
-
-			other.m_checked = false;
-			other.m_value = std::nullopt;
-			other.m_error = std::nullopt;
-		}
-
-		Expected &operator=(const Expected &other) = delete;
-		Expected &operator=(Expected &&other) noexcept
-		{
-			assert_is_checked();
-
-			m_checked = false;
-			m_value = std::move(other.m_value);
-			m_error = std::move(other.m_error);
-
-			other.m_checked = true;
-			other.m_value = std::nullopt;
-			other.m_error = std::nullopt;
-
-			return *this;
-		}
-
-		Expected(ErrorSuccess error_success) = delete;
-
-		~Expected()
-		{
-			assert_is_checked();
-		}
-
 		T &value()
 		{
-			assert_is_checked();
+			assert(m_value.has_value());
 			return m_value.value();
 		}
 
 		const T &value() const
 		{
-			assert_is_checked();
+			assert(m_value.has_value());
 			return m_value.value();
 		}
 
-		T *operator->()
+		ErrorT &error()
 		{
-			assert_is_checked();
-			return std::addressof(m_value.value());
+			assert(m_error.has_value());
+			return m_error.value();
 		}
 
-		const T *operator->() const
+		const ErrorT &error() const
 		{
-			assert_is_checked();
-			return std::addressof(m_value.value());
+			assert(m_error.has_value());
+			return m_error.value();
+		}
+
+		bool is_error() const noexcept
+		{
+			return m_error.has_value();
+		}
+
+		operator bool() const noexcept
+		{
+			return m_error.has_value();
 		}
 
 		T &operator*()
 		{
-			assert_is_checked();
+			assert(m_value.has_value());
 			return m_value.value();
 		}
 
 		const T &operator*() const
 		{
-			assert_is_checked();
+			assert(m_value.has_value());
 			return m_value.value();
 		}
 
-		bool is_error()
+		T *operator->()
 		{
-			m_checked = true;
+			assert(m_value.has_value());
+			return &m_value.value();
+		}
+
+		const T *operator->() const
+		{
+			assert(m_value.has_value());
+			return &m_value.value();
+		}
+
+	private:
+		std::optional<T> m_value = {};
+		std::optional<ErrorT> m_error = {};
+	};
+
+	template <typename ErrorT>
+	class Expected<void, ErrorT>
+	{
+	public:
+		Expected() = default;
+
+		Expected(const ErrorT &error)
+			: m_error(error)
+		{
+		}
+
+		Expected(ErrorT &&error)
+			: m_error(std::move(error))
+		{
+		}
+
+		ErrorT &error()
+		{
+			assert(m_error.has_value());
+			return m_error.value();
+		}
+
+		const ErrorT &error() const
+		{
+			assert(m_error.has_value());
+			return m_error.value();
+		}
+
+		bool is_error() const noexcept
+		{
+			return m_error.has_value();
+		}
+
+		operator bool() const noexcept
+		{
 			return m_error.has_value();
 		}
 
 	private:
-		void assert_is_checked()
-		{
-			if (m_checked)
-			{
-				return;
-			}
-
-			std::abort();
-		}
-
-	private:
-		bool m_checked = false;
-		std::optional<T> m_value = {};
-		std::optional<Error> m_error = {};
+		std::optional<ErrorT> m_error = {};
 	};
 } // namespace HyperEngine

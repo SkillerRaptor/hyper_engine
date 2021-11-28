@@ -6,49 +6,29 @@
 
 #include "HyperEngine/Error.hpp"
 
+#include <cassert>
+
 namespace HyperEngine
 {
-	Error::Error(std::string string)
-		: m_string(std::move(string))
+	Error::Error(std::string error)
+		: m_error(std::move(error))
 	{
 	}
 
-	Error::~Error()
+	std::string Error::error() const
 	{
-		assert_is_checked();
+		assert(m_error.has_value());
+		return m_error.value();
 	}
 
-	Error::Error(Error &&other) noexcept
+	bool Error::is_error() const noexcept
 	{
-		m_checked = true;
-		m_string = std::move(other.m_string);
-
-		other.m_checked = false;
-		other.m_string = std::nullopt;
+		return m_error.has_value();
 	}
 
-	Error &Error::operator=(Error &&other) noexcept
+	Error::operator bool() const noexcept
 	{
-		assert_is_checked();
-
-		m_checked = false;
-		m_string = std::move(other.m_string);
-
-		other.m_checked = true;
-		other.m_string = std::nullopt;
-
-		return *this;
-	}
-
-	std::string Error::string() const noexcept
-	{
-		return m_string.value();
-	}
-
-	bool Error::is_error()
-	{
-		m_checked = true;
-		return m_string.has_value();
+		return m_error.has_value();
 	}
 
 	ErrorSuccess Error::success()
@@ -56,13 +36,9 @@ namespace HyperEngine
 		return {};
 	}
 
-	void Error::assert_is_checked()
+	std::ostream &operator<<(std::ostream &ostream, const Error &error)
 	{
-		if (m_checked || !m_string.has_value())
-		{
-			return;
-		}
-
-		std::abort();
+		ostream << error.error();
+		return ostream;
 	}
 } // namespace HyperEngine
