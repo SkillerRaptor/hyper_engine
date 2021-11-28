@@ -7,7 +7,7 @@
 #pragma once
 
 #include "HyperEngine/Application.hpp"
-#include "HyperEngine/Expected.hpp"
+#include "HyperEngine/Support/Expected.hpp"
 
 namespace HyperEngine
 {

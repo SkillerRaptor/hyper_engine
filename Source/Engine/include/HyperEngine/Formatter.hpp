@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "HyperEngine/Expected.hpp"
-#include "HyperEngine/Prerequisites.hpp"
+#include "HyperEngine/Support/Expected.hpp"
+#include "HyperEngine/Support/Prerequisites.hpp"
 
 #include <sstream>
 #include <string>

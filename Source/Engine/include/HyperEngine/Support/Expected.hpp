@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "HyperEngine/Error.hpp"
+#include "Error.hpp"
 
 #include <cassert>
 #include <optional>

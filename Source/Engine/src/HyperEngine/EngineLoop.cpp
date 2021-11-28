@@ -6,7 +6,7 @@
 
 #include "HyperEngine/EngineLoop.hpp"
 
-#include "HyperEngine/Prerequisites.hpp"
+#include "HyperEngine/Support/Prerequisites.hpp"
 
 namespace HyperEngine
 {

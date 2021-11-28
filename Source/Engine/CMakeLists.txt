@@ -9,17 +9,17 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/HyperEngine/EngineLoop.cpp
-        src/HyperEngine/Error.cpp)
+        src/HyperEngine/Support/Error.cpp)
 
 set(HEADERS
         include/HyperEngine/Application.hpp
         include/HyperEngine/EngineLoop.hpp
-        include/HyperEngine/Error.hpp
-        include/HyperEngine/Expected.hpp
         include/HyperEngine/Formatter.hpp
         include/HyperEngine/Launcher.hpp
         include/HyperEngine/Logger.hpp
-        include/HyperEngine/Prerequisites.hpp)
+        include/HyperEngine/Support/Error.hpp
+        include/HyperEngine/Support/Expected.hpp
+        include/HyperEngine/Support/Prerequisites.hpp)
 
 add_library(HyperEngine STATIC ${SOURCES} ${HEADERS})
 target_link_libraries(

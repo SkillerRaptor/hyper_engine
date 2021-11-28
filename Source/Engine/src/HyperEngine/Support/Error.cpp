@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "HyperEngine/Error.hpp"
+#include "HyperEngine/Support/Error.hpp"
 
 #include <cassert>
 
