@@ -10,30 +10,32 @@
 
 namespace HyperEngine
 {
-	EngineLoop::EngineLoop(Application &application, Error &error)
+	EngineLoop::EngineLoop(
+		Application &application,
+		std::unique_ptr<Window> window)
 		: m_application(application)
+		, m_window(std::move(window))
 	{
 		HYPERENGINE_UNUSED_VARIABLE(m_application);
-		HYPERENGINE_UNUSED_VARIABLE(error);
 	}
 
 	void EngineLoop::run()
 	{
 		while (true)
 		{
+			m_window->update();
 			break;
 		}
 	}
 
 	Expected<EngineLoop> EngineLoop::create(Application &application)
 	{
-		Error error = Error::success();
-		EngineLoop engine_loop(application, error);
-		if (error.is_error())
+		auto window = Window::create("HyperEngine", 1280, 720);
+		if (window.is_error())
 		{
-			return error;
+			return window.error();
 		}
 
-		return engine_loop;
+		return EngineLoop(application, std::move(window.value()));
 	}
 } // namespace HyperEngine

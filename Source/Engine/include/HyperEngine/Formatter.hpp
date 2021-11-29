@@ -46,15 +46,6 @@ namespace HyperEngine::Formatter
 		}
 	} // namespace Detail
 
-	class FormatError : public Error
-	{
-	public:
-		FormatError()
-			: Error("bad format string")
-		{
-		}
-	};
-
 	template <Detail::Printable... Args>
 	Expected<std::string> format(std::string_view format, Args &&...args)
 	{
@@ -73,12 +64,12 @@ namespace HyperEngine::Formatter
 
 			if (*it != '}')
 			{
-				return FormatError();
+				return Error("bad format string");
 			}
 
 			if (argument_index >= sizeof...(args))
 			{
-				return FormatError();
+				return Error("bad format string");
 			}
 
 			Detail::format(

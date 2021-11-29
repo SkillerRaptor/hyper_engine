@@ -17,6 +17,8 @@ namespace HyperEngine
 	class Error
 	{
 	public:
+		explicit Error(std::string error);
+
 		std::string error() const;
 
 		bool is_error() const noexcept;
@@ -27,8 +29,6 @@ namespace HyperEngine
 
 	protected:
 		Error() = default;
-
-		explicit Error(std::string error);
 
 	private:
 		std::optional<std::string> m_error = {};

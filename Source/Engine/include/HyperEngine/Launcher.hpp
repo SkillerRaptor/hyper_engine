@@ -23,7 +23,7 @@ namespace HyperEngine
 		{
 			T application(std::forward<Args>(args)...);
 
-			Expected<EngineLoop> engine_loop = EngineLoop::create(application);
+			auto engine_loop = EngineLoop::create(application);
 			if (engine_loop.is_error())
 			{
 				Logger::error("{}\n", engine_loop.error());
