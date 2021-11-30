@@ -21,6 +21,10 @@ function(enable_doxygen)
         set(DOXYGEN_DISTRIBUTE_GROUP_DOC YES)
         set(DOXYGEN_DOT_TRANSPARENT YES)
         set(DOXYGEN_EXTRACT_ALL YES)
+        set(DOXYGEN_EXCLUDE_PATTERNS
+                */glfw/*
+                */volk/*
+                */Vulkan-Headers/*)
         set(DOXYGEN_GENERATE_TREEVIEW YES)
         set(DOXYGEN_HAVE_DOT YES)
         set(DOXYGEN_HIDE_UNDOC_RELATIONS NO)
