@@ -9,6 +9,7 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/HyperEngine/EngineLoop.cpp
+        src/HyperEngine/Rendering/RenderContext.cpp
         src/HyperEngine/Platform/Window.cpp
         src/HyperEngine/Support/Error.cpp)
 
@@ -18,6 +19,7 @@ set(HEADERS
         include/HyperEngine/Formatter.hpp
         include/HyperEngine/Launcher.hpp
         include/HyperEngine/Logger.hpp
+        include/HyperEngine/Rendering/RenderContext.hpp
         include/HyperEngine/Platform/Window.hpp
         include/HyperEngine/Support/Error.hpp
         include/HyperEngine/Support/Expected.hpp

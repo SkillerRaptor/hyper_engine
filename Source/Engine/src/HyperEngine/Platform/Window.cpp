@@ -35,8 +35,24 @@ namespace HyperEngine
 
 	Window::~Window()
 	{
-		glfwDestroyWindow(m_window);
-		glfwTerminate();
+		if (m_window != nullptr)
+		{
+			glfwDestroyWindow(m_window);
+			glfwTerminate();
+		}
+	}
+
+	Window::Window(Window &&other) noexcept
+	{
+		m_window = other.m_window;
+		other.m_window = nullptr;
+	}
+
+	Window &Window::operator=(Window &&other) noexcept
+	{
+		m_window = other.m_window;
+		other.m_window = nullptr;
+		return *this;
 	}
 
 	void Window::update()
@@ -44,13 +60,13 @@ namespace HyperEngine
 		glfwPollEvents();
 	}
 
-	Expected<std::unique_ptr<Window>> Window::create(
+	Expected<Window> Window::create(
 		const std::string &title,
 		size_t width,
 		size_t height)
 	{
 		Error error = Error::success();
-		auto window = std::make_unique<Window>(title, width, height, error);
+		Window window(title, width, height, error);
 		if (error.is_error())
 		{
 			return error;

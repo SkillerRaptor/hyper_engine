@@ -7,6 +7,7 @@
 #pragma once
 
 #include "HyperEngine/Support/Expected.hpp"
+#include "HyperEngine/Support/Prerequisites.hpp"
 
 #include <memory>
 #include <string>
@@ -18,15 +19,23 @@ namespace HyperEngine
 	class Window
 	{
 	public:
-		Window(const std::string &title, size_t width, size_t height, Error &error);
+		HYPERENGINE_NON_COPYABLE(Window);
+
+	public:
 		~Window();
+
+		Window(Window &&other) noexcept;
+		Window &operator=(Window &&other) noexcept;
 
 		void update();
 
-		static Expected<std::unique_ptr<Window>> create(
+		static Expected<Window> create(
 			const std::string &title,
 			size_t width,
 			size_t height);
+
+	private:
+		Window(const std::string &title, size_t width, size_t height, Error &error);
 
 	private:
 		GLFWwindow *m_window = nullptr;

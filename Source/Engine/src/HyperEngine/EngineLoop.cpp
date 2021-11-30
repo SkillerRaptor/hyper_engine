@@ -12,9 +12,11 @@ namespace HyperEngine
 {
 	EngineLoop::EngineLoop(
 		Application &application,
-		std::unique_ptr<Window> window)
+		Window window,
+		RenderContext render_context)
 		: m_application(application)
 		, m_window(std::move(window))
+		, m_render_context(std::move(render_context))
 	{
 		HYPERENGINE_UNUSED_VARIABLE(m_application);
 	}
@@ -23,7 +25,7 @@ namespace HyperEngine
 	{
 		while (true)
 		{
-			m_window->update();
+			m_window.update();
 			break;
 		}
 	}
@@ -36,6 +38,15 @@ namespace HyperEngine
 			return window.error();
 		}
 
-		return EngineLoop(application, std::move(window.value()));
+		auto render_context = RenderContext::create();
+		if (render_context.is_error())
+		{
+			return render_context.error();
+		}
+
+		return EngineLoop(
+			application,
+			std::move(window.value()),
+			std::move(render_context.value()));
 	}
 } // namespace HyperEngine

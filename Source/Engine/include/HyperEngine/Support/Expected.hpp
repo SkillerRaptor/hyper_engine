@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "Error.hpp"
+#include "HyperEngine/Support/Error.hpp"
 
 #include <cassert>
 #include <optional>
@@ -37,28 +37,52 @@ namespace HyperEngine
 		{
 		}
 
-		T &value()
+		T &value() &
 		{
 			assert(m_value.has_value());
-			return m_value.value();
+			return *m_value;
 		}
 
-		const T &value() const
+		const T &value() const &
 		{
 			assert(m_value.has_value());
-			return m_value.value();
+			return *m_value;
 		}
 
-		ErrorT &error()
+		T &&value() &&
 		{
-			assert(m_error.has_value());
-			return m_error.value();
+			assert(m_value.has_value());
+			return *std::move(m_value);
 		}
 
-		const ErrorT &error() const
+		const T &&value() const &&
+		{
+			assert(m_value.has_value());
+			return *std::move(m_value);
+		}
+
+		ErrorT &error() &
 		{
 			assert(m_error.has_value());
-			return m_error.value();
+			return *m_error;
+		}
+
+		const ErrorT &error() const &
+		{
+			assert(m_error.has_value());
+			return *m_error;
+		}
+
+		ErrorT &&error() &&
+		{
+			assert(m_error.has_value());
+			return *std::move(m_error);
+		}
+
+		const ErrorT &&error() const &&
+		{
+			assert(m_error.has_value());
+			return *std::move(m_error);
 		}
 
 		bool is_error() const noexcept
