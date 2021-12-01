@@ -38,7 +38,13 @@ namespace HyperEngine
 			return window.error();
 		}
 
-		auto render_context = RenderContext::create();
+#if HYPERENGINE_DEBUG
+		constexpr bool validation_layers_enabled = true;
+#else
+		constexpr bool validation_layers_enabled = false;
+#endif
+
+		auto render_context = RenderContext::create(validation_layers_enabled);
 		if (render_context.is_error())
 		{
 			return render_context.error();
