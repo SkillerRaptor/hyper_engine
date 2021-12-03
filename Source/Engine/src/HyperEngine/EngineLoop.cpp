@@ -13,7 +13,7 @@ namespace HyperEngine
 	EngineLoop::EngineLoop(
 		Application &application,
 		Window window,
-		RenderContext render_context)
+		Rendering::RenderContext render_context)
 		: m_application(application)
 		, m_window(std::move(window))
 		, m_render_context(std::move(render_context))
@@ -44,7 +44,8 @@ namespace HyperEngine
 		constexpr bool validation_layers_enabled = false;
 #endif
 
-		auto render_context = RenderContext::create(validation_layers_enabled);
+		auto render_context =
+			Rendering::RenderContext::create(validation_layers_enabled);
 		if (render_context.is_error())
 		{
 			return render_context.error();

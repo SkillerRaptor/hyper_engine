@@ -6,16 +6,16 @@
 
 #include "HyperEngine/Rendering/RenderContext.hpp"
 
+#include "HyperEngine/Rendering/Device.hpp"
 #include "HyperEngine/Rendering/Utils.hpp"
 
+#include <cstring>
 #include <GLFW/glfw3.h>
 #include <volk.h>
 
-#include <cstring>
-
-namespace HyperEngine
+namespace HyperEngine::Rendering
 {
-	RenderContext::RenderContext(bool validation_layers_enabled, Error &error)
+	RenderContext::RenderContext(bool validation_layers_requested, Error &error)
 	{
 		if (volkInitialize() != VK_SUCCESS)
 		{
@@ -23,7 +23,7 @@ namespace HyperEngine
 			return;
 		}
 
-		if (validation_layers_enabled && validation_layers_supported())
+		if (validation_layers_requested && validation_layers_supported())
 		{
 			m_validation_layers_enabled = true;
 		}
@@ -44,10 +44,24 @@ namespace HyperEngine
 				return;
 			}
 		}
+
+		auto device = Device::create(m_instance);
+		if (device.is_error())
+		{
+			error = device.error();
+			return;
+		}
+
+		m_device = device.value();
 	}
 
 	RenderContext::~RenderContext()
 	{
+		if (m_device != nullptr)
+		{
+			delete m_device;
+		}
+
 		if (m_debug_messenger != nullptr)
 		{
 			vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messenger, nullptr);
@@ -63,18 +77,22 @@ namespace HyperEngine
 	{
 		m_instance = other.m_instance;
 		m_debug_messenger = other.m_debug_messenger;
+		m_device = other.m_device;
 
 		other.m_instance = nullptr;
 		other.m_debug_messenger = nullptr;
+		other.m_device = nullptr;
 	}
 
 	RenderContext &RenderContext::operator=(RenderContext &&other) noexcept
 	{
 		m_instance = other.m_instance;
 		m_debug_messenger = other.m_debug_messenger;
+		m_device = other.m_device;
 
 		other.m_instance = nullptr;
 		other.m_debug_messenger = nullptr;
+		other.m_device = nullptr;
 
 		return *this;
 	}
@@ -85,10 +103,10 @@ namespace HyperEngine
 			.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
 			.pNext = nullptr,
 			.pApplicationName = "HyperEditor",
-			.applicationVersion = Vulkan::make_version(1, 0, 0),
+			.applicationVersion = make_version(1, 0, 0),
 			.pEngineName = "HyperEngine",
-			.engineVersion = Vulkan::make_version(1, 0, 0),
-			.apiVersion = Vulkan::make_api_version(0, 1, 2, 0),
+			.engineVersion = make_version(1, 0, 0),
+			.apiVersion = make_api_version(0, 1, 2, 0),
 		};
 
 		const VkDebugUtilsMessageSeverityFlagsEXT message_severity =
@@ -103,12 +121,11 @@ namespace HyperEngine
 			.flags = 0,
 			.messageSeverity = message_severity,
 			.messageType = message_type,
-			.pfnUserCallback = Vulkan::debug_callback,
+			.pfnUserCallback = debug_callback,
 			.pUserData = nullptr,
 		};
 
 		const std::vector<const char *> extensions = request_required_extensions();
-
 		const uint32_t enabled_layer_count =
 			m_validation_layers_enabled
 				? static_cast<uint32_t>(s_validation_layers.size())
@@ -152,7 +169,7 @@ namespace HyperEngine
 			.flags = 0,
 			.messageSeverity = message_severity,
 			.messageType = message_type,
-			.pfnUserCallback = Vulkan::debug_callback,
+			.pfnUserCallback = debug_callback,
 			.pUserData = nullptr,
 		};
 
@@ -170,6 +187,10 @@ namespace HyperEngine
 	{
 		uint32_t instance_layer_count = 0;
 		vkEnumerateInstanceLayerProperties(&instance_layer_count, nullptr);
+		if (instance_layer_count == 0)
+		{
+			return false;
+		}
 
 		std::vector<VkLayerProperties> instance_layers(instance_layer_count);
 		vkEnumerateInstanceLayerProperties(
@@ -204,10 +225,13 @@ namespace HyperEngine
 		uint32_t instance_extension_count = 0;
 		const char **instance_extensions =
 			glfwGetRequiredInstanceExtensions(&instance_extension_count);
+		if (instance_extension_count == 0 || instance_extensions == nullptr)
+		{
+			return {};
+		}
 
 		std::vector<const char *> extensions(
 			instance_extensions, instance_extensions + instance_extension_count);
-
 		if (m_validation_layers_enabled)
 		{
 			extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -216,10 +240,11 @@ namespace HyperEngine
 		return extensions;
 	}
 
-	Expected<RenderContext> RenderContext::create(bool validation_layers_enabled)
+	Expected<RenderContext> RenderContext::create(
+		bool validation_layers_requested)
 	{
 		Error error = Error::success();
-		RenderContext render_context(validation_layers_enabled, error);
+		RenderContext render_context(validation_layers_requested, error);
 		if (error.is_error())
 		{
 			return error;
@@ -227,4 +252,4 @@ namespace HyperEngine
 
 		return render_context;
 	}
-} // namespace HyperEngine
+} // namespace HyperEngine::Rendering

@@ -51,9 +51,9 @@ namespace HyperEngine
 	Window &Window::operator=(Window &&other) noexcept
 	{
 		m_window = other.m_window;
-		
+
 		other.m_window = nullptr;
-		
+
 		return *this;
 	}
 

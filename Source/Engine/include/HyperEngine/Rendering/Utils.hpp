@@ -6,22 +6,16 @@
 
 #pragma once
 
-#include <cstdint>
 #include <volk.h>
 
-namespace HyperEngine::Vulkan
+namespace HyperEngine::Rendering
 {
 	constexpr uint32_t make_version(
 		uint32_t major,
 		uint32_t minor,
 		uint32_t patch) noexcept
 	{
-		uint32_t value = 0;
-		value |= major << 22;
-		value |= minor << 12;
-		value |= patch << 0;
-
-		return value;
+		return (major << 22) | (minor << 12) | (patch << 0);
 	}
 
 	constexpr uint32_t make_api_version(
@@ -30,13 +24,7 @@ namespace HyperEngine::Vulkan
 		uint32_t minor,
 		uint32_t patch) noexcept
 	{
-		uint32_t value = 0;
-		value |= variant << 29;
-		value |= major << 22;
-		value |= minor << 12;
-		value |= patch << 0;
-
-		return value;
+		return (variant << 29) | (major << 22) | (minor << 12) | (patch << 0);
 	}
 
 	VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
@@ -44,4 +32,4 @@ namespace HyperEngine::Vulkan
 		VkDebugUtilsMessageTypeFlagsEXT type_flags,
 		const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
 		void *user_data);
-} // namespace HyperEngine::Vulkan
+} // namespace HyperEngine::Rendering

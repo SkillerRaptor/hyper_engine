@@ -24,12 +24,12 @@ namespace HyperEngine
 		EngineLoop(
 			Application &application,
 			Window window,
-			RenderContext render_context);
+			Rendering::RenderContext render_context);
 
 	private:
 		Application &m_application;
 
 		Window m_window;
-		RenderContext m_render_context;
+		Rendering::RenderContext m_render_context;
 	};
 } // namespace HyperEngine

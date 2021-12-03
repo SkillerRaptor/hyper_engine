@@ -9,7 +9,7 @@
 #include "HyperEngine/Logger.hpp"
 #include "HyperEngine/Support/Prerequisites.hpp"
 
-namespace HyperEngine::Vulkan
+namespace HyperEngine::Rendering
 {
 	VkBool32 debug_callback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT severity_flags,
@@ -19,7 +19,7 @@ namespace HyperEngine::Vulkan
 	{
 		HYPERENGINE_UNUSED_VARIABLE(type_flags);
 		HYPERENGINE_UNUSED_VARIABLE(user_data);
-		
+
 		switch (severity_flags)
 		{
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
@@ -31,7 +31,7 @@ namespace HyperEngine::Vulkan
 		default:
 			break;
 		}
-		
+
 		return VK_FALSE;
 	}
-} // namespace HyperEngine::Vulkan
+} // namespace HyperEngine::Rendering

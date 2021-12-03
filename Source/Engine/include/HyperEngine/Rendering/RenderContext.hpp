@@ -6,17 +6,17 @@
 
 #pragma once
 
+#include "HyperEngine/Rendering/Forward.hpp"
 #include "HyperEngine/Support/Expected.hpp"
 #include "HyperEngine/Support/Prerequisites.hpp"
 
 #include <array>
 #include <vector>
 
-using VkInstance = struct VkInstance_T *;
-using VkDebugUtilsMessengerEXT = struct VkDebugUtilsMessengerEXT_T *;
-
-namespace HyperEngine
+namespace HyperEngine::Rendering
 {
+	class Device;
+
 	class RenderContext
 	{
 	public:
@@ -33,10 +33,10 @@ namespace HyperEngine
 		RenderContext(RenderContext &&other) noexcept;
 		RenderContext &operator=(RenderContext &&other) noexcept;
 
-		static Expected<RenderContext> create(bool validation_layers_enabled);
+		static Expected<RenderContext> create(bool validation_layers_requested);
 
 	private:
-		explicit RenderContext(bool validation_layers_enabled, Error &error);
+		explicit RenderContext(bool validation_layers_requested, Error &error);
 
 		Expected<void> create_instance();
 		Expected<void> create_debug_messenger();
@@ -47,7 +47,9 @@ namespace HyperEngine
 	private:
 		VkInstance m_instance = nullptr;
 		VkDebugUtilsMessengerEXT m_debug_messenger = nullptr;
-		
+
+		Device *m_device = nullptr;
+
 		bool m_validation_layers_enabled = false;
 	};
-} // namespace HyperEngine
+} // namespace HyperEngine::Rendering
