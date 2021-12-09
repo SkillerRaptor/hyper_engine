@@ -17,52 +17,50 @@ namespace HyperEngine::Formatter
 {
 	namespace Detail
 	{
-		template <class T>
+		template <typename T>
 		concept Printable = requires(std::ostream &ostream, T value)
 		{
 			ostream << value;
 		};
 
-		inline void format(std::stringstream &format_stream, size_t argument_index)
+		inline void format(std::stringstream &, size_t)
 		{
-			HYPERENGINE_UNUSED_VARIABLE(format_stream);
-			HYPERENGINE_UNUSED_VARIABLE(argument_index);
 		}
 
 		template <Printable T, Printable... Args>
 		void format(
-			std::stringstream &format_stream,
+			std::stringstream &stream,
 			size_t argument_index,
 			T &&argument,
 			Args &&...args)
 		{
 			if (argument_index != 0)
 			{
-				format(format_stream, argument_index - 1, std::forward<Args>(args)...);
+				format(stream, argument_index - 1, std::forward<Args>(args)...);
 				return;
 			}
 
-			format_stream << argument;
+			stream << argument;
 		}
 	} // namespace Detail
 
 	template <Detail::Printable... Args>
 	Expected<std::string> format(std::string_view format, Args &&...args)
 	{
-		std::stringstream format_stream;
+		std::stringstream stream;
 
 		size_t argument_index = 0;
-		for (auto it = format.begin(); it != format.end(); ++it)
+		for (auto iterator = format.begin(); iterator != format.end(); ++iterator)
 		{
-			if (*it != '{')
+			if (*iterator != '{')
 			{
-				format_stream << *it;
+				stream << *iterator;
 				continue;
 			}
 
-			++it;
+			++iterator;
 
-			if (*it != '}')
+			if (*iterator != '}')
 			{
 				return Error("bad format string");
 			}
@@ -72,10 +70,9 @@ namespace HyperEngine::Formatter
 				return Error("bad format string");
 			}
 
-			Detail::format(
-				format_stream, argument_index++, std::forward<Args>(args)...);
+			Detail::format(stream, argument_index++, std::forward<Args>(args)...);
 		}
 
-		return format_stream.str();
+		return stream.str();
 	}
 } // namespace HyperEngine::Formatter

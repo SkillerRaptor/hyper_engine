@@ -18,11 +18,14 @@ namespace HyperEngine
 		, m_window(std::move(window))
 		, m_render_context(std::move(render_context))
 	{
-		HYPERENGINE_UNUSED_VARIABLE(m_application);
 	}
 
 	void EngineLoop::run()
 	{
+		HYPERENGINE_UNUSED_VARIABLE(m_application);
+		HYPERENGINE_UNUSED_VARIABLE(m_window);
+		HYPERENGINE_UNUSED_VARIABLE(m_render_context);
+
 		while (true)
 		{
 			m_window.update();
@@ -32,19 +35,19 @@ namespace HyperEngine
 
 	Expected<EngineLoop> EngineLoop::create(Application &application)
 	{
-		auto window = Window::create("HyperEngine", 1280, 720);
-		if (window.is_error())
-		{
-			return window.error();
-		}
-
 #if HYPERENGINE_DEBUG
 		constexpr bool validation_layers_enabled = true;
 #else
 		constexpr bool validation_layers_enabled = false;
 #endif
+		
+		Expected<Window> window = Window::create("HyperEngine", 1280, 720);
+		if (window.is_error())
+		{
+			return window.error();
+		}
 
-		auto render_context =
+		Expected<Rendering::RenderContext> render_context =
 			Rendering::RenderContext::create(validation_layers_enabled);
 		if (render_context.is_error())
 		{

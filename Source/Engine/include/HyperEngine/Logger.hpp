@@ -16,6 +16,12 @@ namespace HyperEngine::Logger
 {
 	namespace Detail
 	{
+		template <typename T>
+		concept Printable = requires(std::ostream &ostream, T value)
+		{
+			ostream << value;
+		};
+		
 		enum class Level
 		{
 			Info = 0,
@@ -24,10 +30,10 @@ namespace HyperEngine::Logger
 			Debug
 		};
 
-		template <typename... Args>
+		template <Detail::Printable... Args>
 		void log(Level level, std::string_view format, Args &&...args)
 		{
-			const std::string color_string = [level]()
+			const std::string_view color_string = [level]()
 			{
 				switch (level)
 				{
@@ -44,7 +50,7 @@ namespace HyperEngine::Logger
 				}
 			}();
 
-			const std::string level_string = [level]()
+			const std::string_view level_string = [level]()
 			{
 				switch (level)
 				{
@@ -68,7 +74,8 @@ namespace HyperEngine::Logger
 				return;
 			}
 
-			const std::string string = [&]()
+			const std::string string =
+				[color_string, level_string, formatted_string]()
 			{
 				std::stringstream string_stream;
 				string_stream << "\033[37m";
@@ -85,25 +92,25 @@ namespace HyperEngine::Logger
 		}
 	} // namespace Detail
 
-	template <typename... Args>
+	template <Detail::Printable... Args>
 	void info(std::string_view format, Args &&...args)
 	{
 		Detail::log(Detail::Level::Info, format, std::forward<Args>(args)...);
 	}
 
-	template <typename... Args>
+	template <Detail::Printable... Args>
 	void warning(std::string_view format, Args &&...args)
 	{
 		Detail::log(Detail::Level::Warning, format, std::forward<Args>(args)...);
 	}
 
-	template <typename... Args>
+	template <Detail::Printable... Args>
 	void error(std::string_view format, Args &&...args)
 	{
 		Detail::log(Detail::Level::Error, format, std::forward<Args>(args)...);
 	}
 
-	template <typename... Args>
+	template <Detail::Printable... Args>
 	void debug(std::string_view format, Args &&...args)
 	{
 		Detail::log(Detail::Level::Debug, format, std::forward<Args>(args)...);
