@@ -62,6 +62,11 @@ namespace HyperEngine
 		glfwPollEvents();
 	}
 
+	GLFWwindow *Window::native_window() const
+	{
+		return m_window;
+	}
+
 	Expected<Window> Window::create(
 		const std::string &title,
 		size_t width,

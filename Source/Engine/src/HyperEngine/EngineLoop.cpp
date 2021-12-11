@@ -40,7 +40,7 @@ namespace HyperEngine
 #else
 		constexpr bool validation_layers_enabled = false;
 #endif
-		
+
 		Expected<Window> window = Window::create("HyperEngine", 1280, 720);
 		if (window.is_error())
 		{
@@ -48,7 +48,8 @@ namespace HyperEngine
 		}
 
 		Expected<Rendering::RenderContext> render_context =
-			Rendering::RenderContext::create(validation_layers_enabled);
+			Rendering::RenderContext::create(
+				validation_layers_enabled, window->native_window());
 		if (render_context.is_error())
 		{
 			return render_context.error();

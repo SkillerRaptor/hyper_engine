@@ -21,7 +21,7 @@ namespace HyperEngine::Logger
 		{
 			ostream << value;
 		};
-		
+
 		enum class Level
 		{
 			Info = 0,

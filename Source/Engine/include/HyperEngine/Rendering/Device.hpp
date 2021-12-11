@@ -21,6 +21,7 @@ namespace HyperEngine::Rendering
 		struct QueueFamilies
 		{
 			std::optional<uint32_t> graphics_family = std::nullopt;
+			std::optional<uint32_t> present_family = std::nullopt;
 		};
 
 	public:
@@ -29,23 +30,26 @@ namespace HyperEngine::Rendering
 		Device(Device &&other) noexcept;
 		Device &operator=(Device &&other) noexcept;
 
-		static Expected<Device *> create(VkInstance instance);
+		static Expected<Device *> create(VkInstance instance, VkSurfaceKHR surface);
 
 	private:
-		Device(VkInstance instance, Error &error);
+		Device(VkInstance instance, VkSurfaceKHR surface, Error &error);
 
-		Expected<void> pick_physical_device();
+		Expected<void> find_physical_device();
 		Expected<void> create_device();
 
-		bool is_physical_device_suitable(VkPhysicalDevice physical_device) const;
+		bool check_physical_device_suitability(
+			VkPhysicalDevice physical_device) const;
 		QueueFamilies find_queue_families(VkPhysicalDevice physical_device) const;
 
 	private:
 		VkInstance m_instance = nullptr;
+		VkSurfaceKHR m_surface = nullptr;
 
 		VkPhysicalDevice m_physical_device = nullptr;
 		VkDevice m_device = nullptr;
 
 		VkQueue m_graphics_queue = nullptr;
+		VkQueue m_present_queue = nullptr;
 	};
 } // namespace HyperEngine::Rendering

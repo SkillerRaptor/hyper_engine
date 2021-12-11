@@ -8,15 +8,13 @@
 
 #include <volk.h>
 
-namespace HyperEngine::Rendering
+namespace HyperEngine::Rendering::Utils
 {
-	constexpr uint32_t make_version(
-		uint32_t major,
-		uint32_t minor,
-		uint32_t patch) noexcept
-	{
-		return (major << 22) | (minor << 12) | (patch << 0);
-	}
+	VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
+		VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+		VkDebugUtilsMessageTypeFlagsEXT type,
+		const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
+		void *user_data);
 
 	constexpr uint32_t make_api_version(
 		uint32_t variant,
@@ -26,10 +24,4 @@ namespace HyperEngine::Rendering
 	{
 		return (variant << 29) | (major << 22) | (minor << 12) | (patch << 0);
 	}
-
-	VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
-		VkDebugUtilsMessageSeverityFlagBitsEXT severity_flags,
-		VkDebugUtilsMessageTypeFlagsEXT type_flags,
-		const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
-		void *user_data);
-} // namespace HyperEngine::Rendering
+} // namespace HyperEngine::Rendering::Utils

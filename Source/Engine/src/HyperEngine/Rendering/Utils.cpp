@@ -9,18 +9,18 @@
 #include "HyperEngine/Logger.hpp"
 #include "HyperEngine/Support/Prerequisites.hpp"
 
-namespace HyperEngine::Rendering
+namespace HyperEngine::Rendering::Utils
 {
 	VkBool32 debug_callback(
-		VkDebugUtilsMessageSeverityFlagBitsEXT severity_flags,
-		VkDebugUtilsMessageTypeFlagsEXT type_flags,
+		VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+		VkDebugUtilsMessageTypeFlagsEXT type,
 		const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
 		void *user_data)
 	{
-		HYPERENGINE_UNUSED_VARIABLE(type_flags);
+		HYPERENGINE_UNUSED_VARIABLE(type);
 		HYPERENGINE_UNUSED_VARIABLE(user_data);
 
-		switch (severity_flags)
+		switch (severity)
 		{
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
 			Logger::warning("{}\n", callback_data->pMessage);
@@ -34,4 +34,4 @@ namespace HyperEngine::Rendering
 
 		return VK_FALSE;
 	}
-} // namespace HyperEngine::Rendering
+} // namespace HyperEngine::Rendering::Utils

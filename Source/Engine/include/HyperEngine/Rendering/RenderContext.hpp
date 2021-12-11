@@ -13,6 +13,8 @@
 #include <array>
 #include <vector>
 
+struct GLFWwindow;
+
 namespace HyperEngine::Rendering
 {
 	class Device;
@@ -22,24 +24,25 @@ namespace HyperEngine::Rendering
 	public:
 		HYPERENGINE_NON_COPYABLE(RenderContext);
 
-	private:
-		static constexpr std::array<const char *, 1> s_validation_layers = {
-			"VK_LAYER_KHRONOS_validation"
-		};
-
 	public:
 		~RenderContext();
 
 		RenderContext(RenderContext &&other) noexcept;
 		RenderContext &operator=(RenderContext &&other) noexcept;
 
-		static Expected<RenderContext> create(bool validation_layers_requested);
+		static Expected<RenderContext> create(
+			bool request_validation_layers,
+			GLFWwindow *window);
 
 	private:
-		explicit RenderContext(bool validation_layers_requested, Error &error);
+		explicit RenderContext(
+			bool request_validation_layers,
+			GLFWwindow *window,
+			Error &error);
 
 		Expected<void> create_instance();
 		Expected<void> create_debug_messenger();
+		Expected<void> create_surface(GLFWwindow *window);
 
 		bool validation_layers_supported() const;
 		std::vector<const char *> request_required_extensions() const;
@@ -47,6 +50,7 @@ namespace HyperEngine::Rendering
 	private:
 		VkInstance m_instance = nullptr;
 		VkDebugUtilsMessengerEXT m_debug_messenger = nullptr;
+		VkSurfaceKHR m_surface = nullptr;
 
 		Device *m_device = nullptr;
 

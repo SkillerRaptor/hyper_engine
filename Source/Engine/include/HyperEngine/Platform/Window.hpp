@@ -29,6 +29,8 @@ namespace HyperEngine
 
 		void update();
 
+		GLFWwindow *native_window() const;
+
 		static Expected<Window> create(
 			const std::string &title,
 			size_t width,
