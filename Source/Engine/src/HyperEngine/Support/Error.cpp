@@ -26,12 +26,7 @@ namespace HyperEngine
 		return m_error.has_value();
 	}
 
-	Error::operator bool() const noexcept
-	{
-		return m_error.has_value();
-	}
-
-	ErrorSuccess Error::success()
+	ErrorSuccess Error::success() noexcept
 	{
 		return {};
 	}

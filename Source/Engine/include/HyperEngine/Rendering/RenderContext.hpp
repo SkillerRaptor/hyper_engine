@@ -10,14 +10,12 @@
 #include "HyperEngine/Support/Expected.hpp"
 #include "HyperEngine/Support/Prerequisites.hpp"
 
-#include <array>
 #include <vector>
 
-struct GLFWwindow;
-
-namespace HyperEngine::Rendering
+namespace HyperEngine
 {
 	class Device;
+	class Window;
 
 	class RenderContext
 	{
@@ -30,21 +28,21 @@ namespace HyperEngine::Rendering
 		RenderContext(RenderContext &&other) noexcept;
 		RenderContext &operator=(RenderContext &&other) noexcept;
 
-		static Expected<RenderContext> create(
+		static Expected<RenderContext *> create(
 			bool request_validation_layers,
-			GLFWwindow *window);
+			const Window &window);
 
 	private:
 		explicit RenderContext(
 			bool request_validation_layers,
-			GLFWwindow *window,
+			const Window &window,
 			Error &error);
 
 		Expected<void> create_instance();
 		Expected<void> create_debug_messenger();
-		Expected<void> create_surface(GLFWwindow *window);
+		Expected<void> create_surface(const Window &window);
 
-		bool validation_layers_supported() const;
+		bool validation_layers_supported() const noexcept;
 		std::vector<const char *> request_required_extensions() const;
 
 	private:
@@ -56,4 +54,4 @@ namespace HyperEngine::Rendering
 
 		bool m_validation_layers_enabled = false;
 	};
-} // namespace HyperEngine::Rendering
+} // namespace HyperEngine

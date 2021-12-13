@@ -8,6 +8,7 @@
 # HyperEngine
 #-------------------------------------------------------------------------------------------
 set(SOURCES
+        src/HyperEngine/Application.cpp
         src/HyperEngine/EngineLoop.cpp
         src/HyperEngine/Rendering/Device.cpp
         src/HyperEngine/Rendering/RenderContext.cpp

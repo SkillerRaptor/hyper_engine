@@ -6,6 +6,7 @@
 
 #include "HyperEngine/Rendering/RenderContext.hpp"
 
+#include "HyperEngine/Platform/Window.hpp"
 #include "HyperEngine/Rendering/Device.hpp"
 #include "HyperEngine/Rendering/Utils.hpp"
 
@@ -13,11 +14,11 @@
 #include <GLFW/glfw3.h>
 #include <volk.h>
 
-namespace HyperEngine::Rendering
+namespace HyperEngine
 {
 	RenderContext::RenderContext(
 		bool request_validation_layers,
-		GLFWwindow *window,
+		const Window &window,
 		Error &error)
 	{
 		if (volkInitialize() != VK_SUCCESS)
@@ -26,12 +27,10 @@ namespace HyperEngine::Rendering
 			return;
 		}
 
-		if (request_validation_layers && validation_layers_supported())
-		{
-			m_validation_layers_enabled = true;
-		}
+		m_validation_layers_enabled =
+			request_validation_layers && validation_layers_supported();
 
-		const Expected<void> instance = create_instance();
+		const auto instance = create_instance();
 		if (instance.is_error())
 		{
 			error = instance.error();
@@ -40,7 +39,7 @@ namespace HyperEngine::Rendering
 
 		if (m_validation_layers_enabled)
 		{
-			const Expected<void> debug_messenger = create_debug_messenger();
+			const auto debug_messenger = create_debug_messenger();
 			if (debug_messenger.is_error())
 			{
 				error = debug_messenger.error();
@@ -48,14 +47,14 @@ namespace HyperEngine::Rendering
 			}
 		}
 
-		const Expected<void> surface = create_surface(window);
+		const auto surface = create_surface(window);
 		if (surface.is_error())
 		{
 			error = surface.error();
 			return;
 		}
 
-		Expected<Device *> device = Device::create(m_instance, m_surface);
+		auto device = Device::create(m_instance, m_surface);
 		if (device.is_error())
 		{
 			error = device.error();
@@ -90,28 +89,18 @@ namespace HyperEngine::Rendering
 
 	RenderContext::RenderContext(RenderContext &&other) noexcept
 	{
-		m_instance = other.m_instance;
-		m_debug_messenger = other.m_debug_messenger;
-		m_surface = other.m_surface;
-		m_device = other.m_device;
-
-		other.m_instance = nullptr;
-		other.m_debug_messenger = nullptr;
-		other.m_surface = nullptr;
-		other.m_device = nullptr;
+		m_instance = std::exchange(other.m_instance, nullptr);
+		m_debug_messenger = std::exchange(other.m_debug_messenger, nullptr);
+		m_surface = std::exchange(other.m_surface, nullptr);
+		m_device = std::exchange(other.m_device, nullptr);
 	}
 
 	RenderContext &RenderContext::operator=(RenderContext &&other) noexcept
 	{
-		m_instance = other.m_instance;
-		m_debug_messenger = other.m_debug_messenger;
-		m_surface = other.m_surface;
-		m_device = other.m_device;
-
-		other.m_instance = nullptr;
-		other.m_debug_messenger = nullptr;
-		other.m_surface = nullptr;
-		other.m_device = nullptr;
+		m_instance = std::exchange(other.m_instance, nullptr);
+		m_debug_messenger = std::exchange(other.m_debug_messenger, nullptr);
+		m_surface = std::exchange(other.m_surface, nullptr);
+		m_device = std::exchange(other.m_device, nullptr);
 
 		return *this;
 	}
@@ -160,7 +149,7 @@ namespace HyperEngine::Rendering
 			.ppEnabledExtensionNames = extensions.data(),
 		};
 
-		const VkResult result =
+		const auto result =
 			vkCreateInstance(&instance_create_info, nullptr, &m_instance);
 		if (result != VK_SUCCESS)
 		{
@@ -190,7 +179,7 @@ namespace HyperEngine::Rendering
 			.pUserData = nullptr,
 		};
 
-		const VkResult result = vkCreateDebugUtilsMessengerEXT(
+		const auto result = vkCreateDebugUtilsMessengerEXT(
 			m_instance, &debug_messenger_info, nullptr, &m_debug_messenger);
 		if (result != VK_SUCCESS)
 		{
@@ -200,10 +189,10 @@ namespace HyperEngine::Rendering
 		return {};
 	}
 
-	Expected<void> RenderContext::create_surface(GLFWwindow *window)
+	Expected<void> RenderContext::create_surface(const Window &window)
 	{
-		const VkResult result =
-			glfwCreateWindowSurface(m_instance, window, nullptr, &m_surface);
+		const auto result = glfwCreateWindowSurface(
+			m_instance, window.native_window(), nullptr, &m_surface);
 		if (result != VK_SUCCESS)
 		{
 			return Error("failed to create surface");
@@ -212,7 +201,7 @@ namespace HyperEngine::Rendering
 		return {};
 	}
 
-	bool RenderContext::validation_layers_supported() const
+	bool RenderContext::validation_layers_supported() const noexcept
 	{
 		uint32_t layer_count = 0;
 		vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
@@ -257,17 +246,19 @@ namespace HyperEngine::Rendering
 		return extensions;
 	}
 
-	Expected<RenderContext> RenderContext::create(
+	Expected<RenderContext *> RenderContext::create(
 		bool request_validation_layers,
-		GLFWwindow *window)
+		const Window &window)
 	{
 		Error error = Error::success();
-		RenderContext render_context(request_validation_layers, window, error);
+		auto *render_context =
+			new RenderContext(request_validation_layers, window, error);
 		if (error.is_error())
 		{
+			delete render_context;
 			return error;
 		}
 
 		return render_context;
 	}
-} // namespace HyperEngine::Rendering
+} // namespace HyperEngine

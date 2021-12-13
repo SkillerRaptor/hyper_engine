@@ -9,7 +9,7 @@
 #include "HyperEngine/Logger.hpp"
 #include "HyperEngine/Support/Prerequisites.hpp"
 
-namespace HyperEngine::Rendering::Utils
+namespace HyperEngine::Utils
 {
 	VkBool32 debug_callback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT severity,
@@ -34,4 +34,4 @@ namespace HyperEngine::Rendering::Utils
 
 		return VK_FALSE;
 	}
-} // namespace HyperEngine::Rendering::Utils
+} // namespace HyperEngine::Utils

@@ -19,19 +19,17 @@ namespace HyperEngine
 	public:
 		explicit Error(std::string error);
 
-		std::string error() const;
-
 		bool is_error() const noexcept;
 
-		operator bool() const noexcept;
+		std::string error() const;
 
-		static ErrorSuccess success();
+		static ErrorSuccess success() noexcept;
 
 	protected:
 		Error() = default;
 
 	private:
-		std::optional<std::string> m_error = {};
+		std::optional<std::string> m_error = std::nullopt;
 	};
 
 	class ErrorSuccess final : public Error

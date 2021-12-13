@@ -10,20 +10,20 @@
 #include <vector>
 #include <volk.h>
 
-namespace HyperEngine::Rendering
+namespace HyperEngine
 {
 	Device::Device(VkInstance instance, VkSurfaceKHR surface, Error &error)
 		: m_instance(instance)
 		, m_surface(surface)
 	{
-		const Expected<void> physical_device = find_physical_device();
+		const auto physical_device = find_physical_device();
 		if (physical_device.is_error())
 		{
 			error = physical_device.error();
 			return;
 		}
 
-		const Expected<void> device = create_device();
+		const auto device = create_device();
 		if (device.is_error())
 		{
 			error = device.error();
@@ -41,20 +41,14 @@ namespace HyperEngine::Rendering
 
 	Device::Device(Device &&other) noexcept
 	{
-		m_physical_device = other.m_physical_device;
-		m_device = other.m_device;
-
-		other.m_physical_device = nullptr;
-		other.m_device = nullptr;
+		m_physical_device = std::exchange(other.m_physical_device, nullptr);
+		m_device = std::exchange(other.m_device, nullptr);
 	}
 
 	Device &Device::operator=(Device &&other) noexcept
 	{
-		m_physical_device = other.m_physical_device;
-		m_device = other.m_device;
-
-		other.m_physical_device = nullptr;
-		other.m_device = nullptr;
+		m_physical_device = std::exchange(other.m_physical_device, nullptr);
+		m_device = std::exchange(other.m_device, nullptr);
 
 		return *this;
 	}
@@ -130,7 +124,7 @@ namespace HyperEngine::Rendering
 			.pEnabledFeatures = &physical_device_features,
 		};
 
-		const VkResult device_result = vkCreateDevice(
+		const auto device_result = vkCreateDevice(
 			m_physical_device, &device_create_info, nullptr, &m_device);
 		if (device_result != VK_SUCCESS)
 		{
@@ -214,7 +208,7 @@ namespace HyperEngine::Rendering
 		assert(surface != nullptr);
 
 		Error error = Error::success();
-		Device *device = new Device(instance, surface, error);
+		auto *device = new Device(instance, surface, error);
 		if (error.is_error())
 		{
 			delete device;
@@ -223,4 +217,4 @@ namespace HyperEngine::Rendering
 
 		return device;
 	}
-} // namespace HyperEngine::Rendering
+} // namespace HyperEngine

@@ -14,21 +14,16 @@
 
 namespace HyperEngine
 {
-	namespace Detail
-	{
-		template <typename T>
-		concept IsApplication = std::derived_from<T, Application>;
-	} // namespace Detail
-
 	class Launcher
 	{
 	public:
-		template <Detail::IsApplication T, typename... Args>
+		template <typename T, typename... Args>
+		requires std::derived_from<T, Application>
 		static int launch(Args &&...args)
 		{
 			T application(std::forward<Args>(args)...);
 
-			Expected<EngineLoop> engine_loop = EngineLoop::create(application);
+			auto engine_loop = EngineLoop::create(application);
 			if (engine_loop.is_error())
 			{
 				Logger::error("{}\n", engine_loop.error());

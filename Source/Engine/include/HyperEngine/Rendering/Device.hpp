@@ -10,7 +10,7 @@
 #include "HyperEngine/Support/Expected.hpp"
 #include "HyperEngine/Support/Prerequisites.hpp"
 
-namespace HyperEngine::Rendering
+namespace HyperEngine
 {
 	class Device
 	{
@@ -52,4 +52,4 @@ namespace HyperEngine::Rendering
 		VkQueue m_graphics_queue = nullptr;
 		VkQueue m_present_queue = nullptr;
 	};
-} // namespace HyperEngine::Rendering
+} // namespace HyperEngine

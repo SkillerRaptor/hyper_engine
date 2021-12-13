@@ -4,14 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-#pragma once
-
-#include <string>
+#include "HyperEngine/Application.hpp"
 
 namespace HyperEngine
 {
-	class Application
-	{
-	public:
-	};
 } // namespace HyperEngine

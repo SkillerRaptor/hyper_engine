@@ -16,20 +16,25 @@ namespace HyperEngine
 	class EngineLoop
 	{
 	public:
+		HYPERENGINE_NON_COPYABLE(EngineLoop);
+
+	public:
+		~EngineLoop();
+
+		EngineLoop(EngineLoop &&other) noexcept;
+		EngineLoop &operator=(EngineLoop &&other) noexcept;
+
 		void run();
 
 		static Expected<EngineLoop> create(Application &application);
 
 	private:
-		EngineLoop(
-			Application &application,
-			Window window,
-			Rendering::RenderContext render_context);
+		EngineLoop(Application *application, Error &error);
 
 	private:
-		Application &m_application;
+		Application *m_application = nullptr;
 
-		Window m_window;
-		Rendering::RenderContext m_render_context;
+		Window *m_window = nullptr;
+		RenderContext *m_render_context = nullptr;
 	};
 } // namespace HyperEngine

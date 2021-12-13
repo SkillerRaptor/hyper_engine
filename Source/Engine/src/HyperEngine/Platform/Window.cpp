@@ -11,7 +11,7 @@
 namespace HyperEngine
 {
 	Window::Window(
-		const std::string &title,
+		std::string_view title,
 		size_t width,
 		size_t height,
 		Error &error)
@@ -23,7 +23,7 @@ namespace HyperEngine
 		m_window = glfwCreateWindow(
 			static_cast<int>(width),
 			static_cast<int>(height),
-			title.c_str(),
+			title.data(),
 			nullptr,
 			nullptr);
 		if (m_window == nullptr)
@@ -44,15 +44,12 @@ namespace HyperEngine
 
 	Window::Window(Window &&other) noexcept
 	{
-		m_window = other.m_window;
-		other.m_window = nullptr;
+		m_window = std::exchange(other.m_window, nullptr);
 	}
 
 	Window &Window::operator=(Window &&other) noexcept
 	{
-		m_window = other.m_window;
-
-		other.m_window = nullptr;
+		m_window = std::exchange(other.m_window, nullptr);
 
 		return *this;
 	}
@@ -67,15 +64,16 @@ namespace HyperEngine
 		return m_window;
 	}
 
-	Expected<Window> Window::create(
-		const std::string &title,
+	Expected<Window *> Window::create(
+		std::string_view title,
 		size_t width,
 		size_t height)
 	{
 		Error error = Error::success();
-		Window window(title, width, height, error);
+		auto *window = new Window(title, width, height, error);
 		if (error.is_error())
 		{
+			delete window;
 			return error;
 		}
 

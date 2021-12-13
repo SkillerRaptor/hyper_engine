@@ -8,7 +8,7 @@
 
 #include <volk.h>
 
-namespace HyperEngine::Rendering::Utils
+namespace HyperEngine::Utils
 {
 	VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT severity,
@@ -24,4 +24,4 @@ namespace HyperEngine::Rendering::Utils
 	{
 		return (variant << 29) | (major << 22) | (minor << 12) | (patch << 0);
 	}
-} // namespace HyperEngine::Rendering::Utils
+} // namespace HyperEngine::Utils

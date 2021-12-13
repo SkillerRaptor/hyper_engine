@@ -37,62 +37,57 @@ namespace HyperEngine
 		{
 		}
 
-		T &value() &
-		{
-			assert(m_value.has_value());
-			return *m_value;
-		}
-
-		const T &value() const &
-		{
-			assert(m_value.has_value());
-			return *m_value;
-		}
-
-		T &&value() &&
-		{
-			assert(m_value.has_value());
-			return *std::move(m_value);
-		}
-
-		const T &&value() const &&
-		{
-			assert(m_value.has_value());
-			return *std::move(m_value);
-		}
-
-		ErrorT &error() &
-		{
-			assert(m_error.has_value());
-			return *m_error;
-		}
-
-		const ErrorT &error() const &
-		{
-			assert(m_error.has_value());
-			return *m_error;
-		}
-
-		ErrorT &&error() &&
-		{
-			assert(m_error.has_value());
-			return *std::move(m_error);
-		}
-
-		const ErrorT &&error() const &&
-		{
-			assert(m_error.has_value());
-			return *std::move(m_error);
-		}
-
 		bool is_error() const noexcept
 		{
 			return m_error.has_value();
 		}
 
-		operator bool() const noexcept
+		T &value() &
 		{
-			return m_error.has_value();
+			assert(m_value.has_value());
+			return m_value.value();
+		}
+
+		const T &value() const &
+		{
+			assert(m_value.has_value());
+			return m_value.value();
+		}
+
+		T &&value() &&
+		{
+			assert(m_value.has_value());
+			return std::move(m_value.value());
+		}
+
+		const T &&value() const &&
+		{
+			assert(m_value.has_value());
+			return std::move(m_value.value());
+		}
+
+		ErrorT &error() &
+		{
+			assert(m_error.has_value());
+			return m_error.value();
+		}
+
+		const ErrorT &error() const &
+		{
+			assert(m_error.has_value());
+			return m_error.value();
+		}
+
+		ErrorT &&error() &&
+		{
+			assert(m_error.has_value());
+			return std::move(m_error.value());
+		}
+
+		const ErrorT &&error() const &&
+		{
+			assert(m_error.has_value());
+			return std::move(m_error.value());
 		}
 
 		T &operator*()
@@ -120,8 +115,8 @@ namespace HyperEngine
 		}
 
 	private:
-		std::optional<T> m_value = {};
-		std::optional<ErrorT> m_error = {};
+		std::optional<T> m_value = std::nullopt;
+		std::optional<ErrorT> m_error = std::nullopt;
 	};
 
 	template <typename ErrorT>
@@ -140,6 +135,11 @@ namespace HyperEngine
 		{
 		}
 
+		bool is_error() const noexcept
+		{
+			return m_error.has_value();
+		}
+
 		ErrorT &error()
 		{
 			assert(m_error.has_value());
@@ -152,17 +152,7 @@ namespace HyperEngine
 			return m_error.value();
 		}
 
-		bool is_error() const noexcept
-		{
-			return m_error.has_value();
-		}
-
-		operator bool() const noexcept
-		{
-			return m_error.has_value();
-		}
-
 	private:
-		std::optional<ErrorT> m_error = {};
+		std::optional<ErrorT> m_error = std::nullopt;
 	};
 } // namespace HyperEngine

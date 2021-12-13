@@ -44,13 +44,13 @@ namespace HyperEngine::Formatter
 		}
 	} // namespace Detail
 
-	template <Detail::Printable... Args>
+	template <typename... Args>
 	Expected<std::string> format(std::string_view format, Args &&...args)
 	{
 		std::stringstream stream;
 
 		size_t argument_index = 0;
-		for (auto iterator = format.begin(); iterator != format.end(); ++iterator)
+		for (auto iterator = format.cbegin(); iterator != format.cend(); ++iterator)
 		{
 			if (*iterator != '{')
 			{
@@ -62,12 +62,12 @@ namespace HyperEngine::Formatter
 
 			if (*iterator != '}')
 			{
-				return Error("bad format string");
+				return Error("format bracket unclosed");
 			}
 
 			if (argument_index >= sizeof...(args))
 			{
-				return Error("bad format string");
+				return Error("format argument not found");
 			}
 
 			Detail::format(stream, argument_index++, std::forward<Args>(args)...);

@@ -10,7 +10,7 @@
 #include "HyperEngine/Support/Prerequisites.hpp"
 
 #include <memory>
-#include <string>
+#include <string_view>
 
 struct GLFWwindow;
 
@@ -31,13 +31,13 @@ namespace HyperEngine
 
 		GLFWwindow *native_window() const;
 
-		static Expected<Window> create(
-			const std::string &title,
+		static Expected<Window *> create(
+			std::string_view title,
 			size_t width,
 			size_t height);
 
 	private:
-		Window(const std::string &title, size_t width, size_t height, Error &error);
+		Window(std::string_view title, size_t width, size_t height, Error &error);
 
 	private:
 		GLFWwindow *m_window = nullptr;
