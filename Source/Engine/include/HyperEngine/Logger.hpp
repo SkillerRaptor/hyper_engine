@@ -7,6 +7,7 @@
 #pragma once
 
 #include "HyperEngine/Formatter.hpp"
+#include "HyperEngine/Support/ErrorHandling.hpp"
 
 #include <cstdio>
 #include <sstream>

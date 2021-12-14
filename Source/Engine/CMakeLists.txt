@@ -14,7 +14,8 @@ set(SOURCES
         src/HyperEngine/Rendering/RenderContext.cpp
         src/HyperEngine/Rendering/Utils.cpp
         src/HyperEngine/Platform/Window.cpp
-        src/HyperEngine/Support/Error.cpp)
+        src/HyperEngine/Support/Error.cpp
+        src/HyperEngine/Support/ErrorHandling.cpp)
 
 set(HEADERS
         include/HyperEngine/Application.hpp
@@ -27,7 +28,9 @@ set(HEADERS
         include/HyperEngine/Rendering/RenderContext.hpp
         include/HyperEngine/Rendering/Utils.hpp
         include/HyperEngine/Platform/Window.hpp
+        include/HyperEngine/Support/Compiler.hpp
         include/HyperEngine/Support/Error.hpp
+        include/HyperEngine/Support/ErrorHandling.hpp
         include/HyperEngine/Support/Expected.hpp
         include/HyperEngine/Support/Prerequisites.hpp)
 
