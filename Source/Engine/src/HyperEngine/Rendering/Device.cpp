@@ -119,8 +119,9 @@ namespace HyperEngine
 			.pQueueCreateInfos = device_queue_create_infos.data(),
 			.enabledLayerCount = 0,
 			.ppEnabledLayerNames = nullptr,
-			.enabledExtensionCount = 0,
-			.ppEnabledExtensionNames = nullptr,
+			.enabledExtensionCount =
+				static_cast<uint32_t>(s_device_extensions.size()),
+			.ppEnabledExtensionNames = s_device_extensions.data(),
 			.pEnabledFeatures = &physical_device_features,
 		};
 
@@ -153,9 +154,25 @@ namespace HyperEngine
 	{
 		const Device::QueueFamilies queue_families =
 			find_queue_families(physical_device);
+		const bool extensions_supported =
+			check_physical_device_extensions_support(physical_device);
+		const bool swap_chain_adequate =
+			[this, physical_device, extensions_supported]()
+		{
+			if (!extensions_supported)
+			{
+				return false;
+			}
+
+			const SwapChainSupportDetails swap_chain_support_details =
+				query_swap_chain_support(physical_device);
+			return !swap_chain_support_details.formats.empty() &&
+						 !swap_chain_support_details.present_modes.empty();
+		}();
 
 		return queue_families.graphics_family.has_value() &&
-					 queue_families.present_family.has_value();
+					 queue_families.present_family.has_value() && extensions_supported &&
+					 swap_chain_adequate;
 	}
 
 	Device::QueueFamilies Device::find_queue_families(
@@ -200,6 +217,78 @@ namespace HyperEngine
 		}
 
 		return queue_families;
+	}
+
+	Device::SwapChainSupportDetails Device::query_swap_chain_support(
+		VkPhysicalDevice physical_device) const
+	{
+		SwapChainSupportDetails swap_chain_support_details = {};
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+			physical_device, m_surface, &swap_chain_support_details.capabilities);
+
+		uint32_t format_count = 0;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(
+			physical_device, m_surface, &format_count, nullptr);
+		if (format_count != 0)
+		{
+			swap_chain_support_details.formats.resize(format_count);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(
+				physical_device,
+				m_surface,
+				&format_count,
+				swap_chain_support_details.formats.data());
+		}
+
+		uint32_t present_mode_count = 0;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(
+			physical_device, m_surface, &present_mode_count, nullptr);
+		if (present_mode_count != 0)
+		{
+			swap_chain_support_details.present_modes.resize(present_mode_count);
+			vkGetPhysicalDeviceSurfacePresentModesKHR(
+				physical_device,
+				m_surface,
+				&present_mode_count,
+				swap_chain_support_details.present_modes.data());
+		}
+
+		return swap_chain_support_details;
+	}
+
+	bool Device::check_physical_device_extensions_support(
+		VkPhysicalDevice physical_device) const
+	{
+		uint32_t extension_count = 0;
+		vkEnumerateDeviceExtensionProperties(
+			physical_device, nullptr, &extension_count, nullptr);
+		if (extension_count == 0)
+		{
+			return false;
+		}
+
+		std::vector<VkExtensionProperties> extensions(extension_count);
+		vkEnumerateDeviceExtensionProperties(
+			physical_device, nullptr, &extension_count, extensions.data());
+
+		std::set<std::string> required_extensions(
+			s_device_extensions.begin(), s_device_extensions.end());
+
+		for (const VkExtensionProperties &extension : extensions)
+		{
+			required_extensions.erase(extension.extensionName);
+		}
+
+		return required_extensions.empty();
+	}
+
+	VkPhysicalDevice Device::physical_device() const
+	{
+		return m_physical_device;
+	}
+
+	VkDevice Device::device() const
+	{
+		return m_device;
 	}
 
 	Expected<Device *> Device::create(VkInstance instance, VkSurfaceKHR surface)

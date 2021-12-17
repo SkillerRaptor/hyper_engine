@@ -7,7 +7,6 @@
 #include "HyperEngine/EngineLoop.hpp"
 
 #include "HyperEngine/Support/Prerequisites.hpp"
-#include "HyperEngine/Support/ErrorHandling.hpp"
 
 namespace HyperEngine
 {

@@ -6,21 +6,31 @@
 
 #pragma once
 
-#include "HyperEngine/Rendering/Forward.hpp"
 #include "HyperEngine/Support/Expected.hpp"
 #include "HyperEngine/Support/Prerequisites.hpp"
 
+#include <array>
 #include <vector>
+
+using VkInstance = struct VkInstance_T *;
+using VkDebugUtilsMessengerEXT = struct VkDebugUtilsMessengerEXT_T *;
+using VkSurfaceKHR = struct VkSurfaceKHR_T *;
 
 namespace HyperEngine
 {
 	class Device;
+	class SwapChain;
 	class Window;
 
 	class RenderContext
 	{
 	public:
 		HYPERENGINE_NON_COPYABLE(RenderContext);
+
+	private:
+		static constexpr std::array<const char *, 1> s_validation_layers = {
+			"VK_LAYER_KHRONOS_validation"
+		};
 
 	public:
 		~RenderContext();
@@ -51,6 +61,7 @@ namespace HyperEngine
 		VkSurfaceKHR m_surface = nullptr;
 
 		Device *m_device = nullptr;
+		SwapChain *m_swap_chain = nullptr;
 
 		bool m_validation_layers_enabled = false;
 	};

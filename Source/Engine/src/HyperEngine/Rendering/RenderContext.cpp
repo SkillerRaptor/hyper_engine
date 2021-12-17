@@ -8,6 +8,7 @@
 
 #include "HyperEngine/Platform/Window.hpp"
 #include "HyperEngine/Rendering/Device.hpp"
+#include "HyperEngine/Rendering/SwapChain.hpp"
 #include "HyperEngine/Rendering/Utils.hpp"
 
 #include <cstring>
@@ -62,10 +63,24 @@ namespace HyperEngine
 		}
 
 		m_device = device.value();
+
+		auto swap_chain = SwapChain::create(m_surface, *m_device, window);
+		if (swap_chain.is_error())
+		{
+			error = swap_chain.error();
+			return;
+		}
+
+		m_swap_chain = swap_chain.value();
 	}
 
 	RenderContext::~RenderContext()
 	{
+		if (m_swap_chain != nullptr)
+		{
+			delete m_swap_chain;
+		}
+
 		if (m_device != nullptr)
 		{
 			delete m_device;
@@ -93,6 +108,7 @@ namespace HyperEngine
 		m_debug_messenger = std::exchange(other.m_debug_messenger, nullptr);
 		m_surface = std::exchange(other.m_surface, nullptr);
 		m_device = std::exchange(other.m_device, nullptr);
+		m_swap_chain = std::exchange(other.m_swap_chain, nullptr);
 	}
 
 	RenderContext &RenderContext::operator=(RenderContext &&other) noexcept
@@ -101,6 +117,7 @@ namespace HyperEngine
 		m_debug_messenger = std::exchange(other.m_debug_messenger, nullptr);
 		m_surface = std::exchange(other.m_surface, nullptr);
 		m_device = std::exchange(other.m_device, nullptr);
+		m_swap_chain = std::exchange(other.m_swap_chain, nullptr);
 
 		return *this;
 	}
@@ -133,18 +150,18 @@ namespace HyperEngine
 			.pUserData = nullptr,
 		};
 
-		const uint32_t enabled_layer_count = m_validation_layers_enabled ? 1 : 0;
-		const char *const enabled_layers =
-			m_validation_layers_enabled ? "VK_LAYER_KHRONOS_validation" : nullptr;
-
+		const size_t layer_count =
+			m_validation_layers_enabled ? s_validation_layers.size() : 0;
+		const char *const *layers =
+			m_validation_layers_enabled ? s_validation_layers.data() : nullptr;
 		const std::vector<const char *> extensions = request_required_extensions();
 		const VkInstanceCreateInfo instance_create_info = {
 			.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
 			.pNext = m_validation_layers_enabled ? &debug_messenger_info : nullptr,
 			.flags = 0,
 			.pApplicationInfo = &application_info,
-			.enabledLayerCount = enabled_layer_count,
-			.ppEnabledLayerNames = &enabled_layers,
+			.enabledLayerCount = static_cast<uint32_t>(layer_count),
+			.ppEnabledLayerNames = layers,
 			.enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
 			.ppEnabledExtensionNames = extensions.data(),
 		};
@@ -213,14 +230,17 @@ namespace HyperEngine
 		std::vector<VkLayerProperties> layers(layer_count);
 		vkEnumerateInstanceLayerProperties(&layer_count, layers.data());
 
-		for (const VkLayerProperties &properties : layers)
+		for (const char *validation_layer : s_validation_layers)
 		{
-			if (strcmp("VK_LAYER_KHRONOS_validation", properties.layerName) == 0)
+			for (const VkLayerProperties &properties : layers)
 			{
-				continue;
-			}
+				if (strcmp(validation_layer, properties.layerName) == 0)
+				{
+					continue;
+				}
 
-			return true;
+				return true;
+			}
 		}
 
 		return false;

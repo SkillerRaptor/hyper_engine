@@ -6,9 +6,12 @@
 
 #pragma once
 
-#include "HyperEngine/Rendering/Forward.hpp"
 #include "HyperEngine/Support/Expected.hpp"
 #include "HyperEngine/Support/Prerequisites.hpp"
+
+#include <array>
+#include <vector>
+#include <volk.h>
 
 namespace HyperEngine
 {
@@ -17,11 +20,23 @@ namespace HyperEngine
 	public:
 		HYPERENGINE_NON_COPYABLE(Device);
 
-	private:
+	public:
 		struct QueueFamilies
 		{
 			std::optional<uint32_t> graphics_family = std::nullopt;
 			std::optional<uint32_t> present_family = std::nullopt;
+		};
+
+		struct SwapChainSupportDetails
+		{
+			VkSurfaceCapabilitiesKHR capabilities = {};
+			std::vector<VkSurfaceFormatKHR> formats = {};
+			std::vector<VkPresentModeKHR> present_modes = {};
+		};
+
+	private:
+		static constexpr std::array<const char *, 1> s_device_extensions = {
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME
 		};
 
 	public:
@@ -29,6 +44,13 @@ namespace HyperEngine
 
 		Device(Device &&other) noexcept;
 		Device &operator=(Device &&other) noexcept;
+
+		QueueFamilies find_queue_families(VkPhysicalDevice physical_device) const;
+		SwapChainSupportDetails query_swap_chain_support(
+			VkPhysicalDevice physical_device) const;
+
+		VkPhysicalDevice physical_device() const;
+		VkDevice device() const;
 
 		static Expected<Device *> create(VkInstance instance, VkSurfaceKHR surface);
 
@@ -40,7 +62,8 @@ namespace HyperEngine
 
 		bool check_physical_device_suitability(
 			VkPhysicalDevice physical_device) const;
-		QueueFamilies find_queue_families(VkPhysicalDevice physical_device) const;
+		bool check_physical_device_extensions_support(
+			VkPhysicalDevice physical_device) const;
 
 	private:
 		VkInstance m_instance = nullptr;
