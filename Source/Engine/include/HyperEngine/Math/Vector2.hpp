@@ -18,30 +18,8 @@ namespace HyperEngine
 	class Vector2
 	{
 	public:
-		HYPERENGINE_DISABLE_WARNINGS()
-		union
-		{
-			T data[2] = { 0 };
-
-			struct
-			{
-				T x;
-				T y;
-			};
-
-			struct
-			{
-				T s;
-				T t;
-			};
-
-			struct
-			{
-				T u;
-				T v;
-			};
-		};
-		HYPERENGINE_RESTORE_WARNINGS()
+		T x;
+		T y;
 	};
 
 	using Vec2 = Vector2<float>;

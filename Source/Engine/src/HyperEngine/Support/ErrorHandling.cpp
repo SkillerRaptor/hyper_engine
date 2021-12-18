@@ -8,13 +8,11 @@
 
 #include "HyperEngine/Logger.hpp"
 
-#include <iostream>
-
 namespace HyperEngine::Detail
 {
-	void unreachable(std::string_view file, size_t line)
+	void unreachable(const char *file_name, uint32_t line)
 	{
-		Logger::error("unreachable code executed at {}:{}\n", file, line);
+		Logger::error("unreachable code executed at {}:{}\n", file_name, line);
 		std::abort();
 
 		HYPERENGINE_BUILTIN_UNREACHABLE();

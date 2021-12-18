@@ -13,12 +13,13 @@
 
 namespace HyperEngine::Detail
 {
-	[[noreturn]] void unreachable(std::string_view file, size_t line);
+	[[noreturn]] void unreachable(
+		const char *file_name = __builtin_FILE(),
+		uint32_t line = __builtin_LINE());
 } // namespace HyperEngine::Detail
 
 #if HYPERENGINE_DEBUG
-#	define HYPERENGINE_UNREACHABLE() \
-		::HyperEngine::Detail::unreachable(__FILE__, __LINE__)
+#	define HYPERENGINE_UNREACHABLE() ::HyperEngine::Detail::unreachable()
 #else
 #	define HYPERENGINE_UNREACHABLE() HYPERENGINE_BUILTIN_UNREACHABLE()
 #endif

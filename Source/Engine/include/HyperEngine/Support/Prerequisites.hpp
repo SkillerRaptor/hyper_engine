@@ -16,6 +16,9 @@
 #	define HYPERENGINE_DEBUG 0
 #endif
 
+#define HYPERENGINE_STRINGIFY_HELPER(x) #x
+#define HYPERENGINE_STRINGIFY(x) HYPERENGINE_STRINGIFY_HELPER(x)
+
 #define HYPERENGINE_NON_COPYABLE(class_name)    \
 	class_name(const class_name &other) = delete; \
 	class_name &operator=(const class_name &other) = delete

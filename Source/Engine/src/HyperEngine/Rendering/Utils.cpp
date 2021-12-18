@@ -12,7 +12,7 @@ namespace HyperEngine::Utils
 {
 	VkBool32 debug_callback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-		VkDebugUtilsMessageTypeFlagsEXT ,
+		VkDebugUtilsMessageTypeFlagsEXT,
 		const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
 		void *)
 	{

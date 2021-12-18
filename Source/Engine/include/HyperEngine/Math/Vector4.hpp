@@ -18,36 +18,10 @@ namespace HyperEngine
 	class Vector4
 	{
 	public:
-		HYPERENGINE_DISABLE_WARNINGS()
-		union
-		{
-			T data[4] = { 0 };
-
-			struct
-			{
-				T x;
-				T y;
-				T z;
-				T w;
-			};
-
-			struct
-			{
-				T r;
-				T g;
-				T b;
-				T a;
-			};
-
-			struct
-			{
-				T s;
-				T t;
-				T p;
-				T q;
-			};
-		};
-		HYPERENGINE_RESTORE_WARNINGS()
+		T x;
+		T y;
+		T z;
+		T w;
 	};
 
 	using Vec4 = Vector4<float>;

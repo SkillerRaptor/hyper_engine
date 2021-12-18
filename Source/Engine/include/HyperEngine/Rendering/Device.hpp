@@ -62,8 +62,7 @@ namespace HyperEngine
 		Expected<void> find_physical_device();
 		Expected<void> create_device();
 
-		bool is_physical_device_suitable(
-			VkPhysicalDevice physical_device) const;
+		bool is_physical_device_suitable(VkPhysicalDevice physical_device) const;
 		bool check_physical_device_extensions_support(
 			VkPhysicalDevice physical_device) const;
 

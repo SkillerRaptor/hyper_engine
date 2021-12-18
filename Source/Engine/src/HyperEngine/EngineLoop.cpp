@@ -72,6 +72,7 @@ namespace HyperEngine
 		while (true)
 		{
 			m_window->poll_events();
+
 			break;
 		}
 	}

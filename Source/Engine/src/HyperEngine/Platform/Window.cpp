@@ -108,7 +108,7 @@ namespace HyperEngine
 		assert(!title.empty() && "The title can't be empty");
 		assert(width != 0 && "The width can't be 0");
 		assert(height != 0 && "The height can't be 0");
-		
+
 		Error error = Error::success();
 		auto *window = new Window(title, width, height, error);
 		if (error.is_error())

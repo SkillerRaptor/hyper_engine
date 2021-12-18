@@ -56,10 +56,10 @@ namespace HyperEngine
 
 	private:
 		const Window *m_window = nullptr;
-		
+
 		VkInstance m_instance = nullptr;
 		VkDebugUtilsMessengerEXT m_debug_messenger = nullptr;
-		
+
 		VkSurfaceKHR m_surface = nullptr;
 		Device *m_device = nullptr;
 		SwapChain *m_swap_chain = nullptr;

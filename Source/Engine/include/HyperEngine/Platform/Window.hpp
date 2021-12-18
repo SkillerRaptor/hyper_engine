@@ -31,12 +31,12 @@ namespace HyperEngine
 		Window &operator=(Window &&other) noexcept;
 
 		void poll_events();
-		
+
 		Expected<VkSurfaceKHR> create_surface(VkInstance instance) const;
 
 		Vec2ui get_window_size() const;
 		Vec2ui get_framebuffer_size() const;
-		
+
 		static Expected<Window *> create(
 			std::string_view title,
 			size_t width,

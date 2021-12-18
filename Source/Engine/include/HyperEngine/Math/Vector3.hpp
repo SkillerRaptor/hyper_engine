@@ -18,40 +18,9 @@ namespace HyperEngine
 	class Vector3
 	{
 	public:
-		HYPERENGINE_DISABLE_WARNINGS()
-		union
-		{
-			T data[3] = { 0 };
-
-			struct
-			{
-				T x;
-				T y;
-				T z;
-			};
-
-			struct
-			{
-				T r;
-				T g;
-				T b;
-			};
-
-			struct
-			{
-				T s;
-				T t;
-				T p;
-			};
-
-			struct
-			{
-				T u;
-				T v;
-				T w;
-			};
-		};
-		HYPERENGINE_RESTORE_WARNINGS()
+		T x;
+		T y;
+		T z;
 	};
 
 	using Vec3 = Vector3<float>;

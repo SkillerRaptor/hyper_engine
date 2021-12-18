@@ -65,7 +65,8 @@ namespace HyperEngine::Formatter
 				return Error("format bracket unclosed");
 			}
 
-			if (argument_index >= sizeof...(args))
+			constexpr size_t argument_size = sizeof...(args);
+			if (argument_index >= argument_size)
 			{
 				return Error("format argument not found");
 			}
