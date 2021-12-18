@@ -23,17 +23,16 @@ namespace HyperEngine
 		: m_device(&device)
 		, m_window(&window)
 	{
-		const Device::SwapChainSupportDetails swap_chain_support_details =
+		const Device::SwapChainSupportDetails support_details =
 			m_device->query_swap_chain_support(m_device->physical_device());
 		const VkSurfaceFormatKHR surface_format =
-			choose_surface_format(swap_chain_support_details.formats);
+			choose_surface_format(support_details.formats);
 		const VkPresentModeKHR present_mode =
-			choose_present_mode(swap_chain_support_details.present_modes);
-		const VkExtent2D extent =
-			choose_extent(swap_chain_support_details.capabilities);
+			choose_present_mode(support_details.present_modes);
+		const VkExtent2D extent = choose_extent(support_details.capabilities);
 		const uint32_t image_count = std::min(
-			swap_chain_support_details.capabilities.minImageCount + 1,
-			swap_chain_support_details.capabilities.maxImageCount);
+			support_details.capabilities.minImageCount + 1,
+			support_details.capabilities.maxImageCount);
 		const Device::QueueFamilies queue_families =
 			m_device->find_queue_families(m_device->physical_device());
 		const std::array<uint32_t, 2> queue_family = {
@@ -66,7 +65,7 @@ namespace HyperEngine
 			.imageSharingMode = sharing_mode,
 			.queueFamilyIndexCount = static_cast<uint32_t>(queue_family_index_count),
 			.pQueueFamilyIndices = queue_family_indices,
-			.preTransform = swap_chain_support_details.capabilities.currentTransform,
+			.preTransform = support_details.capabilities.currentTransform,
 			.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
 			.presentMode = present_mode,
 			.clipped = VK_TRUE,
@@ -91,10 +90,10 @@ namespace HyperEngine
 	}
 
 	SwapChain::SwapChain(SwapChain &&other) noexcept
+		: m_device(std::exchange(other.m_device, nullptr))
+		, m_window(std::exchange(other.m_window, nullptr))
+		, m_swap_chain(std::exchange(other.m_swap_chain, nullptr))
 	{
-		m_device = std::exchange(other.m_device, nullptr);
-		m_window = std::exchange(other.m_window, nullptr);
-		m_swap_chain = std::exchange(other.m_swap_chain, nullptr);
 	}
 
 	SwapChain &SwapChain::operator=(SwapChain &&other) noexcept
@@ -102,24 +101,7 @@ namespace HyperEngine
 		m_device = std::exchange(other.m_device, nullptr);
 		m_window = std::exchange(other.m_window, nullptr);
 		m_swap_chain = std::exchange(other.m_swap_chain, nullptr);
-
 		return *this;
-	}
-
-	Expected<SwapChain *> SwapChain::create(
-		VkSurfaceKHR surface,
-		const Device &device,
-		const Window &window)
-	{
-		Error error = Error::success();
-		auto *swap_chain = new SwapChain(surface, device, window, error);
-		if (error.is_error())
-		{
-			delete swap_chain;
-			return error;
-		}
-
-		return swap_chain;
 	}
 
 	VkExtent2D SwapChain::choose_extent(
@@ -132,17 +114,14 @@ namespace HyperEngine
 			return surface_capabilities.currentExtent;
 		}
 
-		int width = 0;
-		int height = 0;
-		glfwGetFramebufferSize(m_window->native_window(), &width, &height);
-
+		const Vec2ui framebuffer_size = m_window->get_framebuffer_size();
 		const VkExtent2D extent = {
 			.width = std::clamp(
-				static_cast<uint32_t>(width),
+				framebuffer_size.x,
 				surface_capabilities.minImageExtent.width,
 				surface_capabilities.maxImageExtent.width),
 			.height = std::clamp(
-				static_cast<uint32_t>(height),
+				framebuffer_size.y,
 				surface_capabilities.minImageExtent.height,
 				surface_capabilities.maxImageExtent.height),
 		};
@@ -182,5 +161,23 @@ namespace HyperEngine
 		}
 
 		return VK_PRESENT_MODE_FIFO_KHR;
+	}
+
+	Expected<SwapChain *> SwapChain::create(
+		VkSurfaceKHR surface,
+		const Device &device,
+		const Window &window)
+	{
+		assert(surface != nullptr && "The surface can't be null");
+
+		Error error = Error::success();
+		auto *swap_chain = new SwapChain(surface, device, window, error);
+		if (error.is_error())
+		{
+			delete swap_chain;
+			return error;
+		}
+
+		return swap_chain;
 	}
 } // namespace HyperEngine

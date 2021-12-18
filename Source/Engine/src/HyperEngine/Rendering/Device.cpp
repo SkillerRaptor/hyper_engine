@@ -40,16 +40,15 @@ namespace HyperEngine
 	}
 
 	Device::Device(Device &&other) noexcept
+		: m_physical_device(std::exchange(other.m_physical_device, nullptr))
+		, m_device(std::exchange(other.m_device, nullptr))
 	{
-		m_physical_device = std::exchange(other.m_physical_device, nullptr);
-		m_device = std::exchange(other.m_device, nullptr);
 	}
 
 	Device &Device::operator=(Device &&other) noexcept
 	{
 		m_physical_device = std::exchange(other.m_physical_device, nullptr);
 		m_device = std::exchange(other.m_device, nullptr);
-
 		return *this;
 	}
 
@@ -59,7 +58,7 @@ namespace HyperEngine
 		vkEnumeratePhysicalDevices(m_instance, &device_count, nullptr);
 		if (device_count == 0)
 		{
-			return Error("failed to find gpu with vulkan support");
+			return Error("failed to find physical device with vulkan support");
 		}
 
 		std::vector<VkPhysicalDevice> devices(device_count);
@@ -67,7 +66,7 @@ namespace HyperEngine
 
 		for (const VkPhysicalDevice &device : devices)
 		{
-			if (!check_physical_device_suitability(device))
+			if (!is_physical_device_suitable(device))
 			{
 				continue;
 			}
@@ -78,7 +77,7 @@ namespace HyperEngine
 
 		if (m_physical_device == nullptr)
 		{
-			return Error("failed to find suitable gpu");
+			return Error("failed to find suitable physical device");
 		}
 
 		return {};
@@ -88,14 +87,13 @@ namespace HyperEngine
 	{
 		const Device::QueueFamilies queue_families =
 			find_queue_families(m_physical_device);
-
-		std::vector<VkDeviceQueueCreateInfo> device_queue_create_infos = {};
-
 		const float queue_priority = 1.0F;
 		const std::set<uint32_t> queue_family_list = {
 			queue_families.graphics_family.value(),
 			queue_families.present_family.value()
 		};
+
+		std::vector<VkDeviceQueueCreateInfo> queue_create_infos = {};
 		for (uint32_t queue_family : queue_family_list)
 		{
 			const VkDeviceQueueCreateInfo device_queue_create_info = {
@@ -106,7 +104,7 @@ namespace HyperEngine
 				.queueCount = 1,
 				.pQueuePriorities = &queue_priority,
 			};
-			device_queue_create_infos.push_back(device_queue_create_info);
+			queue_create_infos.push_back(device_queue_create_info);
 		}
 
 		const VkPhysicalDeviceFeatures physical_device_features = {};
@@ -114,9 +112,8 @@ namespace HyperEngine
 			.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 			.pNext = nullptr,
 			.flags = 0,
-			.queueCreateInfoCount =
-				static_cast<uint32_t>(device_queue_create_infos.size()),
-			.pQueueCreateInfos = device_queue_create_infos.data(),
+			.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size()),
+			.pQueueCreateInfos = queue_create_infos.data(),
 			.enabledLayerCount = 0,
 			.ppEnabledLayerNames = nullptr,
 			.enabledExtensionCount =
@@ -149,7 +146,7 @@ namespace HyperEngine
 		return {};
 	}
 
-	bool Device::check_physical_device_suitability(
+	bool Device::is_physical_device_suitable(
 		VkPhysicalDevice physical_device) const
 	{
 		const Device::QueueFamilies queue_families =
@@ -190,9 +187,8 @@ namespace HyperEngine
 		vkGetPhysicalDeviceQueueFamilyProperties(
 			physical_device, &property_count, properties.data());
 
-		Device::QueueFamilies queue_families = {};
-
 		uint32_t i = 0;
+		Device::QueueFamilies queue_families = {};
 		for (const VkQueueFamilyProperties &queue_family : properties)
 		{
 			if (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT)
@@ -222,21 +218,21 @@ namespace HyperEngine
 	Device::SwapChainSupportDetails Device::query_swap_chain_support(
 		VkPhysicalDevice physical_device) const
 	{
-		SwapChainSupportDetails swap_chain_support_details = {};
+		SwapChainSupportDetails support_details = {};
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-			physical_device, m_surface, &swap_chain_support_details.capabilities);
+			physical_device, m_surface, &support_details.capabilities);
 
 		uint32_t format_count = 0;
 		vkGetPhysicalDeviceSurfaceFormatsKHR(
 			physical_device, m_surface, &format_count, nullptr);
 		if (format_count != 0)
 		{
-			swap_chain_support_details.formats.resize(format_count);
+			support_details.formats.resize(format_count);
 			vkGetPhysicalDeviceSurfaceFormatsKHR(
 				physical_device,
 				m_surface,
 				&format_count,
-				swap_chain_support_details.formats.data());
+				support_details.formats.data());
 		}
 
 		uint32_t present_mode_count = 0;
@@ -244,15 +240,15 @@ namespace HyperEngine
 			physical_device, m_surface, &present_mode_count, nullptr);
 		if (present_mode_count != 0)
 		{
-			swap_chain_support_details.present_modes.resize(present_mode_count);
+			support_details.present_modes.resize(present_mode_count);
 			vkGetPhysicalDeviceSurfacePresentModesKHR(
 				physical_device,
 				m_surface,
 				&present_mode_count,
-				swap_chain_support_details.present_modes.data());
+				support_details.present_modes.data());
 		}
 
-		return swap_chain_support_details;
+		return support_details;
 	}
 
 	bool Device::check_physical_device_extensions_support(
@@ -272,7 +268,6 @@ namespace HyperEngine
 
 		std::set<std::string> required_extensions(
 			s_device_extensions.begin(), s_device_extensions.end());
-
 		for (const VkExtensionProperties &extension : extensions)
 		{
 			required_extensions.erase(extension.extensionName);
@@ -281,20 +276,30 @@ namespace HyperEngine
 		return required_extensions.empty();
 	}
 
-	VkPhysicalDevice Device::physical_device() const
+	VkPhysicalDevice Device::physical_device() const noexcept
 	{
 		return m_physical_device;
 	}
 
-	VkDevice Device::device() const
+	VkDevice Device::device() const noexcept
 	{
 		return m_device;
 	}
 
+	VkQueue Device::graphics_queue() const noexcept
+	{
+		return m_graphics_queue;
+	}
+
+	VkQueue Device::present_queue() const noexcept
+	{
+		return m_present_queue;
+	}
+
 	Expected<Device *> Device::create(VkInstance instance, VkSurfaceKHR surface)
 	{
-		assert(instance != nullptr);
-		assert(surface != nullptr);
+		assert(instance != nullptr && "The instance can't be null");
+		assert(surface != nullptr && "The surface can't be null");
 
 		Error error = Error::success();
 		auto *device = new Device(instance, surface, error);

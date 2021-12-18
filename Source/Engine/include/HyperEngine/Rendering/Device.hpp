@@ -49,8 +49,10 @@ namespace HyperEngine
 		SwapChainSupportDetails query_swap_chain_support(
 			VkPhysicalDevice physical_device) const;
 
-		VkPhysicalDevice physical_device() const;
-		VkDevice device() const;
+		VkPhysicalDevice physical_device() const noexcept;
+		VkDevice device() const noexcept;
+		VkQueue graphics_queue() const noexcept;
+		VkQueue present_queue() const noexcept;
 
 		static Expected<Device *> create(VkInstance instance, VkSurfaceKHR surface);
 
@@ -60,7 +62,7 @@ namespace HyperEngine
 		Expected<void> find_physical_device();
 		Expected<void> create_device();
 
-		bool check_physical_device_suitability(
+		bool is_physical_device_suitable(
 			VkPhysicalDevice physical_device) const;
 		bool check_physical_device_extensions_support(
 			VkPhysicalDevice physical_device) const;

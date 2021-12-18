@@ -21,3 +21,22 @@
 #elif HYPERENGINE_COMPILER_MSVC
 #	define HYPERENGINE_BUILTIN_UNREACHABLE() __assume(false)
 #endif
+
+// clang-format off
+#if HYPERENGINE_COMPILER_CLANG
+#	define HYPERENGINE_DISABLE_WARNINGS() \
+	_Pragma("clang diagnostic push")       \
+	_Pragma("clang diagnostic ignored \"-Weverything\"")
+#	define HYPERENGINE_RESTORE_WARNINGS() _Pragma("clang diagnostic pop")
+#elif HYPERENGINE_COMPILER_GCC
+#	define HYPERENGINE_DISABLE_WARNINGS()        \
+	_Pragma("GCC diagnostic push")                \
+	_Pragma("GCC diagnostic ignored \"-Wall\"")   \
+	_Pragma("GCC diagnostic ignored \"-Wextra\"") \
+	_Pragma("GCC diagnostic ignored \"-Wpedantic\"")
+#	define HYPERENGINE_RESTORE_WARNINGS() _Pragma("GCC diagnostic pop")
+#elif HYPERENGINE_COMPILER_MSVC
+#	define HYPERENGINE_DISABLE_WARNINGS() __pragma(warning(push, 0))
+#	define HYPERENGINE_RESTORE_WARNINGS() __pragma(warning(pop))
+#endif
+// clang-format on

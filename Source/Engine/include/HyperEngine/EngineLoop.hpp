@@ -29,7 +29,7 @@ namespace HyperEngine
 		static Expected<EngineLoop> create(Application &application);
 
 	private:
-		EngineLoop(Application *application, Error &error);
+		EngineLoop(Application &application, Error &error);
 
 	private:
 		Application *m_application = nullptr;

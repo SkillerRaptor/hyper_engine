@@ -7,19 +7,15 @@
 #include "HyperEngine/Rendering/Utils.hpp"
 
 #include "HyperEngine/Logger.hpp"
-#include "HyperEngine/Support/Prerequisites.hpp"
 
 namespace HyperEngine::Utils
 {
 	VkBool32 debug_callback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-		VkDebugUtilsMessageTypeFlagsEXT type,
+		VkDebugUtilsMessageTypeFlagsEXT ,
 		const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
-		void *user_data)
+		void *)
 	{
-		HYPERENGINE_UNUSED_VARIABLE(type);
-		HYPERENGINE_UNUSED_VARIABLE(user_data);
-
 		switch (severity)
 		{
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:

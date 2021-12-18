@@ -12,9 +12,9 @@ namespace HyperEngine::Utils
 {
 	VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-		VkDebugUtilsMessageTypeFlagsEXT type,
+		VkDebugUtilsMessageTypeFlagsEXT,
 		const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
-		void *user_data);
+		void *);
 
 	constexpr uint32_t make_api_version(
 		uint32_t variant,

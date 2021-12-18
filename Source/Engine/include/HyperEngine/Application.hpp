@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <string>
-
 namespace HyperEngine
 {
 	class Application

@@ -21,6 +21,7 @@ namespace HyperEngine
 		bool request_validation_layers,
 		const Window &window,
 		Error &error)
+		: m_window(&window)
 	{
 		if (volkInitialize() != VK_SUCCESS)
 		{
@@ -48,12 +49,14 @@ namespace HyperEngine
 			}
 		}
 
-		const auto surface = create_surface(window);
+		const auto surface = m_window->create_surface(m_instance);
 		if (surface.is_error())
 		{
 			error = surface.error();
 			return;
 		}
+
+		m_surface = surface.value();
 
 		auto device = Device::create(m_instance, m_surface);
 		if (device.is_error())
@@ -64,7 +67,7 @@ namespace HyperEngine
 
 		m_device = device.value();
 
-		auto swap_chain = SwapChain::create(m_surface, *m_device, window);
+		auto swap_chain = SwapChain::create(m_surface, *m_device, *m_window);
 		if (swap_chain.is_error())
 		{
 			error = swap_chain.error();
@@ -103,22 +106,23 @@ namespace HyperEngine
 	}
 
 	RenderContext::RenderContext(RenderContext &&other) noexcept
+		: m_window(std::exchange(other.m_window, nullptr))
+		, m_instance(std::exchange(other.m_instance, nullptr))
+		, m_debug_messenger(std::exchange(other.m_debug_messenger, nullptr))
+		, m_surface(std::exchange(other.m_surface, nullptr))
+		, m_device(std::exchange(other.m_device, nullptr))
+		, m_swap_chain(std::exchange(other.m_swap_chain, nullptr))
 	{
-		m_instance = std::exchange(other.m_instance, nullptr);
-		m_debug_messenger = std::exchange(other.m_debug_messenger, nullptr);
-		m_surface = std::exchange(other.m_surface, nullptr);
-		m_device = std::exchange(other.m_device, nullptr);
-		m_swap_chain = std::exchange(other.m_swap_chain, nullptr);
 	}
 
 	RenderContext &RenderContext::operator=(RenderContext &&other) noexcept
 	{
+		m_window = std::exchange(other.m_window, nullptr);
 		m_instance = std::exchange(other.m_instance, nullptr);
 		m_debug_messenger = std::exchange(other.m_debug_messenger, nullptr);
 		m_surface = std::exchange(other.m_surface, nullptr);
 		m_device = std::exchange(other.m_device, nullptr);
 		m_swap_chain = std::exchange(other.m_swap_chain, nullptr);
-
 		return *this;
 	}
 
@@ -154,7 +158,7 @@ namespace HyperEngine
 			m_validation_layers_enabled ? s_validation_layers.size() : 0;
 		const char *const *layers =
 			m_validation_layers_enabled ? s_validation_layers.data() : nullptr;
-		const std::vector<const char *> extensions = request_required_extensions();
+		const std::vector<const char *> extensions = get_required_extensions();
 		const VkInstanceCreateInfo instance_create_info = {
 			.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
 			.pNext = m_validation_layers_enabled ? &debug_messenger_info : nullptr,
@@ -206,18 +210,6 @@ namespace HyperEngine
 		return {};
 	}
 
-	Expected<void> RenderContext::create_surface(const Window &window)
-	{
-		const auto result = glfwCreateWindowSurface(
-			m_instance, window.native_window(), nullptr, &m_surface);
-		if (result != VK_SUCCESS)
-		{
-			return Error("failed to create surface");
-		}
-
-		return {};
-	}
-
 	bool RenderContext::validation_layers_supported() const noexcept
 	{
 		uint32_t layer_count = 0;
@@ -246,7 +238,7 @@ namespace HyperEngine
 		return false;
 	}
 
-	std::vector<const char *> RenderContext::request_required_extensions() const
+	std::vector<const char *> RenderContext::get_required_extensions() const
 	{
 		uint32_t required_extension_count = 0;
 		const char **required_extensions =

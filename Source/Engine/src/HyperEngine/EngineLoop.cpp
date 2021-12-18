@@ -10,8 +10,8 @@
 
 namespace HyperEngine
 {
-	EngineLoop::EngineLoop(Application *application, Error &error)
-		: m_application(application)
+	EngineLoop::EngineLoop(Application &application, Error &error)
+		: m_application(&application)
 	{
 #if HYPERENGINE_DEBUG
 		constexpr bool validation_layers_enabled = true;
@@ -41,22 +41,22 @@ namespace HyperEngine
 
 	EngineLoop::~EngineLoop()
 	{
-		if (m_window != nullptr)
-		{
-			delete m_window;
-		}
-
 		if (m_render_context != nullptr)
 		{
 			delete m_render_context;
 		}
+
+		if (m_window != nullptr)
+		{
+			delete m_window;
+		}
 	}
 
 	EngineLoop::EngineLoop(EngineLoop &&other) noexcept
+		: m_application(std::exchange(other.m_application, nullptr))
+		, m_window(std::exchange(other.m_window, nullptr))
+		, m_render_context(std::exchange(other.m_render_context, nullptr))
 	{
-		m_application = std::exchange(other.m_application, nullptr);
-		m_window = std::exchange(other.m_window, nullptr);
-		m_render_context = std::exchange(other.m_render_context, nullptr);
 	}
 
 	EngineLoop &EngineLoop::operator=(EngineLoop &&other) noexcept
@@ -64,7 +64,6 @@ namespace HyperEngine
 		m_application = std::exchange(other.m_application, nullptr);
 		m_window = std::exchange(other.m_window, nullptr);
 		m_render_context = std::exchange(other.m_render_context, nullptr);
-
 		return *this;
 	}
 
@@ -72,7 +71,7 @@ namespace HyperEngine
 	{
 		while (true)
 		{
-			m_window->update();
+			m_window->poll_events();
 			break;
 		}
 	}
@@ -80,7 +79,7 @@ namespace HyperEngine
 	Expected<EngineLoop> EngineLoop::create(Application &application)
 	{
 		Error error = Error::success();
-		EngineLoop engine_loop(&application, error);
+		EngineLoop engine_loop(application, error);
 		if (error.is_error())
 		{
 			return error;

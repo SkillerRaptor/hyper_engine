@@ -50,16 +50,17 @@ namespace HyperEngine
 
 		Expected<void> create_instance();
 		Expected<void> create_debug_messenger();
-		Expected<void> create_surface(const Window &window);
 
 		bool validation_layers_supported() const noexcept;
-		std::vector<const char *> request_required_extensions() const;
+		std::vector<const char *> get_required_extensions() const;
 
 	private:
+		const Window *m_window = nullptr;
+		
 		VkInstance m_instance = nullptr;
 		VkDebugUtilsMessengerEXT m_debug_messenger = nullptr;
+		
 		VkSurfaceKHR m_surface = nullptr;
-
 		Device *m_device = nullptr;
 		SwapChain *m_swap_chain = nullptr;
 

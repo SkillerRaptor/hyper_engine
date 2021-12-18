@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "HyperEngine/Math/Vector2.hpp"
 #include "HyperEngine/Support/Expected.hpp"
 #include "HyperEngine/Support/Prerequisites.hpp"
 
@@ -13,6 +14,8 @@
 #include <string_view>
 
 struct GLFWwindow;
+using VkInstance = struct VkInstance_T *;
+using VkSurfaceKHR = struct VkSurfaceKHR_T *;
 
 namespace HyperEngine
 {
@@ -27,10 +30,13 @@ namespace HyperEngine
 		Window(Window &&other) noexcept;
 		Window &operator=(Window &&other) noexcept;
 
-		void update();
+		void poll_events();
+		
+		Expected<VkSurfaceKHR> create_surface(VkInstance instance) const;
 
-		GLFWwindow *native_window() const;
-
+		Vec2ui get_window_size() const;
+		Vec2ui get_framebuffer_size() const;
+		
 		static Expected<Window *> create(
 			std::string_view title,
 			size_t width,

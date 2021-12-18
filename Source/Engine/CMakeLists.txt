@@ -24,11 +24,14 @@ set(HEADERS
         include/HyperEngine/Formatter.hpp
         include/HyperEngine/Launcher.hpp
         include/HyperEngine/Logger.hpp
+        include/HyperEngine/Math/Vector2.hpp
+        include/HyperEngine/Math/Vector3.hpp
+        include/HyperEngine/Math/Vector4.hpp
+        include/HyperEngine/Platform/Window.hpp
         include/HyperEngine/Rendering/Device.hpp
         include/HyperEngine/Rendering/RenderContext.hpp
         include/HyperEngine/Rendering/SwapChain.hpp
         include/HyperEngine/Rendering/Utils.hpp
-        include/HyperEngine/Platform/Window.hpp
         include/HyperEngine/Support/Compiler.hpp
         include/HyperEngine/Support/Error.hpp
         include/HyperEngine/Support/ErrorHandling.hpp
