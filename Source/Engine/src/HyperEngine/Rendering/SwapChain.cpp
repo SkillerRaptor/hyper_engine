@@ -72,17 +72,72 @@ namespace HyperEngine
 			.oldSwapchain = nullptr,
 		};
 
-		const auto result = vkCreateSwapchainKHR(
+		const auto swap_chain_result = vkCreateSwapchainKHR(
 			m_device->device(), &swapchain_create_info, nullptr, &m_swap_chain);
-		if (result != VK_SUCCESS)
+		if (swap_chain_result != VK_SUCCESS)
 		{
 			error = Error("failed to create swap chain");
 			return;
 		}
-	}
+
+		m_swap_chain_format = surface_format.format;
+		m_swap_chain_extent = extent;
+
+		uint32_t swap_chain_image_count = 0;
+		vkGetSwapchainImagesKHR(
+			m_device->device(), m_swap_chain, &swap_chain_image_count, nullptr);
+		m_swap_chain_images.resize(swap_chain_image_count);
+		vkGetSwapchainImagesKHR(
+			m_device->device(),
+			m_swap_chain,
+			&swap_chain_image_count,
+			m_swap_chain_images.data());
+
+		m_swap_chain_image_views.resize(swap_chain_image_count);
+		for (size_t i = 0; i < m_swap_chain_images.size(); ++i)
+		{
+			const VkImageViewCreateInfo image_view_create_info = {
+				.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+				.pNext = nullptr,
+				.flags = 0,
+				.image = m_swap_chain_images[i],
+				.viewType = VK_IMAGE_VIEW_TYPE_2D,
+				.format = m_swap_chain_format,
+				.components = {
+					.r = VK_COMPONENT_SWIZZLE_IDENTITY,
+					.g = VK_COMPONENT_SWIZZLE_IDENTITY,
+					.b = VK_COMPONENT_SWIZZLE_IDENTITY,
+					.a = VK_COMPONENT_SWIZZLE_IDENTITY,
+				},
+				.subresourceRange = {
+					.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+					.baseMipLevel = 0,
+					.levelCount = 1,
+					.baseArrayLayer = 0,
+					.layerCount = 1,
+				},
+			};
+
+			const auto image_view_result = vkCreateImageView(
+				m_device->device(),
+				&image_view_create_info,
+				nullptr,
+				&m_swap_chain_image_views[i]);
+			if (image_view_result != VK_SUCCESS)
+			{
+				error = Error("failed to create image view #" + std::to_string(i));
+				return;
+			}
+		}
+	} // namespace HyperEngine
 
 	SwapChain::~SwapChain()
 	{
+		for (const VkImageView &swap_chain_image_view : m_swap_chain_image_views)
+		{
+			vkDestroyImageView(m_device->device(), swap_chain_image_view, nullptr);
+		}
+
 		if (m_swap_chain != nullptr)
 		{
 			vkDestroySwapchainKHR(m_device->device(), m_swap_chain, nullptr);

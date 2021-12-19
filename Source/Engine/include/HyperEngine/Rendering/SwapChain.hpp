@@ -52,5 +52,9 @@ namespace HyperEngine
 		const Window *m_window = nullptr;
 
 		VkSwapchainKHR m_swap_chain = nullptr;
+		VkFormat m_swap_chain_format = {};
+		VkExtent2D m_swap_chain_extent = {};
+		std::vector<VkImage> m_swap_chain_images = {};
+		std::vector<VkImageView> m_swap_chain_image_views = {};
 	};
 } // namespace HyperEngine
