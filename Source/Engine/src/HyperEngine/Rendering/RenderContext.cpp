@@ -6,9 +6,7 @@
 
 #include "HyperEngine/Rendering/RenderContext.hpp"
 
-#include "HyperEngine/Platform/Window.hpp"
-#include "HyperEngine/Rendering/Device.hpp"
-#include "HyperEngine/Rendering/SwapChain.hpp"
+#include "HyperEngine/Logger.hpp"
 #include "HyperEngine/Rendering/Utils.hpp"
 
 #include <cstring>
@@ -17,97 +15,8 @@
 
 namespace HyperEngine
 {
-	RenderContext::RenderContext(
-		bool request_validation_layers,
-		const Window &window,
-		Error &error)
-		: m_window(&window)
-	{
-		if (volkInitialize() != VK_SUCCESS)
-		{
-			error = Error("failed to initialize volk");
-			return;
-		}
-
-		m_validation_layers_enabled =
-			request_validation_layers && validation_layers_supported();
-
-		const auto instance = create_instance();
-		if (instance.is_error())
-		{
-			error = instance.error();
-			return;
-		}
-
-		if (m_validation_layers_enabled)
-		{
-			const auto debug_messenger = create_debug_messenger();
-			if (debug_messenger.is_error())
-			{
-				error = debug_messenger.error();
-				return;
-			}
-		}
-
-		const auto surface = m_window->create_surface(m_instance);
-		if (surface.is_error())
-		{
-			error = surface.error();
-			return;
-		}
-
-		m_surface = surface.value();
-
-		auto device = Device::create(m_instance, m_surface);
-		if (device.is_error())
-		{
-			error = device.error();
-			return;
-		}
-
-		m_device = device.value();
-
-		auto swap_chain = SwapChain::create(m_surface, *m_device, *m_window);
-		if (swap_chain.is_error())
-		{
-			error = swap_chain.error();
-			return;
-		}
-
-		m_swap_chain = swap_chain.value();
-	}
-
-	RenderContext::~RenderContext()
-	{
-		if (m_swap_chain != nullptr)
-		{
-			delete m_swap_chain;
-		}
-
-		if (m_device != nullptr)
-		{
-			delete m_device;
-		}
-
-		if (m_surface != nullptr)
-		{
-			vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
-		}
-
-		if (m_debug_messenger != nullptr)
-		{
-			vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messenger, nullptr);
-		}
-
-		if (m_instance != nullptr)
-		{
-			vkDestroyInstance(m_instance, nullptr);
-		}
-	}
-
 	RenderContext::RenderContext(RenderContext &&other) noexcept
-		: m_window(std::exchange(other.m_window, nullptr))
-		, m_instance(std::exchange(other.m_instance, nullptr))
+		: m_instance(std::exchange(other.m_instance, nullptr))
 		, m_debug_messenger(std::exchange(other.m_debug_messenger, nullptr))
 		, m_surface(std::exchange(other.m_surface, nullptr))
 		, m_device(std::exchange(other.m_device, nullptr))
@@ -117,13 +26,67 @@ namespace HyperEngine
 
 	RenderContext &RenderContext::operator=(RenderContext &&other) noexcept
 	{
-		m_window = std::exchange(other.m_window, nullptr);
 		m_instance = std::exchange(other.m_instance, nullptr);
 		m_debug_messenger = std::exchange(other.m_debug_messenger, nullptr);
 		m_surface = std::exchange(other.m_surface, nullptr);
 		m_device = std::exchange(other.m_device, nullptr);
 		m_swap_chain = std::exchange(other.m_swap_chain, nullptr);
 		return *this;
+	}
+
+	Expected<void> RenderContext::initialize(
+		bool request_validation_layers,
+		const Window &window)
+	{
+		if (volkInitialize() != VK_SUCCESS)
+		{
+			return Error("failed to initialize volk");
+		}
+
+		m_validation_layers_enabled =
+			request_validation_layers && validation_layers_supported();
+
+		const auto instance = create_instance();
+		if (instance.is_error())
+		{
+			return instance.error();
+		}
+
+		if (m_validation_layers_enabled)
+		{
+			const auto debug_messenger = create_debug_messenger();
+			if (debug_messenger.is_error())
+			{
+				return debug_messenger.error();
+			}
+		}
+
+		auto surface = window.create_surface(m_instance);
+		if (surface.is_error())
+		{
+			return surface.error();
+		}
+
+		m_surface = std::move(surface.value());
+
+		auto device = Device::create(m_instance, m_surface);
+		if (device.is_error())
+		{
+			return device.error();
+		}
+
+		m_device = std::move(device.value());
+
+		auto swap_chain = SwapChain::create(
+			m_surface.release_non_null(), m_device.release_non_null(), window);
+		if (swap_chain.is_error())
+		{
+			return swap_chain.error();
+		}
+
+		m_swap_chain = std::move(swap_chain.value());
+
+		return {};
 	}
 
 	Expected<void> RenderContext::create_instance()
@@ -170,12 +133,20 @@ namespace HyperEngine
 			.ppEnabledExtensionNames = extensions.data(),
 		};
 
+		VkInstance instance = nullptr;
 		const auto result =
-			vkCreateInstance(&instance_create_info, nullptr, &m_instance);
+			vkCreateInstance(&instance_create_info, nullptr, &instance);
 		if (result != VK_SUCCESS)
 		{
 			return Error("failed to create instance");
 		}
+
+		m_instance = NonNullOwnPtr<VkInstance>(
+			instance,
+			[](VkInstance handle)
+			{
+				vkDestroyInstance(handle, nullptr);
+			});
 
 		volkLoadInstance(m_instance);
 
@@ -200,12 +171,20 @@ namespace HyperEngine
 			.pUserData = nullptr,
 		};
 
+		VkDebugUtilsMessengerEXT debug_messenger = nullptr;
 		const auto result = vkCreateDebugUtilsMessengerEXT(
-			m_instance, &debug_messenger_info, nullptr, &m_debug_messenger);
+			m_instance, &debug_messenger_info, nullptr, &debug_messenger);
 		if (result != VK_SUCCESS)
 		{
 			return Error("failed to create debug messenger");
 		}
+
+		m_debug_messenger = NonNullOwnPtr<VkDebugUtilsMessengerEXT>(
+			debug_messenger,
+			[this](VkDebugUtilsMessengerEXT handle)
+			{
+				vkDestroyDebugUtilsMessengerEXT(m_instance, handle, nullptr);
+			});
 
 		return {};
 	}
@@ -258,17 +237,16 @@ namespace HyperEngine
 		return extensions;
 	}
 
-	Expected<RenderContext *> RenderContext::create(
+	Expected<NonNullOwnPtr<RenderContext>> RenderContext::create(
 		bool request_validation_layers,
 		const Window &window)
 	{
-		Error error = Error::success();
-		auto *render_context =
-			new RenderContext(request_validation_layers, window, error);
-		if (error.is_error())
+		auto render_context = make_non_null_own<RenderContext>();
+		const auto result =
+			render_context->initialize(request_validation_layers, window);
+		if (result.is_error())
 		{
-			delete render_context;
-			return error;
+			return result.error();
 		}
 
 		return render_context;

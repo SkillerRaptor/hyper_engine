@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "HyperEngine/Support/Concepts.hpp"
 #include "HyperEngine/Support/Expected.hpp"
 #include "HyperEngine/Support/Prerequisites.hpp"
 
@@ -17,12 +18,6 @@ namespace HyperEngine::Formatter
 {
 	namespace Detail
 	{
-		template <typename T>
-		concept Printable = requires(std::ostream &ostream, T value)
-		{
-			ostream << value;
-		};
-
 		inline void format(std::stringstream &, size_t)
 		{
 		}
@@ -44,29 +39,29 @@ namespace HyperEngine::Formatter
 		}
 	} // namespace Detail
 
-	template <typename... Args>
+	template <Printable... Args>
 	Expected<std::string> format(std::string_view format, Args &&...args)
 	{
 		std::stringstream stream;
 
 		size_t argument_index = 0;
-		for (auto iterator = format.cbegin(); iterator != format.cend(); ++iterator)
+		constexpr size_t argument_count = sizeof...(args);
+		for (auto it = format.cbegin(); it != format.cend(); ++it)
 		{
-			if (*iterator != '{')
+			if (*it != '{')
 			{
-				stream << *iterator;
+				stream << *it;
 				continue;
 			}
 
-			++iterator;
+			++it;
 
-			if (*iterator != '}')
+			if (*it != '}')
 			{
 				return Error("format bracket unclosed");
 			}
 
-			constexpr size_t argument_size = sizeof...(args);
-			if (argument_index >= argument_size)
+			if (argument_index >= argument_count)
 			{
 				return Error("format argument not found");
 			}

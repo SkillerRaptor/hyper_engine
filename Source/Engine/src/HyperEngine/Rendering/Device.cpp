@@ -12,44 +12,44 @@
 
 namespace HyperEngine
 {
-	Device::Device(VkInstance instance, VkSurfaceKHR surface, Error &error)
+	Device::Device(const VkInstance &instance, const VkSurfaceKHR &surface)
 		: m_instance(instance)
 		, m_surface(surface)
 	{
-		const auto physical_device = find_physical_device();
-		if (physical_device.is_error())
-		{
-			error = physical_device.error();
-			return;
-		}
-
-		const auto device = create_device();
-		if (device.is_error())
-		{
-			error = device.error();
-			return;
-		}
-	}
-
-	Device::~Device()
-	{
-		if (m_device != nullptr)
-		{
-			vkDestroyDevice(m_device, nullptr);
-		}
 	}
 
 	Device::Device(Device &&other) noexcept
-		: m_physical_device(std::exchange(other.m_physical_device, nullptr))
+		: m_instance(std::exchange(other.m_instance, nullptr))
+		, m_surface(std::exchange(other.m_surface, nullptr))
+		, m_physical_device(std::exchange(other.m_physical_device, nullptr))
 		, m_device(std::exchange(other.m_device, nullptr))
 	{
 	}
 
 	Device &Device::operator=(Device &&other) noexcept
 	{
+		m_instance = std::exchange(other.m_instance, nullptr);
+		m_surface = std::exchange(other.m_surface, nullptr);
 		m_physical_device = std::exchange(other.m_physical_device, nullptr);
 		m_device = std::exchange(other.m_device, nullptr);
 		return *this;
+	}
+
+	Expected<void> Device::initialize()
+	{
+		const auto physical_device = find_physical_device();
+		if (physical_device.is_error())
+		{
+			return physical_device.error();
+		}
+
+		const auto device = create_device();
+		if (device.is_error())
+		{
+			return device.error();
+		}
+
+		return {};
 	}
 
 	Expected<void> Device::find_physical_device()
@@ -122,12 +122,20 @@ namespace HyperEngine
 			.pEnabledFeatures = &physical_device_features,
 		};
 
-		const auto device_result = vkCreateDevice(
-			m_physical_device, &device_create_info, nullptr, &m_device);
+		VkDevice device = nullptr;
+		const auto device_result =
+			vkCreateDevice(m_physical_device, &device_create_info, nullptr, &device);
 		if (device_result != VK_SUCCESS)
 		{
 			return Error("failed to create logical device");
 		}
+
+		m_device = NonNullOwnPtr<VkDevice>(
+			device,
+			[](VkDevice handle)
+			{
+				vkDestroyDevice(handle, nullptr);
+			});
 
 		vkGetDeviceQueue(
 			m_device, queue_families.graphics_family.value(), 0, &m_graphics_queue);
@@ -296,17 +304,15 @@ namespace HyperEngine
 		return m_present_queue;
 	}
 
-	Expected<Device *> Device::create(VkInstance instance, VkSurfaceKHR surface)
+	Expected<NonNullOwnPtr<Device>> Device::create(
+		const VkInstance &instance,
+		const VkSurfaceKHR &surface)
 	{
-		assert(instance != nullptr && "The instance can't be null");
-		assert(surface != nullptr && "The surface can't be null");
-
-		Error error = Error::success();
-		auto *device = new Device(instance, surface, error);
-		if (error.is_error())
+		auto device = make_non_null_own<Device>(instance, surface);
+		const auto result = device->initialize();
+		if (result.is_error())
 		{
-			delete device;
-			return error;
+			return result.error();
 		}
 
 		return device;

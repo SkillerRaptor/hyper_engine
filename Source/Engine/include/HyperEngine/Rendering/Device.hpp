@@ -7,6 +7,7 @@
 #pragma once
 
 #include "HyperEngine/Support/Expected.hpp"
+#include "HyperEngine/Support/OwnPtr.hpp"
 #include "HyperEngine/Support/Prerequisites.hpp"
 
 #include <array>
@@ -40,10 +41,12 @@ namespace HyperEngine
 		};
 
 	public:
-		~Device();
+		Device(const VkInstance &instance, const VkSurfaceKHR &surface);
 
 		Device(Device &&other) noexcept;
 		Device &operator=(Device &&other) noexcept;
+
+		Expected<void> initialize();
 
 		QueueFamilies find_queue_families(VkPhysicalDevice physical_device) const;
 		SwapChainSupportDetails query_swap_chain_support(
@@ -54,11 +57,11 @@ namespace HyperEngine
 		VkQueue graphics_queue() const noexcept;
 		VkQueue present_queue() const noexcept;
 
-		static Expected<Device *> create(VkInstance instance, VkSurfaceKHR surface);
+		static Expected<NonNullOwnPtr<Device>> create(
+			const VkInstance &instance,
+			const VkSurfaceKHR &surface);
 
 	private:
-		Device(VkInstance instance, VkSurfaceKHR surface, Error &error);
-
 		Expected<void> find_physical_device();
 		Expected<void> create_device();
 
@@ -71,7 +74,7 @@ namespace HyperEngine
 		VkSurfaceKHR m_surface = nullptr;
 
 		VkPhysicalDevice m_physical_device = nullptr;
-		VkDevice m_device = nullptr;
+		OwnPtr<VkDevice> m_device = nullptr;
 
 		VkQueue m_graphics_queue = nullptr;
 		VkQueue m_present_queue = nullptr;

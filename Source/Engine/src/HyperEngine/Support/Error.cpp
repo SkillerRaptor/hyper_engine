@@ -6,8 +6,6 @@
 
 #include "HyperEngine/Support/Error.hpp"
 
-#include <cassert>
-
 namespace HyperEngine
 {
 	Error::Error(std::string error)
@@ -17,23 +15,6 @@ namespace HyperEngine
 
 	std::string Error::error() const
 	{
-		assert(m_error.has_value());
-		return m_error.value();
-	}
-
-	bool Error::is_error() const noexcept
-	{
-		return m_error.has_value();
-	}
-
-	ErrorSuccess Error::success() noexcept
-	{
-		return {};
-	}
-
-	std::ostream &operator<<(std::ostream &ostream, const Error &error)
-	{
-		ostream << error.error();
-		return ostream;
+		return m_error;
 	}
 } // namespace HyperEngine

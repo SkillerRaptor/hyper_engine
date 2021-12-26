@@ -10,18 +10,43 @@
 #include "HyperEngine/Rendering/Device.hpp"
 
 #include <algorithm>
-#include <GLFW/glfw3.h>
 #include <volk.h>
 
 namespace HyperEngine
 {
 	SwapChain::SwapChain(
-		VkSurfaceKHR surface,
-		const Device &device,
-		const Window &window,
-		Error &error)
-		: m_device(&device)
+		const NonNullOwnPtr<Device> &device,
+		const Window &window)
+		: m_device(device)
 		, m_window(&window)
+	{
+	}
+
+	SwapChain::SwapChain(SwapChain &&other) noexcept
+		: m_device(std::exchange(other.m_device, nullptr))
+		, m_window(std::exchange(other.m_window, nullptr))
+		, m_swap_chain(std::exchange(other.m_swap_chain, nullptr))
+		, m_swap_chain_images(std::move(other.m_swap_chain_images))
+		, m_swap_chain_image_views(std::move(other.m_swap_chain_image_views))
+		, m_swap_chain_format(other.m_swap_chain_format)
+		, m_swap_chain_extent(other.m_swap_chain_extent)
+	{
+	}
+
+	SwapChain &SwapChain::operator=(SwapChain &&other) noexcept
+	{
+		m_device = std::exchange(other.m_device, nullptr);
+		m_window = std::exchange(other.m_window, nullptr);
+		m_swap_chain = std::exchange(other.m_swap_chain, nullptr);
+		m_swap_chain_images = std::move(other.m_swap_chain_images);
+		m_swap_chain_image_views = std::move(other.m_swap_chain_image_views);
+		m_swap_chain_format = other.m_swap_chain_format;
+		m_swap_chain_extent = other.m_swap_chain_extent;
+		return *this;
+	}
+
+	Expected<void> SwapChain::initialize(
+		const NonNullOwnPtr<VkSurfaceKHR> &surface)
 	{
 		const Device::SwapChainSupportDetails support_details =
 			m_device->query_swap_chain_support(m_device->physical_device());
@@ -72,13 +97,20 @@ namespace HyperEngine
 			.oldSwapchain = nullptr,
 		};
 
+		VkSwapchainKHR swap_chain = nullptr;
 		const auto swap_chain_result = vkCreateSwapchainKHR(
-			m_device->device(), &swapchain_create_info, nullptr, &m_swap_chain);
+			m_device->device(), &swapchain_create_info, nullptr, &swap_chain);
 		if (swap_chain_result != VK_SUCCESS)
 		{
-			error = Error("failed to create swap chain");
-			return;
+			return Error("failed to create swap chain");
 		}
+
+		m_swap_chain = NonNullOwnPtr<VkSwapchainKHR>(
+			swap_chain,
+			[this](VkSwapchainKHR handle)
+			{
+				vkDestroySwapchainKHR(m_device->device(), handle, nullptr);
+			});
 
 		m_swap_chain_format = surface_format.format;
 		m_swap_chain_extent = extent;
@@ -86,12 +118,24 @@ namespace HyperEngine
 		uint32_t swap_chain_image_count = 0;
 		vkGetSwapchainImagesKHR(
 			m_device->device(), m_swap_chain, &swap_chain_image_count, nullptr);
-		m_swap_chain_images.resize(swap_chain_image_count);
+
+		std::vector<VkImage> swap_chain_images(swap_chain_image_count);
 		vkGetSwapchainImagesKHR(
 			m_device->device(),
 			m_swap_chain,
 			&swap_chain_image_count,
-			m_swap_chain_images.data());
+			swap_chain_images.data());
+
+		for (VkImage &image : swap_chain_images)
+		{
+			auto ptr = NonNullOwnPtr<VkImage>(
+				image,
+				[this](VkImage handle)
+				{
+					vkDestroyImage(m_device->device(), handle, nullptr);
+				});
+			m_swap_chain_images.emplace_back(std::move(ptr));
+		}
 
 		m_swap_chain_image_views.resize(swap_chain_image_count);
 		for (size_t i = 0; i < m_swap_chain_images.size(); ++i)
@@ -125,38 +169,11 @@ namespace HyperEngine
 				&m_swap_chain_image_views[i]);
 			if (image_view_result != VK_SUCCESS)
 			{
-				error = Error("failed to create image view #" + std::to_string(i));
-				return;
+				return Error("failed to create image view #" + std::to_string(i));
 			}
 		}
-	} // namespace HyperEngine
 
-	SwapChain::~SwapChain()
-	{
-		for (const VkImageView &swap_chain_image_view : m_swap_chain_image_views)
-		{
-			vkDestroyImageView(m_device->device(), swap_chain_image_view, nullptr);
-		}
-
-		if (m_swap_chain != nullptr)
-		{
-			vkDestroySwapchainKHR(m_device->device(), m_swap_chain, nullptr);
-		}
-	}
-
-	SwapChain::SwapChain(SwapChain &&other) noexcept
-		: m_device(std::exchange(other.m_device, nullptr))
-		, m_window(std::exchange(other.m_window, nullptr))
-		, m_swap_chain(std::exchange(other.m_swap_chain, nullptr))
-	{
-	}
-
-	SwapChain &SwapChain::operator=(SwapChain &&other) noexcept
-	{
-		m_device = std::exchange(other.m_device, nullptr);
-		m_window = std::exchange(other.m_window, nullptr);
-		m_swap_chain = std::exchange(other.m_swap_chain, nullptr);
-		return *this;
+		return {};
 	}
 
 	VkExtent2D SwapChain::choose_extent(
@@ -169,7 +186,7 @@ namespace HyperEngine
 			return surface_capabilities.currentExtent;
 		}
 
-		const Vec2ui framebuffer_size = m_window->get_framebuffer_size();
+		const Vec2ui framebuffer_size = m_window->framebuffer_size();
 		const VkExtent2D extent = {
 			.width = std::clamp(
 				framebuffer_size.x,
@@ -218,19 +235,18 @@ namespace HyperEngine
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
-	Expected<SwapChain *> SwapChain::create(
-		VkSurfaceKHR surface,
-		const Device &device,
+	Expected<NonNullOwnPtr<SwapChain>> SwapChain::create(
+		const NonNullOwnPtr<VkSurfaceKHR> &surface,
+		const NonNullOwnPtr<Device> &device,
 		const Window &window)
 	{
 		assert(surface != nullptr && "The surface can't be null");
 
-		Error error = Error::success();
-		auto *swap_chain = new SwapChain(surface, device, window, error);
-		if (error.is_error())
+		auto swap_chain = make_non_null_own<SwapChain>(device, window);
+		const auto result = swap_chain->initialize(surface);
+		if (result.is_error())
 		{
-			delete swap_chain;
-			return error;
+			return result.error();
 		}
 
 		return swap_chain;

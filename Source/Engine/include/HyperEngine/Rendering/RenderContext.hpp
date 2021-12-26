@@ -6,48 +6,40 @@
 
 #pragma once
 
+#include "HyperEngine/Platform/Window.hpp"
+#include "HyperEngine/Rendering/Device.hpp"
+#include "HyperEngine/Rendering/SwapChain.hpp"
 #include "HyperEngine/Support/Expected.hpp"
-#include "HyperEngine/Support/Prerequisites.hpp"
+#include "HyperEngine/Support/OwnPtr.hpp"
 
 #include <array>
+#include <memory>
 #include <vector>
-
-using VkInstance = struct VkInstance_T *;
-using VkDebugUtilsMessengerEXT = struct VkDebugUtilsMessengerEXT_T *;
-using VkSurfaceKHR = struct VkSurfaceKHR_T *;
 
 namespace HyperEngine
 {
-	class Device;
-	class SwapChain;
-	class Window;
-
 	class RenderContext
 	{
-	public:
-		HYPERENGINE_NON_COPYABLE(RenderContext);
-
 	private:
 		static constexpr std::array<const char *, 1> s_validation_layers = {
 			"VK_LAYER_KHRONOS_validation"
 		};
 
 	public:
-		~RenderContext();
+		RenderContext() = default;
 
 		RenderContext(RenderContext &&other) noexcept;
 		RenderContext &operator=(RenderContext &&other) noexcept;
 
-		static Expected<RenderContext *> create(
+		Expected<void> initialize(
+			bool request_validation_layers,
+			const Window &window);
+
+		static Expected<NonNullOwnPtr<RenderContext>> create(
 			bool request_validation_layers,
 			const Window &window);
 
 	private:
-		explicit RenderContext(
-			bool request_validation_layers,
-			const Window &window,
-			Error &error);
-
 		Expected<void> create_instance();
 		Expected<void> create_debug_messenger();
 
@@ -55,15 +47,13 @@ namespace HyperEngine
 		std::vector<const char *> get_required_extensions() const;
 
 	private:
-		const Window *m_window = nullptr;
-
-		VkInstance m_instance = nullptr;
-		VkDebugUtilsMessengerEXT m_debug_messenger = nullptr;
-
-		VkSurfaceKHR m_surface = nullptr;
-		Device *m_device = nullptr;
-		SwapChain *m_swap_chain = nullptr;
-
 		bool m_validation_layers_enabled = false;
+
+		OwnPtr<VkInstance> m_instance = nullptr;
+		OwnPtr<VkDebugUtilsMessengerEXT> m_debug_messenger = nullptr;
+		OwnPtr<VkSurfaceKHR> m_surface = nullptr;
+
+		OwnPtr<Device> m_device = nullptr;
+		OwnPtr<SwapChain> m_swap_chain = nullptr;
 	};
 } // namespace HyperEngine

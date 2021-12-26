@@ -8,10 +8,9 @@
 
 #include "HyperEngine/Math/Vector2.hpp"
 #include "HyperEngine/Support/Expected.hpp"
-#include "HyperEngine/Support/Prerequisites.hpp"
+#include "HyperEngine/Support/NonNullOwnPtr.hpp"
 
-#include <memory>
-#include <string_view>
+#include <string>
 
 struct GLFWwindow;
 using VkInstance = struct VkInstance_T *;
@@ -22,30 +21,33 @@ namespace HyperEngine
 	class Window
 	{
 	public:
-		HYPERENGINE_NON_COPYABLE(Window);
-
-	public:
+		Window(std::string title);
 		~Window();
 
 		Window(Window &&other) noexcept;
 		Window &operator=(Window &&other) noexcept;
 
+		Expected<void> initialize(size_t width, size_t height);
 		void poll_events();
 
-		Expected<VkSurfaceKHR> create_surface(VkInstance instance) const;
+		Expected<NonNullOwnPtr<VkSurfaceKHR>> create_surface(
+			const VkInstance &instance) const;
 
-		Vec2ui get_window_size() const;
-		Vec2ui get_framebuffer_size() const;
+		void set_title(std::string title);
+		std::string title() const;
 
-		static Expected<Window *> create(
-			std::string_view title,
+		void set_window_size(Vec2ui window_size);
+		Vec2ui window_size() const;
+		Vec2ui framebuffer_size() const;
+
+		static Expected<NonNullOwnPtr<Window>> create(
+			std::string title,
 			size_t width,
 			size_t height);
 
 	private:
-		Window(std::string_view title, size_t width, size_t height, Error &error);
+		std::string m_title;
 
-	private:
 		GLFWwindow *m_window = nullptr;
 	};
 } // namespace HyperEngine

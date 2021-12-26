@@ -7,21 +7,20 @@
 #pragma once
 
 #include "HyperEngine/Support/Compiler.hpp"
+#include "HyperEngine/Support/Concepts.hpp"
 
 #include <cstdint>
-#include <type_traits>
 
 namespace HyperEngine
 {
-	template <typename T>
-	requires std::is_arithmetic_v<T>
+	template <Arithmetic T>
 	class Vector4
 	{
 	public:
-		T x;
-		T y;
-		T z;
-		T w;
+		T x = 0;
+		T y = 0;
+		T z = 0;
+		T w = 0;
 	};
 
 	using Vec4 = Vector4<float>;

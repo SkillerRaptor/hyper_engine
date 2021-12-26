@@ -33,9 +33,12 @@ set(HEADERS
         include/HyperEngine/Rendering/SwapChain.hpp
         include/HyperEngine/Rendering/Utils.hpp
         include/HyperEngine/Support/Compiler.hpp
+        include/HyperEngine/Support/Concepts.hpp
         include/HyperEngine/Support/Error.hpp
         include/HyperEngine/Support/ErrorHandling.hpp
         include/HyperEngine/Support/Expected.hpp
+        include/HyperEngine/Support/NonNullOwnPtr.hpp
+        include/HyperEngine/Support/OwnPtr.hpp
         include/HyperEngine/Support/Prerequisites.hpp)
 
 add_library(HyperEngine STATIC ${SOURCES} ${HEADERS})

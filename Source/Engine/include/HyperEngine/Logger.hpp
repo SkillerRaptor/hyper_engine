@@ -7,6 +7,7 @@
 #pragma once
 
 #include "HyperEngine/Formatter.hpp"
+#include "HyperEngine/Support/Concepts.hpp"
 #include "HyperEngine/Support/ErrorHandling.hpp"
 
 #include <cstdio>
@@ -23,12 +24,6 @@ namespace HyperEngine::Logger
 			Warning,
 			Error,
 			Debug
-		};
-
-		template <typename T>
-		concept Printable = requires(std::ostream &ostream, T value)
-		{
-			ostream << value;
 		};
 
 		template <Printable... Args>
@@ -93,25 +88,25 @@ namespace HyperEngine::Logger
 		}
 	} // namespace Detail
 
-	template <typename... Args>
+	template <Printable... Args>
 	void info(std::string_view format, Args &&...args)
 	{
 		Detail::log(Detail::Level::Info, format, std::forward<Args>(args)...);
 	}
 
-	template <typename... Args>
+	template <Printable... Args>
 	void warning(std::string_view format, Args &&...args)
 	{
 		Detail::log(Detail::Level::Warning, format, std::forward<Args>(args)...);
 	}
 
-	template <typename... Args>
+	template <Printable... Args>
 	void error(std::string_view format, Args &&...args)
 	{
 		Detail::log(Detail::Level::Error, format, std::forward<Args>(args)...);
 	}
 
-	template <typename... Args>
+	template <Printable... Args>
 	void debug(std::string_view format, Args &&...args)
 	{
 		Detail::log(Detail::Level::Debug, format, std::forward<Args>(args)...);

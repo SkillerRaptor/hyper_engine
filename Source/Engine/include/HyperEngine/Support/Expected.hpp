@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "HyperEngine/Support/Concepts.hpp"
 #include "HyperEngine/Support/Error.hpp"
 
 #include <cassert>
@@ -13,7 +14,7 @@
 
 namespace HyperEngine
 {
-	template <typename T, typename ErrorT = Error>
+	template <typename T>
 	class Expected
 	{
 	public:
@@ -27,12 +28,12 @@ namespace HyperEngine
 		{
 		}
 
-		Expected(const ErrorT &error)
+		Expected(const Error &error)
 			: m_error(error)
 		{
 		}
 
-		Expected(ErrorT &&error)
+		Expected(Error &&error)
 			: m_error(std::move(error))
 		{
 		}
@@ -44,50 +45,38 @@ namespace HyperEngine
 
 		T &value() &
 		{
-			assert(m_value.has_value());
+			assert(m_value.has_value() && "The value can't be null");
 			return m_value.value();
 		}
 
 		const T &value() const &
 		{
-			assert(m_value.has_value());
+			assert(m_value.has_value() && "The value can't be null");
 			return m_value.value();
 		}
 
 		T &&value() &&
 		{
-			assert(m_value.has_value());
+			assert(m_value.has_value() && "The value can't be null");
 			return std::move(m_value.value());
 		}
 
 		const T &&value() const &&
 		{
-			assert(m_value.has_value());
+			assert(m_value.has_value() && "The value can't be null");
 			return std::move(m_value.value());
 		}
 
-		ErrorT &error() &
+		Error &error()
 		{
-			assert(m_error.has_value());
+			assert(m_error.has_value() && "The error can't be null");
 			return m_error.value();
 		}
 
-		const ErrorT &error() const &
+		const Error &error() const
 		{
-			assert(m_error.has_value());
+			assert(m_error.has_value() && "The error can't be null");
 			return m_error.value();
-		}
-
-		ErrorT &&error() &&
-		{
-			assert(m_error.has_value());
-			return std::move(m_error.value());
-		}
-
-		const ErrorT &&error() const &&
-		{
-			assert(m_error.has_value());
-			return std::move(m_error.value());
 		}
 
 		T &operator*()
@@ -116,21 +105,21 @@ namespace HyperEngine
 
 	private:
 		std::optional<T> m_value = std::nullopt;
-		std::optional<ErrorT> m_error = std::nullopt;
+		std::optional<Error> m_error = std::nullopt;
 	};
 
-	template <typename ErrorT>
-	class Expected<void, ErrorT>
+	template <>
+	class Expected<void>
 	{
 	public:
 		Expected() = default;
 
-		Expected(const ErrorT &error)
+		Expected(const Error &error)
 			: m_error(error)
 		{
 		}
 
-		Expected(ErrorT &&error)
+		Expected(Error &&error)
 			: m_error(std::move(error))
 		{
 		}
@@ -140,19 +129,19 @@ namespace HyperEngine
 			return m_error.has_value();
 		}
 
-		ErrorT &error()
+		Error &error()
 		{
-			assert(m_error.has_value());
+			assert(m_error.has_value() && "The error can't be null");
 			return m_error.value();
 		}
 
-		const ErrorT &error() const
+		const Error &error() const
 		{
-			assert(m_error.has_value());
+			assert(m_error.has_value() && "The error can't be null");
 			return m_error.value();
 		}
 
 	private:
-		std::optional<ErrorT> m_error = std::nullopt;
+		std::optional<Error> m_error = std::nullopt;
 	};
 } // namespace HyperEngine

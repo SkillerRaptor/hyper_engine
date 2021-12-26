@@ -10,7 +10,7 @@
 
 namespace HyperEngine::Detail
 {
-	void unreachable(const char *file_name, uint32_t line)
+	void unreachable(const char *file_name, size_t line)
 	{
 		Logger::error("unreachable code executed at {}:{}\n", file_name, line);
 		std::abort();

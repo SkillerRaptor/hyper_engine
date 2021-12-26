@@ -6,32 +6,16 @@
 
 #include "HyperEngine/Platform/Window.hpp"
 
+#include "HyperEngine/Logger.hpp"
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 namespace HyperEngine
 {
-	Window::Window(
-		std::string_view title,
-		size_t width,
-		size_t height,
-		Error &error)
+	Window::Window(std::string title)
+		: m_title(std::move(title))
 	{
-		glfwInit();
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-		m_window = glfwCreateWindow(
-			static_cast<int>(width),
-			static_cast<int>(height),
-			title.data(),
-			nullptr,
-			nullptr);
-		if (m_window == nullptr)
-		{
-			error = Error("failed to create window");
-			return;
-		}
 	}
 
 	Window::~Window()
@@ -44,14 +28,36 @@ namespace HyperEngine
 	}
 
 	Window::Window(Window &&other) noexcept
-		: m_window(std::exchange(other.m_window, nullptr))
+		: m_title(std::move(other.m_title))
+		, m_window(std::exchange(other.m_window, nullptr))
 	{
 	}
 
 	Window &Window::operator=(Window &&other) noexcept
 	{
+		m_title = std::move(other.m_title);
 		m_window = std::exchange(other.m_window, nullptr);
 		return *this;
+	}
+
+	Expected<void> Window::initialize(size_t width, size_t height)
+	{
+		glfwInit();
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+		m_window = glfwCreateWindow(
+			static_cast<int>(width),
+			static_cast<int>(height),
+			m_title.data(),
+			nullptr,
+			nullptr);
+		if (m_window == nullptr)
+		{
+			return Error("failed to create window");
+		}
+
+		return {};
 	}
 
 	void Window::poll_events()
@@ -59,10 +65,9 @@ namespace HyperEngine
 		glfwPollEvents();
 	}
 
-	Expected<VkSurfaceKHR> Window::create_surface(VkInstance instance) const
+	Expected<NonNullOwnPtr<VkSurfaceKHR>> Window::create_surface(
+		const VkInstance &instance) const
 	{
-		assert(instance != nullptr && "The instance can't be null");
-
 		VkSurfaceKHR surface = nullptr;
 		const auto result =
 			glfwCreateWindowSurface(instance, m_window, nullptr, &surface);
@@ -71,10 +76,35 @@ namespace HyperEngine
 			return Error("failed to create surface");
 		}
 
-		return surface;
+		auto ptr = NonNullOwnPtr<VkSurfaceKHR>(
+			surface,
+			[&instance](VkSurfaceKHR handle)
+			{
+				vkDestroySurfaceKHR(instance, handle, nullptr);
+			});
+		return ptr;
 	}
 
-	Vec2ui Window::get_window_size() const
+	void Window::set_title(std::string title)
+	{
+		m_title = std::move(title);
+		glfwSetWindowTitle(m_window, m_title.c_str());
+	}
+
+	std::string Window::title() const
+	{
+		return m_title;
+	}
+
+	void Window::set_window_size(Vec2ui window_size)
+	{
+		glfwSetWindowSize(
+			m_window,
+			static_cast<int>(window_size.x),
+			static_cast<int>(window_size.y));
+	}
+
+	Vec2ui Window::window_size() const
 	{
 		int width = 0;
 		int height = 0;
@@ -87,7 +117,7 @@ namespace HyperEngine
 		return size;
 	}
 
-	Vec2ui Window::get_framebuffer_size() const
+	Vec2ui Window::framebuffer_size() const
 	{
 		int width = 0;
 		int height = 0;
@@ -100,8 +130,8 @@ namespace HyperEngine
 		return size;
 	}
 
-	Expected<Window *> Window::create(
-		std::string_view title,
+	Expected<NonNullOwnPtr<Window>> Window::create(
+		std::string title,
 		size_t width,
 		size_t height)
 	{
@@ -109,12 +139,11 @@ namespace HyperEngine
 		assert(width != 0 && "The width can't be 0");
 		assert(height != 0 && "The height can't be 0");
 
-		Error error = Error::success();
-		auto *window = new Window(title, width, height, error);
-		if (error.is_error())
+		auto window = make_non_null_own<Window>(std::move(title));
+		const auto result = window->initialize(width, height);
+		if (result.is_error())
 		{
-			delete window;
-			return error;
+			return result.error();
 		}
 
 		return window;

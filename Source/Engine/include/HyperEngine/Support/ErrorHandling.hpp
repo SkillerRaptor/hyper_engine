@@ -9,13 +9,13 @@
 #include "HyperEngine/Support/Compiler.hpp"
 #include "HyperEngine/Support/Prerequisites.hpp"
 
-#include <string_view>
+#include <cstddef>
 
 namespace HyperEngine::Detail
 {
 	[[noreturn]] void unreachable(
 		const char *file_name = __builtin_FILE(),
-		uint32_t line = __builtin_LINE());
+		size_t line = __builtin_LINE());
 } // namespace HyperEngine::Detail
 
 #if HYPERENGINE_DEBUG
