@@ -1,0 +1,55 @@
+#-------------------------------------------------------------------------------------------
+# Copyright (c) 2022-present, SkillerRaptor <skillerraptor@protonmail.com>
+#
+# SPDX-License-Identifier: MIT
+#-------------------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------------------
+# Clang Tidy
+#-------------------------------------------------------------------------------------------
+Checks: '
+	-*,
+	bugprone-*,
+	-bugprone-exception-escape,
+	clang-analyzer-*,
+	clang-diagnostic-*,
+	concurrency-*,
+	-concurrency-mt-unsafe,
+	google-*,
+	llvm-*,
+	misc-*,
+	-misc-no-recursion,
+	modernize-*,
+	-modernize-use-auto,
+	-modernize-use-trailing-return-type,
+	performance-*,
+	portability-*,
+	readability-identifier-naming'
+
+CheckOptions:
+	- key: readability-identifier-naming.ClassCase
+		value: CamelCase
+	- key: readability-identifier-naming.EnumCase
+		value: CamelCase
+	- key: readability-identifier-naming.EnumConstantCase
+		value: CamelCase
+	- key: readability-identifier-naming.FunctionCase
+		value: snake_case
+	- key: readability-identifier-naming.MacroDefinitionCase
+		value: UPPER_CASE
+	- key: readability-identifier-naming.MemberCase
+		value: snake_case
+	- key: readability-identifier-naming.NamespaceCase
+		value: CamelCase
+	- key: readability-identifier-naming.StructCase
+		value: CamelCase
+	- key: readability-identifier-naming.TypeAliasCase
+		value: CamelCase
+	- key: readability-identifier-naming.TypedefCase
+		value: CamelCase
+	- key: readability-identifier-naming.ParameterCase
+		value: snake_case
+	- key: readability-identifier-naming.UnionCase
+		value: CamelCase
+	- key: readability-identifier-naming.VariableCase
+		value: snake_case
