@@ -1,0 +1,70 @@
+name: build-linux
+
+on: [ push, pull_request ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Ubuntu Clang Debug",
+            artifact: "linux-clang-debug.tar.xz",
+            cc: "clang-14",
+            build_type: "Debug"
+          }
+          - {
+            name: "Ubuntu GCC Debug",
+            artifact: "linux-gcc-debug.tar.xz",
+            cc: "gcc-12",
+            build_type: "Debug"
+          }
+          - {
+            name: "Ubuntu Clang Release",
+            artifact: "linux-clang-release.tar.xz",
+            cc: "clang-14",
+            build_type: "Release"
+          }
+          - {
+            name: "Ubuntu GCC Release",
+            artifact: "linux-gcc-release.tar.xz",
+            cc: "gcc-12",
+            build_type: "Release"
+          }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Update environment
+        run: |
+          sudo apt update -qq
+          sudo apt install -y \
+            clang-14 \
+            cmake \
+            gcc-12 \
+
+      - name: Configure CMake
+        run: |
+          export CC=${{ matrix.config.cc }}
+          cmake . -B build -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+
+      - name: Build
+        run: |
+          cmake --build build --parallel $(nproc)
+
+      - name: Prepare upload
+        run: |
+          tar cfz ${{ matrix.config.artifact }} build
+
+      - name: Upload
+        uses: actions/upload-artifact@v1
+        with:
+          path: ${{ matrix.config.artifact }}
+          name: ${{ matrix.config.artifact }}

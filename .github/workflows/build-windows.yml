@@ -1,0 +1,54 @@
+name: build-windows
+
+on: [ push, pull_request ]
+
+jobs:
+  build-windows:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: cmd
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Windows MSVC Debug",
+            artifact: "windows-msvc-debug.zip",
+            cc: "cl",
+            cmake_build_options: "--config Debug",
+            cmake_configure_options: '-G "Visual Studio 17 2022" -A x64 -T host=x64',
+            build_type: "Debug"
+          }
+          - {
+            name: "Windows MSVC Release",
+            artifact: "windows-msvc-release.zip",
+            cc: "cl",
+            cmake_build_options: "--config Release",
+            cmake_configure_options: '-G "Visual Studio 17 2022" -A x64 -T host=x64',
+            build_type: "Release"
+          }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          
+      - name: Configure CMake
+        run: |
+          set CC=${{ matrix.config.cc }}
+          cmake . -B build -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+
+      - name: Build
+        run: |
+          cmake --build build ${{ matrix.config.cmake_build_options }}
+
+      - name: Prepare upload
+        run: |
+          7z a -tzip ${{ matrix.config.artifact }} build/*
+
+      - name: Upload
+        uses: actions/upload-artifact@v1
+        with:
+          path: ${{ matrix.config.artifact }}
+          name: ${{ matrix.config.artifact }}
