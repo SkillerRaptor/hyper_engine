@@ -15,9 +15,9 @@ struct source_location
 	const char *function_name;
 };
 
-#define source_location_current$()              \
-	((struct source_location){                    \
-		.line = __LINE__,                           \
-		.file_name = __FILE__ + SOURCE_PATH_LENGTH, \
-		.function_name = __FUNCTION__,              \
+#define source_location_current$() \
+	((struct source_location){       \
+		.line = __LINE__,              \
+		.file_name = __FILE__,         \
+		.function_name = __FUNCTION__, \
 	})

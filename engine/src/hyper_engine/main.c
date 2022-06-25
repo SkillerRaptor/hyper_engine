@@ -4,18 +4,13 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "hyper_engine/utilities/assertion.h"
-#include "hyper_engine/utilities/logger.h"
-
-#include <stdio.h>
+#include "hyper_engine/core/engine.h"
 
 int main()
 {
-	logger_info("Hello, World!");
-	logger_warn("Hello, World!");
-	logger_error("Hello, World!");
-	logger_debug("Hello, World!");
-	assert$(69 == 420);
-
+	struct hyper_engine engine = { 0 };
+	hyper_engine_create(&engine);
+	hyper_engine_run(&engine);
+	hyper_engine_destroy(&engine);
 	return 0;
 }

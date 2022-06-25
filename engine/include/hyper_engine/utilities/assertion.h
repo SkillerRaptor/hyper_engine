@@ -8,11 +8,7 @@
 
 #include "hyper_engine/utilities/source_location.h"
 
-#if !defined(_DEBUG) && !defined(ADEBUG) && !defined(NDEBUG)
-#	define NDEBUG
-#endif
-
-#ifndef NDEBUG
+#ifdef HYPERENGINE_DEBUG
 #	define assert$(assertion)                                      \
 		do                                                            \
 		{                                                             \
