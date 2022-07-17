@@ -27,15 +27,14 @@ void hyper_logger_debug(
 	...);
 
 #define hyper_logger_info$(format, ...) \
-	hyper_logger_info(hyper_source_location_current$(), format, __VA_ARGS__)
+	hyper_logger_info(hyper_source_location_current$(), format, ##__VA_ARGS__)
 #define hyper_logger_warning$(format, ...) \
-	hyper_logger_warning(hyper_source_location_current$(), format, __VA_ARGS__)
+	hyper_logger_warning(hyper_source_location_current$(), format, ##__VA_ARGS__)
 #define hyper_logger_error$(format, ...) \
-	hyper_logger_error(hyper_source_location_current$(), format, __VA_ARGS__)
-
+	hyper_logger_error(hyper_source_location_current$(), format, ##__VA_ARGS__)
 #if HYPER_DEBUG
 #	define hyper_logger_debug$(format, ...) \
-		hyper_logger_debug(hyper_source_location_current$(), format, __VA_ARGS__)
+		hyper_logger_debug(hyper_source_location_current$(), format, ##__VA_ARGS__)
 #else
 #	define hyper_logger_debug$(format, ...) ((void) 0)
 #endif

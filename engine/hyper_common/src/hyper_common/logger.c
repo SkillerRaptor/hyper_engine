@@ -37,7 +37,7 @@ static void hyper_logger_vlog(
 
 	const struct tm *time_info = localtime(&raw_time);
 	printf(
-		"%02u:%02u:%02u | %s:%lu: ",
+		"%02u:%02u:%02u | %s:%u: ",
 		time_info->tm_hour,
 		time_info->tm_min,
 		time_info->tm_sec,
