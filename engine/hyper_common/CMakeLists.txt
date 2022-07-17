@@ -41,3 +41,10 @@ target_link_libraries(
 		hyper_common
 		PRIVATE
 		${CMAKE_DL_LIBS})
+
+if(NOT WIN32)
+		set_target_properties(
+				hyper_common
+				PROPERTIES
+				POSITION_INDEPENDENT_CODE ON)
+endif()
