@@ -49,6 +49,7 @@ jobs:
             clang-14 \
             cmake \
             gcc-12 \
+            xorg-dev \
 
       - name: Configure CMake
         run: |
