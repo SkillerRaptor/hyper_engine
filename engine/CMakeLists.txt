@@ -5,40 +5,19 @@
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# engine
+# hyper common
 #-------------------------------------------------------------------------------------------
-set(SOURCES
-		src/hyper_engine/main.c
-		src/hyper_engine/core/engine.c
-		src/hyper_engine/platform/window.c
-		src/hyper_engine/utilities/assertion.c
-		src/hyper_engine/utilities/logger.c)
+add_subdirectory(hyper_common)
 
-set(HEADERS
-		include/hyper_engine/core/engine.h
-		include/hyper_engine/platform/platform.h
-		include/hyper_engine/platform/window.h
-		include/hyper_engine/utilities/assertion.h
-		include/hyper_engine/utilities/logger.h
-		include/hyper_engine/utilities/source_location.h)
+#-------------------------------------------------------------------------------------------
+# hyper platform
+#-------------------------------------------------------------------------------------------
+add_subdirectory(hyper_platform)
 
-foreach(item IN ITEMS ${SOURCES} ${HEADERS})
-		get_filename_component(src_path "${item}" PATH)
-		string(REPLACE "${CMAKE_SOURCE_DIR}" "" group_path "${src_path}")
-		string(REPLACE "/" "\\" group_path "${group_path}")
-		source_group("${group_path}" FILES "${item}")
-endforeach()
+#-------------------------------------------------------------------------------------------
+# hyper engine
+#-------------------------------------------------------------------------------------------
+set(HYPER_MODULES
+		hyper_platform)
 
-add_executable(hyper_engine ${SOURCES} ${HEADERS})
-target_compile_definitions(
-    hyper_engine
-    PRIVATE
-    "$<$<CONFIG:DEBUG>:HYPERENGINE_DEBUG>")	
-target_include_directories(
-		hyper_engine
-		PRIVATE
-		include)
-target_link_libraries(
-		hyper_engine
-		PRIVATE
-		glfw)
+add_subdirectory(hyper_engine)

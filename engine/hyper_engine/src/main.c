@@ -4,13 +4,16 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "hyper_engine/core/engine.h"
+#include "hyper_engine/engine.h"
 
-int main()
+#include <stdlib.h>
+
+int main(int argc, char **argv)
 {
 	struct hyper_engine engine = { 0 };
 	hyper_engine_create(&engine);
 	hyper_engine_run(&engine);
 	hyper_engine_destroy(&engine);
-	return 0;
+
+	return EXIT_SUCCESS;
 }
