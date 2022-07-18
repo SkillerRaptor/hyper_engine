@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "hyper_common/memory.h"
 #include "hyper_common/result.h"
 #include "hyper_common/vector.h"
 
@@ -17,6 +18,7 @@ struct hyper_module
 
 struct hyper_module_loader
 {
+	void *allocation_debug_info;
 	struct hyper_vector modules;
 };
 

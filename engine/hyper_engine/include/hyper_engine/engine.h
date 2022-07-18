@@ -6,8 +6,10 @@
 
 #pragma once
 
+#include "hyper_common/memory.h"
 #include "hyper_common/result.h"
 #include "hyper_engine/module_loader.h"
+#include "hyper_game/event_bus.h"
 #include "hyper_platform/window.h"
 
 #include <stdbool.h>
@@ -15,8 +17,14 @@
 struct hyper_engine
 {
 	bool running;
+
+#if HYPER_DEBUG
+	struct hyper_allocation_debug_info allocation_debug_info;
+#endif
+
 	struct hyper_module_loader module_loader;
 	struct hyper_window window;
+	struct hyper_event_bus event_bus;
 };
 
 enum hyper_result hyper_engine_create(struct hyper_engine *engine);

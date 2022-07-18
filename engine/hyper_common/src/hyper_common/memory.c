@@ -12,15 +12,12 @@
 #include <string.h>
 
 #if HYPER_DEBUG
-static uint64_t s_total_allocs = 0;
-static uint64_t s_total_frees = 0;
-static uint64_t s_total_bytes = 0;
-static uint64_t s_current_bytes = 0;
-
 struct hyper_allocation_header
 {
 	size_t size;
 };
+
+static struct hyper_allocation_debug_info *s_allocation_debug_info;
 #endif
 
 void *hyper_allocate(size_t size)
@@ -40,9 +37,9 @@ void *hyper_allocate(size_t size)
 
 	allocation_header->size = size;
 
-	s_total_bytes += size;
-	s_current_bytes += size;
-	s_total_allocs++;
+	s_allocation_debug_info->total_bytes += size;
+	s_allocation_debug_info->current_bytes += size;
+	s_allocation_debug_info->total_allocs++;
 
 	return ptr;
 #else
@@ -72,8 +69,8 @@ void hyper_deallocate(void *ptr)
 	struct hyper_allocation_header *allocation_header =
 		(struct hyper_allocation_header *) real_ptr;
 
-	s_current_bytes -= allocation_header->size;
-	s_total_frees++;
+	s_allocation_debug_info->current_bytes -= allocation_header->size;
+	s_allocation_debug_info->total_frees++;
 
 	free(real_ptr);
 #else
@@ -81,10 +78,18 @@ void hyper_deallocate(void *ptr)
 #endif
 }
 
+void hyper_set_allocation_debug_info(
+	struct hyper_allocation_debug_info *allocation_debug_info)
+{
+#if HYPER_DEBUG
+	s_allocation_debug_info = allocation_debug_info;
+#endif
+}
+
 uint64_t hyper_get_total_allocs()
 {
 #if HYPER_DEBUG
-	return s_total_allocs;
+	return s_allocation_debug_info->total_allocs;
 #else
 	return 0;
 #endif
@@ -93,7 +98,7 @@ uint64_t hyper_get_total_allocs()
 uint64_t hyper_get_total_frees()
 {
 #if HYPER_DEBUG
-	return s_total_frees;
+	return s_allocation_debug_info->total_frees;
 #else
 	return 0;
 #endif
@@ -102,7 +107,7 @@ uint64_t hyper_get_total_frees()
 uint64_t hyper_get_total_bytes()
 {
 #if HYPER_DEBUG
-	return s_total_bytes;
+	return s_allocation_debug_info->total_bytes;
 #else
 	return 0;
 #endif
@@ -111,7 +116,7 @@ uint64_t hyper_get_total_bytes()
 uint64_t hyper_get_current_bytes()
 {
 #if HYPER_DEBUG
-	return s_current_bytes;
+	return s_allocation_debug_info->current_bytes;
 #else
 	return 0;
 #endif

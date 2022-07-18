@@ -11,9 +11,21 @@
 #include "hyper_common/memory.h"
 #include "hyper_common/vector.h"
 
+static void hyper_window_close_callback(
+	struct hyper_window_close_event window_close_event,
+	void *user_data)
+{
+	struct hyper_engine *engine = user_data;
+	engine->running = false;
+}
+
 enum hyper_result hyper_engine_create(struct hyper_engine *engine)
 {
 	hyper_assert$(engine != NULL);
+
+#if HYPER_DEBUG
+	hyper_set_allocation_debug_info(&engine->allocation_debug_info);
+#endif
 
 	if (
 		hyper_module_loader_create(&engine->module_loader) != HYPER_RESULT_SUCCESS)
@@ -22,7 +34,14 @@ enum hyper_result hyper_engine_create(struct hyper_engine *engine)
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
+#if HYPER_DEBUG
+	engine->module_loader.allocation_debug_info = &engine->allocation_debug_info;
+#else
+	engine->module_loader.allocation_debug_info = NULL;
+#endif
+
 	static const char *modules[] = {
+		"hyper_game",
 		"hyper_platform",
 	};
 
@@ -53,8 +72,16 @@ enum hyper_result hyper_engine_create(struct hyper_engine *engine)
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
-	// TODO: Hook running flag with closed event
-	// engine->running = true;
+	if (hyper_event_bus_create(&engine->event_bus, &engine->window) != HYPER_RESULT_SUCCESS)
+	{
+		hyper_logger_error$("Failed to create event bus\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
+
+	hyper_register_window_close_callback(
+		&engine->event_bus, hyper_window_close_callback, engine);
+
+	engine->running = true;
 
 	return HYPER_RESULT_SUCCESS;
 }
@@ -63,16 +90,17 @@ void hyper_engine_destroy(struct hyper_engine *engine)
 {
 	hyper_assert$(engine != NULL);
 
+	hyper_event_bus_destroy(&engine->event_bus);
 	hyper_window_destroy(&engine->window);
 	hyper_module_loader_destroy(&engine->module_loader);
 
 	hyper_logger_debug$("Heap Summary:\n");
 	hyper_logger_debug$(
-		"\t%u allocations, %u frees\n",
+		"  %u allocations, %u frees\n",
 		hyper_get_total_allocs(),
 		hyper_get_total_frees());
 	hyper_logger_debug$(
-		"\t%u bytes allocated, %u bytes leaked\n",
+		"  %u bytes allocated, %u bytes leaked\n",
 		hyper_get_total_bytes(),
 		hyper_get_current_bytes());
 }
@@ -83,6 +111,9 @@ void hyper_engine_run(struct hyper_engine *engine)
 
 	while (engine->running)
 	{
+		// TODO: Replace this with async event bus for non blocking events
+		hyper_event_bus_process(&engine->event_bus);
+
 		hyper_window_update(&engine->window);
 	}
 }

@@ -31,10 +31,14 @@ target_include_directories(
 target_link_libraries(
 		hyper_engine
 		PRIVATE
-		hyper_common
-		hyper_platform)
+		hyper_common)
 		
 foreach(item IN ITEMS ${HYPER_MODULES})
+		target_link_libraries(
+				hyper_engine
+				PRIVATE
+				${item})
+
 		add_custom_command(
 				TARGET hyper_engine
 				POST_BUILD

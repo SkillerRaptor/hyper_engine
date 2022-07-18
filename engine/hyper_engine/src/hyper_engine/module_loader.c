@@ -31,7 +31,7 @@ enum hyper_result hyper_module_loader_create(
 void hyper_module_loader_destroy(struct hyper_module_loader *module_loader)
 {
 	hyper_assert$(module_loader != NULL);
-	
+
 	for (size_t i = 0; i < module_loader->modules.size; ++i)
 	{
 		struct hyper_module *module = hyper_vector_get(&module_loader->modules, i);
@@ -62,7 +62,8 @@ enum hyper_result hyper_module_loader_load(
 	const uint8_t extension_length = strlen(HYPER_SHARED_EXTENSION);
 	const size_t library_name_length =
 		prefix_length + module_name_length + extension_length;
-	char *library_name = hyper_callocate((library_name_length + 1) * sizeof(char));
+	char *library_name =
+		hyper_callocate((library_name_length + 1) * sizeof(char));
 
 	strcat(library_name, HYPER_SHARED_PREFIX);
 	strcat(library_name, module_name);
@@ -76,6 +77,24 @@ enum hyper_result hyper_module_loader_load(
 	}
 
 	hyper_deallocate(library_name);
+
+	typedef enum hyper_result (*hyper_module_start_proc)(
+		void *allocation_debug_info);
+	hyper_module_start_proc module_start =
+		(hyper_module_start_proc) hyper_get_proc_address$(
+			library_handle, "hyper_module_start");
+	if (module_start == NULL)
+	{
+		hyper_logger_error$("Failed to find module start function\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
+
+	if (
+		module_start(module_loader->allocation_debug_info) != HYPER_RESULT_SUCCESS)
+	{
+		hyper_logger_error$("Failed to find start module '%s'\n", module_name);
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
 
 	struct hyper_module module = {
 		.name = hyper_callocate((strlen(module_name) + 1) * sizeof(char)),

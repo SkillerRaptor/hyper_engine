@@ -11,7 +11,9 @@
 
 #include <string.h>
 
-static void vector_reallocate(struct hyper_vector *vector, size_t new_capacity)
+static void hyper_vector_reallocate(
+	struct hyper_vector *vector,
+	size_t new_capacity)
 {
 	hyper_assert$(vector != NULL);
 	hyper_assert$(new_capacity != 0);
@@ -29,7 +31,7 @@ static void vector_reallocate(struct hyper_vector *vector, size_t new_capacity)
 	vector->capacity = new_capacity;
 }
 
-static void *vector_get_offset(struct hyper_vector *vector, size_t index)
+static void *hyper_vector_get_offset(struct hyper_vector *vector, size_t index)
 {
 	hyper_assert$(vector != NULL);
 
@@ -69,10 +71,10 @@ void hyper_vector_push_back(struct hyper_vector *vector, void *element)
 
 	if (vector->size >= vector->capacity)
 	{
-		vector_reallocate(vector, vector->capacity + vector->capacity / 2);
+		hyper_vector_reallocate(vector, vector->capacity + vector->capacity / 2);
 	}
 
-	void *ptr = vector_get_offset(vector, vector->size);
+	void *ptr = hyper_vector_get_offset(vector, vector->size);
 	memcpy(ptr, element, vector->element_size);
 
 	++vector->size;
@@ -82,5 +84,5 @@ void *hyper_vector_get(struct hyper_vector *vector, size_t index)
 {
 	hyper_assert$(vector != NULL);
 
-	return vector_get_offset(vector, index);
+	return hyper_vector_get_offset(vector, index);
 }
