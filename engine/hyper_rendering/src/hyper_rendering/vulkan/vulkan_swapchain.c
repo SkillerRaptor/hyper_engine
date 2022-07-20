@@ -179,6 +179,49 @@ enum hyper_result hyper_vulkan_swapchain_create(
 	vulkan_context->swapchain_format = surface_format.format;
 	vulkan_context->swapchain_extent = extent;
 
+	hyper_vector_create(
+		&vulkan_context->swapchain_images_views, sizeof(VkImageView));
+	hyper_vector_resize(
+		&vulkan_context->swapchain_images_views,
+		vulkan_context->swapchain_images.size);
+
+	for (size_t i = 0; i < vulkan_context->swapchain_images.size; ++i)
+	{
+		const VkImage *image =
+			hyper_vector_get(&vulkan_context->swapchain_images, i);
+
+		const VkImageViewCreateInfo image_view_create_info = {
+			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+			.image = *image,
+			.viewType = VK_IMAGE_VIEW_TYPE_2D,
+			.format = vulkan_context->swapchain_format,
+			.components = { 
+				.r = VK_COMPONENT_SWIZZLE_IDENTITY,
+				.g = VK_COMPONENT_SWIZZLE_IDENTITY,
+				.b = VK_COMPONENT_SWIZZLE_IDENTITY,
+				.a = VK_COMPONENT_SWIZZLE_IDENTITY,
+			},
+			.subresourceRange = {
+				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1,
+			},
+		};
+
+		VkImageView *image_view =
+			hyper_vector_get(&vulkan_context->swapchain_images_views, i);
+		if (
+			vkCreateImageView(
+				vulkan_context->device, &image_view_create_info, NULL, image_view) !=
+			VK_SUCCESS)
+		{
+			hyper_logger_error$("Failed to create image view #%u\n", i);
+			return HYPER_RESULT_INITIALIZATION_FAILED;
+		}
+	}
+
 	return HYPER_RESULT_SUCCESS;
 }
 
@@ -186,6 +229,14 @@ void hyper_vulkan_swapchain_destroy(struct hyper_vulkan_context *vulkan_context)
 {
 	hyper_assert$(vulkan_context != NULL);
 
+	for (size_t i = 0; i < vulkan_context->swapchain_images_views.size; ++i)
+	{
+		VkImageView *image_view =
+			hyper_vector_get(&vulkan_context->swapchain_images_views, i);
+		vkDestroyImageView(vulkan_context->device, *image_view, NULL);
+	}
+
+	hyper_vector_destroy(&vulkan_context->swapchain_images_views);
 	hyper_vector_destroy(&vulkan_context->swapchain_images);
 
 	vkDestroySwapchainKHR(

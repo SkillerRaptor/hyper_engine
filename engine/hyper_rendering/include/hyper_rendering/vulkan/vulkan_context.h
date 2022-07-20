@@ -28,6 +28,7 @@ struct hyper_vulkan_context
 	struct hyper_vector swapchain_images;
 	VkFormat swapchain_format;
 	VkExtent2D swapchain_extent;
+	struct hyper_vector swapchain_images_views;
 };
 
 enum hyper_result hyper_vulkan_context_create(
