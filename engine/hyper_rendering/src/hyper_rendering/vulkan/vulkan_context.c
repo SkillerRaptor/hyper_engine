@@ -75,7 +75,6 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL hyper_debug_messenger_callback(
 
 static enum hyper_result hyper_record_command_buffer(
 	struct hyper_vulkan_context *vulkan_context,
-	VkCommandBuffer command_buffer,
 	uint32_t image_index)
 {
 	const VkCommandBufferBeginInfo command_buffer_begin_info = {
@@ -84,8 +83,8 @@ static enum hyper_result hyper_record_command_buffer(
 	};
 
 	if (
-		vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info) !=
-		VK_SUCCESS)
+		vkBeginCommandBuffer(
+			vulkan_context->command_buffer, &command_buffer_begin_info) != VK_SUCCESS)
 	{
 		hyper_logger_error$("Failed to begin recording command buffer\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
@@ -102,10 +101,12 @@ static enum hyper_result hyper_record_command_buffer(
 		},
 	};
 
+	VkFramebuffer *framebuffer =
+		hyper_vector_get(&vulkan_context->swapchain_framebuffers, image_index);
 	const VkRenderPassBeginInfo render_pass_begin_info = {
 		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
 		.renderPass = vulkan_context->render_pass,
-		.framebuffer = hyper_vector_get(&vulkan_context->swapchain_framebuffers, image_index),
+		.framebuffer = *framebuffer,
 		.renderArea = {
 			.offset = {
 				.x = 0,
@@ -118,11 +119,15 @@ static enum hyper_result hyper_record_command_buffer(
 	};
 
 	vkCmdBeginRenderPass(
-		command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+		vulkan_context->command_buffer,
+		&render_pass_begin_info,
+		VK_SUBPASS_CONTENTS_INLINE);
 
 	vkCmdBindPipeline(
-		command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_context->pipeline);
-	
+		vulkan_context->command_buffer,
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		vulkan_context->pipeline);
+
 	const VkViewport viewport = {
 		.x = 0.0f,
 		.y = 0.0f,
@@ -131,7 +136,7 @@ static enum hyper_result hyper_record_command_buffer(
 		.minDepth = 0.0f,
 		.maxDepth = 1.0f,
 	};
-	vkCmdSetViewport(command_buffer, 0, 1, &viewport);
+	vkCmdSetViewport(vulkan_context->command_buffer, 0, 1, &viewport);
 
 	const VkRect2D scissor = {
 		.offset = {
@@ -140,13 +145,13 @@ static enum hyper_result hyper_record_command_buffer(
 		},
 		.extent = vulkan_context->swapchain_extent,
 	};
-	vkCmdSetScissor(command_buffer, 0, 1, &scissor);
+	vkCmdSetScissor(vulkan_context->command_buffer, 0, 1, &scissor);
 
-	vkCmdDraw(command_buffer, 3, 1, 0, 0);
+	vkCmdDraw(vulkan_context->command_buffer, 3, 1, 0, 0);
 
-	vkCmdEndRenderPass(command_buffer);
+	vkCmdEndRenderPass(vulkan_context->command_buffer);
 
-	if (vkEndCommandBuffer(command_buffer) != VK_SUCCESS)
+	if (vkEndCommandBuffer(vulkan_context->command_buffer) != VK_SUCCESS)
 	{
 		hyper_logger_error$("Failed to end recording command buffer\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
@@ -390,12 +395,62 @@ enum hyper_result hyper_vulkan_context_create(
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
+	const VkSemaphoreCreateInfo semaphore_create_info = {
+		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+	};
+
+	if (
+		vkCreateSemaphore(
+			vulkan_context->device,
+			&semaphore_create_info,
+			NULL,
+			&vulkan_context->image_available_semaphore) != VK_SUCCESS)
+	{
+		hyper_logger_error$("Failed to create image available semaphore\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
+
+	if (
+		vkCreateSemaphore(
+			vulkan_context->device,
+			&semaphore_create_info,
+			NULL,
+			&vulkan_context->render_finished_semaphore) != VK_SUCCESS)
+	{
+		hyper_logger_error$("Failed to create render finished semaphore\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
+
+	const VkFenceCreateInfo fence_create_info = {
+		.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+		.flags = VK_FENCE_CREATE_SIGNALED_BIT,
+	};
+
+	if (
+		vkCreateFence(
+			vulkan_context->device,
+			&fence_create_info,
+			NULL,
+			&vulkan_context->in_flight_fence) != VK_SUCCESS)
+	{
+		hyper_logger_error$("Failed to create in flight fence\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
+
 	return HYPER_RESULT_SUCCESS;
 }
 
 void hyper_vulkan_context_destroy(struct hyper_vulkan_context *vulkan_context)
 {
 	hyper_assert$(vulkan_context != NULL);
+
+	vkDeviceWaitIdle(vulkan_context->device);
+
+	vkDestroyFence(vulkan_context->device, vulkan_context->in_flight_fence, NULL);
+	vkDestroySemaphore(
+		vulkan_context->device, vulkan_context->render_finished_semaphore, NULL);
+	vkDestroySemaphore(
+		vulkan_context->device, vulkan_context->image_available_semaphore, NULL);
 
 	vkDestroyCommandPool(
 		vulkan_context->device, vulkan_context->command_pool, NULL);
@@ -426,4 +481,79 @@ void hyper_vulkan_context_destroy(struct hyper_vulkan_context *vulkan_context)
 
 void hyper_vulkan_context_render(struct hyper_vulkan_context *vulkan_context)
 {
+	vkWaitForFences(
+		vulkan_context->device,
+		1,
+		&vulkan_context->in_flight_fence,
+		VK_TRUE,
+		UINT64_MAX);
+	vkResetFences(vulkan_context->device, 1, &vulkan_context->in_flight_fence);
+
+	uint32_t image_index = 0;
+	vkAcquireNextImageKHR(
+		vulkan_context->device,
+		vulkan_context->swapchain,
+		UINT64_MAX,
+		vulkan_context->image_available_semaphore,
+		VK_NULL_HANDLE,
+		&image_index);
+
+	vkResetCommandBuffer(vulkan_context->command_buffer, 0);
+	if (
+		hyper_record_command_buffer(vulkan_context, image_index) !=
+		HYPER_RESULT_SUCCESS)
+	{
+		hyper_logger_error$("Failed to record command buffer\n");
+		return;
+	}
+
+	const VkSemaphore wait_semaphores[] = {
+		[0] = vulkan_context->image_available_semaphore,
+	};
+
+	const VkPipelineStageFlags wait_stages[] = {
+		[0] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+	};
+
+	const VkSemaphore signal_semaphores[] = {
+		[0] = vulkan_context->render_finished_semaphore,
+	};
+
+	const VkSubmitInfo submit_info = {
+		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+		.waitSemaphoreCount = 1,
+		.pWaitSemaphores = wait_semaphores,
+		.pWaitDstStageMask = wait_stages,
+		.commandBufferCount = 1,
+		.pCommandBuffers = &vulkan_context->command_buffer,
+		.signalSemaphoreCount = 1,
+		.pSignalSemaphores = signal_semaphores,
+	};
+
+	if (
+		vkQueueSubmit(
+			vulkan_context->graphics_queue,
+			1,
+			&submit_info,
+			vulkan_context->in_flight_fence) != VK_SUCCESS)
+	{
+		hyper_logger_error$("Failed to submit command buffer queue\n");
+		return;
+	}
+
+	const VkSwapchainKHR swapchains[] = {
+		[0] = vulkan_context->swapchain,
+	};
+
+	const VkPresentInfoKHR present_info = {
+		.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+		.waitSemaphoreCount = 1,
+		.pWaitSemaphores = signal_semaphores,
+		.swapchainCount = 1,
+		.pSwapchains = swapchains,
+		.pImageIndices = &image_index,
+		.pResults = NULL,
+	};
+
+	vkQueuePresentKHR(vulkan_context->present_queue, &present_info);
 }

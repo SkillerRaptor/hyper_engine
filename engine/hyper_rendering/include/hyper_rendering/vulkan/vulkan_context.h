@@ -35,6 +35,9 @@ struct hyper_vulkan_context
 	struct hyper_vector swapchain_framebuffers;
 	VkCommandPool command_pool;
 	VkCommandBuffer command_buffer;
+	VkSemaphore image_available_semaphore;
+	VkSemaphore render_finished_semaphore;
+	VkFence in_flight_fence;
 };
 
 enum hyper_result hyper_vulkan_context_create(
