@@ -9,6 +9,7 @@
 #include "hyper_common/library.h"
 #include "hyper_common/result.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 
 struct hyper_window;
@@ -159,3 +160,7 @@ HYPER_API void hyper_window_get_required_extensions(
 	struct hyper_window *window,
 	const char ***extensions,
 	uint32_t *extension_count);
+HYPER_API bool hyper_window_create_window_surface(
+	struct hyper_window *window,
+	void *instance,
+	void **surface);

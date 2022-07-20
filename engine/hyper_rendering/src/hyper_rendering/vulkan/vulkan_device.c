@@ -10,14 +10,17 @@
 #include "hyper_common/logger.h"
 #include "hyper_common/vector.h"
 
-static bool hyper_is_physical_device_suitable(VkPhysicalDevice physical_device)
+static bool hyper_is_physical_device_suitable(
+	VkPhysicalDevice physical_device,
+	VkSurfaceKHR surface)
 {
 	hyper_assert$(physical_device != VK_NULL_HANDLE);
 
 	struct hyper_queue_families queue_families =
-		hyper_find_queue_families(physical_device);
+		hyper_find_queue_families(physical_device, surface);
 
-	return queue_families.graphics_family_valid;
+	return queue_families.graphics_family_valid &&
+				 queue_families.present_family_valid;
 }
 
 enum hyper_result hyper_vulkan_device_create(
@@ -43,7 +46,8 @@ enum hyper_result hyper_vulkan_device_create(
 	for (size_t i = 0; i < devices.size; ++i)
 	{
 		const VkPhysicalDevice *physical_device = hyper_vector_get(&devices, i);
-		if (!hyper_is_physical_device_suitable(*physical_device))
+		if (!hyper_is_physical_device_suitable(
+					*physical_device, vulkan_context->surface))
 		{
 			continue;
 		}
@@ -62,23 +66,41 @@ enum hyper_result hyper_vulkan_device_create(
 
 	hyper_vector_destroy(&devices);
 
-	struct hyper_queue_families queue_families =
-		hyper_find_queue_families(vulkan_context->physical_device);
+	struct hyper_queue_families queue_families = hyper_find_queue_families(
+		vulkan_context->physical_device, vulkan_context->surface);
+
+	struct hyper_vector queue_create_infos = { 0 };
+	hyper_vector_create(&queue_create_infos, sizeof(VkDeviceQueueCreateInfo));
 
 	const float queue_priority = 1.0f;
-	const VkDeviceQueueCreateInfo queue_create_info = {
+
+	const VkDeviceQueueCreateInfo graphics_queue_create_info = {
 		.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
 		.queueFamilyIndex = queue_families.graphics_family,
 		.queueCount = 1,
 		.pQueuePriorities = &queue_priority,
 	};
 
+	hyper_vector_push_back(&queue_create_infos, &graphics_queue_create_info);
+
+	if (queue_families.graphics_family != queue_families.present_family)
+	{
+		const VkDeviceQueueCreateInfo present_queue_create_info = {
+			.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+			.queueFamilyIndex = queue_families.present_family,
+			.queueCount = 1,
+			.pQueuePriorities = &queue_priority,
+		};
+
+		hyper_vector_push_back(&queue_create_infos, &present_queue_create_info);
+	}
+
 	const VkPhysicalDeviceFeatures physical_device_features = { 0 };
 
 	const VkDeviceCreateInfo device_create_info = {
 		.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-		.queueCreateInfoCount = 1,
-		.pQueueCreateInfos = &queue_create_info,
+		.queueCreateInfoCount = queue_create_infos.size,
+		.pQueueCreateInfos = queue_create_infos.data,
 		.enabledLayerCount = 0,
 		.ppEnabledLayerNames = NULL,
 		.enabledExtensionCount = 0,
@@ -93,15 +115,24 @@ enum hyper_result hyper_vulkan_device_create(
 			NULL,
 			&vulkan_context->device) != VK_SUCCESS)
 	{
+		hyper_vector_destroy(&queue_create_infos);
+
 		hyper_logger_error$("Failed to create logical device\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
+
+	hyper_vector_destroy(&queue_create_infos);
 
 	vkGetDeviceQueue(
 		vulkan_context->device,
 		queue_families.graphics_family,
 		0,
 		&vulkan_context->graphics_queue);
+	vkGetDeviceQueue(
+		vulkan_context->device,
+		queue_families.present_family,
+		0,
+		&vulkan_context->present_queue);
 
 	return HYPER_RESULT_SUCCESS;
 }
@@ -114,7 +145,8 @@ void hyper_vulkan_device_destroy(struct hyper_vulkan_context *vulkan_context)
 }
 
 struct hyper_queue_families hyper_find_queue_families(
-	VkPhysicalDevice physical_device)
+	VkPhysicalDevice physical_device,
+	VkSurfaceKHR surface)
 {
 	hyper_assert$(physical_device != VK_NULL_HANDLE);
 
@@ -141,7 +173,19 @@ struct hyper_queue_families hyper_find_queue_families(
 			queue_families.graphics_family_valid = true;
 		}
 
-		if (queue_families.graphics_family_valid)
+		VkBool32 present_family_supported = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(
+			physical_device, i, surface, &present_family_supported);
+
+		if (present_family_supported)
+		{
+			queue_families.present_family = index;
+			queue_families.present_family_valid = true;
+		}
+
+		if (
+			queue_families.graphics_family_valid &&
+			queue_families.present_family_valid)
 		{
 			break;
 		}

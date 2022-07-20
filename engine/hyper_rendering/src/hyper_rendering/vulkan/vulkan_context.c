@@ -204,6 +204,13 @@ enum hyper_result hyper_vulkan_context_create(
 		}
 	}
 
+	if (!hyper_window_create_window_surface(
+				window, vulkan_context->instance, &vulkan_context->surface))
+	{
+		hyper_logger_error$("Failed to create surface\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
+
 	hyper_vulkan_device_create(vulkan_context);
 
 	return HYPER_RESULT_SUCCESS;
@@ -214,6 +221,8 @@ void hyper_vulkan_context_destroy(struct hyper_vulkan_context *vulkan_context)
 	hyper_assert$(vulkan_context != NULL);
 
 	hyper_vulkan_device_destroy(vulkan_context);
+
+	vkDestroySurfaceKHR(vulkan_context->instance, vulkan_context->surface, NULL);
 
 	if (vulkan_context->validation_layers_enabled)
 	{

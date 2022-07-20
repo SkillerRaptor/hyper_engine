@@ -16,6 +16,8 @@ struct hyper_queue_families
 {
 	uint32_t graphics_family;
 	bool graphics_family_valid;
+	uint32_t present_family;
+	bool present_family_valid;
 };
 
 enum hyper_result hyper_vulkan_device_create(
@@ -23,4 +25,5 @@ enum hyper_result hyper_vulkan_device_create(
 void hyper_vulkan_device_destroy(struct hyper_vulkan_context *vulkan_context);
 
 struct hyper_queue_families hyper_find_queue_families(
-	VkPhysicalDevice physical_device);
+	VkPhysicalDevice physical_device,
+	VkSurfaceKHR surface);

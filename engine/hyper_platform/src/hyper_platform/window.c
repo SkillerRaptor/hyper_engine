@@ -9,6 +9,7 @@
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
 
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <stddef.h>
 
@@ -233,4 +234,20 @@ void hyper_window_get_required_extensions(
 	uint32_t *extension_count)
 {
 	*extensions = glfwGetRequiredInstanceExtensions(extension_count);
+}
+
+bool hyper_window_create_window_surface(
+	struct hyper_window *window,
+	void *instance,
+	void **surface)
+{
+	if (
+		glfwCreateWindowSurface(
+			instance, window->native_window, NULL, (VkSurfaceKHR *) surface) !=
+		VK_SUCCESS)
+	{
+		return false;
+	}
+
+	return true;
 }

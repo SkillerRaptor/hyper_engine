@@ -35,4 +35,5 @@ target_link_libraries(
 		hyper_platform
 		PRIVATE
 		glfw
+		volk
 		hyper_common)
