@@ -24,6 +24,7 @@ enum hyper_result hyper_vulkan_device_create(
 	struct hyper_vulkan_context *vulkan_context);
 void hyper_vulkan_device_destroy(struct hyper_vulkan_context *vulkan_context);
 
-struct hyper_queue_families hyper_find_queue_families(
+void hyper_vulkan_device_find_queue_families(
+	struct hyper_queue_families *queue_families,
 	VkPhysicalDevice physical_device,
 	VkSurfaceKHR surface);

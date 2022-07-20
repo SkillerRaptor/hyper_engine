@@ -49,6 +49,9 @@ typedef void (*hyper_event_window_move_callback_function)(
 typedef void (*hyper_event_window_resize_callback_function)(
 	struct hyper_window_resize_event window_resize_event,
 	void *user_data);
+typedef void (*hyper_event_window_framebuffer_resize_callback_function)(
+	struct hyper_window_framebuffer_resize_event window_framebuffer_resize_event,
+	void *user_data);
 
 struct hyper_event_bus
 {
@@ -64,6 +67,7 @@ struct hyper_event_bus
 	struct hyper_vector window_close_callbacks;
 	struct hyper_vector window_move_callbacks;
 	struct hyper_vector window_resize_callbacks;
+	struct hyper_vector window_framebuffer_resize_callbacks;
 };
 
 HYPER_API enum hyper_result hyper_event_bus_create(
@@ -115,4 +119,8 @@ HYPER_API void hyper_register_window_move_callback(
 HYPER_API void hyper_register_window_resize_callback(
 	struct hyper_event_bus *event_bus,
 	hyper_event_window_resize_callback_function window_resize_callback,
+	void *user_data);
+HYPER_API void hyper_register_window_framebuffer_resize_callback(
+	struct hyper_event_bus *event_bus,
+	hyper_event_window_framebuffer_resize_callback_function window_framebuffer_resize_callback,
 	void *user_data);

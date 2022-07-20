@@ -70,6 +70,12 @@ struct hyper_event_window_resize_data
 	void *user_data;
 };
 
+struct hyper_event_window_framebuffer_resize_data
+{
+	hyper_event_window_framebuffer_resize_callback_function callback;
+	void *user_data;
+};
+
 static void hyper_key_callback(
 	struct hyper_window *window,
 	enum hyper_key_action key_action,
@@ -267,6 +273,27 @@ static void hyper_window_resize_callback(
 	hyper_queue_push(&event_bus->event_list, &event_data);
 }
 
+static void hyper_window_framebuffer_resize_callback(
+	struct hyper_window *window,
+	uint32_t width,
+	uint32_t height,
+	void *user_data)
+{
+	struct hyper_event_bus *event_bus = user_data;
+
+	struct hyper_window_framebuffer_resize_event
+		window_framebuffer_resize_event = {
+		.width = width,
+		.height = height,
+	};
+	struct hyper_event event_data = {
+		.type = HYPER_EVENT_TYPE_WINDOW_FRAMEBUFFER_RESIZE,
+		.window_framebuffer_resize_event = window_framebuffer_resize_event,
+	};
+
+	hyper_queue_push(&event_bus->event_list, &event_data);
+}
+
 enum hyper_result hyper_event_bus_create(
 	struct hyper_event_bus *event_bus,
 	struct hyper_window *window)
@@ -381,6 +408,17 @@ enum hyper_result hyper_event_bus_create(
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
+	if (
+		hyper_vector_create(
+			&event_bus->window_framebuffer_resize_callbacks,
+			sizeof(struct hyper_event_window_framebuffer_resize_data)) !=
+		HYPER_RESULT_SUCCESS)
+	{
+		hyper_logger_error$(
+			"Failed to create vector for 'window framebuffer resize callbacks'\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
+
 	window->key_callback.callback = hyper_key_callback;
 	window->key_callback.user_data = event_bus;
 	window->key_type_callback.callback = hyper_key_type_callback;
@@ -397,6 +435,9 @@ enum hyper_result hyper_event_bus_create(
 	window->window_move_callback.user_data = event_bus;
 	window->window_resize_callback.callback = hyper_window_resize_callback;
 	window->window_resize_callback.user_data = event_bus;
+	window->window_framebuffer_resize_callback.callback =
+		hyper_window_framebuffer_resize_callback;
+	window->window_framebuffer_resize_callback.user_data = event_bus;
 
 	return HYPER_RESULT_SUCCESS;
 }
@@ -416,6 +457,7 @@ void hyper_event_bus_destroy(struct hyper_event_bus *event_bus)
 	hyper_vector_destroy(&event_bus->window_close_callbacks);
 	hyper_vector_destroy(&event_bus->window_move_callbacks);
 	hyper_vector_destroy(&event_bus->window_resize_callbacks);
+	hyper_vector_destroy(&event_bus->window_framebuffer_resize_callbacks);
 }
 
 void hyper_event_bus_process(struct hyper_event_bus *event_bus)
@@ -525,6 +567,20 @@ void hyper_event_bus_process(struct hyper_event_bus *event_bus)
 				hyper_vector_get(&event_bus->window_resize_callbacks, i);
 			window_resize_data->callback(
 				event_data->window_resize_event, window_resize_data->user_data);
+		}
+		break;
+	}
+	case HYPER_EVENT_TYPE_WINDOW_FRAMEBUFFER_RESIZE:
+	{
+		for (size_t i = 0; i < event_bus->window_framebuffer_resize_callbacks.size;
+				 ++i)
+		{
+			struct hyper_event_window_framebuffer_resize_data
+				*window_framebuffer_resize_data =
+					hyper_vector_get(&event_bus->window_framebuffer_resize_callbacks, i);
+			window_framebuffer_resize_data->callback(
+				event_data->window_framebuffer_resize_event,
+				window_framebuffer_resize_data->user_data);
 		}
 		break;
 	}
@@ -679,4 +735,21 @@ void hyper_register_window_resize_callback(
 
 	hyper_vector_push_back(
 		&event_bus->window_resize_callbacks, &window_resize_data);
+}
+
+void hyper_register_window_framebuffer_resize_callback(
+	struct hyper_event_bus *event_bus,
+	hyper_event_window_framebuffer_resize_callback_function
+		window_framebuffer_resize_callback,
+	void *user_data)
+{
+	struct hyper_event_window_framebuffer_resize_data
+		window_framebuffer_resize_data = {
+			.callback = window_framebuffer_resize_callback,
+			.user_data = user_data,
+		};
+
+	hyper_vector_push_back(
+		&event_bus->window_framebuffer_resize_callbacks,
+		&window_framebuffer_resize_data);
 }

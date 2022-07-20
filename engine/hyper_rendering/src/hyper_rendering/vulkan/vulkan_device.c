@@ -8,7 +8,62 @@
 
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
+#include "hyper_common/prerequisites.h"
 #include "hyper_common/vector.h"
+#include "hyper_rendering/vulkan/vulkan_swapchain.h"
+
+#include <string.h>
+
+static const char *s_physical_device_extensions[] = {
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+};
+
+static bool hyper_physical_device_extensions_supported(
+	VkPhysicalDevice physical_device)
+{
+	hyper_assert$(physical_device != VK_NULL_HANDLE);
+
+	uint32_t extension_count = 0;
+	vkEnumerateDeviceExtensionProperties(
+		physical_device, NULL, &extension_count, NULL);
+
+	struct hyper_vector extensions = { 0 };
+	hyper_vector_create(&extensions, sizeof(VkExtensionProperties));
+	hyper_vector_resize(&extensions, extension_count);
+	vkEnumerateDeviceExtensionProperties(
+		physical_device, NULL, &extension_count, extensions.data);
+
+	for (size_t i = 0; i < hyper_array_size$(s_physical_device_extensions); ++i)
+	{
+		const char *extension_name = s_physical_device_extensions[i];
+
+		bool extension_found = false;
+		for (size_t j = 0; j < extensions.size; ++j)
+		{
+			const VkExtensionProperties *extension_properties =
+				hyper_vector_get(&extensions, j);
+
+			if (
+				strncmp(
+					extension_name,
+					extension_properties->extensionName,
+					strlen(extension_name)) == 0)
+			{
+				extension_found = true;
+				break;
+			}
+		}
+
+		if (!extension_found)
+		{
+			hyper_vector_destroy(&extensions);
+			return false;
+		}
+	}
+
+	hyper_vector_destroy(&extensions);
+	return true;
+}
 
 static bool hyper_is_physical_device_suitable(
 	VkPhysicalDevice physical_device,
@@ -16,11 +71,30 @@ static bool hyper_is_physical_device_suitable(
 {
 	hyper_assert$(physical_device != VK_NULL_HANDLE);
 
-	struct hyper_queue_families queue_families =
-		hyper_find_queue_families(physical_device, surface);
+	struct hyper_queue_families queue_families = { 0 };
+	hyper_vulkan_device_find_queue_families(
+		&queue_families, physical_device, surface);
+
+	const bool extensions_supported =
+		hyper_physical_device_extensions_supported(physical_device);
+
+	bool swapchain_valid = false;
+	if (extensions_supported)
+	{
+		struct hyper_swapchain_details swapchain_details = { 0 };
+		hyper_vulkan_swapchain_query_details(
+			&swapchain_details, physical_device, surface);
+
+		swapchain_valid =
+			(swapchain_details.formats.size != 0 &&
+			 swapchain_details.present_modes.size);
+
+		hyper_vulkan_swapchain_destroy_details(&swapchain_details);
+	}
 
 	return queue_families.graphics_family_valid &&
-				 queue_families.present_family_valid;
+				 queue_families.present_family_valid && extensions_supported &&
+				 swapchain_valid;
 }
 
 enum hyper_result hyper_vulkan_device_create(
@@ -66,8 +140,9 @@ enum hyper_result hyper_vulkan_device_create(
 
 	hyper_vector_destroy(&devices);
 
-	struct hyper_queue_families queue_families = hyper_find_queue_families(
-		vulkan_context->physical_device, vulkan_context->surface);
+	struct hyper_queue_families queue_families = { 0 };
+	hyper_vulkan_device_find_queue_families(
+		&queue_families, vulkan_context->physical_device, vulkan_context->surface);
 
 	struct hyper_vector queue_create_infos = { 0 };
 	hyper_vector_create(&queue_create_infos, sizeof(VkDeviceQueueCreateInfo));
@@ -103,8 +178,8 @@ enum hyper_result hyper_vulkan_device_create(
 		.pQueueCreateInfos = queue_create_infos.data,
 		.enabledLayerCount = 0,
 		.ppEnabledLayerNames = NULL,
-		.enabledExtensionCount = 0,
-		.ppEnabledExtensionNames = NULL,
+		.enabledExtensionCount = hyper_array_size$(s_physical_device_extensions),
+		.ppEnabledExtensionNames = s_physical_device_extensions,
 		.pEnabledFeatures = &physical_device_features,
 	};
 
@@ -144,13 +219,12 @@ void hyper_vulkan_device_destroy(struct hyper_vulkan_context *vulkan_context)
 	vkDestroyDevice(vulkan_context->device, NULL);
 }
 
-struct hyper_queue_families hyper_find_queue_families(
+void hyper_vulkan_device_find_queue_families(
+	struct hyper_queue_families *queue_families,
 	VkPhysicalDevice physical_device,
 	VkSurfaceKHR surface)
 {
 	hyper_assert$(physical_device != VK_NULL_HANDLE);
-
-	struct hyper_queue_families queue_families = { 0 };
 
 	uint32_t properties_count = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(
@@ -169,8 +243,8 @@ struct hyper_queue_families hyper_find_queue_families(
 			hyper_vector_get(&properties, i);
 		if (queue_family->queueFlags & VK_QUEUE_GRAPHICS_BIT)
 		{
-			queue_families.graphics_family = index;
-			queue_families.graphics_family_valid = true;
+			queue_families->graphics_family = index;
+			queue_families->graphics_family_valid = true;
 		}
 
 		VkBool32 present_family_supported = false;
@@ -179,13 +253,13 @@ struct hyper_queue_families hyper_find_queue_families(
 
 		if (present_family_supported)
 		{
-			queue_families.present_family = index;
-			queue_families.present_family_valid = true;
+			queue_families->present_family = index;
+			queue_families->present_family_valid = true;
 		}
 
 		if (
-			queue_families.graphics_family_valid &&
-			queue_families.present_family_valid)
+			queue_families->graphics_family_valid &&
+			queue_families->present_family_valid)
 		{
 			break;
 		}
@@ -194,6 +268,4 @@ struct hyper_queue_families hyper_find_queue_families(
 	}
 
 	hyper_vector_destroy(&properties);
-
-	return queue_families;
 }

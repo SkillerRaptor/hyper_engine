@@ -23,6 +23,7 @@ enum hyper_event_type
 
 	HYPER_EVENT_TYPE_WINDOW_CLOSE,
 	HYPER_EVENT_TYPE_WINDOW_RESIZE,
+	HYPER_EVENT_TYPE_WINDOW_FRAMEBUFFER_RESIZE,
 	HYPER_EVENT_TYPE_WINDOW_MOVE,
 };
 
@@ -43,6 +44,7 @@ struct hyper_event
 
 		struct hyper_window_close_event window_close_event;
 		struct hyper_window_resize_event window_resize_event;
+		struct hyper_window_framebuffer_resize_event window_framebuffer_resize_event;
 		struct hyper_window_move_event window_move_event;
 	};
 };

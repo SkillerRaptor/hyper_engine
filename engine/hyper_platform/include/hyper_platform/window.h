@@ -55,6 +55,11 @@ typedef void (*hyper_window_resize_callback_function)(
 	uint32_t width,
 	uint32_t height,
 	void *user_data);
+typedef void (*hyper_window_framebuffer_resize_callback_function)(
+	struct hyper_window *window,
+	uint32_t width,
+	uint32_t height,
+	void *user_data);
 
 struct hyper_key_callback_data
 {
@@ -104,6 +109,12 @@ struct hyper_window_resize_callback_data
 	void *user_data;
 };
 
+struct hyper_window_framebuffer_resize_callback_data
+{
+	hyper_window_framebuffer_resize_callback_function callback;
+	void *user_data;
+};
+
 enum hyper_key_action
 {
 	HYPER_KEY_ACTION_NONE,
@@ -135,6 +146,8 @@ struct hyper_window
 	uint32_t y;
 	uint32_t width;
 	uint32_t height;
+	uint32_t framebuffer_width;
+	uint32_t framebuffer_height;
 
 	// TODO: Find a better way to carry the callbacks around
 	struct hyper_key_callback_data key_callback;
@@ -145,6 +158,8 @@ struct hyper_window
 	struct hyper_window_close_callback_data window_close_callback;
 	struct hyper_window_move_callback_data window_move_callback;
 	struct hyper_window_resize_callback_data window_resize_callback;
+	struct hyper_window_framebuffer_resize_callback_data
+		window_framebuffer_resize_callback;
 
 	void *native_window;
 };

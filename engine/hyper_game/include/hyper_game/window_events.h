@@ -25,3 +25,9 @@ struct hyper_window_resize_event
 	uint32_t width;
 	uint32_t height;
 };
+
+struct hyper_window_framebuffer_resize_event
+{
+	uint32_t width;
+	uint32_t height;
+};

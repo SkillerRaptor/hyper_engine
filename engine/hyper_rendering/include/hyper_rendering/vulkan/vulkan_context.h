@@ -7,6 +7,7 @@
 #pragma once
 
 #include "hyper_common/result.h"
+#include "hyper_common/vector.h"
 #include "hyper_platform/window.h"
 
 #include <stdbool.h>
@@ -23,6 +24,10 @@ struct hyper_vulkan_context
 	VkDevice device;
 	VkQueue graphics_queue;
 	VkQueue present_queue;
+	VkSwapchainKHR swapchain;
+	struct hyper_vector swapchain_images;
+	VkFormat swapchain_format;
+	VkExtent2D swapchain_extent;
 };
 
 enum hyper_result hyper_vulkan_context_create(

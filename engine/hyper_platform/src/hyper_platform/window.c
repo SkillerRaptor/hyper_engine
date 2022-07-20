@@ -165,6 +165,25 @@ static void hyper_window_resize_callback(
 	}
 }
 
+static void hyper_window_framebuffer_resize_callback(
+	GLFWwindow *native_window,
+	int width,
+	int height)
+{
+	struct hyper_window *window = glfwGetWindowUserPointer(native_window);
+	window->framebuffer_width = width;
+	window->framebuffer_height = height;
+
+	if (window->window_framebuffer_resize_callback.callback != NULL)
+	{
+		window->window_framebuffer_resize_callback.callback(
+			window,
+			(uint32_t) width,
+			(uint32_t) height,
+			window->window_framebuffer_resize_callback.user_data);
+	}
+}
+
 enum hyper_result hyper_window_create(
 	struct hyper_window *window,
 	const struct hyper_window_create_info *window_create_info)
@@ -201,6 +220,27 @@ enum hyper_result hyper_window_create(
 	glfwSetWindowPosCallback(window->native_window, hyper_window_move_callback);
 	glfwSetWindowSizeCallback(
 		window->native_window, hyper_window_resize_callback);
+	glfwSetFramebufferSizeCallback(
+		window->native_window, hyper_window_framebuffer_resize_callback);
+
+	int x = 0;
+	int y = 0;
+	glfwGetWindowPos(window->native_window, &x, &y);
+	window->x = x;
+	window->y = y;
+
+	int width = 0;
+	int height = 0;
+	glfwGetWindowSize(window->native_window, &width, &height);
+	window->width = width;
+	window->height = height;
+
+	int framebuffer_width = 0;
+	int framebuffer_height = 0;
+	glfwGetFramebufferSize(
+		window->native_window, &framebuffer_width, &framebuffer_height);
+	window->framebuffer_width = framebuffer_width;
+	window->framebuffer_height = framebuffer_height;
 
 	++s_window_count;
 

@@ -13,6 +13,7 @@
 #include "hyper_common/prerequisites.h"
 #include "hyper_common/vector.h"
 #include "hyper_rendering/vulkan/vulkan_device.h"
+#include "hyper_rendering/vulkan/vulkan_swapchain.h"
 
 #include <string.h>
 
@@ -211,7 +212,19 @@ enum hyper_result hyper_vulkan_context_create(
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
-	hyper_vulkan_device_create(vulkan_context);
+	if (hyper_vulkan_device_create(vulkan_context) != HYPER_RESULT_SUCCESS)
+	{
+		hyper_logger_error$("Failed to create device\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
+
+	if (
+		hyper_vulkan_swapchain_create(vulkan_context, window) !=
+		HYPER_RESULT_SUCCESS)
+	{
+		hyper_logger_error$("Failed to create swapchain\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
 
 	return HYPER_RESULT_SUCCESS;
 }
@@ -220,6 +233,7 @@ void hyper_vulkan_context_destroy(struct hyper_vulkan_context *vulkan_context)
 {
 	hyper_assert$(vulkan_context != NULL);
 
+	hyper_vulkan_swapchain_destroy(vulkan_context);
 	hyper_vulkan_device_destroy(vulkan_context);
 
 	vkDestroySurfaceKHR(vulkan_context->instance, vulkan_context->surface, NULL);
