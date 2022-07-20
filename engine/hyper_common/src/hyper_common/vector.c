@@ -38,7 +38,9 @@ static void *hyper_vector_get_offset(struct hyper_vector *vector, size_t index)
 	return (uint8_t *) vector->data + (index * vector->element_size);
 }
 
-enum hyper_result hyper_vector_create(struct hyper_vector *vector, size_t element_size)
+enum hyper_result hyper_vector_create(
+	struct hyper_vector *vector,
+	size_t element_size)
 {
 	hyper_assert$(vector != NULL);
 	hyper_assert$(element_size != 0);
@@ -64,7 +66,7 @@ void hyper_vector_destroy(struct hyper_vector *vector)
 	vector->data = NULL;
 }
 
-void hyper_vector_push_back(struct hyper_vector *vector, void *element)
+void hyper_vector_push_back(struct hyper_vector *vector, const void *element)
 {
 	hyper_assert$(vector != NULL);
 	hyper_assert$(element != NULL);
@@ -78,6 +80,28 @@ void hyper_vector_push_back(struct hyper_vector *vector, void *element)
 	memcpy(ptr, element, vector->element_size);
 
 	++vector->size;
+}
+
+void hyper_vector_resize(struct hyper_vector *vector, size_t size)
+{
+	hyper_assert$(vector != NULL);
+	hyper_assert$(size != 0);
+
+	hyper_vector_reallocate(vector, size + size / 2);
+	vector->size = size;
+}
+
+void hyper_vector_reserve(struct hyper_vector *vector, size_t capacity)
+{
+	hyper_assert$(vector != NULL);
+	hyper_assert$(capacity != 0);
+
+	if (capacity <= vector->capacity)
+	{
+		return;
+	}
+
+	hyper_vector_reallocate(vector, capacity);
 }
 
 void *hyper_vector_get(struct hyper_vector *vector, size_t index)

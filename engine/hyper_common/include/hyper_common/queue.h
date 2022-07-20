@@ -24,7 +24,7 @@ enum hyper_result hyper_queue_create(
 	size_t element_size);
 void hyper_queue_destroy(struct hyper_queue *queue);
 
-void hyper_queue_push(struct hyper_queue *queue, void *element);
+void hyper_queue_push(struct hyper_queue *queue, const void *element);
 void hyper_queue_pop(struct hyper_queue *queue);
 
 void *hyper_queue_front(struct hyper_queue *queue);

@@ -8,6 +8,9 @@ jobs:
     defaults:
       run:
         shell: cmd
+    env:
+      vulkan_sdk: "${{ github.workspace }}/vulkan_sdk/"
+      vulkan_version: "1.3.216.0"
     strategy:
       fail-fast: false
       matrix:
@@ -34,9 +37,16 @@ jobs:
         with:
           submodules: recursive
           
+      - name: Install Vulkan SDK
+        run: |
+          curl -LS -o vulkansdk.exe https://sdk.lunarg.com/sdk/download/${{ env.vulkan_version }}/windows/VulkanSDK-${{ env.vulkan_version }}-Installer.exe?Human=true
+          7z x vulkansdk.exe -o"${{ env.vulkan_sdk }}"
+
       - name: Configure CMake
         run: |
           set CC=${{ matrix.config.cc }}
+          set PATH=%PATH%;${{ env.vulkan_sdk }}\;${{ env.vulkan_sdk }}\Bin\
+
           cmake . -B build -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
 
       - name: Build

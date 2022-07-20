@@ -15,15 +15,17 @@ add_subdirectory(hyper_common)
 add_subdirectory(hyper_platform)
 
 #-------------------------------------------------------------------------------------------
-# hyper game
+# hyper game & hyper rendering
 #-------------------------------------------------------------------------------------------
 add_subdirectory(hyper_game)
+add_subdirectory(hyper_rendering)
 
 #-------------------------------------------------------------------------------------------
 # hyper engine
 #-------------------------------------------------------------------------------------------
 set(HYPER_MODULES
 		hyper_game
-		hyper_platform)
+		hyper_platform
+		hyper_rendering)
 
 add_subdirectory(hyper_engine)

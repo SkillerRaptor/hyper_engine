@@ -226,3 +226,11 @@ void hyper_window_update(struct hyper_window *window)
 
 	glfwPollEvents();
 }
+
+void hyper_window_get_required_extensions(
+	struct hyper_window *window,
+	const char ***extensions,
+	uint32_t *extension_count)
+{
+	*extensions = glfwGetRequiredInstanceExtensions(extension_count);
+}

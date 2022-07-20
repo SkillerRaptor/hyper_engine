@@ -34,15 +34,15 @@ target_link_libraries(
 		hyper_common)
 		
 foreach(item IN ITEMS ${HYPER_MODULES})
-		target_link_libraries(
-				hyper_engine
-				PRIVATE
-				${item})
-
 		add_custom_command(
 				TARGET hyper_engine
 				POST_BUILD
 				COMMAND ${CMAKE_COMMAND} -E copy_directory
 				$<TARGET_FILE_DIR:${item}>
 				$<TARGET_FILE_DIR:hyper_engine>)
+
+		target_link_libraries(
+				hyper_engine
+				PRIVATE
+				${item})
 endforeach()

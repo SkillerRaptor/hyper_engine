@@ -24,6 +24,9 @@ enum hyper_result hyper_vector_create(
 	size_t element_size);
 void hyper_vector_destroy(struct hyper_vector *vector);
 
-void hyper_vector_push_back(struct hyper_vector *vector, void *element);
+void hyper_vector_push_back(struct hyper_vector *vector, const void *element);
+
+void hyper_vector_resize(struct hyper_vector *vector, size_t size);
+void hyper_vector_reserve(struct hyper_vector *vector, size_t capacity);
 
 void *hyper_vector_get(struct hyper_vector *vector, size_t index);

@@ -66,7 +66,7 @@ void hyper_queue_destroy(struct hyper_queue *queue)
 	queue->data = NULL;
 }
 
-void hyper_queue_push(struct hyper_queue *queue, void *element)
+void hyper_queue_push(struct hyper_queue *queue, const void *element)
 {
 	hyper_assert$(queue != NULL);
 	hyper_assert$(element != NULL);

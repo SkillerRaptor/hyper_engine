@@ -43,6 +43,7 @@ enum hyper_result hyper_engine_create(struct hyper_engine *engine)
 	static const char *modules[] = {
 		"hyper_game",
 		"hyper_platform",
+		"hyper_rendering",
 	};
 
 	for (size_t i = 0; i < sizeof(modules) / sizeof(modules[0]); ++i)
@@ -81,6 +82,14 @@ enum hyper_result hyper_engine_create(struct hyper_engine *engine)
 	hyper_register_window_close_callback(
 		&engine->event_bus, hyper_window_close_callback, engine);
 
+	if (
+		hyper_graphics_context_create(&engine->graphics_context, &engine->window) !=
+		HYPER_RESULT_SUCCESS)
+	{
+		hyper_logger_error$("Failed to create graphics context\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
+
 	engine->running = true;
 
 	return HYPER_RESULT_SUCCESS;
@@ -90,6 +99,7 @@ void hyper_engine_destroy(struct hyper_engine *engine)
 {
 	hyper_assert$(engine != NULL);
 
+	hyper_graphics_context_destroy(&engine->graphics_context);
 	hyper_event_bus_destroy(&engine->event_bus);
 	hyper_window_destroy(&engine->window);
 	hyper_module_loader_destroy(&engine->module_loader);
