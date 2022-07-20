@@ -163,4 +163,4 @@ HYPER_API void hyper_window_get_required_extensions(
 HYPER_API bool hyper_window_create_window_surface(
 	struct hyper_window *window,
 	void *instance,
-	void **surface);
+	void *surface);
