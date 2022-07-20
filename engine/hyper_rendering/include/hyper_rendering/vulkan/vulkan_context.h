@@ -18,6 +18,9 @@ struct hyper_vulkan_context
 
 	VkInstance instance;
 	VkDebugUtilsMessengerEXT debug_messenger;
+	VkPhysicalDevice physical_device;
+	VkDevice device;
+	VkQueue graphics_queue;
 };
 
 enum hyper_result hyper_vulkan_context_create(

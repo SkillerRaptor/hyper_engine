@@ -10,12 +10,14 @@
 set(SOURCES
 		src/hyper_rendering/graphics_context.c
 		src/hyper_rendering/hyper_rendering.c
-		src/hyper_rendering/vulkan/vulkan_context.c)
+		src/hyper_rendering/vulkan/vulkan_context.c
+		src/hyper_rendering/vulkan/vulkan_device.c)
 
 set(HEADERS
 		include/hyper_rendering/graphics_context.h
 		include/hyper_rendering/hyper_rendering.h
-		include/hyper_rendering/vulkan/vulkan_context.h)
+		include/hyper_rendering/vulkan/vulkan_context.h
+		include/hyper_rendering/vulkan/vulkan_device.h)
 
 foreach(item IN ITEMS ${SOURCES} ${HEADERS})
 		get_filename_component(src_path "${item}" PATH)

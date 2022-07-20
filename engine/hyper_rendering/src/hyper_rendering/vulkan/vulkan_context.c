@@ -12,6 +12,7 @@
 #include "hyper_common/memory.h"
 #include "hyper_common/prerequisites.h"
 #include "hyper_common/vector.h"
+#include "hyper_rendering/vulkan/vulkan_device.h"
 
 #include <string.h>
 
@@ -167,6 +168,14 @@ enum hyper_result hyper_vulkan_context_create(
 		vkCreateInstance(&instance_create_info, NULL, &vulkan_context->instance) !=
 		VK_SUCCESS)
 	{
+		for (size_t i = 0; i < extensions.size; ++i)
+		{
+			char *string = *(char **) hyper_vector_get(&extensions, i);
+			hyper_deallocate(string);
+		}
+
+		hyper_vector_destroy(&extensions);
+
 		hyper_logger_error$("Failed to create instance\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
@@ -195,12 +204,16 @@ enum hyper_result hyper_vulkan_context_create(
 		}
 	}
 
+	hyper_vulkan_device_create(vulkan_context);
+
 	return HYPER_RESULT_SUCCESS;
 }
 
 void hyper_vulkan_context_destroy(struct hyper_vulkan_context *vulkan_context)
 {
 	hyper_assert$(vulkan_context != NULL);
+
+	hyper_vulkan_device_destroy(vulkan_context);
 
 	if (vulkan_context->validation_layers_enabled)
 	{
