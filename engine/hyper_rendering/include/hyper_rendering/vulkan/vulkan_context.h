@@ -29,6 +29,9 @@ struct hyper_vulkan_context
 	VkFormat swapchain_format;
 	VkExtent2D swapchain_extent;
 	struct hyper_vector swapchain_images_views;
+	VkRenderPass render_pass;
+	VkPipelineLayout pipeline_layout;
+	VkPipeline pipeline;
 };
 
 enum hyper_result hyper_vulkan_context_create(

@@ -32,7 +32,12 @@ target_link_libraries(
 		hyper_engine
 		PRIVATE
 		hyper_common)
-		
+
+add_custom_command(
+	TARGET hyper_engine
+	POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets/ $<TARGET_FILE_DIR:hyper_engine>/assets)
+
 foreach(item IN ITEMS ${HYPER_MODULES})
 		add_custom_command(
 				TARGET hyper_engine
