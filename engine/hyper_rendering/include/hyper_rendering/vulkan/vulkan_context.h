@@ -32,9 +32,14 @@ struct hyper_vulkan_context
 	VkRenderPass render_pass;
 	VkPipelineLayout pipeline_layout;
 	VkPipeline pipeline;
+	struct hyper_vector swapchain_framebuffers;
+	VkCommandPool command_pool;
+	VkCommandBuffer command_buffer;
 };
 
 enum hyper_result hyper_vulkan_context_create(
 	struct hyper_vulkan_context *vulkan_context,
 	struct hyper_window *window);
 void hyper_vulkan_context_destroy(struct hyper_vulkan_context *vulkan_context);
+
+void hyper_vulkan_context_render(struct hyper_vulkan_context *vulkan_context);

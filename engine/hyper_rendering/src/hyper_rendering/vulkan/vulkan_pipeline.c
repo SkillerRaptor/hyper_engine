@@ -8,8 +8,8 @@
 
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
-#include "hyper_common/vector.h"
 #include "hyper_common/prerequisites.h"
+#include "hyper_common/vector.h"
 
 #include <stdio.h>
 

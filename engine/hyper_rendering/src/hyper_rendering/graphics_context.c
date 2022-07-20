@@ -40,3 +40,14 @@ void hyper_graphics_context_destroy(
 
 	hyper_deallocate(graphics_context->internal_context);
 }
+
+void hyper_graphics_context_render(
+	struct hyper_graphics_context *graphics_context)
+{
+	hyper_assert$(graphics_context != NULL);
+
+	struct hyper_vulkan_context *vulkan_context =
+		graphics_context->internal_context;
+
+	hyper_vulkan_context_render(vulkan_context);
+}

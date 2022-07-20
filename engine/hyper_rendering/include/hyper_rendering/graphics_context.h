@@ -20,3 +20,6 @@ HYPER_API enum hyper_result hyper_graphics_context_create(
 	struct hyper_window *window);
 HYPER_API void hyper_graphics_context_destroy(
 	struct hyper_graphics_context *graphics_context);
+
+HYPER_API void hyper_graphics_context_render(
+	struct hyper_graphics_context *graphics_context);
