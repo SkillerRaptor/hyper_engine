@@ -121,9 +121,6 @@ void hyper_engine_run(struct hyper_engine *engine)
 
 	while (engine->running)
 	{
-		// TODO: Replace this with async event bus for non blocking events
-		hyper_event_bus_process(&engine->event_bus);
-
 		hyper_window_update(&engine->window);
 
 		hyper_graphics_context_render(&engine->graphics_context);
