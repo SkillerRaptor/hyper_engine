@@ -22,6 +22,8 @@ static const char *s_validation_layers[] = {
 	"VK_LAYER_KHRONOS_validation",
 };
 
+static size_t s_max_frames_in_flight = 2;
+
 static bool hyper_validation_layers_supported()
 {
 	uint32_t layer_count = 0;
@@ -75,6 +77,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL hyper_debug_messenger_callback(
 
 static enum hyper_result hyper_record_command_buffer(
 	struct hyper_vulkan_context *vulkan_context,
+	VkCommandBuffer command_buffer,
 	uint32_t image_index)
 {
 	const VkCommandBufferBeginInfo command_buffer_begin_info = {
@@ -83,8 +86,8 @@ static enum hyper_result hyper_record_command_buffer(
 	};
 
 	if (
-		vkBeginCommandBuffer(
-			vulkan_context->command_buffer, &command_buffer_begin_info) != VK_SUCCESS)
+		vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info) !=
+		VK_SUCCESS)
 	{
 		hyper_logger_error$("Failed to begin recording command buffer\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
@@ -119,14 +122,10 @@ static enum hyper_result hyper_record_command_buffer(
 	};
 
 	vkCmdBeginRenderPass(
-		vulkan_context->command_buffer,
-		&render_pass_begin_info,
-		VK_SUBPASS_CONTENTS_INLINE);
+		command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
 	vkCmdBindPipeline(
-		vulkan_context->command_buffer,
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		vulkan_context->pipeline);
+		command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_context->pipeline);
 
 	const VkViewport viewport = {
 		.x = 0.0f,
@@ -136,7 +135,7 @@ static enum hyper_result hyper_record_command_buffer(
 		.minDepth = 0.0f,
 		.maxDepth = 1.0f,
 	};
-	vkCmdSetViewport(vulkan_context->command_buffer, 0, 1, &viewport);
+	vkCmdSetViewport(command_buffer, 0, 1, &viewport);
 
 	const VkRect2D scissor = {
 		.offset = {
@@ -145,13 +144,13 @@ static enum hyper_result hyper_record_command_buffer(
 		},
 		.extent = vulkan_context->swapchain_extent,
 	};
-	vkCmdSetScissor(vulkan_context->command_buffer, 0, 1, &scissor);
+	vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
-	vkCmdDraw(vulkan_context->command_buffer, 3, 1, 0, 0);
+	vkCmdDraw(command_buffer, 3, 1, 0, 0);
 
-	vkCmdEndRenderPass(vulkan_context->command_buffer);
+	vkCmdEndRenderPass(command_buffer);
 
-	if (vkEndCommandBuffer(vulkan_context->command_buffer) != VK_SUCCESS)
+	if (vkEndCommandBuffer(command_buffer) != VK_SUCCESS)
 	{
 		hyper_logger_error$("Failed to end recording command buffer\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
@@ -378,63 +377,90 @@ enum hyper_result hyper_vulkan_context_create(
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
+	hyper_vector_create(
+		&vulkan_context->command_buffers, sizeof(VkCommandBuffer));
+	hyper_vector_resize(&vulkan_context->command_buffers, s_max_frames_in_flight);
+
 	const VkCommandBufferAllocateInfo command_buffer_allocate_info = {
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
 		.commandPool = vulkan_context->command_pool,
 		.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-		.commandBufferCount = 1,
+		.commandBufferCount = vulkan_context->command_buffers.size,
 	};
 
 	if (
 		vkAllocateCommandBuffers(
 			vulkan_context->device,
 			&command_buffer_allocate_info,
-			&vulkan_context->command_buffer) != VK_SUCCESS)
+			vulkan_context->command_buffers.data) != VK_SUCCESS)
 	{
 		hyper_logger_error$("Failed to allocate command buffers\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
+	hyper_vector_create(
+		&vulkan_context->image_available_semaphores, sizeof(VkSemaphore));
+	hyper_vector_resize(
+		&vulkan_context->image_available_semaphores, s_max_frames_in_flight);
+
 	const VkSemaphoreCreateInfo semaphore_create_info = {
 		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
 	};
 
-	if (
-		vkCreateSemaphore(
-			vulkan_context->device,
-			&semaphore_create_info,
-			NULL,
-			&vulkan_context->image_available_semaphore) != VK_SUCCESS)
+	for (size_t i = 0; i < s_max_frames_in_flight; ++i)
 	{
-		hyper_logger_error$("Failed to create image available semaphore\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
+		VkSemaphore *semaphore =
+			hyper_vector_get(&vulkan_context->image_available_semaphores, i);
+		if (
+			vkCreateSemaphore(
+				vulkan_context->device, &semaphore_create_info, NULL, semaphore) !=
+			VK_SUCCESS)
+		{
+			hyper_logger_error$(
+				"Failed to create image available semaphore #%u\n", i);
+			return HYPER_RESULT_INITIALIZATION_FAILED;
+		}
 	}
 
-	if (
-		vkCreateSemaphore(
-			vulkan_context->device,
-			&semaphore_create_info,
-			NULL,
-			&vulkan_context->render_finished_semaphore) != VK_SUCCESS)
+	hyper_vector_create(
+		&vulkan_context->render_finished_semaphores, sizeof(VkSemaphore));
+	hyper_vector_resize(
+		&vulkan_context->render_finished_semaphores, s_max_frames_in_flight);
+
+	for (size_t i = 0; i < s_max_frames_in_flight; ++i)
 	{
-		hyper_logger_error$("Failed to create render finished semaphore\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
+		VkSemaphore *semaphore =
+			hyper_vector_get(&vulkan_context->render_finished_semaphores, i);
+		if (
+			vkCreateSemaphore(
+				vulkan_context->device, &semaphore_create_info, NULL, semaphore) !=
+			VK_SUCCESS)
+		{
+			hyper_logger_error$(
+				"Failed to create render finished semaphore #%u\n", i);
+			return HYPER_RESULT_INITIALIZATION_FAILED;
+		}
 	}
+
+	hyper_vector_create(&vulkan_context->in_flight_fences, sizeof(VkFence));
+	hyper_vector_resize(
+		&vulkan_context->in_flight_fences, s_max_frames_in_flight);
 
 	const VkFenceCreateInfo fence_create_info = {
 		.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
 		.flags = VK_FENCE_CREATE_SIGNALED_BIT,
 	};
 
-	if (
-		vkCreateFence(
-			vulkan_context->device,
-			&fence_create_info,
-			NULL,
-			&vulkan_context->in_flight_fence) != VK_SUCCESS)
+	for (size_t i = 0; i < s_max_frames_in_flight; ++i)
 	{
-		hyper_logger_error$("Failed to create in flight fence\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
+		VkFence *fence = hyper_vector_get(&vulkan_context->in_flight_fences, i);
+		if (
+			vkCreateFence(vulkan_context->device, &fence_create_info, NULL, fence) !=
+			VK_SUCCESS)
+		{
+			hyper_logger_error$("Failed to create in flight fence #%u\n", i);
+			return HYPER_RESULT_INITIALIZATION_FAILED;
+		}
 	}
 
 	return HYPER_RESULT_SUCCESS;
@@ -446,11 +472,27 @@ void hyper_vulkan_context_destroy(struct hyper_vulkan_context *vulkan_context)
 
 	vkDeviceWaitIdle(vulkan_context->device);
 
-	vkDestroyFence(vulkan_context->device, vulkan_context->in_flight_fence, NULL);
-	vkDestroySemaphore(
-		vulkan_context->device, vulkan_context->render_finished_semaphore, NULL);
-	vkDestroySemaphore(
-		vulkan_context->device, vulkan_context->image_available_semaphore, NULL);
+	for (size_t i = 0; i < s_max_frames_in_flight; ++i)
+	{
+		VkFence *in_flight_fence =
+			hyper_vector_get(&vulkan_context->in_flight_fences, i);
+		vkDestroyFence(vulkan_context->device, *in_flight_fence, NULL);
+
+		VkSemaphore *render_finished_semaphore =
+			hyper_vector_get(&vulkan_context->render_finished_semaphores, i);
+		vkDestroySemaphore(
+			vulkan_context->device, *render_finished_semaphore, NULL);
+
+		VkSemaphore *image_available_semaphore =
+			hyper_vector_get(&vulkan_context->image_available_semaphores, i);
+		vkDestroySemaphore(
+			vulkan_context->device, *image_available_semaphore, NULL);
+	}
+
+	hyper_vector_destroy(&vulkan_context->in_flight_fences);
+	hyper_vector_destroy(&vulkan_context->render_finished_semaphores);
+	hyper_vector_destroy(&vulkan_context->image_available_semaphores);
+	hyper_vector_destroy(&vulkan_context->command_buffers);
 
 	vkDestroyCommandPool(
 		vulkan_context->device, vulkan_context->command_pool, NULL);
@@ -481,26 +523,28 @@ void hyper_vulkan_context_destroy(struct hyper_vulkan_context *vulkan_context)
 
 void hyper_vulkan_context_render(struct hyper_vulkan_context *vulkan_context)
 {
+	VkFence *in_flight_fence = hyper_vector_get(
+		&vulkan_context->in_flight_fences, vulkan_context->current_frame);
 	vkWaitForFences(
-		vulkan_context->device,
-		1,
-		&vulkan_context->in_flight_fence,
-		VK_TRUE,
-		UINT64_MAX);
-	vkResetFences(vulkan_context->device, 1, &vulkan_context->in_flight_fence);
+		vulkan_context->device, 1, &*in_flight_fence, VK_TRUE, UINT64_MAX);
+	vkResetFences(vulkan_context->device, 1, &*in_flight_fence);
 
+	VkSemaphore *image_available_semaphore = hyper_vector_get(
+		&vulkan_context->image_available_semaphores, vulkan_context->current_frame);
 	uint32_t image_index = 0;
 	vkAcquireNextImageKHR(
 		vulkan_context->device,
 		vulkan_context->swapchain,
 		UINT64_MAX,
-		vulkan_context->image_available_semaphore,
+		*image_available_semaphore,
 		VK_NULL_HANDLE,
 		&image_index);
 
-	vkResetCommandBuffer(vulkan_context->command_buffer, 0);
+	VkCommandBuffer *command_buffer = hyper_vector_get(
+		&vulkan_context->command_buffers, vulkan_context->current_frame);
+	vkResetCommandBuffer(*command_buffer, 0);
 	if (
-		hyper_record_command_buffer(vulkan_context, image_index) !=
+		hyper_record_command_buffer(vulkan_context, *command_buffer, image_index) !=
 		HYPER_RESULT_SUCCESS)
 	{
 		hyper_logger_error$("Failed to record command buffer\n");
@@ -508,15 +552,17 @@ void hyper_vulkan_context_render(struct hyper_vulkan_context *vulkan_context)
 	}
 
 	const VkSemaphore wait_semaphores[] = {
-		[0] = vulkan_context->image_available_semaphore,
+		[0] = *image_available_semaphore,
 	};
 
 	const VkPipelineStageFlags wait_stages[] = {
 		[0] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 	};
 
+	VkSemaphore *render_finished_semaphore = hyper_vector_get(
+		&vulkan_context->render_finished_semaphores, vulkan_context->current_frame);
 	const VkSemaphore signal_semaphores[] = {
-		[0] = vulkan_context->render_finished_semaphore,
+		[0] = *render_finished_semaphore,
 	};
 
 	const VkSubmitInfo submit_info = {
@@ -525,17 +571,15 @@ void hyper_vulkan_context_render(struct hyper_vulkan_context *vulkan_context)
 		.pWaitSemaphores = wait_semaphores,
 		.pWaitDstStageMask = wait_stages,
 		.commandBufferCount = 1,
-		.pCommandBuffers = &vulkan_context->command_buffer,
+		.pCommandBuffers = &*command_buffer,
 		.signalSemaphoreCount = 1,
 		.pSignalSemaphores = signal_semaphores,
 	};
 
 	if (
 		vkQueueSubmit(
-			vulkan_context->graphics_queue,
-			1,
-			&submit_info,
-			vulkan_context->in_flight_fence) != VK_SUCCESS)
+			vulkan_context->graphics_queue, 1, &submit_info, *in_flight_fence) !=
+		VK_SUCCESS)
 	{
 		hyper_logger_error$("Failed to submit command buffer queue\n");
 		return;
@@ -556,4 +600,7 @@ void hyper_vulkan_context_render(struct hyper_vulkan_context *vulkan_context)
 	};
 
 	vkQueuePresentKHR(vulkan_context->present_queue, &present_info);
+
+	vulkan_context->current_frame =
+		(vulkan_context->current_frame + 1) % s_max_frames_in_flight;
 }

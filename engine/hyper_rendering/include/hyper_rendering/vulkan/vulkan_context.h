@@ -16,6 +16,7 @@
 struct hyper_vulkan_context
 {
 	bool validation_layers_enabled;
+	uint32_t current_frame;
 
 	VkInstance instance;
 	VkDebugUtilsMessengerEXT debug_messenger;
@@ -34,10 +35,10 @@ struct hyper_vulkan_context
 	VkPipeline pipeline;
 	struct hyper_vector swapchain_framebuffers;
 	VkCommandPool command_pool;
-	VkCommandBuffer command_buffer;
-	VkSemaphore image_available_semaphore;
-	VkSemaphore render_finished_semaphore;
-	VkFence in_flight_fence;
+	struct hyper_vector command_buffers;
+	struct hyper_vector image_available_semaphores;
+	struct hyper_vector render_finished_semaphores;
+	struct hyper_vector in_flight_fences;
 };
 
 enum hyper_result hyper_vulkan_context_create(

@@ -19,7 +19,7 @@ enum hyper_result hyper_graphics_context_create(
 	hyper_assert$(window != NULL);
 
 	struct hyper_vulkan_context *vulkan_context =
-		hyper_allocate(sizeof(struct hyper_vulkan_context));
+		hyper_callocate(sizeof(struct hyper_vulkan_context));
 
 	graphics_context->internal_context = vulkan_context;
 
