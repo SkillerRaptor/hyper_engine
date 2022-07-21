@@ -16,104 +16,31 @@ struct hyper_window;
 enum hyper_key_action;
 enum hyper_mouse_action;
 
-typedef void (*hyper_key_callback_function)(
-	struct hyper_window *window,
-	enum hyper_key_action key_action,
-	uint32_t key_code,
-	void *user_data);
-typedef void (*hyper_key_type_callback_function)(
-	struct hyper_window *window,
-	uint32_t key_code,
-	void *user_data);
+#define HYPER_WINDOW_CALLBACKS                                                \
+	X(key, enum hyper_key_action key_action, uint32_t key_code);                \
+	X(key_type, uint32_t key_code);                                             \
+	X(mouse_button, enum hyper_mouse_action mouse_action, uint32_t mouse_code); \
+	X(mouse_move, float position_x, float position_y);                          \
+	X(mouse_scroll, float offset_x, float offset_y);                            \
+	X(window_close);                                                            \
+	X(window_move, uint32_t position_x, uint32_t position_y);                   \
+	X(window_resize, uint32_t width, uint32_t height);                          \
+	X(window_framebuffer_resize, uint32_t width, uint32_t height);
 
-typedef void (*hyper_mouse_button_callback_function)(
-	struct hyper_window *window,
-	enum hyper_mouse_action mouse_action,
-	uint32_t mouse_code,
-	void *user_data);
-typedef void (*hyper_mouse_move_callback_function)(
-	struct hyper_window *window,
-	float position_x,
-	float position_y,
-	void *user_data);
-typedef void (*hyper_mouse_scroll_callback_function)(
-	struct hyper_window *window,
-	float offset_x,
-	float offset_y,
-	void *user_data);
+#define X(name, ...)                                \
+	typedef void (*hyper_##name##_callback_function)( \
+		struct hyper_window * window, ##__VA_ARGS__, void *user_data)
+HYPER_WINDOW_CALLBACKS
+#undef X
 
-typedef void (*hyper_window_close_callback_function)(
-	struct hyper_window *window,
-	void *user_data);
-typedef void (*hyper_window_move_callback_function)(
-	struct hyper_window *window,
-	uint32_t position_x,
-	uint32_t position_y,
-	void *user_data);
-typedef void (*hyper_window_resize_callback_function)(
-	struct hyper_window *window,
-	uint32_t width,
-	uint32_t height,
-	void *user_data);
-typedef void (*hyper_window_framebuffer_resize_callback_function)(
-	struct hyper_window *window,
-	uint32_t width,
-	uint32_t height,
-	void *user_data);
-
-struct hyper_key_callback_data
-{
-	hyper_key_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_key_type_callback_data
-{
-	hyper_key_type_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_mouse_button_callback_data
-{
-	hyper_mouse_button_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_mouse_move_callback_data
-{
-	hyper_mouse_move_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_mouse_scroll_callback_data
-{
-	hyper_mouse_scroll_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_window_close_callback_data
-{
-	hyper_window_close_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_window_move_callback_data
-{
-	hyper_window_move_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_window_resize_callback_data
-{
-	hyper_window_resize_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_window_framebuffer_resize_callback_data
-{
-	hyper_window_framebuffer_resize_callback_function callback;
-	void *user_data;
-};
+#define X(name, ...)                           \
+	struct hyper_##name##_callback_data          \
+	{                                            \
+		hyper_##name##_callback_function callback; \
+		void *user_data;                           \
+	}
+HYPER_WINDOW_CALLBACKS
+#undef X
 
 enum hyper_key_action
 {
@@ -150,16 +77,9 @@ struct hyper_window
 	uint32_t framebuffer_height;
 
 	// TODO: Find a better way to carry the callbacks around
-	struct hyper_key_callback_data key_callback;
-	struct hyper_key_type_callback_data key_type_callback;
-	struct hyper_mouse_button_callback_data mouse_button_callback;
-	struct hyper_mouse_move_callback_data mouse_move_callback;
-	struct hyper_mouse_scroll_callback_data mouse_scroll_callback;
-	struct hyper_window_close_callback_data window_close_callback;
-	struct hyper_window_move_callback_data window_move_callback;
-	struct hyper_window_resize_callback_data window_resize_callback;
-	struct hyper_window_framebuffer_resize_callback_data
-		window_framebuffer_resize_callback;
+#define X(name, ...) struct hyper_##name##_callback_data name##_callback
+	HYPER_WINDOW_CALLBACKS
+#undef X
 
 	void *native_window;
 };

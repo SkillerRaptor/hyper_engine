@@ -10,64 +10,38 @@
 #include "hyper_common/queue.h"
 #include "hyper_common/result.h"
 #include "hyper_common/vector.h"
+#include "hyper_game/event.h"
 #include "hyper_game/key_events.h"
 #include "hyper_game/mouse_events.h"
 #include "hyper_game/window_events.h"
 #include "hyper_platform/window.h"
 
-// TODO: Replace repeating code with macros
+#define HYPER_EVENT_BUS_CALLBACKS                                 \
+	X(key_press, HYPER_EVENT_TYPE_KEY_PRESS);                       \
+	X(key_release, HYPER_EVENT_TYPE_KEY_RELEASE);                   \
+	X(key_type, HYPER_EVENT_TYPE_KEY_TYPE);                         \
+	X(mouse_button_press, HYPER_EVENT_TYPE_MOUSE_BUTTON_PRESS);     \
+	X(mouse_button_release, HYPER_EVENT_TYPE_MOUSE_BUTTON_RELEASE); \
+	X(mouse_move, HYPER_EVENT_TYPE_MOUSE_MOVE);                     \
+	X(mouse_scroll, HYPER_EVENT_TYPE_MOUSE_SCROLL);                 \
+	X(window_close, HYPER_EVENT_TYPE_WINDOW_CLOSE);                 \
+	X(window_move, HYPER_EVENT_TYPE_WINDOW_MOVE);                   \
+	X(window_resize, HYPER_EVENT_TYPE_WINDOW_RESIZE);               \
+	X(window_framebuffer_resize, HYPER_EVENT_TYPE_WINDOW_FRAMEBUFFER_RESIZE);
 
-typedef void (*hyper_event_key_press_callback_function)(
-	struct hyper_key_press_event key_press_event,
-	void *user_data);
-typedef void (*hyper_event_key_release_callback_function)(
-	struct hyper_key_release_event key_release_event,
-	void *user_data);
-typedef void (*hyper_event_key_type_callback_function)(
-	struct hyper_key_type_event key_type_event,
-	void *user_data);
-
-typedef void (*hyper_event_mouse_button_press_callback_function)(
-	struct hyper_mouse_button_press_event mouse_button_press_event,
-	void *user_data);
-typedef void (*hyper_event_mouse_button_release_callback_function)(
-	struct hyper_mouse_button_release_event mouse_button_release_event,
-	void *user_data);
-typedef void (*hyper_event_mouse_move_callback_function)(
-	struct hyper_mouse_move_event mouse_move_event,
-	void *user_data);
-typedef void (*hyper_event_mouse_scroll_callback_function)(
-	struct hyper_mouse_scroll_event mouse_scroll_event,
-	void *user_data);
-
-typedef void (*hyper_event_window_close_callback_function)(
-	struct hyper_window_close_event window_close_event,
-	void *user_data);
-typedef void (*hyper_event_window_move_callback_function)(
-	struct hyper_window_move_event window_move_event,
-	void *user_data);
-typedef void (*hyper_event_window_resize_callback_function)(
-	struct hyper_window_resize_event window_resize_event,
-	void *user_data);
-typedef void (*hyper_event_window_framebuffer_resize_callback_function)(
-	struct hyper_window_framebuffer_resize_event window_framebuffer_resize_event,
-	void *user_data);
+#define X(name, type)                                     \
+	typedef void (*hyper_event_##name##_callback_function)( \
+		struct hyper_##name##_event name##_event, void *user_data)
+HYPER_EVENT_BUS_CALLBACKS
+#undef X
 
 struct hyper_event_bus
 {
 	struct hyper_queue event_list;
 
-	struct hyper_vector key_press_callbacks;
-	struct hyper_vector key_release_callbacks;
-	struct hyper_vector key_type_callbacks;
-	struct hyper_vector mouse_button_press_callbacks;
-	struct hyper_vector mouse_button_release_callbacks;
-	struct hyper_vector mouse_move_callbacks;
-	struct hyper_vector mouse_scroll_callbacks;
-	struct hyper_vector window_close_callbacks;
-	struct hyper_vector window_move_callbacks;
-	struct hyper_vector window_resize_callbacks;
-	struct hyper_vector window_framebuffer_resize_callbacks;
+#define X(name, type) struct hyper_vector name##_callbacks
+	HYPER_EVENT_BUS_CALLBACKS
+#undef X
 };
 
 HYPER_API enum hyper_result hyper_event_bus_create(
@@ -77,50 +51,10 @@ HYPER_API void hyper_event_bus_destroy(struct hyper_event_bus *event_bus);
 
 HYPER_API void hyper_event_bus_process(struct hyper_event_bus *event_bus);
 
-HYPER_API void hyper_register_key_press_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_key_press_callback_function key_press_callback,
-	void *user_data);
-HYPER_API void hyper_register_key_release_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_key_release_callback_function key_release_callback,
-	void *user_data);
-HYPER_API void hyper_register_key_type_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_key_type_callback_function key_type_callback,
-	void *user_data);
-
-HYPER_API void hyper_register_mouse_button_press_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_mouse_button_press_callback_function mouse_button_press_callback,
-	void *user_data);
-HYPER_API void hyper_register_mouse_button_release_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_mouse_button_release_callback_function
-		mouse_button_release_callback,
-	void *user_data);
-HYPER_API void hyper_register_mouse_move_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_mouse_move_callback_function mouse_move_callback,
-	void *user_data);
-HYPER_API void hyper_register_mouse_scroll_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_mouse_scroll_callback_function mouse_scroll_callback,
-	void *user_data);
-
-HYPER_API void hyper_register_window_close_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_window_close_callback_function window_close_callback,
-	void *user_data);
-HYPER_API void hyper_register_window_move_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_window_move_callback_function window_move_callback,
-	void *user_data);
-HYPER_API void hyper_register_window_resize_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_window_resize_callback_function window_resize_callback,
-	void *user_data);
-HYPER_API void hyper_register_window_framebuffer_resize_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_window_framebuffer_resize_callback_function window_framebuffer_resize_callback,
-	void *user_data);
+#define X(name, type)                                             \
+	HYPER_API void hyper_register_##name##_callback(          \
+		struct hyper_event_bus *event_bus,                      \
+		hyper_event_##name##_callback_function name##_callback, \
+		void *user_data)
+HYPER_EVENT_BUS_CALLBACKS
+#undef X

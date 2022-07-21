@@ -223,6 +223,7 @@ enum hyper_result hyper_window_create(
 	glfwSetFramebufferSizeCallback(
 		window->native_window, hyper_window_framebuffer_resize_callback);
 
+	// TODO: Improve setting initial values
 	int x = 0;
 	int y = 0;
 	glfwGetWindowPos(window->native_window, &x, &y);

@@ -8,73 +8,15 @@
 
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
-#include "hyper_game/event.h"
 
-struct hyper_event_key_press_data
-{
-	hyper_event_key_press_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_event_key_release_data
-{
-	hyper_event_key_release_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_event_key_type_data
-{
-	hyper_event_key_type_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_event_mouse_button_press_data
-{
-	hyper_event_mouse_button_press_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_event_mouse_button_release_data
-{
-	hyper_event_mouse_button_release_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_event_mouse_move_data
-{
-	hyper_event_mouse_move_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_event_mouse_scroll_data
-{
-	hyper_event_mouse_scroll_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_event_window_close_data
-{
-	hyper_event_window_close_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_event_window_move_data
-{
-	hyper_event_window_move_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_event_window_resize_data
-{
-	hyper_event_window_resize_callback_function callback;
-	void *user_data;
-};
-
-struct hyper_event_window_framebuffer_resize_data
-{
-	hyper_event_window_framebuffer_resize_callback_function callback;
-	void *user_data;
-};
+#define X(name, type)                                \
+	struct hyper_event_##name##_data                   \
+	{                                                  \
+		hyper_event_##name##_callback_function callback; \
+		void *user_data;                                 \
+	}
+HYPER_EVENT_BUS_CALLBACKS
+#undef X
 
 static void hyper_key_callback(
 	struct hyper_window *window,
@@ -283,9 +225,9 @@ static void hyper_window_framebuffer_resize_callback(
 
 	struct hyper_window_framebuffer_resize_event
 		window_framebuffer_resize_event = {
-		.width = width,
-		.height = height,
-	};
+			.width = width,
+			.height = height,
+		};
 	struct hyper_event event_data = {
 		.type = HYPER_EVENT_TYPE_WINDOW_FRAMEBUFFER_RESIZE,
 		.window_framebuffer_resize_event = window_framebuffer_resize_event,
@@ -309,115 +251,17 @@ enum hyper_result hyper_event_bus_create(
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
-	if (
-		hyper_vector_create(
-			&event_bus->key_press_callbacks,
-			sizeof(struct hyper_event_key_press_data)) != HYPER_RESULT_SUCCESS)
-	{
-		hyper_logger_error$("Failed to create vector for 'key press callbacks'\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
+#define X(name, type)                                                         \
+	if (                                                                        \
+		hyper_vector_create(                                                      \
+			&event_bus->name##_callbacks,                                           \
+			sizeof(struct hyper_event_##name##_data)) != HYPER_RESULT_SUCCESS)      \
+	{                                                                           \
+		hyper_logger_error$("Failed to create vector for %s callbacks\n", #name); \
+		return HYPER_RESULT_INITIALIZATION_FAILED;                                \
 	}
-
-	if (
-		hyper_vector_create(
-			&event_bus->key_release_callbacks,
-			sizeof(struct hyper_event_key_release_data)) != HYPER_RESULT_SUCCESS)
-	{
-		hyper_logger_error$(
-			"Failed to create vector for 'key release callbacks'\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
-	}
-
-	if (
-		hyper_vector_create(
-			&event_bus->key_type_callbacks,
-			sizeof(struct hyper_event_key_type_data)) != HYPER_RESULT_SUCCESS)
-	{
-		hyper_logger_error$("Failed to create vector for 'key type callbacks'\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
-	}
-
-	if (
-		hyper_vector_create(
-			&event_bus->mouse_button_press_callbacks,
-			sizeof(struct hyper_event_mouse_button_press_data)) !=
-		HYPER_RESULT_SUCCESS)
-	{
-		hyper_logger_error$(
-			"Failed to create vector for 'mouse button press callbacks'\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
-	}
-
-	if (
-		hyper_vector_create(
-			&event_bus->mouse_button_release_callbacks,
-			sizeof(struct hyper_event_mouse_button_release_data)) !=
-		HYPER_RESULT_SUCCESS)
-	{
-		hyper_logger_error$(
-			"Failed to create vector for 'mouse button release callbacks'\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
-	}
-
-	if (
-		hyper_vector_create(
-			&event_bus->mouse_move_callbacks,
-			sizeof(struct hyper_event_mouse_move_data)) != HYPER_RESULT_SUCCESS)
-	{
-		hyper_logger_error$("Failed to create vector for 'mouse move callbacks'\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
-	}
-
-	if (
-		hyper_vector_create(
-			&event_bus->mouse_scroll_callbacks,
-			sizeof(struct hyper_event_mouse_scroll_data)) != HYPER_RESULT_SUCCESS)
-	{
-		hyper_logger_error$(
-			"Failed to create vector for 'mouse scroll callbacks'\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
-	}
-
-	if (
-		hyper_vector_create(
-			&event_bus->window_close_callbacks,
-			sizeof(struct hyper_event_window_close_data)) != HYPER_RESULT_SUCCESS)
-	{
-		hyper_logger_error$(
-			"Failed to create vector for 'window close callbacks'\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
-	}
-
-	if (
-		hyper_vector_create(
-			&event_bus->window_move_callbacks,
-			sizeof(struct hyper_event_window_move_data)) != HYPER_RESULT_SUCCESS)
-	{
-		hyper_logger_error$(
-			"Failed to create vector for 'window move callbacks'\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
-	}
-
-	if (
-		hyper_vector_create(
-			&event_bus->window_resize_callbacks,
-			sizeof(struct hyper_event_window_resize_data)) != HYPER_RESULT_SUCCESS)
-	{
-		hyper_logger_error$(
-			"Failed to create vector for 'window resize callbacks'\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
-	}
-
-	if (
-		hyper_vector_create(
-			&event_bus->window_framebuffer_resize_callbacks,
-			sizeof(struct hyper_event_window_framebuffer_resize_data)) !=
-		HYPER_RESULT_SUCCESS)
-	{
-		hyper_logger_error$(
-			"Failed to create vector for 'window framebuffer resize callbacks'\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
-	}
+	HYPER_EVENT_BUS_CALLBACKS
+#undef X
 
 	window->key_callback.callback = hyper_key_callback;
 	window->key_callback.user_data = event_bus;
@@ -447,17 +291,9 @@ void hyper_event_bus_destroy(struct hyper_event_bus *event_bus)
 	hyper_assert$(event_bus != NULL);
 
 	hyper_queue_destroy(&event_bus->event_list);
-	hyper_vector_destroy(&event_bus->key_press_callbacks);
-	hyper_vector_destroy(&event_bus->key_release_callbacks);
-	hyper_vector_destroy(&event_bus->key_type_callbacks);
-	hyper_vector_destroy(&event_bus->mouse_button_press_callbacks);
-	hyper_vector_destroy(&event_bus->mouse_button_release_callbacks);
-	hyper_vector_destroy(&event_bus->mouse_move_callbacks);
-	hyper_vector_destroy(&event_bus->mouse_scroll_callbacks);
-	hyper_vector_destroy(&event_bus->window_close_callbacks);
-	hyper_vector_destroy(&event_bus->window_move_callbacks);
-	hyper_vector_destroy(&event_bus->window_resize_callbacks);
-	hyper_vector_destroy(&event_bus->window_framebuffer_resize_callbacks);
+#define X(name, type) hyper_vector_destroy(&event_bus->name##_callbacks);
+	HYPER_EVENT_BUS_CALLBACKS
+#undef X
 }
 
 void hyper_event_bus_process(struct hyper_event_bus *event_bus)
@@ -470,131 +306,19 @@ void hyper_event_bus_process(struct hyper_event_bus *event_bus)
 	struct hyper_event *event_data = hyper_queue_front(&event_bus->event_list);
 	switch (event_data->type)
 	{
-	case HYPER_EVENT_TYPE_KEY_PRESS:
-	{
-		for (size_t i = 0; i < event_bus->key_press_callbacks.size; ++i)
-		{
-			struct hyper_event_key_press_data *key_press_data =
-				hyper_vector_get(&event_bus->key_press_callbacks, i);
-			key_press_data->callback(
-				event_data->key_press_event, key_press_data->user_data);
-		}
-		break;
+#define X(name, type)                                                          \
+	case type:                                                                   \
+	{                                                                            \
+		for (size_t i = 0; i < event_bus->name##_callbacks.size; ++i)              \
+		{                                                                          \
+			struct hyper_event_##name##_data *name##_data =                          \
+				hyper_vector_get(&event_bus->name##_callbacks, i);                     \
+			name##_data->callback(event_data->name##_event, name##_data->user_data); \
+		}                                                                          \
+		break;                                                                     \
 	}
-	case HYPER_EVENT_TYPE_KEY_RELEASE:
-	{
-		for (size_t i = 0; i < event_bus->key_release_callbacks.size; ++i)
-		{
-			struct hyper_event_key_release_data *lkey_release_data =
-				hyper_vector_get(&event_bus->key_release_callbacks, i);
-			lkey_release_data->callback(
-				event_data->key_release_event, lkey_release_data->user_data);
-		}
-		break;
-	}
-	case HYPER_EVENT_TYPE_KEY_TYPE:
-	{
-		for (size_t i = 0; i < event_bus->key_type_callbacks.size; ++i)
-		{
-			struct hyper_event_key_type_data *key_type_data =
-				hyper_vector_get(&event_bus->key_type_callbacks, i);
-			key_type_data->callback(
-				event_data->key_type_event, key_type_data->user_data);
-		}
-		break;
-	}
-	case HYPER_EVENT_TYPE_MOUSE_BUTTON_PRESS:
-	{
-		for (size_t i = 0; i < event_bus->mouse_button_press_callbacks.size; ++i)
-		{
-			struct hyper_event_mouse_button_press_data *mouse_button_press_data =
-				hyper_vector_get(&event_bus->mouse_button_press_callbacks, i);
-			mouse_button_press_data->callback(
-				event_data->mouse_button_press_event,
-				mouse_button_press_data->user_data);
-		}
-		break;
-	}
-	case HYPER_EVENT_TYPE_MOUSE_BUTTON_RELEASE:
-	{
-		for (size_t i = 0; i < event_bus->mouse_button_release_callbacks.size; ++i)
-		{
-			struct hyper_event_mouse_button_release_data *mouse_release_data =
-				hyper_vector_get(&event_bus->mouse_button_release_callbacks, i);
-			mouse_release_data->callback(
-				event_data->mouse_button_release_event, mouse_release_data->user_data);
-		}
-		break;
-	}
-	case HYPER_EVENT_TYPE_MOUSE_MOVE:
-	{
-		for (size_t i = 0; i < event_bus->mouse_move_callbacks.size; ++i)
-		{
-			struct hyper_event_mouse_move_data *mouse_move_data =
-				hyper_vector_get(&event_bus->mouse_move_callbacks, i);
-			mouse_move_data->callback(
-				event_data->mouse_move_event, mouse_move_data->user_data);
-		}
-		break;
-	}
-	case HYPER_EVENT_TYPE_MOUSE_SCROLL:
-	{
-		for (size_t i = 0; i < event_bus->mouse_scroll_callbacks.size; ++i)
-		{
-			struct hyper_event_mouse_scroll_data *mouse_scroll_data =
-				hyper_vector_get(&event_bus->mouse_scroll_callbacks, i);
-			mouse_scroll_data->callback(
-				event_data->mouse_scroll_event, mouse_scroll_data->user_data);
-		}
-		break;
-	}
-	case HYPER_EVENT_TYPE_WINDOW_CLOSE:
-	{
-		for (size_t i = 0; i < event_bus->window_close_callbacks.size; ++i)
-		{
-			struct hyper_event_window_close_data *window_close_data =
-				hyper_vector_get(&event_bus->window_close_callbacks, i);
-			window_close_data->callback(
-				event_data->window_close_event, window_close_data->user_data);
-		}
-		break;
-	}
-	case HYPER_EVENT_TYPE_WINDOW_RESIZE:
-	{
-		for (size_t i = 0; i < event_bus->window_resize_callbacks.size; ++i)
-		{
-			struct hyper_event_window_resize_data *window_resize_data =
-				hyper_vector_get(&event_bus->window_resize_callbacks, i);
-			window_resize_data->callback(
-				event_data->window_resize_event, window_resize_data->user_data);
-		}
-		break;
-	}
-	case HYPER_EVENT_TYPE_WINDOW_FRAMEBUFFER_RESIZE:
-	{
-		for (size_t i = 0; i < event_bus->window_framebuffer_resize_callbacks.size;
-				 ++i)
-		{
-			struct hyper_event_window_framebuffer_resize_data
-				*window_framebuffer_resize_data =
-					hyper_vector_get(&event_bus->window_framebuffer_resize_callbacks, i);
-			window_framebuffer_resize_data->callback(
-				event_data->window_framebuffer_resize_event,
-				window_framebuffer_resize_data->user_data);
-		}
-		break;
-	}
-	case HYPER_EVENT_TYPE_WINDOW_MOVE:
-	{
-		for (size_t i = 0; i < event_bus->window_move_callbacks.size; ++i)
-		{
-			struct hyper_event_window_move_data *window_move_data =
-				hyper_vector_get(&event_bus->window_move_callbacks, i);
-			window_move_data->callback(
-				event_data->window_move_event, window_move_data->user_data);
-		}
-		break;
-	}
+		HYPER_EVENT_BUS_CALLBACKS
+#undef X
 	default:
 		break;
 	}
@@ -602,154 +326,19 @@ void hyper_event_bus_process(struct hyper_event_bus *event_bus)
 	hyper_queue_pop(&event_bus->event_list);
 }
 
-void hyper_register_key_press_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_key_press_callback_function key_press_callback,
-	void *user_data)
-{
-	struct hyper_event_key_press_data key_press_data = {
-		.callback = key_press_callback,
-		.user_data = user_data,
-	};
+#define X(name, type)                                                   \
+	void hyper_register_##name##_callback(                                \
+		struct hyper_event_bus *event_bus,                                  \
+		hyper_event_##name##_callback_function name##_callback,             \
+		void *user_data)                                                    \
+	{                                                                     \
+		struct hyper_event_##name##_data name##_data = {                    \
+			.callback = name##_callback,                                      \
+			.user_data = user_data,                                           \
+		};                                                                  \
+                                                                        \
+		hyper_vector_push_back(&event_bus->name##_callbacks, &name##_data); \
+	}
 
-	hyper_vector_push_back(&event_bus->key_press_callbacks, &key_press_data);
-}
-
-void hyper_register_key_release_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_key_release_callback_function key_release_callback,
-	void *user_data)
-{
-	struct hyper_event_key_release_data key_release_data = {
-		.callback = key_release_callback,
-		.user_data = user_data,
-	};
-
-	hyper_vector_push_back(&event_bus->key_release_callbacks, &key_release_data);
-}
-
-void hyper_register_key_type_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_key_type_callback_function key_type_callback,
-	void *user_data)
-{
-	struct hyper_event_key_type_data key_type_data = {
-		.callback = key_type_callback,
-		.user_data = user_data,
-	};
-
-	hyper_vector_push_back(&event_bus->key_type_callbacks, &key_type_data);
-}
-
-void hyper_register_mouse_button_press_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_mouse_button_press_callback_function mouse_button_press_callback,
-	void *user_data)
-{
-	struct hyper_event_mouse_button_press_data mouse_button_press_data = {
-		.callback = mouse_button_press_callback,
-		.user_data = user_data,
-	};
-
-	hyper_vector_push_back(
-		&event_bus->key_press_callbacks, &mouse_button_press_data);
-}
-
-void hyper_register_mouse_button_release_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_mouse_button_release_callback_function
-		mouse_button_release_callback,
-	void *user_data)
-{
-	struct hyper_event_mouse_button_release_data mouse_button_release_data = {
-		.callback = mouse_button_release_callback,
-		.user_data = user_data,
-	};
-
-	hyper_vector_push_back(
-		&event_bus->key_press_callbacks, &mouse_button_release_data);
-}
-
-void hyper_register_mouse_move_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_mouse_move_callback_function mouse_move_callback,
-	void *user_data)
-{
-	struct hyper_event_mouse_move_data mouse_move_data = {
-		.callback = mouse_move_callback,
-		.user_data = user_data,
-	};
-
-	hyper_vector_push_back(&event_bus->key_press_callbacks, &mouse_move_data);
-}
-
-void hyper_register_mouse_scroll_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_mouse_scroll_callback_function mouse_scroll_callback,
-	void *user_data)
-{
-	struct hyper_event_mouse_scroll_data mouse_scroll_data = {
-		.callback = mouse_scroll_callback,
-		.user_data = user_data,
-	};
-
-	hyper_vector_push_back(&event_bus->key_press_callbacks, &mouse_scroll_data);
-}
-
-void hyper_register_window_close_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_window_close_callback_function window_close_callback,
-	void *user_data)
-{
-	struct hyper_event_window_close_data window_close_data = {
-		.callback = window_close_callback,
-		.user_data = user_data,
-	};
-
-	hyper_vector_push_back(
-		&event_bus->window_close_callbacks, &window_close_data);
-}
-
-void hyper_register_window_move_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_window_move_callback_function window_move_callback,
-	void *user_data)
-{
-	struct hyper_event_window_move_data window_move_data = {
-		.callback = window_move_callback,
-		.user_data = user_data,
-	};
-
-	hyper_vector_push_back(&event_bus->window_move_callbacks, &window_move_data);
-}
-
-void hyper_register_window_resize_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_window_resize_callback_function window_resize_callback,
-	void *user_data)
-{
-	struct hyper_event_window_resize_data window_resize_data = {
-		.callback = window_resize_callback,
-		.user_data = user_data,
-	};
-
-	hyper_vector_push_back(
-		&event_bus->window_resize_callbacks, &window_resize_data);
-}
-
-void hyper_register_window_framebuffer_resize_callback(
-	struct hyper_event_bus *event_bus,
-	hyper_event_window_framebuffer_resize_callback_function
-		window_framebuffer_resize_callback,
-	void *user_data)
-{
-	struct hyper_event_window_framebuffer_resize_data
-		window_framebuffer_resize_data = {
-			.callback = window_framebuffer_resize_callback,
-			.user_data = user_data,
-		};
-
-	hyper_vector_push_back(
-		&event_bus->window_framebuffer_resize_callbacks,
-		&window_framebuffer_resize_data);
-}
+HYPER_EVENT_BUS_CALLBACKS
+#undef X
