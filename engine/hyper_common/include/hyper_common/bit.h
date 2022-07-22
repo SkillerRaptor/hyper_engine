@@ -6,4 +6,5 @@
 
 #pragma once
 
-#define hyper_array_size$(x) (sizeof(x) / sizeof(*x))
+#define hyper_bit$(x) (1ull << (x))
+#define hyper_mask$(x) (hyper_bit$((x)) - 1ull)

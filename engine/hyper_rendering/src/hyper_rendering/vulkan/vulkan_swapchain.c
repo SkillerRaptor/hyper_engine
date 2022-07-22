@@ -8,7 +8,7 @@
 
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
-#include "hyper_common/prerequisites.h"
+#include "hyper_math/common.h"
 #include "hyper_rendering/vulkan/vulkan_device.h"
 
 #include <limits.h>

@@ -10,8 +10,9 @@
 add_subdirectory(hyper_common)
 
 #-------------------------------------------------------------------------------------------
-# hyper platform
+# hyper math & hyper platform
 #-------------------------------------------------------------------------------------------
+add_subdirectory(hyper_math)
 add_subdirectory(hyper_platform)
 
 #-------------------------------------------------------------------------------------------
@@ -25,6 +26,7 @@ add_subdirectory(hyper_rendering)
 #-------------------------------------------------------------------------------------------
 set(HYPER_MODULES
 		hyper_game
+		hyper_math
 		hyper_platform
 		hyper_rendering)
 

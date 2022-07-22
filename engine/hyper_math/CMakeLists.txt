@@ -5,29 +5,14 @@
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# hyper common
+# hyper math
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-		src/hyper_common/assertion.c
-		src/hyper_common/logger.c
-		src/hyper_common/memory.c
-		src/hyper_common/queue.c
-		src/hyper_common/vector.c)
+		src/hyper_math/hyper_math.c)
 
 set(HEADERS
-		include/hyper_common/assertion.h
-		include/hyper_common/bit.h
-		include/hyper_common/compiler.h
-		include/hyper_common/debug.h
-		include/hyper_common/file.h
-		include/hyper_common/library.h
-		include/hyper_common/logger.h
-		include/hyper_common/memory.h
-		include/hyper_common/platform.h
-		include/hyper_common/prerequisites.h
-		include/hyper_common/source_location.h
-		include/hyper_common/queue.h
-		include/hyper_common/vector.h)
+		include/hyper_math/common.h
+		include/hyper_math/hyper_math.h)
 
 foreach(item IN ITEMS ${SOURCES} ${HEADERS})
 		get_filename_component(src_path "${item}" PATH)
@@ -36,12 +21,16 @@ foreach(item IN ITEMS ${SOURCES} ${HEADERS})
 		source_group("${group_path}" FILES "${item}")
 endforeach()
 
-add_library(hyper_common STATIC ${SOURCES} ${HEADERS})
+add_library(hyper_math SHARED ${SOURCES} ${HEADERS})
+target_compile_definitions(
+		hyper_math
+		PRIVATE
+		-DHYPER_SYMBOLS_EXPORT=1)
 target_include_directories(
-		hyper_common
+		hyper_math
 		PUBLIC
 		include)
 target_link_libraries(
-		hyper_common
+		hyper_math
 		PRIVATE
-		${CMAKE_DL_LIBS})
+		hyper_common)

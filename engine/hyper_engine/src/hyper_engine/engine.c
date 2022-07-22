@@ -42,6 +42,7 @@ enum hyper_result hyper_engine_create(struct hyper_engine *engine)
 
 	static const char *modules[] = {
 		"hyper_game",
+		"hyper_math",
 		"hyper_platform",
 		"hyper_rendering",
 	};

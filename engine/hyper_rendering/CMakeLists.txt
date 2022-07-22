@@ -44,4 +44,5 @@ target_link_libraries(
 		PRIVATE
 		volk
 		hyper_common
+		hyper_math
 		hyper_platform)
