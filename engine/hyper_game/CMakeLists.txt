@@ -12,7 +12,6 @@ set(SOURCES
 		src/hyper_game/hyper_game.c)
 
 set(HEADERS
-		include/hyper_game/event.h
 		include/hyper_game/event_bus.h
 		include/hyper_game/hyper_game.h
 		include/hyper_game/key_codes.h
