@@ -6,9 +6,9 @@
 
 #include "hyper_rendering/vulkan/vulkan_pipeline.h"
 
+#include "hyper_common/array.h"
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
-#include "hyper_common/prerequisites.h"
 #include "hyper_common/vector.h"
 
 #include <stdio.h>

@@ -18,13 +18,14 @@
 HYPER_EVENT_BUS_CALLBACKS
 #undef X
 
-#define hyper_call_callbacks$(event_name)                             \
-	for (size_t i = 0; i < event_bus->event_name##_callbacks.size; ++i) \
-	{                                                                   \
-		struct hyper_event_##event_name##_data *event_name##_data =       \
-			hyper_vector_get(&event_bus->event_name##_callbacks, i);        \
-		event_name##_data->callback(                                      \
-			event_name##_event, event_name##_data->user_data);              \
+#define hyper_call_callbacks$(event_name)                \
+	hyper_vector_foreach$(                                 \
+		event_bus->event_name##_callbacks,                   \
+		struct hyper_event_##event_name##_data,              \
+		event_name##_data)                                   \
+	{                                                      \
+		event_name##_data->callback(                         \
+			event_name##_event, event_name##_data->user_data); \
 	}
 
 static void hyper_key_callback(

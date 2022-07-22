@@ -6,11 +6,11 @@
 
 #include "hyper_rendering/vulkan/vulkan_context.h"
 
+#include "hyper_common/array.h"
 #include "hyper_common/assertion.h"
 #include "hyper_common/debug.h"
 #include "hyper_common/logger.h"
 #include "hyper_common/memory.h"
-#include "hyper_common/prerequisites.h"
 #include "hyper_common/vector.h"
 #include "hyper_rendering/vulkan/vulkan_device.h"
 #include "hyper_rendering/vulkan/vulkan_pipeline.h"
@@ -39,10 +39,8 @@ static bool hyper_validation_layers_supported()
 		const char *validation_layer = s_validation_layers[i];
 
 		bool layer_found = false;
-		for (size_t j = 0; j < layers.size; ++j)
+		hyper_vector_foreach$(layers, const VkLayerProperties, layer_properties)
 		{
-			const VkLayerProperties *layer_properties = hyper_vector_get(&layers, j);
-
 			if (
 				strncmp(
 					validation_layer,
@@ -256,10 +254,9 @@ enum hyper_result hyper_vulkan_context_create(
 		vkCreateInstance(&instance_create_info, NULL, &vulkan_context->instance) !=
 		VK_SUCCESS)
 	{
-		for (size_t i = 0; i < extensions.size; ++i)
+		hyper_vector_foreach$(extensions, char *, extension)
 		{
-			char *string = *(char **) hyper_vector_get(&extensions, i);
-			hyper_deallocate(string);
+			hyper_deallocate(*extension);
 		}
 
 		hyper_vector_destroy(&extensions);
@@ -272,10 +269,9 @@ enum hyper_result hyper_vulkan_context_create(
 
 	if (vulkan_context->validation_layers_enabled)
 	{
-		for (size_t i = 0; i < extensions.size; ++i)
+		hyper_vector_foreach$(extensions, char *, extension)
 		{
-			char *string = *(char **) hyper_vector_get(&extensions, i);
-			hyper_deallocate(string);
+			hyper_deallocate(*extension);
 		}
 
 		hyper_vector_destroy(&extensions);
@@ -326,10 +322,9 @@ enum hyper_result hyper_vulkan_context_create(
 		&vulkan_context->swapchain_framebuffers,
 		vulkan_context->swapchain_images_views.size);
 
-	for (size_t i = 0; i < vulkan_context->swapchain_images_views.size; ++i)
+	hyper_vector_foreach$(
+		vulkan_context->swapchain_images_views, VkImageView, image_view)
 	{
-		VkImageView *image_view =
-			hyper_vector_get(&vulkan_context->swapchain_images_views, i);
 		const VkImageView attachments[] = {
 			[0] = *image_view,
 		};
@@ -345,13 +340,13 @@ enum hyper_result hyper_vulkan_context_create(
 		};
 
 		VkFramebuffer *framebuffer =
-			hyper_vector_get(&vulkan_context->swapchain_framebuffers, i);
+			hyper_vector_get(&vulkan_context->swapchain_framebuffers, vector_index);
 		if (
 			vkCreateFramebuffer(
 				vulkan_context->device, &framebuffer_create_info, NULL, framebuffer) !=
 			VK_SUCCESS)
 		{
-			hyper_logger_error$("Failed to create framebuffer #%u\n", i);
+			hyper_logger_error$("Failed to create framebuffer #%u\n", vector_index);
 			return HYPER_RESULT_INITIALIZATION_FAILED;
 		}
 	}
@@ -407,17 +402,16 @@ enum hyper_result hyper_vulkan_context_create(
 		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
 	};
 
-	for (size_t i = 0; i < s_max_frames_in_flight; ++i)
+	hyper_vector_foreach$(
+		vulkan_context->image_available_semaphores, VkSemaphore, semaphore)
 	{
-		VkSemaphore *semaphore =
-			hyper_vector_get(&vulkan_context->image_available_semaphores, i);
 		if (
 			vkCreateSemaphore(
 				vulkan_context->device, &semaphore_create_info, NULL, semaphore) !=
 			VK_SUCCESS)
 		{
 			hyper_logger_error$(
-				"Failed to create image available semaphore #%u\n", i);
+				"Failed to create image available semaphore #%u\n", vector_index);
 			return HYPER_RESULT_INITIALIZATION_FAILED;
 		}
 	}
@@ -427,17 +421,16 @@ enum hyper_result hyper_vulkan_context_create(
 	hyper_vector_resize(
 		&vulkan_context->render_finished_semaphores, s_max_frames_in_flight);
 
-	for (size_t i = 0; i < s_max_frames_in_flight; ++i)
+	hyper_vector_foreach$(
+		vulkan_context->render_finished_semaphores, VkSemaphore, semaphore)
 	{
-		VkSemaphore *semaphore =
-			hyper_vector_get(&vulkan_context->render_finished_semaphores, i);
 		if (
 			vkCreateSemaphore(
 				vulkan_context->device, &semaphore_create_info, NULL, semaphore) !=
 			VK_SUCCESS)
 		{
 			hyper_logger_error$(
-				"Failed to create render finished semaphore #%u\n", i);
+				"Failed to create render finished semaphore #%u\n", vector_index);
 			return HYPER_RESULT_INITIALIZATION_FAILED;
 		}
 	}
@@ -451,14 +444,14 @@ enum hyper_result hyper_vulkan_context_create(
 		.flags = VK_FENCE_CREATE_SIGNALED_BIT,
 	};
 
-	for (size_t i = 0; i < s_max_frames_in_flight; ++i)
+	hyper_vector_foreach$(vulkan_context->in_flight_fences, VkFence, fence)
 	{
-		VkFence *fence = hyper_vector_get(&vulkan_context->in_flight_fences, i);
 		if (
 			vkCreateFence(vulkan_context->device, &fence_create_info, NULL, fence) !=
 			VK_SUCCESS)
 		{
-			hyper_logger_error$("Failed to create in flight fence #%u\n", i);
+			hyper_logger_error$(
+				"Failed to create in flight fence #%u\n", vector_index);
 			return HYPER_RESULT_INITIALIZATION_FAILED;
 		}
 	}
@@ -497,10 +490,11 @@ void hyper_vulkan_context_destroy(struct hyper_vulkan_context *vulkan_context)
 	vkDestroyCommandPool(
 		vulkan_context->device, vulkan_context->command_pool, NULL);
 
-	for (size_t i = 0; i < vulkan_context->swapchain_framebuffers.size; ++i)
+	hyper_vector_foreach$(
+		vulkan_context->swapchain_framebuffers,
+		VkFramebuffer,
+		framebuffer)
 	{
-		VkFramebuffer *framebuffer =
-			hyper_vector_get(&vulkan_context->swapchain_framebuffers, i);
 		vkDestroyFramebuffer(vulkan_context->device, *framebuffer, NULL);
 	}
 

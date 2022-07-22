@@ -10,6 +10,12 @@
 
 #include <stddef.h>
 
+#define hyper_vector_foreach$(vector, type, name)                            \
+	for (size_t vector_index = 0; vector_index < (vector).size;            \
+			 ++vector_index)                                                       \
+		for (type *name = hyper_vector_get(&vector, vector_index); name != NULL; \
+				 name = NULL)
+
 struct hyper_vector
 {
 	size_t size;

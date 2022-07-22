@@ -32,9 +32,8 @@ void hyper_module_loader_destroy(struct hyper_module_loader *module_loader)
 {
 	hyper_assert$(module_loader != NULL);
 
-	for (size_t i = 0; i < module_loader->modules.size; ++i)
+	hyper_vector_foreach$(module_loader->modules, struct hyper_module, module)
 	{
-		struct hyper_module *module = hyper_vector_get(&module_loader->modules, i);
 		hyper_module_loader_unload(module_loader, module->name);
 	}
 
@@ -46,9 +45,8 @@ enum hyper_result hyper_module_loader_load(
 	const char *module_name)
 {
 	// TODO: Replace vector with map
-	for (size_t i = 0; i < module_loader->modules.size; ++i)
+	hyper_vector_foreach$(module_loader->modules, struct hyper_module, module)
 	{
-		struct hyper_module *module = hyper_vector_get(&module_loader->modules, i);
 		if (strncmp(module_name, module->name, strlen(module_name)) == 0)
 		{
 			hyper_logger_error$(
@@ -115,9 +113,8 @@ void hyper_module_loader_unload(
 	const char *module_name)
 {
 	// TODO: Replace vector with map
-	for (size_t i = 0; i < module_loader->modules.size; ++i)
+	hyper_vector_foreach$(module_loader->modules, struct hyper_module, module)
 	{
-		struct hyper_module *module = hyper_vector_get(&module_loader->modules, i);
 		if (strncmp(module_name, module->name, strlen(module_name)) != 0)
 		{
 			continue;

@@ -6,9 +6,9 @@
 
 #include "hyper_rendering/vulkan/vulkan_device.h"
 
+#include "hyper_common/array.h"
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
-#include "hyper_common/prerequisites.h"
 #include "hyper_common/vector.h"
 #include "hyper_rendering/vulkan/vulkan_swapchain.h"
 
@@ -38,11 +38,9 @@ static bool hyper_physical_device_extensions_supported(
 		const char *extension_name = s_physical_device_extensions[i];
 
 		bool extension_found = false;
-		for (size_t j = 0; j < extensions.size; ++j)
+		hyper_vector_foreach$(
+			extensions, const VkExtensionProperties, extension_properties)
 		{
-			const VkExtensionProperties *extension_properties =
-				hyper_vector_get(&extensions, j);
-
 			if (
 				strncmp(
 					extension_name,
@@ -117,9 +115,8 @@ enum hyper_result hyper_vulkan_device_create(
 	vkEnumeratePhysicalDevices(
 		vulkan_context->instance, &device_count, devices.data);
 
-	for (size_t i = 0; i < devices.size; ++i)
+	hyper_vector_foreach$(devices, const VkPhysicalDevice, physical_device)
 	{
-		const VkPhysicalDevice *physical_device = hyper_vector_get(&devices, i);
 		if (!hyper_is_physical_device_suitable(
 					*physical_device, vulkan_context->surface))
 		{
@@ -237,10 +234,8 @@ void hyper_vulkan_device_find_queue_families(
 		physical_device, &properties_count, properties.data);
 
 	size_t index = 0;
-	for (size_t i = 0; i < properties.size; ++i)
+	hyper_vector_foreach$(properties, const VkQueueFamilyProperties, queue_family)
 	{
-		const VkQueueFamilyProperties *queue_family =
-			hyper_vector_get(&properties, i);
 		if (queue_family->queueFlags & VK_QUEUE_GRAPHICS_BIT)
 		{
 			queue_families->graphics_family = index;
@@ -249,7 +244,7 @@ void hyper_vulkan_device_find_queue_families(
 
 		VkBool32 present_family_supported = false;
 		vkGetPhysicalDeviceSurfaceSupportKHR(
-			physical_device, i, surface, &present_family_supported);
+			physical_device, vector_index, surface, &present_family_supported);
 
 		if (present_family_supported)
 		{

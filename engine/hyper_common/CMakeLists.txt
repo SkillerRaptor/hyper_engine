@@ -15,6 +15,7 @@ set(SOURCES
 		src/hyper_common/vector.c)
 
 set(HEADERS
+		include/hyper_common/array.h
 		include/hyper_common/assertion.h
 		include/hyper_common/bit.h
 		include/hyper_common/compiler.h
@@ -24,9 +25,9 @@ set(HEADERS
 		include/hyper_common/logger.h
 		include/hyper_common/memory.h
 		include/hyper_common/platform.h
-		include/hyper_common/prerequisites.h
-		include/hyper_common/source_location.h
 		include/hyper_common/queue.h
+		include/hyper_common/result.h
+		include/hyper_common/source_location.h
 		include/hyper_common/vector.h)
 
 foreach(item IN ITEMS ${SOURCES} ${HEADERS})

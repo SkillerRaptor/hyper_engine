@@ -18,9 +18,8 @@ static VkSurfaceFormatKHR hyper_choose_surface_format(
 {
 	hyper_assert$(formats != NULL);
 
-	for (size_t i = 0; i < formats->size; ++i)
+	hyper_vector_foreach$(*formats, const VkSurfaceFormatKHR, surface_format)
 	{
-		const VkSurfaceFormatKHR *surface_format = hyper_vector_get(formats, i);
 		if (surface_format->format != VK_FORMAT_B8G8R8A8_SRGB)
 		{
 			continue;
@@ -42,9 +41,11 @@ static VkPresentModeKHR hyper_choose_present_mode(
 {
 	hyper_assert$(present_modes != NULL);
 
-	for (size_t i = 0; i < present_modes->size; ++i)
+	hyper_vector_foreach$(
+		*present_modes,
+		const VkPresentModeKHR,
+		present_mode)
 	{
-		const VkPresentModeKHR *present_mode = hyper_vector_get(present_modes, i);
 		if (*present_mode != VK_PRESENT_MODE_MAILBOX_KHR)
 		{
 			continue;
@@ -185,11 +186,11 @@ enum hyper_result hyper_vulkan_swapchain_create(
 		&vulkan_context->swapchain_images_views,
 		vulkan_context->swapchain_images.size);
 
-	for (size_t i = 0; i < vulkan_context->swapchain_images.size; ++i)
+	hyper_vector_foreach$(
+		vulkan_context->swapchain_images,
+		const VkImage,
+		image)
 	{
-		const VkImage *image =
-			hyper_vector_get(&vulkan_context->swapchain_images, i);
-
 		const VkImageViewCreateInfo image_view_create_info = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 			.image = *image,
@@ -211,13 +212,13 @@ enum hyper_result hyper_vulkan_swapchain_create(
 		};
 
 		VkImageView *image_view =
-			hyper_vector_get(&vulkan_context->swapchain_images_views, i);
+			hyper_vector_get(&vulkan_context->swapchain_images_views, vector_index);
 		if (
 			vkCreateImageView(
 				vulkan_context->device, &image_view_create_info, NULL, image_view) !=
 			VK_SUCCESS)
 		{
-			hyper_logger_error$("Failed to create image view #%u\n", i);
+			hyper_logger_error$("Failed to create image view #%u\n", vector_index);
 			return HYPER_RESULT_INITIALIZATION_FAILED;
 		}
 	}
@@ -229,10 +230,11 @@ void hyper_vulkan_swapchain_destroy(struct hyper_vulkan_context *vulkan_context)
 {
 	hyper_assert$(vulkan_context != NULL);
 
-	for (size_t i = 0; i < vulkan_context->swapchain_images_views.size; ++i)
+	hyper_vector_foreach$(
+		vulkan_context->swapchain_images_views,
+		const VkImageView,
+		image_view)
 	{
-		VkImageView *image_view =
-			hyper_vector_get(&vulkan_context->swapchain_images_views, i);
 		vkDestroyImageView(vulkan_context->device, *image_view, NULL);
 	}
 
