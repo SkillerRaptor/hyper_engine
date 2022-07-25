@@ -15,9 +15,15 @@ struct hyper_source_location
 	const char *function_name;
 };
 
-#define hyper_source_location_current$() \
-	((struct hyper_source_location){       \
-		.line = __LINE__,                    \
-		.file_name = __FILE__,               \
-		.function_name = __FUNCTION__,       \
+#if defined(__FUNCTION__)
+#	define hyper_current_file$() __FUNCTION__
+#else
+#	define hyper_current_file$() __func__
+#endif
+
+#define hyper_source_location_current$()    \
+	((struct hyper_source_location){          \
+		.line = __LINE__,                       \
+		.file_name = __FILE__,                  \
+		.function_name = hyper_current_file$(), \
 	})

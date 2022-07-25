@@ -599,5 +599,5 @@ void hyper_vulkan_context_render(struct hyper_vulkan_context *vulkan_context)
 	vkQueuePresentKHR(vulkan_context->present_queue, &present_info);
 
 	vulkan_context->current_frame =
-		(vulkan_context->current_frame + 1) % s_max_frames_in_flight;
+		(vulkan_context->current_frame + 1) % (uint32_t) s_max_frames_in_flight;
 }

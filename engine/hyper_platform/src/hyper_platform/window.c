@@ -132,7 +132,7 @@ static void hyper_window_close_callback(GLFWwindow *native_window)
 	if (window->window_close_callback.callback != NULL)
 	{
 		window->window_close_callback.callback(
-			window, window->window_close_callback.user_data);
+			window, 0, window->window_close_callback.user_data);
 	}
 }
 

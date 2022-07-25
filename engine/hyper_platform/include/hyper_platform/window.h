@@ -29,13 +29,13 @@ enum hyper_mouse_action
 	HYPER_MOUSE_ACTION_RELEASE,
 };
 
-#define HYPER_WINDOW_CALLBACKS                                                \
+#define HYPER_WINDOW_CALLBACKS                                               \
 	X(key, enum hyper_key_action key_action, uint32_t key_code)                \
 	X(key_type, uint32_t key_code)                                             \
 	X(mouse_button, enum hyper_mouse_action mouse_action, uint32_t mouse_code) \
 	X(mouse_move, float position_x, float position_y)                          \
 	X(mouse_scroll, float offset_x, float offset_y)                            \
-	X(window_close)                                                            \
+	X(window_close, uint8_t unused)                                            \
 	X(window_move, uint32_t position_x, uint32_t position_y)                   \
 	X(window_resize, uint32_t width, uint32_t height)                          \
 	X(window_framebuffer_resize, uint32_t width, uint32_t height)

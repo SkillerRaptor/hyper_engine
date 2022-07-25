@@ -38,11 +38,8 @@ function(hyper_enable_warnings project_name)
 				-Wall
 				-Wextra
 				-Wshadow
-				-Wnon-virtual-dtor
-				-Wold-style-cast
 				-Wcast-align
 				-Wunused
-				-Woverloaded-virtual
 				-Wpedantic
 				-Wconversion
 				-Wsign-conversion
@@ -54,12 +51,22 @@ function(hyper_enable_warnings project_name)
 				-Wno-gnu-zero-variadic-macro-arguments)
 
 		set(GCC_WARNINGS
-				${CLANG_WARNINGS}
+				-Wall
+				-Wextra
+				-Wshadow
+				-Wcast-align
+				-Wunused
+				-Wpedantic
+				-Wconversion
+				-Wsign-conversion
+				-Wnull-dereference
+				-Wdouble-promotion
+				-Wformat=2
 				-Wmisleading-indentation
 				-Wduplicated-cond
 				-Wduplicated-branches
 				-Wlogical-op
-				-Wuseless-cast)
+				-Wno-format-nonliteral)
 
 		if (WARNINGS_AS_ERRORS)
 				set(CLANG_WARNINGS ${CLANG_WARNINGS} -Werror)

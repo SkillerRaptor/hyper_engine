@@ -155,9 +155,11 @@ static void hyper_mouse_scroll_callback(
 
 static void hyper_window_close_callback(
 	struct hyper_window *window,
+	uint8_t unused,
 	void *user_data)
 {
 	hyper_unused_variable$(window);
+	hyper_unused_variable$(unused);
 
 	struct hyper_event_bus *event_bus = user_data;
 

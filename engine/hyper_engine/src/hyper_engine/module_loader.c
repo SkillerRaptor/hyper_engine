@@ -10,6 +10,7 @@
 #include "hyper_common/library.h"
 #include "hyper_common/logger.h"
 #include "hyper_common/memory.h"
+#include "hyper_common/platform.h"
 
 #include <string.h>
 
@@ -76,10 +77,10 @@ enum hyper_result hyper_module_loader_load(
 
 	hyper_deallocate(library_name);
 
-	typedef enum hyper_result (*hyper_module_start_proc)(
-		void *memory_info);
+	typedef enum hyper_result (*hyper_module_start_proc)(void *memory_info);
+
 	hyper_module_start_proc module_start =
-		(hyper_module_start_proc) hyper_get_proc_address$(
+		(hyper_module_start_proc) (intptr_t) hyper_get_proc_address$(
 			library_handle, "hyper_module_start");
 	if (module_start == NULL)
 	{
@@ -87,8 +88,7 @@ enum hyper_result hyper_module_loader_load(
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
-	if (
-		module_start(module_loader->memory_info) != HYPER_RESULT_SUCCESS)
+	if (module_start(module_loader->memory_info) != HYPER_RESULT_SUCCESS)
 	{
 		hyper_logger_error$("Failed to find start module '%s'\n", module_name);
 		return HYPER_RESULT_INITIALIZATION_FAILED;
