@@ -39,5 +39,7 @@ target_include_directories(
 target_link_libraries(
 		hyper_game
 		PRIVATE
+		hyper_project_options
+		hyper_project_warnings
 		hyper_common
 		hyper_platform)

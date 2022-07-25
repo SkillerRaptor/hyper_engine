@@ -8,13 +8,14 @@
 
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
+#include "hyper_common/prerequisites.h"
 
 #define X(name)                                      \
 	struct hyper_event_##name##_data                   \
 	{                                                  \
 		hyper_event_##name##_callback_function callback; \
 		void *user_data;                                 \
-	}
+	};
 HYPER_EVENT_BUS_CALLBACKS
 #undef X
 
@@ -34,6 +35,8 @@ static void hyper_key_callback(
 	uint32_t key_code,
 	void *user_data)
 {
+	hyper_unused_variable$(window);
+
 	struct hyper_event_bus *event_bus = user_data;
 
 	switch (key_action)
@@ -68,6 +71,8 @@ static void hyper_key_type_callback(
 	uint32_t key_code,
 	void *user_data)
 {
+	hyper_unused_variable$(window);
+
 	struct hyper_event_bus *event_bus = user_data;
 
 	struct hyper_key_type_event key_type_event = {
@@ -83,6 +88,8 @@ static void hyper_mouse_button_callback(
 	uint32_t mouse_code,
 	void *user_data)
 {
+	hyper_unused_variable$(window);
+
 	struct hyper_event_bus *event_bus = user_data;
 
 	switch (mouse_action)
@@ -116,6 +123,8 @@ static void hyper_mouse_move_callback(
 	float position_y,
 	void *user_data)
 {
+	hyper_unused_variable$(window);
+
 	struct hyper_event_bus *event_bus = user_data;
 
 	struct hyper_mouse_move_event mouse_move_event = {
@@ -132,6 +141,8 @@ static void hyper_mouse_scroll_callback(
 	float offset_y,
 	void *user_data)
 {
+	hyper_unused_variable$(window);
+
 	struct hyper_event_bus *event_bus = user_data;
 
 	struct hyper_mouse_scroll_event mouse_scroll_event = {
@@ -146,6 +157,8 @@ static void hyper_window_close_callback(
 	struct hyper_window *window,
 	void *user_data)
 {
+	hyper_unused_variable$(window);
+
 	struct hyper_event_bus *event_bus = user_data;
 
 	struct hyper_window_close_event window_close_event = { 0 };
@@ -159,6 +172,8 @@ static void hyper_window_move_callback(
 	uint32_t position_y,
 	void *user_data)
 {
+	hyper_unused_variable$(window);
+
 	struct hyper_event_bus *event_bus = user_data;
 
 	struct hyper_window_move_event window_move_event = {
@@ -175,6 +190,8 @@ static void hyper_window_resize_callback(
 	uint32_t height,
 	void *user_data)
 {
+	hyper_unused_variable$(window);
+
 	struct hyper_event_bus *event_bus = user_data;
 
 	struct hyper_window_resize_event window_resize_event = {
@@ -191,6 +208,8 @@ static void hyper_window_framebuffer_resize_callback(
 	uint32_t height,
 	void *user_data)
 {
+	hyper_unused_variable$(window);
+
 	struct hyper_event_bus *event_bus = user_data;
 
 	struct hyper_window_framebuffer_resize_event
@@ -248,7 +267,7 @@ void hyper_event_bus_destroy(struct hyper_event_bus *event_bus)
 {
 	hyper_assert$(event_bus != NULL);
 
-#define X(name) hyper_vector_destroy(&event_bus->name##_callbacks)
+#define X(name) hyper_vector_destroy(&event_bus->name##_callbacks);
 	HYPER_EVENT_BUS_CALLBACKS
 #undef X
 }

@@ -171,7 +171,7 @@ enum hyper_result hyper_vulkan_device_create(
 
 	const VkDeviceCreateInfo device_create_info = {
 		.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-		.queueCreateInfoCount = queue_create_infos.size,
+		.queueCreateInfoCount = (uint32_t) queue_create_infos.size,
 		.pQueueCreateInfos = queue_create_infos.data,
 		.enabledLayerCount = 0,
 		.ppEnabledLayerNames = NULL,
@@ -238,17 +238,17 @@ void hyper_vulkan_device_find_queue_families(
 	{
 		if (queue_family->queueFlags & VK_QUEUE_GRAPHICS_BIT)
 		{
-			queue_families->graphics_family = index;
+			queue_families->graphics_family = (uint32_t) index;
 			queue_families->graphics_family_valid = true;
 		}
 
 		VkBool32 present_family_supported = false;
 		vkGetPhysicalDeviceSurfaceSupportKHR(
-			physical_device, vector_index, surface, &present_family_supported);
+			physical_device, (uint32_t) vector_index, surface, &present_family_supported);
 
 		if (present_family_supported)
 		{
-			queue_families->present_family = index;
+			queue_families->present_family = (uint32_t) index;
 			queue_families->present_family_valid = true;
 		}
 

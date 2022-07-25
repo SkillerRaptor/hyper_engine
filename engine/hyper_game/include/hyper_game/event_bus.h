@@ -16,27 +16,27 @@
 #include "hyper_platform/window.h"
 
 #define HYPER_EVENT_BUS_CALLBACKS \
-	X(key_press);                   \
-	X(key_release);                 \
-	X(key_type);                    \
-	X(mouse_button_press);          \
-	X(mouse_button_release);        \
-	X(mouse_move);                  \
-	X(mouse_scroll);                \
-	X(window_close);                \
-	X(window_move);                 \
-	X(window_resize);               \
-	X(window_framebuffer_resize);
+	X(key_press)                   \
+	X(key_release)                 \
+	X(key_type)                    \
+	X(mouse_button_press)          \
+	X(mouse_button_release)        \
+	X(mouse_move)                  \
+	X(mouse_scroll)                \
+	X(window_close)                \
+	X(window_move)                 \
+	X(window_resize)               \
+	X(window_framebuffer_resize)
 
 #define X(name)                                           \
 	typedef void (*hyper_event_##name##_callback_function)( \
-		struct hyper_##name##_event name##_event, void *user_data)
+		struct hyper_##name##_event name##_event, void *user_data);
 HYPER_EVENT_BUS_CALLBACKS
 #undef X
 
 struct hyper_event_bus
 {
-#define X(name) struct hyper_vector name##_callbacks
+#define X(name) struct hyper_vector name##_callbacks;
 	HYPER_EVENT_BUS_CALLBACKS
 #undef X
 };
@@ -50,6 +50,6 @@ HYPER_API void hyper_event_bus_destroy(struct hyper_event_bus *event_bus);
 	HYPER_API void hyper_register_##name##_callback(          \
 		struct hyper_event_bus *event_bus,                      \
 		hyper_event_##name##_callback_function name##_callback, \
-		void *user_data)
+		void *user_data);
 HYPER_EVENT_BUS_CALLBACKS
 #undef X

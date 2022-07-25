@@ -55,9 +55,9 @@ enum hyper_result hyper_module_loader_load(
 		}
 	}
 
-	const uint8_t prefix_length = strlen(HYPER_SHARED_PREFIX);
-	const uint16_t module_name_length = strlen(module_name);
-	const uint8_t extension_length = strlen(HYPER_SHARED_EXTENSION);
+	const size_t prefix_length = strlen(HYPER_SHARED_PREFIX);
+	const size_t module_name_length = strlen(module_name);
+	const size_t extension_length = strlen(HYPER_SHARED_EXTENSION);
 	const size_t library_name_length =
 		prefix_length + module_name_length + extension_length;
 	char *library_name =
@@ -77,7 +77,7 @@ enum hyper_result hyper_module_loader_load(
 	hyper_deallocate(library_name);
 
 	typedef enum hyper_result (*hyper_module_start_proc)(
-		void *allocation_debug_info);
+		void *memory_info);
 	hyper_module_start_proc module_start =
 		(hyper_module_start_proc) hyper_get_proc_address$(
 			library_handle, "hyper_module_start");
@@ -88,7 +88,7 @@ enum hyper_result hyper_module_loader_load(
 	}
 
 	if (
-		module_start(module_loader->allocation_debug_info) != HYPER_RESULT_SUCCESS)
+		module_start(module_loader->memory_info) != HYPER_RESULT_SUCCESS)
 	{
 		hyper_logger_error$("Failed to find start module '%s'\n", module_name);
 		return HYPER_RESULT_INITIALIZATION_FAILED;

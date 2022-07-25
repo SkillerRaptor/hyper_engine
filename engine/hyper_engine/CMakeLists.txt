@@ -31,6 +31,8 @@ target_include_directories(
 target_link_libraries(
 		hyper_engine
 		PRIVATE
+		hyper_project_options
+		hyper_project_warnings
 		hyper_common)
 
 add_custom_command(

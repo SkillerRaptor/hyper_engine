@@ -7,6 +7,8 @@
 #include "hyper_common/memory.h"
 
 #include "hyper_common/assertion.h"
+#include "hyper_common/debug.h"
+#include "hyper_common/prerequisites.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +19,7 @@ struct hyper_allocation_header
 	size_t size;
 };
 
-static struct hyper_allocation_debug_info *s_allocation_debug_info;
+static struct hyper_memory_info *s_memory_info;
 #endif
 
 void *hyper_allocate(size_t size)
@@ -37,9 +39,9 @@ void *hyper_allocate(size_t size)
 
 	allocation_header->size = size;
 
-	s_allocation_debug_info->total_bytes += size;
-	s_allocation_debug_info->current_bytes += size;
-	s_allocation_debug_info->total_allocs++;
+	s_memory_info->total_bytes += size;
+	s_memory_info->current_bytes += size;
+	s_memory_info->total_allocs++;
 
 	return ptr;
 #else
@@ -69,8 +71,8 @@ void hyper_deallocate(void *ptr)
 	struct hyper_allocation_header *allocation_header =
 		(struct hyper_allocation_header *) real_ptr;
 
-	s_allocation_debug_info->current_bytes -= allocation_header->size;
-	s_allocation_debug_info->total_frees++;
+	s_memory_info->current_bytes -= allocation_header->size;
+	s_memory_info->total_frees++;
 
 	free(real_ptr);
 #else
@@ -78,46 +80,12 @@ void hyper_deallocate(void *ptr)
 #endif
 }
 
-void hyper_set_allocation_debug_info(
-	struct hyper_allocation_debug_info *allocation_debug_info)
+void hyper_set_memory_info(struct hyper_memory_info *memory_info)
 {
-#if HYPER_DEBUG
-	s_allocation_debug_info = allocation_debug_info;
-#endif
-}
+	hyper_unused_debug_variable$(memory_info);
 
-uint64_t hyper_get_total_allocs()
-{
+	// TODO: Change debug memory info into a CMake option
 #if HYPER_DEBUG
-	return s_allocation_debug_info->total_allocs;
-#else
-	return 0;
-#endif
-}
-
-uint64_t hyper_get_total_frees()
-{
-#if HYPER_DEBUG
-	return s_allocation_debug_info->total_frees;
-#else
-	return 0;
-#endif
-}
-
-uint64_t hyper_get_total_bytes()
-{
-#if HYPER_DEBUG
-	return s_allocation_debug_info->total_bytes;
-#else
-	return 0;
-#endif
-}
-
-uint64_t hyper_get_current_bytes()
-{
-#if HYPER_DEBUG
-	return s_allocation_debug_info->current_bytes;
-#else
-	return 0;
+	s_memory_info = memory_info;
 #endif
 }

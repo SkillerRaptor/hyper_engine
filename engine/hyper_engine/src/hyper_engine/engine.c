@@ -9,12 +9,15 @@
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
 #include "hyper_common/memory.h"
+#include "hyper_common/prerequisites.h"
 #include "hyper_common/vector.h"
 
 static void hyper_window_close_callback(
 	struct hyper_window_close_event window_close_event,
 	void *user_data)
 {
+	hyper_unused_variable$(window_close_event);
+
 	struct hyper_engine *engine = user_data;
 	engine->running = false;
 }
@@ -24,7 +27,7 @@ enum hyper_result hyper_engine_create(struct hyper_engine *engine)
 	hyper_assert$(engine != NULL);
 
 #if HYPER_DEBUG
-	hyper_set_allocation_debug_info(&engine->allocation_debug_info);
+	hyper_set_memory_info(&engine->memory_info);
 #endif
 
 	if (
@@ -35,9 +38,9 @@ enum hyper_result hyper_engine_create(struct hyper_engine *engine)
 	}
 
 #if HYPER_DEBUG
-	engine->module_loader.allocation_debug_info = &engine->allocation_debug_info;
+	engine->module_loader.memory_info = &engine->memory_info;
 #else
-	engine->module_loader.allocation_debug_info = NULL;
+	engine->module_loader.memory_info = NULL;
 #endif
 
 	static const char *modules[] = {
@@ -108,12 +111,12 @@ void hyper_engine_destroy(struct hyper_engine *engine)
 	hyper_logger_debug$("Heap Summary:\n");
 	hyper_logger_debug$(
 		"  %u allocations, %u frees\n",
-		hyper_get_total_allocs(),
-		hyper_get_total_frees());
+		engine->memory_info.total_allocs,
+		engine->memory_info.total_frees);
 	hyper_logger_debug$(
 		"  %u bytes allocated, %u bytes leaked\n",
-		hyper_get_total_bytes(),
-		hyper_get_current_bytes());
+		engine->memory_info.total_bytes,
+		engine->memory_info.current_bytes);
 }
 
 void hyper_engine_run(struct hyper_engine *engine)

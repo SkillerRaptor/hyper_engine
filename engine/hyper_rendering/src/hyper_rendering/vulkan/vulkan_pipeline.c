@@ -86,7 +86,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 	}
 
 	fseek(vertex_shader_file, 0, SEEK_END);
-	const size_t vertex_shader_file_length = ftell(vertex_shader_file);
+	const size_t vertex_shader_file_length = (size_t) ftell(vertex_shader_file);
 	rewind(vertex_shader_file);
 
 	struct hyper_vector vertex_shader_code = { 0 };
@@ -106,7 +106,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 	}
 
 	fseek(fragment_shader_file, 0, SEEK_END);
-	const size_t fragment_shader_file_length = ftell(fragment_shader_file);
+	const size_t fragment_shader_file_length = (size_t) ftell(fragment_shader_file);
 	rewind(fragment_shader_file);
 
 	struct hyper_vector fragment_shader_code = { 0 };
@@ -195,8 +195,8 @@ enum hyper_result hyper_vulkan_pipeline_create(
 	const VkViewport viewport = {
 		.x = 0.0f,
 		.y = 0.0f,
-		.width = vulkan_context->swapchain_extent.width,
-		.height = vulkan_context->swapchain_extent.height,
+		.width = (float) vulkan_context->swapchain_extent.width,
+		.height = (float) vulkan_context->swapchain_extent.height,
 		.minDepth = 0.0f,
 		.maxDepth = 1.0f,
 	};

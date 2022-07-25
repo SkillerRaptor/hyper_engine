@@ -11,6 +11,7 @@
 #include "hyper_common/debug.h"
 #include "hyper_common/logger.h"
 #include "hyper_common/memory.h"
+#include "hyper_common/prerequisites.h"
 #include "hyper_common/vector.h"
 #include "hyper_rendering/vulkan/vulkan_device.h"
 #include "hyper_rendering/vulkan/vulkan_pipeline.h"
@@ -24,7 +25,7 @@ static const char *s_validation_layers[] = {
 
 static size_t s_max_frames_in_flight = 2;
 
-static bool hyper_validation_layers_supported()
+hyper_unused_function$() bool hyper_validation_layers_supported(void)
 {
 	uint32_t layer_count = 0;
 	vkEnumerateInstanceLayerProperties(&layer_count, NULL);
@@ -69,6 +70,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL hyper_debug_messenger_callback(
 	const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
 	void *user_data)
 {
+	hyper_unused_variable$(severity);
+	hyper_unused_variable$(type);
+	hyper_unused_variable$(user_data);
+
 	hyper_logger_error$("Validation layer: %s\n", callback_data->pMessage);
 	return VK_FALSE;
 }
@@ -128,8 +133,8 @@ static enum hyper_result hyper_record_command_buffer(
 	const VkViewport viewport = {
 		.x = 0.0f,
 		.y = 0.0f,
-		.width = vulkan_context->swapchain_extent.width,
-		.height = vulkan_context->swapchain_extent.height,
+		.width = (float) vulkan_context->swapchain_extent.width,
+		.height = (float) vulkan_context->swapchain_extent.height,
 		.minDepth = 0.0f,
 		.maxDepth = 1.0f,
 	};
@@ -176,7 +181,7 @@ enum hyper_result hyper_vulkan_context_create(
 		.applicationVersion = VK_MAKE_VERSION(1, 0, 0),
 		.pEngineName = "HyperEngine",
 		.engineVersion = VK_MAKE_VERSION(1, 0, 0),
-		.apiVersion = VK_API_VERSION_1_3,
+		.apiVersion = VK_API_VERSION_1_2,
 	};
 
 #if HYPER_DEBUG
@@ -236,7 +241,7 @@ enum hyper_result hyper_vulkan_context_create(
 			(strlen(VK_EXT_DEBUG_UTILS_EXTENSION_NAME) + 1) * sizeof(char));
 		strcpy(*string_ptr, VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
-		enabled_extension_count = extensions.size;
+		enabled_extension_count = (uint32_t) extensions.size;
 		enabled_extensions = extensions.data;
 	}
 
@@ -380,7 +385,7 @@ enum hyper_result hyper_vulkan_context_create(
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
 		.commandPool = vulkan_context->command_pool,
 		.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-		.commandBufferCount = vulkan_context->command_buffers.size,
+		.commandBufferCount = (uint32_t) vulkan_context->command_buffers.size,
 	};
 
 	if (
@@ -491,9 +496,7 @@ void hyper_vulkan_context_destroy(struct hyper_vulkan_context *vulkan_context)
 		vulkan_context->device, vulkan_context->command_pool, NULL);
 
 	hyper_vector_foreach$(
-		vulkan_context->swapchain_framebuffers,
-		VkFramebuffer,
-		framebuffer)
+		vulkan_context->swapchain_framebuffers, VkFramebuffer, framebuffer)
 	{
 		vkDestroyFramebuffer(vulkan_context->device, *framebuffer, NULL);
 	}

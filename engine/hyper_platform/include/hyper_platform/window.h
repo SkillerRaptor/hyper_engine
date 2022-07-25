@@ -13,34 +13,6 @@
 #include <stdint.h>
 
 struct hyper_window;
-enum hyper_key_action;
-enum hyper_mouse_action;
-
-#define HYPER_WINDOW_CALLBACKS                                                \
-	X(key, enum hyper_key_action key_action, uint32_t key_code);                \
-	X(key_type, uint32_t key_code);                                             \
-	X(mouse_button, enum hyper_mouse_action mouse_action, uint32_t mouse_code); \
-	X(mouse_move, float position_x, float position_y);                          \
-	X(mouse_scroll, float offset_x, float offset_y);                            \
-	X(window_close);                                                            \
-	X(window_move, uint32_t position_x, uint32_t position_y);                   \
-	X(window_resize, uint32_t width, uint32_t height);                          \
-	X(window_framebuffer_resize, uint32_t width, uint32_t height);
-
-#define X(name, ...)                                \
-	typedef void (*hyper_##name##_callback_function)( \
-		struct hyper_window * window, ##__VA_ARGS__, void *user_data)
-HYPER_WINDOW_CALLBACKS
-#undef X
-
-#define X(name, ...)                           \
-	struct hyper_##name##_callback_data          \
-	{                                            \
-		hyper_##name##_callback_function callback; \
-		void *user_data;                           \
-	}
-HYPER_WINDOW_CALLBACKS
-#undef X
 
 enum hyper_key_action
 {
@@ -56,6 +28,32 @@ enum hyper_mouse_action
 	HYPER_MOUSE_ACTION_PRESS,
 	HYPER_MOUSE_ACTION_RELEASE,
 };
+
+#define HYPER_WINDOW_CALLBACKS                                                \
+	X(key, enum hyper_key_action key_action, uint32_t key_code)                \
+	X(key_type, uint32_t key_code)                                             \
+	X(mouse_button, enum hyper_mouse_action mouse_action, uint32_t mouse_code) \
+	X(mouse_move, float position_x, float position_y)                          \
+	X(mouse_scroll, float offset_x, float offset_y)                            \
+	X(window_close)                                                            \
+	X(window_move, uint32_t position_x, uint32_t position_y)                   \
+	X(window_resize, uint32_t width, uint32_t height)                          \
+	X(window_framebuffer_resize, uint32_t width, uint32_t height)
+
+#define X(name, ...)                                \
+	typedef void (*hyper_##name##_callback_function)( \
+		struct hyper_window * window, ##__VA_ARGS__, void *user_data);
+HYPER_WINDOW_CALLBACKS
+#undef X
+
+#define X(name, ...)                           \
+	struct hyper_##name##_callback_data          \
+	{                                            \
+		hyper_##name##_callback_function callback; \
+		void *user_data;                           \
+	};
+HYPER_WINDOW_CALLBACKS
+#undef X
 
 struct hyper_window_create_info
 {
@@ -77,7 +75,7 @@ struct hyper_window
 	uint32_t framebuffer_height;
 
 	// TODO: Find a better way to carry the callbacks around
-#define X(name, ...) struct hyper_##name##_callback_data name##_callback
+#define X(name, ...) struct hyper_##name##_callback_data name##_callback;
 	HYPER_WINDOW_CALLBACKS
 #undef X
 

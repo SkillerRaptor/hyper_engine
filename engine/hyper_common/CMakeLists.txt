@@ -25,6 +25,7 @@ set(HEADERS
 		include/hyper_common/logger.h
 		include/hyper_common/memory.h
 		include/hyper_common/platform.h
+		include/hyper_common/prerequisites.h
 		include/hyper_common/queue.h
 		include/hyper_common/result.h
 		include/hyper_common/source_location.h
@@ -45,4 +46,6 @@ target_include_directories(
 target_link_libraries(
 		hyper_common
 		PRIVATE
-		${CMAKE_DL_LIBS})
+		${CMAKE_DL_LIBS}
+		hyper_project_options
+		hyper_project_warnings)

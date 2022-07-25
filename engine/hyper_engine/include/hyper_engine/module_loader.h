@@ -18,7 +18,7 @@ struct hyper_module
 
 struct hyper_module_loader
 {
-	void *allocation_debug_info;
+	void *memory_info;
 	struct hyper_vector modules;
 };
 

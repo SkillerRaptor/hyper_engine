@@ -8,6 +8,7 @@
 
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
+#include "hyper_common/prerequisites.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -22,6 +23,9 @@ static void hyper_key_callback(
 	int action,
 	int mods)
 {
+	hyper_unused_variable$(scan_code);
+	hyper_unused_variable$(mods);
+
 	struct hyper_window *window = glfwGetWindowUserPointer(native_window);
 	if (window->key_callback.callback != NULL)
 	{
@@ -42,7 +46,7 @@ static void hyper_key_callback(
 		}
 
 		window->key_callback.callback(
-			window, key_action, key_code, window->key_callback.user_data);
+			window, key_action, (uint32_t) key_code, window->key_callback.user_data);
 	}
 }
 
@@ -64,6 +68,8 @@ static void hyper_mouse_button_callback(
 	int action,
 	int mods)
 {
+	hyper_unused_variable$(mods);
+
 	struct hyper_window *window = glfwGetWindowUserPointer(native_window);
 	if (window->mouse_button_callback.callback != NULL)
 	{
@@ -81,7 +87,10 @@ static void hyper_mouse_button_callback(
 		}
 
 		window->mouse_button_callback.callback(
-			window, mouse_action, button, window->mouse_button_callback.user_data);
+			window,
+			mouse_action,
+			(uint32_t) button,
+			window->mouse_button_callback.user_data);
 	}
 }
 
@@ -133,8 +142,8 @@ static void hyper_window_move_callback(
 	int position_y)
 {
 	struct hyper_window *window = glfwGetWindowUserPointer(native_window);
-	window->x = position_x;
-	window->y = position_y;
+	window->x = (uint32_t) position_x;
+	window->y = (uint32_t) position_y;
 
 	if (window->window_move_callback.callback != NULL)
 	{
@@ -152,8 +161,8 @@ static void hyper_window_resize_callback(
 	int height)
 {
 	struct hyper_window *window = glfwGetWindowUserPointer(native_window);
-	window->width = width;
-	window->height = height;
+	window->width = (uint32_t) width;
+	window->height = (uint32_t) height;
 
 	if (window->window_resize_callback.callback != NULL)
 	{
@@ -171,8 +180,8 @@ static void hyper_window_framebuffer_resize_callback(
 	int height)
 {
 	struct hyper_window *window = glfwGetWindowUserPointer(native_window);
-	window->framebuffer_width = width;
-	window->framebuffer_height = height;
+	window->framebuffer_width = (uint32_t) width;
+	window->framebuffer_height = (uint32_t) height;
 
 	if (window->window_framebuffer_resize_callback.callback != NULL)
 	{
@@ -196,8 +205,8 @@ enum hyper_result hyper_window_create(
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	window->native_window = glfwCreateWindow(
-		window_create_info->width,
-		window_create_info->height,
+		(int) window_create_info->width,
+		(int) window_create_info->height,
 		window_create_info->title,
 		NULL,
 		NULL);
@@ -227,21 +236,21 @@ enum hyper_result hyper_window_create(
 	int x = 0;
 	int y = 0;
 	glfwGetWindowPos(window->native_window, &x, &y);
-	window->x = x;
-	window->y = y;
+	window->x = (uint32_t) x;
+	window->y = (uint32_t) y;
 
 	int width = 0;
 	int height = 0;
 	glfwGetWindowSize(window->native_window, &width, &height);
-	window->width = width;
-	window->height = height;
+	window->width = (uint32_t) width;
+	window->height = (uint32_t) height;
 
 	int framebuffer_width = 0;
 	int framebuffer_height = 0;
 	glfwGetFramebufferSize(
 		window->native_window, &framebuffer_width, &framebuffer_height);
-	window->framebuffer_width = framebuffer_width;
-	window->framebuffer_height = framebuffer_height;
+	window->framebuffer_width = (uint32_t) framebuffer_width;
+	window->framebuffer_height = (uint32_t) framebuffer_height;
 
 	++s_window_count;
 
@@ -264,6 +273,8 @@ void hyper_window_destroy(struct hyper_window *window)
 
 void hyper_window_update(struct hyper_window *window)
 {
+	hyper_unused_debug_variable$(window);
+
 	hyper_assert$(window != NULL);
 
 	glfwPollEvents();
@@ -274,6 +285,8 @@ void hyper_window_get_required_extensions(
 	const char ***extensions,
 	uint32_t *extension_count)
 {
+	hyper_unused_variable$(window);
+
 	*extensions = glfwGetRequiredInstanceExtensions(extension_count);
 }
 

@@ -36,4 +36,6 @@ target_link_libraries(
 		PRIVATE
 		glfw
 		volk
+		hyper_project_options
+		hyper_project_warnings
 		hyper_common)

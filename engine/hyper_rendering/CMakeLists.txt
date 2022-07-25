@@ -43,6 +43,8 @@ target_link_libraries(
 		hyper_rendering
 		PRIVATE
 		volk
+		hyper_project_options
+		hyper_project_warnings
 		hyper_common
 		hyper_math
 		hyper_platform)

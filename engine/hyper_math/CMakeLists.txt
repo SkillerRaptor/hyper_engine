@@ -33,4 +33,6 @@ target_include_directories(
 target_link_libraries(
 		hyper_math
 		PRIVATE
+		hyper_project_options
+		hyper_project_warnings
 		hyper_common)
