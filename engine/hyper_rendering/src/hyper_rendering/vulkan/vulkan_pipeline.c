@@ -93,8 +93,16 @@ enum hyper_result hyper_vulkan_pipeline_create(
 	hyper_vector_create(&vertex_shader_code, sizeof(uint8_t));
 	hyper_vector_resize(&vertex_shader_code, vertex_shader_file_length);
 
-	fread(
-		vertex_shader_code.data, vertex_shader_file_length, 1, vertex_shader_file);
+	if (
+		fread(
+			vertex_shader_code.data,
+			vertex_shader_file_length,
+			1,
+			vertex_shader_file) == 0)
+	{
+		hyper_logger_error$("Failed to read vertex shader file\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
 	fclose(vertex_shader_file);
 
 	FILE *fragment_shader_file =
@@ -106,18 +114,24 @@ enum hyper_result hyper_vulkan_pipeline_create(
 	}
 
 	fseek(fragment_shader_file, 0, SEEK_END);
-	const size_t fragment_shader_file_length = (size_t) ftell(fragment_shader_file);
+	const size_t fragment_shader_file_length =
+		(size_t) ftell(fragment_shader_file);
 	rewind(fragment_shader_file);
 
 	struct hyper_vector fragment_shader_code = { 0 };
 	hyper_vector_create(&fragment_shader_code, sizeof(uint8_t));
 	hyper_vector_resize(&fragment_shader_code, fragment_shader_file_length);
 
-	fread(
-		fragment_shader_code.data,
-		fragment_shader_file_length,
-		1,
-		fragment_shader_file);
+	if (
+		fread(
+			fragment_shader_code.data,
+			fragment_shader_file_length,
+			1,
+			fragment_shader_file) == 0)
+	{
+		hyper_logger_error$("Failed to read fragment shader file\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
 	fclose(fragment_shader_file);
 
 	const VkShaderModuleCreateInfo vertex_shader_module_create_info = {
