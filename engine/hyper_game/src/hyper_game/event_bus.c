@@ -284,7 +284,7 @@ void hyper_event_bus_destroy(struct hyper_event_bus *event_bus)
 			.callback = name##_callback,                                      \
 			.user_data = user_data,                                           \
 		};                                                                  \
-                                                                        \
+																																				\
 		hyper_vector_push_back(&event_bus->name##_callbacks, &name##_data); \
 	}
 

@@ -77,7 +77,9 @@ enum hyper_result hyper_engine_create(struct hyper_engine *engine)
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
-	if (hyper_event_bus_create(&engine->event_bus, &engine->window) != HYPER_RESULT_SUCCESS)
+	if (
+		hyper_event_bus_create(&engine->event_bus, &engine->window) !=
+		HYPER_RESULT_SUCCESS)
 	{
 		hyper_logger_error$("Failed to create event bus\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;

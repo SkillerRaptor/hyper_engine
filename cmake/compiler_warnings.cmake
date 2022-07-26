@@ -8,7 +8,7 @@
 # Compiler Warnings
 #-------------------------------------------------------------------------------------------
 function(hyper_enable_warnings project_name)
-		option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
+		option(HYPER_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 
 		set(MSVC_WARNINGS
 				/W4
@@ -68,7 +68,7 @@ function(hyper_enable_warnings project_name)
 				-Wlogical-op
 				-Wno-format-nonliteral)
 
-		if (WARNINGS_AS_ERRORS)
+		if (HYPER_WARNINGS_AS_ERRORS)
 				set(CLANG_WARNINGS ${CLANG_WARNINGS} -Werror)
 				set(GCC_WARNINGS ${GCC_WARNINGS} -Werror)
 				set(MSVC_WARNINGS ${MSVC_WARNINGS} /WX)
