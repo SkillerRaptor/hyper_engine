@@ -17,65 +17,6 @@ enum hyper_result hyper_vulkan_pipeline_create(
 {
 	HYPER_ASSERT(vulkan_context != NULL);
 
-	const VkAttachmentDescription color_attachment_description = {
-		.format = vulkan_context->swapchain_format,
-		.samples = VK_SAMPLE_COUNT_1_BIT,
-		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-		.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-		.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-		.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-	};
-
-	const VkAttachmentReference color_attachment_reference = {
-		.attachment = 0,
-		.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-	};
-
-	const VkSubpassDescription subpass_description = {
-		.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-		.inputAttachmentCount = 0,
-		.pInputAttachments = NULL,
-		.colorAttachmentCount = 1,
-		.pColorAttachments = &color_attachment_reference,
-		.pResolveAttachments = NULL,
-		.pDepthStencilAttachment = NULL,
-		.preserveAttachmentCount = 0,
-		.pPreserveAttachments = NULL,
-	};
-
-	const VkSubpassDependency subpass_dependency = {
-		.srcSubpass = VK_SUBPASS_EXTERNAL,
-		.dstSubpass = 0,
-		.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		.srcAccessMask = 0,
-		.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-		.dependencyFlags = 0,
-	};
-
-	const VkRenderPassCreateInfo render_pass_create_info = {
-		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-		.attachmentCount = 1,
-		.pAttachments = &color_attachment_description,
-		.subpassCount = 1,
-		.pSubpasses = &subpass_description,
-		.dependencyCount = 1,
-		.pDependencies = &subpass_dependency,
-	};
-
-	if (
-		vkCreateRenderPass(
-			vulkan_context->device,
-			&render_pass_create_info,
-			NULL,
-			&vulkan_context->render_pass) != VK_SUCCESS)
-	{
-		hyper_logger_error("Failed to create render pass\n");
-		return HYPER_RESULT_INITIALIZATION_FAILED;
-	}
-
 	FILE *vertex_shader_file =
 		fopen("./assets/shaders/default_shader_vertex.spv", "rb");
 	if (vertex_shader_file == NULL)
@@ -311,9 +252,9 @@ enum hyper_result hyper_vulkan_pipeline_create(
 
 	const VkPipelineRenderingCreateInfo pipeline_rendering_create_info = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
-    .viewMask = 0,
-    .colorAttachmentCount = 1,
-    .pColorAttachmentFormats = &vulkan_context->swapchain_format,
+		.viewMask = 0,
+		.colorAttachmentCount = 1,
+		.pColorAttachmentFormats = &vulkan_context->swapchain_format,
 		.depthAttachmentFormat = VK_FORMAT_UNDEFINED,
 		.stencilAttachmentFormat = VK_FORMAT_UNDEFINED,
 	};
@@ -368,6 +309,4 @@ void hyper_vulkan_pipeline_destroy(struct hyper_vulkan_context *vulkan_context)
 	vkDestroyPipeline(vulkan_context->device, vulkan_context->pipeline, NULL);
 	vkDestroyPipelineLayout(
 		vulkan_context->device, vulkan_context->pipeline_layout, NULL);
-	vkDestroyRenderPass(
-		vulkan_context->device, vulkan_context->render_pass, NULL);
 }

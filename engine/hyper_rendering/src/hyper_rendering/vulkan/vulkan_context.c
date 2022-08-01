@@ -407,41 +407,6 @@ enum hyper_result hyper_vulkan_context_create(
 	}
 
 	// TODO: Abstract following code into own files
-	hyper_vector_create(
-		&vulkan_context->swapchain_framebuffers, sizeof(VkFramebuffer));
-	hyper_vector_resize(
-		&vulkan_context->swapchain_framebuffers,
-		vulkan_context->swapchain_images_views.size);
-
-	HYPER_VECTOR_FOREACH (
-		vulkan_context->swapchain_images_views, i, VkImageView, image_view)
-	{
-		const VkImageView attachments[] = {
-			[0] = *image_view,
-		};
-
-		const VkFramebufferCreateInfo framebuffer_create_info = {
-			.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-			.renderPass = vulkan_context->render_pass,
-			.attachmentCount = 1,
-			.pAttachments = attachments,
-			.width = vulkan_context->swapchain_extent.width,
-			.height = vulkan_context->swapchain_extent.height,
-			.layers = 1,
-		};
-
-		VkFramebuffer *framebuffer =
-			hyper_vector_get(&vulkan_context->swapchain_framebuffers, i);
-		if (
-			vkCreateFramebuffer(
-				vulkan_context->device, &framebuffer_create_info, NULL, framebuffer) !=
-			VK_SUCCESS)
-		{
-			hyper_logger_error("Failed to create framebuffer #%u\n", i);
-			return HYPER_RESULT_INITIALIZATION_FAILED;
-		}
-	}
-
 	struct hyper_queue_families queue_families = { 0 };
 	hyper_vulkan_device_find_queue_families(
 		&queue_families, vulkan_context->physical_device, vulkan_context->surface);
@@ -580,14 +545,6 @@ void hyper_vulkan_context_destroy(struct hyper_vulkan_context *vulkan_context)
 
 	vkDestroyCommandPool(
 		vulkan_context->device, vulkan_context->command_pool, NULL);
-
-	HYPER_VECTOR_FOREACH (
-		vulkan_context->swapchain_framebuffers, i, VkFramebuffer, framebuffer)
-	{
-		vkDestroyFramebuffer(vulkan_context->device, *framebuffer, NULL);
-	}
-
-	hyper_vector_destroy(&vulkan_context->swapchain_framebuffers);
 
 	hyper_vulkan_pipeline_destroy(vulkan_context);
 	hyper_vulkan_swapchain_destroy(vulkan_context);

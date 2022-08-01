@@ -30,10 +30,8 @@ struct hyper_vulkan_context
 	VkFormat swapchain_format;
 	VkExtent2D swapchain_extent;
 	struct hyper_vector swapchain_images_views;
-	VkRenderPass render_pass;
 	VkPipelineLayout pipeline_layout;
 	VkPipeline pipeline;
-	struct hyper_vector swapchain_framebuffers;
 	VkCommandPool command_pool;
 	struct hyper_vector command_buffers;
 	struct hyper_vector image_available_semaphores;
