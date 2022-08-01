@@ -16,9 +16,9 @@
 static VkSurfaceFormatKHR hyper_choose_surface_format(
 	struct hyper_vector *formats)
 {
-	hyper_assert$(formats != NULL);
+	HYPER_ASSERT(formats != NULL);
 
-	hyper_vector_foreach$(*formats, const VkSurfaceFormatKHR, surface_format)
+	HYPER_VECTOR_FOREACH (*formats, i, const VkSurfaceFormatKHR, surface_format)
 	{
 		if (surface_format->format != VK_FORMAT_B8G8R8A8_SRGB)
 		{
@@ -39,12 +39,9 @@ static VkSurfaceFormatKHR hyper_choose_surface_format(
 static VkPresentModeKHR hyper_choose_present_mode(
 	struct hyper_vector *present_modes)
 {
-	hyper_assert$(present_modes != NULL);
+	HYPER_ASSERT(present_modes != NULL);
 
-	hyper_vector_foreach$(
-		*present_modes,
-		const VkPresentModeKHR,
-		present_mode)
+	HYPER_VECTOR_FOREACH (*present_modes, i, const VkPresentModeKHR, present_mode)
 	{
 		if (*present_mode != VK_PRESENT_MODE_MAILBOX_KHR)
 		{
@@ -61,8 +58,8 @@ static VkExtent2D hyper_choose_extent(
 	const VkSurfaceCapabilitiesKHR *capabilities,
 	struct hyper_window *window)
 {
-	hyper_assert$(capabilities != NULL);
-	hyper_assert$(window != NULL);
+	HYPER_ASSERT(capabilities != NULL);
+	HYPER_ASSERT(window != NULL);
 
 	if (
 		capabilities->currentExtent.width != UINT32_MAX ||
@@ -72,11 +69,11 @@ static VkExtent2D hyper_choose_extent(
 	}
 
 	const VkExtent2D extent = {
-		.width = hyper_clamp$(
+		.width = HYPER_CLAMP(
 			window->framebuffer_width,
 			capabilities->minImageExtent.width,
 			capabilities->maxImageExtent.width),
-		.height = hyper_clamp$(
+		.height = HYPER_CLAMP(
 			window->framebuffer_height,
 			capabilities->minImageExtent.height,
 			capabilities->maxImageExtent.height),
@@ -89,7 +86,7 @@ enum hyper_result hyper_vulkan_swapchain_create(
 	struct hyper_vulkan_context *vulkan_context,
 	struct hyper_window *window)
 {
-	hyper_assert$(vulkan_context != NULL);
+	HYPER_ASSERT(vulkan_context != NULL);
 
 	struct hyper_swapchain_details swapchain_details = { 0 };
 	hyper_vulkan_swapchain_query_details(
@@ -104,7 +101,7 @@ enum hyper_result hyper_vulkan_swapchain_create(
 	const VkExtent2D extent =
 		hyper_choose_extent(&swapchain_details.capabilities, window);
 
-	const uint32_t image_count = hyper_clamp$(
+	const uint32_t image_count = HYPER_CLAMP(
 		swapchain_details.capabilities.minImageCount + 1,
 		swapchain_details.capabilities.minImageCount,
 		swapchain_details.capabilities.maxImageCount);
@@ -157,7 +154,7 @@ enum hyper_result hyper_vulkan_swapchain_create(
 			NULL,
 			&vulkan_context->swapchain) != VK_SUCCESS)
 	{
-		hyper_logger_error$("Failed to create swapchain\n");
+		hyper_logger_error("Failed to create swapchain\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
@@ -186,10 +183,8 @@ enum hyper_result hyper_vulkan_swapchain_create(
 		&vulkan_context->swapchain_images_views,
 		vulkan_context->swapchain_images.size);
 
-	hyper_vector_foreach$(
-		vulkan_context->swapchain_images,
-		const VkImage,
-		image)
+	HYPER_VECTOR_FOREACH (
+		vulkan_context->swapchain_images, i, const VkImage, image)
 	{
 		const VkImageViewCreateInfo image_view_create_info = {
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -212,13 +207,13 @@ enum hyper_result hyper_vulkan_swapchain_create(
 		};
 
 		VkImageView *image_view =
-			hyper_vector_get(&vulkan_context->swapchain_images_views, vector_index);
+			hyper_vector_get(&vulkan_context->swapchain_images_views, i);
 		if (
 			vkCreateImageView(
 				vulkan_context->device, &image_view_create_info, NULL, image_view) !=
 			VK_SUCCESS)
 		{
-			hyper_logger_error$("Failed to create image view #%u\n", vector_index);
+			hyper_logger_error("Failed to create image view #%u\n", i);
 			return HYPER_RESULT_INITIALIZATION_FAILED;
 		}
 	}
@@ -228,12 +223,10 @@ enum hyper_result hyper_vulkan_swapchain_create(
 
 void hyper_vulkan_swapchain_destroy(struct hyper_vulkan_context *vulkan_context)
 {
-	hyper_assert$(vulkan_context != NULL);
+	HYPER_ASSERT(vulkan_context != NULL);
 
-	hyper_vector_foreach$(
-		vulkan_context->swapchain_images_views,
-		const VkImageView,
-		image_view)
+	HYPER_VECTOR_FOREACH (
+		vulkan_context->swapchain_images_views, i, const VkImageView, image_view)
 	{
 		vkDestroyImageView(vulkan_context->device, *image_view, NULL);
 	}
@@ -250,9 +243,9 @@ void hyper_vulkan_swapchain_query_details(
 	VkPhysicalDevice physical_device,
 	VkSurfaceKHR surface)
 {
-	hyper_assert$(swapchain_details != NULL);
-	hyper_assert$(physical_device != VK_NULL_HANDLE);
-	hyper_assert$(surface != VK_NULL_HANDLE);
+	HYPER_ASSERT(swapchain_details != NULL);
+	HYPER_ASSERT(physical_device != VK_NULL_HANDLE);
+	HYPER_ASSERT(surface != VK_NULL_HANDLE);
 
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
 		physical_device, surface, &swapchain_details->capabilities);
@@ -289,7 +282,7 @@ void hyper_vulkan_swapchain_query_details(
 void hyper_vulkan_swapchain_destroy_details(
 	struct hyper_swapchain_details *swapchain_details)
 {
-	hyper_assert$(swapchain_details != NULL);
+	HYPER_ASSERT(swapchain_details != NULL);
 
 	hyper_vector_destroy(&swapchain_details->formats);
 	hyper_vector_destroy(&swapchain_details->present_modes);

@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include "hyper_common/debug.h"
-#include "hyper_common/memory.h"
 #include "hyper_common/result.h"
 #include "hyper_engine/module_loader.h"
 #include "hyper_game/event_bus.h"
@@ -19,10 +17,6 @@
 struct hyper_engine
 {
 	bool running;
-
-#if HYPER_DEBUG
-	struct hyper_memory_info memory_info;
-#endif
 
 	struct hyper_module_loader module_loader;
 	struct hyper_window window;

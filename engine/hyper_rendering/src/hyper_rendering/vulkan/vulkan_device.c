@@ -6,7 +6,6 @@
 
 #include "hyper_rendering/vulkan/vulkan_device.h"
 
-#include "hyper_common/array.h"
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
 #include "hyper_common/vector.h"
@@ -21,7 +20,7 @@ static const char *s_physical_device_extensions[] = {
 static bool hyper_physical_device_extensions_supported(
 	VkPhysicalDevice physical_device)
 {
-	hyper_assert$(physical_device != VK_NULL_HANDLE);
+	HYPER_ASSERT(physical_device != VK_NULL_HANDLE);
 
 	uint32_t extension_count = 0;
 	vkEnumerateDeviceExtensionProperties(
@@ -33,13 +32,13 @@ static bool hyper_physical_device_extensions_supported(
 	vkEnumerateDeviceExtensionProperties(
 		physical_device, NULL, &extension_count, extensions.data);
 
-	for (size_t i = 0; i < hyper_array_size$(s_physical_device_extensions); ++i)
+	for (size_t i = 0; i < HYPER_ARRAY_SIZE(s_physical_device_extensions); ++i)
 	{
 		const char *extension_name = s_physical_device_extensions[i];
 
 		bool extension_found = false;
-		hyper_vector_foreach$(
-			extensions, const VkExtensionProperties, extension_properties)
+		HYPER_VECTOR_FOREACH (
+			extensions, j, const VkExtensionProperties, extension_properties)
 		{
 			if (
 				strncmp(
@@ -67,7 +66,7 @@ static bool hyper_is_physical_device_suitable(
 	VkPhysicalDevice physical_device,
 	VkSurfaceKHR surface)
 {
-	hyper_assert$(physical_device != VK_NULL_HANDLE);
+	HYPER_ASSERT(physical_device != VK_NULL_HANDLE);
 
 	struct hyper_queue_families queue_families = { 0 };
 	hyper_vulkan_device_find_queue_families(
@@ -98,14 +97,14 @@ static bool hyper_is_physical_device_suitable(
 enum hyper_result hyper_vulkan_device_create(
 	struct hyper_vulkan_context *vulkan_context)
 {
-	hyper_assert$(vulkan_context != NULL);
+	HYPER_ASSERT(vulkan_context != NULL);
 
 	uint32_t device_count = 0;
 	vkEnumeratePhysicalDevices(vulkan_context->instance, &device_count, NULL);
 
 	if (device_count == 0)
 	{
-		hyper_logger_error$("Failed to find physical device with Vulkan support\n");
+		hyper_logger_error("Failed to find physical device with Vulkan support\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
@@ -115,7 +114,7 @@ enum hyper_result hyper_vulkan_device_create(
 	vkEnumeratePhysicalDevices(
 		vulkan_context->instance, &device_count, devices.data);
 
-	hyper_vector_foreach$(devices, const VkPhysicalDevice, physical_device)
+	HYPER_VECTOR_FOREACH (devices, i, const VkPhysicalDevice, physical_device)
 	{
 		if (!hyper_is_physical_device_suitable(
 					*physical_device, vulkan_context->surface))
@@ -131,7 +130,7 @@ enum hyper_result hyper_vulkan_device_create(
 	{
 		hyper_vector_destroy(&devices);
 
-		hyper_logger_error$("Failed to find suitable physical device\n");
+		hyper_logger_error("Failed to find suitable physical device\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
@@ -175,7 +174,7 @@ enum hyper_result hyper_vulkan_device_create(
 		.pQueueCreateInfos = queue_create_infos.data,
 		.enabledLayerCount = 0,
 		.ppEnabledLayerNames = NULL,
-		.enabledExtensionCount = hyper_array_size$(s_physical_device_extensions),
+		.enabledExtensionCount = HYPER_ARRAY_SIZE(s_physical_device_extensions),
 		.ppEnabledExtensionNames = s_physical_device_extensions,
 		.pEnabledFeatures = &physical_device_features,
 	};
@@ -189,7 +188,7 @@ enum hyper_result hyper_vulkan_device_create(
 	{
 		hyper_vector_destroy(&queue_create_infos);
 
-		hyper_logger_error$("Failed to create logical device\n");
+		hyper_logger_error("Failed to create logical device\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
@@ -211,7 +210,7 @@ enum hyper_result hyper_vulkan_device_create(
 
 void hyper_vulkan_device_destroy(struct hyper_vulkan_context *vulkan_context)
 {
-	hyper_assert$(vulkan_context != NULL);
+	HYPER_ASSERT(vulkan_context != NULL);
 
 	vkDestroyDevice(vulkan_context->device, NULL);
 }
@@ -221,7 +220,7 @@ void hyper_vulkan_device_find_queue_families(
 	VkPhysicalDevice physical_device,
 	VkSurfaceKHR surface)
 {
-	hyper_assert$(physical_device != VK_NULL_HANDLE);
+	HYPER_ASSERT(physical_device != VK_NULL_HANDLE);
 
 	uint32_t properties_count = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(
@@ -234,7 +233,8 @@ void hyper_vulkan_device_find_queue_families(
 		physical_device, &properties_count, properties.data);
 
 	size_t index = 0;
-	hyper_vector_foreach$(properties, const VkQueueFamilyProperties, queue_family)
+	HYPER_VECTOR_FOREACH (
+		properties, i, const VkQueueFamilyProperties, queue_family)
 	{
 		if (queue_family->queueFlags & VK_QUEUE_GRAPHICS_BIT)
 		{
@@ -244,7 +244,7 @@ void hyper_vulkan_device_find_queue_families(
 
 		VkBool32 present_family_supported = false;
 		vkGetPhysicalDeviceSurfaceSupportKHR(
-			physical_device, (uint32_t) vector_index, surface, &present_family_supported);
+			physical_device, (uint32_t) i, surface, &present_family_supported);
 
 		if (present_family_supported)
 		{

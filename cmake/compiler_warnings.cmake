@@ -5,7 +5,7 @@
 #-------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------
-# Compiler Warnings
+# compiler warnings
 #-------------------------------------------------------------------------------------------
 function(hyper_enable_warnings project_name)
 		option(HYPER_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
@@ -32,6 +32,7 @@ function(hyper_enable_warnings project_name)
 				/w14906
 				/w14928
 				/wd4996
+				/wd6011
 				/permissive-)
 
 		set(CLANG_WARNINGS
@@ -45,33 +46,19 @@ function(hyper_enable_warnings project_name)
 				-Wsign-conversion
 				-Wnull-dereference
 				-Wdouble-promotion
-				-Wformat=2
-				-Wno-dollar-in-identifier-extension
-				-Wno-format-nonliteral
-				-Wno-gnu-zero-variadic-macro-arguments)
+				-Wformat=2)
 
 		set(GCC_WARNINGS
-				-Wall
-				-Wextra
-				-Wshadow
-				-Wcast-align
-				-Wunused
-				-Wpedantic
-				-Wconversion
-				-Wsign-conversion
-				-Wnull-dereference
-				-Wdouble-promotion
-				-Wformat=2
+				${CLANG_WARNINGS}
 				-Wmisleading-indentation
 				-Wduplicated-cond
 				-Wduplicated-branches
-				-Wlogical-op
-				-Wno-format-nonliteral)
+				-Wlogical-op)
 
 		if (HYPER_WARNINGS_AS_ERRORS)
+				set(MSVC_WARNINGS ${MSVC_WARNINGS} /WX)
 				set(CLANG_WARNINGS ${CLANG_WARNINGS} -Werror)
 				set(GCC_WARNINGS ${GCC_WARNINGS} -Werror)
-				set(MSVC_WARNINGS ${MSVC_WARNINGS} /WX)
 		endif ()
 
 		if (MSVC)

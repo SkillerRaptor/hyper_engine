@@ -8,19 +8,11 @@
 
 #include "hyper_common/compiler.h"
 #include "hyper_common/platform.h"
+#include "hyper_common/result.h"
 
 #if HYPER_PLATFORM_WINDOWS
-#	define NOMINMAX
-#	define WIN32_LEAN_AND_MEAN
-#	include <Windows.h>
-#
 #	define HYPER_SHARED_PREFIX ""
 #	define HYPER_SHARED_EXTENSION ".dll"
-#
-#	define hyper_open_library$(library) LoadLibrary(library)
-#	define hyper_close_library$(library) FreeLibrary(library)
-#	define hyper_get_proc_address$(library, proc_name) \
-		GetProcAddress(library, proc_name)
 #
 #	if HYPER_SYMBOLS_EXPORT
 #		if HYPER_COMPILER_GCC
@@ -36,23 +28,20 @@
 #		endif
 #	endif
 #elif HYPER_PLATFORM_LINUX
-#	include <dlfcn.h>
-#
 #	define HYPER_SHARED_PREFIX "lib"
 #	define HYPER_SHARED_EXTENSION ".so"
 #
-#	define hyper_open_library$(library) dlopen(library, RTLD_NOW | RTLD_LOCAL)
-#	define hyper_close_library$(library) dlclose(library)
-#	define hyper_get_proc_address$(library, proc_name) dlsym(library, proc_name)
-#
 #	define HYPER_API __attribute__((visibility("default")))
-#else
-#	define HYPER_SHARED_PREFIX ""
-#	define HYPER_SHARED_EXTENSION ""
-#
-#	define hyper_open_library$(library) ((void) 0)
-#	define hyper_close_library$(library) ((void) 0)
-#	define hyper_get_proc_address$(library, proc_name) ((void) 0)
-#
-#	define HYPER_API
 #endif
+
+struct hyper_library
+{
+	void *handle;
+};
+
+enum hyper_result hyper_library_open(
+	struct hyper_library *library,
+	const char *library_path);
+void hyper_library_close(struct hyper_library *library);
+
+void *hyper_library_get(struct hyper_library *library, const char *proc_name);

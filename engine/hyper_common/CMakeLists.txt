@@ -9,26 +9,25 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
 		src/hyper_common/assertion.c
+		src/hyper_common/library.c
 		src/hyper_common/logger.c
-		src/hyper_common/memory.c
 		src/hyper_common/queue.c
+		src/hyper_common/strings.c
 		src/hyper_common/vector.c)
 
 set(HEADERS
-		include/hyper_common/array.h
 		include/hyper_common/assertion.h
-		include/hyper_common/bit.h
+		include/hyper_common/bits.h
 		include/hyper_common/compiler.h
+		include/hyper_common/core.h
 		include/hyper_common/debug.h
-		include/hyper_common/file.h
 		include/hyper_common/library.h
 		include/hyper_common/logger.h
-		include/hyper_common/memory.h
 		include/hyper_common/platform.h
-		include/hyper_common/prerequisites.h
 		include/hyper_common/queue.h
 		include/hyper_common/result.h
 		include/hyper_common/source_location.h
+		include/hyper_common/strings.h
 		include/hyper_common/vector.h)
 
 foreach(item IN ITEMS ${SOURCES} ${HEADERS})
@@ -49,3 +48,10 @@ target_link_libraries(
 		${CMAKE_DL_LIBS}
 		hyper_project_options
 		hyper_project_warnings)
+		
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+		target_compile_definitions(
+				hyper_common
+				PRIVATE
+				-DHYPER_DEBUG=1)
+endif()

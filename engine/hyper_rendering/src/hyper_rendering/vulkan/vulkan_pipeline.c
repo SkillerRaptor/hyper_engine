@@ -6,7 +6,6 @@
 
 #include "hyper_rendering/vulkan/vulkan_pipeline.h"
 
-#include "hyper_common/array.h"
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
 #include "hyper_common/vector.h"
@@ -16,7 +15,7 @@
 enum hyper_result hyper_vulkan_pipeline_create(
 	struct hyper_vulkan_context *vulkan_context)
 {
-	hyper_assert$(vulkan_context != NULL);
+	HYPER_ASSERT(vulkan_context != NULL);
 
 	const VkAttachmentDescription color_attachment_description = {
 		.format = vulkan_context->swapchain_format,
@@ -73,7 +72,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 			NULL,
 			&vulkan_context->render_pass) != VK_SUCCESS)
 	{
-		hyper_logger_error$("Failed to create render pass\n");
+		hyper_logger_error("Failed to create render pass\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
@@ -81,7 +80,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 		fopen("./assets/shaders/default_shader_vertex.spv", "rb");
 	if (vertex_shader_file == NULL)
 	{
-		hyper_logger_error$("Failed to open vertex shader file\n");
+		hyper_logger_error("Failed to open vertex shader file\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
@@ -100,7 +99,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 			1,
 			vertex_shader_file) == 0)
 	{
-		hyper_logger_error$("Failed to read vertex shader file\n");
+		hyper_logger_error("Failed to read vertex shader file\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 	fclose(vertex_shader_file);
@@ -109,7 +108,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 		fopen("./assets/shaders/default_shader_fragment.spv", "rb");
 	if (fragment_shader_file == NULL)
 	{
-		hyper_logger_error$("Failed to open fragment shader file\n");
+		hyper_logger_error("Failed to open fragment shader file\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
@@ -129,7 +128,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 			1,
 			fragment_shader_file) == 0)
 	{
-		hyper_logger_error$("Failed to read fragment shader file\n");
+		hyper_logger_error("Failed to read fragment shader file\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 	fclose(fragment_shader_file);
@@ -148,7 +147,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 			NULL,
 			&vertex_shader_module) != VK_SUCCESS)
 	{
-		hyper_logger_error$("Failed to create vertex shader module\n");
+		hyper_logger_error("Failed to create vertex shader module\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
@@ -166,7 +165,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 			NULL,
 			&fragment_shader_module) != VK_SUCCESS)
 	{
-		hyper_logger_error$("Failed to create fragment shader module\n");
+		hyper_logger_error("Failed to create fragment shader module\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
@@ -295,7 +294,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 			NULL,
 			&vulkan_context->pipeline_layout) != VK_SUCCESS)
 	{
-		hyper_logger_error$("Failed to create pipeline layout\n");
+		hyper_logger_error("Failed to create pipeline layout\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
@@ -306,7 +305,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 
 	const VkPipelineDynamicStateCreateInfo dynamic_state_create_info = {
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
-		.dynamicStateCount = hyper_array_size$(dynamic_states),
+		.dynamicStateCount = HYPER_ARRAY_SIZE(dynamic_states),
 		.pDynamicStates = dynamic_states,
 	};
 
@@ -339,7 +338,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 			NULL,
 			&vulkan_context->pipeline) != VK_SUCCESS)
 	{
-		hyper_logger_error$("Failed to create graphics pipeline\n");
+		hyper_logger_error("Failed to create graphics pipeline\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
@@ -354,7 +353,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 
 void hyper_vulkan_pipeline_destroy(struct hyper_vulkan_context *vulkan_context)
 {
-	hyper_assert$(vulkan_context != NULL);
+	HYPER_ASSERT(vulkan_context != NULL);
 
 	vkDestroyPipeline(vulkan_context->device, vulkan_context->pipeline, NULL);
 	vkDestroyPipelineLayout(

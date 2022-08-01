@@ -7,104 +7,103 @@
 #include "hyper_common/queue.h"
 
 #include "hyper_common/assertion.h"
-#include "hyper_common/memory.h"
 
+#include <stdlib.h>
 #include <string.h>
 
-static void hyper_queue_reallocate(
-	struct hyper_queue *queue,
-	size_t new_capacity)
+static void hyper_queue_reallocate(struct hyper_queue *queue, size_t new_size)
 {
-	hyper_assert$(queue != NULL);
-	hyper_assert$(new_capacity != 0);
+	HYPER_ASSERT(queue != NULL);
+	HYPER_ASSERT(new_size != 0);
 
-	if (new_capacity < queue->size)
-	{
-		queue->size = new_capacity;
-	}
-
-	void *new_data = hyper_allocate(new_capacity * queue->element_size);
+	void *new_data = malloc(new_size * queue->element_size);
 	memcpy(new_data, queue->data, queue->size * queue->element_size);
-	hyper_deallocate(queue->data);
+	free(queue->data);
 
 	queue->data = new_data;
-	queue->capacity = new_capacity;
+	queue->size = new_size;
 }
 
-static void *hyper_queue_get_offset(struct hyper_queue *queue, size_t index)
+static void *hyper_queue_get(struct hyper_queue *queue, size_t index)
 {
-	hyper_assert$(queue != NULL);
+	HYPER_ASSERT(queue != NULL);
+	HYPER_ASSERT(index < queue->size);
 
-	return (uint8_t *) queue->data + (index * queue->element_size);
+	return ((uint8_t *) queue->data) + (index * queue->element_size);
 }
 
 enum hyper_result hyper_queue_create(
 	struct hyper_queue *queue,
 	size_t element_size)
 {
-	hyper_assert$(queue != NULL);
-	hyper_assert$(element_size != 0);
+	HYPER_ASSERT(queue != NULL);
+	HYPER_ASSERT(element_size != 0);
 
 	queue->size = 0;
-	queue->capacity = 2;
 	queue->element_size = element_size;
-	queue->data = hyper_allocate(queue->capacity * queue->element_size);
-
-	if (queue->data == NULL)
-	{
-		return HYPER_RESULT_OUT_OF_MEMORY;
-	}
+	queue->data = NULL;
 
 	return HYPER_RESULT_SUCCESS;
 }
 
 void hyper_queue_destroy(struct hyper_queue *queue)
 {
-	hyper_assert$(queue != NULL);
-
-	hyper_deallocate(queue->data);
-	queue->data = NULL;
-}
-
-void hyper_queue_push(struct hyper_queue *queue, const void *element)
-{
-	hyper_assert$(queue != NULL);
-	hyper_assert$(element != NULL);
-
-	if (queue->size >= queue->capacity)
+	if (queue == NULL)
 	{
-		hyper_queue_reallocate(queue, queue->capacity + queue->capacity / 2);
+		return;
 	}
 
-	void *ptr = hyper_queue_get_offset(queue, queue->size);
-	memcpy(ptr, element, queue->element_size);
-
-	++queue->size;
-}
-
-void hyper_queue_pop(struct hyper_queue *queue)
-{
-	hyper_assert$(queue != NULL);
-
-	void *ptr = hyper_queue_get_offset(queue, 0);
-	memmove(
-		ptr,
-		(uint8_t *) ptr + queue->element_size,
-		(queue->size - 1) * queue->element_size);
-
-	--queue->size;
+	free(queue->data);
 }
 
 void *hyper_queue_front(struct hyper_queue *queue)
 {
-	hyper_assert$(queue != NULL);
+	HYPER_ASSERT(queue != NULL);
+	HYPER_ASSERT(queue->size != 0);
 
-	return hyper_queue_get_offset(queue, 0);
+	return hyper_queue_get(queue, 0);
 }
 
 void *hyper_queue_back(struct hyper_queue *queue)
 {
-	hyper_assert$(queue != NULL);
+	HYPER_ASSERT(queue != NULL);
+	HYPER_ASSERT(queue->size != 0);
 
-	return hyper_queue_get_offset(queue, queue->size - 1);
+	return hyper_queue_get(queue, queue->size - 1);
+}
+
+bool hyper_queue_empty(struct hyper_queue *queue)
+{
+	HYPER_ASSERT(queue != NULL);
+
+	return queue->size == 0;
+}
+
+void hyper_queue_push(struct hyper_queue *queue, const void *element)
+{
+	HYPER_ASSERT(queue != NULL);
+	HYPER_ASSERT(element != NULL);
+
+	++queue->size;
+
+	hyper_queue_reallocate(queue, queue->size);
+
+	void *ptr = hyper_queue_get(queue, queue->size - 1);
+	memcpy(ptr, element, queue->element_size);
+}
+
+void hyper_queue_pop(struct hyper_queue *queue)
+{
+	HYPER_ASSERT(queue != NULL);
+	HYPER_ASSERT(queue->size > 0);
+
+	--queue->size;
+
+	void *ptr = hyper_queue_get(queue, 0);
+	memmove(
+		ptr,
+		((uint8_t *) ptr) + (1 * queue->element_size),
+		queue->size * queue->element_size);
+
+	hyper_queue_reallocate(queue, queue->size - 1);
 }

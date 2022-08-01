@@ -8,13 +8,8 @@
 
 #include "hyper_common/result.h"
 
+#include <stdbool.h>
 #include <stddef.h>
-
-#define hyper_vector_foreach$(vector, type, name)                            \
-	for (size_t vector_index = 0; vector_index < (vector).size;            \
-			 ++vector_index)                                                       \
-		for (type *name = hyper_vector_get(&vector, vector_index); name != NULL; \
-				 name = NULL)
 
 struct hyper_vector
 {
@@ -30,9 +25,26 @@ enum hyper_result hyper_vector_create(
 	size_t element_size);
 void hyper_vector_destroy(struct hyper_vector *vector);
 
+void *hyper_vector_get(struct hyper_vector *vector, size_t index);
+
+void *hyper_vector_front(struct hyper_vector *vector);
+void *hyper_vector_back(struct hyper_vector *vector);
+
+bool hyper_vector_empty(struct hyper_vector *vector);
+
+void hyper_vector_clear(struct hyper_vector *vector);
 void hyper_vector_push_back(struct hyper_vector *vector, const void *element);
+void hyper_vector_pop_back(struct hyper_vector *vector);
 
 void hyper_vector_resize(struct hyper_vector *vector, size_t size);
 void hyper_vector_reserve(struct hyper_vector *vector, size_t capacity);
 
-void *hyper_vector_get(struct hyper_vector *vector, size_t index);
+#define HYPER_VECTOR_FOREACH(vector, index_name, type, name)                 \
+	for (size_t index_name = 0; index_name < (vector).size; ++index_name)      \
+		for (type *name = hyper_vector_get(&(vector), index_name); name != NULL; \
+				 name = NULL)
+
+#define HYPER_VECTOR_FOREACH_REVERSE(vector, index_name, type, name)         \
+	for (size_t index_name = (vector).size; index_name-- > 0;)                 \
+		for (type *name = hyper_vector_get(&(vector), index_name); name != NULL; \
+				 name = NULL)

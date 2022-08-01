@@ -8,12 +8,10 @@
 # hyper game
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-		src/hyper_game/event_bus.c
-		src/hyper_game/hyper_game.c)
+		src/hyper_game/event_bus.c)
 
 set(HEADERS
 		include/hyper_game/event_bus.h
-		include/hyper_game/hyper_game.h
 		include/hyper_game/key_codes.h
 		include/hyper_game/key_events.h
 		include/hyper_game/mouse_codes.h

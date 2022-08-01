@@ -10,6 +10,6 @@
 #	define NDEBUG
 #endif
 
-#ifndef NDEBUG
+#if !defined(HYPER_DEBUG) && !defined(NDEBUG)
 #	define HYPER_DEBUG 1
 #endif

@@ -8,11 +8,12 @@
 # hyper math
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-		src/hyper_math/hyper_math.c)
+		src/hyper_math/trigonometric.c)
 
 set(HEADERS
 		include/hyper_math/common.h
-		include/hyper_math/hyper_math.h)
+		include/hyper_math/constants.h
+		include/hyper_math/trigonometric.h)
 
 foreach(item IN ITEMS ${SOURCES} ${HEADERS})
 		get_filename_component(src_path "${item}" PATH)

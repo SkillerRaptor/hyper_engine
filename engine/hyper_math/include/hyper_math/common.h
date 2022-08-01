@@ -6,8 +6,8 @@
 
 #pragma once
 
-#define hyper_min$(a, b) (((b) < (a)) ? (b) : (a))
-#define hyper_max$(a, b) (((a) < (b)) ? (b) : (a))
+#define HYPER_MIN(a, b) (((b) < (a)) ? (b) : (a))
+#define HYPER_MAX(a, b) (((a) < (b)) ? (b) : (a))
 
-#define hyper_clamp$(value, lower, upper) \
-	(hyper_max$((lower), hyper_min$((value), (upper))))
+#define HYPER_CLAMP(value, lower, upper) \
+	(HYPER_MAX((lower), HYPER_MIN((value), (upper))))

@@ -8,11 +8,9 @@
 # hyper platform
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-		src/hyper_platform/hyper_platform.c
 		src/hyper_platform/window.c)
 
 set(HEADERS
-		include/hyper_platform/hyper_platform.h
 		include/hyper_platform/window.h)
 
 foreach(item IN ITEMS ${SOURCES} ${HEADERS})

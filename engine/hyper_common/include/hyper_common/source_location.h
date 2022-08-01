@@ -15,15 +15,22 @@ struct hyper_source_location
 	const char *function_name;
 };
 
+#define HYPER_LINE_CURRENT() __LINE__
+#define HYPER_FILE_CURRENT() __FILE__
+
 #if defined(__FUNCTION__)
-#	define hyper_current_file$() __FUNCTION__
+#	define HYPER_FUNCTION_CURRENT() __FUNCTION__
+#elif defined(__func__)
+#	define HYPER_FUNCTION_CURRENT() __func__
+#elif defined(__PRETTY_FUNCTION__)
+#	define HYPER_FUNCTION_CURRENT() __PRETTY_FUNCTION__
 #else
-#	define hyper_current_file$() __func__
+#	define HYPER_FUNCTION_CURRENT() "unknown"
 #endif
 
-#define hyper_source_location_current$()    \
-	((struct hyper_source_location){          \
-		.line = __LINE__,                       \
-		.file_name = __FILE__,                  \
-		.function_name = hyper_current_file$(), \
+#define HYPER_SOURCE_LOCATION_CURRENT()        \
+	((struct hyper_source_location){             \
+		.line = HYPER_LINE_CURRENT(),              \
+		.file_name = HYPER_FILE_CURRENT(),         \
+		.function_name = HYPER_FUNCTION_CURRENT(), \
 	})

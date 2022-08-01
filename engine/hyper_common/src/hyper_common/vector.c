@@ -7,49 +7,41 @@
 #include "hyper_common/vector.h"
 
 #include "hyper_common/assertion.h"
-#include "hyper_common/memory.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 static void hyper_vector_reallocate(
 	struct hyper_vector *vector,
 	size_t new_capacity)
 {
-	hyper_assert$(vector != NULL);
-	hyper_assert$(new_capacity != 0);
+	HYPER_ASSERT(vector != NULL);
+	HYPER_ASSERT(new_capacity != 0);
 
 	if (new_capacity < vector->size)
 	{
 		vector->size = new_capacity;
 	}
 
-	void *new_data = hyper_allocate(new_capacity * vector->element_size);
+	void *new_data = malloc(new_capacity * vector->element_size);
 	memcpy(new_data, vector->data, vector->size * vector->element_size);
-	hyper_deallocate(vector->data);
+	free(vector->data);
 
 	vector->data = new_data;
 	vector->capacity = new_capacity;
-}
-
-static void *hyper_vector_get_offset(struct hyper_vector *vector, size_t index)
-{
-	hyper_assert$(vector != NULL);
-
-	return (uint8_t *) vector->data + (index * vector->element_size);
 }
 
 enum hyper_result hyper_vector_create(
 	struct hyper_vector *vector,
 	size_t element_size)
 {
-	hyper_assert$(vector != NULL);
-	hyper_assert$(element_size != 0);
+	HYPER_ASSERT(vector != NULL);
+	HYPER_ASSERT(element_size != 0);
 
 	vector->size = 0;
 	vector->capacity = 2;
 	vector->element_size = element_size;
-	vector->data = hyper_allocate(vector->capacity * vector->element_size);
-
+	vector->data = malloc(vector->capacity * vector->element_size);
 	if (vector->data == NULL)
 	{
 		return HYPER_RESULT_OUT_OF_MEMORY;
@@ -60,32 +52,80 @@ enum hyper_result hyper_vector_create(
 
 void hyper_vector_destroy(struct hyper_vector *vector)
 {
-	hyper_assert$(vector != NULL);
+	if (vector == NULL)
+	{
+		return;
+	}
 
-	hyper_deallocate(vector->data);
-	vector->data = NULL;
+	free(vector->data);
+}
+
+void *hyper_vector_get(struct hyper_vector *vector, size_t index)
+{
+	HYPER_ASSERT(vector != NULL);
+	HYPER_ASSERT(index < vector->size);
+
+	return ((uint8_t *) vector->data) + (index * vector->element_size);
+}
+
+void *hyper_vector_front(struct hyper_vector *vector)
+{
+	HYPER_ASSERT(vector != NULL);
+	HYPER_ASSERT(vector->size != 0);
+
+	return hyper_vector_get(vector, 0);
+}
+
+void *hyper_vector_back(struct hyper_vector *vector)
+{
+	HYPER_ASSERT(vector != NULL);
+	HYPER_ASSERT(vector->size != 0);
+
+	return hyper_vector_get(vector, vector->size - 1);
+}
+
+bool hyper_vector_empty(struct hyper_vector *vector)
+{
+	HYPER_ASSERT(vector != NULL);
+
+	return vector->size == 0;
+}
+
+void hyper_vector_clear(struct hyper_vector *vector)
+{
+	HYPER_ASSERT(vector != NULL);
+
+	hyper_vector_resize(vector, 0);
 }
 
 void hyper_vector_push_back(struct hyper_vector *vector, const void *element)
 {
-	hyper_assert$(vector != NULL);
-	hyper_assert$(element != NULL);
+	HYPER_ASSERT(vector != NULL);
+	HYPER_ASSERT(element != NULL);
 
 	if (vector->size >= vector->capacity)
 	{
 		hyper_vector_reallocate(vector, vector->capacity + vector->capacity / 2);
 	}
 
-	void *ptr = hyper_vector_get_offset(vector, vector->size);
-	memcpy(ptr, element, vector->element_size);
-
 	++vector->size;
+
+	void *ptr = hyper_vector_get(vector, vector->size - 1);
+	memcpy(ptr, element, vector->element_size);
+}
+
+void hyper_vector_pop_back(struct hyper_vector *vector)
+{
+	HYPER_ASSERT(vector != NULL);
+	HYPER_ASSERT(vector->size > 0);
+
+	--vector->size;
 }
 
 void hyper_vector_resize(struct hyper_vector *vector, size_t size)
 {
-	hyper_assert$(vector != NULL);
-	hyper_assert$(size != 0);
+	HYPER_ASSERT(vector != NULL);
+	HYPER_ASSERT(size != 0);
 
 	hyper_vector_reallocate(vector, size + size / 2);
 	vector->size = size;
@@ -93,20 +133,8 @@ void hyper_vector_resize(struct hyper_vector *vector, size_t size)
 
 void hyper_vector_reserve(struct hyper_vector *vector, size_t capacity)
 {
-	hyper_assert$(vector != NULL);
-	hyper_assert$(capacity != 0);
-
-	if (capacity <= vector->capacity)
-	{
-		return;
-	}
+	HYPER_ASSERT(vector != NULL);
+	HYPER_ASSERT(capacity != 0);
 
 	hyper_vector_reallocate(vector, capacity);
-}
-
-void *hyper_vector_get(struct hyper_vector *vector, size_t index)
-{
-	hyper_assert$(vector != NULL);
-
-	return hyper_vector_get_offset(vector, index);
 }

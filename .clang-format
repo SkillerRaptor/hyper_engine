@@ -46,6 +46,8 @@ DerivePointerAlignment: false
 DisableFormat: false
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
+ForEachMacros:
+  - 'HYPER_VECTOR_FOREACH'
 IncludeBlocks: Regroup
 IndentCaseLabels: false
 IndentPPDirectives: AfterHash

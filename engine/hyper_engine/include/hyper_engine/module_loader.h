@@ -6,15 +6,8 @@
 
 #pragma once
 
-#include "hyper_common/memory.h"
 #include "hyper_common/result.h"
 #include "hyper_common/vector.h"
-
-struct hyper_module
-{
-	char *name;
-	void *library_handle;
-};
 
 struct hyper_module_loader
 {
@@ -28,7 +21,4 @@ void hyper_module_loader_destroy(struct hyper_module_loader *module_loader);
 
 enum hyper_result hyper_module_loader_load(
 	struct hyper_module_loader *module_loader,
-	const char *module_name);
-void hyper_module_loader_unload(
-	struct hyper_module_loader *module_loader,
-	const char *module_name);
+	const char *library_name);

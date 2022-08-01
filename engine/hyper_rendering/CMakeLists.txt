@@ -9,7 +9,6 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
 		src/hyper_rendering/graphics_context.c
-		src/hyper_rendering/hyper_rendering.c
 		src/hyper_rendering/vulkan/vulkan_context.c
 		src/hyper_rendering/vulkan/vulkan_device.c
 		src/hyper_rendering/vulkan/vulkan_pipeline.c
@@ -17,7 +16,6 @@ set(SOURCES
 
 set(HEADERS
 		include/hyper_rendering/graphics_context.h
-		include/hyper_rendering/hyper_rendering.h
 		include/hyper_rendering/vulkan/vulkan_context.h
 		include/hyper_rendering/vulkan/vulkan_device.h
 		include/hyper_rendering/vulkan/vulkan_pipeline.h

@@ -8,7 +8,6 @@
 
 #include "hyper_common/assertion.h"
 #include "hyper_common/logger.h"
-#include "hyper_common/prerequisites.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -23,11 +22,11 @@ static void hyper_key_callback(
 	int action,
 	int mods)
 {
-	hyper_unused_variable$(scan_code);
-	hyper_unused_variable$(mods);
+	HYPER_UNUSED_VARIABLE(scan_code);
+	HYPER_UNUSED_VARIABLE(mods);
 
 	struct hyper_window *window = glfwGetWindowUserPointer(native_window);
-	if (window->key_callback.callback != NULL)
+	if (window->key_function != NULL)
 	{
 		enum hyper_key_action key_action = HYPER_KEY_ACTION_NONE;
 		switch (action)
@@ -45,8 +44,8 @@ static void hyper_key_callback(
 			break;
 		}
 
-		window->key_callback.callback(
-			window, key_action, (uint32_t) key_code, window->key_callback.user_data);
+		window->key_function(
+			window, (uint32_t) key_code, key_action, window->user_data);
 	}
 }
 
@@ -55,10 +54,9 @@ static void hyper_key_type_callback(
 	unsigned int key_code)
 {
 	struct hyper_window *window = glfwGetWindowUserPointer(native_window);
-	if (window->key_type_callback.callback != NULL)
+	if (window->key_type_function != NULL)
 	{
-		window->key_type_callback.callback(
-			window, key_code, window->key_type_callback.user_data);
+		window->key_type_function(window, key_code, window->user_data);
 	}
 }
 
@@ -68,10 +66,10 @@ static void hyper_mouse_button_callback(
 	int action,
 	int mods)
 {
-	hyper_unused_variable$(mods);
+	HYPER_UNUSED_VARIABLE(mods);
 
 	struct hyper_window *window = glfwGetWindowUserPointer(native_window);
-	if (window->mouse_button_callback.callback != NULL)
+	if (window->mouse_button_function != NULL)
 	{
 		enum hyper_mouse_action mouse_action = HYPER_MOUSE_ACTION_NONE;
 		switch (action)
@@ -86,11 +84,8 @@ static void hyper_mouse_button_callback(
 			break;
 		}
 
-		window->mouse_button_callback.callback(
-			window,
-			mouse_action,
-			(uint32_t) button,
-			window->mouse_button_callback.user_data);
+		window->mouse_button_function(
+			window, (uint32_t) button, mouse_action, window->user_data);
 	}
 }
 
@@ -100,13 +95,10 @@ static void hyper_mouse_scroll_callback(
 	double offset_y)
 {
 	struct hyper_window *window = glfwGetWindowUserPointer(native_window);
-	if (window->mouse_scroll_callback.callback != NULL)
+	if (window->mouse_scroll_function != NULL)
 	{
-		window->mouse_scroll_callback.callback(
-			window,
-			(float) offset_x,
-			(float) offset_y,
-			window->mouse_scroll_callback.user_data);
+		window->mouse_scroll_function(
+			window, (float) offset_x, (float) offset_y, window->user_data);
 	}
 }
 
@@ -116,23 +108,19 @@ static void hyper_mouse_move_callback(
 	double position_y)
 {
 	struct hyper_window *window = glfwGetWindowUserPointer(native_window);
-	if (window->mouse_move_callback.callback != NULL)
+	if (window->mouse_move_function != NULL)
 	{
-		window->mouse_move_callback.callback(
-			window,
-			(float) position_x,
-			(float) position_y,
-			window->mouse_move_callback.user_data);
+		window->mouse_move_function(
+			window, (float) position_x, (float) position_y, window->user_data);
 	}
 }
 
 static void hyper_window_close_callback(GLFWwindow *native_window)
 {
 	struct hyper_window *window = glfwGetWindowUserPointer(native_window);
-	if (window->window_close_callback.callback != NULL)
+	if (window->window_close_function != NULL)
 	{
-		window->window_close_callback.callback(
-			window, 0, window->window_close_callback.user_data);
+		window->window_close_function(window, window->user_data);
 	}
 }
 
@@ -145,13 +133,10 @@ static void hyper_window_move_callback(
 	window->x = (uint32_t) position_x;
 	window->y = (uint32_t) position_y;
 
-	if (window->window_move_callback.callback != NULL)
+	if (window->window_move_function != NULL)
 	{
-		window->window_move_callback.callback(
-			window,
-			(uint32_t) position_x,
-			(uint32_t) position_y,
-			window->window_move_callback.user_data);
+		window->window_move_function(
+			window, (uint32_t) position_x, (uint32_t) position_y, window->user_data);
 	}
 }
 
@@ -164,13 +149,10 @@ static void hyper_window_resize_callback(
 	window->width = (uint32_t) width;
 	window->height = (uint32_t) height;
 
-	if (window->window_resize_callback.callback != NULL)
+	if (window->window_resize_function != NULL)
 	{
-		window->window_resize_callback.callback(
-			window,
-			(uint32_t) width,
-			(uint32_t) height,
-			window->window_resize_callback.user_data);
+		window->window_resize_function(
+			window, (uint32_t) width, (uint32_t) height, window->user_data);
 	}
 }
 
@@ -183,13 +165,10 @@ static void hyper_window_framebuffer_resize_callback(
 	window->framebuffer_width = (uint32_t) width;
 	window->framebuffer_height = (uint32_t) height;
 
-	if (window->window_framebuffer_resize_callback.callback != NULL)
+	if (window->window_framebuffer_resize_function != NULL)
 	{
-		window->window_framebuffer_resize_callback.callback(
-			window,
-			(uint32_t) width,
-			(uint32_t) height,
-			window->window_framebuffer_resize_callback.user_data);
+		window->window_framebuffer_resize_function(
+			window, (uint32_t) width, (uint32_t) height, window->user_data);
 	}
 }
 
@@ -197,13 +176,17 @@ enum hyper_result hyper_window_create(
 	struct hyper_window *window,
 	const struct hyper_window_create_info *window_create_info)
 {
-	hyper_assert$(window != NULL);
-	hyper_assert$(window_create_info != NULL);
+	HYPER_ASSERT(window != NULL);
+	HYPER_ASSERT(window_create_info != NULL);
 
-	glfwInit();
+	if (glfwInit() == GLFW_FALSE)
+	{
+		hyper_logger_error("Failed to initialize GLFW\n");
+		return HYPER_RESULT_INITIALIZATION_FAILED;
+	}
+
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
 	window->native_window = glfwCreateWindow(
 		(int) window_create_info->width,
 		(int) window_create_info->height,
@@ -212,7 +195,7 @@ enum hyper_result hyper_window_create(
 		NULL);
 	if (window->native_window == NULL)
 	{
-		hyper_logger_error$("Failed to create window\n");
+		hyper_logger_error("Failed to create GLFW window\n");
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
@@ -232,76 +215,83 @@ enum hyper_result hyper_window_create(
 	glfwSetFramebufferSizeCallback(
 		window->native_window, hyper_window_framebuffer_resize_callback);
 
-	// TODO: Improve setting initial values
 	int x = 0;
 	int y = 0;
 	glfwGetWindowPos(window->native_window, &x, &y);
-	window->x = (uint32_t) x;
-	window->y = (uint32_t) y;
 
 	int width = 0;
 	int height = 0;
 	glfwGetWindowSize(window->native_window, &width, &height);
-	window->width = (uint32_t) width;
-	window->height = (uint32_t) height;
 
 	int framebuffer_width = 0;
 	int framebuffer_height = 0;
 	glfwGetFramebufferSize(
 		window->native_window, &framebuffer_width, &framebuffer_height);
+
+	window->title = window_create_info->title;
+	window->x = (uint32_t) x;
+	window->y = (uint32_t) y;
+	window->width = (uint32_t) width;
+	window->height = (uint32_t) height;
 	window->framebuffer_width = (uint32_t) framebuffer_width;
 	window->framebuffer_height = (uint32_t) framebuffer_height;
 
 	++s_window_count;
+
+	hyper_logger_info(
+		"Successfully created window '%s'\n",
+		window->title,
+		window->width,
+		window->height);
 
 	return HYPER_RESULT_SUCCESS;
 }
 
 void hyper_window_destroy(struct hyper_window *window)
 {
-	hyper_assert$(window != NULL);
-
-	--s_window_count;
+	if (window == NULL)
+	{
+		glfwTerminate();
+		return;
+	}
 
 	glfwDestroyWindow(window->native_window);
+	hyper_logger_info(
+		"Successfully destroyed window '%s'\n", window->title);
 
+	--s_window_count;
 	if (s_window_count == 0)
 	{
 		glfwTerminate();
 	}
 }
 
-void hyper_window_update(struct hyper_window *window)
+void hyper_window_poll_events(void)
 {
-	hyper_unused_debug_variable$(window);
-
-	hyper_assert$(window != NULL);
-
 	glfwPollEvents();
-}
-
-void hyper_window_get_required_extensions(
-	struct hyper_window *window,
-	const char ***extensions,
-	uint32_t *extension_count)
-{
-	hyper_unused_variable$(window);
-
-	*extensions = glfwGetRequiredInstanceExtensions(extension_count);
 }
 
 bool hyper_window_create_window_surface(
 	struct hyper_window *window,
-	void *instance,
-	void *surface)
+	void *HYPER_RESTRICT instance,
+	void *HYPER_RESTRICT surface)
 {
+	HYPER_ASSERT(window != NULL);
+	HYPER_ASSERT(instance != NULL);
+
 	if (
-		glfwCreateWindowSurface(
-			instance, window->native_window, NULL, (VkSurfaceKHR *) surface) !=
+		glfwCreateWindowSurface(instance, window->native_window, NULL, surface) !=
 		VK_SUCCESS)
 	{
 		return false;
 	}
 
 	return true;
+}
+
+void hyper_window_get_required_extensions(
+	const char ***extensions,
+	uint32_t *extension_count)
+{
+	*extensions = glfwGetRequiredInstanceExtensions(extension_count);
 }

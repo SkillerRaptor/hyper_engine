@@ -4,16 +4,15 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "hyper_common/core.h"
 #include "hyper_engine/engine.h"
-
-#include "hyper_common/prerequisites.h"
 
 #include <stdlib.h>
 
 int main(int argc, char **argv)
 {
-	hyper_unused_variable$(argc);
-	hyper_unused_variable$(argv);
+	HYPER_UNUSED_VARIABLE(argc);
+	HYPER_UNUSED_VARIABLE(argv);
 
 	struct hyper_engine engine = { 0 };
 	hyper_engine_create(&engine);
