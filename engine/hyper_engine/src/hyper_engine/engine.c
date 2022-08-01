@@ -111,6 +111,7 @@ void hyper_engine_run(struct hyper_engine *engine)
 	{
 		hyper_window_poll_events();
 
-		hyper_graphics_context_render(&engine->graphics_context);
+		hyper_graphics_context_begin_frame(&engine->graphics_context);
+		hyper_graphics_context_end_frame(&engine->graphics_context);
 	}
 }

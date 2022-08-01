@@ -69,11 +69,24 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL hyper_debug_messenger_callback(
 	const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
 	void *user_data)
 {
-	HYPER_UNUSED_VARIABLE(severity);
 	HYPER_UNUSED_VARIABLE(type);
 	HYPER_UNUSED_VARIABLE(user_data);
 
-	hyper_logger_error("Vulkan Validation layer: %s\n", callback_data->pMessage);
+	switch (severity)
+	{
+	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+		hyper_logger_info("Validation layer: %s\n", callback_data->pMessage);
+		break;
+	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+		hyper_logger_warning("Validation layer: %s\n", callback_data->pMessage);
+		break;
+	case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+		hyper_logger_error("Validation layer: %s\n", callback_data->pMessage);
+		break;
+	default:
+		break;
+	}
+
 	return VK_FALSE;
 }
 
@@ -95,6 +108,38 @@ static enum hyper_result hyper_record_command_buffer(
 		return HYPER_RESULT_INITIALIZATION_FAILED;
 	}
 
+	VkImage *image =
+		hyper_vector_get(&vulkan_context->swapchain_images, image_index);
+	const VkImageMemoryBarrier image_memory_barrier_start = {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.srcAccessMask = 0,
+		.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+		.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		.srcQueueFamilyIndex = 0,
+		.dstQueueFamilyIndex = 0,
+		.image = *image,
+		.subresourceRange = {
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel = 0,
+			.levelCount = 1,
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		},
+	};
+
+	vkCmdPipelineBarrier(
+		command_buffer,
+		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		0,
+		0,
+		NULL,
+		0,
+		NULL,
+		1,
+		&image_memory_barrier_start);
+
 	const VkClearValue clear_color = {
 		.color = {
 			.float32 = {
@@ -106,25 +151,38 @@ static enum hyper_result hyper_record_command_buffer(
 		},
 	};
 
-	VkFramebuffer *framebuffer =
-		hyper_vector_get(&vulkan_context->swapchain_framebuffers, image_index);
-	const VkRenderPassBeginInfo render_pass_begin_info = {
-		.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-		.renderPass = vulkan_context->render_pass,
-		.framebuffer = *framebuffer,
-		.renderArea = {
+	VkImageView *image_view =
+		hyper_vector_get(&vulkan_context->swapchain_images_views, image_index);
+	const VkRenderingAttachmentInfo color_attachment_info = {
+		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+		.imageView = *image_view,
+		.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		.resolveMode = VK_RESOLVE_MODE_NONE,
+		.resolveImageView = 0,
+		.resolveImageLayout = 0,
+		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+		.clearValue = clear_color,
+	};
+
+	const VkRenderingInfo rendering_info = {
+    .sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+    .renderArea = {
 			.offset = {
 				.x = 0,
 				.y = 0,
 			},
 			.extent = vulkan_context->swapchain_extent,
 		},
-		.clearValueCount = 1,
-		.pClearValues = &clear_color,
+    .layerCount = 1,
+    .viewMask = 0,
+    .colorAttachmentCount = 1,
+    .pColorAttachments = &color_attachment_info,
+    .pDepthAttachment = NULL,
+    .pStencilAttachment = NULL,
 	};
 
-	vkCmdBeginRenderPass(
-		command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRendering(command_buffer, &rendering_info);
 
 	vkCmdBindPipeline(
 		command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_context->pipeline);
@@ -150,7 +208,37 @@ static enum hyper_result hyper_record_command_buffer(
 
 	vkCmdDraw(command_buffer, 3, 1, 0, 0);
 
-	vkCmdEndRenderPass(command_buffer);
+	vkCmdEndRendering(command_buffer);
+
+	const VkImageMemoryBarrier image_memory_barrier_end = {
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		.dstAccessMask = 0,
+		.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		.srcQueueFamilyIndex = 0,
+		.dstQueueFamilyIndex = 0,
+		.image = *image,
+		.subresourceRange = {
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel = 0,
+			.levelCount = 1,
+			.baseArrayLayer = 0,
+			.layerCount = 1,
+		},
+	};
+
+	vkCmdPipelineBarrier(
+		command_buffer,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+		0,
+		0,
+		NULL,
+		0,
+		NULL,
+		1,
+		&image_memory_barrier_end);
 
 	if (vkEndCommandBuffer(command_buffer) != VK_SUCCESS)
 	{
@@ -180,7 +268,7 @@ enum hyper_result hyper_vulkan_context_create(
 		.applicationVersion = VK_MAKE_VERSION(1, 0, 0),
 		.pEngineName = "HyperEngine",
 		.engineVersion = VK_MAKE_VERSION(1, 0, 0),
-		.apiVersion = VK_API_VERSION_1_2,
+		.apiVersion = VK_API_VERSION_1_3,
 	};
 
 #if HYPER_DEBUG
@@ -461,7 +549,10 @@ enum hyper_result hyper_vulkan_context_create(
 
 void hyper_vulkan_context_destroy(struct hyper_vulkan_context *vulkan_context)
 {
-	HYPER_ASSERT(vulkan_context != NULL);
+	if (vulkan_context == NULL)
+	{
+		return;
+	}
 
 	vkDeviceWaitIdle(vulkan_context->device);
 

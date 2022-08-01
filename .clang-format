@@ -48,6 +48,7 @@ ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
 ForEachMacros:
   - 'HYPER_VECTOR_FOREACH'
+  - 'HYPER_VECTOR_FOREACH_REVERSE'
 IncludeBlocks: Regroup
 IndentCaseLabels: false
 IndentPPDirectives: AfterHash

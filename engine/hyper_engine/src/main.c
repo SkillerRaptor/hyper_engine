@@ -15,7 +15,12 @@ int main(int argc, char **argv)
 	HYPER_UNUSED_VARIABLE(argv);
 
 	struct hyper_engine engine = { 0 };
-	hyper_engine_create(&engine);
+	if (hyper_engine_create(&engine) != HYPER_RESULT_SUCCESS)
+	{
+		hyper_engine_destroy(&engine);
+		return EXIT_FAILURE;
+	}
+
 	hyper_engine_run(&engine);
 	hyper_engine_destroy(&engine);
 

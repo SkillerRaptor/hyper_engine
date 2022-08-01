@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "hyper_common/result.h"
+
 void hyper_logger_info(const char *format, ...);
 void hyper_logger_warning(const char *format, ...);
 void hyper_logger_error(const char *format, ...);

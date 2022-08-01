@@ -14,6 +14,7 @@
 #include <string.h>
 
 static const char *s_physical_device_extensions[] = {
+	VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 };
 
@@ -168,8 +169,14 @@ enum hyper_result hyper_vulkan_device_create(
 
 	const VkPhysicalDeviceFeatures physical_device_features = { 0 };
 
+	const VkPhysicalDeviceDynamicRenderingFeatures dynamic_rendering_feature = {
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES,
+		.dynamicRendering = true,
+	};
+
 	const VkDeviceCreateInfo device_create_info = {
 		.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+		.pNext = &dynamic_rendering_feature,
 		.queueCreateInfoCount = (uint32_t) queue_create_infos.size,
 		.pQueueCreateInfos = queue_create_infos.data,
 		.enabledLayerCount = 0,
@@ -193,6 +200,8 @@ enum hyper_result hyper_vulkan_device_create(
 	}
 
 	hyper_vector_destroy(&queue_create_infos);
+
+	volkLoadDevice(vulkan_context->device);
 
 	vkGetDeviceQueue(
 		vulkan_context->device,

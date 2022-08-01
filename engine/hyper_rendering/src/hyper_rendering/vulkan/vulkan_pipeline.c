@@ -309,8 +309,18 @@ enum hyper_result hyper_vulkan_pipeline_create(
 		.pDynamicStates = dynamic_states,
 	};
 
+	const VkPipelineRenderingCreateInfo pipeline_rendering_create_info = {
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
+    .viewMask = 0,
+    .colorAttachmentCount = 1,
+    .pColorAttachmentFormats = &vulkan_context->swapchain_format,
+		.depthAttachmentFormat = VK_FORMAT_UNDEFINED,
+		.stencilAttachmentFormat = VK_FORMAT_UNDEFINED,
+	};
+
 	const VkGraphicsPipelineCreateInfo graphics_pipeline_create_info = {
 		.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+		.pNext = &pipeline_rendering_create_info,
 		.stageCount = 2,
 		.pStages = &shader_stage_create_infos[0],
 		.pVertexInputState = &vertex_input_state_create_info,
@@ -323,7 +333,7 @@ enum hyper_result hyper_vulkan_pipeline_create(
 		.pColorBlendState = &color_blend_state_create_info,
 		.pDynamicState = &dynamic_state_create_info,
 		.layout = vulkan_context->pipeline_layout,
-		.renderPass = vulkan_context->render_pass,
+		.renderPass = VK_NULL_HANDLE,
 		.subpass = 0,
 		.basePipelineHandle = VK_NULL_HANDLE,
 		.basePipelineIndex = -1,
