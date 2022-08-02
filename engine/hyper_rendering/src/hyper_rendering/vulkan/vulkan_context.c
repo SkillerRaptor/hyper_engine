@@ -166,20 +166,20 @@ static enum hyper_result hyper_record_command_buffer(
 	};
 
 	const VkRenderingInfo rendering_info = {
-    .sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
-    .renderArea = {
+		.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+		.renderArea = {
 			.offset = {
 				.x = 0,
 				.y = 0,
 			},
 			.extent = vulkan_context->swapchain_extent,
 		},
-    .layerCount = 1,
-    .viewMask = 0,
-    .colorAttachmentCount = 1,
-    .pColorAttachments = &color_attachment_info,
-    .pDepthAttachment = NULL,
-    .pStencilAttachment = NULL,
+		.layerCount = 1,
+		.viewMask = 0,
+		.colorAttachmentCount = 1,
+		.pColorAttachments = &color_attachment_info,
+		.pDepthAttachment = NULL,
+		.pStencilAttachment = NULL,
 	};
 
 	vkCmdBeginRendering(command_buffer, &rendering_info);

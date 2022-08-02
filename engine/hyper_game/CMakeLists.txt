@@ -41,3 +41,10 @@ target_link_libraries(
 		hyper_project_warnings
 		hyper_common
 		hyper_platform)
+		
+add_custom_command(
+		TARGET hyper_game
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		$<TARGET_FILE_DIR:hyper_game>
+		$<TARGET_FILE_DIR:hyper_engine>)

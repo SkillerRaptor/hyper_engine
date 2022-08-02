@@ -24,10 +24,4 @@ add_subdirectory(hyper_rendering)
 #-------------------------------------------------------------------------------------------
 # hyper engine
 #-------------------------------------------------------------------------------------------
-set(HYPER_MODULES
-		hyper_game
-		hyper_math
-		hyper_platform
-		hyper_rendering)
-
 add_subdirectory(hyper_engine)

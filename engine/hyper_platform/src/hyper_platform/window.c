@@ -256,8 +256,7 @@ void hyper_window_destroy(struct hyper_window *window)
 	}
 
 	glfwDestroyWindow(window->native_window);
-	hyper_logger_info(
-		"Successfully destroyed window '%s'\n", window->title);
+	hyper_logger_info("Successfully destroyed window '%s'\n", window->title);
 
 	--s_window_count;
 	if (s_window_count == 0)
@@ -273,8 +272,8 @@ void hyper_window_poll_events(void)
 
 bool hyper_window_create_window_surface(
 	struct hyper_window *window,
-	void *HYPER_RESTRICT instance,
-	void *HYPER_RESTRICT surface)
+	VkInstance instance,
+	VkSurfaceKHR *surface)
 {
 	HYPER_ASSERT(window != NULL);
 	HYPER_ASSERT(instance != NULL);

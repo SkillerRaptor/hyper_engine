@@ -33,23 +33,13 @@ target_link_libraries(
 		PRIVATE
 		hyper_project_options
 		hyper_project_warnings
-		hyper_common)
+		hyper_common
+		hyper_game
+		hyper_math
+		hyper_platform
+		hyper_rendering)
 
 add_custom_command(
 	TARGET hyper_engine
 	POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets/ $<TARGET_FILE_DIR:hyper_engine>/assets)
-
-foreach(item IN ITEMS ${HYPER_MODULES})
-		add_custom_command(
-				TARGET hyper_engine
-				POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy_directory
-				$<TARGET_FILE_DIR:${item}>
-				$<TARGET_FILE_DIR:hyper_engine>)
-
-		target_link_libraries(
-				hyper_engine
-				PRIVATE
-				${item})
-endforeach()

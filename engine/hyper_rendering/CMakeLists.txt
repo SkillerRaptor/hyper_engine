@@ -46,3 +46,10 @@ target_link_libraries(
 		hyper_common
 		hyper_math
 		hyper_platform)
+		
+add_custom_command(
+		TARGET hyper_rendering
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		$<TARGET_FILE_DIR:hyper_rendering>
+		$<TARGET_FILE_DIR:hyper_engine>)

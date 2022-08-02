@@ -14,6 +14,8 @@
 #include <stdint.h>
 
 struct hyper_window;
+typedef struct VkInstance_T *VkInstance;
+typedef struct VkSurfaceKHR_T *VkSurfaceKHR;
 
 enum hyper_key_action
 {
@@ -122,8 +124,8 @@ HYPER_API void hyper_window_poll_events(void);
 
 HYPER_API bool hyper_window_create_window_surface(
 	struct hyper_window *window,
-	void *HYPER_RESTRICT instance,
-	void *HYPER_RESTRICT surface);
+	VkInstance instance,
+	VkSurfaceKHR *surface);
 HYPER_API void hyper_window_get_required_extensions(
 	const char ***extensions,
 	uint32_t *extension_count);
