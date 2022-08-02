@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void HYPER_ASSERTion_failed(
+void hyper_assertion_failed(
 	const char *expression,
 	struct hyper_source_location source_location)
 {

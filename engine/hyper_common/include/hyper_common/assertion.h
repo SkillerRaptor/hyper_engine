@@ -9,7 +9,7 @@
 #include "hyper_common/debug.h"
 #include "hyper_common/source_location.h"
 
-void HYPER_ASSERTion_failed(
+void hyper_assertion_failed(
 	const char *expression,
 	struct hyper_source_location source_location);
 
@@ -19,7 +19,7 @@ void HYPER_ASSERTion_failed(
 		{                                                                         \
 			if (!(expression))                                                      \
 			{                                                                       \
-				HYPER_ASSERTion_failed(#expression, HYPER_SOURCE_LOCATION_CURRENT()); \
+				hyper_assertion_failed(#expression, HYPER_SOURCE_LOCATION_CURRENT()); \
 			}                                                                       \
 		} while (0)
 #else
