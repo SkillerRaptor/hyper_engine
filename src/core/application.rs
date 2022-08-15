@@ -7,9 +7,10 @@
 use colored::Colorize;
 use core::panic;
 use log::{error, info};
-use winit::{event, event_loop};
+use winit::{event, event_loop, platform::run_return::EventLoopExtRunReturn};
 
 use crate::core::window::Window;
+use crate::rendering::render_context::RenderContext;
 
 pub enum ApplicationError {
     IoError(std::io::Error),
@@ -43,6 +44,7 @@ impl From<log::SetLoggerError> for ApplicationError {
 
 pub struct Application {
     window: Window,
+    render_context: RenderContext,
 }
 
 impl Application {
@@ -60,12 +62,23 @@ impl Application {
             }
         };
 
+        let render_context = match RenderContext::new(&window) {
+            Ok(window) => window,
+            Err(error) => {
+                error!("Failed to create render context: {}", error);
+                panic!();
+            }
+        };
+
         info!("Successfully created application");
-        Self { window }
+        Self {
+            window,
+            render_context,
+        }
     }
 
-    pub fn run(self) {
-        self.window.event_loop.run(move |event, _, control_flow| {
+    pub fn run(&mut self) {
+        self.window.event_loop.run_return(|event, _, control_flow| {
             *control_flow = event_loop::ControlFlow::Poll;
 
             match event {

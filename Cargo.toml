@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+ash = "0.37.0"
+ash-window = "0.11.0"
 chrono = "0.4.22"
 colored = "2.0.0"
 log = "0.4.17"

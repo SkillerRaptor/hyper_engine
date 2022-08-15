@@ -4,5 +4,4 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub mod core;
-pub mod rendering;
+pub mod render_context;
