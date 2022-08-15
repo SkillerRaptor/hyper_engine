@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-use core::panic;
-
 use colored::Colorize;
+use core::panic;
 use log::{error, info};
+use winit::{event, event_loop};
+
+use crate::core::window::Window;
 
 pub enum ApplicationError {
     IoError(std::io::Error),
@@ -39,7 +41,9 @@ impl From<log::SetLoggerError> for ApplicationError {
     }
 }
 
-pub struct Application {}
+pub struct Application {
+    window: Window,
+}
 
 impl Application {
     pub fn new() -> Self {
@@ -48,8 +52,37 @@ impl Application {
             panic!();
         }
 
+        let window = match Window::new("HyperEngine", 1280, 720) {
+            Ok(window) => window,
+            Err(error) => {
+                error!("Failed to create window: {}", error);
+                panic!();
+            }
+        };
+
         info!("Successfully created application");
-        Application {}
+        Self { window }
+    }
+
+    pub fn run(self) {
+        self.window.event_loop.run(move |event, _, control_flow| {
+            *control_flow = event_loop::ControlFlow::Poll;
+
+            match event {
+                event::Event::WindowEvent {
+                    event: event::WindowEvent::CloseRequested,
+                    window_id,
+                } => {
+                    if window_id == self.window.native_window.id() {
+                        *control_flow = event_loop::ControlFlow::Exit;
+                    }
+                }
+                event::Event::MainEventsCleared => {
+                    // TODO: Main Loop
+                }
+                _ => (),
+            }
+        });
     }
 
     fn setup_logger() -> Result<(), ApplicationError> {
