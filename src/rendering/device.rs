@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+use crate::rendering::instance::Instance;
+
 use ash::vk;
 use log::{info, warn};
 
@@ -51,6 +53,9 @@ impl From<vk::Result> for DeviceError {
 
 pub struct Device {
     physical_device: vk::PhysicalDevice,
+    device: ash::Device,
+
+    graphics_queue: vk::Queue,
 }
 
 struct QueueFamilyIndices {
@@ -79,11 +84,19 @@ impl QueueFamilyIndices {
 }
 
 impl Device {
-    pub fn new(instance: &ash::Instance) -> Result<Self, DeviceError> {
-        let physical_device = Self::pick_physical_device(instance)?;
+    pub fn new(instance: &Instance) -> Result<Self, DeviceError> {
+        let physical_device = Self::pick_physical_device(&instance.instance)?;
+        let device = Self::create_logical_device(&instance.instance, physical_device)?;
+
+        let queue_families = QueueFamilyIndices::new(&instance.instance, physical_device)?;
+        let graphics_queue = unsafe { device.get_device_queue(queue_families.graphics, 0) };
 
         info!("Successfully created device");
-        Ok(Self { physical_device })
+        Ok(Self {
+            physical_device,
+            device,
+            graphics_queue,
+        })
     }
 
     fn check_physical_device(
@@ -189,5 +202,49 @@ impl Device {
         Err(DeviceError::SuitabilityError(SuitabilityError(
             "Failed to find suitable physical device",
         )))
+    }
+
+    fn create_logical_device(
+        instance: &ash::Instance,
+        physical_device: vk::PhysicalDevice,
+    ) -> Result<ash::Device, DeviceError> {
+        let queue_families = QueueFamilyIndices::new(instance, physical_device)?;
+
+        let queue_priorities = &[1.0];
+        let queue_create_info = vk::DeviceQueueCreateInfo {
+            queue_family_index: queue_families.graphics,
+            queue_count: 1,
+            p_queue_priorities: queue_priorities.as_ptr(),
+            ..Default::default()
+        };
+
+        let physical_device_features = vk::PhysicalDeviceFeatures {
+            ..Default::default()
+        };
+
+        let device_create_info = vk::DeviceCreateInfo {
+            queue_create_info_count: 1,
+            p_queue_create_infos: &queue_create_info,
+            enabled_layer_count: 0,
+            pp_enabled_layer_names: std::ptr::null(),
+            enabled_extension_count: 0,
+            pp_enabled_extension_names: std::ptr::null(),
+            p_enabled_features: &physical_device_features,
+            ..Default::default()
+        };
+
+        unsafe {
+            let instance = instance.create_device(physical_device, &device_create_info, None)?;
+            info!("Successfully created logical device");
+            Ok(instance)
+        }
+    }
+}
+
+impl Drop for Device {
+    fn drop(&mut self) {
+        unsafe {
+            self.device.destroy_device(None);
+        }
     }
 }
