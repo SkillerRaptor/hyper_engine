@@ -5,7 +5,7 @@
  */
 
 use ash::vk;
-use log::{debug, info, warn};
+use log::{info, warn};
 
 pub struct SuitabilityError(&'static str);
 
@@ -90,12 +90,15 @@ impl Device {
         instance: &ash::Instance,
         physical_device: vk::PhysicalDevice,
     ) -> Result<(), DeviceError> {
+        info!("");
         let properties = unsafe { instance.get_physical_device_properties(physical_device) };
         let queue_families =
             unsafe { instance.get_physical_device_queue_family_properties(physical_device) };
 
         let device_name =
             unsafe { std::ffi::CStr::from_ptr(properties.device_name.as_ptr()).to_str()? };
+        info!("'{}' Info:", device_name);
+
         let device_type = match properties.device_type {
             ash::vk::PhysicalDeviceType::CPU => "CPU",
             ash::vk::PhysicalDeviceType::INTEGRATED_GPU => "Integrated GPU",
@@ -104,20 +107,18 @@ impl Device {
             ash::vk::PhysicalDeviceType::OTHER => "Unknown",
             _ => panic!(),
         };
-
-        debug!("Checking device: {} ({})", device_name, device_type);
+        info!("  Type: {}", device_type);
 
         let major_version = ash::vk::api_version_major(properties.api_version);
         let minor_version = ash::vk::api_version_minor(properties.api_version);
         let patch_version = ash::vk::api_version_patch(properties.api_version);
-
-        debug!(
+        info!(
             "  API Version: {}.{}.{}",
             major_version, minor_version, patch_version
         );
 
-        debug!("  Queue Family Count: {}", queue_families.len());
-        debug!("  | Count | Graphics | Compute | Transfer | Sparse Binding |");
+        info!("  Queue Family Count: {}", queue_families.len());
+        info!("  Count | Graphics | Compute | Transfer | Sparse Binding");
         for queue_family in queue_families.iter() {
             let graphics_support = if queue_family
                 .queue_flags
@@ -155,8 +156,8 @@ impl Device {
                 '-'
             };
 
-            debug!(
-                "  | {:>5} | {:>8} | {:>7} | {:>8} | {:>14} |",
+            info!(
+                "  {:>5} | {:>8} | {:>7} | {:>8} | {:>14}",
                 queue_family.queue_count,
                 graphics_support,
                 compute_support,
@@ -164,6 +165,7 @@ impl Device {
                 sparse_support
             );
         }
+        info!("");
 
         QueueFamilyIndices::new(instance, physical_device)?;
         Ok(())
@@ -180,7 +182,7 @@ impl Device {
                 continue;
             }
 
-            info!("Successfully selected physical device ({})", device_name);
+            info!("Successfully selected physical device ({})", device_name,);
             return Ok(physical_device);
         }
 

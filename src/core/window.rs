@@ -41,7 +41,12 @@ impl Window {
             .with_resizable(false)
             .build(&event_loop)?;
 
-        info!("Successfully created window");
+        info!(
+            "Successfully created window '{}' ({}x{})",
+            title,
+            native_window.inner_size().width,
+            native_window.inner_size().height
+        );
         Ok(Self {
             event_loop,
             native_window,
