@@ -1,0 +1,21 @@
+#-------------------------------------------------------------------------------------------
+# Copyright (c) 2022-present, SkillerRaptor <skillerraptor@protonmail.com>
+#
+# SPDX-License-Identifier: MIT
+#-------------------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------------------
+# Editor Config
+#-------------------------------------------------------------------------------------------
+root = true
+
+[*]
+end_of_line = lf
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Rust files
+[*.rs]
+indent_style = space
+indent_size = 4
