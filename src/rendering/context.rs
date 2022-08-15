@@ -82,7 +82,7 @@ impl RenderContext {
         let entry = unsafe { ash::Entry::load()? };
         let instance = Instance::new(&window, &entry)?;
         let surface = Surface::new(&window, &entry, &instance)?;
-        let device = Device::new(&instance)?;
+        let device = Device::new(&instance, &surface)?;
 
         Ok(Self {
             _device: device,

@@ -92,7 +92,7 @@ impl Instance {
             false
         };
 
-        let instance = Self::create_instance(&window, &entry, validation_enabled)?;
+        let instance = Self::create_instance(&window.native_window, &entry, validation_enabled)?;
         let (debug_loader, debug_messenger) =
             Self::create_debug_messenger(&entry, &instance, validation_enabled)?;
 
@@ -105,7 +105,7 @@ impl Instance {
     }
 
     fn create_instance(
-        window: &Window,
+        window: &winit::window::Window,
         entry: &ash::Entry,
         validation_enabled: bool,
     ) -> Result<ash::Instance, InstanceError> {
@@ -135,8 +135,7 @@ impl Instance {
             Vec::new()
         };
 
-        let mut extensions =
-            ash_window::enumerate_required_extensions(&window.native_window)?.to_vec();
+        let mut extensions = ash_window::enumerate_required_extensions(&window)?.to_vec();
         if validation_enabled {
             extensions.push(ash::extensions::ext::DebugUtils::name().as_ptr());
         }

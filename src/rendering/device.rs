@@ -5,6 +5,7 @@
  */
 
 use crate::rendering::instance::Instance;
+use crate::rendering::surface::Surface;
 
 use ash::vk;
 use log::{info, warn};
@@ -65,30 +66,67 @@ struct QueueFamilyIndices {
 impl QueueFamilyIndices {
     pub fn new(
         instance: &ash::Instance,
+        surface_loader: &ash::extensions::khr::Surface,
+        surface: vk::SurfaceKHR,
         physical_device: vk::PhysicalDevice,
     ) -> Result<Self, DeviceError> {
         let queue_families =
             unsafe { instance.get_physical_device_queue_family_properties(physical_device) };
-        let graphics = queue_families
-            .iter()
-            .position(|properties| {
-                properties
-                    .queue_flags
-                    .contains(ash::vk::QueueFlags::GRAPHICS)
-            })
-            .map(|i| i as u32)
-            .ok_or(SuitabilityError("Missing graphics queue"))?;
 
-        Ok(Self { graphics })
+        let mut graphics = None;
+        for (i, properties) in queue_families.iter().enumerate() {
+            if !properties
+                .queue_flags
+                .contains(ash::vk::QueueFlags::GRAPHICS)
+            {
+                continue;
+            }
+
+            if unsafe {
+                !surface_loader.get_physical_device_surface_support(
+                    physical_device,
+                    i as u32,
+                    surface,
+                )?
+            } {
+                continue;
+            }
+
+            graphics = Some(i as u32);
+        }
+
+        if graphics.is_none() {
+            return Err(DeviceError::SuitabilityError(SuitabilityError(
+                "Missing graphics/present queue",
+            )));
+        }
+
+        Ok(Self {
+            graphics: graphics.unwrap(),
+        })
     }
 }
 
 impl Device {
-    pub fn new(instance: &Instance) -> Result<Self, DeviceError> {
-        let physical_device = Self::pick_physical_device(&instance.instance)?;
-        let device = Self::create_logical_device(&instance.instance, physical_device)?;
+    pub fn new(instance: &Instance, surface: &Surface) -> Result<Self, DeviceError> {
+        let physical_device = Self::pick_physical_device(
+            &instance.instance,
+            &surface.surface_loader,
+            surface.surface,
+        )?;
+        let device = Self::create_logical_device(
+            &instance.instance,
+            &surface.surface_loader,
+            surface.surface,
+            physical_device,
+        )?;
 
-        let queue_families = QueueFamilyIndices::new(&instance.instance, physical_device)?;
+        let queue_families = QueueFamilyIndices::new(
+            &instance.instance,
+            &surface.surface_loader,
+            surface.surface,
+            physical_device,
+        )?;
         let graphics_queue = unsafe { device.get_device_queue(queue_families.graphics, 0) };
 
         info!("Successfully created device");
@@ -101,6 +139,8 @@ impl Device {
 
     fn check_physical_device(
         instance: &ash::Instance,
+        surface_loader: &ash::extensions::khr::Surface,
+        surface: vk::SurfaceKHR,
         physical_device: vk::PhysicalDevice,
     ) -> Result<(), DeviceError> {
         info!("");
@@ -180,17 +220,23 @@ impl Device {
         }
         info!("");
 
-        QueueFamilyIndices::new(instance, physical_device)?;
+        QueueFamilyIndices::new(&instance, &surface_loader, surface, physical_device)?;
         Ok(())
     }
 
-    fn pick_physical_device(instance: &ash::Instance) -> Result<vk::PhysicalDevice, DeviceError> {
+    fn pick_physical_device(
+        instance: &ash::Instance,
+        surface_loader: &ash::extensions::khr::Surface,
+        surface: vk::SurfaceKHR,
+    ) -> Result<vk::PhysicalDevice, DeviceError> {
         for physical_device in unsafe { instance.enumerate_physical_devices()? } {
             let properties = unsafe { instance.get_physical_device_properties(physical_device) };
             let device_name =
                 unsafe { std::ffi::CStr::from_ptr(properties.device_name.as_ptr()).to_str()? };
 
-            if let Err(error) = Self::check_physical_device(&instance, physical_device) {
+            if let Err(error) =
+                Self::check_physical_device(&instance, &surface_loader, surface, physical_device)
+            {
                 warn!("Skipped physical device ({}): {}", device_name, error);
                 continue;
             }
@@ -206,9 +252,12 @@ impl Device {
 
     fn create_logical_device(
         instance: &ash::Instance,
+        surface_loader: &ash::extensions::khr::Surface,
+        surface: vk::SurfaceKHR,
         physical_device: vk::PhysicalDevice,
     ) -> Result<ash::Device, DeviceError> {
-        let queue_families = QueueFamilyIndices::new(instance, physical_device)?;
+        let queue_families =
+            QueueFamilyIndices::new(&instance, &surface_loader, surface, physical_device)?;
 
         // NOTE: Using HashSet for compute and transfer queue later
         let mut unique_queues = std::collections::HashSet::new();
