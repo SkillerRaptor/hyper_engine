@@ -65,7 +65,7 @@ unsafe extern "system" fn vulkan_debug_callback(
 pub struct Instance {
     validation_enabled: bool,
     pub instance: ash::Instance,
-    debug_utils: ash::extensions::ext::DebugUtils,
+    debug_loader: ash::extensions::ext::DebugUtils,
     debug_messenger: vk::DebugUtilsMessengerEXT,
 }
 
@@ -93,13 +93,13 @@ impl Instance {
         };
 
         let instance = Self::create_instance(&window, &entry, validation_enabled)?;
-        let (debug_utils, debug_messenger) =
+        let (debug_loader, debug_messenger) =
             Self::create_debug_messenger(&entry, &instance, validation_enabled)?;
 
         Ok(Self {
             validation_enabled,
             instance,
-            debug_utils,
+            debug_loader,
             debug_messenger,
         })
     }
@@ -199,7 +199,7 @@ impl Drop for Instance {
     fn drop(&mut self) {
         unsafe {
             if self.validation_enabled {
-                self.debug_utils
+                self.debug_loader
                     .destroy_debug_utils_messenger(self.debug_messenger, None);
             }
             self.instance.destroy_instance(None);

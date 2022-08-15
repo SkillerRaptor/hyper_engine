@@ -210,21 +210,28 @@ impl Device {
     ) -> Result<ash::Device, DeviceError> {
         let queue_families = QueueFamilyIndices::new(instance, physical_device)?;
 
+        // NOTE: Using HashSet for compute and transfer queue later
+        let mut unique_queues = std::collections::HashSet::new();
+        unique_queues.insert(queue_families.graphics);
+
         let queue_priorities = &[1.0];
-        let queue_create_info = vk::DeviceQueueCreateInfo {
-            queue_family_index: queue_families.graphics,
-            queue_count: 1,
-            p_queue_priorities: queue_priorities.as_ptr(),
-            ..Default::default()
-        };
+        let queue_create_infos = unique_queues
+            .iter()
+            .map(|index| vk::DeviceQueueCreateInfo {
+                queue_family_index: *index,
+                queue_count: 1,
+                p_queue_priorities: queue_priorities.as_ptr(),
+                ..Default::default()
+            })
+            .collect::<Vec<_>>();
 
         let physical_device_features = vk::PhysicalDeviceFeatures {
             ..Default::default()
         };
 
         let device_create_info = vk::DeviceCreateInfo {
-            queue_create_info_count: 1,
-            p_queue_create_infos: &queue_create_info,
+            queue_create_info_count: queue_create_infos.len() as u32,
+            p_queue_create_infos: queue_create_infos.as_ptr(),
             enabled_layer_count: 0,
             pp_enabled_layer_names: std::ptr::null(),
             enabled_extension_count: 0,

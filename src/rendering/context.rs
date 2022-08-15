@@ -7,12 +7,14 @@
 use crate::core::window::Window;
 use crate::rendering::device::{Device, DeviceError};
 use crate::rendering::instance::{Instance, InstanceError};
+use crate::rendering::surface::{Surface, SurfaceError};
 
 pub enum RenderContextError {
     LoadingError(ash::LoadingError),
     NulError(std::ffi::NulError),
 
     InstanceError(InstanceError),
+    SurfaceError(SurfaceError),
     DeviceError(DeviceError),
 }
 
@@ -26,6 +28,9 @@ impl std::fmt::Display for RenderContextError {
                 write!(formatter, "{}", error)
             }
             RenderContextError::InstanceError(error) => {
+                write!(formatter, "{}", error)
+            }
+            RenderContextError::SurfaceError(error) => {
                 write!(formatter, "{}", error)
             }
             RenderContextError::DeviceError(error) => {
@@ -53,6 +58,12 @@ impl From<InstanceError> for RenderContextError {
     }
 }
 
+impl From<SurfaceError> for RenderContextError {
+    fn from(error: SurfaceError) -> Self {
+        RenderContextError::SurfaceError(error)
+    }
+}
+
 impl From<DeviceError> for RenderContextError {
     fn from(error: DeviceError) -> Self {
         RenderContextError::DeviceError(error)
@@ -61,6 +72,7 @@ impl From<DeviceError> for RenderContextError {
 
 pub struct RenderContext {
     _device: Device,
+    _surface: Surface,
     _instance: Instance,
     _entry: ash::Entry,
 }
@@ -69,10 +81,12 @@ impl RenderContext {
     pub fn new(window: &Window) -> Result<Self, RenderContextError> {
         let entry = unsafe { ash::Entry::load()? };
         let instance = Instance::new(&window, &entry)?;
+        let surface = Surface::new(&window, &entry, &instance)?;
         let device = Device::new(&instance)?;
 
         Ok(Self {
             _device: device,
+            _surface: surface,
             _instance: instance,
             _entry: entry,
         })
