@@ -10,7 +10,7 @@ use log::{error, info};
 use winit::{event, event_loop, platform::run_return::EventLoopExtRunReturn};
 
 use crate::core::window::Window;
-use crate::rendering::render_context::RenderContext;
+use crate::rendering::context::RenderContext;
 
 pub enum ApplicationError {
     IoError(std::io::Error),

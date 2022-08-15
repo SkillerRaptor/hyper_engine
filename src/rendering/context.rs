@@ -5,6 +5,7 @@
  */
 
 use crate::core::window::Window;
+use crate::rendering::device::{Device, DeviceError};
 
 use ash::vk;
 use log::{debug, error, info, trace, warn};
@@ -13,6 +14,7 @@ pub enum RenderContextError {
     LoadingError(ash::LoadingError),
     NulError(std::ffi::NulError),
     VulkanError(vk::Result),
+    DeviceError(DeviceError),
 }
 
 impl std::fmt::Display for RenderContextError {
@@ -25,6 +27,9 @@ impl std::fmt::Display for RenderContextError {
                 write!(formatter, "{}", error)
             }
             RenderContextError::VulkanError(error) => {
+                write!(formatter, "{}", error)
+            }
+            RenderContextError::DeviceError(error) => {
                 write!(formatter, "{}", error)
             }
         }
@@ -49,12 +54,19 @@ impl From<vk::Result> for RenderContextError {
     }
 }
 
+impl From<DeviceError> for RenderContextError {
+    fn from(error: DeviceError) -> Self {
+        RenderContextError::DeviceError(error)
+    }
+}
+
 pub struct RenderContext {
     validation_enabled: bool,
     _entry: ash::Entry,
     instance: ash::Instance,
     debug_utils: ash::extensions::ext::DebugUtils,
     debug_messenger: vk::DebugUtilsMessengerEXT,
+    device: Device,
 }
 
 unsafe extern "system" fn vulkan_debug_callback(
@@ -75,9 +87,7 @@ unsafe extern "system" fn vulkan_debug_callback(
         ash::vk::DebugUtilsMessageSeverityFlagsEXT::ERROR => {
             error!("{}", message)
         }
-        _ => {
-            trace!("{}", message)
-        }
+        _ => (),
     };
 
     ash::vk::FALSE
@@ -110,6 +120,7 @@ impl RenderContext {
         let instance = Self::create_instance(&window, &entry, validation_enabled)?;
         let (debug_utils, debug_messenger) =
             Self::create_debug_messenger(&entry, &instance, validation_enabled)?;
+        let device = Device::new(&instance)?;
 
         Ok(Self {
             validation_enabled,
@@ -117,6 +128,7 @@ impl RenderContext {
             instance,
             debug_utils,
             debug_messenger,
+            device,
         })
     }
 
