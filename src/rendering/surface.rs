@@ -12,12 +12,16 @@ use ash::vk;
 use log::debug;
 
 pub struct Surface {
-    pub surface_loader: ash::extensions::khr::Surface,
     pub surface: vk::SurfaceKHR,
+    pub surface_loader: ash::extensions::khr::Surface,
 }
 
 impl Surface {
-    pub fn new(window: &Window, entry: &ash::Entry, instance: &Instance) -> Result<Self, Error> {
+    pub fn new(
+        window: &Window,
+        entry: &ash::Entry,
+        instance: &std::rc::Rc<Instance>,
+    ) -> Result<Self, Error> {
         let surface_loader = ash::extensions::khr::Surface::new(entry, &instance.instance);
         let surface = unsafe {
             ash_window::create_surface(entry, &instance.instance, &window.native_window, None)?
@@ -25,8 +29,8 @@ impl Surface {
 
         debug!("Created vulkan surface");
         Ok(Self {
-            surface_loader,
             surface,
+            surface_loader,
         })
     }
 }

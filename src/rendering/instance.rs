@@ -34,10 +34,10 @@ unsafe extern "system" fn vulkan_debug_callback(
     ash::vk::FALSE
 }
 pub struct Instance {
-    validation_enabled: bool,
+    pub debug_messenger: vk::DebugUtilsMessengerEXT,
+    pub debug_loader: ash::extensions::ext::DebugUtils,
     pub instance: ash::Instance,
-    debug_loader: ash::extensions::ext::DebugUtils,
-    debug_messenger: vk::DebugUtilsMessengerEXT,
+    validation_enabled: bool,
 }
 
 impl Instance {
@@ -68,10 +68,10 @@ impl Instance {
             Self::create_debug_messenger(&entry, &instance, validation_enabled)?;
 
         Ok(Self {
-            validation_enabled,
-            instance,
-            debug_loader,
             debug_messenger,
+            debug_loader,
+            instance,
+            validation_enabled,
         })
     }
 

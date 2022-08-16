@@ -7,18 +7,12 @@
 use crate::rendering::error::{Error, SuitabilityError};
 use crate::rendering::instance::Instance;
 use crate::rendering::surface::Surface;
+use crate::rendering::swapchain::SwapchainSupport;
 
 use ash::vk;
 use log::{debug, warn};
 
-pub struct Device {
-    physical_device: vk::PhysicalDevice,
-    device: ash::Device,
-
-    graphics_queue: vk::Queue,
-}
-
-struct QueueFamilyIndices {
+pub struct QueueFamilyIndices {
     graphics: u32,
 }
 
@@ -66,8 +60,20 @@ impl QueueFamilyIndices {
     }
 }
 
+pub struct Device {
+    pub graphics_queue: vk::Queue,
+    pub device: ash::Device,
+    pub physical_device: vk::PhysicalDevice,
+}
+
 impl Device {
-    pub fn new(instance: &Instance, surface: &Surface) -> Result<Self, Error> {
+    const DEVICE_EXTENSIONS: &[&'static std::ffi::CStr] =
+        &[ash::extensions::khr::Swapchain::name()];
+
+    pub fn new(
+        instance: &std::rc::Rc<Instance>,
+        surface: &std::rc::Rc<Surface>,
+    ) -> Result<Self, Error> {
         let physical_device = Self::pick_physical_device(
             &instance.instance,
             &surface.surface_loader,
@@ -89,20 +95,10 @@ impl Device {
         let graphics_queue = unsafe { device.get_device_queue(queue_families.graphics, 0) };
 
         Ok(Self {
-            physical_device,
-            device,
             graphics_queue,
+            device,
+            physical_device,
         })
-    }
-
-    fn check_physical_device(
-        instance: &ash::Instance,
-        surface_loader: &ash::extensions::khr::Surface,
-        surface: vk::SurfaceKHR,
-        physical_device: vk::PhysicalDevice,
-    ) -> Result<(), Error> {
-        QueueFamilyIndices::new(&instance, &surface_loader, surface, physical_device)?;
-        Ok(())
     }
 
     fn pick_physical_device(
@@ -123,87 +119,136 @@ impl Device {
             }
 
             debug!("Selected physical device ({})", device_name);
-
-            let properties = unsafe { instance.get_physical_device_properties(physical_device) };
-            let queue_families =
-                unsafe { instance.get_physical_device_queue_family_properties(physical_device) };
-
-            let device_name =
-                unsafe { std::ffi::CStr::from_ptr(properties.device_name.as_ptr()).to_str()? };
-            debug!("'{}' Info:", device_name);
-
-            let device_type = match properties.device_type {
-                ash::vk::PhysicalDeviceType::CPU => "CPU",
-                ash::vk::PhysicalDeviceType::INTEGRATED_GPU => "Integrated GPU",
-                ash::vk::PhysicalDeviceType::DISCRETE_GPU => "Discrete GPU",
-                ash::vk::PhysicalDeviceType::VIRTUAL_GPU => "Virtual GPU",
-                ash::vk::PhysicalDeviceType::OTHER => "Unknown",
-                _ => panic!(),
-            };
-            debug!("  Type: {}", device_type);
-
-            let major_version = ash::vk::api_version_major(properties.api_version);
-            let minor_version = ash::vk::api_version_minor(properties.api_version);
-            let patch_version = ash::vk::api_version_patch(properties.api_version);
-            debug!(
-                "  API Version: {}.{}.{}",
-                major_version, minor_version, patch_version
-            );
-
-            debug!("  Queue Family Count: {}", queue_families.len());
-            debug!("  Count | Graphics | Compute | Transfer | Sparse Binding");
-            for queue_family in queue_families.iter() {
-                let graphics_support = if queue_family
-                    .queue_flags
-                    .contains(ash::vk::QueueFlags::GRAPHICS)
-                {
-                    '+'
-                } else {
-                    '-'
-                };
-
-                let compute_support = if queue_family
-                    .queue_flags
-                    .contains(ash::vk::QueueFlags::COMPUTE)
-                {
-                    '+'
-                } else {
-                    '-'
-                };
-
-                let transfer_support = if queue_family
-                    .queue_flags
-                    .contains(ash::vk::QueueFlags::TRANSFER)
-                {
-                    '+'
-                } else {
-                    '-'
-                };
-
-                let sparse_support = if queue_family
-                    .queue_flags
-                    .contains(ash::vk::QueueFlags::SPARSE_BINDING)
-                {
-                    '+'
-                } else {
-                    '-'
-                };
-
-                debug!(
-                    "  {:>5} | {:>8} | {:>7} | {:>8} | {:>14}",
-                    queue_family.queue_count,
-                    graphics_support,
-                    compute_support,
-                    transfer_support,
-                    sparse_support
-                );
-            }
-
             return Ok(physical_device);
         }
 
         Err(Error::SuitabilityError(SuitabilityError(
             "Failed to find suitable physical device",
+        )))
+    }
+
+    fn check_physical_device(
+        instance: &ash::Instance,
+        surface_loader: &ash::extensions::khr::Surface,
+        surface: vk::SurfaceKHR,
+        physical_device: vk::PhysicalDevice,
+    ) -> Result<(), Error> {
+        let properties = unsafe { instance.get_physical_device_properties(physical_device) };
+        let queue_families =
+            unsafe { instance.get_physical_device_queue_family_properties(physical_device) };
+
+        let device_name =
+            unsafe { std::ffi::CStr::from_ptr(properties.device_name.as_ptr()).to_str()? };
+        debug!("'{}' Info:", device_name);
+
+        let device_type = match properties.device_type {
+            ash::vk::PhysicalDeviceType::CPU => "CPU",
+            ash::vk::PhysicalDeviceType::INTEGRATED_GPU => "Integrated GPU",
+            ash::vk::PhysicalDeviceType::DISCRETE_GPU => "Discrete GPU",
+            ash::vk::PhysicalDeviceType::VIRTUAL_GPU => "Virtual GPU",
+            ash::vk::PhysicalDeviceType::OTHER => "Unknown",
+            _ => panic!(),
+        };
+        debug!("  Type: {}", device_type);
+
+        let major_version = ash::vk::api_version_major(properties.api_version);
+        let minor_version = ash::vk::api_version_minor(properties.api_version);
+        let patch_version = ash::vk::api_version_patch(properties.api_version);
+        debug!(
+            "  API Version: {}.{}.{}",
+            major_version, minor_version, patch_version
+        );
+
+        debug!("  Queue Family Count: {}", queue_families.len());
+        debug!("  Count | Graphics | Compute | Transfer | Sparse Binding");
+        for queue_family in queue_families.iter() {
+            let graphics_support = if queue_family
+                .queue_flags
+                .contains(ash::vk::QueueFlags::GRAPHICS)
+            {
+                '+'
+            } else {
+                '-'
+            };
+
+            let compute_support = if queue_family
+                .queue_flags
+                .contains(ash::vk::QueueFlags::COMPUTE)
+            {
+                '+'
+            } else {
+                '-'
+            };
+
+            let transfer_support = if queue_family
+                .queue_flags
+                .contains(ash::vk::QueueFlags::TRANSFER)
+            {
+                '+'
+            } else {
+                '-'
+            };
+
+            let sparse_support = if queue_family
+                .queue_flags
+                .contains(ash::vk::QueueFlags::SPARSE_BINDING)
+            {
+                '+'
+            } else {
+                '-'
+            };
+
+            debug!(
+                "  {:>5} | {:>8} | {:>7} | {:>8} | {:>14}",
+                queue_family.queue_count,
+                graphics_support,
+                compute_support,
+                transfer_support,
+                sparse_support
+            );
+        }
+
+        let queue_family_indices =
+            QueueFamilyIndices::new(&instance, &surface_loader, surface, physical_device)?;
+        debug!("  Graphics Queue Id: {}", queue_family_indices.graphics);
+
+        Self::check_physical_device_extensions(instance, physical_device)?;
+        debug!("  Requested Extensions: {:?}", Self::DEVICE_EXTENSIONS);
+
+        let support = SwapchainSupport::new(surface_loader, surface, physical_device)?;
+        if support.formats.is_empty() || support.present_modes.is_empty() {
+            return Err(Error::SuitabilityError(SuitabilityError(
+                "Insufficient swapchain support",
+            )));
+        }
+
+        debug!("  Surface Format Count: {}", support.formats.len());
+        debug!("  Present Mode Count: {}", support.present_modes.len());
+
+        Ok(())
+    }
+
+    fn check_physical_device_extensions(
+        instance: &ash::Instance,
+        physical_device: vk::PhysicalDevice,
+    ) -> Result<(), Error> {
+        let extensions = unsafe {
+            instance
+                .enumerate_device_extension_properties(physical_device)?
+                .iter()
+                .map(|extension| std::ffi::CStr::from_ptr(extension.extension_name.as_ptr()))
+                .collect::<std::collections::HashSet<_>>()
+        };
+
+        if Self::DEVICE_EXTENSIONS
+            .iter()
+            .all(|extension| extensions.contains(extension))
+        {
+            return Ok(());
+        }
+
+        Err(Error::SuitabilityError(SuitabilityError(
+            "Missing required device extensions",
         )))
     }
 
@@ -235,13 +280,18 @@ impl Device {
             ..Default::default()
         };
 
+        let device_extensions = Self::DEVICE_EXTENSIONS
+            .iter()
+            .map(|extension| extension.as_ptr())
+            .collect::<Vec<_>>();
+
         let device_create_info = vk::DeviceCreateInfo {
             queue_create_info_count: queue_create_infos.len() as u32,
             p_queue_create_infos: queue_create_infos.as_ptr(),
             enabled_layer_count: 0,
             pp_enabled_layer_names: std::ptr::null(),
-            enabled_extension_count: 0,
-            pp_enabled_extension_names: std::ptr::null(),
+            enabled_extension_count: device_extensions.len() as u32,
+            pp_enabled_extension_names: device_extensions.as_ptr(),
             p_enabled_features: &physical_device_features,
             ..Default::default()
         };
