@@ -42,7 +42,7 @@ impl Window {
             .build(&event_loop)?;
 
         info!(
-            "Successfully created window '{}' ({}x{})",
+            "Created window '{}' (width={}, height={})",
             title,
             native_window.inner_size().width,
             native_window.inner_size().height

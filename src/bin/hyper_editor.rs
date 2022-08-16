@@ -8,7 +8,9 @@ extern crate hyper_engine;
 
 use hyper_engine::core;
 
-fn main() {
+fn main() -> Result<(), String> {
     let mut application = core::application::Application::new();
     application.run();
+
+    Ok(())
 }

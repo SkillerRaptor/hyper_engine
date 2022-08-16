@@ -5,8 +5,7 @@
  */
 
 use colored::Colorize;
-use core::panic;
-use log::{error, info};
+use log::error;
 use winit::{event, event_loop, platform::run_return::EventLoopExtRunReturn};
 
 use crate::core::window::Window;
@@ -51,14 +50,14 @@ impl Application {
     pub fn new() -> Self {
         if let Err(error) = Self::setup_logger() {
             error!("Failed to create logger: {}", error);
-            panic!();
+            std::process::exit(1);
         }
 
         let window = match Window::new("HyperEngine", 1280, 720) {
             Ok(window) => window,
             Err(error) => {
                 error!("Failed to create window: {}", error);
-                panic!();
+                std::process::exit(1);
             }
         };
 
@@ -66,11 +65,10 @@ impl Application {
             Ok(window) => window,
             Err(error) => {
                 error!("Failed to create render context: {}", error);
-                panic!();
+                std::process::exit(1);
             }
         };
 
-        info!("Successfully created application");
         Self {
             window,
             render_context,
@@ -143,7 +141,6 @@ impl Application {
             )
             .apply()?;
 
-        info!("Successfully created logger");
         Ok(())
     }
 }

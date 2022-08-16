@@ -5,39 +5,10 @@
  */
 
 use crate::core::window::Window;
+use crate::rendering::error::Error;
 
 use ash::vk;
-use log::{debug, error, info, warn};
-
-pub enum InstanceError {
-    NulError(std::ffi::NulError),
-    VulkanError(vk::Result),
-}
-
-impl std::fmt::Display for InstanceError {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            InstanceError::NulError(error) => {
-                write!(formatter, "{}", error)
-            }
-            InstanceError::VulkanError(error) => {
-                write!(formatter, "{}", error)
-            }
-        }
-    }
-}
-
-impl From<std::ffi::NulError> for InstanceError {
-    fn from(error: std::ffi::NulError) -> Self {
-        InstanceError::NulError(error)
-    }
-}
-
-impl From<vk::Result> for InstanceError {
-    fn from(error: vk::Result) -> Self {
-        InstanceError::VulkanError(error)
-    }
-}
+use log::{debug, error, warn};
 
 unsafe extern "system" fn vulkan_debug_callback(
     message_severity: ash::vk::DebugUtilsMessageSeverityFlagsEXT,
@@ -70,9 +41,9 @@ pub struct Instance {
 }
 
 impl Instance {
-    const VALIDATION_LAYER: &str = "VK_LAYER_KHRONOS_validation";
+    const VALIDATION_LAYER: &'static str = "VK_LAYER_KHRONOS_validation";
 
-    pub fn new(window: &Window, entry: &ash::Entry) -> Result<Self, InstanceError> {
+    pub fn new(window: &Window, entry: &ash::Entry) -> Result<Self, Error> {
         let available_layers = entry
             .enumerate_instance_layer_properties()?
             .iter()
@@ -108,7 +79,7 @@ impl Instance {
         window: &winit::window::Window,
         entry: &ash::Entry,
         validation_enabled: bool,
-    ) -> Result<ash::Instance, InstanceError> {
+    ) -> Result<ash::Instance, Error> {
         let title = std::ffi::CString::new("HyperEngine")?.as_ptr();
         let application_info = ash::vk::ApplicationInfo {
             p_application_name: title,
@@ -152,7 +123,7 @@ impl Instance {
 
         unsafe {
             let instance = entry.create_instance(&instance_create_info, None)?;
-            info!("Successfully created instance");
+            debug!("Created vulkan instance");
             Ok(instance)
         }
     }
@@ -166,7 +137,7 @@ impl Instance {
             ash::extensions::ext::DebugUtils,
             ash::vk::DebugUtilsMessengerEXT,
         ),
-        InstanceError,
+        Error,
     > {
         let debug_utils = ash::extensions::ext::DebugUtils::new(&entry, &instance);
 
@@ -189,7 +160,7 @@ impl Instance {
             debug_utils.create_debug_utils_messenger(&debug_utils_messenger_create_info, None)?
         };
 
-        info!("Successfully created debug messenger");
+        debug!("Created vulkan debug messenger");
         Ok((debug_utils, debug_messenger))
     }
 }
