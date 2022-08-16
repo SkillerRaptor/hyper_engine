@@ -10,6 +10,7 @@ use winit::{event, event_loop, platform::run_return::EventLoopExtRunReturn};
 
 use crate::core::window::Window;
 use crate::rendering::context::RenderContext;
+use crate::rendering::renderer::Renderer;
 
 pub enum ApplicationError {
     IoError(std::io::Error),
@@ -42,8 +43,10 @@ impl From<log::SetLoggerError> for ApplicationError {
 }
 
 pub struct Application {
-    window: Window,
+    renderer: Renderer,
     render_context: RenderContext,
+    window: Window,
+    destroyed: bool,
 }
 
 impl Application {
@@ -69,9 +72,19 @@ impl Application {
             }
         };
 
+        let renderer = match Renderer::new(&render_context) {
+            Ok(window) => window,
+            Err(error) => {
+                error!("Failed to create renderer: {}", error);
+                std::process::exit(1);
+            }
+        };
+
         Self {
-            window,
+            renderer,
             render_context,
+            window,
+            destroyed: false,
         }
     }
 
@@ -83,13 +96,30 @@ impl Application {
                 event::Event::WindowEvent {
                     event: event::WindowEvent::CloseRequested,
                     window_id,
-                } => {
-                    if window_id == self.window.native_window.id() {
-                        *control_flow = event_loop::ControlFlow::Exit;
+                } if window_id == self.window.native_window.id() => {
+                    self.destroyed = true;
+                    *control_flow = event_loop::ControlFlow::Exit;
+
+                    unsafe {
+                        self.render_context
+                            .device
+                            .device
+                            .device_wait_idle()
+                            .unwrap();
                     }
                 }
-                event::Event::MainEventsCleared => {
-                    // TODO: Main Loop
+                event::Event::MainEventsCleared if !self.destroyed => {
+                    if let Err(error) = self.renderer.begin_frame() {
+                        error!("Failed to begin frame: {}", error);
+                        std::process::exit(1);
+                    }
+
+                    self.renderer.draw();
+
+                    if let Err(error) = self.renderer.end_frame() {
+                        error!("Failed to end frame: {}", error);
+                        std::process::exit(1);
+                    }
                 }
                 _ => (),
             }

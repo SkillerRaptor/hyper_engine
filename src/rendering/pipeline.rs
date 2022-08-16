@@ -17,8 +17,8 @@ enum ShaderStage {
 }
 
 pub struct Pipeline {
-    pipeline: vk::Pipeline,
-    pipeline_layout: vk::PipelineLayout,
+    pub pipeline: vk::Pipeline,
+    pub pipeline_layout: vk::PipelineLayout,
     device: std::rc::Rc<Device>,
 }
 
@@ -133,6 +133,13 @@ impl Pipeline {
             ..Default::default()
         };
 
+        let dynamic_states = &[vk::DynamicState::VIEWPORT, vk::DynamicState::SCISSOR];
+        let dynamic_state_create_info = vk::PipelineDynamicStateCreateInfo {
+            dynamic_state_count: dynamic_states.len() as u32,
+            p_dynamic_states: dynamic_states.as_ptr(),
+            ..Default::default()
+        };
+
         let pipeline_layout_info_create_info = vk::PipelineLayoutCreateInfo {
             set_layout_count: 0 as u32,
             p_set_layouts: std::ptr::null(),
@@ -170,7 +177,7 @@ impl Pipeline {
             p_multisample_state: &multisample_state_create_info,
             p_depth_stencil_state: std::ptr::null(),
             p_color_blend_state: &color_blend_state_create_info,
-            p_dynamic_state: std::ptr::null(),
+            p_dynamic_state: &dynamic_state_create_info,
             layout: pipeline_layout,
             render_pass: vk::RenderPass::null(),
             subpass: 0,
@@ -309,6 +316,7 @@ impl Pipeline {
             "  Attachment Count: {:?}",
             color_blend_state_create_info.attachment_count
         );
+        debug!("  Dynamic States: {:?}", dynamic_states);
         debug!(
             "  Descriptor Set Layout Count: {}",
             pipeline_layout_info_create_info.set_layout_count

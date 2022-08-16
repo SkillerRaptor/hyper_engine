@@ -13,7 +13,7 @@ use ash::vk;
 use log::{debug, warn};
 
 pub struct QueueFamilyIndices {
-    graphics: u32,
+    pub graphics: u32,
 }
 
 impl QueueFamilyIndices {

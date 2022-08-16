@@ -16,11 +16,11 @@ use log::info;
 
 // NOTE: Using Rc for ref-counting, replace with Arc when multithreading
 pub struct RenderContext {
-    _pipeline: std::rc::Rc<Pipeline>,
-    _swapchain: std::rc::Rc<Swapchain>,
-    _device: std::rc::Rc<Device>,
-    _surface: std::rc::Rc<Surface>,
-    _instance: std::rc::Rc<Instance>,
+    pub pipeline: std::rc::Rc<Pipeline>,
+    pub swapchain: std::rc::Rc<Swapchain>,
+    pub device: std::rc::Rc<Device>,
+    pub surface: std::rc::Rc<Surface>,
+    pub instance: std::rc::Rc<Instance>,
     _entry: ash::Entry,
 }
 
@@ -35,11 +35,11 @@ impl RenderContext {
 
         info!("Created render context");
         Ok(Self {
-            _pipeline: pipeline,
-            _swapchain: swapchain,
-            _device: device,
-            _surface: surface,
-            _instance: instance,
+            pipeline,
+            swapchain,
+            device,
+            surface,
+            instance,
             _entry: entry,
         })
     }
