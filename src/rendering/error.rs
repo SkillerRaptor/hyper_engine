@@ -6,9 +6,11 @@
 
 use ash::vk;
 
+pub struct AlignError(pub &'static str);
 pub struct SuitabilityError(pub &'static str);
 
 pub enum Error {
+    AlignError(AlignError),
     SuitabilityError(SuitabilityError),
 
     NulError(std::ffi::NulError),
@@ -21,6 +23,9 @@ pub enum Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Error::AlignError(error) => {
+                write!(formatter, "{}", error.0)
+            }
             Error::SuitabilityError(error) => {
                 write!(formatter, "{}", error.0)
             }
@@ -37,6 +42,12 @@ impl std::fmt::Display for Error {
                 write!(formatter, "{}", error)
             }
         }
+    }
+}
+
+impl From<AlignError> for Error {
+    fn from(error: AlignError) -> Self {
+        Error::AlignError(error)
     }
 }
 

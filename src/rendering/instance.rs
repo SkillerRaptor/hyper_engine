@@ -80,11 +80,11 @@ impl Instance {
         entry: &ash::Entry,
         validation_enabled: bool,
     ) -> Result<ash::Instance, Error> {
-        let title = std::ffi::CString::new("HyperEngine")?.as_ptr();
+        let title = std::ffi::CString::new("HyperEngine")?;
         let application_info = ash::vk::ApplicationInfo {
-            p_application_name: title,
+            p_application_name: title.as_ptr(),
             application_version: ash::vk::make_api_version(0, 1, 0, 0),
-            p_engine_name: title,
+            p_engine_name: title.as_ptr(),
             engine_version: ash::vk::make_api_version(0, 1, 0, 0),
             api_version: ash::vk::API_VERSION_1_3,
             ..Default::default()

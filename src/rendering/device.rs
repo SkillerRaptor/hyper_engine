@@ -285,7 +285,13 @@ impl Device {
             .map(|extension| extension.as_ptr())
             .collect::<Vec<_>>();
 
+        let dynamic_rendering_feature = vk::PhysicalDeviceDynamicRenderingFeatures {
+            dynamic_rendering: true as u32,
+            ..Default::default()
+        };
+
         let device_create_info = vk::DeviceCreateInfo {
+            p_next: unsafe { std::mem::transmute(&dynamic_rendering_feature) },
             queue_create_info_count: queue_create_infos.len() as u32,
             p_queue_create_infos: queue_create_infos.as_ptr(),
             enabled_layer_count: 0,
