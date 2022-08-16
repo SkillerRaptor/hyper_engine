@@ -13,7 +13,6 @@ jobs:
           - stable
           - beta
           - nightly
-        matrix:
         os:
           - ubuntu-latest
           - macos-latest
