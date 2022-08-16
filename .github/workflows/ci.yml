@@ -25,9 +25,9 @@ jobs:
 
       - name: Build
         run: |
-          cargo build --verbose
+          cargo build
 
       - name: Test
         run: |
-          cargo test --verbose
+          cargo test
 

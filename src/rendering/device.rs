@@ -67,7 +67,7 @@ pub struct Device {
 }
 
 impl Device {
-    const DEVICE_EXTENSIONS: &[&'static std::ffi::CStr] =
+    const DEVICE_EXTENSIONS: &'static [&'static std::ffi::CStr] =
         &[ash::extensions::khr::Swapchain::name()];
 
     pub fn new(
