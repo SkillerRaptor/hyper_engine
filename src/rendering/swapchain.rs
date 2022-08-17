@@ -109,24 +109,21 @@ impl Swapchain {
         // NOTE: Using exlusive sharing mode cause graphics & present queue are the same
         let image_sharing_mode = vk::SharingMode::EXCLUSIVE;
 
-        let swapchain_create_info = vk::SwapchainCreateInfoKHR {
-            surface: surface,
-            min_image_count: image_count,
-            image_format: surface_format.format,
-            image_color_space: surface_format.color_space,
-            image_extent: extent,
-            image_array_layers: 1,
-            image_usage: vk::ImageUsageFlags::COLOR_ATTACHMENT,
-            image_sharing_mode: image_sharing_mode,
-            queue_family_index_count: 0,
-            p_queue_family_indices: std::ptr::null(),
-            pre_transform: support.capabilities.current_transform,
-            composite_alpha: vk::CompositeAlphaFlagsKHR::OPAQUE,
-            present_mode: present_mode,
-            clipped: true as u32,
-            old_swapchain: vk::SwapchainKHR::null(),
-            ..Default::default()
-        };
+        let swapchain_create_info = vk::SwapchainCreateInfoKHR::builder()
+            .surface(surface)
+            .min_image_count(image_count)
+            .image_format(surface_format.format)
+            .image_color_space(surface_format.color_space)
+            .image_extent(extent)
+            .image_array_layers(1)
+            .image_usage(vk::ImageUsageFlags::COLOR_ATTACHMENT)
+            .image_sharing_mode(image_sharing_mode)
+            .queue_family_indices(&[])
+            .pre_transform(support.capabilities.current_transform)
+            .composite_alpha(vk::CompositeAlphaFlagsKHR::OPAQUE)
+            .present_mode(present_mode)
+            .clipped(true)
+            .old_swapchain(vk::SwapchainKHR::null());
 
         let swapchain = unsafe { swapchain_loader.create_swapchain(&swapchain_create_info, None)? };
 
@@ -225,31 +222,25 @@ impl Swapchain {
         let image_views = images
             .iter()
             .map(|image| {
-                let components = vk::ComponentMapping {
-                    r: vk::ComponentSwizzle::IDENTITY,
-                    g: vk::ComponentSwizzle::IDENTITY,
-                    b: vk::ComponentSwizzle::IDENTITY,
-                    a: vk::ComponentSwizzle::IDENTITY,
-                    ..Default::default()
-                };
+                let components = vk::ComponentMapping::builder()
+                    .r(vk::ComponentSwizzle::IDENTITY)
+                    .g(vk::ComponentSwizzle::IDENTITY)
+                    .b(vk::ComponentSwizzle::IDENTITY)
+                    .a(vk::ComponentSwizzle::IDENTITY);
 
-                let subsource_range = vk::ImageSubresourceRange {
-                    aspect_mask: vk::ImageAspectFlags::COLOR,
-                    base_mip_level: 0,
-                    level_count: 1,
-                    base_array_layer: 0,
-                    layer_count: 1,
-                    ..Default::default()
-                };
+                let subsource_range = vk::ImageSubresourceRange::builder()
+                    .aspect_mask(vk::ImageAspectFlags::COLOR)
+                    .base_mip_level(0)
+                    .level_count(1)
+                    .base_array_layer(0)
+                    .layer_count(1);
 
-                let image_view_create_info = vk::ImageViewCreateInfo {
-                    image: *image,
-                    view_type: vk::ImageViewType::TYPE_2D,
-                    format: format,
-                    components: components,
-                    subresource_range: subsource_range,
-                    ..Default::default()
-                };
+                let image_view_create_info = vk::ImageViewCreateInfo::builder()
+                    .image(*image)
+                    .view_type(vk::ImageViewType::TYPE_2D)
+                    .format(format)
+                    .components(*components)
+                    .subresource_range(*subsource_range);
 
                 unsafe { device.create_image_view(&image_view_create_info, None) }
             })

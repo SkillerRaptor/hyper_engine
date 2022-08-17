@@ -11,27 +11,27 @@ use ash::vk;
 use log::{debug, error, warn};
 
 unsafe extern "system" fn vulkan_debug_callback(
-    message_severity: ash::vk::DebugUtilsMessageSeverityFlagsEXT,
-    _message_type: ash::vk::DebugUtilsMessageTypeFlagsEXT,
-    callback_data: *const ash::vk::DebugUtilsMessengerCallbackDataEXT,
+    message_severity: vk::DebugUtilsMessageSeverityFlagsEXT,
+    _message_type: vk::DebugUtilsMessageTypeFlagsEXT,
+    callback_data: *const vk::DebugUtilsMessengerCallbackDataEXT,
     _user_data: *mut std::os::raw::c_void,
-) -> ash::vk::Bool32 {
+) -> vk::Bool32 {
     let callback_data = *callback_data;
     let message = std::ffi::CStr::from_ptr(callback_data.p_message).to_string_lossy();
     match message_severity {
-        ash::vk::DebugUtilsMessageSeverityFlagsEXT::INFO => {
+        vk::DebugUtilsMessageSeverityFlagsEXT::INFO => {
             debug!("{}", message)
         }
-        ash::vk::DebugUtilsMessageSeverityFlagsEXT::WARNING => {
+        vk::DebugUtilsMessageSeverityFlagsEXT::WARNING => {
             warn!("{}", message)
         }
-        ash::vk::DebugUtilsMessageSeverityFlagsEXT::ERROR => {
+        vk::DebugUtilsMessageSeverityFlagsEXT::ERROR => {
             error!("{}", message)
         }
         _ => (),
     };
 
-    ash::vk::FALSE
+    vk::FALSE
 }
 pub struct Instance {
     pub debug_messenger: vk::DebugUtilsMessengerEXT,
@@ -81,27 +81,27 @@ impl Instance {
         validation_enabled: bool,
     ) -> Result<ash::Instance, Error> {
         let title = std::ffi::CString::new("HyperEngine")?;
-        let application_info = ash::vk::ApplicationInfo {
-            p_application_name: title.as_ptr(),
-            application_version: ash::vk::make_api_version(0, 1, 0, 0),
-            p_engine_name: title.as_ptr(),
-            engine_version: ash::vk::make_api_version(0, 1, 0, 0),
-            api_version: ash::vk::API_VERSION_1_3,
-            ..Default::default()
-        };
+        let application_info = vk::ApplicationInfo::builder()
+            .application_name(&title)
+            .application_version(vk::make_api_version(0, 1, 0, 0))
+            .engine_name(&title)
+            .engine_version(vk::make_api_version(0, 1, 0, 0))
+            .api_version(vk::API_VERSION_1_3);
 
-        let debug_utils_messenger_create_info = ash::vk::DebugUtilsMessengerCreateInfoEXT {
-            message_severity: ash::vk::DebugUtilsMessageSeverityFlagsEXT::ERROR
-                | ash::vk::DebugUtilsMessageSeverityFlagsEXT::WARNING
-                | ash::vk::DebugUtilsMessageSeverityFlagsEXT::VERBOSE,
-            message_type: ash::vk::DebugUtilsMessageTypeFlagsEXT::VALIDATION
-                | ash::vk::DebugUtilsMessageTypeFlagsEXT::PERFORMANCE,
-            pfn_user_callback: Some(vulkan_debug_callback),
-            ..Default::default()
-        };
+        let mut debug_utils_messenger_create_info = vk::DebugUtilsMessengerCreateInfoEXT::builder()
+            .message_severity(
+                vk::DebugUtilsMessageSeverityFlagsEXT::ERROR
+                    | vk::DebugUtilsMessageSeverityFlagsEXT::WARNING
+                    | vk::DebugUtilsMessageSeverityFlagsEXT::VERBOSE,
+            )
+            .message_type(
+                vk::DebugUtilsMessageTypeFlagsEXT::VALIDATION
+                    | vk::DebugUtilsMessageTypeFlagsEXT::PERFORMANCE,
+            )
+            .pfn_user_callback(Some(vulkan_debug_callback));
 
         let layers = if validation_enabled {
-            vec![Self::VALIDATION_LAYER.as_ptr()]
+            vec![Self::VALIDATION_LAYER.as_ptr() as *const i8]
         } else {
             Vec::new()
         };
@@ -111,15 +111,11 @@ impl Instance {
             extensions.push(ash::extensions::ext::DebugUtils::name().as_ptr());
         }
 
-        let instance_create_info = ash::vk::InstanceCreateInfo {
-            p_next: unsafe { std::mem::transmute(&debug_utils_messenger_create_info) },
-            p_application_info: &application_info,
-            enabled_layer_count: layers.len() as u32,
-            pp_enabled_layer_names: layers.as_ptr() as *const *const i8,
-            enabled_extension_count: extensions.len() as u32,
-            pp_enabled_extension_names: extensions.as_ptr(),
-            ..Default::default()
-        };
+        let instance_create_info = vk::InstanceCreateInfo::builder()
+            .push_next(&mut debug_utils_messenger_create_info)
+            .application_info(&application_info)
+            .enabled_layer_names(&layers)
+            .enabled_extension_names(&extensions);
 
         unsafe {
             let instance = entry.create_instance(&instance_create_info, None)?;
@@ -132,29 +128,24 @@ impl Instance {
         entry: &ash::Entry,
         instance: &ash::Instance,
         validation_enabled: bool,
-    ) -> Result<
-        (
-            ash::extensions::ext::DebugUtils,
-            ash::vk::DebugUtilsMessengerEXT,
-        ),
-        Error,
-    > {
+    ) -> Result<(ash::extensions::ext::DebugUtils, vk::DebugUtilsMessengerEXT), Error> {
         let debug_utils = ash::extensions::ext::DebugUtils::new(&entry, &instance);
 
         if !validation_enabled {
-            return Ok((debug_utils, ash::vk::DebugUtilsMessengerEXT::null()));
+            return Ok((debug_utils, vk::DebugUtilsMessengerEXT::null()));
         }
 
-        let debug_utils_messenger_create_info = ash::vk::DebugUtilsMessengerCreateInfoEXT {
-            message_severity: ash::vk::DebugUtilsMessageSeverityFlagsEXT::ERROR
-                | ash::vk::DebugUtilsMessageSeverityFlagsEXT::WARNING
-                | ash::vk::DebugUtilsMessageSeverityFlagsEXT::VERBOSE,
-            message_type: ash::vk::DebugUtilsMessageTypeFlagsEXT::GENERAL
-                | ash::vk::DebugUtilsMessageTypeFlagsEXT::VALIDATION
-                | ash::vk::DebugUtilsMessageTypeFlagsEXT::PERFORMANCE,
-            pfn_user_callback: Some(vulkan_debug_callback),
-            ..Default::default()
-        };
+        let debug_utils_messenger_create_info = vk::DebugUtilsMessengerCreateInfoEXT::builder()
+            .message_severity(
+                vk::DebugUtilsMessageSeverityFlagsEXT::ERROR
+                    | vk::DebugUtilsMessageSeverityFlagsEXT::WARNING
+                    | vk::DebugUtilsMessageSeverityFlagsEXT::VERBOSE,
+            )
+            .message_type(
+                vk::DebugUtilsMessageTypeFlagsEXT::VALIDATION
+                    | vk::DebugUtilsMessageTypeFlagsEXT::PERFORMANCE,
+            )
+            .pfn_user_callback(Some(vulkan_debug_callback));
 
         let debug_messenger = unsafe {
             debug_utils.create_debug_utils_messenger(&debug_utils_messenger_create_info, None)?

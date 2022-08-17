@@ -28,10 +28,7 @@ impl QueueFamilyIndices {
 
         let mut graphics = None;
         for (i, properties) in queue_families.iter().enumerate() {
-            if !properties
-                .queue_flags
-                .contains(ash::vk::QueueFlags::GRAPHICS)
-            {
+            if !properties.queue_flags.contains(vk::QueueFlags::GRAPHICS) {
                 continue;
             }
 
@@ -139,18 +136,18 @@ impl Device {
         debug!("'{}' Info:", device_name);
 
         let device_type = match properties.device_type {
-            ash::vk::PhysicalDeviceType::CPU => "CPU",
-            ash::vk::PhysicalDeviceType::INTEGRATED_GPU => "Integrated GPU",
-            ash::vk::PhysicalDeviceType::DISCRETE_GPU => "Discrete GPU",
-            ash::vk::PhysicalDeviceType::VIRTUAL_GPU => "Virtual GPU",
-            ash::vk::PhysicalDeviceType::OTHER => "Unknown",
+            vk::PhysicalDeviceType::CPU => "CPU",
+            vk::PhysicalDeviceType::INTEGRATED_GPU => "Integrated GPU",
+            vk::PhysicalDeviceType::DISCRETE_GPU => "Discrete GPU",
+            vk::PhysicalDeviceType::VIRTUAL_GPU => "Virtual GPU",
+            vk::PhysicalDeviceType::OTHER => "Unknown",
             _ => panic!(),
         };
         debug!("  Type: {}", device_type);
 
-        let major_version = ash::vk::api_version_major(properties.api_version);
-        let minor_version = ash::vk::api_version_minor(properties.api_version);
-        let patch_version = ash::vk::api_version_patch(properties.api_version);
+        let major_version = vk::api_version_major(properties.api_version);
+        let minor_version = vk::api_version_minor(properties.api_version);
+        let patch_version = vk::api_version_patch(properties.api_version);
         debug!(
             "  API Version: {}.{}.{}",
             major_version, minor_version, patch_version
@@ -159,28 +156,19 @@ impl Device {
         debug!("  Queue Family Count: {}", queue_families.len());
         debug!("  Count | Graphics | Compute | Transfer | Sparse Binding");
         for queue_family in queue_families.iter() {
-            let graphics_support = if queue_family
-                .queue_flags
-                .contains(ash::vk::QueueFlags::GRAPHICS)
-            {
+            let graphics_support = if queue_family.queue_flags.contains(vk::QueueFlags::GRAPHICS) {
                 '+'
             } else {
                 '-'
             };
 
-            let compute_support = if queue_family
-                .queue_flags
-                .contains(ash::vk::QueueFlags::COMPUTE)
-            {
+            let compute_support = if queue_family.queue_flags.contains(vk::QueueFlags::COMPUTE) {
                 '+'
             } else {
                 '-'
             };
 
-            let transfer_support = if queue_family
-                .queue_flags
-                .contains(ash::vk::QueueFlags::TRANSFER)
-            {
+            let transfer_support = if queue_family.queue_flags.contains(vk::QueueFlags::TRANSFER) {
                 '+'
             } else {
                 '-'
@@ -188,7 +176,7 @@ impl Device {
 
             let sparse_support = if queue_family
                 .queue_flags
-                .contains(ash::vk::QueueFlags::SPARSE_BINDING)
+                .contains(vk::QueueFlags::SPARSE_BINDING)
             {
                 '+'
             } else {
@@ -265,39 +253,29 @@ impl Device {
         let queue_priorities = &[1.0];
         let queue_create_infos = unique_queues
             .iter()
-            .map(|index| vk::DeviceQueueCreateInfo {
-                queue_family_index: *index,
-                queue_count: 1,
-                p_queue_priorities: queue_priorities.as_ptr(),
-                ..Default::default()
+            .map(|index| {
+                *vk::DeviceQueueCreateInfo::builder()
+                    .queue_family_index(*index)
+                    .queue_priorities(queue_priorities)
             })
             .collect::<Vec<_>>();
 
-        let physical_device_features = vk::PhysicalDeviceFeatures {
-            ..Default::default()
-        };
+        let physical_device_features = vk::PhysicalDeviceFeatures::builder();
 
         let device_extensions = Self::DEVICE_EXTENSIONS
             .iter()
             .map(|extension| extension.as_ptr())
             .collect::<Vec<_>>();
 
-        let dynamic_rendering_feature = vk::PhysicalDeviceDynamicRenderingFeatures {
-            dynamic_rendering: true as u32,
-            ..Default::default()
-        };
+        let mut dynamic_rendering_feature =
+            vk::PhysicalDeviceDynamicRenderingFeatures::builder().dynamic_rendering(true);
 
-        let device_create_info = vk::DeviceCreateInfo {
-            p_next: unsafe { std::mem::transmute(&dynamic_rendering_feature) },
-            queue_create_info_count: queue_create_infos.len() as u32,
-            p_queue_create_infos: queue_create_infos.as_ptr(),
-            enabled_layer_count: 0,
-            pp_enabled_layer_names: std::ptr::null(),
-            enabled_extension_count: device_extensions.len() as u32,
-            pp_enabled_extension_names: device_extensions.as_ptr(),
-            p_enabled_features: &physical_device_features,
-            ..Default::default()
-        };
+        let device_create_info = vk::DeviceCreateInfo::builder()
+            .push_next(&mut dynamic_rendering_feature)
+            .queue_create_infos(&queue_create_infos)
+            .enabled_layer_names(&[])
+            .enabled_extension_names(&device_extensions)
+            .enabled_features(&physical_device_features);
 
         unsafe {
             let instance = instance.create_device(physical_device, &device_create_info, None)?;

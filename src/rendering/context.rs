@@ -79,9 +79,7 @@ impl RenderContext {
     fn create_sync_objects(
         device: &ash::Device,
     ) -> Result<(Vec<vk::Semaphore>, Vec<vk::Semaphore>, Vec<vk::Fence>), Error> {
-        let semaphore_info = vk::SemaphoreCreateInfo {
-            ..Default::default()
-        };
+        let semaphore_info = vk::SemaphoreCreateInfo::builder();
 
         let mut image_available_semaphores = Vec::new();
         for i in 0..Self::MAX_FRAMES_IN_FLIGHT {
@@ -99,10 +97,7 @@ impl RenderContext {
             debug!("Created render finished semaphore #{}", i);
         }
 
-        let fence_info = vk::FenceCreateInfo {
-            flags: vk::FenceCreateFlags::SIGNALED,
-            ..Default::default()
-        };
+        let fence_info = vk::FenceCreateInfo::builder().flags(vk::FenceCreateFlags::SIGNALED);
 
         let mut in_flight_fences = Vec::new();
         for i in 0..Self::MAX_FRAMES_IN_FLIGHT {
@@ -128,11 +123,9 @@ impl RenderContext {
         let queue_families =
             QueueFamilyIndices::new(instance, surface_loader, surface, physical_device)?;
 
-        let command_pool_create_info = vk::CommandPoolCreateInfo {
-            flags: vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER,
-            queue_family_index: queue_families.graphics,
-            ..Default::default()
-        };
+        let command_pool_create_info = vk::CommandPoolCreateInfo::builder()
+            .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
+            .queue_family_index(queue_families.graphics);
 
         unsafe {
             let command_pool = device.create_command_pool(&command_pool_create_info, None)?;
@@ -145,12 +138,10 @@ impl RenderContext {
         device: &ash::Device,
         command_pool: vk::CommandPool,
     ) -> Result<Vec<vk::CommandBuffer>, Error> {
-        let command_buffer_allocate_info = vk::CommandBufferAllocateInfo {
-            command_pool: command_pool,
-            level: vk::CommandBufferLevel::PRIMARY,
-            command_buffer_count: Self::MAX_FRAMES_IN_FLIGHT as u32,
-            ..Default::default()
-        };
+        let command_buffer_allocate_info = vk::CommandBufferAllocateInfo::builder()
+            .command_pool(command_pool)
+            .level(vk::CommandBufferLevel::PRIMARY)
+            .command_buffer_count(Self::MAX_FRAMES_IN_FLIGHT as u32);
 
         unsafe {
             let command_buffers = device.allocate_command_buffers(&command_buffer_allocate_info)?;
@@ -197,11 +188,10 @@ impl RenderContext {
             )?;
         }
 
-        let command_buffer_begin_info = vk::CommandBufferBeginInfo {
-            flags: vk::CommandBufferUsageFlags::empty(),
-            p_inheritance_info: std::ptr::null(),
-            ..Default::default()
-        };
+        let inheritance_info = vk::CommandBufferInheritanceInfo::builder();
+        let command_buffer_begin_info = vk::CommandBufferBeginInfo::builder()
+            .flags(vk::CommandBufferUsageFlags::empty())
+            .inheritance_info(&inheritance_info);
 
         unsafe {
             self.device.device.begin_command_buffer(
@@ -210,26 +200,22 @@ impl RenderContext {
             )?;
         }
 
-        let image_subresource_range = vk::ImageSubresourceRange {
-            aspect_mask: vk::ImageAspectFlags::COLOR,
-            base_mip_level: 0,
-            level_count: 1,
-            base_array_layer: 0,
-            layer_count: 1,
-            ..Default::default()
-        };
+        let image_subresource_range = vk::ImageSubresourceRange::builder()
+            .aspect_mask(vk::ImageAspectFlags::COLOR)
+            .base_mip_level(0)
+            .level_count(1)
+            .base_array_layer(0)
+            .layer_count(1);
 
-        let image_memory_barrier = vk::ImageMemoryBarrier {
-            src_access_mask: vk::AccessFlags::empty(),
-            dst_access_mask: vk::AccessFlags::COLOR_ATTACHMENT_WRITE,
-            old_layout: vk::ImageLayout::UNDEFINED,
-            new_layout: vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-            src_queue_family_index: 0,
-            dst_queue_family_index: 0,
-            image: self.swapchain.images[self.current_image_index as usize],
-            subresource_range: image_subresource_range,
-            ..Default::default()
-        };
+        let image_memory_barrier = vk::ImageMemoryBarrier::builder()
+            .src_access_mask(vk::AccessFlags::empty())
+            .dst_access_mask(vk::AccessFlags::COLOR_ATTACHMENT_WRITE)
+            .old_layout(vk::ImageLayout::UNDEFINED)
+            .new_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+            .src_queue_family_index(0)
+            .dst_queue_family_index(0)
+            .image(self.swapchain.images[self.current_image_index as usize])
+            .subresource_range(*image_subresource_range);
 
         unsafe {
             self.device.device.cmd_pipeline_barrier(
@@ -239,7 +225,7 @@ impl RenderContext {
                 vk::DependencyFlags::empty(),
                 &[],
                 &[],
-                &[image_memory_barrier],
+                &[*image_memory_barrier],
             );
         }
 
@@ -249,35 +235,32 @@ impl RenderContext {
             },
         };
 
-        let color_attachment_info = vk::RenderingAttachmentInfo {
-            image_view: self.swapchain.image_views[self.current_image_index as usize],
-            image_layout: vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-            resolve_mode: vk::ResolveModeFlags::NONE,
-            resolve_image_view: vk::ImageView::null(),
-            resolve_image_layout: vk::ImageLayout::UNDEFINED,
-            load_op: vk::AttachmentLoadOp::CLEAR,
-            store_op: vk::AttachmentStoreOp::STORE,
-            clear_value: color_clear_value,
-            ..Default::default()
-        };
+        let offset = vk::Offset2D::builder();
+        let rendering_area = vk::Rect2D::builder()
+            .offset(*offset)
+            .extent(self.swapchain.extent);
 
-        let rendering_area = vk::Rect2D {
-            offset: vk::Offset2D::default(),
-            extent: self.swapchain.extent,
-            ..Default::default()
-        };
+        let color_attachment_info = vk::RenderingAttachmentInfo::builder()
+            .image_view(self.swapchain.image_views[self.current_image_index as usize])
+            .image_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+            .resolve_mode(vk::ResolveModeFlags::NONE)
+            .resolve_image_view(vk::ImageView::null())
+            .resolve_image_layout(vk::ImageLayout::UNDEFINED)
+            .load_op(vk::AttachmentLoadOp::CLEAR)
+            .store_op(vk::AttachmentStoreOp::STORE)
+            .clear_value(color_clear_value);
 
-        let color_atachments = &[color_attachment_info];
-        let rendering_info = vk::RenderingInfo {
-            render_area: rendering_area,
-            layer_count: 1,
-            view_mask: 0,
-            color_attachment_count: color_atachments.len() as u32,
-            p_color_attachments: color_atachments.as_ptr(),
-            p_depth_attachment: std::ptr::null(),
-            p_stencil_attachment: std::ptr::null(),
-            ..Default::default()
-        };
+        let depth_attachment_info = vk::RenderingAttachmentInfo::builder();
+        let stencil_attachment_info = vk::RenderingAttachmentInfo::builder();
+
+        let color_atachments = &[*color_attachment_info];
+        let rendering_info = vk::RenderingInfo::builder()
+            .render_area(*rendering_area)
+            .layer_count(1)
+            .view_mask(0)
+            .color_attachments(color_atachments)
+            .depth_attachment(&depth_attachment_info)
+            .stencil_attachment(&stencil_attachment_info);
 
         unsafe {
             self.device.device.cmd_begin_rendering(
@@ -302,26 +285,22 @@ impl RenderContext {
                 .cmd_end_rendering(self.command_buffers[self.current_frame as usize]);
         }
 
-        let image_subresource_range = vk::ImageSubresourceRange {
-            aspect_mask: vk::ImageAspectFlags::COLOR,
-            base_mip_level: 0,
-            level_count: 1,
-            base_array_layer: 0,
-            layer_count: 1,
-            ..Default::default()
-        };
+        let image_subresource_range = vk::ImageSubresourceRange::builder()
+            .aspect_mask(vk::ImageAspectFlags::COLOR)
+            .base_mip_level(0)
+            .level_count(1)
+            .base_array_layer(0)
+            .layer_count(1);
 
-        let image_memory_barrier = vk::ImageMemoryBarrier {
-            src_access_mask: vk::AccessFlags::COLOR_ATTACHMENT_WRITE,
-            dst_access_mask: vk::AccessFlags::empty(),
-            old_layout: vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-            new_layout: vk::ImageLayout::PRESENT_SRC_KHR,
-            src_queue_family_index: 0,
-            dst_queue_family_index: 0,
-            image: self.swapchain.images[self.current_image_index as usize],
-            subresource_range: image_subresource_range,
-            ..Default::default()
-        };
+        let image_memory_barrier = vk::ImageMemoryBarrier::builder()
+            .src_access_mask(vk::AccessFlags::COLOR_ATTACHMENT_WRITE)
+            .dst_access_mask(vk::AccessFlags::empty())
+            .old_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+            .new_layout(vk::ImageLayout::PRESENT_SRC_KHR)
+            .src_queue_family_index(0)
+            .dst_queue_family_index(0)
+            .image(self.swapchain.images[self.current_image_index as usize])
+            .subresource_range(*image_subresource_range);
 
         unsafe {
             self.device.device.cmd_pipeline_barrier(
@@ -331,7 +310,7 @@ impl RenderContext {
                 vk::DependencyFlags::empty(),
                 &[],
                 &[],
-                &[image_memory_barrier],
+                &[*image_memory_barrier],
             );
 
             self.device
@@ -351,18 +330,13 @@ impl RenderContext {
         let wait_stages = &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
         let command_buffers = &[self.command_buffers[self.current_frame as usize]];
         let signal_semaphores = &[self.render_finished_semaphores[self.current_frame as usize]];
-        let submit_info = vk::SubmitInfo {
-            wait_semaphore_count: wait_semaphores.len() as u32,
-            p_wait_semaphores: wait_semaphores.as_ptr(),
-            p_wait_dst_stage_mask: wait_stages.as_ptr(),
-            command_buffer_count: command_buffers.len() as u32,
-            p_command_buffers: command_buffers.as_ptr(),
-            signal_semaphore_count: signal_semaphores.len() as u32,
-            p_signal_semaphores: signal_semaphores.as_ptr(),
-            ..Default::default()
-        };
+        let submit_info = vk::SubmitInfo::builder()
+            .wait_semaphores(wait_semaphores)
+            .wait_dst_stage_mask(wait_stages)
+            .command_buffers(command_buffers)
+            .signal_semaphores(signal_semaphores);
 
-        let submits = &[submit_info];
+        let submits = &[*submit_info];
         unsafe {
             self.device.device.queue_submit(
                 self.device.graphics_queue,
@@ -374,15 +348,11 @@ impl RenderContext {
         let wait_semaphores = &[self.render_finished_semaphores[self.current_frame as usize]];
         let swapchains = &[self.swapchain.swapchain];
         let image_indices = &[self.current_image_index];
-        let present_info = vk::PresentInfoKHR {
-            wait_semaphore_count: wait_semaphores.len() as u32,
-            p_wait_semaphores: wait_semaphores.as_ptr(),
-            swapchain_count: swapchains.len() as u32,
-            p_swapchains: swapchains.as_ptr(),
-            p_image_indices: image_indices.as_ptr(),
-            p_results: std::ptr::null_mut(),
-            ..Default::default()
-        };
+
+        let present_info = vk::PresentInfoKHR::builder()
+            .wait_semaphores(wait_semaphores)
+            .image_indices(image_indices)
+            .swapchains(swapchains);
 
         unsafe {
             let changed = match self
@@ -419,33 +389,30 @@ impl RenderContext {
     }
 
     pub fn draw(&self) {
-        let viewport = vk::Viewport {
-            x: 0.0,
-            y: 0.0,
-            width: self.swapchain.extent.width as f32,
-            height: self.swapchain.extent.height as f32,
-            min_depth: 0.0,
-            max_depth: 1.0,
-            ..Default::default()
-        };
+        let viewport = vk::Viewport::builder()
+            .x(0.0)
+            .y(0.0)
+            .width(self.swapchain.extent.width as f32)
+            .height(self.swapchain.extent.height as f32)
+            .min_depth(0.0)
+            .max_depth(1.0);
 
-        let scissor = vk::Rect2D {
-            offset: vk::Offset2D { x: 0, y: 0 },
-            extent: self.swapchain.extent,
-            ..Default::default()
-        };
+        let offset = vk::Offset2D::builder();
+        let scissor = vk::Rect2D::builder()
+            .offset(*offset)
+            .extent(self.swapchain.extent);
 
         unsafe {
             self.device.device.cmd_set_viewport(
                 self.command_buffers[self.current_frame as usize],
                 0,
-                &[viewport],
+                &[*viewport],
             );
 
             self.device.device.cmd_set_scissor(
                 self.command_buffers[self.current_frame as usize],
                 0,
-                &[scissor],
+                &[*scissor],
             );
 
             self.device.device.cmd_draw(

@@ -112,7 +112,12 @@ impl Application {
                             .unwrap();
                     }
                 }
-                event::Event::MainEventsCleared if !self.destroyed && !self.minimized => {
+                event::Event::MainEventsCleared => {
+                    // TODO: Update
+
+                    self.window.native_window.request_redraw();
+                }
+                event::Event::RedrawRequested(_) if !self.destroyed && !self.minimized => {
                     if let Err(error) = self.render_context.begin_frame(&self.window.native_window)
                     {
                         error!("Failed to begin frame: {}", error);
