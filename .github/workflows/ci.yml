@@ -9,6 +9,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        config:
+          - debug
+          - release
         toolchain:
           - stable
           - beta
@@ -30,11 +33,13 @@ jobs:
       - name: Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Build (Debug)
+      - name: Build
+        if: matrix.config == 'debug'
         run: |
           cargo build --verbose --workspace
 
-      - name: Build (Release)
+      - name: Build
+        if: matrix.config == 'release'
         run: |
           cargo build --verbose --workspace --release
 
