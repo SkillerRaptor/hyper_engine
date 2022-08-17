@@ -70,10 +70,7 @@ impl Device {
     const DEVICE_EXTENSIONS: &'static [&'static std::ffi::CStr] =
         &[ash::extensions::khr::Swapchain::name()];
 
-    pub fn new(
-        instance: &std::rc::Rc<Instance>,
-        surface: &std::rc::Rc<Surface>,
-    ) -> Result<Self, Error> {
+    pub fn new(instance: &Instance, surface: &Surface) -> Result<Self, Error> {
         let physical_device = Self::pick_physical_device(
             &instance.instance,
             &surface.surface_loader,
@@ -306,14 +303,6 @@ impl Device {
             let instance = instance.create_device(physical_device, &device_create_info, None)?;
             debug!("Created vulkan logical device");
             Ok(instance)
-        }
-    }
-}
-
-impl Drop for Device {
-    fn drop(&mut self) {
-        unsafe {
-            self.device.destroy_device(None);
         }
     }
 }

@@ -10,7 +10,6 @@ use winit::{event, event_loop, platform::run_return::EventLoopExtRunReturn};
 
 use crate::core::window::Window;
 use crate::rendering::context::RenderContext;
-use crate::rendering::renderer::Renderer;
 
 pub enum ApplicationError {
     IoError(std::io::Error),
@@ -43,7 +42,6 @@ impl From<log::SetLoggerError> for ApplicationError {
 }
 
 pub struct Application {
-    renderer: Renderer,
     render_context: RenderContext,
     window: Window,
     destroyed: bool,
@@ -65,23 +63,14 @@ impl Application {
         };
 
         let render_context = match RenderContext::new(&window) {
-            Ok(window) => window,
+            Ok(render_context) => render_context,
             Err(error) => {
                 error!("Failed to create render context: {}", error);
                 std::process::exit(1);
             }
         };
 
-        let renderer = match Renderer::new(&render_context) {
-            Ok(window) => window,
-            Err(error) => {
-                error!("Failed to create renderer: {}", error);
-                std::process::exit(1);
-            }
-        };
-
         Self {
-            renderer,
             render_context,
             window,
             destroyed: false,
@@ -109,15 +98,21 @@ impl Application {
                     }
                 }
                 event::Event::MainEventsCleared if !self.destroyed => {
-                    if let Err(error) = self.renderer.begin_frame() {
+                    if let Err(error) = self.render_context.begin_frame(&self.window.native_window)
+                    {
                         error!("Failed to begin frame: {}", error);
                         std::process::exit(1);
                     }
 
-                    self.renderer.draw();
+                    self.render_context.draw();
 
-                    if let Err(error) = self.renderer.end_frame() {
+                    if let Err(error) = self.render_context.end_frame() {
                         error!("Failed to end frame: {}", error);
+                        std::process::exit(1);
+                    }
+
+                    if let Err(error) = self.render_context.submit(&self.window.native_window) {
+                        error!("Failed to submit: {}", error);
                         std::process::exit(1);
                     }
                 }

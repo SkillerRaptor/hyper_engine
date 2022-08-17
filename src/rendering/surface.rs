@@ -17,11 +17,7 @@ pub struct Surface {
 }
 
 impl Surface {
-    pub fn new(
-        window: &Window,
-        entry: &ash::Entry,
-        instance: &std::rc::Rc<Instance>,
-    ) -> Result<Self, Error> {
+    pub fn new(window: &Window, entry: &ash::Entry, instance: &Instance) -> Result<Self, Error> {
         let surface_loader = ash::extensions::khr::Surface::new(entry, &instance.instance);
         let surface = unsafe {
             ash_window::create_surface(entry, &instance.instance, &window.native_window, None)?
@@ -32,13 +28,5 @@ impl Surface {
             surface,
             surface_loader,
         })
-    }
-}
-
-impl Drop for Surface {
-    fn drop(&mut self) {
-        unsafe {
-            self.surface_loader.destroy_surface(self.surface, None);
-        }
     }
 }

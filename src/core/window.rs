@@ -38,7 +38,6 @@ impl Window {
         let native_window = window::WindowBuilder::new()
             .with_title(title)
             .with_inner_size(dpi::LogicalSize::new(width, height))
-            .with_resizable(false)
             .build(&event_loop)?;
 
         info!(

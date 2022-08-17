@@ -37,7 +37,7 @@ pub struct Instance {
     pub debug_messenger: vk::DebugUtilsMessengerEXT,
     pub debug_loader: ash::extensions::ext::DebugUtils,
     pub instance: ash::Instance,
-    validation_enabled: bool,
+    pub validation_enabled: bool,
 }
 
 impl Instance {
@@ -162,17 +162,5 @@ impl Instance {
 
         debug!("Created vulkan debug messenger");
         Ok((debug_utils, debug_messenger))
-    }
-}
-
-impl Drop for Instance {
-    fn drop(&mut self) {
-        unsafe {
-            if self.validation_enabled {
-                self.debug_loader
-                    .destroy_debug_utils_messenger(self.debug_messenger, None);
-            }
-            self.instance.destroy_instance(None);
-        }
     }
 }

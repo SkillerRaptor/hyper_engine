@@ -19,14 +19,10 @@ enum ShaderStage {
 pub struct Pipeline {
     pub pipeline: vk::Pipeline,
     pub pipeline_layout: vk::PipelineLayout,
-    device: std::rc::Rc<Device>,
 }
 
 impl Pipeline {
-    pub fn new(
-        device: &std::rc::Rc<Device>,
-        swapchain: &std::rc::Rc<Swapchain>,
-    ) -> Result<Self, Error> {
+    pub fn new(device: &Device, swapchain: &Swapchain) -> Result<Self, Error> {
         let entry_point = std::ffi::CString::new("main")?;
 
         let vertex = include_bytes!("../../assets/shaders/default_shader_vertex.spv");
@@ -61,29 +57,11 @@ impl Pipeline {
             ..Default::default()
         };
 
-        let viewport = vk::Viewport {
-            x: 0.0,
-            y: 0.0,
-            width: swapchain.extent.width as f32,
-            height: swapchain.extent.height as f32,
-            min_depth: 0.0,
-            max_depth: 1.0,
-            ..Default::default()
-        };
-
-        let scissor = vk::Rect2D {
-            offset: vk::Offset2D { x: 0, y: 0 },
-            extent: swapchain.extent,
-            ..Default::default()
-        };
-
-        let viewports = &[viewport];
-        let scissors = &[scissor];
         let viewport_state_create_info = vk::PipelineViewportStateCreateInfo {
-            viewport_count: viewports.len() as u32,
-            p_viewports: viewports.as_ptr(),
-            scissor_count: scissors.len() as u32,
-            p_scissors: scissors.as_ptr(),
+            viewport_count: 1,
+            p_viewports: std::ptr::null(),
+            scissor_count: 1,
+            p_scissors: std::ptr::null(),
             ..Default::default()
         };
 
@@ -206,20 +184,6 @@ impl Pipeline {
             "  Primitive Restart Enable: {}",
             input_assembly_state_create_info.primitive_restart_enable != 0
         );
-        debug!(
-            "  Viewport: x={}, y={}, width={}, height={}, min depth={}, max depth={}",
-            viewport.x,
-            viewport.y,
-            viewport.width,
-            viewport.height,
-            viewport.min_depth,
-            viewport.max_depth
-        );
-        debug!(
-            "  Scissor: x={}, y={}, width={}, height={}",
-            scissor.offset.x, scissor.offset.y, scissor.extent.width, scissor.extent.height
-        );
-
         debug!(
             "  Depth Clamp Enable: {}",
             rasterization_state_create_info.depth_clamp_enable != 0
@@ -355,7 +319,6 @@ impl Pipeline {
         Ok(Self {
             pipeline,
             pipeline_layout,
-            device: device.clone(),
         })
     }
 
@@ -389,16 +352,5 @@ impl Pipeline {
         debug!("Created {} shader module", shader_stage,);
 
         Ok(shader_module)
-    }
-}
-
-impl Drop for Pipeline {
-    fn drop(&mut self) {
-        unsafe {
-            self.device.device.destroy_pipeline(self.pipeline, None);
-            self.device
-                .device
-                .destroy_pipeline_layout(self.pipeline_layout, None);
-        }
     }
 }

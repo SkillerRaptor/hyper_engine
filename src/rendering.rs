@@ -9,6 +9,5 @@ pub mod device;
 pub mod error;
 pub mod instance;
 pub mod pipeline;
-pub mod renderer;
 pub mod surface;
 pub mod swapchain;

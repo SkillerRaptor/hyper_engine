@@ -52,26 +52,50 @@ pub struct Swapchain {
     pub images: Vec<vk::Image>,
     pub swapchain: vk::SwapchainKHR,
     pub swapchain_loader: ash::extensions::khr::Swapchain,
-    device: std::rc::Rc<Device>,
 }
 
 impl Swapchain {
     pub fn new(
         window: &Window,
-        instance: &std::rc::Rc<Instance>,
-        surface: &std::rc::Rc<Surface>,
-        device: &std::rc::Rc<Device>,
+        instance: &Instance,
+        surface: &Surface,
+        device: &Device,
     ) -> Result<Self, Error> {
         let swapchain_loader =
             ash::extensions::khr::Swapchain::new(&instance.instance, &device.device);
-
-        let support = SwapchainSupport::new(
+        let (swapchain, extent, format) = Self::create_swapchain(
+            &window.native_window,
             &surface.surface_loader,
             surface.surface,
             device.physical_device,
+            &swapchain_loader,
+            false,
         )?;
 
-        let extent = Self::choose_extent(&window.native_window, support.capabilities);
+        let images = unsafe { swapchain_loader.get_swapchain_images(swapchain)? };
+        let image_views = Self::create_image_views(&device.device, format, &images)?;
+
+        debug!("Created vulkan swapchain");
+        Ok(Self {
+            format,
+            extent,
+            image_views,
+            images,
+            swapchain,
+            swapchain_loader,
+        })
+    }
+
+    fn create_swapchain(
+        window: &winit::window::Window,
+        surface_loader: &ash::extensions::khr::Surface,
+        surface: vk::SurfaceKHR,
+        physical_device: vk::PhysicalDevice,
+        swapchain_loader: &ash::extensions::khr::Swapchain,
+        recreate: bool,
+    ) -> Result<(vk::SwapchainKHR, vk::Extent2D, vk::Format), Error> {
+        let support = SwapchainSupport::new(&surface_loader, surface, physical_device)?;
+        let extent = Self::choose_extent(&window, support.capabilities);
         let surface_format = Self::choose_surface_format(&support.formats);
         let present_mode = Self::choose_present_mode(&support.present_modes);
 
@@ -86,7 +110,7 @@ impl Swapchain {
         let image_sharing_mode = vk::SharingMode::EXCLUSIVE;
 
         let swapchain_create_info = vk::SwapchainCreateInfoKHR {
-            surface: surface.surface,
+            surface: surface,
             min_image_count: image_count,
             image_format: surface_format.format,
             image_color_space: surface_format.color_space,
@@ -106,54 +130,44 @@ impl Swapchain {
 
         let swapchain = unsafe { swapchain_loader.create_swapchain(&swapchain_create_info, None)? };
 
-        debug!("Swapchain Info:");
-        debug!(
-            "  Min Image Count: {}",
-            swapchain_create_info.min_image_count
-        );
-        debug!(
-            "  Max Image Count: {}",
-            support.capabilities.max_image_count
-        );
-        debug!("  Image Format: {:?}", swapchain_create_info.image_format);
-        debug!(
-            "  Image Color Space: {:?}",
-            swapchain_create_info.image_color_space
-        );
-        debug!(
-            "  Image Extent: width={}, height={}",
-            swapchain_create_info.image_extent.width, swapchain_create_info.image_extent.height
-        );
-        debug!(
-            "  Image Array Layers: {}",
-            swapchain_create_info.image_array_layers
-        );
-        debug!("  Image Usage: {:?}", swapchain_create_info.image_usage);
-        debug!(
-            "  Image Sharing Mode: {:?}",
-            swapchain_create_info.image_sharing_mode
-        );
-        debug!("  Pre Transform: {:?}", swapchain_create_info.pre_transform);
-        debug!(
-            "  Composite Alpha: {:?}",
-            swapchain_create_info.composite_alpha
-        );
-        debug!("  Present Mode: {:?}", swapchain_create_info.present_mode);
-        debug!("  Clipped: {}", swapchain_create_info.clipped != 0);
+        if !recreate {
+            debug!("Swapchain Info:");
+            debug!(
+                "  Min Image Count: {}",
+                swapchain_create_info.min_image_count
+            );
+            debug!(
+                "  Max Image Count: {}",
+                support.capabilities.max_image_count
+            );
+            debug!("  Image Format: {:?}", swapchain_create_info.image_format);
+            debug!(
+                "  Image Color Space: {:?}",
+                swapchain_create_info.image_color_space
+            );
+            debug!(
+                "  Image Extent: width={}, height={}",
+                swapchain_create_info.image_extent.width, swapchain_create_info.image_extent.height
+            );
+            debug!(
+                "  Image Array Layers: {}",
+                swapchain_create_info.image_array_layers
+            );
+            debug!("  Image Usage: {:?}", swapchain_create_info.image_usage);
+            debug!(
+                "  Image Sharing Mode: {:?}",
+                swapchain_create_info.image_sharing_mode
+            );
+            debug!("  Pre Transform: {:?}", swapchain_create_info.pre_transform);
+            debug!(
+                "  Composite Alpha: {:?}",
+                swapchain_create_info.composite_alpha
+            );
+            debug!("  Present Mode: {:?}", swapchain_create_info.present_mode);
+            debug!("  Clipped: {}", swapchain_create_info.clipped != 0);
+        }
 
-        let images = unsafe { swapchain_loader.get_swapchain_images(swapchain)? };
-        let image_views = Self::create_image_views(&device.device, surface_format.format, &images)?;
-
-        debug!("Created vulkan swapchain");
-        Ok(Self {
-            format: surface_format.format,
-            extent,
-            image_views,
-            images,
-            swapchain,
-            swapchain_loader,
-            device: device.clone(),
-        })
+        Ok((swapchain, extent, surface_format.format))
     }
 
     fn choose_extent(
@@ -243,14 +257,48 @@ impl Swapchain {
 
         Ok(image_views)
     }
-}
 
-impl Drop for Swapchain {
-    fn drop(&mut self) {
+    pub fn recreate(
+        &mut self,
+        window: &winit::window::Window,
+        surface: vk::SurfaceKHR,
+        surface_loader: &ash::extensions::khr::Surface,
+        physical_device: vk::PhysicalDevice,
+        device: &ash::Device,
+    ) -> Result<(), Error> {
+        unsafe {
+            device.device_wait_idle()?;
+        }
+
+        self.cleanup(device);
+
+        let (swapchain, extent, format) = Self::create_swapchain(
+            &window,
+            &surface_loader,
+            surface,
+            physical_device,
+            &self.swapchain_loader,
+            true,
+        )?;
+
+        self.swapchain = swapchain;
+        self.extent = extent;
+        self.format = format;
+
+        let images = unsafe { self.swapchain_loader.get_swapchain_images(swapchain)? };
+        let image_views = Self::create_image_views(&device, format, &images)?;
+
+        self.images = images;
+        self.image_views = image_views;
+
+        Ok(())
+    }
+
+    pub fn cleanup(&mut self, device: &ash::Device) {
         unsafe {
             self.image_views
                 .iter()
-                .for_each(|image_view| self.device.device.destroy_image_view(*image_view, None));
+                .for_each(|image_view| device.destroy_image_view(*image_view, None));
             self.swapchain_loader
                 .destroy_swapchain(self.swapchain, None);
         }
