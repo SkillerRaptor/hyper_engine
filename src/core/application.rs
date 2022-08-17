@@ -82,6 +82,9 @@ impl Application {
     }
 
     pub fn run(&mut self) {
+        let mut fps: u16 = 0;
+        let mut last_frame = std::time::Instant::now();
+        let mut last_fps_frame = std::time::Instant::now();
         self.window.event_loop.run_return(|event, _, control_flow| {
             *control_flow = event_loop::ControlFlow::Poll;
 
@@ -112,12 +115,26 @@ impl Application {
                             .unwrap();
                     }
                 }
-                event::Event::MainEventsCleared => {
-                    // TODO: Update
+                _ => (),
+            }
 
-                    self.window.native_window.request_redraw();
-                }
+            match event {
                 event::Event::RedrawRequested(_) if !self.destroyed && !self.minimized => {
+                    let current_frame = std::time::Instant::now();
+                    let delta_time = current_frame.duration_since(last_frame).as_secs_f64();
+
+                    while current_frame.duration_since(last_fps_frame).as_secs_f64() >= 1.0 {
+                        self.window.native_window.set_title(
+                            format!("HyperEngine (Delta Time: {}, FPS: {})", delta_time, fps)
+                                .as_str(),
+                        );
+                        fps = 0;
+                        last_fps_frame = current_frame;
+                    }
+
+                    // NOTE: Update
+
+                    // NOTE: Render
                     if let Err(error) = self.render_context.begin_frame(&self.window.native_window)
                     {
                         error!("Failed to begin frame: {}", error);
@@ -138,6 +155,12 @@ impl Application {
                         error!("Failed to submit: {}", error);
                         std::process::exit(1);
                     }
+
+                    fps += 1;
+                    last_frame = current_frame;
+                }
+                event::Event::MainEventsCleared => {
+                    self.window.native_window.request_redraw();
                 }
                 _ => (),
             }
