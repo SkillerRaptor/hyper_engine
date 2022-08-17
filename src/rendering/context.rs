@@ -166,23 +166,14 @@ impl RenderContext {
                 true,
                 u64::MAX,
             )?;
-            self.device
-                .device
-                .reset_fences(&[self.in_flight_fences[self.current_frame as usize]])?;
             match self.swapchain.swapchain_loader.acquire_next_image(
                 self.swapchain.swapchain,
                 u64::MAX,
                 self.image_available_semaphores[self.current_frame as usize],
                 vk::Fence::null(),
             ) {
-                Ok((image_index, _)) => {
-                    self.current_image_index = image_index;
-                }
-                Err(error) => {
-                    if error != vk::Result::ERROR_OUT_OF_DATE_KHR {
-                        return Err(Error::VulkanError(error));
-                    }
-
+                Ok((image_index, _)) => self.current_image_index = image_index,
+                Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => {
                     self.swapchain.recreate(
                         &window,
                         self.surface.surface,
@@ -190,8 +181,15 @@ impl RenderContext {
                         self.device.physical_device,
                         &self.device.device,
                     )?;
+
+                    return Ok(());
                 }
+                Err(error) => return Err(Error::VulkanError(error)),
             }
+
+            self.device
+                .device
+                .reset_fences(&[self.in_flight_fences[self.current_frame as usize]])?;
 
             self.device.device.reset_command_buffer(
                 self.command_buffers[self.current_frame as usize],
@@ -344,7 +342,11 @@ impl RenderContext {
         Ok(())
     }
 
-    pub fn submit(&mut self, window: &winit::window::Window) -> Result<(), Error> {
+    pub fn submit(
+        &mut self,
+        window: &winit::window::Window,
+        resized: &mut bool,
+    ) -> Result<(), Error> {
         let wait_semaphores = &[self.image_available_semaphores[self.current_frame as usize]];
         let wait_stages = &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
         let command_buffers = &[self.command_buffers[self.current_frame as usize]];
@@ -383,35 +385,31 @@ impl RenderContext {
         };
 
         unsafe {
-            match self
+            let changed = match self
                 .swapchain
                 .swapchain_loader
                 .queue_present(self.device.graphics_queue, &present_info)
             {
                 Ok(suboptimal) => {
                     if suboptimal {
-                        self.swapchain.recreate(
-                            &window,
-                            self.surface.surface,
-                            &self.surface.surface_loader,
-                            self.device.physical_device,
-                            &self.device.device,
-                        )?;
+                        true
+                    } else {
+                        false
                     }
                 }
-                Err(error) => {
-                    if error != vk::Result::ERROR_OUT_OF_DATE_KHR {
-                        return Err(Error::VulkanError(error));
-                    }
+                Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => true,
+                Err(error) => return Err(Error::VulkanError(error)),
+            };
 
-                    self.swapchain.recreate(
-                        &window,
-                        self.surface.surface,
-                        &self.surface.surface_loader,
-                        self.device.physical_device,
-                        &self.device.device,
-                    )?;
-                }
+            if changed || *resized {
+                *resized = false;
+                self.swapchain.recreate(
+                    &window,
+                    self.surface.surface,
+                    &self.surface.surface_loader,
+                    self.device.physical_device,
+                    &self.device.device,
+                )?;
             }
         }
 

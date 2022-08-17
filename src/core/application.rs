@@ -42,9 +42,11 @@ impl From<log::SetLoggerError> for ApplicationError {
 }
 
 pub struct Application {
+    minimized: bool,
+    resized: bool,
+    destroyed: bool,
     render_context: RenderContext,
     window: Window,
-    destroyed: bool,
 }
 
 impl Application {
@@ -71,9 +73,11 @@ impl Application {
         };
 
         Self {
+            minimized: false,
+            resized: false,
+            destroyed: false,
             render_context,
             window,
-            destroyed: false,
         }
     }
 
@@ -83,9 +87,20 @@ impl Application {
 
             match event {
                 event::Event::WindowEvent {
+                    event: event::WindowEvent::Resized(size),
+                    ..
+                } => {
+                    if size.width == 0 || size.height == 0 {
+                        self.minimized = true;
+                    } else {
+                        self.minimized = false;
+                        self.resized = true;
+                    }
+                }
+                event::Event::WindowEvent {
                     event: event::WindowEvent::CloseRequested,
-                    window_id,
-                } if window_id == self.window.native_window.id() => {
+                    ..
+                } => {
                     self.destroyed = true;
                     *control_flow = event_loop::ControlFlow::Exit;
 
@@ -97,7 +112,7 @@ impl Application {
                             .unwrap();
                     }
                 }
-                event::Event::MainEventsCleared if !self.destroyed => {
+                event::Event::MainEventsCleared if !self.destroyed && !self.minimized => {
                     if let Err(error) = self.render_context.begin_frame(&self.window.native_window)
                     {
                         error!("Failed to begin frame: {}", error);
@@ -111,7 +126,10 @@ impl Application {
                         std::process::exit(1);
                     }
 
-                    if let Err(error) = self.render_context.submit(&self.window.native_window) {
+                    if let Err(error) = self
+                        .render_context
+                        .submit(&self.window.native_window, &mut self.resized)
+                    {
                         error!("Failed to submit: {}", error);
                         std::process::exit(1);
                     }
