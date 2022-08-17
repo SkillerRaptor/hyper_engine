@@ -30,11 +30,15 @@ jobs:
       - name: Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Build
+      - name: Build (Debug)
         run: |
-          cargo build
+          cargo build --verbose --workspace
+
+      - name: Build (Release)
+        run: |
+          cargo build --verbose --workspace --release
 
       - name: Test
         run: |
-          cargo test
+          cargo test --verbose --workspace
 
