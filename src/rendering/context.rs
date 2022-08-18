@@ -121,7 +121,11 @@ impl RenderContext {
     }
 
     pub fn device_wait_idle(&self) -> Result<(), Error> {
-        unsafe { Ok(self.device.logical_device().device_wait_idle()?) }
+        unsafe {
+            self.device.logical_device().device_wait_idle()?;
+        }
+
+        Ok(())
     }
 
     pub fn begin_frame(&mut self, window: &window::Window) -> Result<(), Error> {
@@ -156,13 +160,14 @@ impl RenderContext {
     }
 
     pub fn end_frame(&self) -> Result<(), Error> {
-        Ok(self
-            .renderer
-            .end_frame(&self.swapchain, &self.command_buffers)?)
+        self.renderer
+            .end_frame(&self.swapchain, &self.command_buffers)?;
+
+        Ok(())
     }
 
     pub fn submit(&mut self, window: &window::Window, resized: &mut bool) -> Result<(), Error> {
-        Ok(self.renderer.submit(
+        self.renderer.submit(
             window,
             &self.surface,
             &self.device,
@@ -172,7 +177,9 @@ impl RenderContext {
             &self.render_finished_semaphores,
             &self.in_flight_fences,
             resized,
-        )?)
+        )?;
+
+        Ok(())
     }
 
     pub fn draw(&self) {
