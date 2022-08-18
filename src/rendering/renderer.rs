@@ -18,8 +18,8 @@ use log::{debug, info};
 use winit::window;
 
 pub struct Renderer {
-    current_frame: u32,
-    current_image_index: u32,
+    current_frame: usize,
+    current_image_index: usize,
 
     in_flight_fences: Vec<Fence>,
     render_finished_semaphores: Vec<Semaphore>,
@@ -145,7 +145,7 @@ impl Renderer {
                 *self.image_available_semaphores[self.current_frame as usize].semaphore(),
                 vk::Fence::null(),
             ) {
-                Ok((image_index, _)) => self.current_image_index = image_index,
+                Ok((image_index, _)) => self.current_image_index = image_index as usize,
                 Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => {
                     swapchain.recreate(
                         &window,
@@ -161,14 +161,11 @@ impl Renderer {
             }
         }
 
-        let command_buffer = self.current_command_buffer();
-        let in_flight_fence = self.current_in_flight_fence();
+        self.in_flight_fences[self.current_frame].reset()?;
 
-        in_flight_fence.reset()?;
+        self.command_buffers[self.current_frame].reset(vk::CommandBufferResetFlags::empty())?;
 
-        command_buffer.reset(vk::CommandBufferResetFlags::empty())?;
-
-        command_buffer.begin(
+        self.command_buffers[self.current_frame].begin(
             vk::CommandBufferUsageFlags::empty(),
             &vk::CommandBufferInheritanceInfo::default(),
         )?;
@@ -190,7 +187,7 @@ impl Renderer {
             .image(swapchain.images()[self.current_image_index as usize])
             .subresource_range(*image_subresource_range);
 
-        command_buffer.cmd_pipeline_barrier(
+        self.command_buffers[self.current_frame].cmd_pipeline_barrier(
             vk::PipelineStageFlags::TOP_OF_PIPE,
             vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
             vk::DependencyFlags::empty(),
@@ -232,9 +229,10 @@ impl Renderer {
             .depth_attachment(&depth_attachment_info)
             .stencil_attachment(&stencil_attachment_info);
 
-        command_buffer.cmd_begin_rendering(&rendering_info);
+        self.command_buffers[self.current_frame].cmd_begin_rendering(&rendering_info);
 
-        command_buffer.cmd_bind_pipeline(vk::PipelineBindPoint::GRAPHICS, self.pipeline);
+        self.command_buffers[self.current_frame]
+            .cmd_bind_pipeline(vk::PipelineBindPoint::GRAPHICS, self.pipeline);
 
         let extent = swapchain.extent();
         let viewport = vk::Viewport::builder()
@@ -244,19 +242,17 @@ impl Renderer {
             .height(extent.height as f32)
             .min_depth(0.0)
             .max_depth(1.0);
-        command_buffer.cmd_set_viewport(0, &[*viewport]);
+        self.command_buffers[self.current_frame].cmd_set_viewport(0, &[*viewport]);
 
         let offset = vk::Offset2D::builder();
         let scissor = vk::Rect2D::builder().offset(*offset).extent(*extent);
-        command_buffer.cmd_set_scissor(0, &[*scissor]);
+        self.command_buffers[self.current_frame].cmd_set_scissor(0, &[*scissor]);
 
         Ok(())
     }
 
     pub fn end_frame(&self, swapchain: &Swapchain) -> Result<(), Error> {
-        let command_buffer = self.current_command_buffer();
-
-        command_buffer.cmd_end_rendering();
+        self.command_buffers[self.current_frame].cmd_end_rendering();
 
         let image_subresource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -275,7 +271,7 @@ impl Renderer {
             .image(swapchain.images()[self.current_image_index as usize])
             .subresource_range(*image_subresource_range);
 
-        command_buffer.cmd_pipeline_barrier(
+        self.command_buffers[self.current_frame].cmd_pipeline_barrier(
             vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
             vk::PipelineStageFlags::BOTTOM_OF_PIPE,
             vk::DependencyFlags::empty(),
@@ -284,7 +280,7 @@ impl Renderer {
             &[*image_memory_barrier],
         );
 
-        command_buffer.end()?;
+        self.command_buffers[self.current_frame].end()?;
 
         Ok(())
     }
@@ -295,15 +291,10 @@ impl Renderer {
         swapchain: &mut Swapchain,
         resized: &mut bool,
     ) -> Result<(), Error> {
-        let command_buffer = self.current_command_buffer();
-        let in_flight_fence = self.current_in_flight_fence();
-        let render_finished_semaphore = self.current_render_finished_semaphore();
-        let image_available_semaphore = self.current_image_available_semaphore();
-
-        let wait_semaphores = &[*image_available_semaphore.semaphore()];
+        let wait_semaphores = &[*self.image_available_semaphores[self.current_frame].semaphore()];
         let wait_stages = &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
-        let command_buffers = &[*command_buffer.command_buffer()];
-        let signal_semaphores = &[*render_finished_semaphore.semaphore()];
+        let command_buffers = &[*self.command_buffers[self.current_frame].command_buffer()];
+        let signal_semaphores = &[*self.render_finished_semaphores[self.current_frame].semaphore()];
         let submit_info = vk::SubmitInfo::builder()
             .wait_semaphores(wait_semaphores)
             .wait_dst_stage_mask(wait_stages)
@@ -316,13 +307,13 @@ impl Renderer {
             self.logical_device.queue_submit(
                 self.graphics_queue,
                 submits,
-                *in_flight_fence.fence(),
+                *self.in_flight_fences[self.current_frame].fence(),
             )?;
         }
 
-        let wait_semaphores = &[*render_finished_semaphore.semaphore()];
+        let wait_semaphores = &[*self.render_finished_semaphores[self.current_frame].semaphore()];
         let swapchains = &[*swapchain.swapchain()];
-        let image_indices = &[self.current_image_index];
+        let image_indices = &[self.current_image_index as u32];
 
         let present_info = vk::PresentInfoKHR::builder()
             .wait_semaphores(wait_semaphores)
@@ -358,34 +349,21 @@ impl Renderer {
             }
         }
 
-        self.current_frame = (self.current_frame + 1) % Self::MAX_FRAMES_IN_FLIGHT as u32;
+        self.current_frame = (self.current_frame + 1) % Self::MAX_FRAMES_IN_FLIGHT;
 
         Ok(())
     }
 
     pub fn draw_triangle(&self) {
-        let command_buffer = self.current_command_buffer();
-
         let buffers = &[*self.vertex_buffer.buffer()];
         let offsets = &[0];
-        command_buffer.cmd_bind_vertex_buffers(0, buffers, offsets);
+        self.command_buffers[self.current_frame].cmd_bind_vertex_buffers(0, buffers, offsets);
 
-        command_buffer.cmd_draw(self.vertex_buffer.vertices().len() as u32, 1, 0, 0);
-    }
-
-    pub fn current_command_buffer(&self) -> &CommandBuffer {
-        &self.command_buffers[self.current_frame as usize]
-    }
-
-    fn current_in_flight_fence(&self) -> &Fence {
-        &self.in_flight_fences[self.current_frame as usize]
-    }
-
-    fn current_render_finished_semaphore(&self) -> &Semaphore {
-        &self.render_finished_semaphores[self.current_frame as usize]
-    }
-
-    fn current_image_available_semaphore(&self) -> &Semaphore {
-        &self.image_available_semaphores[self.current_frame as usize]
+        self.command_buffers[self.current_frame].cmd_draw(
+            self.vertex_buffer.vertices().len() as u32,
+            1,
+            0,
+            0,
+        );
     }
 }
