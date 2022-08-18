@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: MIT
  */
 
-use colored::Colorize;
-use log::error;
-use winit::{event, event_loop, platform::run_return::EventLoopExtRunReturn};
-
-use crate::core::window::Window;
 use crate::rendering::context::RenderContext;
+
+use colored::Colorize;
+use log::{error, info};
+use winit::{dpi, error, event, event_loop, platform::run_return::EventLoopExtRunReturn, window};
 
 pub enum ApplicationError {
     IoError(std::io::Error),
     LogError(log::SetLoggerError),
+    OsError(error::OsError),
 }
 
 impl std::fmt::Display for ApplicationError {
@@ -23,6 +23,9 @@ impl std::fmt::Display for ApplicationError {
                 write!(formatter, "{}", error)
             }
             ApplicationError::LogError(error) => {
+                write!(formatter, "{}", error)
+            }
+            ApplicationError::OsError(error) => {
                 write!(formatter, "{}", error)
             }
         }
@@ -41,12 +44,19 @@ impl From<log::SetLoggerError> for ApplicationError {
     }
 }
 
+impl From<error::OsError> for ApplicationError {
+    fn from(error: error::OsError) -> Self {
+        ApplicationError::OsError(error)
+    }
+}
+
 pub struct Application {
     minimized: bool,
     resized: bool,
     destroyed: bool,
     render_context: RenderContext,
-    window: Window,
+    window: window::Window,
+    event_loop: event_loop::EventLoop<()>,
 }
 
 impl Application {
@@ -56,7 +66,8 @@ impl Application {
             std::process::exit(1);
         }
 
-        let window = match Window::new("HyperEngine", 1280, 720) {
+        let event_loop = event_loop::EventLoop::new();
+        let window = match Self::create_window(&event_loop, "HyperEngine", 1280, 720) {
             Ok(window) => window,
             Err(error) => {
                 error!("Failed to create window: {}", error);
@@ -78,14 +89,36 @@ impl Application {
             destroyed: false,
             render_context,
             window,
+            event_loop,
         }
+    }
+
+    fn create_window(
+        event_loop: &event_loop::EventLoop<()>,
+        title: &str,
+        width: u32,
+        height: u32,
+    ) -> Result<window::Window, ApplicationError> {
+        let window = window::WindowBuilder::new()
+            .with_title(title)
+            .with_inner_size(dpi::LogicalSize::new(width, height))
+            .build(&event_loop)?;
+
+        info!(
+            "Created window '{}' ({}x{})",
+            title,
+            window.inner_size().width,
+            window.inner_size().height
+        );
+
+        Ok(window)
     }
 
     pub fn run(&mut self) {
         let mut fps: u16 = 0;
         let mut last_frame = std::time::Instant::now();
         let mut last_fps_frame = std::time::Instant::now();
-        self.window.event_loop.run_return(|event, _, control_flow| {
+        self.event_loop.run_return(|event, _, control_flow| {
             *control_flow = event_loop::ControlFlow::Poll;
 
             match event {
@@ -106,11 +139,6 @@ impl Application {
                 } => {
                     self.destroyed = true;
                     *control_flow = event_loop::ControlFlow::Exit;
-
-                    //if let Err(error) = self.render_context.device_wait_idle() {
-                    //    error!("Failed to device wait idle: {}", error);
-                    //    std::process::exit(1);
-                    //}
                 }
                 _ => (),
             }
@@ -121,7 +149,7 @@ impl Application {
                     let delta_time = current_frame.duration_since(last_frame).as_secs_f64();
 
                     while current_frame.duration_since(last_fps_frame).as_secs_f64() >= 1.0 {
-                        self.window.native_window.set_title(
+                        self.window.set_title(
                             format!("HyperEngine (Delta Time: {}, FPS: {})", delta_time, fps)
                                 .as_str(),
                         );
@@ -132,8 +160,7 @@ impl Application {
                     // NOTE: Update
 
                     // NOTE: Render
-                    if let Err(error) = self.render_context.begin_frame(&self.window.native_window)
-                    {
+                    if let Err(error) = self.render_context.begin_frame(&self.window) {
                         error!("Failed to begin frame: {}", error);
                         std::process::exit(1);
                     }
@@ -145,9 +172,7 @@ impl Application {
                         std::process::exit(1);
                     }
 
-                    if let Err(error) = self
-                        .render_context
-                        .submit(&self.window.native_window, &mut self.resized)
+                    if let Err(error) = self.render_context.submit(&self.window, &mut self.resized)
                     {
                         error!("Failed to submit: {}", error);
                         std::process::exit(1);
@@ -157,7 +182,7 @@ impl Application {
                     last_frame = current_frame;
                 }
                 event::Event::MainEventsCleared => {
-                    self.window.native_window.request_redraw();
+                    self.window.request_redraw();
                 }
                 _ => (),
             }

@@ -6,11 +6,10 @@
 
 use super::super::error::Error;
 
-use crate::core::window::Window;
-
 use ash::extensions::ext::DebugUtils as DebugLoader;
 use ash::vk;
 use log::{debug, error, warn};
+use winit::window;
 
 pub struct Instance {
     debug_messenger: vk::DebugUtilsMessengerEXT,
@@ -46,7 +45,7 @@ impl Instance {
         vk::FALSE
     }
 
-    pub fn new(window: &Window, entry: &ash::Entry) -> Result<Self, Error> {
+    pub fn new(window: &window::Window, entry: &ash::Entry) -> Result<Self, Error> {
         let validation_layer_enabled = Self::check_validation_layer_support(entry)?;
         let instance = Self::create_instance(&window, &entry, validation_layer_enabled)?;
         let (debug_loader, debug_messenger) =
@@ -85,7 +84,7 @@ impl Instance {
     }
 
     fn create_instance(
-        window: &Window,
+        window: &window::Window,
         entry: &ash::Entry,
         validation_enabled: bool,
     ) -> Result<ash::Instance, Error> {
@@ -116,8 +115,7 @@ impl Instance {
             Vec::new()
         };
 
-        let mut extensions =
-            ash_window::enumerate_required_extensions(&window.native_window)?.to_vec();
+        let mut extensions = ash_window::enumerate_required_extensions(&window)?.to_vec();
 
         if validation_enabled {
             extensions.push(DebugLoader::name().as_ptr());

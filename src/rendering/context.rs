@@ -16,8 +16,6 @@ use super::renderer::Renderer;
 use super::sync::fence::Fence;
 use super::sync::semaphore::Semaphore;
 
-use crate::core::window::Window;
-
 use ash::vk;
 use log::{debug, info};
 use std::rc::Rc;
@@ -45,7 +43,7 @@ pub struct RenderContext {
 impl RenderContext {
     pub(super) const MAX_FRAMES_IN_FLIGHT: usize = 2;
 
-    pub fn new(window: &Window) -> Result<Self, Error> {
+    pub fn new(window: &window::Window) -> Result<Self, Error> {
         let entry = unsafe { ash::Entry::load()? };
         let instance = Rc::new(Instance::new(&window, &entry)?);
         let surface = Rc::new(Surface::new(&window, &entry, &instance)?);

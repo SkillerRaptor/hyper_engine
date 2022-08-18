@@ -9,8 +9,6 @@ use super::super::devices::instance::Instance;
 use super::super::devices::surface::Surface;
 use super::super::error::Error;
 
-use crate::core::window::Window;
-
 use ash::extensions::khr::Swapchain as SwapchainLoader;
 use ash::vk;
 use log::debug;
@@ -30,19 +28,14 @@ pub struct Swapchain {
 
 impl Swapchain {
     pub fn new(
-        window: &Window,
+        window: &window::Window,
         instance: &Rc<Instance>,
         surface: &Rc<Surface>,
         device: &Rc<Device>,
     ) -> Result<Self, Error> {
         let swapchain_loader = SwapchainLoader::new(&instance.instance(), &device.logical_device());
-        let (swapchain, extent, format) = Self::create_swapchain(
-            &window.native_window,
-            &surface,
-            &device,
-            &swapchain_loader,
-            false,
-        )?;
+        let (swapchain, extent, format) =
+            Self::create_swapchain(&window, &surface, &device, &swapchain_loader, false)?;
 
         let images = unsafe { swapchain_loader.get_swapchain_images(swapchain)? };
         let image_views = Self::create_image_views(&device, &format, &images)?;
