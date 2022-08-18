@@ -44,15 +44,11 @@ impl Renderer {
         in_flight_fences: &Vec<Fence>,
     ) -> Result<(), Error> {
         let command_buffer = self.current_command_buffer(command_buffers);
+        let in_flight_fence = self.current_fence(in_flight_fences);
+
+        in_flight_fence.wait(u64::MAX)?;
 
         unsafe {
-            // TODO: Move this to fence class
-            device.logical_device().wait_for_fences(
-                &[*in_flight_fences[self.current_frame as usize].fence()],
-                true,
-                u64::MAX,
-            )?;
-
             // TODO: Move this to swapchain class
             match swapchain.swapchain_loader().acquire_next_image(
                 *swapchain.swapchain(),
@@ -68,13 +64,11 @@ impl Renderer {
                 }
                 Err(error) => return Err(Error::VulkanError(error)),
             }
-
-            // TODO: Move this to fence class
-            device
-                .logical_device()
-                .reset_fences(&[*in_flight_fences[self.current_frame as usize].fence()])?;
-            command_buffer.reset(vk::CommandBufferResetFlags::empty())?;
         }
+
+        in_flight_fence.reset()?;
+
+        command_buffer.reset(vk::CommandBufferResetFlags::empty())?;
 
         command_buffer.begin(
             vk::CommandBufferUsageFlags::empty(),
@@ -271,5 +265,13 @@ impl Renderer {
         command_buffers: &'a Vec<CommandBuffer>,
     ) -> &'a CommandBuffer {
         &command_buffers[self.current_frame as usize]
+    }
+
+    fn current_fence<'a>(&self, fences: &'a Vec<Fence>) -> &'a Fence {
+        &fences[self.current_frame as usize]
+    }
+
+    fn current_semaphore<'a>(&self, semaphores: &'a Vec<Semaphore>) -> &'a Semaphore {
+        &semaphores[self.current_frame as usize]
     }
 }
