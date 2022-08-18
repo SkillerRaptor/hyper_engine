@@ -255,9 +255,9 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn draw(&self, command_buffers: &Vec<CommandBuffer>) {
+    pub fn draw(&self, command_buffers: &Vec<CommandBuffer>, vertex_count: u32) {
         let command_buffer = self.current_command_buffer(command_buffers);
-        command_buffer.cmd_draw(3, 1, 0, 0);
+        command_buffer.cmd_draw(vertex_count, 1, 0, 0);
     }
 
     pub fn current_command_buffer<'a>(

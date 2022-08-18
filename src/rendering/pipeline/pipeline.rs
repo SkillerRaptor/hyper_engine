@@ -6,6 +6,7 @@
 
 use super::super::devices::device::Device;
 use super::super::error::{AlignError, Error};
+use super::super::vertex::Vertex;
 use super::swapchain::Swapchain;
 
 use ash::vk;
@@ -48,7 +49,11 @@ impl Pipeline {
             .name(&entry_point)
             .specialization_info(&specialization_info);
 
-        let vertex_input_state_create_info = vk::PipelineVertexInputStateCreateInfo::builder();
+        let binding_description = &[Vertex::binding_description()];
+        let attribute_description = Vertex::attribute_descriptions();
+        let vertex_input_state_create_info = vk::PipelineVertexInputStateCreateInfo::builder()
+            .vertex_binding_descriptions(binding_description)
+            .vertex_attribute_descriptions(&attribute_description);
 
         let input_assembly_state_create_info = vk::PipelineInputAssemblyStateCreateInfo::builder()
             .topology(vk::PrimitiveTopology::TRIANGLE_LIST)

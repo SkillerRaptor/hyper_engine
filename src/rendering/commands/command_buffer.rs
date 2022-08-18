@@ -135,6 +135,22 @@ impl CommandBuffer {
         }
     }
 
+    pub fn cmd_bind_vertex_buffers(
+        &self,
+        first_binding: u32,
+        buffers: &[vk::Buffer],
+        offsets: &[vk::DeviceSize],
+    ) {
+        unsafe {
+            self.device.logical_device().cmd_bind_vertex_buffers(
+                self.command_buffer,
+                first_binding,
+                buffers,
+                offsets,
+            );
+        }
+    }
+
     pub fn cmd_set_scissor(&self, first_scissor: u32, scissors: &[vk::Rect2D]) {
         unsafe {
             self.device.logical_device().cmd_set_scissor(

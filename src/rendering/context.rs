@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+use super::buffers::vertex_buffer::VertexBuffer;
 use super::commands::command_buffer::CommandBuffer;
 use super::commands::command_pool::CommandPool;
 use super::devices::device::Device;
@@ -30,6 +31,7 @@ pub struct RenderContext {
     image_available_semaphores: Vec<Semaphore>,
 
     command_buffers: Vec<CommandBuffer>,
+    vertex_buffer: VertexBuffer,
     _command_pool: Rc<CommandPool>,
 
     pipeline: Pipeline,
@@ -52,6 +54,7 @@ impl RenderContext {
         let pipeline = Pipeline::new(&device, &swapchain)?;
 
         let command_pool = Rc::new(CommandPool::new(&instance, &surface, &device)?);
+        let vertex_buffer = VertexBuffer::new(&instance, &device)?;
         let command_buffers = Self::create_command_buffers(&device, &command_pool)?;
 
         let (image_available_semaphores, render_finished_semaphores, in_flight_fences) =
@@ -66,6 +69,7 @@ impl RenderContext {
             render_finished_semaphores,
             in_flight_fences,
             command_buffers,
+            vertex_buffer,
             _command_pool: command_pool,
             pipeline,
             swapchain,
@@ -183,7 +187,16 @@ impl RenderContext {
     }
 
     pub fn draw(&self) {
-        self.renderer.draw(&self.command_buffers);
+        let command_buffer = self.renderer.current_command_buffer(&self.command_buffers);
+
+        let buffers = &[*self.vertex_buffer.buffer()];
+        let offsets = &[0];
+        command_buffer.cmd_bind_vertex_buffers(0, buffers, offsets);
+
+        self.renderer.draw(
+            &self.command_buffers,
+            self.vertex_buffer.vertices().len() as u32,
+        );
     }
 }
 
