@@ -4,42 +4,35 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::devices::device::Device;
 use super::super::error::Error;
 
 use ash::vk;
 use log::debug;
-use std::rc::Rc;
 
 pub struct Fence {
     fence: vk::Fence,
 
-    device: Rc<Device>,
+    logical_device: ash::Device,
 }
 
 impl Fence {
-    pub fn new(device: &Rc<Device>) -> Result<Self, Error> {
+    pub fn new(logical_device: &ash::Device) -> Result<Self, Error> {
         let fence_create_info =
             vk::FenceCreateInfo::builder().flags(vk::FenceCreateFlags::SIGNALED);
 
-        let fence = unsafe {
-            device
-                .logical_device()
-                .create_fence(&fence_create_info, None)?
-        };
+        let fence = unsafe { logical_device.create_fence(&fence_create_info, None)? };
 
         debug!("Created fence");
         Ok(Self {
             fence,
 
-            device: device.clone(),
+            logical_device: logical_device.clone(),
         })
     }
 
     pub fn wait(&self, timeout: u64) -> Result<(), Error> {
         unsafe {
-            self.device
-                .logical_device()
+            self.logical_device
                 .wait_for_fences(&[self.fence], true, timeout)?;
         }
 
@@ -48,7 +41,7 @@ impl Fence {
 
     pub fn reset(&self) -> Result<(), Error> {
         unsafe {
-            self.device.logical_device().reset_fences(&[self.fence])?;
+            self.logical_device.reset_fences(&[self.fence])?;
         }
 
         Ok(())
@@ -62,7 +55,7 @@ impl Fence {
 impl Drop for Fence {
     fn drop(&mut self) {
         unsafe {
-            self.device.logical_device().destroy_fence(self.fence, None);
+            self.logical_device.destroy_fence(self.fence, None);
         }
     }
 }

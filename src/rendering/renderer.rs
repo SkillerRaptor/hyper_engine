@@ -4,67 +4,165 @@
  * SPDX-License-Identifier: MIT
  */
 
+use super::buffers::vertex_buffer::VertexBuffer;
 use super::commands::command_buffer::CommandBuffer;
-use super::context::RenderContext;
-use super::devices::device::Device;
-use super::devices::surface::Surface;
+use super::commands::command_pool::CommandPool;
 use super::error::Error;
-use super::pipeline::pipeline::Pipeline;
 use super::pipeline::swapchain::Swapchain;
 use super::sync::fence::Fence;
 use super::sync::semaphore::Semaphore;
 
-use winit::window;
-
+use ash::extensions::khr::Surface as SurfaceLoader;
 use ash::vk;
-use std::rc::Rc;
+use log::{debug, info};
+use winit::window;
 
 pub struct Renderer {
     current_frame: u32,
     current_image_index: u32,
+
+    in_flight_fences: Vec<Fence>,
+    render_finished_semaphores: Vec<Semaphore>,
+    image_available_semaphores: Vec<Semaphore>,
+
+    vertex_buffer: VertexBuffer,
+    command_buffers: Vec<CommandBuffer>,
+    _command_pool: CommandPool,
+
+    pipeline: vk::Pipeline,
+    graphics_queue: vk::Queue,
+    logical_device: ash::Device,
+    physical_device: vk::PhysicalDevice,
+    surface: vk::SurfaceKHR,
+    surface_loader: SurfaceLoader,
 }
 
 impl Renderer {
-    pub fn new() -> Self {
-        Self {
+    const MAX_FRAMES_IN_FLIGHT: usize = 2;
+
+    pub fn new(
+        instance: &ash::Instance,
+        surface_loader: &SurfaceLoader,
+        surface: &vk::SurfaceKHR,
+        physical_device: &vk::PhysicalDevice,
+        logical_device: &ash::Device,
+        graphics_queue: &vk::Queue,
+        pipeline: &vk::Pipeline,
+    ) -> Result<Self, Error> {
+        let command_pool = CommandPool::new(
+            &instance,
+            &surface_loader,
+            &surface,
+            &physical_device,
+            &logical_device,
+        )?;
+        let command_buffers =
+            Self::create_command_buffers(&logical_device, &command_pool.command_pool())?;
+        let vertex_buffer = VertexBuffer::new(&instance, &physical_device, &logical_device)?;
+        let (image_available_semaphores, render_finished_semaphores, in_flight_fences) =
+            Self::create_sync_objects(&logical_device)?;
+
+        info!("Created renderer");
+        Ok(Self {
             current_frame: 0,
             current_image_index: 0,
+
+            image_available_semaphores,
+            render_finished_semaphores,
+            in_flight_fences,
+            vertex_buffer,
+            command_buffers,
+            _command_pool: command_pool,
+
+            pipeline: pipeline.clone(),
+            graphics_queue: graphics_queue.clone(),
+            logical_device: logical_device.clone(),
+            physical_device: physical_device.clone(),
+            surface: surface.clone(),
+            surface_loader: surface_loader.clone(),
+        })
+    }
+
+    fn create_command_buffers(
+        logical_device: &ash::Device,
+        command_pool: &vk::CommandPool,
+    ) -> Result<Vec<CommandBuffer>, Error> {
+        let mut command_buffers = Vec::new();
+
+        for i in 0..Self::MAX_FRAMES_IN_FLIGHT {
+            let command_buffer = CommandBuffer::new(
+                &logical_device,
+                &command_pool,
+                vk::CommandBufferLevel::PRIMARY,
+            )?;
+            command_buffers.push(command_buffer);
+            debug!("Created command buffer #{}", i);
         }
+
+        Ok(command_buffers)
+    }
+
+    fn create_sync_objects(
+        logical_device: &ash::Device,
+    ) -> Result<(Vec<Semaphore>, Vec<Semaphore>, Vec<Fence>), Error> {
+        let mut image_available_semaphores = Vec::new();
+        let mut render_finished_semaphores = Vec::new();
+        let mut in_flight_fences = Vec::new();
+
+        for i in 0..Self::MAX_FRAMES_IN_FLIGHT {
+            let image_available_semaphore = Semaphore::new(&logical_device)?;
+            image_available_semaphores.push(image_available_semaphore);
+            debug!("Created image available semaphore #{}", i);
+
+            let render_finished_semaphore = Semaphore::new(&logical_device)?;
+            render_finished_semaphores.push(render_finished_semaphore);
+            debug!("Created render finished semaphore #{}", i);
+
+            let in_flight_fence = Fence::new(&logical_device)?;
+            in_flight_fences.push(in_flight_fence);
+            debug!("Created in flight fence #{}", i);
+        }
+
+        Ok((
+            image_available_semaphores,
+            render_finished_semaphores,
+            in_flight_fences,
+        ))
     }
 
     pub fn begin_frame(
         &mut self,
         window: &window::Window,
-        surface: &Rc<Surface>,
-        device: &Rc<Device>,
         swapchain: &mut Swapchain,
-        pipeline: &Pipeline,
-        command_buffers: &Vec<CommandBuffer>,
-        image_available_semaphores: &Vec<Semaphore>,
-        in_flight_fences: &Vec<Fence>,
     ) -> Result<(), Error> {
-        let command_buffer = self.current_command_buffer(command_buffers);
-        let in_flight_fence = self.current_fence(in_flight_fences);
-
-        in_flight_fence.wait(u64::MAX)?;
+        self.in_flight_fences[self.current_frame as usize].wait(u64::MAX)?;
 
         unsafe {
             // TODO: Move this to swapchain class
             match swapchain.swapchain_loader().acquire_next_image(
                 *swapchain.swapchain(),
                 u64::MAX,
-                *image_available_semaphores[self.current_frame as usize].semaphore(),
+                *self.image_available_semaphores[self.current_frame as usize].semaphore(),
                 vk::Fence::null(),
             ) {
                 Ok((image_index, _)) => self.current_image_index = image_index,
                 Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => {
-                    swapchain.recreate(&window, &surface, &device)?;
+                    swapchain.recreate(
+                        &window,
+                        &self.surface_loader,
+                        &self.surface,
+                        &self.physical_device,
+                        &self.logical_device,
+                    )?;
 
                     return Ok(());
                 }
                 Err(error) => return Err(Error::VulkanError(error)),
             }
         }
+
+        let command_buffer = self.current_command_buffer();
+        let in_flight_fence = self.current_in_flight_fence();
 
         in_flight_fence.reset()?;
 
@@ -136,17 +234,27 @@ impl Renderer {
 
         command_buffer.cmd_begin_rendering(&rendering_info);
 
-        command_buffer.cmd_bind_pipeline(vk::PipelineBindPoint::GRAPHICS, *pipeline.pipeline());
+        command_buffer.cmd_bind_pipeline(vk::PipelineBindPoint::GRAPHICS, self.pipeline);
+
+        let extent = swapchain.extent();
+        let viewport = vk::Viewport::builder()
+            .x(0.0)
+            .y(0.0)
+            .width(extent.width as f32)
+            .height(extent.height as f32)
+            .min_depth(0.0)
+            .max_depth(1.0);
+        command_buffer.cmd_set_viewport(0, &[*viewport]);
+
+        let offset = vk::Offset2D::builder();
+        let scissor = vk::Rect2D::builder().offset(*offset).extent(*extent);
+        command_buffer.cmd_set_scissor(0, &[*scissor]);
 
         Ok(())
     }
 
-    pub fn end_frame(
-        &self,
-        swapchain: &Swapchain,
-        command_buffers: &Vec<CommandBuffer>,
-    ) -> Result<(), Error> {
-        let command_buffer = self.current_command_buffer(command_buffers);
+    pub fn end_frame(&self, swapchain: &Swapchain) -> Result<(), Error> {
+        let command_buffer = self.current_command_buffer();
 
         command_buffer.cmd_end_rendering();
 
@@ -184,23 +292,18 @@ impl Renderer {
     pub fn submit(
         &mut self,
         window: &window::Window,
-        surface: &Rc<Surface>,
-        device: &Rc<Device>,
         swapchain: &mut Swapchain,
-        command_buffers: &Vec<CommandBuffer>,
-        image_available_semaphores: &Vec<Semaphore>,
-        render_finished_semaphores: &Vec<Semaphore>,
-        in_flight_fences: &Vec<Fence>,
         resized: &mut bool,
     ) -> Result<(), Error> {
-        let command_buffer = self.current_command_buffer(command_buffers);
+        let command_buffer = self.current_command_buffer();
+        let in_flight_fence = self.current_in_flight_fence();
+        let render_finished_semaphore = self.current_render_finished_semaphore();
+        let image_available_semaphore = self.current_image_available_semaphore();
 
-        let wait_semaphores =
-            &[*image_available_semaphores[self.current_frame as usize].semaphore()];
+        let wait_semaphores = &[*image_available_semaphore.semaphore()];
         let wait_stages = &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
         let command_buffers = &[*command_buffer.command_buffer()];
-        let signal_semaphores =
-            &[*render_finished_semaphores[self.current_frame as usize].semaphore()];
+        let signal_semaphores = &[*render_finished_semaphore.semaphore()];
         let submit_info = vk::SubmitInfo::builder()
             .wait_semaphores(wait_semaphores)
             .wait_dst_stage_mask(wait_stages)
@@ -210,15 +313,14 @@ impl Renderer {
         let submits = &[*submit_info];
         unsafe {
             // TODO: Create queue class and move this to queue class
-            device.logical_device().queue_submit(
-                *device.graphics_queue(),
+            self.logical_device.queue_submit(
+                self.graphics_queue,
                 submits,
-                *in_flight_fences[self.current_frame as usize].fence(),
+                *in_flight_fence.fence(),
             )?;
         }
 
-        let wait_semaphores =
-            &[*render_finished_semaphores[self.current_frame as usize].semaphore()];
+        let wait_semaphores = &[*render_finished_semaphore.semaphore()];
         let swapchains = &[*swapchain.swapchain()];
         let image_indices = &[self.current_image_index];
 
@@ -231,7 +333,7 @@ impl Renderer {
             // TODO: Move this to swapchain class
             let changed = match swapchain
                 .swapchain_loader()
-                .queue_present(*device.graphics_queue(), &present_info)
+                .queue_present(self.graphics_queue, &present_info)
             {
                 Ok(suboptimal) => {
                     if suboptimal {
@@ -246,32 +348,44 @@ impl Renderer {
 
             if changed || *resized {
                 *resized = false;
-                swapchain.recreate(&window, &surface, &device)?;
+                swapchain.recreate(
+                    &window,
+                    &self.surface_loader,
+                    &self.surface,
+                    &self.physical_device,
+                    &self.logical_device,
+                )?;
             }
         }
 
-        self.current_frame = (self.current_frame + 1) % RenderContext::MAX_FRAMES_IN_FLIGHT as u32;
+        self.current_frame = (self.current_frame + 1) % Self::MAX_FRAMES_IN_FLIGHT as u32;
 
         Ok(())
     }
 
-    pub fn draw(&self, command_buffers: &Vec<CommandBuffer>, vertex_count: u32) {
-        let command_buffer = self.current_command_buffer(command_buffers);
-        command_buffer.cmd_draw(vertex_count, 1, 0, 0);
+    pub fn draw_triangle(&self) {
+        let command_buffer = self.current_command_buffer();
+
+        let buffers = &[*self.vertex_buffer.buffer()];
+        let offsets = &[0];
+        command_buffer.cmd_bind_vertex_buffers(0, buffers, offsets);
+
+        command_buffer.cmd_draw(self.vertex_buffer.vertices().len() as u32, 1, 0, 0);
     }
 
-    pub fn current_command_buffer<'a>(
-        &self,
-        command_buffers: &'a Vec<CommandBuffer>,
-    ) -> &'a CommandBuffer {
-        &command_buffers[self.current_frame as usize]
+    pub fn current_command_buffer(&self) -> &CommandBuffer {
+        &self.command_buffers[self.current_frame as usize]
     }
 
-    fn current_fence<'a>(&self, fences: &'a Vec<Fence>) -> &'a Fence {
-        &fences[self.current_frame as usize]
+    fn current_in_flight_fence(&self) -> &Fence {
+        &self.in_flight_fences[self.current_frame as usize]
     }
 
-    fn current_semaphore<'a>(&self, semaphores: &'a Vec<Semaphore>) -> &'a Semaphore {
-        &semaphores[self.current_frame as usize]
+    fn current_render_finished_semaphore(&self) -> &Semaphore {
+        &self.render_finished_semaphores[self.current_frame as usize]
+    }
+
+    fn current_image_available_semaphore(&self) -> &Semaphore {
+        &self.image_available_semaphores[self.current_frame as usize]
     }
 }

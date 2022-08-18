@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::devices::device::Device;
-use super::super::devices::instance::Instance;
 use super::super::error::{Error, SuitabilityError};
 use super::super::vertex::Vertex;
 
@@ -14,18 +12,21 @@ use log::debug;
 use nalgebra_glm as glm;
 use std::mem::size_of;
 use std::ptr::copy_nonoverlapping;
-use std::rc::Rc;
 
 pub struct VertexBuffer {
     device_memory: vk::DeviceMemory,
     buffer: vk::Buffer,
     vertices: Vec<Vertex>,
 
-    device: Rc<Device>,
+    logical_device: ash::Device,
 }
 
 impl VertexBuffer {
-    pub fn new(instance: &Rc<Instance>, device: &Rc<Device>) -> Result<Self, Error> {
+    pub fn new(
+        instance: &ash::Instance,
+        physical_device: &vk::PhysicalDevice,
+        logical_device: &ash::Device,
+    ) -> Result<Self, Error> {
         let vertices = vec![
             Vertex::new(glm::vec2(0.0, -0.5), glm::vec3(1.0, 1.0, 1.0)),
             Vertex::new(glm::vec2(0.5, 0.5), glm::vec3(0.0, 1.0, 0.0)),
@@ -37,17 +38,13 @@ impl VertexBuffer {
             .usage(vk::BufferUsageFlags::VERTEX_BUFFER)
             .sharing_mode(vk::SharingMode::EXCLUSIVE);
 
-        let buffer = unsafe { device.logical_device().create_buffer(&create_info, None)? };
+        let buffer = unsafe { logical_device.create_buffer(&create_info, None)? };
 
-        let requirements = unsafe {
-            device
-                .logical_device()
-                .get_buffer_memory_requirements(buffer)
-        };
+        let requirements = unsafe { logical_device.get_buffer_memory_requirements(buffer) };
 
         let memory_type_index = Self::find_memory_type_index(
             &instance,
-            &device,
+            &physical_device,
             vk::MemoryPropertyFlags::HOST_COHERENT | vk::MemoryPropertyFlags::HOST_VISIBLE,
             requirements,
         )?;
@@ -56,20 +53,14 @@ impl VertexBuffer {
             .allocation_size(requirements.size)
             .memory_type_index(memory_type_index);
 
-        let device_memory = unsafe {
-            device
-                .logical_device()
-                .allocate_memory(&allocate_info, None)?
-        };
+        let device_memory = unsafe { logical_device.allocate_memory(&allocate_info, None)? };
 
         unsafe {
-            device
-                .logical_device()
-                .bind_buffer_memory(buffer, device_memory, 0)?;
+            logical_device.bind_buffer_memory(buffer, device_memory, 0)?;
         }
 
         let memory = unsafe {
-            device.logical_device().map_memory(
+            logical_device.map_memory(
                 device_memory,
                 0,
                 create_info.size,
@@ -87,21 +78,17 @@ impl VertexBuffer {
             buffer,
             vertices,
 
-            device: device.clone(),
+            logical_device: logical_device.clone(),
         })
     }
 
     fn find_memory_type_index(
-        instance: &Rc<Instance>,
-        device: &Rc<Device>,
+        instance: &ash::Instance,
+        physical_device: &vk::PhysicalDevice,
         properties: vk::MemoryPropertyFlags,
         requirements: vk::MemoryRequirements,
     ) -> Result<u32, Error> {
-        let memory = unsafe {
-            instance
-                .instance()
-                .get_physical_device_memory_properties(*device.physical_device())
-        };
+        let memory = unsafe { instance.get_physical_device_memory_properties(*physical_device) };
 
         let index = (0..memory.memory_type_count)
             .find(|index| {
@@ -128,13 +115,8 @@ impl VertexBuffer {
 impl Drop for VertexBuffer {
     fn drop(&mut self) {
         unsafe {
-            self.device
-                .logical_device()
-                .free_memory(self.device_memory, None);
-
-            self.device
-                .logical_device()
-                .destroy_buffer(self.buffer, None);
+            self.logical_device.free_memory(self.device_memory, None);
+            self.logical_device.destroy_buffer(self.buffer, None);
         }
     }
 }

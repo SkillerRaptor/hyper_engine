@@ -21,32 +21,8 @@ pub struct Instance {
 impl Instance {
     const VALIDATION_LAYER: &'static str = "VK_LAYER_KHRONOS_validation";
 
-    unsafe extern "system" fn debug_callback(
-        message_severity: vk::DebugUtilsMessageSeverityFlagsEXT,
-        _message_type: vk::DebugUtilsMessageTypeFlagsEXT,
-        callback_data: *const vk::DebugUtilsMessengerCallbackDataEXT,
-        _user_data: *mut std::os::raw::c_void,
-    ) -> vk::Bool32 {
-        let callback_data = *callback_data;
-        let message = std::ffi::CStr::from_ptr(callback_data.p_message).to_string_lossy();
-        match message_severity {
-            vk::DebugUtilsMessageSeverityFlagsEXT::INFO => {
-                debug!("{}", message)
-            }
-            vk::DebugUtilsMessageSeverityFlagsEXT::WARNING => {
-                warn!("{}", message)
-            }
-            vk::DebugUtilsMessageSeverityFlagsEXT::ERROR => {
-                error!("{}", message)
-            }
-            _ => (),
-        };
-
-        vk::FALSE
-    }
-
     pub fn new(window: &window::Window, entry: &ash::Entry) -> Result<Self, Error> {
-        let validation_layer_enabled = Self::check_validation_layer_support(entry)?;
+        let validation_layer_enabled = Self::check_validation_layer_support(&entry)?;
         let instance = Self::create_instance(&window, &entry, validation_layer_enabled)?;
         let (debug_loader, debug_messenger) =
             Self::create_debug_messenger(&entry, &instance, validation_layer_enabled)?;
@@ -161,6 +137,30 @@ impl Instance {
 
         debug!("Created vulkan debug messenger");
         Ok((debug_utils, debug_messenger))
+    }
+
+    unsafe extern "system" fn debug_callback(
+        message_severity: vk::DebugUtilsMessageSeverityFlagsEXT,
+        _message_type: vk::DebugUtilsMessageTypeFlagsEXT,
+        callback_data: *const vk::DebugUtilsMessengerCallbackDataEXT,
+        _user_data: *mut std::os::raw::c_void,
+    ) -> vk::Bool32 {
+        let callback_data = *callback_data;
+        let message = std::ffi::CStr::from_ptr(callback_data.p_message).to_string_lossy();
+        match message_severity {
+            vk::DebugUtilsMessageSeverityFlagsEXT::INFO => {
+                debug!("{}", message)
+            }
+            vk::DebugUtilsMessageSeverityFlagsEXT::WARNING => {
+                warn!("{}", message)
+            }
+            vk::DebugUtilsMessageSeverityFlagsEXT::ERROR => {
+                error!("{}", message)
+            }
+            _ => (),
+        };
+
+        vk::FALSE
     }
 
     pub fn instance(&self) -> &ash::Instance {

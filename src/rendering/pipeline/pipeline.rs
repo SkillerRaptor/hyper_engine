@@ -4,14 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::devices::device::Device;
 use super::super::error::{AlignError, Error};
 use super::super::vertex::Vertex;
-use super::swapchain::Swapchain;
 
 use ash::vk;
 use log::debug;
-use std::rc::Rc;
 
 enum ShaderStage {
     Vertex,
@@ -22,18 +19,18 @@ pub struct Pipeline {
     pipeline: vk::Pipeline,
     pipeline_layout: vk::PipelineLayout,
 
-    device: Rc<Device>,
+    logical_device: ash::Device,
 }
 
 impl Pipeline {
-    pub fn new(device: &Rc<Device>, swapchain: &Swapchain) -> Result<Self, Error> {
+    pub fn new(logical_device: &ash::Device, format: &vk::Format) -> Result<Self, Error> {
         let entry_point = std::ffi::CString::new("main")?;
 
         let specialization_info = vk::SpecializationInfo::builder();
 
         let vertex = include_bytes!("../../../assets/shaders/default_shader_vertex.spv");
         let vertex_shader_module =
-            Self::create_shader_module(ShaderStage::Vertex, &device, vertex)?;
+            Self::create_shader_module(&logical_device, ShaderStage::Vertex, vertex)?;
         let vertex_stage = vk::PipelineShaderStageCreateInfo::builder()
             .stage(vk::ShaderStageFlags::VERTEX)
             .module(vertex_shader_module)
@@ -42,7 +39,7 @@ impl Pipeline {
 
         let fragment = include_bytes!("../../../assets/shaders/default_shader_fragment.spv");
         let fragment_shader_module =
-            Self::create_shader_module(ShaderStage::Fragment, &device, fragment)?;
+            Self::create_shader_module(&logical_device, ShaderStage::Fragment, fragment)?;
         let fragment_stage = vk::PipelineShaderStageCreateInfo::builder()
             .stage(vk::ShaderStageFlags::FRAGMENT)
             .module(fragment_shader_module)
@@ -117,12 +114,10 @@ impl Pipeline {
             .push_constant_ranges(push_constant_ranges);
 
         let pipeline_layout = unsafe {
-            device
-                .logical_device()
-                .create_pipeline_layout(&pipeline_layout_info_create_info, None)?
+            logical_device.create_pipeline_layout(&pipeline_layout_info_create_info, None)?
         };
 
-        let color_attachment_formats = &[*swapchain.format()];
+        let color_attachment_formats = &[*format];
         let mut pipeline_rendering_create_info = vk::PipelineRenderingCreateInfo::builder()
             .view_mask(0)
             .color_attachment_formats(color_attachment_formats)
@@ -149,8 +144,7 @@ impl Pipeline {
             .base_pipeline_index(-1);
 
         let pipeline = unsafe {
-            device
-                .logical_device()
+            logical_device
                 .create_graphics_pipelines(
                     vk::PipelineCache::null(),
                     &[*graphics_pipeline_create_info],
@@ -291,12 +285,8 @@ impl Pipeline {
         );
 
         unsafe {
-            device
-                .logical_device()
-                .destroy_shader_module(fragment_shader_module, None);
-            device
-                .logical_device()
-                .destroy_shader_module(vertex_shader_module, None);
+            logical_device.destroy_shader_module(fragment_shader_module, None);
+            logical_device.destroy_shader_module(vertex_shader_module, None);
         }
 
         debug!("Created vulkan pipeline");
@@ -304,13 +294,13 @@ impl Pipeline {
             pipeline,
             pipeline_layout,
 
-            device: device.clone(),
+            logical_device: logical_device.clone(),
         })
     }
 
     fn create_shader_module(
+        logical_device: &ash::Device,
         shader_stage: ShaderStage,
-        device: &Device,
         bytecode: &[u8],
     ) -> Result<vk::ShaderModule, Error> {
         let bytecode = Vec::<u8>::from(bytecode);
@@ -323,11 +313,8 @@ impl Pipeline {
 
         let shader_module_create_info = vk::ShaderModuleCreateInfo::builder().code(code);
 
-        let shader_module = unsafe {
-            device
-                .logical_device()
-                .create_shader_module(&shader_module_create_info, None)?
-        };
+        let shader_module =
+            unsafe { logical_device.create_shader_module(&shader_module_create_info, None)? };
 
         let shader_stage = match shader_stage {
             ShaderStage::Vertex => "vertex",
@@ -347,11 +334,8 @@ impl Pipeline {
 impl Drop for Pipeline {
     fn drop(&mut self) {
         unsafe {
-            self.device
-                .logical_device()
-                .destroy_pipeline(self.pipeline, None);
-            self.device
-                .logical_device()
+            self.logical_device.destroy_pipeline(self.pipeline, None);
+            self.logical_device
                 .destroy_pipeline_layout(self.pipeline_layout, None);
         }
     }

@@ -4,45 +4,41 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::devices::device::{Device, QueueFamilyIndices};
-use super::super::devices::instance::Instance;
-use super::super::devices::surface::Surface;
+use super::super::devices::device::QueueFamilyIndices;
 use super::super::error::Error;
 
+use ash::extensions::khr::Surface as SurfaceLoader;
 use ash::vk;
 use log::debug;
-use std::rc::Rc;
 
 pub struct CommandPool {
     command_pool: vk::CommandPool,
 
-    device: Rc<Device>,
+    logical_device: ash::Device,
 }
 
 impl CommandPool {
     pub fn new(
-        instance: &Rc<Instance>,
-        surface: &Rc<Surface>,
-        device: &Rc<Device>,
+        instance: &ash::Instance,
+        surface_loader: &SurfaceLoader,
+        surface: &vk::SurfaceKHR,
+        physical_device: &vk::PhysicalDevice,
+        logical_device: &ash::Device,
     ) -> Result<Self, Error> {
         let queue_families =
-            QueueFamilyIndices::new(&instance, &surface, &device.physical_device())?;
+            QueueFamilyIndices::new(&instance, &surface_loader, &surface, &physical_device)?;
 
         let create_info = vk::CommandPoolCreateInfo::builder()
             .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
             .queue_family_index(*queue_families.graphics());
 
-        let command_pool = unsafe {
-            device
-                .logical_device()
-                .create_command_pool(&create_info, None)?
-        };
+        let command_pool = unsafe { logical_device.create_command_pool(&create_info, None)? };
 
         debug!("Created command pool");
         Ok(Self {
             command_pool,
 
-            device: device.clone(),
+            logical_device: logical_device.clone(),
         })
     }
 
@@ -54,8 +50,7 @@ impl CommandPool {
 impl Drop for CommandPool {
     fn drop(&mut self) {
         unsafe {
-            self.device
-                .logical_device()
+            self.logical_device
                 .destroy_command_pool(self.command_pool, None);
         }
     }

@@ -5,12 +5,10 @@
  */
 
 use super::super::error::Error;
-use super::instance::Instance;
 
 use ash::extensions::khr::Surface as SurfaceLoader;
 use ash::vk;
 use log::debug;
-use std::rc::Rc;
 use winit::window;
 
 pub struct Surface {
@@ -22,11 +20,10 @@ impl Surface {
     pub fn new(
         window: &window::Window,
         entry: &ash::Entry,
-        instance: &Rc<Instance>,
+        instance: &ash::Instance,
     ) -> Result<Self, Error> {
-        let surface_loader = SurfaceLoader::new(entry, &instance.instance());
-        let surface =
-            unsafe { ash_window::create_surface(entry, &instance.instance(), &window, None)? };
+        let surface_loader = SurfaceLoader::new(&entry, &instance);
+        let surface = unsafe { ash_window::create_surface(&entry, &instance, &window, None)? };
 
         debug!("Created vulkan surface");
         Ok(Self {

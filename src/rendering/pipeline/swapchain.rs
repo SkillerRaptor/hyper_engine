@@ -4,15 +4,13 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::devices::device::{Device, SwapchainSupport};
-use super::super::devices::instance::Instance;
-use super::super::devices::surface::Surface;
+use super::super::devices::device::SwapchainSupport;
 use super::super::error::Error;
 
+use ash::extensions::khr::Surface as SurfaceLoader;
 use ash::extensions::khr::Swapchain as SwapchainLoader;
 use ash::vk;
 use log::debug;
-use std::rc::Rc;
 use winit::window;
 
 pub struct Swapchain {
@@ -23,22 +21,31 @@ pub struct Swapchain {
     swapchain: vk::SwapchainKHR,
     swapchain_loader: SwapchainLoader,
 
-    device: Rc<Device>,
+    logical_device: ash::Device,
 }
 
 impl Swapchain {
     pub fn new(
         window: &window::Window,
-        instance: &Rc<Instance>,
-        surface: &Rc<Surface>,
-        device: &Rc<Device>,
+        instance: &ash::Instance,
+        surface_loader: &SurfaceLoader,
+        surface: &vk::SurfaceKHR,
+        physical_device: &vk::PhysicalDevice,
+        logical_device: &ash::Device,
     ) -> Result<Self, Error> {
-        let swapchain_loader = SwapchainLoader::new(&instance.instance(), &device.logical_device());
-        let (swapchain, extent, format) =
-            Self::create_swapchain(&window, &surface, &device, &swapchain_loader, false)?;
+        let swapchain_loader = SwapchainLoader::new(&instance, &logical_device);
+        let (swapchain, extent, format) = Self::create_swapchain(
+            &window,
+            &surface_loader,
+            &surface,
+            &physical_device,
+            &swapchain_loader,
+            false,
+        )?;
 
         let images = unsafe { swapchain_loader.get_swapchain_images(swapchain)? };
-        let image_views = Self::create_image_views(&device, &format, &images)?;
+
+        let image_views = Self::create_image_views(&logical_device, &format, &images)?;
 
         debug!("Created vulkan swapchain");
         Ok(Self {
@@ -49,18 +56,19 @@ impl Swapchain {
             swapchain,
             swapchain_loader,
 
-            device: device.clone(),
+            logical_device: logical_device.clone(),
         })
     }
 
     fn create_swapchain(
         window: &window::Window,
-        surface: &Rc<Surface>,
-        device: &Rc<Device>,
+        surface_loader: &SurfaceLoader,
+        surface: &vk::SurfaceKHR,
+        physical_device: &vk::PhysicalDevice,
         swapchain_loader: &SwapchainLoader,
         recreate: bool,
     ) -> Result<(vk::SwapchainKHR, vk::Extent2D, vk::Format), Error> {
-        let support = SwapchainSupport::new(&surface, device.physical_device())?;
+        let support = SwapchainSupport::new(&surface_loader, &surface, &physical_device)?;
         let extent = Self::choose_extent(&window, support.capabilities());
         let surface_format = Self::choose_surface_format(&support.formats());
         let present_mode = Self::choose_present_mode(&support.present_modes());
@@ -76,7 +84,7 @@ impl Swapchain {
         let image_sharing_mode = vk::SharingMode::EXCLUSIVE;
 
         let swapchain_create_info = vk::SwapchainCreateInfoKHR::builder()
-            .surface(*surface.surface())
+            .surface(*surface)
             .min_image_count(image_count)
             .image_format(surface_format.format)
             .image_color_space(surface_format.color_space)
@@ -181,7 +189,7 @@ impl Swapchain {
     }
 
     fn create_image_views(
-        device: &Device,
+        logical_device: &ash::Device,
         format: &vk::Format,
         images: &Vec<vk::Image>,
     ) -> Result<Vec<vk::ImageView>, Error> {
@@ -208,11 +216,7 @@ impl Swapchain {
                     .components(*components)
                     .subresource_range(*subsource_range);
 
-                unsafe {
-                    device
-                        .logical_device()
-                        .create_image_view(&image_view_create_info, None)
-                }
+                unsafe { logical_device.create_image_view(&image_view_create_info, None) }
             })
             .collect::<Result<Vec<_>, _>>()?;
 
@@ -222,24 +226,32 @@ impl Swapchain {
     pub fn recreate(
         &mut self,
         window: &window::Window,
-        surface: &Rc<Surface>,
-        device: &Rc<Device>,
+        surface_loader: &SurfaceLoader,
+        surface: &vk::SurfaceKHR,
+        physical_device: &vk::PhysicalDevice,
+        logical_device: &ash::Device,
     ) -> Result<(), Error> {
         unsafe {
-            device.logical_device().device_wait_idle()?;
+            logical_device.device_wait_idle().unwrap();
         }
 
         self.cleanup();
 
-        let (swapchain, extent, format) =
-            Self::create_swapchain(window, &surface, &device, &self.swapchain_loader, true)?;
+        let (swapchain, extent, format) = Self::create_swapchain(
+            window,
+            &surface_loader,
+            &surface,
+            &physical_device,
+            &self.swapchain_loader,
+            true,
+        )?;
 
         self.swapchain = swapchain;
         self.extent = extent;
         self.format = format;
 
         let images = unsafe { self.swapchain_loader.get_swapchain_images(swapchain)? };
-        let image_views = Self::create_image_views(&device, &format, &images)?;
+        let image_views = Self::create_image_views(&logical_device, &format, &images)?;
 
         self.images = images;
         self.image_views = image_views;
@@ -249,11 +261,9 @@ impl Swapchain {
 
     pub fn cleanup(&mut self) {
         unsafe {
-            self.image_views.iter().for_each(|image_view| {
-                self.device
-                    .logical_device()
-                    .destroy_image_view(*image_view, None)
-            });
+            self.image_views
+                .iter()
+                .for_each(|image_view| self.logical_device.destroy_image_view(*image_view, None));
             self.swapchain_loader
                 .destroy_swapchain(self.swapchain, None);
         }

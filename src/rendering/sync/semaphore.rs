@@ -4,34 +4,28 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::devices::device::Device;
 use super::super::error::Error;
 
 use ash::vk;
 use log::debug;
-use std::rc::Rc;
 
 pub struct Semaphore {
     semaphore: vk::Semaphore,
 
-    device: Rc<Device>,
+    logical_device: ash::Device,
 }
 
 impl Semaphore {
-    pub fn new(device: &Rc<Device>) -> Result<Self, Error> {
+    pub fn new(logical_device: &ash::Device) -> Result<Self, Error> {
         let semaphore_create_info = vk::SemaphoreCreateInfo::builder();
 
-        let semaphore = unsafe {
-            device
-                .logical_device()
-                .create_semaphore(&semaphore_create_info, None)?
-        };
+        let semaphore = unsafe { logical_device.create_semaphore(&semaphore_create_info, None)? };
 
         debug!("Created semaphore");
         Ok(Self {
             semaphore,
 
-            device: device.clone(),
+            logical_device: logical_device.clone(),
         })
     }
 
@@ -43,9 +37,7 @@ impl Semaphore {
 impl Drop for Semaphore {
     fn drop(&mut self) {
         unsafe {
-            self.device
-                .logical_device()
-                .destroy_semaphore(self.semaphore, None);
+            self.logical_device.destroy_semaphore(self.semaphore, None);
         }
     }
 }
