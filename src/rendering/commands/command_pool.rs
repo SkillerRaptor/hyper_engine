@@ -11,6 +11,7 @@ use super::super::error::Error;
 
 use ash::vk;
 use log::debug;
+use std::ops::Deref;
 use std::rc::Rc;
 
 pub struct CommandPool {
@@ -28,14 +29,14 @@ impl CommandPool {
         let queue_families =
             QueueFamilyIndices::new(&instance, &surface, &device.physical_device())?;
 
-        let command_pool_create_info = vk::CommandPoolCreateInfo::builder()
+        let create_info = vk::CommandPoolCreateInfo::builder()
             .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
             .queue_family_index(*queue_families.graphics());
 
         let command_pool = unsafe {
             device
                 .logical_device()
-                .create_command_pool(&command_pool_create_info, None)?
+                .create_command_pool(&create_info, None)?
         };
 
         debug!("Created command pool");

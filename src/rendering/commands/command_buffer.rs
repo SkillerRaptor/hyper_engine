@@ -25,7 +25,7 @@ impl CommandBuffer {
         command_pool: &Rc<CommandPool>,
         level: vk::CommandBufferLevel,
     ) -> Result<Self, Error> {
-        let command_buffer_allocate_info = vk::CommandBufferAllocateInfo::builder()
+        let allocate_info = vk::CommandBufferAllocateInfo::builder()
             .command_pool(*command_pool.command_pool())
             .level(level)
             .command_buffer_count(1);
@@ -33,7 +33,7 @@ impl CommandBuffer {
         let command_buffer = unsafe {
             device
                 .logical_device()
-                .allocate_command_buffers(&command_buffer_allocate_info)?[0]
+                .allocate_command_buffers(&allocate_info)?[0]
         };
 
         debug!("Created command buffer");
