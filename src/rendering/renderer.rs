@@ -43,6 +43,8 @@ impl Renderer {
         image_available_semaphores: &Vec<Semaphore>,
         in_flight_fences: &Vec<Fence>,
     ) -> Result<(), Error> {
+        let command_buffer = self.current_command_buffer(command_buffers);
+
         unsafe {
             // TODO: Move this to fence class
             device.logical_device().wait_for_fences(
@@ -71,26 +73,13 @@ impl Renderer {
             device
                 .logical_device()
                 .reset_fences(&[*in_flight_fences[self.current_frame as usize].fence()])?;
-
-            // TODO: Move this to command buffer class
-            device.logical_device().reset_command_buffer(
-                *command_buffers[self.current_frame as usize].command_buffer(),
-                vk::CommandBufferResetFlags::empty(),
-            )?;
+            command_buffer.reset(vk::CommandBufferResetFlags::empty())?;
         }
 
-        let inheritance_info = vk::CommandBufferInheritanceInfo::builder();
-        let command_buffer_begin_info = vk::CommandBufferBeginInfo::builder()
-            .flags(vk::CommandBufferUsageFlags::empty())
-            .inheritance_info(&inheritance_info);
-
-        unsafe {
-            // TODO: Move this to command buffer class
-            device.logical_device().begin_command_buffer(
-                *command_buffers[self.current_frame as usize].command_buffer(),
-                &command_buffer_begin_info,
-            )?;
-        }
+        command_buffer.begin(
+            vk::CommandBufferUsageFlags::empty(),
+            &vk::CommandBufferInheritanceInfo::default(),
+        )?;
 
         let image_subresource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -109,18 +98,14 @@ impl Renderer {
             .image(swapchain.images()[self.current_image_index as usize])
             .subresource_range(*image_subresource_range);
 
-        unsafe {
-            // TODO: Move this to command buffer class
-            device.logical_device().cmd_pipeline_barrier(
-                *command_buffers[self.current_frame as usize].command_buffer(),
-                vk::PipelineStageFlags::TOP_OF_PIPE,
-                vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
-                vk::DependencyFlags::empty(),
-                &[],
-                &[],
-                &[*image_memory_barrier],
-            );
-        }
+        command_buffer.cmd_pipeline_barrier(
+            vk::PipelineStageFlags::TOP_OF_PIPE,
+            vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
+            vk::DependencyFlags::empty(),
+            &[],
+            &[],
+            &[*image_memory_barrier],
+        );
 
         let color_clear_value = vk::ClearValue {
             color: vk::ClearColorValue {
@@ -155,20 +140,9 @@ impl Renderer {
             .depth_attachment(&depth_attachment_info)
             .stencil_attachment(&stencil_attachment_info);
 
-        unsafe {
-            // TODO: Move this to command buffer class
-            device.logical_device().cmd_begin_rendering(
-                *command_buffers[self.current_frame as usize].command_buffer(),
-                &rendering_info,
-            );
+        command_buffer.cmd_begin_rendering(&rendering_info);
 
-            // TODO: Move this to pipeline class
-            device.logical_device().cmd_bind_pipeline(
-                *command_buffers[self.current_frame as usize].command_buffer(),
-                vk::PipelineBindPoint::GRAPHICS,
-                *pipeline.pipeline(),
-            );
-        }
+        command_buffer.cmd_bind_pipeline(vk::PipelineBindPoint::GRAPHICS, *pipeline.pipeline());
 
         Ok(())
     }
@@ -179,12 +153,9 @@ impl Renderer {
         swapchain: &Swapchain,
         command_buffers: &Vec<CommandBuffer>,
     ) -> Result<(), Error> {
-        unsafe {
-            // TODO: Move this to command buffer class
-            device
-                .logical_device()
-                .cmd_end_rendering(*command_buffers[self.current_frame as usize].command_buffer());
-        }
+        let command_buffer = self.current_command_buffer(command_buffers);
+
+        command_buffer.cmd_end_rendering();
 
         let image_subresource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -203,23 +174,16 @@ impl Renderer {
             .image(swapchain.images()[self.current_image_index as usize])
             .subresource_range(*image_subresource_range);
 
-        unsafe {
-            // TODO: Move this to pipeline class
-            device.logical_device().cmd_pipeline_barrier(
-                *command_buffers[self.current_frame as usize].command_buffer(),
-                vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
-                vk::PipelineStageFlags::BOTTOM_OF_PIPE,
-                vk::DependencyFlags::empty(),
-                &[],
-                &[],
-                &[*image_memory_barrier],
-            );
+        command_buffer.cmd_pipeline_barrier(
+            vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
+            vk::PipelineStageFlags::BOTTOM_OF_PIPE,
+            vk::DependencyFlags::empty(),
+            &[],
+            &[],
+            &[*image_memory_barrier],
+        );
 
-            // TODO: Move this to command buffer class
-            device.logical_device().end_command_buffer(
-                *command_buffers[self.current_frame as usize].command_buffer(),
-            )?;
-        }
+        command_buffer.end()?;
 
         Ok(())
     }
@@ -236,10 +200,12 @@ impl Renderer {
         in_flight_fences: &Vec<Fence>,
         resized: &mut bool,
     ) -> Result<(), Error> {
+        let command_buffer = self.current_command_buffer(command_buffers);
+
         let wait_semaphores =
             &[*image_available_semaphores[self.current_frame as usize].semaphore()];
         let wait_stages = &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
-        let command_buffers = &[*command_buffers[self.current_frame as usize].command_buffer()];
+        let command_buffers = &[*command_buffer.command_buffer()];
         let signal_semaphores =
             &[*render_finished_semaphores[self.current_frame as usize].semaphore()];
         let submit_info = vk::SubmitInfo::builder()
@@ -296,12 +262,9 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn draw(
-        &self,
-        device: &Rc<Device>,
-        swapchain: &Swapchain,
-        command_buffers: &Vec<CommandBuffer>,
-    ) {
+    pub fn draw(&self, swapchain: &Swapchain, command_buffers: &Vec<CommandBuffer>) {
+        let command_buffer = self.current_command_buffer(command_buffers);
+
         let viewport = vk::Viewport::builder()
             .x(0.0)
             .y(0.0)
@@ -309,35 +272,21 @@ impl Renderer {
             .height(swapchain.extent().height as f32)
             .min_depth(0.0)
             .max_depth(1.0);
+        command_buffer.cmd_set_viewport(0, &[*viewport]);
 
         let offset = vk::Offset2D::builder();
         let scissor = vk::Rect2D::builder()
             .offset(*offset)
             .extent(*swapchain.extent());
+        command_buffer.cmd_set_scissor(0, &[*scissor]);
 
-        unsafe {
-            // TODO: Move this to command buffer class
-            device.logical_device().cmd_set_viewport(
-                *command_buffers[self.current_frame as usize].command_buffer(),
-                0,
-                &[*viewport],
-            );
+        command_buffer.cmd_draw(3, 1, 0, 0);
+    }
 
-            // TODO: Move this to command buffer class
-            device.logical_device().cmd_set_scissor(
-                *command_buffers[self.current_frame as usize].command_buffer(),
-                0,
-                &[*scissor],
-            );
-
-            // TODO: Move this to command buffer class
-            device.logical_device().cmd_draw(
-                *command_buffers[self.current_frame as usize].command_buffer(),
-                3,
-                1,
-                0,
-                0,
-            );
-        }
+    pub fn current_command_buffer<'a>(
+        &self,
+        command_buffers: &'a Vec<CommandBuffer>,
+    ) -> &'a CommandBuffer {
+        &command_buffers[self.current_frame as usize]
     }
 }

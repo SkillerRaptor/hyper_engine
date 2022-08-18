@@ -158,8 +158,7 @@ impl RenderContext {
     }
 
     pub fn draw(&self) {
-        self.renderer
-            .draw(&self.device, &self.swapchain, &self.command_buffers);
+        self.renderer.draw(&self.swapchain, &self.command_buffers);
     }
 }
 
