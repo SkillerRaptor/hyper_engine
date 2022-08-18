@@ -11,7 +11,6 @@ use super::super::error::Error;
 
 use ash::vk;
 use log::debug;
-use std::ops::Deref;
 use std::rc::Rc;
 
 pub struct CommandPool {

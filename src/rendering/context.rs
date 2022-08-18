@@ -125,7 +125,7 @@ impl RenderContext {
     }
 
     pub fn begin_frame(&mut self, window: &window::Window) -> Result<(), Error> {
-        Ok(self.renderer.begin_frame(
+        self.renderer.begin_frame(
             window,
             &self.surface,
             &self.device,
@@ -134,13 +134,31 @@ impl RenderContext {
             &self.command_buffers,
             &self.image_available_semaphores,
             &self.in_flight_fences,
-        )?)
+        )?;
+
+        let extent = self.swapchain.extent();
+        let command_buffer = self.renderer.current_command_buffer(&self.command_buffers);
+
+        let viewport = vk::Viewport::builder()
+            .x(0.0)
+            .y(0.0)
+            .width(extent.width as f32)
+            .height(extent.height as f32)
+            .min_depth(0.0)
+            .max_depth(1.0);
+        command_buffer.cmd_set_viewport(0, &[*viewport]);
+
+        let offset = vk::Offset2D::builder();
+        let scissor = vk::Rect2D::builder().offset(*offset).extent(*extent);
+        command_buffer.cmd_set_scissor(0, &[*scissor]);
+
+        Ok(())
     }
 
     pub fn end_frame(&self) -> Result<(), Error> {
         Ok(self
             .renderer
-            .end_frame(&self.device, &self.swapchain, &self.command_buffers)?)
+            .end_frame(&self.swapchain, &self.command_buffers)?)
     }
 
     pub fn submit(&mut self, window: &window::Window, resized: &mut bool) -> Result<(), Error> {
@@ -158,7 +176,7 @@ impl RenderContext {
     }
 
     pub fn draw(&self) {
-        self.renderer.draw(&self.swapchain, &self.command_buffers);
+        self.renderer.draw(&self.command_buffers);
     }
 }
 

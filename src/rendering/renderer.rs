@@ -149,7 +149,6 @@ impl Renderer {
 
     pub fn end_frame(
         &self,
-        device: &Rc<Device>,
         swapchain: &Swapchain,
         command_buffers: &Vec<CommandBuffer>,
     ) -> Result<(), Error> {
@@ -262,24 +261,8 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn draw(&self, swapchain: &Swapchain, command_buffers: &Vec<CommandBuffer>) {
+    pub fn draw(&self, command_buffers: &Vec<CommandBuffer>) {
         let command_buffer = self.current_command_buffer(command_buffers);
-
-        let viewport = vk::Viewport::builder()
-            .x(0.0)
-            .y(0.0)
-            .width(swapchain.extent().width as f32)
-            .height(swapchain.extent().height as f32)
-            .min_depth(0.0)
-            .max_depth(1.0);
-        command_buffer.cmd_set_viewport(0, &[*viewport]);
-
-        let offset = vk::Offset2D::builder();
-        let scissor = vk::Rect2D::builder()
-            .offset(*offset)
-            .extent(*swapchain.extent());
-        command_buffer.cmd_set_scissor(0, &[*scissor]);
-
         command_buffer.cmd_draw(3, 1, 0, 0);
     }
 
