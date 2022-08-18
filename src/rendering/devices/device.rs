@@ -4,27 +4,29 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::rendering::error::{Error, SuitabilityError};
-use crate::rendering::instance::Instance;
-use crate::rendering::surface::Surface;
-use crate::rendering::swapchain::SwapchainSupport;
+use super::super::error::{Error, SuitabilityError};
+use super::instance::Instance;
+use super::surface::Surface;
 
 use ash::vk;
 use log::{debug, warn};
+use std::rc::Rc;
 
 pub struct QueueFamilyIndices {
-    pub graphics: u32,
+    graphics: u32,
 }
 
 impl QueueFamilyIndices {
     pub fn new(
-        instance: &ash::Instance,
-        surface_loader: &ash::extensions::khr::Surface,
-        surface: vk::SurfaceKHR,
-        physical_device: vk::PhysicalDevice,
+        instance: &Rc<Instance>,
+        surface: &Rc<Surface>,
+        physical_device: &vk::PhysicalDevice,
     ) -> Result<Self, Error> {
-        let queue_families =
-            unsafe { instance.get_physical_device_queue_family_properties(physical_device) };
+        let queue_families = unsafe {
+            instance
+                .instance()
+                .get_physical_device_queue_family_properties(*physical_device)
+        };
 
         let mut graphics = None;
         for (i, properties) in queue_families.iter().enumerate() {
@@ -33,11 +35,13 @@ impl QueueFamilyIndices {
             }
 
             if unsafe {
-                !surface_loader.get_physical_device_surface_support(
-                    physical_device,
-                    i as u32,
-                    surface,
-                )?
+                !surface
+                    .surface_loader()
+                    .get_physical_device_surface_support(
+                        *physical_device,
+                        i as u32,
+                        *surface.surface(),
+                    )?
             } {
                 continue;
             }
@@ -47,7 +51,7 @@ impl QueueFamilyIndices {
 
         if graphics.is_none() {
             return Err(Error::SuitabilityError(SuitabilityError(
-                "Missing graphics/present queue",
+                "Missing graphics & present queue",
             )));
         }
 
@@ -55,59 +59,94 @@ impl QueueFamilyIndices {
             graphics: graphics.unwrap(),
         })
     }
+
+    pub fn graphics(&self) -> &u32 {
+        &self.graphics
+    }
+}
+
+pub struct SwapchainSupport {
+    capabilities: vk::SurfaceCapabilitiesKHR,
+    formats: Vec<vk::SurfaceFormatKHR>,
+    present_modes: Vec<vk::PresentModeKHR>,
+}
+
+impl SwapchainSupport {
+    pub fn new(surface: &Rc<Surface>, physical_device: &vk::PhysicalDevice) -> Result<Self, Error> {
+        let capabilities = unsafe {
+            surface
+                .surface_loader()
+                .get_physical_device_surface_capabilities(*physical_device, *surface.surface())?
+        };
+        let formats = unsafe {
+            surface
+                .surface_loader()
+                .get_physical_device_surface_formats(*physical_device, *surface.surface())?
+        };
+        let present_modes = unsafe {
+            surface
+                .surface_loader()
+                .get_physical_device_surface_present_modes(*physical_device, *surface.surface())?
+        };
+
+        Ok(Self {
+            capabilities,
+            formats,
+            present_modes,
+        })
+    }
+
+    pub fn capabilities(&self) -> &vk::SurfaceCapabilitiesKHR {
+        &self.capabilities
+    }
+
+    pub fn formats(&self) -> &Vec<vk::SurfaceFormatKHR> {
+        &self.formats
+    }
+
+    pub fn present_modes(&self) -> &Vec<vk::PresentModeKHR> {
+        &self.present_modes
+    }
 }
 
 pub struct Device {
-    pub graphics_queue: vk::Queue,
-    pub device: ash::Device,
-    pub physical_device: vk::PhysicalDevice,
+    graphics_queue: vk::Queue,
+    logical_device: ash::Device,
+    physical_device: vk::PhysicalDevice,
 }
 
 impl Device {
     const DEVICE_EXTENSIONS: &'static [&'static std::ffi::CStr] =
         &[ash::extensions::khr::Swapchain::name()];
 
-    pub fn new(instance: &Instance, surface: &Surface) -> Result<Self, Error> {
-        let physical_device = Self::pick_physical_device(
-            &instance.instance,
-            &surface.surface_loader,
-            surface.surface,
-        )?;
-        let device = Self::create_logical_device(
-            &instance.instance,
-            &surface.surface_loader,
-            surface.surface,
-            physical_device,
-        )?;
+    pub fn new(instance: &Rc<Instance>, surface: &Rc<Surface>) -> Result<Self, Error> {
+        let physical_device = Self::pick_physical_device(&instance, &surface)?;
+        let logical_device = Self::create_logical_device(&instance, &surface, &physical_device)?;
 
-        let queue_families = QueueFamilyIndices::new(
-            &instance.instance,
-            &surface.surface_loader,
-            surface.surface,
-            physical_device,
-        )?;
-        let graphics_queue = unsafe { device.get_device_queue(queue_families.graphics, 0) };
+        let queue_families = QueueFamilyIndices::new(&instance, &surface, &physical_device)?;
+        let graphics_queue = unsafe { logical_device.get_device_queue(queue_families.graphics, 0) };
 
         Ok(Self {
             graphics_queue,
-            device,
+            logical_device: logical_device,
             physical_device,
         })
     }
 
     fn pick_physical_device(
-        instance: &ash::Instance,
-        surface_loader: &ash::extensions::khr::Surface,
-        surface: vk::SurfaceKHR,
+        instance: &Rc<Instance>,
+        surface: &Rc<Surface>,
     ) -> Result<vk::PhysicalDevice, Error> {
-        for physical_device in unsafe { instance.enumerate_physical_devices()? } {
-            let properties = unsafe { instance.get_physical_device_properties(physical_device) };
+        for physical_device in unsafe { instance.instance().enumerate_physical_devices()? } {
+            let properties = unsafe {
+                instance
+                    .instance()
+                    .get_physical_device_properties(physical_device)
+            };
             let device_name =
                 unsafe { std::ffi::CStr::from_ptr(properties.device_name.as_ptr()).to_str()? };
 
-            if let Err(error) =
-                Self::check_physical_device(&instance, &surface_loader, surface, physical_device)
-            {
+            if let Err(error) = Self::check_physical_device(&instance, &surface, &physical_device) {
                 warn!("Skipped physical device ({}): {}", device_name, error);
                 continue;
             }
@@ -122,14 +161,15 @@ impl Device {
     }
 
     fn check_physical_device(
-        instance: &ash::Instance,
-        surface_loader: &ash::extensions::khr::Surface,
-        surface: vk::SurfaceKHR,
-        physical_device: vk::PhysicalDevice,
+        instance: &Rc<Instance>,
+        surface: &Rc<Surface>,
+        physical_device: &vk::PhysicalDevice,
     ) -> Result<(), Error> {
-        let properties = unsafe { instance.get_physical_device_properties(physical_device) };
-        let queue_families =
-            unsafe { instance.get_physical_device_queue_family_properties(physical_device) };
+        let properties = unsafe {
+            instance
+                .instance()
+                .get_physical_device_properties(*physical_device)
+        };
 
         let device_name =
             unsafe { std::ffi::CStr::from_ptr(properties.device_name.as_ptr()).to_str()? };
@@ -153,6 +193,11 @@ impl Device {
             major_version, minor_version, patch_version
         );
 
+        let queue_families = unsafe {
+            instance
+                .instance()
+                .get_physical_device_queue_family_properties(*physical_device)
+        };
         debug!("  Queue Family Count: {}", queue_families.len());
         debug!("  Count | Graphics | Compute | Transfer | Sparse Binding");
         for queue_family in queue_families.iter() {
@@ -193,14 +238,13 @@ impl Device {
             );
         }
 
-        let queue_family_indices =
-            QueueFamilyIndices::new(&instance, &surface_loader, surface, physical_device)?;
+        let queue_family_indices = QueueFamilyIndices::new(&instance, &surface, physical_device)?;
         debug!("  Graphics Queue Id: {}", queue_family_indices.graphics);
 
-        Self::check_physical_device_extensions(instance, physical_device)?;
+        Self::check_physical_device_extensions(&instance, physical_device)?;
         debug!("  Requested Extensions: {:?}", Self::DEVICE_EXTENSIONS);
 
-        let support = SwapchainSupport::new(surface_loader, surface, physical_device)?;
+        let support = SwapchainSupport::new(&surface, physical_device)?;
         if support.formats.is_empty() || support.present_modes.is_empty() {
             return Err(Error::SuitabilityError(SuitabilityError(
                 "Insufficient swapchain support",
@@ -214,12 +258,13 @@ impl Device {
     }
 
     fn check_physical_device_extensions(
-        instance: &ash::Instance,
-        physical_device: vk::PhysicalDevice,
+        instance: &Rc<Instance>,
+        physical_device: &vk::PhysicalDevice,
     ) -> Result<(), Error> {
         let extensions = unsafe {
             instance
-                .enumerate_device_extension_properties(physical_device)?
+                .instance()
+                .enumerate_device_extension_properties(*physical_device)?
                 .iter()
                 .map(|extension| std::ffi::CStr::from_ptr(extension.extension_name.as_ptr()))
                 .collect::<std::collections::HashSet<_>>()
@@ -238,13 +283,11 @@ impl Device {
     }
 
     fn create_logical_device(
-        instance: &ash::Instance,
-        surface_loader: &ash::extensions::khr::Surface,
-        surface: vk::SurfaceKHR,
-        physical_device: vk::PhysicalDevice,
+        instance: &Rc<Instance>,
+        surface: &Rc<Surface>,
+        physical_device: &vk::PhysicalDevice,
     ) -> Result<ash::Device, Error> {
-        let queue_families =
-            QueueFamilyIndices::new(&instance, &surface_loader, surface, physical_device)?;
+        let queue_families = QueueFamilyIndices::new(&instance, &surface, physical_device)?;
 
         // NOTE: Using HashSet for compute and transfer queue later
         let mut unique_queues = std::collections::HashSet::new();
@@ -277,10 +320,33 @@ impl Device {
             .enabled_extension_names(&device_extensions)
             .enabled_features(&physical_device_features);
 
+        let logical_device = unsafe {
+            instance
+                .instance()
+                .create_device(*physical_device, &device_create_info, None)?
+        };
+
+        debug!("Created vulkan logical device");
+        Ok(logical_device)
+    }
+
+    pub fn physical_device(&self) -> &vk::PhysicalDevice {
+        &self.physical_device
+    }
+
+    pub fn logical_device(&self) -> &ash::Device {
+        &self.logical_device
+    }
+
+    pub fn graphics_queue(&self) -> &vk::Queue {
+        &self.graphics_queue
+    }
+}
+
+impl Drop for Device {
+    fn drop(&mut self) {
         unsafe {
-            let instance = instance.create_device(physical_device, &device_create_info, None)?;
-            debug!("Created vulkan logical device");
-            Ok(instance)
+            self.logical_device.destroy_device(None);
         }
     }
 }

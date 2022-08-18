@@ -107,13 +107,10 @@ impl Application {
                     self.destroyed = true;
                     *control_flow = event_loop::ControlFlow::Exit;
 
-                    unsafe {
-                        self.render_context
-                            .device
-                            .device
-                            .device_wait_idle()
-                            .unwrap();
-                    }
+                    //if let Err(error) = self.render_context.device_wait_idle() {
+                    //    error!("Failed to device wait idle: {}", error);
+                    //    std::process::exit(1);
+                    //}
                 }
                 _ => (),
             }

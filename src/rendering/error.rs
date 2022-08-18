@@ -6,9 +6,13 @@
 
 use ash::vk;
 
+#[derive(Debug)]
 pub struct AlignError(pub &'static str);
+
+#[derive(Debug)]
 pub struct SuitabilityError(pub &'static str);
 
+#[derive(Debug)]
 pub enum Error {
     AlignError(AlignError),
     SuitabilityError(SuitabilityError),

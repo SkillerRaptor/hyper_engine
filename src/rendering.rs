@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
+pub mod commands;
 pub mod context;
-pub mod device;
+pub mod devices;
 pub mod error;
-pub mod instance;
 pub mod pipeline;
-pub mod surface;
-pub mod swapchain;
+pub mod renderer;
+pub mod sync;

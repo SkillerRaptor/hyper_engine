@@ -5,7 +5,7 @@
  */
 
 use log::info;
-use winit::{dpi, event_loop, window};
+use winit::{dpi, error, event_loop, window};
 
 pub enum WindowError {
     OsError(winit::error::OsError),
@@ -21,8 +21,8 @@ impl std::fmt::Display for WindowError {
     }
 }
 
-impl From<winit::error::OsError> for WindowError {
-    fn from(error: winit::error::OsError) -> Self {
+impl From<error::OsError> for WindowError {
+    fn from(error: error::OsError) -> Self {
         WindowError::OsError(error)
     }
 }

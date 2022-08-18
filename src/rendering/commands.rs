@@ -4,5 +4,5 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub mod pipeline;
-pub mod swapchain;
+pub mod command_buffer;
+pub mod command_pool;
