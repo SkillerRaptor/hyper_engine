@@ -46,16 +46,11 @@ impl Renderer {
         surface: &vk::SurfaceKHR,
         physical_device: &vk::PhysicalDevice,
         logical_device: &ash::Device,
+        graphics_queue_index: &u32,
         graphics_queue: &vk::Queue,
         pipeline: &vk::Pipeline,
     ) -> Result<Self, Error> {
-        let command_pool = CommandPool::new(
-            &instance,
-            &surface_loader,
-            &surface,
-            &physical_device,
-            &logical_device,
-        )?;
+        let command_pool = CommandPool::new(&logical_device, &graphics_queue_index)?;
         let command_buffers =
             Self::create_command_buffers(&logical_device, &command_pool.command_pool())?;
         let vertex_buffer = VertexBuffer::new(&instance, &physical_device, &logical_device)?;

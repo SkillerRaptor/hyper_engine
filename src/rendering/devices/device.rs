@@ -12,6 +12,7 @@ use log::{debug, warn};
 
 pub struct Device {
     graphics_queue: vk::Queue,
+    graphics_queue_index: u32,
     logical_device: ash::Device,
     physical_device: vk::PhysicalDevice,
 }
@@ -29,13 +30,14 @@ impl Device {
         let logical_device =
             Self::create_logical_device(&instance, &surface_loader, &surface, &physical_device)?;
 
-        let queue_families =
-            QueueFamilyIndices::new(&instance, &surface_loader, &surface, &physical_device)?;
-        let graphics_queue = unsafe { logical_device.get_device_queue(queue_families.graphics, 0) };
+        let graphics_queue_index =
+            Self::find_graphics_queue(&instance, &surface_loader, &surface, &physical_device)?;
+        let graphics_queue = unsafe { logical_device.get_device_queue(graphics_queue_index, 0) };
 
         Ok(Self {
             graphics_queue,
-            logical_device: logical_device,
+            graphics_queue_index,
+            logical_device,
             physical_device,
         })
     }
@@ -139,9 +141,9 @@ impl Device {
             );
         }
 
-        let queue_family_indices =
-            QueueFamilyIndices::new(&instance, &surface_loader, &surface, physical_device)?;
-        debug!("  Graphics Queue Id: {}", queue_family_indices.graphics);
+        let grahics_queue_index =
+            Self::find_graphics_queue(&instance, &surface_loader, &surface, &physical_device)?;
+        debug!("  Graphics Queue Index: {}", grahics_queue_index);
 
         Self::check_physical_device_extensions(&instance, &physical_device)?;
         debug!("  Requested Extensions: {:?}", Self::DEVICE_EXTENSIONS);
@@ -189,12 +191,12 @@ impl Device {
         surface: &vk::SurfaceKHR,
         physical_device: &vk::PhysicalDevice,
     ) -> Result<ash::Device, Error> {
-        let queue_families =
-            QueueFamilyIndices::new(&instance, &surface_loader, &surface, &physical_device)?;
-
         // NOTE: Using HashSet for compute and transfer queue later
         let mut unique_queues = std::collections::HashSet::new();
-        unique_queues.insert(queue_families.graphics);
+
+        let grahics_queue_index =
+            Self::find_graphics_queue(&instance, &surface_loader, &surface, &physical_device)?;
+        unique_queues.insert(grahics_queue_index);
 
         let queue_priorities = &[1.0];
         let queue_create_infos = unique_queues
@@ -230,38 +232,12 @@ impl Device {
         Ok(logical_device)
     }
 
-    pub fn physical_device(&self) -> &vk::PhysicalDevice {
-        &self.physical_device
-    }
-
-    pub fn logical_device(&self) -> &ash::Device {
-        &self.logical_device
-    }
-
-    pub fn graphics_queue(&self) -> &vk::Queue {
-        &self.graphics_queue
-    }
-}
-
-impl Drop for Device {
-    fn drop(&mut self) {
-        unsafe {
-            self.logical_device.destroy_device(None);
-        }
-    }
-}
-
-pub struct QueueFamilyIndices {
-    graphics: u32,
-}
-
-impl QueueFamilyIndices {
-    pub fn new(
+    fn find_graphics_queue(
         instance: &ash::Instance,
         surface_loader: &SurfaceLoader,
         surface: &vk::SurfaceKHR,
         physical_device: &vk::PhysicalDevice,
-    ) -> Result<Self, Error> {
+    ) -> Result<u32, Error> {
         let queue_families =
             unsafe { instance.get_physical_device_queue_family_properties(*physical_device) };
 
@@ -290,13 +266,31 @@ impl QueueFamilyIndices {
             )));
         }
 
-        Ok(Self {
-            graphics: graphics.unwrap(),
-        })
+        Ok(graphics.unwrap())
     }
 
-    pub fn graphics(&self) -> &u32 {
-        &self.graphics
+    pub fn physical_device(&self) -> &vk::PhysicalDevice {
+        &self.physical_device
+    }
+
+    pub fn logical_device(&self) -> &ash::Device {
+        &self.logical_device
+    }
+
+    pub fn graphics_queue_index(&self) -> &u32 {
+        &self.graphics_queue_index
+    }
+
+    pub fn graphics_queue(&self) -> &vk::Queue {
+        &self.graphics_queue
+    }
+}
+
+impl Drop for Device {
+    fn drop(&mut self) {
+        unsafe {
+            self.logical_device.destroy_device(None);
+        }
     }
 }
 

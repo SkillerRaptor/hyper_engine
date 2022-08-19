@@ -53,6 +53,7 @@ impl RenderContext {
             &surface.surface(),
             &device.physical_device(),
             &device.logical_device(),
+            &device.graphics_queue_index(),
             &device.graphics_queue(),
             &pipeline.pipeline(),
         )?;
