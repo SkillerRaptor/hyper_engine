@@ -126,13 +126,7 @@ impl Renderer {
         swapchain: &mut Swapchain,
         pipeline: &Pipeline,
     ) -> Result<(), Error> {
-        unsafe {
-            device.logical_device().wait_for_fences(
-                &[*self.in_flight_fences[self.current_frame as usize].fence()],
-                true,
-                u64::MAX,
-            )?;
-        }
+        self.in_flight_fences[self.current_frame].wait(device, u64::MAX)?;
 
         unsafe {
             // TODO: Move this to swapchain class
@@ -151,28 +145,16 @@ impl Renderer {
             }
         }
 
-        unsafe {
-            device
-                .logical_device()
-                .reset_fences(&[*self.in_flight_fences[self.current_frame as usize].fence()])?;
+        self.in_flight_fences[self.current_frame].reset(device)?;
 
-            device.logical_device().reset_command_buffer(
-                *self.command_buffers[self.current_frame].command_buffer(),
-                vk::CommandBufferResetFlags::empty(),
-            )?;
-        }
+        self.command_buffers[self.current_frame]
+            .reset(device, vk::CommandBufferResetFlags::empty())?;
 
-        let inheritance_info = vk::CommandBufferInheritanceInfo::default();
-        let begin_info = vk::CommandBufferBeginInfo::builder()
-            .flags(vk::CommandBufferUsageFlags::empty())
-            .inheritance_info(&inheritance_info);
-
-        unsafe {
-            device.logical_device().begin_command_buffer(
-                *self.command_buffers[self.current_frame].command_buffer(),
-                &begin_info,
-            )?;
-        }
+        self.command_buffers[self.current_frame].begin(
+            device,
+            vk::CommandBufferUsageFlags::empty(),
+            &vk::CommandBufferInheritanceInfo::default(),
+        )?;
 
         let image_subresource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -191,17 +173,15 @@ impl Renderer {
             .image(swapchain.images()[self.current_image_index as usize])
             .subresource_range(*image_subresource_range);
 
-        unsafe {
-            device.logical_device().cmd_pipeline_barrier(
-                *self.command_buffers[self.current_frame].command_buffer(),
-                vk::PipelineStageFlags::TOP_OF_PIPE,
-                vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
-                vk::DependencyFlags::empty(),
-                &[],
-                &[],
-                &[*image_memory_barrier],
-            );
-        }
+        self.command_buffers[self.current_frame].pipeline_barrier(
+            device,
+            vk::PipelineStageFlags::TOP_OF_PIPE,
+            vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
+            vk::DependencyFlags::empty(),
+            &[],
+            &[],
+            &[*image_memory_barrier],
+        );
 
         let color_clear_value = vk::ClearValue {
             color: vk::ClearColorValue {
@@ -236,18 +216,12 @@ impl Renderer {
             .depth_attachment(&depth_attachment_info)
             .stencil_attachment(&stencil_attachment_info);
 
-        unsafe {
-            device.logical_device().cmd_begin_rendering(
-                *self.command_buffers[self.current_frame].command_buffer(),
-                &rendering_info,
-            );
-
-            device.logical_device().cmd_bind_pipeline(
-                *self.command_buffers[self.current_frame].command_buffer(),
-                vk::PipelineBindPoint::GRAPHICS,
-                *pipeline.pipeline(),
-            );
-        }
+        self.command_buffers[self.current_frame].begin_rendering(device, &rendering_info);
+        self.command_buffers[self.current_frame].bind_pipeline(
+            device,
+            vk::PipelineBindPoint::GRAPHICS,
+            *pipeline.pipeline(),
+        );
 
         let extent = swapchain.extent();
         let viewport = vk::Viewport::builder()
@@ -257,34 +231,17 @@ impl Renderer {
             .height(extent.height as f32)
             .min_depth(0.0)
             .max_depth(1.0);
-
-        unsafe {
-            device.logical_device().cmd_set_viewport(
-                *self.command_buffers[self.current_frame].command_buffer(),
-                0,
-                &[*viewport],
-            );
-        }
+        self.command_buffers[self.current_frame].set_viewport(device, 0, &[*viewport]);
 
         let offset = vk::Offset2D::builder();
         let scissor = vk::Rect2D::builder().offset(*offset).extent(*extent);
-        unsafe {
-            device.logical_device().cmd_set_scissor(
-                *self.command_buffers[self.current_frame].command_buffer(),
-                0,
-                &[*scissor],
-            );
-        }
+        self.command_buffers[self.current_frame].set_scissor(device, 0, &[*scissor]);
 
         Ok(())
     }
 
     pub fn end_frame(&self, device: &Device, swapchain: &Swapchain) -> Result<(), Error> {
-        unsafe {
-            device
-                .logical_device()
-                .cmd_end_rendering(*self.command_buffers[self.current_frame].command_buffer());
-        }
+        self.command_buffers[self.current_frame].end_rendering(device);
 
         let image_subresource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -303,21 +260,17 @@ impl Renderer {
             .image(swapchain.images()[self.current_image_index as usize])
             .subresource_range(*image_subresource_range);
 
-        unsafe {
-            device.logical_device().cmd_pipeline_barrier(
-                *self.command_buffers[self.current_frame].command_buffer(),
-                vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
-                vk::PipelineStageFlags::BOTTOM_OF_PIPE,
-                vk::DependencyFlags::empty(),
-                &[],
-                &[],
-                &[*image_memory_barrier],
-            );
+        self.command_buffers[self.current_frame].pipeline_barrier(
+            device,
+            vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
+            vk::PipelineStageFlags::BOTTOM_OF_PIPE,
+            vk::DependencyFlags::empty(),
+            &[],
+            &[],
+            &[*image_memory_barrier],
+        );
 
-            device
-                .logical_device()
-                .end_command_buffer(*self.command_buffers[self.current_frame].command_buffer())?;
-        }
+        self.command_buffers[self.current_frame].end(device)?;
 
         Ok(())
     }
@@ -391,21 +344,13 @@ impl Renderer {
         let buffers = &[*self.vertex_buffer.buffer()];
         let offsets = &[0];
 
-        unsafe {
-            device.logical_device().cmd_bind_vertex_buffers(
-                *self.command_buffers[self.current_frame].command_buffer(),
-                0,
-                buffers,
-                offsets,
-            );
-
-            device.logical_device().cmd_draw(
-                *self.command_buffers[self.current_frame].command_buffer(),
-                self.vertex_buffer.vertices().len() as u32,
-                1,
-                0,
-                0,
-            );
-        }
+        self.command_buffers[self.current_frame].bind_vertex_buffers(device, 0, buffers, offsets);
+        self.command_buffers[self.current_frame].draw(
+            device,
+            self.vertex_buffer.vertices().len() as u32,
+            1,
+            0,
+            0,
+        );
     }
 }
