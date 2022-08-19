@@ -13,7 +13,6 @@ pub struct CommandBuffer {
     command_buffer: vk::CommandBuffer,
 
     logical_device: ash::Device,
-    command_pool: vk::CommandPool,
 }
 
 impl CommandBuffer {
@@ -34,7 +33,6 @@ impl CommandBuffer {
             command_buffer,
 
             logical_device: logical_device.clone(),
-            command_pool: command_pool.clone(),
         })
     }
 
@@ -172,14 +170,5 @@ impl CommandBuffer {
 
     pub fn command_buffer(&self) -> &vk::CommandBuffer {
         &self.command_buffer
-    }
-}
-
-impl Drop for CommandBuffer {
-    fn drop(&mut self) {
-        unsafe {
-            self.logical_device
-                .free_command_buffers(self.command_pool, &[self.command_buffer]);
-        }
     }
 }
