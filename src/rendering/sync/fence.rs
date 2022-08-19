@@ -30,23 +30,6 @@ impl Fence {
         })
     }
 
-    pub fn wait(&self, timeout: u64) -> Result<(), Error> {
-        unsafe {
-            self.logical_device
-                .wait_for_fences(&[self.fence], true, timeout)?;
-        }
-
-        Ok(())
-    }
-
-    pub fn reset(&self) -> Result<(), Error> {
-        unsafe {
-            self.logical_device.reset_fences(&[self.fence])?;
-        }
-
-        Ok(())
-    }
-
     pub fn fence(&self) -> &vk::Fence {
         &self.fence
     }

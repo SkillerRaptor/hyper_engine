@@ -14,11 +14,11 @@ use std::mem::size_of;
 use std::ptr::copy_nonoverlapping;
 
 pub struct VertexBuffer {
-    device_memory: vk::DeviceMemory,
-    buffer: vk::Buffer,
-    vertices: Vec<Vertex>,
-
     logical_device: ash::Device,
+
+    vertices: Vec<Vertex>,
+    buffer: vk::Buffer,
+    device_memory: vk::DeviceMemory,
 }
 
 impl VertexBuffer {
@@ -40,6 +40,7 @@ impl VertexBuffer {
 
         let buffer = unsafe { logical_device.create_buffer(&create_info, None)? };
 
+        // TODO: Replace memory allocations with VMA
         let requirements = unsafe { logical_device.get_buffer_memory_requirements(buffer) };
 
         let memory_type_index = Self::find_memory_type_index(
@@ -74,11 +75,11 @@ impl VertexBuffer {
 
         debug!("Created vertex buffer");
         Ok(Self {
-            device_memory,
-            buffer,
-            vertices,
-
             logical_device: logical_device.clone(),
+
+            vertices,
+            buffer,
+            device_memory,
         })
     }
 
