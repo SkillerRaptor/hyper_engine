@@ -9,54 +9,60 @@ use super::super::error::Error;
 use ash::extensions::ext::DebugUtils as DebugLoader;
 use ash::vk;
 use log::{debug, error, warn};
+use std::collections::HashSet;
+use std::ffi::CStr;
+use std::ffi::CString;
 use winit::window;
 
 pub struct Instance {
-    debug_messenger: vk::DebugUtilsMessengerEXT,
-    debug_loader: DebugLoader,
-    instance: ash::Instance,
     validation_layer_enabled: bool,
+
+    instance: ash::Instance,
+
+    debug_loader: DebugLoader,
+    debug_messenger: vk::DebugUtilsMessengerEXT,
 }
 
 impl Instance {
     const VALIDATION_LAYER: &'static str = "VK_LAYER_KHRONOS_validation";
 
     pub fn new(window: &window::Window, entry: &ash::Entry) -> Result<Self, Error> {
-        let validation_layer_enabled = Self::check_validation_layer_support(&entry)?;
+        let validation_layer_enabled = Self::check_validation_layers(&entry)?;
+
         let instance = Self::create_instance(&window, &entry, validation_layer_enabled)?;
+
         let (debug_loader, debug_messenger) =
             Self::create_debug_messenger(&entry, &instance, validation_layer_enabled)?;
 
         Ok(Self {
-            debug_messenger,
-            debug_loader,
-            instance,
             validation_layer_enabled,
+
+            instance,
+
+            debug_loader,
+            debug_messenger,
         })
     }
 
-    fn check_validation_layer_support(entry: &ash::Entry) -> Result<bool, Error> {
+    fn check_validation_layers(entry: &ash::Entry) -> Result<bool, Error> {
+        if !(cfg!(debug_assertions)) {
+            return Ok(false);
+        }
+
         let available_layers = entry
             .enumerate_instance_layer_properties()?
             .iter()
             .map(|layer_properties| unsafe {
-                std::ffi::CStr::from_ptr(layer_properties.layer_name.as_ptr()).to_owned()
+                CStr::from_ptr(layer_properties.layer_name.as_ptr()).to_owned()
             })
-            .collect::<std::collections::HashSet<_>>();
+            .collect::<HashSet<_>>();
 
-        if !cfg!(debug_assertions) {
+        if !available_layers.contains(&CString::new(Self::VALIDATION_LAYER)?) {
+            warn!("Requested validation layers are not supported");
             return Ok(false);
         }
 
-        let validation_enabled =
-            if available_layers.contains(&std::ffi::CString::new(Self::VALIDATION_LAYER)?) {
-                true
-            } else {
-                warn!("Requested validation layers but not supported");
-                false
-            };
-
-        Ok(validation_enabled)
+        Ok(true)
     }
 
     fn create_instance(
@@ -64,8 +70,7 @@ impl Instance {
         entry: &ash::Entry,
         validation_enabled: bool,
     ) -> Result<ash::Instance, Error> {
-        let title = std::ffi::CString::new("HyperEngine")?;
-
+        let title = CStr::from_bytes_with_nul(b"HyperEngine\0")?;
         let application_info = vk::ApplicationInfo::builder()
             .application_name(&title)
             .application_version(vk::make_api_version(0, 1, 0, 0))
@@ -92,7 +97,6 @@ impl Instance {
         };
 
         let mut extensions = ash_window::enumerate_required_extensions(&window)?.to_vec();
-
         if validation_enabled {
             extensions.push(DebugLoader::name().as_ptr());
         }
@@ -115,6 +119,7 @@ impl Instance {
         validation_enabled: bool,
     ) -> Result<(DebugLoader, vk::DebugUtilsMessengerEXT), Error> {
         let debug_utils = DebugLoader::new(&entry, &instance);
+
         if !validation_enabled {
             return Ok((debug_utils, vk::DebugUtilsMessengerEXT::null()));
         }
@@ -139,15 +144,27 @@ impl Instance {
         Ok((debug_utils, debug_messenger))
     }
 
+    pub fn cleanup(&mut self) {
+        unsafe {
+            if self.validation_layer_enabled {
+                self.debug_loader
+                    .destroy_debug_utils_messenger(self.debug_messenger, None);
+            }
+
+            self.instance.destroy_instance(None);
+        }
+    }
+
     unsafe extern "system" fn debug_callback(
-        message_severity: vk::DebugUtilsMessageSeverityFlagsEXT,
-        _message_type: vk::DebugUtilsMessageTypeFlagsEXT,
+        severity: vk::DebugUtilsMessageSeverityFlagsEXT,
+        _type: vk::DebugUtilsMessageTypeFlagsEXT,
         callback_data: *const vk::DebugUtilsMessengerCallbackDataEXT,
         _user_data: *mut std::os::raw::c_void,
     ) -> vk::Bool32 {
         let callback_data = *callback_data;
+
         let message = std::ffi::CStr::from_ptr(callback_data.p_message).to_string_lossy();
-        match message_severity {
+        match severity {
             vk::DebugUtilsMessageSeverityFlagsEXT::INFO => {
                 debug!("{}", message)
             }
@@ -165,18 +182,5 @@ impl Instance {
 
     pub fn instance(&self) -> &ash::Instance {
         &self.instance
-    }
-}
-
-impl Drop for Instance {
-    fn drop(&mut self) {
-        unsafe {
-            if self.validation_layer_enabled {
-                self.debug_loader
-                    .destroy_debug_utils_messenger(self.debug_messenger, None);
-            }
-
-            self.instance.destroy_instance(None);
-        }
     }
 }

@@ -17,6 +17,7 @@ pub enum Error {
     AlignError(AlignError),
     SuitabilityError(SuitabilityError),
 
+    FromBytesWithNulError(std::ffi::FromBytesWithNulError),
     NulError(std::ffi::NulError),
     Utf8Error(std::str::Utf8Error),
 
@@ -33,12 +34,17 @@ impl std::fmt::Display for Error {
             Error::SuitabilityError(error) => {
                 write!(formatter, "{}", error.0)
             }
+
+            Error::FromBytesWithNulError(error) => {
+                write!(formatter, "{}", error)
+            }
             Error::NulError(error) => {
                 write!(formatter, "{}", error)
             }
             Error::Utf8Error(error) => {
                 write!(formatter, "{}", error)
             }
+
             Error::LoadingError(error) => {
                 write!(formatter, "{}", error)
             }
@@ -58,6 +64,12 @@ impl From<AlignError> for Error {
 impl From<SuitabilityError> for Error {
     fn from(error: SuitabilityError) -> Self {
         Error::SuitabilityError(error)
+    }
+}
+
+impl From<std::ffi::FromBytesWithNulError> for Error {
+    fn from(error: std::ffi::FromBytesWithNulError) -> Self {
+        Error::FromBytesWithNulError(error)
     }
 }
 

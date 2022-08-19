@@ -5,6 +5,7 @@
  */
 
 use super::super::error::Error;
+use super::instance::Instance;
 
 use ash::extensions::khr::Surface as SurfaceLoader;
 use ash::vk;
@@ -12,18 +13,19 @@ use log::debug;
 use winit::window;
 
 pub struct Surface {
-    surface: vk::SurfaceKHR,
     surface_loader: SurfaceLoader,
+    surface: vk::SurfaceKHR,
 }
 
 impl Surface {
     pub fn new(
         window: &window::Window,
         entry: &ash::Entry,
-        instance: &ash::Instance,
+        instance: &Instance,
     ) -> Result<Self, Error> {
-        let surface_loader = SurfaceLoader::new(&entry, &instance);
-        let surface = unsafe { ash_window::create_surface(&entry, &instance, &window, None)? };
+        let surface_loader = SurfaceLoader::new(&entry, &instance.instance());
+        let surface =
+            unsafe { ash_window::create_surface(&entry, &instance.instance(), &window, None)? };
 
         debug!("Created vulkan surface");
         Ok(Self {
@@ -32,19 +34,17 @@ impl Surface {
         })
     }
 
+    pub fn cleanup(&mut self) {
+        unsafe {
+            self.surface_loader.destroy_surface(self.surface, None);
+        }
+    }
+
     pub fn surface_loader(&self) -> &SurfaceLoader {
         &self.surface_loader
     }
 
     pub fn surface(&self) -> &vk::SurfaceKHR {
         &self.surface
-    }
-}
-
-impl Drop for Surface {
-    fn drop(&mut self) {
-        unsafe {
-            self.surface_loader.destroy_surface(self.surface, None);
-        }
     }
 }

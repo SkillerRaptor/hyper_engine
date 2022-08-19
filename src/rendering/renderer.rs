@@ -7,12 +7,15 @@
 use super::buffers::vertex_buffer::VertexBuffer;
 use super::commands::command_buffer::CommandBuffer;
 use super::commands::command_pool::CommandPool;
+use super::devices::device::Device;
+use super::devices::instance::Instance;
+use super::devices::surface::Surface;
 use super::error::Error;
+use super::pipeline::pipeline::Pipeline;
 use super::pipeline::swapchain::Swapchain;
 use super::sync::fence::Fence;
 use super::sync::semaphore::Semaphore;
 
-use ash::extensions::khr::Surface as SurfaceLoader;
 use ash::vk;
 use log::{debug, info};
 use winit::window;
@@ -21,75 +24,51 @@ pub struct Renderer {
     current_frame: usize,
     current_image_index: usize,
 
-    in_flight_fences: Vec<Fence>,
-    render_finished_semaphores: Vec<Semaphore>,
-    image_available_semaphores: Vec<Semaphore>,
+    command_pool: CommandPool,
+    command_buffers: Vec<CommandBuffer>,
 
     vertex_buffer: VertexBuffer,
-    command_buffers: Vec<CommandBuffer>,
-    _command_pool: CommandPool,
 
-    pipeline: vk::Pipeline,
-    graphics_queue: vk::Queue,
-    logical_device: ash::Device,
-    physical_device: vk::PhysicalDevice,
-    surface: vk::SurfaceKHR,
-    surface_loader: SurfaceLoader,
+    image_available_semaphores: Vec<Semaphore>,
+    render_finished_semaphores: Vec<Semaphore>,
+    in_flight_fences: Vec<Fence>,
 }
 
 impl Renderer {
     const MAX_FRAMES_IN_FLIGHT: usize = 2;
 
-    pub fn new(
-        instance: &ash::Instance,
-        surface_loader: &SurfaceLoader,
-        surface: &vk::SurfaceKHR,
-        physical_device: &vk::PhysicalDevice,
-        logical_device: &ash::Device,
-        graphics_queue_index: &u32,
-        graphics_queue: &vk::Queue,
-        pipeline: &vk::Pipeline,
-    ) -> Result<Self, Error> {
-        let command_pool = CommandPool::new(&logical_device, &graphics_queue_index)?;
-        let command_buffers =
-            Self::create_command_buffers(&logical_device, &command_pool.command_pool())?;
-        let vertex_buffer = VertexBuffer::new(&instance, &physical_device, &logical_device)?;
+    pub fn new(instance: &Instance, device: &Device) -> Result<Self, Error> {
+        let command_pool = CommandPool::new(&device)?;
+        let command_buffers = Self::create_command_buffers(&device, &command_pool)?;
+        let vertex_buffer = VertexBuffer::new(&instance, &device)?;
         let (image_available_semaphores, render_finished_semaphores, in_flight_fences) =
-            Self::create_sync_objects(&logical_device)?;
+            Self::create_sync_objects(&device)?;
 
         info!("Created renderer");
         Ok(Self {
             current_frame: 0,
             current_image_index: 0,
 
-            image_available_semaphores,
-            render_finished_semaphores,
-            in_flight_fences,
-            vertex_buffer,
+            command_pool,
             command_buffers,
-            _command_pool: command_pool,
 
-            pipeline: pipeline.clone(),
-            graphics_queue: graphics_queue.clone(),
-            logical_device: logical_device.clone(),
-            physical_device: physical_device.clone(),
-            surface: surface.clone(),
-            surface_loader: surface_loader.clone(),
+            vertex_buffer,
+
+            in_flight_fences,
+            render_finished_semaphores,
+            image_available_semaphores,
         })
     }
 
     fn create_command_buffers(
-        logical_device: &ash::Device,
-        command_pool: &vk::CommandPool,
+        device: &Device,
+        command_pool: &CommandPool,
     ) -> Result<Vec<CommandBuffer>, Error> {
         let mut command_buffers = Vec::new();
 
         for i in 0..Self::MAX_FRAMES_IN_FLIGHT {
-            let command_buffer = CommandBuffer::new(
-                &logical_device,
-                &command_pool,
-                vk::CommandBufferLevel::PRIMARY,
-            )?;
+            let command_buffer =
+                CommandBuffer::new(&device, &command_pool, vk::CommandBufferLevel::PRIMARY)?;
             command_buffers.push(command_buffer);
             debug!("Created command buffer #{}", i);
         }
@@ -98,22 +77,22 @@ impl Renderer {
     }
 
     fn create_sync_objects(
-        logical_device: &ash::Device,
+        device: &Device,
     ) -> Result<(Vec<Semaphore>, Vec<Semaphore>, Vec<Fence>), Error> {
         let mut image_available_semaphores = Vec::new();
         let mut render_finished_semaphores = Vec::new();
         let mut in_flight_fences = Vec::new();
 
         for i in 0..Self::MAX_FRAMES_IN_FLIGHT {
-            let image_available_semaphore = Semaphore::new(&logical_device)?;
+            let image_available_semaphore = Semaphore::new(&device)?;
             image_available_semaphores.push(image_available_semaphore);
             debug!("Created image available semaphore #{}", i);
 
-            let render_finished_semaphore = Semaphore::new(&logical_device)?;
+            let render_finished_semaphore = Semaphore::new(&device)?;
             render_finished_semaphores.push(render_finished_semaphore);
             debug!("Created render finished semaphore #{}", i);
 
-            let in_flight_fence = Fence::new(&logical_device)?;
+            let in_flight_fence = Fence::new(&device)?;
             in_flight_fences.push(in_flight_fence);
             debug!("Created in flight fence #{}", i);
         }
@@ -125,13 +104,30 @@ impl Renderer {
         ))
     }
 
+    pub fn cleanup(&mut self, device: &Device) {
+        self.in_flight_fences
+            .iter_mut()
+            .for_each(|fence| fence.cleanup(&device));
+        self.render_finished_semaphores
+            .iter_mut()
+            .for_each(|semaphore| semaphore.cleanup(&device));
+        self.image_available_semaphores
+            .iter_mut()
+            .for_each(|semaphore| semaphore.cleanup(&device));
+        self.vertex_buffer.cleanup(&device);
+        self.command_pool.cleanup(&device);
+    }
+
     pub fn begin_frame(
         &mut self,
         window: &window::Window,
+        surface: &Surface,
+        device: &Device,
         swapchain: &mut Swapchain,
+        pipeline: &Pipeline,
     ) -> Result<(), Error> {
         unsafe {
-            self.logical_device.wait_for_fences(
+            device.logical_device().wait_for_fences(
                 &[*self.in_flight_fences[self.current_frame as usize].fence()],
                 true,
                 u64::MAX,
@@ -148,14 +144,7 @@ impl Renderer {
             ) {
                 Ok((image_index, _)) => self.current_image_index = image_index as usize,
                 Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => {
-                    swapchain.recreate(
-                        &window,
-                        &self.surface_loader,
-                        &self.surface,
-                        &self.physical_device,
-                        &self.logical_device,
-                    )?;
-
+                    swapchain.recreate(&window, &surface, &device)?;
                     return Ok(());
                 }
                 Err(error) => return Err(Error::VulkanError(error)),
@@ -163,10 +152,11 @@ impl Renderer {
         }
 
         unsafe {
-            self.logical_device
+            device
+                .logical_device()
                 .reset_fences(&[*self.in_flight_fences[self.current_frame as usize].fence()])?;
 
-            self.logical_device.reset_command_buffer(
+            device.logical_device().reset_command_buffer(
                 *self.command_buffers[self.current_frame].command_buffer(),
                 vk::CommandBufferResetFlags::empty(),
             )?;
@@ -178,7 +168,7 @@ impl Renderer {
             .inheritance_info(&inheritance_info);
 
         unsafe {
-            self.logical_device.begin_command_buffer(
+            device.logical_device().begin_command_buffer(
                 *self.command_buffers[self.current_frame].command_buffer(),
                 &begin_info,
             )?;
@@ -202,7 +192,7 @@ impl Renderer {
             .subresource_range(*image_subresource_range);
 
         unsafe {
-            self.logical_device.cmd_pipeline_barrier(
+            device.logical_device().cmd_pipeline_barrier(
                 *self.command_buffers[self.current_frame].command_buffer(),
                 vk::PipelineStageFlags::TOP_OF_PIPE,
                 vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
@@ -247,15 +237,15 @@ impl Renderer {
             .stencil_attachment(&stencil_attachment_info);
 
         unsafe {
-            self.logical_device.cmd_begin_rendering(
+            device.logical_device().cmd_begin_rendering(
                 *self.command_buffers[self.current_frame].command_buffer(),
                 &rendering_info,
             );
 
-            self.logical_device.cmd_bind_pipeline(
+            device.logical_device().cmd_bind_pipeline(
                 *self.command_buffers[self.current_frame].command_buffer(),
                 vk::PipelineBindPoint::GRAPHICS,
-                self.pipeline,
+                *pipeline.pipeline(),
             );
         }
 
@@ -269,7 +259,7 @@ impl Renderer {
             .max_depth(1.0);
 
         unsafe {
-            self.logical_device.cmd_set_viewport(
+            device.logical_device().cmd_set_viewport(
                 *self.command_buffers[self.current_frame].command_buffer(),
                 0,
                 &[*viewport],
@@ -279,7 +269,7 @@ impl Renderer {
         let offset = vk::Offset2D::builder();
         let scissor = vk::Rect2D::builder().offset(*offset).extent(*extent);
         unsafe {
-            self.logical_device.cmd_set_scissor(
+            device.logical_device().cmd_set_scissor(
                 *self.command_buffers[self.current_frame].command_buffer(),
                 0,
                 &[*scissor],
@@ -289,9 +279,10 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn end_frame(&self, swapchain: &Swapchain) -> Result<(), Error> {
+    pub fn end_frame(&self, device: &Device, swapchain: &Swapchain) -> Result<(), Error> {
         unsafe {
-            self.logical_device
+            device
+                .logical_device()
                 .cmd_end_rendering(*self.command_buffers[self.current_frame].command_buffer());
         }
 
@@ -313,7 +304,7 @@ impl Renderer {
             .subresource_range(*image_subresource_range);
 
         unsafe {
-            self.logical_device.cmd_pipeline_barrier(
+            device.logical_device().cmd_pipeline_barrier(
                 *self.command_buffers[self.current_frame].command_buffer(),
                 vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
                 vk::PipelineStageFlags::BOTTOM_OF_PIPE,
@@ -323,7 +314,8 @@ impl Renderer {
                 &[*image_memory_barrier],
             );
 
-            self.logical_device
+            device
+                .logical_device()
                 .end_command_buffer(*self.command_buffers[self.current_frame].command_buffer())?;
         }
 
@@ -333,6 +325,8 @@ impl Renderer {
     pub fn submit(
         &mut self,
         window: &window::Window,
+        surface: &Surface,
+        device: &Device,
         swapchain: &mut Swapchain,
         resized: &mut bool,
     ) -> Result<(), Error> {
@@ -349,8 +343,8 @@ impl Renderer {
         let submits = &[*submit_info];
         unsafe {
             // TODO: Create queue class and move this to queue class
-            self.logical_device.queue_submit(
-                self.graphics_queue,
+            device.logical_device().queue_submit(
+                *device.graphics_queue(),
                 submits,
                 *self.in_flight_fences[self.current_frame].fence(),
             )?;
@@ -369,7 +363,7 @@ impl Renderer {
             // TODO: Move this to swapchain class
             let changed = match swapchain
                 .swapchain_loader()
-                .queue_present(self.graphics_queue, &present_info)
+                .queue_present(*device.graphics_queue(), &present_info)
             {
                 Ok(suboptimal) => {
                     if suboptimal {
@@ -384,13 +378,7 @@ impl Renderer {
 
             if changed || *resized {
                 *resized = false;
-                swapchain.recreate(
-                    &window,
-                    &self.surface_loader,
-                    &self.surface,
-                    &self.physical_device,
-                    &self.logical_device,
-                )?;
+                swapchain.recreate(&window, &surface, &device)?;
             }
         }
 
@@ -399,19 +387,19 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn draw_triangle(&self) {
+    pub fn draw_triangle(&self, device: &Device) {
         let buffers = &[*self.vertex_buffer.buffer()];
         let offsets = &[0];
 
         unsafe {
-            self.logical_device.cmd_bind_vertex_buffers(
+            device.logical_device().cmd_bind_vertex_buffers(
                 *self.command_buffers[self.current_frame].command_buffer(),
                 0,
                 buffers,
                 offsets,
             );
 
-            self.logical_device.cmd_draw(
+            device.logical_device().cmd_draw(
                 *self.command_buffers[self.current_frame].command_buffer(),
                 self.vertex_buffer.vertices().len() as u32,
                 1,
