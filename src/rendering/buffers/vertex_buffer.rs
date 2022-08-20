@@ -25,7 +25,7 @@ pub struct VertexBuffer {
 impl VertexBuffer {
     pub fn new(instance: &Instance, device: &Device) -> Result<Self, Error> {
         let vertices = vec![
-            Vertex::new(glm::vec2(0.0, -0.5), glm::vec3(1.0, 1.0, 1.0)),
+            Vertex::new(glm::vec2(0.0, -0.5), glm::vec3(1.0, 0.0, 0.0)),
             Vertex::new(glm::vec2(0.5, 0.5), glm::vec3(0.0, 1.0, 0.0)),
             Vertex::new(glm::vec2(-0.5, 0.5), glm::vec3(0.0, 0.0, 1.0)),
         ];
