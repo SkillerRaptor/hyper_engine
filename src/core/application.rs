@@ -122,28 +122,29 @@ impl Application {
             *control_flow = event_loop::ControlFlow::Poll;
 
             match event {
-                event::Event::WindowEvent {
-                    event: event::WindowEvent::Resized(size),
-                    ..
-                } => {
-                    if size.width == 0 || size.height == 0 {
-                        self.minimized = true;
-                    } else {
-                        self.minimized = false;
-                        self.resized = true;
+                event::Event::WindowEvent { event, window_id } if window_id == self.window.id() => {
+                    match event {
+                        event::WindowEvent::Resized(size) => {
+                            if size.width == 0 || size.height == 0 {
+                                self.minimized = true;
+                            } else {
+                                self.minimized = false;
+                                self.resized = true;
+                            }
+                        }
+
+                        event::WindowEvent::CloseRequested => {
+                            *control_flow = event_loop::ControlFlow::Exit;
+                            self.destroyed = true;
+                        }
+                        _ => (),
                     }
                 }
-                event::Event::WindowEvent {
-                    event: event::WindowEvent::CloseRequested,
-                    ..
-                } => {
-                    self.destroyed = true;
-                    *control_flow = event_loop::ControlFlow::Exit;
-                }
-                _ => (),
-            }
 
-            match event {
+                event::Event::MainEventsCleared => {
+                    self.window.request_redraw();
+                }
+
                 event::Event::RedrawRequested(_) if !self.destroyed && !self.minimized => {
                     let current_frame = std::time::Instant::now();
                     let delta_time = current_frame.duration_since(last_frame).as_secs_f64();
@@ -181,11 +182,8 @@ impl Application {
                     fps += 1;
                     last_frame = current_frame;
                 }
-                event::Event::MainEventsCleared => {
-                    self.window.request_redraw();
-                }
                 _ => (),
-            }
+            };
         });
     }
 
