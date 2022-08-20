@@ -5,12 +5,11 @@ edition = "2021"
 
 [dependencies]
 ash = "0.37.0"
-ash-window = "0.11.0"
 chrono = "0.4.22"
 colored = "2.0.0"
 fern = "0.6.1"
+glfw = { version = "0.45.0", features = ["vulkan"] }
 gpu-allocator = "0.18.0"
 log = "0.4.17"
 nalgebra-glm = "0.17.0"
 tobj = "3.2.3"
-winit = "0.27.2"

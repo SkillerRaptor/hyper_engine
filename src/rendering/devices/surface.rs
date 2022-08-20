@@ -7,10 +7,11 @@
 use super::super::error::Error;
 use super::instance::Instance;
 
+use crate::core::window::Window;
+
 use ash::extensions::khr::Surface as SurfaceLoader;
 use ash::vk;
 use log::debug;
-use winit::window;
 
 pub struct Surface {
     surface_loader: SurfaceLoader,
@@ -18,14 +19,9 @@ pub struct Surface {
 }
 
 impl Surface {
-    pub fn new(
-        window: &window::Window,
-        entry: &ash::Entry,
-        instance: &Instance,
-    ) -> Result<Self, Error> {
+    pub fn new(window: &Window, entry: &ash::Entry, instance: &Instance) -> Result<Self, Error> {
         let surface_loader = SurfaceLoader::new(&entry, &instance.instance());
-        let surface =
-            unsafe { ash_window::create_surface(&entry, &instance.instance(), &window, None)? };
+        let surface = window.create_window_surface(&instance);
 
         debug!("Created vulkan surface");
         Ok(Self {

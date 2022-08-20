@@ -6,13 +6,14 @@
 
 use super::super::error::Error;
 
+use crate::core::window::Window;
+
 use ash::extensions::ext::DebugUtils as DebugLoader;
 use ash::vk;
 use log::{debug, error, warn};
 use std::collections::HashSet;
 use std::ffi::CStr;
 use std::ffi::CString;
-use winit::window;
 
 pub struct Instance {
     validation_layer_enabled: bool,
@@ -26,7 +27,7 @@ pub struct Instance {
 impl Instance {
     const VALIDATION_LAYER: &'static str = "VK_LAYER_KHRONOS_validation";
 
-    pub fn new(window: &window::Window, entry: &ash::Entry) -> Result<Self, Error> {
+    pub fn new(window: &Window, entry: &ash::Entry) -> Result<Self, Error> {
         let validation_layer_enabled = Self::check_validation_layers(&entry)?;
 
         let instance = Self::create_instance(&window, &entry, validation_layer_enabled)?;
@@ -66,7 +67,7 @@ impl Instance {
     }
 
     fn create_instance(
-        window: &window::Window,
+        window: &Window,
         entry: &ash::Entry,
         validation_enabled: bool,
     ) -> Result<ash::Instance, Error> {
@@ -96,7 +97,15 @@ impl Instance {
             Vec::new()
         };
 
-        let mut extensions = ash_window::enumerate_required_extensions(&window)?.to_vec();
+        let c_extensions = window
+            .get_required_extensions()
+            .iter()
+            .map(|extension| CString::new(extension.clone()))
+            .collect::<Result<Vec<_>, _>>()?;
+        let mut extensions = c_extensions
+            .iter()
+            .map(|extension| extension.as_ptr())
+            .collect::<Vec<_>>();
         if validation_enabled {
             extensions.push(DebugLoader::name().as_ptr());
         }

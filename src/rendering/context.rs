@@ -12,9 +12,10 @@ use super::pipeline::pipeline::Pipeline;
 use super::pipeline::swapchain::Swapchain;
 use super::renderer::Renderer;
 
+use crate::core::window::Window;
+
 use gpu_allocator::vulkan;
 use log::info;
-use winit::window;
 
 // NOTE: Using Rc for ref-counting, replace with Arc when multithreading
 pub struct RenderContext {
@@ -31,7 +32,7 @@ pub struct RenderContext {
 }
 
 impl RenderContext {
-    pub fn new(window: &window::Window) -> Result<Self, Error> {
+    pub fn new(window: &Window) -> Result<Self, Error> {
         let entry = unsafe { ash::Entry::load()? };
         let instance = Instance::new(&window, &entry)?;
         let surface = Surface::new(&window, &entry, &instance)?;
@@ -77,39 +78,39 @@ impl RenderContext {
         })
     }
 
-    pub fn begin_frame(&mut self, window: &window::Window) -> Result<(), Error> {
-        self.renderer.begin_frame(
-            &window,
-            &self.surface,
-            &self.device,
-            &mut self.allocator,
-            &mut self.swapchain,
-            &self.pipeline,
-        )?;
-
-        Ok(())
+    pub fn begin_frame(&mut self, window: &Window) {
+        self.renderer
+            .begin_frame(
+                &window,
+                &self.surface,
+                &self.device,
+                &mut self.allocator,
+                &mut self.swapchain,
+                &self.pipeline,
+            )
+            .unwrap();
     }
 
-    pub fn end_frame(&self) -> Result<(), Error> {
-        self.renderer.end_frame(&self.device, &self.swapchain)?;
-
-        Ok(())
+    pub fn end_frame(&self) {
+        self.renderer
+            .end_frame(&self.device, &self.swapchain)
+            .unwrap();
     }
 
-    pub fn submit(&mut self, window: &window::Window, resized: &mut bool) -> Result<(), Error> {
-        self.renderer.submit(
-            &window,
-            &self.surface,
-            &self.device,
-            &mut self.allocator,
-            &mut self.swapchain,
-            resized,
-        )?;
-
-        Ok(())
+    pub fn submit(&mut self, window: &Window, resized: &mut bool) {
+        self.renderer
+            .submit(
+                &window,
+                &self.surface,
+                &self.device,
+                &mut self.allocator,
+                &mut self.swapchain,
+                resized,
+            )
+            .unwrap();
     }
 
-    pub fn draw(&self, window: &window::Window) {
+    pub fn draw(&self, window: &Window) {
         self.renderer.draw(&window, &self.device, &self.pipeline);
     }
 }

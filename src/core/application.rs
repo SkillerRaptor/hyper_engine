@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: MIT
  */
 
+use super::window::{Window, WindowError};
 use crate::rendering::context::RenderContext;
 
 use colored::Colorize;
-use log::{error, info};
-use winit::{dpi, error, event, event_loop, platform::run_return::EventLoopExtRunReturn, window};
+use log::error;
 
 pub enum ApplicationError {
     IoError(std::io::Error),
     LogError(log::SetLoggerError),
-    OsError(error::OsError),
+    WindowError(WindowError),
 }
 
 impl std::fmt::Display for ApplicationError {
@@ -25,7 +25,7 @@ impl std::fmt::Display for ApplicationError {
             ApplicationError::LogError(error) => {
                 write!(formatter, "{}", error)
             }
-            ApplicationError::OsError(error) => {
+            ApplicationError::WindowError(error) => {
                 write!(formatter, "{}", error)
             }
         }
@@ -44,19 +44,17 @@ impl From<log::SetLoggerError> for ApplicationError {
     }
 }
 
-impl From<error::OsError> for ApplicationError {
-    fn from(error: error::OsError) -> Self {
-        ApplicationError::OsError(error)
+impl From<WindowError> for ApplicationError {
+    fn from(error: WindowError) -> Self {
+        ApplicationError::WindowError(error)
     }
 }
 
 pub struct Application {
-    minimized: bool,
-    resized: bool,
-    destroyed: bool,
+    window: Window,
     render_context: RenderContext,
-    window: window::Window,
-    event_loop: event_loop::EventLoop<()>,
+
+    resized: bool,
 }
 
 impl Application {
@@ -66,8 +64,7 @@ impl Application {
             std::process::exit(1);
         }
 
-        let event_loop = event_loop::EventLoop::new();
-        let window = match Self::create_window(&event_loop, "HyperEngine", 1280, 720) {
+        let window = match Window::new("HyperEngine", 1280, 720) {
             Ok(window) => window,
             Err(error) => {
                 error!("Failed to create window: {}", error);
@@ -84,107 +81,45 @@ impl Application {
         };
 
         Self {
-            minimized: false,
-            resized: false,
-            destroyed: false,
-            render_context,
             window,
-            event_loop,
+            render_context,
+
+            resized: false,
         }
     }
 
-    fn create_window(
-        event_loop: &event_loop::EventLoop<()>,
-        title: &str,
-        width: u32,
-        height: u32,
-    ) -> Result<window::Window, ApplicationError> {
-        let window = window::WindowBuilder::new()
-            .with_title(title)
-            .with_inner_size(dpi::LogicalSize::new(width, height))
-            .build(&event_loop)?;
-
-        info!(
-            "Created window '{}' ({}x{})",
-            title,
-            window.inner_size().width,
-            window.inner_size().height
-        );
-
-        Ok(window)
-    }
-
     pub fn run(&mut self) {
-        let mut fps: u16 = 0;
+        let mut fps: u32 = 0;
         let mut last_frame = std::time::Instant::now();
         let mut last_fps_frame = std::time::Instant::now();
-        self.event_loop.run_return(|event, _, control_flow| {
-            *control_flow = event_loop::ControlFlow::Poll;
+        while !self.window.should_close() {
+            let current_frame = std::time::Instant::now();
+            let delta_time = current_frame.duration_since(last_frame).as_secs_f64();
 
-            match event {
-                event::Event::WindowEvent { event, window_id } if window_id == self.window.id() => {
-                    match event {
-                        event::WindowEvent::Resized(size) => {
-                            if size.width == 0 || size.height == 0 {
-                                self.minimized = true;
-                            } else {
-                                self.minimized = false;
-                                self.resized = true;
-                            }
-                        }
+            while current_frame.duration_since(last_fps_frame).as_secs_f64() >= 1.0 {
+                self.window.set_title(
+                    format!("HyperEngine (Delta Time: {}, FPS: {})", delta_time, fps).as_str(),
+                );
+                fps = 0;
+                last_fps_frame = current_frame;
+            }
 
-                        event::WindowEvent::CloseRequested => {
-                            *control_flow = event_loop::ControlFlow::Exit;
-                            self.destroyed = true;
-                        }
-                        _ => (),
-                    }
-                }
+            // NOTE: Update
+            self.window.poll_events();
+            self.window.handle_events(|event| match event {
+                glfw::WindowEvent::FramebufferSize(_, _) => self.resized = true,
+                _ => {}
+            });
 
-                event::Event::MainEventsCleared => {
-                    self.window.request_redraw();
-                }
+            // NOTE: Render
+            self.render_context.begin_frame(&self.window);
+            self.render_context.draw(&self.window);
+            self.render_context.end_frame();
+            self.render_context.submit(&self.window, &mut self.resized);
 
-                event::Event::RedrawRequested(_) if !self.destroyed && !self.minimized => {
-                    let current_frame = std::time::Instant::now();
-                    let delta_time = current_frame.duration_since(last_frame).as_secs_f64();
-
-                    while current_frame.duration_since(last_fps_frame).as_secs_f64() >= 1.0 {
-                        self.window.set_title(
-                            format!("HyperEngine (Delta Time: {}, FPS: {})", delta_time, fps)
-                                .as_str(),
-                        );
-                        fps = 0;
-                        last_fps_frame = current_frame;
-                    }
-
-                    // NOTE: Update
-
-                    // NOTE: Render
-                    if let Err(error) = self.render_context.begin_frame(&self.window) {
-                        error!("Failed to begin frame: {}", error);
-                        std::process::exit(1);
-                    }
-
-                    self.render_context.draw(&self.window);
-
-                    if let Err(error) = self.render_context.end_frame() {
-                        error!("Failed to end frame: {}", error);
-                        std::process::exit(1);
-                    }
-
-                    if let Err(error) = self.render_context.submit(&self.window, &mut self.resized)
-                    {
-                        error!("Failed to submit: {}", error);
-                        std::process::exit(1);
-                    }
-
-                    fps += 1;
-                    last_frame = current_frame;
-                }
-                _ => (),
-            };
-        });
+            fps += 1;
+            last_frame = current_frame;
+        }
     }
 
     fn setup_logger() -> Result<(), ApplicationError> {

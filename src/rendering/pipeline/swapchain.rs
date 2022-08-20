@@ -10,11 +10,12 @@ use super::super::devices::instance::Instance;
 use super::super::devices::surface::Surface;
 use super::super::error::Error;
 
+use crate::core::window::Window;
+
 use ash::extensions::khr::Swapchain as SwapchainLoader;
 use ash::vk;
 use gpu_allocator::vulkan;
 use log::debug;
-use winit::window;
 
 pub struct Swapchain {
     swapchain_loader: SwapchainLoader,
@@ -34,7 +35,7 @@ pub struct Swapchain {
 
 impl Swapchain {
     pub fn new(
-        window: &window::Window,
+        window: &Window,
         instance: &Instance,
         surface: &Surface,
         device: &Device,
@@ -69,7 +70,7 @@ impl Swapchain {
     }
 
     fn create_swapchain(
-        window: &window::Window,
+        window: &Window,
         surface: &Surface,
         device: &Device,
         swapchain_loader: &SwapchainLoader,
@@ -153,28 +154,24 @@ impl Swapchain {
         Ok((swapchain, extent, format.format))
     }
 
-    fn choose_extent(
-        window: &window::Window,
-        capabilities: &vk::SurfaceCapabilitiesKHR,
-    ) -> vk::Extent2D {
+    fn choose_extent(window: &Window, capabilities: &vk::SurfaceCapabilitiesKHR) -> vk::Extent2D {
         if capabilities.current_extent.width != u32::MAX
             || capabilities.current_extent.height != u32::MAX
         {
             return capabilities.current_extent;
         }
 
-        let size = window.inner_size();
         let clamp = |min: u32, max: u32, value: u32| min.max(max.min(value));
         let extent = vk::Extent2D {
             width: clamp(
                 capabilities.min_image_extent.width,
                 capabilities.max_image_extent.width,
-                size.width,
+                window.framebuffer_width() as u32,
             ),
             height: clamp(
                 capabilities.min_image_extent.height,
                 capabilities.max_image_extent.height,
-                size.height,
+                window.framebuffer_height() as u32,
             ),
         };
 
@@ -240,13 +237,13 @@ impl Swapchain {
     }
 
     fn create_depth_image(
-        window: &window::Window,
+        window: &Window,
         device: &Device,
         allocator: &mut vulkan::Allocator,
     ) -> Result<(vk::Image, vk::ImageView, vk::Format, vulkan::Allocation), Error> {
         let extent = vk::Extent3D::builder()
-            .width(window.inner_size().width)
-            .height(window.inner_size().height)
+            .width(window.framebuffer_width() as u32)
+            .height(window.framebuffer_height() as u32)
             .depth(1);
 
         let format = vk::Format::D32_SFLOAT;
@@ -336,7 +333,7 @@ impl Swapchain {
 
     pub fn recreate(
         &mut self,
-        window: &window::Window,
+        window: &Window,
         surface: &Surface,
         device: &Device,
         allocator: &mut vulkan::Allocator,
@@ -348,7 +345,7 @@ impl Swapchain {
         self.cleanup(&device, allocator);
 
         let (swapchain, extent, format) =
-            Self::create_swapchain(window, &surface, &device, &self.swapchain_loader, true)?;
+            Self::create_swapchain(&window, &surface, &device, &self.swapchain_loader, true)?;
 
         self.swapchain = swapchain;
 

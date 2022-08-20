@@ -15,11 +15,12 @@ use super::pipeline::swapchain::Swapchain;
 use super::sync::fence::Fence;
 use super::sync::semaphore::Semaphore;
 
+use crate::core::window::Window;
+
 use ash::vk;
 use gpu_allocator::vulkan;
 use log::info;
 use nalgebra_glm as glm;
-use winit::window;
 
 pub struct Renderer {
     frame: u32,
@@ -74,7 +75,7 @@ impl Renderer {
 
     pub fn begin_frame(
         &mut self,
-        window: &window::Window,
+        window: &Window,
         surface: &Surface,
         device: &Device,
         allocator: &mut vulkan::Allocator,
@@ -248,7 +249,7 @@ impl Renderer {
 
     pub fn submit(
         &mut self,
-        window: &window::Window,
+        window: &Window,
         surface: &Surface,
         device: &Device,
         allocator: &mut vulkan::Allocator,
@@ -312,10 +313,10 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn draw(&self, window: &window::Window, device: &Device, pipeline: &Pipeline) {
+    pub fn draw(&self, window: &Window, device: &Device, pipeline: &Pipeline) {
         let mut projection_matrix = glm::perspective(
             f32::to_radians(90.0),
-            window.inner_size().width as f32 / window.inner_size().height as f32,
+            window.framebuffer_width() as f32 / window.framebuffer_height() as f32,
             0.1,
             200.0,
         );
