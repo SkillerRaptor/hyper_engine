@@ -15,7 +15,6 @@ use super::pipeline::pipeline::{MeshPushConstants, Pipeline};
 use super::pipeline::swapchain::Swapchain;
 use super::sync::fence::Fence;
 use super::sync::semaphore::Semaphore;
-use super::vertex::Vertex;
 
 use ash::vk;
 use gpu_allocator::vulkan;
@@ -68,25 +67,7 @@ impl Renderer {
         // TODO: Abstract allocator into own class
         let mut allocator = vulkan::Allocator::new(&allocator_create_description)?;
 
-        let vertices = vec![
-            Vertex::new(
-                glm::vec3(1.0, 1.0, 0.0),
-                glm::vec3(0.0, 1.0, 0.0),
-                glm::vec3(0.0, 0.0, 0.0),
-            ),
-            Vertex::new(
-                glm::vec3(-1.0, 1.0, 0.0),
-                glm::vec3(0.0, 1.0, 0.0),
-                glm::vec3(0.0, 0.0, 0.0),
-            ),
-            Vertex::new(
-                glm::vec3(0.0, -1.0, 0.0),
-                glm::vec3(0.0, 1.0, 0.0),
-                glm::vec3(0.0, 0.0, 0.0),
-            ),
-        ];
-
-        let mesh = Mesh::new(&device, &mut allocator, &vertices)?;
+        let mesh = Mesh::load(&device, &mut allocator, "assets/models/monkey_smooth.obj")?;
 
         info!("Created renderer");
         Ok(Self {
@@ -339,12 +320,16 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn draw_triangle(&self, device: &Device, pipeline: &Pipeline) {
-        let camera_position = glm::vec3(0.0, 0.0, -2.0);
+    pub fn draw_triangle(&self, window: &window::Window, device: &Device, pipeline: &Pipeline) {
+        let mut projection_matrix = glm::perspective(
+            f32::to_radians(90.0),
+            window.inner_size().width as f32 / window.inner_size().height as f32,
+            0.1,
+            200.0,
+        );
+        projection_matrix.m22 *= -1 as f32;
 
-        let mut projection_matrix =
-            glm::perspective(f32::to_radians(70.0), 1700.0 / 900.0, 0.1, 200.0);
-        projection_matrix.m11 *= -1 as f32;
+        let camera_position = glm::vec3(0.0, 0.0, -2.0);
 
         let view_matrix = glm::translate(
             &glm::mat4(

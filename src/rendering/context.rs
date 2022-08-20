@@ -79,8 +79,9 @@ impl RenderContext {
         Ok(())
     }
 
-    pub fn draw_triangle(&self) {
-        self.renderer.draw_triangle(&self.device, &self.pipeline);
+    pub fn draw_triangle(&self, window: &window::Window) {
+        self.renderer
+            .draw_triangle(&window, &self.device, &self.pipeline);
     }
 }
 

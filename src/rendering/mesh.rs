@@ -10,6 +10,7 @@ use super::error::Error;
 use super::vertex::Vertex;
 
 use gpu_allocator::vulkan;
+use nalgebra_glm as glm;
 
 pub struct Mesh {
     vertices: Vec<Vertex>,
@@ -22,6 +23,48 @@ impl Mesh {
         allocator: &mut vulkan::Allocator,
         vertices: &Vec<Vertex>,
     ) -> Result<Self, Error> {
+        let vertex_buffer = VertexBuffer::new(&device, allocator, &vertices)?;
+
+        Ok(Self {
+            vertices: vertices.clone(),
+            vertex_buffer,
+        })
+    }
+
+    pub fn load(
+        device: &Device,
+        allocator: &mut vulkan::Allocator,
+        file_name: &str,
+    ) -> Result<Self, Error> {
+        let (models, _) = tobj::load_obj(&file_name, &tobj::LoadOptions::default())?;
+
+        let mut vertices = Vec::new();
+        for model in models {
+            let mesh = &model.mesh;
+
+            for i in 0..(mesh.indices.len() / 3) {
+                let index = mesh.indices[i] as usize;
+                let position = glm::vec3(
+                    mesh.positions[3 * index + 0],
+                    mesh.positions[3 * index + 1],
+                    mesh.positions[3 * index + 2],
+                );
+                let color = glm::vec3(
+                    mesh.normals[3 * index + 0],
+                    mesh.normals[3 * index + 1],
+                    mesh.normals[3 * index + 2],
+                );
+                let normal = glm::vec3(
+                    mesh.normals[3 * index + 0],
+                    mesh.normals[3 * index + 1],
+                    mesh.normals[3 * index + 2],
+                );
+
+                let vertex = Vertex::new(position, color, normal);
+                vertices.push(vertex);
+            }
+        }
+
         let vertex_buffer = VertexBuffer::new(&device, allocator, &vertices)?;
 
         Ok(Self {
