@@ -154,6 +154,28 @@ impl CommandBuffer {
         }
     }
 
+    pub fn push_constants<T>(
+        &self,
+        device: &Device,
+        pipeline_layout: vk::PipelineLayout,
+        stage_flags: vk::ShaderStageFlags,
+        offset: u32,
+        constants: &T,
+    ) {
+        unsafe {
+            device.logical_device().cmd_push_constants(
+                self.command_buffer,
+                pipeline_layout,
+                stage_flags,
+                offset,
+                std::slice::from_raw_parts(
+                    constants as *const T as *const u8,
+                    std::mem::size_of::<T>(),
+                ),
+            );
+        }
+    }
+
     pub fn set_scissor(&self, device: &Device, first_scissor: u32, scissors: &[vk::Rect2D]) {
         unsafe {
             device

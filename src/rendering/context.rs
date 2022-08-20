@@ -80,7 +80,7 @@ impl RenderContext {
     }
 
     pub fn draw_triangle(&self) {
-        self.renderer.draw_triangle(&self.device);
+        self.renderer.draw_triangle(&self.device, &self.pipeline);
     }
 }
 

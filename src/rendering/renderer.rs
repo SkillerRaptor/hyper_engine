@@ -11,7 +11,7 @@ use super::devices::instance::Instance;
 use super::devices::surface::Surface;
 use super::error::Error;
 use super::mesh::Mesh;
-use super::pipeline::pipeline::Pipeline;
+use super::pipeline::pipeline::{MeshPushConstants, Pipeline};
 use super::pipeline::swapchain::Swapchain;
 use super::sync::fence::Fence;
 use super::sync::semaphore::Semaphore;
@@ -339,13 +339,50 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn draw_triangle(&self, device: &Device) {
+    pub fn draw_triangle(&self, device: &Device, pipeline: &Pipeline) {
+        let camera_position = glm::vec3(0.0, 0.0, -2.0);
+
+        let mut projection_matrix =
+            glm::perspective(f32::to_radians(70.0), 1700.0 / 900.0, 0.1, 200.0);
+        projection_matrix.m11 *= -1 as f32;
+
+        let view_matrix = glm::translate(
+            &glm::mat4(
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            ),
+            &camera_position,
+        );
+
+        let model_matrix = glm::rotate(
+            &glm::mat4(
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            ),
+            f32::to_radians(self.frame as f32 * 0.4),
+            &glm::vec3(0.0, 1.0, 0.0),
+        );
+
+        let mesh_matrix = projection_matrix * view_matrix * model_matrix;
+
+        let push_constants = MeshPushConstants {
+            data: glm::vec4(0.0, 0.0, 0.0, 0.0),
+            render_matrix: mesh_matrix,
+        };
+
+        self.command_buffer.push_constants(
+            &device,
+            *pipeline.pipeline_layout(),
+            vk::ShaderStageFlags::VERTEX,
+            0,
+            &push_constants,
+        );
+
         let buffers = &[*self.mesh.vertex_buffer().buffer()];
         let offsets = &[0];
 
         self.command_buffer
-            .bind_vertex_buffers(device, 0, buffers, offsets);
+            .bind_vertex_buffers(&device, 0, buffers, offsets);
+
         self.command_buffer
-            .draw(device, self.mesh.vertices().len() as u32, 1, 0, 0);
+            .draw(&device, self.mesh.vertices().len() as u32, 1, 0, 0);
     }
 }

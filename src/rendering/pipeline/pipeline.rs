@@ -11,6 +11,8 @@ use super::swapchain::Swapchain;
 
 use ash::vk;
 use log::debug;
+use nalgebra_glm as glm;
+use std::mem::size_of;
 
 enum ShaderStage {
     Vertex,
@@ -68,7 +70,7 @@ impl Pipeline {
             .depth_clamp_enable(false)
             .rasterizer_discard_enable(false)
             .polygon_mode(vk::PolygonMode::FILL)
-            .cull_mode(vk::CullModeFlags::BACK)
+            .cull_mode(vk::CullModeFlags::NONE)
             .front_face(vk::FrontFace::CLOCKWISE)
             .depth_bias_enable(false)
             .depth_bias_constant_factor(0.0)
@@ -107,8 +109,13 @@ impl Pipeline {
         let dynamic_state_create_info =
             vk::PipelineDynamicStateCreateInfo::builder().dynamic_states(dynamic_states);
 
+        let push_constant = vk::PushConstantRange::builder()
+            .stage_flags(vk::ShaderStageFlags::VERTEX)
+            .offset(0)
+            .size(size_of::<MeshPushConstants>() as u32);
+
         let set_layouts = &[];
-        let push_constant_ranges = &[];
+        let push_constant_ranges = &[*push_constant];
         let pipeline_layout_info_create_info = vk::PipelineLayoutCreateInfo::builder()
             .set_layouts(set_layouts)
             .push_constant_ranges(push_constant_ranges);
@@ -348,4 +355,13 @@ impl Pipeline {
     pub fn pipeline(&self) -> &vk::Pipeline {
         &self.pipeline
     }
+
+    pub fn pipeline_layout(&self) -> &vk::PipelineLayout {
+        &self.pipeline_layout
+    }
+}
+
+pub struct MeshPushConstants {
+    pub data: glm::Vec4,
+    pub render_matrix: glm::Mat4,
 }
