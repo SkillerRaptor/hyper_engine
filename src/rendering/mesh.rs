@@ -42,22 +42,22 @@ impl Mesh {
         for model in models {
             let mesh = &model.mesh;
 
-            for i in 0..(mesh.indices.len() / 3) {
-                let index = mesh.indices[i] as usize;
+            for i in 0..mesh.indices.len() {
+                let index = 3 * mesh.indices[i] as usize;
                 let position = glm::vec3(
-                    mesh.positions[3 * index + 0],
-                    mesh.positions[3 * index + 1],
-                    mesh.positions[3 * index + 2],
+                    mesh.positions[index + 0],
+                    mesh.positions[index + 1],
+                    mesh.positions[index + 2],
                 );
                 let color = glm::vec3(
-                    mesh.normals[3 * index + 0],
-                    mesh.normals[3 * index + 1],
-                    mesh.normals[3 * index + 2],
+                    mesh.normals[index + 0],
+                    mesh.normals[index + 1],
+                    mesh.normals[index + 2],
                 );
                 let normal = glm::vec3(
-                    mesh.normals[3 * index + 0],
-                    mesh.normals[3 * index + 1],
-                    mesh.normals[3 * index + 2],
+                    mesh.normals[index + 0],
+                    mesh.normals[index + 1],
+                    mesh.normals[index + 2],
                 );
 
                 let vertex = Vertex::new(position, color, normal);

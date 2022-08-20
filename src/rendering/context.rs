@@ -12,6 +12,7 @@ use super::pipeline::pipeline::Pipeline;
 use super::pipeline::swapchain::Swapchain;
 use super::renderer::Renderer;
 
+use gpu_allocator::vulkan;
 use log::info;
 use winit::window;
 
@@ -21,6 +22,9 @@ pub struct RenderContext {
     instance: Instance,
     surface: Surface,
     device: Device,
+
+    allocator: std::mem::ManuallyDrop<vulkan::Allocator>,
+
     swapchain: Swapchain,
     pipeline: Pipeline,
     renderer: Renderer,
@@ -32,9 +36,30 @@ impl RenderContext {
         let instance = Instance::new(&window, &entry)?;
         let surface = Surface::new(&window, &entry, &instance)?;
         let device = Device::new(&instance, &surface)?;
-        let swapchain = Swapchain::new(&window, &instance, &surface, &device)?;
+
+        let debug_enabled = cfg!(debug_assertions);
+        let allocator_debug_settings = gpu_allocator::AllocatorDebugSettings {
+            log_memory_information: debug_enabled,
+            log_leaks_on_shutdown: debug_enabled,
+            store_stack_traces: false,
+            log_allocations: debug_enabled,
+            log_frees: debug_enabled,
+            log_stack_traces: false,
+        };
+        let allocator_create_description = vulkan::AllocatorCreateDesc {
+            instance: instance.instance().clone(),
+            device: device.logical_device().clone(),
+            physical_device: *device.physical_device(),
+            debug_settings: allocator_debug_settings,
+            buffer_device_address: false,
+        };
+
+        // TODO: Abstract allocator into own class
+        let mut allocator = vulkan::Allocator::new(&allocator_create_description)?;
+
+        let swapchain = Swapchain::new(&window, &instance, &surface, &device, &mut allocator)?;
         let pipeline = Pipeline::new(&device, &swapchain)?;
-        let renderer = Renderer::new(&instance, &device)?;
+        let renderer = Renderer::new(&device, &mut allocator)?;
 
         info!("Created render context");
         Ok(Self {
@@ -42,6 +67,9 @@ impl RenderContext {
             instance,
             surface,
             device,
+
+            allocator: std::mem::ManuallyDrop::new(allocator),
+
             swapchain,
             pipeline,
 
@@ -54,6 +82,7 @@ impl RenderContext {
             &window,
             &self.surface,
             &self.device,
+            &mut self.allocator,
             &mut self.swapchain,
             &self.pipeline,
         )?;
@@ -72,6 +101,7 @@ impl RenderContext {
             &window,
             &self.surface,
             &self.device,
+            &mut self.allocator,
             &mut self.swapchain,
             resized,
         )?;
@@ -79,9 +109,8 @@ impl RenderContext {
         Ok(())
     }
 
-    pub fn draw_triangle(&self, window: &window::Window) {
-        self.renderer
-            .draw_triangle(&window, &self.device, &self.pipeline);
+    pub fn draw(&self, window: &window::Window) {
+        self.renderer.draw(&window, &self.device, &self.pipeline);
     }
 }
 
@@ -90,9 +119,12 @@ impl Drop for RenderContext {
         unsafe {
             self.device.logical_device().device_wait_idle().unwrap();
 
-            self.renderer.cleanup(&self.device);
+            self.renderer.cleanup(&self.device, &mut self.allocator);
             self.pipeline.cleanup(&self.device);
-            self.swapchain.cleanup(&self.device);
+            self.swapchain.cleanup(&self.device, &mut self.allocator);
+
+            std::mem::ManuallyDrop::drop(&mut self.allocator);
+
             self.device.cleanup();
             self.surface.cleanup();
             self.instance.cleanup();

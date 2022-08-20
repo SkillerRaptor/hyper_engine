@@ -12,6 +12,7 @@ use super::super::error::Error;
 
 use ash::extensions::khr::Swapchain as SwapchainLoader;
 use ash::vk;
+use gpu_allocator::vulkan;
 use log::debug;
 use winit::window;
 
@@ -24,6 +25,11 @@ pub struct Swapchain {
 
     images: Vec<vk::Image>,
     image_views: Vec<vk::ImageView>,
+
+    depth_image: vk::Image,
+    depth_image_view: vk::ImageView,
+    depth_format: vk::Format,
+    depth_image_allocation: Option<vulkan::Allocation>,
 }
 
 impl Swapchain {
@@ -32,6 +38,7 @@ impl Swapchain {
         instance: &Instance,
         surface: &Surface,
         device: &Device,
+        allocator: &mut vulkan::Allocator,
     ) -> Result<Self, Error> {
         let swapchain_loader = SwapchainLoader::new(&instance.instance(), &device.logical_device());
         let (swapchain, extent, format) =
@@ -39,6 +46,9 @@ impl Swapchain {
 
         let images = unsafe { swapchain_loader.get_swapchain_images(swapchain)? };
         let image_views = Self::create_image_views(&device, &format, &images)?;
+
+        let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
+            Self::create_depth_image(&window, &device, allocator)?;
 
         debug!("Created vulkan swapchain");
         Ok(Self {
@@ -50,6 +60,11 @@ impl Swapchain {
 
             images,
             image_views,
+
+            depth_image,
+            depth_image_view,
+            depth_format,
+            depth_image_allocation: Some(depth_image_allocation),
         })
     }
 
@@ -224,8 +239,91 @@ impl Swapchain {
         Ok(image_views)
     }
 
-    pub fn cleanup(&mut self, device: &Device) {
+    fn create_depth_image(
+        window: &window::Window,
+        device: &Device,
+        allocator: &mut vulkan::Allocator,
+    ) -> Result<(vk::Image, vk::ImageView, vk::Format, vulkan::Allocation), Error> {
+        let extent = vk::Extent3D::builder()
+            .width(window.inner_size().width)
+            .height(window.inner_size().height)
+            .depth(1);
+
+        let format = vk::Format::D32_SFLOAT;
+
+        // NOTE: Hardcoding the depth format to 32 bit float
+        let image_create_info = vk::ImageCreateInfo::builder()
+            .image_type(vk::ImageType::TYPE_2D)
+            .format(format)
+            .extent(*extent)
+            .mip_levels(1)
+            .array_layers(1)
+            .samples(vk::SampleCountFlags::TYPE_1)
+            .tiling(vk::ImageTiling::OPTIMAL)
+            .usage(vk::ImageUsageFlags::DEPTH_STENCIL_ATTACHMENT)
+            .sharing_mode(vk::SharingMode::EXCLUSIVE)
+            .queue_family_indices(&[])
+            .initial_layout(vk::ImageLayout::UNDEFINED);
+
+        let image = unsafe {
+            device
+                .logical_device()
+                .create_image(&image_create_info, None)?
+        };
+
+        let requirements = unsafe { device.logical_device().get_image_memory_requirements(image) };
+
+        let allocation_create_description = vulkan::AllocationCreateDesc {
+            name: "Depth Image",
+            requirements,
+            location: gpu_allocator::MemoryLocation::GpuOnly,
+            linear: true,
+        };
+        let allocation = allocator.allocate(&allocation_create_description)?;
+
         unsafe {
+            device.logical_device().bind_image_memory(
+                image,
+                allocation.memory(),
+                allocation.offset(),
+            )?;
+        }
+
+        let subsource_range = vk::ImageSubresourceRange::builder()
+            .aspect_mask(vk::ImageAspectFlags::DEPTH)
+            .base_mip_level(0)
+            .level_count(1)
+            .base_array_layer(0)
+            .layer_count(1);
+
+        let image_view_create_info = vk::ImageViewCreateInfo::builder()
+            .image(image)
+            .view_type(vk::ImageViewType::TYPE_2D)
+            .format(format)
+            .components(vk::ComponentMapping::default())
+            .subresource_range(*subsource_range);
+
+        let image_view = unsafe {
+            device
+                .logical_device()
+                .create_image_view(&image_view_create_info, None)?
+        };
+
+        debug!("Created depth image");
+        Ok((image, image_view, format, allocation))
+    }
+
+    pub fn cleanup(&mut self, device: &Device, allocator: &mut vulkan::Allocator) {
+        unsafe {
+            device
+                .logical_device()
+                .destroy_image_view(self.depth_image_view, None);
+            allocator
+                .free(self.depth_image_allocation.take().unwrap())
+                .unwrap();
+            device
+                .logical_device()
+                .destroy_image(self.depth_image, None);
             self.image_views.iter().for_each(|image_view| {
                 device
                     .logical_device()
@@ -241,12 +339,13 @@ impl Swapchain {
         window: &window::Window,
         surface: &Surface,
         device: &Device,
+        allocator: &mut vulkan::Allocator,
     ) -> Result<(), Error> {
         unsafe {
             device.logical_device().device_wait_idle().unwrap();
         }
 
-        self.cleanup(&device);
+        self.cleanup(&device, allocator);
 
         let (swapchain, extent, format) =
             Self::create_swapchain(window, &surface, &device, &self.swapchain_loader, true)?;
@@ -261,6 +360,14 @@ impl Swapchain {
 
         self.images = images;
         self.image_views = image_views;
+
+        let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
+            Self::create_depth_image(&window, &device, allocator)?;
+
+        self.depth_image = depth_image;
+        self.depth_image_view = depth_image_view;
+        self.depth_format = depth_format;
+        self.depth_image_allocation = Some(depth_image_allocation);
 
         Ok(())
     }
@@ -287,5 +394,13 @@ impl Swapchain {
 
     pub fn image_views(&self) -> &Vec<vk::ImageView> {
         &self.image_views
+    }
+
+    pub fn depth_image_view(&self) -> &vk::ImageView {
+        &self.depth_image_view
+    }
+
+    pub fn depth_format(&self) -> &vk::Format {
+        &self.depth_format
     }
 }

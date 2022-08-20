@@ -7,7 +7,6 @@
 use super::commands::command_buffer::CommandBuffer;
 use super::commands::command_pool::CommandPool;
 use super::devices::device::Device;
-use super::devices::instance::Instance;
 use super::devices::surface::Surface;
 use super::error::Error;
 use super::mesh::Mesh;
@@ -33,12 +32,11 @@ pub struct Renderer {
     present_semaphore: Semaphore,
     render_semaphore: Semaphore,
 
-    allocator: std::mem::ManuallyDrop<vulkan::Allocator>,
     mesh: Mesh,
 }
 
 impl Renderer {
-    pub fn new(instance: &Instance, device: &Device) -> Result<Self, Error> {
+    pub fn new(device: &Device, allocator: &mut vulkan::Allocator) -> Result<Self, Error> {
         let command_pool = CommandPool::new(&device)?;
         let command_buffer =
             CommandBuffer::new(&device, &command_pool, vk::CommandBufferLevel::PRIMARY)?;
@@ -47,27 +45,7 @@ impl Renderer {
         let present_semaphore = Semaphore::new(&device)?;
         let render_semaphore = Semaphore::new(&device)?;
 
-        let debug_enabled = cfg!(debug_assertions);
-        let allocator_debug_settings = gpu_allocator::AllocatorDebugSettings {
-            log_memory_information: debug_enabled,
-            log_leaks_on_shutdown: debug_enabled,
-            store_stack_traces: false,
-            log_allocations: debug_enabled,
-            log_frees: debug_enabled,
-            log_stack_traces: false,
-        };
-        let allocator_create_description = vulkan::AllocatorCreateDesc {
-            instance: instance.instance().clone(),
-            device: device.logical_device().clone(),
-            physical_device: *device.physical_device(),
-            debug_settings: allocator_debug_settings,
-            buffer_device_address: false,
-        };
-
-        // TODO: Abstract allocator into own class
-        let mut allocator = vulkan::Allocator::new(&allocator_create_description)?;
-
-        let mesh = Mesh::load(&device, &mut allocator, "assets/models/monkey_smooth.obj")?;
+        let mesh = Mesh::load(&device, allocator, "assets/models/monkey_smooth.obj")?;
 
         info!("Created renderer");
         Ok(Self {
@@ -81,17 +59,12 @@ impl Renderer {
             present_semaphore,
             render_semaphore,
 
-            allocator: std::mem::ManuallyDrop::new(allocator),
             mesh,
         })
     }
 
-    pub fn cleanup(&mut self, device: &Device) {
-        self.mesh.cleanup(&device, &mut self.allocator);
-
-        unsafe {
-            std::mem::ManuallyDrop::drop(&mut self.allocator);
-        }
+    pub fn cleanup(&mut self, device: &Device, allocator: &mut vulkan::Allocator) {
+        self.mesh.cleanup(&device, allocator);
 
         self.render_semaphore.cleanup(&device);
         self.present_semaphore.cleanup(&device);
@@ -104,6 +77,7 @@ impl Renderer {
         window: &window::Window,
         surface: &Surface,
         device: &Device,
+        allocator: &mut vulkan::Allocator,
         swapchain: &mut Swapchain,
         pipeline: &Pipeline,
     ) -> Result<(), Error> {
@@ -120,7 +94,7 @@ impl Renderer {
             ) {
                 Ok((image_index, _)) => self.current_image_index = image_index as usize,
                 Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => {
-                    swapchain.recreate(&window, &surface, &device)?;
+                    swapchain.recreate(&window, &surface, &device, allocator)?;
                     return Ok(());
                 }
                 Err(error) => return Err(Error::VulkanError(error)),
@@ -184,7 +158,24 @@ impl Renderer {
             .load_op(vk::AttachmentLoadOp::CLEAR)
             .store_op(vk::AttachmentStoreOp::STORE)
             .clear_value(color_clear_value);
-        let depth_attachment_info = vk::RenderingAttachmentInfo::builder();
+
+        let depth_clear_value = vk::ClearValue {
+            depth_stencil: vk::ClearDepthStencilValue::builder()
+                .depth(1.0)
+                .stencil(0)
+                .build(),
+        };
+
+        let depth_attachment_info = vk::RenderingAttachmentInfo::builder()
+            .image_view(*swapchain.depth_image_view())
+            .image_layout(vk::ImageLayout::DEPTH_ATTACHMENT_OPTIMAL)
+            .resolve_mode(vk::ResolveModeFlags::NONE)
+            .resolve_image_view(vk::ImageView::null())
+            .resolve_image_layout(vk::ImageLayout::UNDEFINED)
+            .load_op(vk::AttachmentLoadOp::CLEAR)
+            .store_op(vk::AttachmentStoreOp::STORE)
+            .clear_value(depth_clear_value);
+
         let stencil_attachment_info = vk::RenderingAttachmentInfo::builder();
 
         let color_atachments = &[*color_attachment_info];
@@ -260,6 +251,7 @@ impl Renderer {
         window: &window::Window,
         surface: &Surface,
         device: &Device,
+        allocator: &mut vulkan::Allocator,
         swapchain: &mut Swapchain,
         resized: &mut bool,
     ) -> Result<(), Error> {
@@ -311,7 +303,7 @@ impl Renderer {
 
             if changed || *resized {
                 *resized = false;
-                swapchain.recreate(&window, &surface, &device)?;
+                swapchain.recreate(&window, &surface, &device, allocator)?;
             }
         }
 
@@ -320,7 +312,7 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn draw_triangle(&self, window: &window::Window, device: &Device, pipeline: &Pipeline) {
+    pub fn draw(&self, window: &window::Window, device: &Device, pipeline: &Pipeline) {
         let mut projection_matrix = glm::perspective(
             f32::to_radians(90.0),
             window.inner_size().width as f32 / window.inner_size().height as f32,

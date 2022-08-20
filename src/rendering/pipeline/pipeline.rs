@@ -86,7 +86,16 @@ impl Pipeline {
             .alpha_to_coverage_enable(false)
             .alpha_to_one_enable(false);
 
-        let depth_stencil_state_create_info = vk::PipelineDepthStencilStateCreateInfo::builder();
+        let depth_stencil_state_create_info = vk::PipelineDepthStencilStateCreateInfo::builder()
+            .depth_test_enable(true)
+            .depth_write_enable(true)
+            .depth_compare_op(vk::CompareOp::LESS_OR_EQUAL)
+            .depth_bounds_test_enable(false)
+            .stencil_test_enable(false)
+            .front(vk::StencilOpState::default())
+            .back(vk::StencilOpState::default())
+            .min_depth_bounds(0.0)
+            .max_depth_bounds(1.0);
 
         let attachment_state = vk::PipelineColorBlendAttachmentState::builder()
             .blend_enable(false)
@@ -127,10 +136,11 @@ impl Pipeline {
         };
 
         let color_attachment_formats = &[*swapchain.format()];
+        let depth_attachment_format = *swapchain.depth_format();
         let mut pipeline_rendering_create_info = vk::PipelineRenderingCreateInfo::builder()
             .view_mask(0)
             .color_attachment_formats(color_attachment_formats)
-            .depth_attachment_format(vk::Format::UNDEFINED)
+            .depth_attachment_format(depth_attachment_format)
             .stencil_attachment_format(vk::Format::UNDEFINED);
 
         let shader_stages = &[*vertex_stage, *fragment_stage];

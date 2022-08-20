@@ -166,7 +166,7 @@ impl Application {
                         std::process::exit(1);
                     }
 
-                    self.render_context.draw_triangle(&self.window);
+                    self.render_context.draw(&self.window);
 
                     if let Err(error) = self.render_context.end_frame() {
                         error!("Failed to end frame: {}", error);
