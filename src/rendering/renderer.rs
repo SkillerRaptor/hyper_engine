@@ -17,103 +17,54 @@ use super::sync::fence::Fence;
 use super::sync::semaphore::Semaphore;
 
 use ash::vk;
-use log::{debug, info};
+use log::info;
 use winit::window;
 
 pub struct Renderer {
-    current_frame: usize,
+    frame: u32,
     current_image_index: usize,
 
     command_pool: CommandPool,
-    command_buffers: Vec<CommandBuffer>,
+    command_buffer: CommandBuffer,
 
     vertex_buffer: VertexBuffer,
 
-    image_available_semaphores: Vec<Semaphore>,
-    render_finished_semaphores: Vec<Semaphore>,
-    in_flight_fences: Vec<Fence>,
+    render_fence: Fence,
+    present_semaphore: Semaphore,
+    render_semaphore: Semaphore,
 }
 
 impl Renderer {
-    const MAX_FRAMES_IN_FLIGHT: usize = 2;
-
     pub fn new(instance: &Instance, device: &Device) -> Result<Self, Error> {
         let command_pool = CommandPool::new(&device)?;
-        let command_buffers = Self::create_command_buffers(&device, &command_pool)?;
+        let command_buffer =
+            CommandBuffer::new(&device, &command_pool, vk::CommandBufferLevel::PRIMARY)?;
         let vertex_buffer = VertexBuffer::new(&instance, &device)?;
-        let (image_available_semaphores, render_finished_semaphores, in_flight_fences) =
-            Self::create_sync_objects(&device)?;
+
+        let render_fence = Fence::new(&device)?;
+        let present_semaphore = Semaphore::new(&device)?;
+        let render_semaphore = Semaphore::new(&device)?;
 
         info!("Created renderer");
         Ok(Self {
-            current_frame: 0,
+            frame: 0,
             current_image_index: 0,
 
             command_pool,
-            command_buffers,
+            command_buffer,
 
             vertex_buffer,
 
-            in_flight_fences,
-            render_finished_semaphores,
-            image_available_semaphores,
+            render_fence,
+            present_semaphore,
+            render_semaphore,
         })
     }
 
-    fn create_command_buffers(
-        device: &Device,
-        command_pool: &CommandPool,
-    ) -> Result<Vec<CommandBuffer>, Error> {
-        let mut command_buffers = Vec::new();
-
-        for i in 0..Self::MAX_FRAMES_IN_FLIGHT {
-            let command_buffer =
-                CommandBuffer::new(&device, &command_pool, vk::CommandBufferLevel::PRIMARY)?;
-            command_buffers.push(command_buffer);
-            debug!("Created command buffer #{}", i);
-        }
-
-        Ok(command_buffers)
-    }
-
-    fn create_sync_objects(
-        device: &Device,
-    ) -> Result<(Vec<Semaphore>, Vec<Semaphore>, Vec<Fence>), Error> {
-        let mut image_available_semaphores = Vec::new();
-        let mut render_finished_semaphores = Vec::new();
-        let mut in_flight_fences = Vec::new();
-
-        for i in 0..Self::MAX_FRAMES_IN_FLIGHT {
-            let image_available_semaphore = Semaphore::new(&device)?;
-            image_available_semaphores.push(image_available_semaphore);
-            debug!("Created image available semaphore #{}", i);
-
-            let render_finished_semaphore = Semaphore::new(&device)?;
-            render_finished_semaphores.push(render_finished_semaphore);
-            debug!("Created render finished semaphore #{}", i);
-
-            let in_flight_fence = Fence::new(&device)?;
-            in_flight_fences.push(in_flight_fence);
-            debug!("Created in flight fence #{}", i);
-        }
-
-        Ok((
-            image_available_semaphores,
-            render_finished_semaphores,
-            in_flight_fences,
-        ))
-    }
-
     pub fn cleanup(&mut self, device: &Device) {
-        self.in_flight_fences
-            .iter_mut()
-            .for_each(|fence| fence.cleanup(&device));
-        self.render_finished_semaphores
-            .iter_mut()
-            .for_each(|semaphore| semaphore.cleanup(&device));
-        self.image_available_semaphores
-            .iter_mut()
-            .for_each(|semaphore| semaphore.cleanup(&device));
+        self.render_semaphore.cleanup(&device);
+        self.present_semaphore.cleanup(&device);
+        self.render_fence.cleanup(&device);
         self.vertex_buffer.cleanup(&device);
         self.command_pool.cleanup(&device);
     }
@@ -126,14 +77,15 @@ impl Renderer {
         swapchain: &mut Swapchain,
         pipeline: &Pipeline,
     ) -> Result<(), Error> {
-        self.in_flight_fences[self.current_frame].wait(device, u64::MAX)?;
+        self.render_fence.wait(&device, u64::MAX)?;
+        self.render_fence.reset(device)?;
 
         unsafe {
             // TODO: Move this to swapchain class
             match swapchain.swapchain_loader().acquire_next_image(
                 *swapchain.swapchain(),
                 u64::MAX,
-                *self.image_available_semaphores[self.current_frame as usize].semaphore(),
+                *self.present_semaphore.semaphore(),
                 vk::Fence::null(),
             ) {
                 Ok((image_index, _)) => self.current_image_index = image_index as usize,
@@ -145,14 +97,12 @@ impl Renderer {
             }
         }
 
-        self.in_flight_fences[self.current_frame].reset(device)?;
-
-        self.command_buffers[self.current_frame]
+        self.command_buffer
             .reset(device, vk::CommandBufferResetFlags::empty())?;
 
-        self.command_buffers[self.current_frame].begin(
+        self.command_buffer.begin(
             device,
-            vk::CommandBufferUsageFlags::empty(),
+            vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT,
             &vk::CommandBufferInheritanceInfo::default(),
         )?;
 
@@ -173,7 +123,7 @@ impl Renderer {
             .image(swapchain.images()[self.current_image_index as usize])
             .subresource_range(*image_subresource_range);
 
-        self.command_buffers[self.current_frame].pipeline_barrier(
+        self.command_buffer.pipeline_barrier(
             device,
             vk::PipelineStageFlags::TOP_OF_PIPE,
             vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
@@ -183,9 +133,10 @@ impl Renderer {
             &[*image_memory_barrier],
         );
 
+        let flash = f32::abs(f32::sin(self.frame as f32 / 120.0));
         let color_clear_value = vk::ClearValue {
             color: vk::ClearColorValue {
-                float32: [0.0, 0.0, 0.0, 1.0],
+                float32: [0.0, 0.0, flash, 1.0],
             },
         };
 
@@ -203,7 +154,6 @@ impl Renderer {
             .load_op(vk::AttachmentLoadOp::CLEAR)
             .store_op(vk::AttachmentStoreOp::STORE)
             .clear_value(color_clear_value);
-
         let depth_attachment_info = vk::RenderingAttachmentInfo::builder();
         let stencil_attachment_info = vk::RenderingAttachmentInfo::builder();
 
@@ -216,8 +166,8 @@ impl Renderer {
             .depth_attachment(&depth_attachment_info)
             .stencil_attachment(&stencil_attachment_info);
 
-        self.command_buffers[self.current_frame].begin_rendering(device, &rendering_info);
-        self.command_buffers[self.current_frame].bind_pipeline(
+        self.command_buffer.begin_rendering(device, &rendering_info);
+        self.command_buffer.bind_pipeline(
             device,
             vk::PipelineBindPoint::GRAPHICS,
             *pipeline.pipeline(),
@@ -231,17 +181,17 @@ impl Renderer {
             .height(extent.height as f32)
             .min_depth(0.0)
             .max_depth(1.0);
-        self.command_buffers[self.current_frame].set_viewport(device, 0, &[*viewport]);
+        self.command_buffer.set_viewport(device, 0, &[*viewport]);
 
         let offset = vk::Offset2D::builder();
         let scissor = vk::Rect2D::builder().offset(*offset).extent(*extent);
-        self.command_buffers[self.current_frame].set_scissor(device, 0, &[*scissor]);
+        self.command_buffer.set_scissor(device, 0, &[*scissor]);
 
         Ok(())
     }
 
     pub fn end_frame(&self, device: &Device, swapchain: &Swapchain) -> Result<(), Error> {
-        self.command_buffers[self.current_frame].end_rendering(device);
+        self.command_buffer.end_rendering(device);
 
         let image_subresource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -260,7 +210,7 @@ impl Renderer {
             .image(swapchain.images()[self.current_image_index as usize])
             .subresource_range(*image_subresource_range);
 
-        self.command_buffers[self.current_frame].pipeline_barrier(
+        self.command_buffer.pipeline_barrier(
             device,
             vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
             vk::PipelineStageFlags::BOTTOM_OF_PIPE,
@@ -270,7 +220,7 @@ impl Renderer {
             &[*image_memory_barrier],
         );
 
-        self.command_buffers[self.current_frame].end(device)?;
+        self.command_buffer.end(device)?;
 
         Ok(())
     }
@@ -283,10 +233,10 @@ impl Renderer {
         swapchain: &mut Swapchain,
         resized: &mut bool,
     ) -> Result<(), Error> {
-        let wait_semaphores = &[*self.image_available_semaphores[self.current_frame].semaphore()];
+        let wait_semaphores = &[*self.present_semaphore.semaphore()];
         let wait_stages = &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
-        let command_buffers = &[*self.command_buffers[self.current_frame].command_buffer()];
-        let signal_semaphores = &[*self.render_finished_semaphores[self.current_frame].semaphore()];
+        let command_buffers = &[*self.command_buffer.command_buffer()];
+        let signal_semaphores = &[*self.render_semaphore.semaphore()];
         let submit_info = vk::SubmitInfo::builder()
             .wait_semaphores(wait_semaphores)
             .wait_dst_stage_mask(wait_stages)
@@ -299,11 +249,11 @@ impl Renderer {
             device.logical_device().queue_submit(
                 *device.graphics_queue(),
                 submits,
-                *self.in_flight_fences[self.current_frame].fence(),
+                *self.render_fence.fence(),
             )?;
         }
 
-        let wait_semaphores = &[*self.render_finished_semaphores[self.current_frame].semaphore()];
+        let wait_semaphores = &[*self.render_semaphore.semaphore()];
         let swapchains = &[*swapchain.swapchain()];
         let image_indices = &[self.current_image_index as u32];
 
@@ -335,7 +285,7 @@ impl Renderer {
             }
         }
 
-        self.current_frame = (self.current_frame + 1) % Self::MAX_FRAMES_IN_FLIGHT;
+        self.frame += 1;
 
         Ok(())
     }
@@ -344,13 +294,9 @@ impl Renderer {
         let buffers = &[*self.vertex_buffer.buffer()];
         let offsets = &[0];
 
-        self.command_buffers[self.current_frame].bind_vertex_buffers(device, 0, buffers, offsets);
-        self.command_buffers[self.current_frame].draw(
-            device,
-            self.vertex_buffer.vertices().len() as u32,
-            1,
-            0,
-            0,
-        );
+        self.command_buffer
+            .bind_vertex_buffers(device, 0, buffers, offsets);
+        self.command_buffer
+            .draw(device, self.vertex_buffer.vertices().len() as u32, 1, 0, 0);
     }
 }
