@@ -26,6 +26,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Update System
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt update -qq
+          sudo apt install -y cmake libwayland-dev libxkbcommon-dev wayland-protocols extra-cmake-modules
+
       - name: Update
         run: |
           rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
@@ -33,12 +39,12 @@ jobs:
       - name: Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Build
+      - name: Build Debug
         if: matrix.config == 'debug'
         run: |
           cargo build --verbose --workspace
 
-      - name: Build
+      - name: Build Release
         if: matrix.config == 'release'
         run: |
           cargo build --verbose --workspace --release
