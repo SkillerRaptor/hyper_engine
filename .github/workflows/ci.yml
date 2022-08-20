@@ -30,7 +30,14 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt update -qq
-          sudo apt install -y cmake libwayland-dev libxkbcommon-dev wayland-protocols extra-cmake-modules
+          sudo apt install -y \
+            cmake \
+            extra-cmake-modules \
+            libwayland-dev \
+            libxinerama-dev \
+            libxkbcommon-dev \
+            wayland-protocols \
+            xorg-dev  \
 
       - name: Update
         run: |
