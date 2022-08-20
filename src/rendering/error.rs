@@ -21,6 +21,8 @@ pub enum Error {
     NulError(std::ffi::NulError),
     Utf8Error(std::str::Utf8Error),
 
+    AllocationError(gpu_allocator::AllocationError),
+
     LoadingError(ash::LoadingError),
     VulkanError(vk::Result),
 }
@@ -42,6 +44,10 @@ impl std::fmt::Display for Error {
                 write!(formatter, "{}", error)
             }
             Error::Utf8Error(error) => {
+                write!(formatter, "{}", error)
+            }
+
+            Error::AllocationError(error) => {
                 write!(formatter, "{}", error)
             }
 
@@ -82,6 +88,12 @@ impl From<std::ffi::NulError> for Error {
 impl From<std::str::Utf8Error> for Error {
     fn from(error: std::str::Utf8Error) -> Self {
         Error::Utf8Error(error)
+    }
+}
+
+impl From<gpu_allocator::AllocationError> for Error {
+    fn from(error: gpu_allocator::AllocationError) -> Self {
+        Error::AllocationError(error)
     }
 }
 

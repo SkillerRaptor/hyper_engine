@@ -4,20 +4,23 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::buffers::vertex_buffer::VertexBuffer;
 use super::commands::command_buffer::CommandBuffer;
 use super::commands::command_pool::CommandPool;
 use super::devices::device::Device;
 use super::devices::instance::Instance;
 use super::devices::surface::Surface;
 use super::error::Error;
+use super::mesh::Mesh;
 use super::pipeline::pipeline::Pipeline;
 use super::pipeline::swapchain::Swapchain;
 use super::sync::fence::Fence;
 use super::sync::semaphore::Semaphore;
+use super::vertex::Vertex;
 
 use ash::vk;
+use gpu_allocator::vulkan;
 use log::info;
+use nalgebra_glm as glm;
 use winit::window;
 
 pub struct Renderer {
@@ -27,11 +30,12 @@ pub struct Renderer {
     command_pool: CommandPool,
     command_buffer: CommandBuffer,
 
-    vertex_buffer: VertexBuffer,
-
     render_fence: Fence,
     present_semaphore: Semaphore,
     render_semaphore: Semaphore,
+
+    allocator: std::mem::ManuallyDrop<vulkan::Allocator>,
+    mesh: Mesh,
 }
 
 impl Renderer {
@@ -39,11 +43,50 @@ impl Renderer {
         let command_pool = CommandPool::new(&device)?;
         let command_buffer =
             CommandBuffer::new(&device, &command_pool, vk::CommandBufferLevel::PRIMARY)?;
-        let vertex_buffer = VertexBuffer::new(&instance, &device)?;
 
         let render_fence = Fence::new(&device)?;
         let present_semaphore = Semaphore::new(&device)?;
         let render_semaphore = Semaphore::new(&device)?;
+
+        let debug_enabled = cfg!(debug_assertions);
+        let allocator_debug_settings = gpu_allocator::AllocatorDebugSettings {
+            log_memory_information: debug_enabled,
+            log_leaks_on_shutdown: debug_enabled,
+            store_stack_traces: false,
+            log_allocations: debug_enabled,
+            log_frees: debug_enabled,
+            log_stack_traces: false,
+        };
+        let allocator_create_description = vulkan::AllocatorCreateDesc {
+            instance: instance.instance().clone(),
+            device: device.logical_device().clone(),
+            physical_device: *device.physical_device(),
+            debug_settings: allocator_debug_settings,
+            buffer_device_address: false,
+        };
+
+        // TODO: Abstract allocator into own class
+        let mut allocator = vulkan::Allocator::new(&allocator_create_description)?;
+
+        let vertices = vec![
+            Vertex::new(
+                glm::vec3(1.0, 1.0, 0.0),
+                glm::vec3(0.0, 1.0, 0.0),
+                glm::vec3(0.0, 0.0, 0.0),
+            ),
+            Vertex::new(
+                glm::vec3(-1.0, 1.0, 0.0),
+                glm::vec3(0.0, 1.0, 0.0),
+                glm::vec3(0.0, 0.0, 0.0),
+            ),
+            Vertex::new(
+                glm::vec3(0.0, -1.0, 0.0),
+                glm::vec3(0.0, 1.0, 0.0),
+                glm::vec3(0.0, 0.0, 0.0),
+            ),
+        ];
+
+        let mesh = Mesh::new(&device, &mut allocator, &vertices)?;
 
         info!("Created renderer");
         Ok(Self {
@@ -53,19 +96,25 @@ impl Renderer {
             command_pool,
             command_buffer,
 
-            vertex_buffer,
-
             render_fence,
             present_semaphore,
             render_semaphore,
+
+            allocator: std::mem::ManuallyDrop::new(allocator),
+            mesh,
         })
     }
 
     pub fn cleanup(&mut self, device: &Device) {
+        self.mesh.cleanup(&device, &mut self.allocator);
+
+        unsafe {
+            std::mem::ManuallyDrop::drop(&mut self.allocator);
+        }
+
         self.render_semaphore.cleanup(&device);
         self.present_semaphore.cleanup(&device);
         self.render_fence.cleanup(&device);
-        self.vertex_buffer.cleanup(&device);
         self.command_pool.cleanup(&device);
     }
 
@@ -291,12 +340,12 @@ impl Renderer {
     }
 
     pub fn draw_triangle(&self, device: &Device) {
-        let buffers = &[*self.vertex_buffer.buffer()];
+        let buffers = &[*self.mesh.vertex_buffer().buffer()];
         let offsets = &[0];
 
         self.command_buffer
             .bind_vertex_buffers(device, 0, buffers, offsets);
         self.command_buffer
-            .draw(device, self.vertex_buffer.vertices().len() as u32, 1, 0, 0);
+            .draw(device, self.mesh.vertices().len() as u32, 1, 0, 0);
     }
 }

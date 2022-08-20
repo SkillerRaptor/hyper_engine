@@ -46,10 +46,10 @@ impl Pipeline {
             .name(&entry_point)
             .specialization_info(&specialization_info);
 
-        let binding_description = &[Vertex::binding_description()];
+        let binding_description = Vertex::binding_descriptions();
         let attribute_description = Vertex::attribute_descriptions();
         let vertex_input_state_create_info = vk::PipelineVertexInputStateCreateInfo::builder()
-            .vertex_binding_descriptions(binding_description)
+            .vertex_binding_descriptions(&binding_description)
             .vertex_attribute_descriptions(&attribute_description);
 
         let input_assembly_state_create_info = vk::PipelineInputAssemblyStateCreateInfo::builder()
