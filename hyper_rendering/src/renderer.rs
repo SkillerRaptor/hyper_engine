@@ -15,7 +15,7 @@ use super::pipeline::swapchain::Swapchain;
 use super::sync::fence::Fence;
 use super::sync::semaphore::Semaphore;
 
-use crate::core::window::Window;
+use hyper_platform::window::Window;
 
 use ash::vk;
 use gpu_allocator::vulkan;

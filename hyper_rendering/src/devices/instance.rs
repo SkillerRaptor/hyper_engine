@@ -6,7 +6,7 @@
 
 use super::super::error::Error;
 
-use crate::core::window::Window;
+use hyper_platform::window::Window;
 
 use ash::extensions::ext::DebugUtils as DebugLoader;
 use ash::vk;

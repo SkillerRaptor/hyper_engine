@@ -1,0 +1,11 @@
+[package]
+name = "hyper_platform"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hyper_core = { path = "../hyper_core" }
+
+ash = "0.37.0"
+glfw = { version = "0.45.0", features = ["vulkan"] }
+log = "0.4.17"

@@ -4,12 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-extern crate hyper_engine;
-
-use hyper_engine::core;
+use hyper_engine::application;
 
 fn main() -> Result<(), String> {
-    let mut application = core::application::Application::new();
+    let mut application = application::Application::new();
     application.run();
 
     Ok(())

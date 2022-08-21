@@ -10,7 +10,7 @@ use super::super::devices::instance::Instance;
 use super::super::devices::surface::Surface;
 use super::super::error::Error;
 
-use crate::core::window::Window;
+use hyper_platform::window::Window;
 
 use ash::extensions::khr::Swapchain as SwapchainLoader;
 use ash::vk;

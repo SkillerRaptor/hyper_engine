@@ -6,8 +6,6 @@
 
 use std::sync::mpsc::Receiver;
 
-use crate::rendering::devices::instance::Instance;
-
 use ash::vk;
 use ash::vk::Handle;
 use log::info;
@@ -106,10 +104,10 @@ impl Window {
         self.glfw.get_required_instance_extensions().unwrap()
     }
 
-    pub fn create_window_surface(&self, instance: &Instance) -> vk::SurfaceKHR {
+    pub fn create_window_surface(&self, instance: &ash::Instance) -> vk::SurfaceKHR {
         let mut surface = 0;
         self.native_window.create_window_surface(
-            instance.instance().handle().as_raw() as usize,
+            instance.handle().as_raw() as usize,
             std::ptr::null(),
             &mut surface,
         );

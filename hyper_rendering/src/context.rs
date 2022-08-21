@@ -12,7 +12,7 @@ use super::pipeline::pipeline::Pipeline;
 use super::pipeline::swapchain::Swapchain;
 use super::renderer::Renderer;
 
-use crate::core::window::Window;
+use hyper_platform::window::Window;
 
 use gpu_allocator::vulkan;
 use log::info;

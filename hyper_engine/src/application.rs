@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::window::{Window, WindowError};
-use crate::rendering::context::RenderContext;
+use hyper_platform::window::{Window, WindowError};
+use hyper_rendering::context::RenderContext;
 
 use colored::Colorize;
 use log::error;
