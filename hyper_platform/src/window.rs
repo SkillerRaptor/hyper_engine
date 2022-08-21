@@ -123,7 +123,7 @@ impl Window {
         self.glfw.get_required_instance_extensions().unwrap()
     }
 
-    pub fn create_window_surface(&self, instance: &vk::Instance) -> vk::SurfaceKHR {
+    pub fn create_window_surface(&self, instance: &ash::Instance) -> vk::SurfaceKHR {
         let mut surface = 0;
         self.native_window.create_window_surface(
             instance.handle().as_raw() as usize,
