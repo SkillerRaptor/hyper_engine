@@ -253,7 +253,6 @@ dependencies = [
  "chrono",
  "colored",
  "fern",
- "glfw",
  "hyper_core",
  "hyper_platform",
  "hyper_rendering",

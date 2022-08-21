@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use hyper_platform::window::{Window, WindowError};
+use hyper_platform::window::{Event, Window, WindowError};
 use hyper_rendering::context::RenderContext;
 
 use colored::Colorize;
@@ -107,8 +107,7 @@ impl Application {
             // NOTE: Update
             self.window.poll_events();
             self.window.handle_events(|event| match event {
-                glfw::WindowEvent::FramebufferSize(_, _) => self.resized = true,
-                _ => {}
+                Event::FramebufferResize(_, _) => self.resized = true,
             });
 
             // NOTE: Render

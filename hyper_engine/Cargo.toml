@@ -12,5 +12,3 @@ chrono = "0.4.22"
 colored = "2.0.0"
 fern = "0.6.1"
 log = "0.4.17"
-
-glfw = { version = "0.45.0", features = ["vulkan"] }

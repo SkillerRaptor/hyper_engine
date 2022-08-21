@@ -42,6 +42,21 @@ impl From<CreationError> for WindowError {
     }
 }
 
+pub enum Event {
+    FramebufferResize(i32, i32),
+}
+
+impl From<glfw::WindowEvent> for Event {
+    fn from(event: glfw::WindowEvent) -> Self {
+        match event {
+            glfw::WindowEvent::FramebufferSize(width, height) => {
+                Event::FramebufferResize(width, height)
+            }
+            _ => panic!(),
+        }
+    }
+}
+
 pub struct Window {
     glfw: glfw::Glfw,
 
@@ -77,10 +92,10 @@ impl Window {
 
     pub fn handle_events<F>(&self, mut handle_event: F)
     where
-        F: FnMut(glfw::WindowEvent),
+        F: FnMut(Event),
     {
-        for (_, event) in glfw::flush_messages(&self.events) {
-            handle_event(event);
+        for (_, glfw_event) in glfw::flush_messages(&self.events) {
+            handle_event(Event::from(glfw_event));
         }
     }
 
