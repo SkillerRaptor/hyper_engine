@@ -127,8 +127,14 @@ impl Application {
             std::fs::create_dir(logs_folder)?;
         }
 
+        let level = if cfg!(debug_assertions) {
+            log::LevelFilter::Debug
+        } else {
+            log::LevelFilter::Info
+        };
+
         fern::Dispatch::new()
-            .level(log::LevelFilter::Trace)
+            .level(level)
             .chain(
                 fern::Dispatch::new()
                     .format(|out, message, record| {
