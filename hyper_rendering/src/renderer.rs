@@ -23,7 +23,6 @@ use log::info;
 use nalgebra_glm as glm;
 
 pub struct Renderer {
-    frame: u32,
     current_image_index: usize,
 
     command_pool: CommandPool,
@@ -50,7 +49,6 @@ impl Renderer {
 
         info!("Created renderer");
         Ok(Self {
-            frame: 0,
             current_image_index: 0,
 
             command_pool,
@@ -138,7 +136,7 @@ impl Renderer {
             &[*image_memory_barrier],
         );
 
-        let flash = f32::abs(f32::sin(self.frame as f32 / 120.0));
+        let flash = f32::abs(f32::sin(window.get_time() as f32 * 2.0));
         let color_clear_value = vk::ClearValue {
             color: vk::ClearColorValue {
                 float32: [0.0, 0.0, flash, 1.0],
@@ -308,8 +306,6 @@ impl Renderer {
             }
         }
 
-        self.frame += 1;
-
         Ok(())
     }
 
@@ -335,7 +331,7 @@ impl Renderer {
             &glm::mat4(
                 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
             ),
-            f32::to_radians(self.frame as f32 * 0.4),
+            f32::to_radians(window.get_time() as f32 * 150.0),
             &glm::vec3(0.0, 1.0, 0.0),
         );
 

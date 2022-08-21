@@ -103,6 +103,10 @@ impl Window {
         self.native_window.should_close()
     }
 
+    pub fn get_time(&self) -> f64 {
+        self.glfw.get_time()
+    }
+
     pub fn set_title(&mut self, title: &str) {
         self.native_window.set_title(title);
     }
@@ -119,7 +123,7 @@ impl Window {
         self.glfw.get_required_instance_extensions().unwrap()
     }
 
-    pub fn create_window_surface(&self, instance: &ash::Instance) -> vk::SurfaceKHR {
+    pub fn create_window_surface(&self, instance: &vk::Instance) -> vk::SurfaceKHR {
         let mut surface = 0;
         self.native_window.create_window_surface(
             instance.handle().as_raw() as usize,
