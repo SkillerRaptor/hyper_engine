@@ -91,18 +91,26 @@ impl Instance {
             )
             .pfn_user_callback(Some(Self::debug_callback));
 
+        let raw_validation_layers = vec![Self::VALIDATION_LAYER]
+            .iter()
+            .map(|layer_name| CString::new(*layer_name))
+            .collect::<Result<Vec<_>, _>>()?;
+        let validation_layers = raw_validation_layers
+            .iter()
+            .map(|layer_name| layer_name.as_ptr())
+            .collect::<Vec<_>>();
         let layers = if validation_enabled {
-            vec![Self::VALIDATION_LAYER.as_ptr() as *const i8]
+            validation_layers
         } else {
             Vec::new()
         };
 
-        let c_extensions = window
+        let raw_extensions = window
             .get_required_extensions()
             .iter()
             .map(|extension| CString::new(extension.clone()))
             .collect::<Result<Vec<_>, _>>()?;
-        let mut extensions = c_extensions
+        let mut extensions = raw_extensions
             .iter()
             .map(|extension| extension.as_ptr())
             .collect::<Vec<_>>();

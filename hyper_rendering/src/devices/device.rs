@@ -166,14 +166,16 @@ impl Device {
         instance: &Instance,
         physical_device: &vk::PhysicalDevice,
     ) -> Result<(), Error> {
-        let extensions = unsafe {
+        let properties = unsafe {
             instance
                 .instance()
                 .enumerate_device_extension_properties(*physical_device)?
-                .iter()
-                .map(|extension| CStr::from_ptr(extension.extension_name.as_ptr()))
-                .collect::<std::collections::HashSet<_>>()
         };
+
+        let extensions = properties
+            .iter()
+            .map(|extension| unsafe { CStr::from_ptr(extension.extension_name.as_ptr()) })
+            .collect::<std::collections::HashSet<_>>();
 
         if !Self::DEVICE_EXTENSIONS
             .iter()
@@ -251,7 +253,7 @@ impl Device {
 
         let physical_device_features = vk::PhysicalDeviceFeatures::builder();
 
-        let device_extensions = Self::DEVICE_EXTENSIONS
+        let extensions = Self::DEVICE_EXTENSIONS
             .iter()
             .map(|extension| extension.as_ptr())
             .collect::<Vec<_>>();
@@ -263,7 +265,7 @@ impl Device {
             .push_next(&mut dynamic_rendering_feature)
             .queue_create_infos(&queue_create_infos)
             .enabled_layer_names(&[])
-            .enabled_extension_names(&device_extensions)
+            .enabled_extension_names(&extensions)
             .enabled_features(&physical_device_features);
 
         let logical_device = unsafe {
