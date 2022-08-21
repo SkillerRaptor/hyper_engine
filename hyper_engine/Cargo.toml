@@ -8,7 +8,4 @@ hyper_core = { path = "../hyper_core" }
 hyper_platform = { path = "../hyper_platform" }
 hyper_rendering = { path = "../hyper_rendering" }
 
-chrono = "0.4.22"
-colored = "2.0.0"
-fern = "0.6.1"
 log = "0.4.17"
