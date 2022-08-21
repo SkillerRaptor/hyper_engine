@@ -97,7 +97,7 @@ impl RenderContext {
             .unwrap();
     }
 
-    pub fn submit(&mut self, window: &Window, resized: &mut bool) {
+    pub fn submit(&mut self, window: &Window) {
         self.renderer
             .submit(
                 &window,
@@ -105,7 +105,6 @@ impl RenderContext {
                 &self.device,
                 &mut self.allocator,
                 &mut self.swapchain,
-                resized,
             )
             .unwrap();
     }

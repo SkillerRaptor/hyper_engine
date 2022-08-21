@@ -136,7 +136,7 @@ impl Renderer {
             &[*image_memory_barrier],
         );
 
-        let flash = f32::abs(f32::sin(window.get_time() as f32 * 2.0));
+        let flash = f32::abs(f32::sin(window.time() as f32 * 2.0));
         let color_clear_value = vk::ClearValue {
             color: vk::ClearColorValue {
                 float32: [0.0, 0.0, flash, 1.0],
@@ -252,7 +252,6 @@ impl Renderer {
         device: &Device,
         allocator: &mut vulkan::Allocator,
         swapchain: &mut Swapchain,
-        resized: &mut bool,
     ) -> Result<(), Error> {
         let wait_semaphores = &[*self.present_semaphore.semaphore()];
         let wait_stages = &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
@@ -300,8 +299,7 @@ impl Renderer {
                 Err(error) => return Err(Error::VulkanError(error)),
             };
 
-            if changed || *resized {
-                *resized = false;
+            if changed {
                 swapchain.recreate(&window, &surface, &device, allocator)?;
             }
         }
@@ -331,7 +329,7 @@ impl Renderer {
             &glm::mat4(
                 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
             ),
-            f32::to_radians(window.get_time() as f32 * 150.0),
+            f32::to_radians(window.time() as f32 * 150.0),
             &glm::vec3(0.0, 1.0, 0.0),
         );
 

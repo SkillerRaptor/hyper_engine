@@ -5,49 +5,23 @@
  */
 
 use hyper_core::logger;
-use hyper_platform::window::{Event, Window, WindowError};
+use hyper_platform::{event_bus::EventBus, window::Window};
 use hyper_rendering::context::RenderContext;
 
 use log::error;
 
-pub enum ApplicationError {
-    WindowError(WindowError),
-}
-
-impl std::fmt::Display for ApplicationError {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ApplicationError::WindowError(error) => {
-                write!(formatter, "{}", error)
-            }
-        }
-    }
-}
-
-impl From<WindowError> for ApplicationError {
-    fn from(error: WindowError) -> Self {
-        ApplicationError::WindowError(error)
-    }
-}
-
 pub struct Application {
-    window: Window,
     render_context: RenderContext,
-
-    resized: bool,
+    event_bus: EventBus,
+    window: Window,
 }
 
 impl Application {
     pub fn new() -> Self {
         logger::init();
 
-        let window = match Window::new("HyperEngine", 1280, 720) {
-            Ok(window) => window,
-            Err(error) => {
-                error!("Failed to create window: {}", error);
-                std::process::exit(1);
-            }
-        };
+        let window = Window::new("HyperEngine", 1280, 720);
+        let event_bus = EventBus::new();
 
         let render_context = match RenderContext::new(&window) {
             Ok(render_context) => render_context,
@@ -58,10 +32,9 @@ impl Application {
         };
 
         Self {
-            window,
             render_context,
-
-            resized: false,
+            event_bus,
+            window,
         }
     }
 
@@ -82,16 +55,13 @@ impl Application {
             }
 
             // NOTE: Update
-            self.window.poll_events();
-            self.window.handle_events(|event| match event {
-                Event::FramebufferResize(_, _) => self.resized = true,
-            });
+            self.window.handle_events(&mut self.event_bus);
 
             // NOTE: Render
             self.render_context.begin_frame(&self.window);
             self.render_context.draw(&self.window);
             self.render_context.end_frame();
-            self.render_context.submit(&self.window, &mut self.resized);
+            self.render_context.submit(&self.window);
 
             fps += 1;
             last_frame = current_frame;

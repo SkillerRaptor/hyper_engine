@@ -4,123 +4,57 @@
  * SPDX-License-Identifier: MIT
  */
 
-use std::sync::mpsc::Receiver;
+use super::event_bus::EventBus;
 
 use ash::vk;
 use ash::vk::Handle;
 use log::info;
-
-pub struct CreationError(pub &'static str);
-
-pub enum WindowError {
-    InitError(glfw::InitError),
-    CreationError(CreationError),
-}
-
-impl std::fmt::Display for WindowError {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            WindowError::InitError(error) => {
-                write!(formatter, "{}", error)
-            }
-            WindowError::CreationError(error) => {
-                write!(formatter, "{}", error.0)
-            }
-        }
-    }
-}
-
-impl From<glfw::InitError> for WindowError {
-    fn from(error: glfw::InitError) -> Self {
-        WindowError::InitError(error)
-    }
-}
-
-impl From<CreationError> for WindowError {
-    fn from(error: CreationError) -> Self {
-        WindowError::CreationError(error)
-    }
-}
-
-pub enum Event {
-    FramebufferResize(i32, i32),
-}
-
-impl From<glfw::WindowEvent> for Event {
-    fn from(event: glfw::WindowEvent) -> Self {
-        match event {
-            glfw::WindowEvent::FramebufferSize(width, height) => {
-                Event::FramebufferResize(width, height)
-            }
-            _ => panic!(),
-        }
-    }
-}
+use std::sync::mpsc::Receiver;
 
 pub struct Window {
-    glfw: glfw::Glfw,
+    title: String,
 
-    native_window: glfw::Window,
     events: Receiver<(f64, glfw::WindowEvent)>,
+    native_window: glfw::Window,
+
+    glfw: glfw::Glfw,
 }
 
 impl Window {
-    pub fn new(title: &str, width: u32, height: u32) -> Result<Self, WindowError> {
-        let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
+    pub fn new(title: &str, width: u32, height: u32) -> Self {
+        let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).expect("Failed to initialize GLFw");
         glfw.window_hint(glfw::WindowHint::ClientApi(glfw::ClientApiHint::NoApi));
 
         let (mut native_window, events) = glfw
             .create_window(width, height, title, glfw::WindowMode::Windowed)
-            .ok_or(WindowError::CreationError(CreationError(
-                "Failed to create GLFW window",
-            )))?;
+            .expect("Failed to create GLFW window");
 
-        native_window.set_framebuffer_size_polling(true);
+        native_window.set_all_polling(true);
 
-        info!("Created window '{}' ({}x{})", title, width, height);
-        Ok(Self {
-            glfw,
+        info!(
+            "Created window with title '{}' and size {}x{}",
+            title, width, height
+        );
+        Self {
+            title: String::from(title),
 
-            native_window,
             events,
-        })
-    }
+            native_window,
 
-    pub fn poll_events(&mut self) {
-        self.glfw.poll_events();
-    }
-
-    pub fn handle_events<F>(&self, mut handle_event: F)
-    where
-        F: FnMut(Event),
-    {
-        for (_, glfw_event) in glfw::flush_messages(&self.events) {
-            handle_event(Event::from(glfw_event));
+            glfw,
         }
     }
 
-    pub fn should_close(&self) -> bool {
-        self.native_window.should_close()
+    pub fn handle_events(&mut self, event_bus: &mut EventBus) {
+        self.glfw.poll_events();
+
+        for (_, event) in glfw::flush_messages(&self.events) {
+            event_bus.invoke(&event);
+        }
     }
 
-    pub fn get_time(&self) -> f64 {
+    pub fn time(&self) -> f64 {
         self.glfw.get_time()
-    }
-
-    pub fn set_title(&mut self, title: &str) {
-        self.native_window.set_title(title);
-    }
-
-    pub fn framebuffer_width(&self) -> i32 {
-        self.native_window.get_framebuffer_size().0
-    }
-
-    pub fn framebuffer_height(&self) -> i32 {
-        self.native_window.get_framebuffer_size().1
-    }
-
-    pub fn get_required_extensions(&self) -> Vec<String> {
-        self.glfw.get_required_instance_extensions().unwrap()
     }
 
     pub fn create_window_surface(&self, instance: &ash::Instance) -> vk::SurfaceKHR {
@@ -132,5 +66,65 @@ impl Window {
         );
 
         vk::SurfaceKHR::from_raw(surface)
+    }
+
+    pub fn required_instance_extensions(&self) -> Vec<String> {
+        self.glfw.get_required_instance_extensions().unwrap()
+    }
+
+    pub fn set_title(&mut self, title: &str) {
+        self.native_window.set_title(title);
+    }
+
+    pub fn title(&self) -> &String {
+        &self.title
+    }
+
+    pub fn set_x(&mut self, x: i32) {
+        self.native_window.set_pos(x, self.y());
+    }
+
+    pub fn x(&self) -> i32 {
+        self.native_window.get_pos().0
+    }
+
+    pub fn set_y(&mut self, y: i32) {
+        self.native_window.set_pos(self.x(), y);
+    }
+
+    pub fn y(&self) -> i32 {
+        self.native_window.get_pos().1
+    }
+
+    pub fn set_width(&mut self, width: i32) {
+        self.native_window.set_size(width, self.height());
+    }
+
+    pub fn width(&self) -> i32 {
+        self.native_window.get_size().0
+    }
+
+    pub fn set_height(&mut self, height: i32) {
+        self.native_window.set_size(self.width(), height);
+    }
+
+    pub fn height(&self) -> i32 {
+        self.native_window.get_size().1
+    }
+
+    pub fn framebuffer_width(&self) -> i32 {
+        self.native_window.get_framebuffer_size().0
+    }
+
+    pub fn framebuffer_height(&self) -> i32 {
+        self.native_window.get_framebuffer_size().1
+    }
+
+    pub fn set_should_close(&mut self, should_close: bool) {
+        self.native_window.set_should_close(should_close);
+    }
+
+    pub fn should_close(&self) -> bool {
+        self.native_window.should_close()
     }
 }

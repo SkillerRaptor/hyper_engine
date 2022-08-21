@@ -106,7 +106,7 @@ impl Instance {
         };
 
         let raw_extensions = window
-            .get_required_extensions()
+            .required_instance_extensions()
             .iter()
             .map(|extension| CString::new(extension.clone()))
             .collect::<Result<Vec<_>, _>>()?;
