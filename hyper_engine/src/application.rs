@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use hyper_core::logger;
+use hyper_core::{logger, panic};
 use hyper_platform::{event_bus::EventBus, window::Window};
 use hyper_rendering::context::RenderContext;
 
@@ -19,6 +19,7 @@ pub struct Application {
 impl Application {
     pub fn new() -> Self {
         logger::init();
+        panic::init();
 
         let window = Window::new("HyperEngine", 1280, 720);
         let event_bus = EventBus::new();

@@ -6,13 +6,14 @@
 
 use colored::Colorize;
 use log::{Level, LevelFilter};
+use std::fs;
 use std::path::Path;
 
 const LOG_FOLDER: &str = "./logs/";
 
 pub fn init() {
     if !Path::new(LOG_FOLDER).exists() {
-        std::fs::create_dir(LOG_FOLDER).expect("Failed to create logs folder");
+        fs::create_dir(LOG_FOLDER).expect("Failed to create logs folder");
     }
 
     let log_level = if cfg!(debug_assertions) {
@@ -63,14 +64,4 @@ pub fn init() {
         )
         .apply()
         .expect("Failed to create logger");
-
-    let backtrace_mode = if cfg!(debug_assertions) {
-        log_panics::BacktraceMode::Resolved
-    } else {
-        log_panics::BacktraceMode::Off
-    };
-
-    log_panics::Config::new()
-        .backtrace_mode(backtrace_mode)
-        .install_panic_hook();
 }
