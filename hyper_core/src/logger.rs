@@ -6,14 +6,29 @@
 
 use colored::Colorize;
 use log::{Level, LevelFilter};
-use std::fs;
-use std::path::Path;
+use std::{fmt::Display, fs, path::Path};
 
 const LOG_FOLDER: &str = "./logs/";
 
-pub fn init() {
+pub enum LoggerError {
+    DispatchCreationError,
+    FolderCreationError,
+}
+
+impl Display for LoggerError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            LoggerError::DispatchCreationError => {
+                write!(formatter, "Failed to create logger dispatch")
+            }
+            LoggerError::FolderCreationError => write!(formatter, "Failed to create logs folder"),
+        }
+    }
+}
+
+pub fn init() -> Result<(), LoggerError> {
     if !Path::new(LOG_FOLDER).exists() {
-        fs::create_dir(LOG_FOLDER).expect("Failed to create logs folder");
+        fs::create_dir(LOG_FOLDER).map_err(|_| LoggerError::FolderCreationError)?;
     }
 
     let log_level = if cfg!(debug_assertions) {
@@ -63,5 +78,7 @@ pub fn init() {
                 ),
         )
         .apply()
-        .expect("Failed to create logger");
+        .map_err(|_| LoggerError::DispatchCreationError)?;
+
+    Ok(())
 }

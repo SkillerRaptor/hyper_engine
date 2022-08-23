@@ -18,7 +18,14 @@ pub struct Application {
 
 impl Application {
     pub fn new() -> Self {
-        logger::init();
+        match logger::init() {
+            Ok(render_context) => render_context,
+            Err(error) => {
+                error!("Failed to create logger: {}", error);
+                std::process::exit(1);
+            }
+        };
+
         panic::init();
 
         let window = Window::new("HyperEngine", 1280, 720);
