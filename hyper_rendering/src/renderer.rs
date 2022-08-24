@@ -37,15 +37,15 @@ pub struct Renderer {
 
 impl Renderer {
     pub fn new(device: &Device, allocator: &mut vulkan::Allocator) -> Result<Self, Error> {
-        let command_pool = CommandPool::new(&device)?;
+        let command_pool = CommandPool::new(device)?;
         let command_buffer =
-            CommandBuffer::new(&device, &command_pool, vk::CommandBufferLevel::PRIMARY)?;
+            CommandBuffer::new(device, &command_pool, vk::CommandBufferLevel::PRIMARY)?;
 
-        let render_fence = Fence::new(&device)?;
-        let present_semaphore = Semaphore::new(&device)?;
-        let render_semaphore = Semaphore::new(&device)?;
+        let render_fence = Fence::new(device)?;
+        let present_semaphore = Semaphore::new(device)?;
+        let render_semaphore = Semaphore::new(device)?;
 
-        let mesh = Mesh::load(&device, allocator, "assets/models/monkey_smooth.obj")?;
+        let mesh = Mesh::load(device, allocator, "assets/models/monkey_smooth.obj")?;
 
         info!("Created renderer");
         Ok(Self {
@@ -63,12 +63,12 @@ impl Renderer {
     }
 
     pub fn cleanup(&mut self, device: &Device, allocator: &mut vulkan::Allocator) {
-        self.mesh.cleanup(&device, allocator);
+        self.mesh.cleanup(device, allocator);
 
-        self.render_semaphore.cleanup(&device);
-        self.present_semaphore.cleanup(&device);
-        self.render_fence.cleanup(&device);
-        self.command_pool.cleanup(&device);
+        self.render_semaphore.cleanup(device);
+        self.present_semaphore.cleanup(device);
+        self.render_fence.cleanup(device);
+        self.command_pool.cleanup(device);
     }
 
     pub fn begin_frame(
@@ -80,7 +80,7 @@ impl Renderer {
         swapchain: &mut Swapchain,
         pipeline: &Pipeline,
     ) -> Result<(), Error> {
-        self.render_fence.wait(&device, u64::MAX)?;
+        self.render_fence.wait(device, u64::MAX)?;
         self.render_fence.reset(device)?;
 
         unsafe {
@@ -93,7 +93,7 @@ impl Renderer {
             ) {
                 Ok((image_index, _)) => self.current_image_index = image_index as usize,
                 Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => {
-                    swapchain.recreate(&window, &surface, &device, allocator)?;
+                    swapchain.recreate(window, surface, device, allocator)?;
                     return Ok(());
                 }
                 Err(error) => return Err(Error::VulkanError(error)),
@@ -289,18 +289,14 @@ impl Renderer {
                 .queue_present(*device.graphics_queue(), &present_info)
             {
                 Ok(suboptimal) => {
-                    if suboptimal {
-                        true
-                    } else {
-                        false
-                    }
+                    suboptimal
                 }
                 Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => true,
                 Err(error) => return Err(Error::VulkanError(error)),
             };
 
             if changed {
-                swapchain.recreate(&window, &surface, &device, allocator)?;
+                swapchain.recreate(window, surface, device, allocator)?;
             }
         }
 
@@ -314,7 +310,7 @@ impl Renderer {
             0.1,
             200.0,
         );
-        projection_matrix.m22 *= -1 as f32;
+        projection_matrix.m22 *= -1_f32;
 
         let camera_position = glm::vec3(0.0, 0.0, -2.0);
 
@@ -341,7 +337,7 @@ impl Renderer {
         };
 
         self.command_buffer.push_constants(
-            &device,
+            device,
             *pipeline.pipeline_layout(),
             vk::ShaderStageFlags::VERTEX,
             0,
@@ -352,9 +348,9 @@ impl Renderer {
         let offsets = &[0];
 
         self.command_buffer
-            .bind_vertex_buffers(&device, 0, buffers, offsets);
+            .bind_vertex_buffers(device, 0, buffers, offsets);
 
         self.command_buffer
-            .draw(&device, self.mesh.vertices().len() as u32, 1, 0, 0);
+            .draw(device, self.mesh.vertices().len() as u32, 1, 0, 0);
     }
 }

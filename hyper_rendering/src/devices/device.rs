@@ -24,11 +24,11 @@ impl Device {
     const DEVICE_EXTENSIONS: &'static [&'static CStr] = &[ash::extensions::khr::Swapchain::name()];
 
     pub fn new(instance: &Instance, surface: &Surface) -> Result<Self, Error> {
-        let physical_device = Self::pick_physical_device(&instance, &surface)?;
-        let logical_device = Self::create_logical_device(&instance, &surface, &physical_device)?;
+        let physical_device = Self::pick_physical_device(instance, surface)?;
+        let logical_device = Self::create_logical_device(instance, surface, &physical_device)?;
 
         let graphics_queue_index =
-            Self::find_graphics_queue(&instance, &surface, &physical_device)?;
+            Self::find_graphics_queue(instance, surface, &physical_device)?;
         let graphics_queue = unsafe { logical_device.get_device_queue(graphics_queue_index, 0) };
 
         Ok(Self {
@@ -52,7 +52,7 @@ impl Device {
 
             let device_name = unsafe { CStr::from_ptr(properties.device_name.as_ptr()).to_str()? };
 
-            if let Err(error) = Self::check_physical_device(&instance, &surface, &physical_device) {
+            if let Err(error) = Self::check_physical_device(instance, surface, &physical_device) {
                 warn!("Skipped physical device ({}): {}", device_name, error);
                 continue;
             }
@@ -98,7 +98,7 @@ impl Device {
             major_version, minor_version, patch_version
         );
 
-        Self::check_physical_device_extensions(&instance, &physical_device)?;
+        Self::check_physical_device_extensions(instance, physical_device)?;
         debug!("  Requested Extensions: {:?}", Self::DEVICE_EXTENSIONS);
 
         let queue_families = unsafe {
@@ -146,10 +146,10 @@ impl Device {
             );
         }
 
-        let grahics_queue_index = Self::find_graphics_queue(&instance, &surface, &physical_device)?;
+        let grahics_queue_index = Self::find_graphics_queue(instance, surface, physical_device)?;
         debug!("  Graphics Queue Index: {}", grahics_queue_index);
 
-        let support = SwapchainSupport::new(&surface, &physical_device)?;
+        let support = SwapchainSupport::new(surface, physical_device)?;
         if support.formats.is_empty() || support.present_modes.is_empty() {
             return Err(Error::SuitabilityError(SuitabilityError(
                 "Insufficient swapchain support",
@@ -238,7 +238,7 @@ impl Device {
         // NOTE: Using HashSet for compute and transfer queue later
         let mut unique_queues = std::collections::HashSet::new();
 
-        let grahics_queue_index = Self::find_graphics_queue(&instance, &surface, &physical_device)?;
+        let grahics_queue_index = Self::find_graphics_queue(instance, surface, physical_device)?;
         unique_queues.insert(grahics_queue_index);
 
         let queue_priorities = &[1.0];

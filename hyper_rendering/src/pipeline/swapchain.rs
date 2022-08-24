@@ -41,15 +41,15 @@ impl Swapchain {
         device: &Device,
         allocator: &mut vulkan::Allocator,
     ) -> Result<Self, Error> {
-        let swapchain_loader = SwapchainLoader::new(&instance.instance(), &device.logical_device());
+        let swapchain_loader = SwapchainLoader::new(instance.instance(), device.logical_device());
         let (swapchain, extent, format) =
-            Self::create_swapchain(&window, &surface, &device, &swapchain_loader, false)?;
+            Self::create_swapchain(window, surface, device, &swapchain_loader, false)?;
 
         let images = unsafe { swapchain_loader.get_swapchain_images(swapchain)? };
-        let image_views = Self::create_image_views(&device, &format, &images)?;
+        let image_views = Self::create_image_views(device, &format, &images)?;
 
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
-            Self::create_depth_image(&window, &device, allocator)?;
+            Self::create_depth_image(window, device, allocator)?;
 
         debug!("Created vulkan swapchain");
         Ok(Self {
@@ -76,11 +76,11 @@ impl Swapchain {
         swapchain_loader: &SwapchainLoader,
         recreate: bool,
     ) -> Result<(vk::SwapchainKHR, vk::Extent2D, vk::Format), Error> {
-        let support = SwapchainSupport::new(&surface, &device.physical_device())?;
+        let support = SwapchainSupport::new(surface, device.physical_device())?;
 
-        let extent = Self::choose_extent(&window, support.capabilities());
-        let format = Self::choose_surface_format(&support.formats());
-        let present_mode = Self::choose_present_mode(&support.present_modes());
+        let extent = Self::choose_extent(window, support.capabilities());
+        let format = Self::choose_surface_format(support.formats());
+        let present_mode = Self::choose_present_mode(support.present_modes());
 
         let image_count = {
             let count = support.capabilities().min_image_count + 1;
@@ -162,7 +162,8 @@ impl Swapchain {
         }
 
         let clamp = |min: u32, max: u32, value: u32| min.max(max.min(value));
-        let extent = vk::Extent2D {
+
+        vk::Extent2D {
             width: clamp(
                 capabilities.min_image_extent.width,
                 capabilities.max_image_extent.width,
@@ -173,9 +174,7 @@ impl Swapchain {
                 capabilities.max_image_extent.height,
                 window.framebuffer_height() as u32,
             ),
-        };
-
-        extent
+        }
     }
 
     fn choose_surface_format(formats: &[vk::SurfaceFormatKHR]) -> vk::SurfaceFormatKHR {
@@ -194,13 +193,13 @@ impl Swapchain {
             .iter()
             .cloned()
             .find(|present_mode| *present_mode == vk::PresentModeKHR::MAILBOX)
-            .unwrap_or_else(|| vk::PresentModeKHR::FIFO)
+            .unwrap_or(vk::PresentModeKHR::FIFO)
     }
 
     fn create_image_views(
         device: &Device,
         format: &vk::Format,
-        images: &Vec<vk::Image>,
+        images: &[vk::Image],
     ) -> Result<Vec<vk::ImageView>, Error> {
         let image_views = images
             .iter()
@@ -342,10 +341,10 @@ impl Swapchain {
             device.logical_device().device_wait_idle().unwrap();
         }
 
-        self.cleanup(&device, allocator);
+        self.cleanup(device, allocator);
 
         let (swapchain, extent, format) =
-            Self::create_swapchain(&window, &surface, &device, &self.swapchain_loader, true)?;
+            Self::create_swapchain(window, surface, device, &self.swapchain_loader, true)?;
 
         self.swapchain = swapchain;
 
@@ -353,13 +352,13 @@ impl Swapchain {
         self.format = format;
 
         let images = unsafe { self.swapchain_loader.get_swapchain_images(swapchain)? };
-        let image_views = Self::create_image_views(&device, &format, &images)?;
+        let image_views = Self::create_image_views(device, &format, &images)?;
 
         self.images = images;
         self.image_views = image_views;
 
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
-            Self::create_depth_image(&window, &device, allocator)?;
+            Self::create_depth_image(window, device, allocator)?;
 
         self.depth_image = depth_image;
         self.depth_image_view = depth_image_view;

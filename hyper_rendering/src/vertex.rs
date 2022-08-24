@@ -40,14 +40,14 @@ impl Vertex {
             .binding(0)
             .location(0)
             .format(vk::Format::R32G32B32_SFLOAT)
-            .offset((size_of::<glm::Vec3>() * 0) as u32)
+            .offset(0)
             .build();
 
         let color_description = vk::VertexInputAttributeDescription::builder()
             .binding(0)
             .location(1)
             .format(vk::Format::R32G32B32_SFLOAT)
-            .offset((size_of::<glm::Vec3>() * 1) as u32)
+            .offset(size_of::<glm::Vec3>() as u32)
             .build();
 
         let normal_description = vk::VertexInputAttributeDescription::builder()

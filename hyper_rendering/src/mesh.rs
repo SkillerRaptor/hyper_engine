@@ -23,7 +23,7 @@ impl Mesh {
         allocator: &mut vulkan::Allocator,
         vertices: &Vec<Vertex>,
     ) -> Result<Self, Error> {
-        let vertex_buffer = VertexBuffer::new(&device, allocator, &vertices)?;
+        let vertex_buffer = VertexBuffer::new(device, allocator, vertices)?;
 
         Ok(Self {
             vertices: vertices.clone(),
@@ -45,17 +45,17 @@ impl Mesh {
             for i in 0..mesh.indices.len() {
                 let index = 3 * mesh.indices[i] as usize;
                 let position = glm::vec3(
-                    mesh.positions[index + 0],
+                    mesh.positions[index],
                     mesh.positions[index + 1],
                     mesh.positions[index + 2],
                 );
                 let color = glm::vec3(
-                    mesh.normals[index + 0],
+                    mesh.normals[index],
                     mesh.normals[index + 1],
                     mesh.normals[index + 2],
                 );
                 let normal = glm::vec3(
-                    mesh.normals[index + 0],
+                    mesh.normals[index],
                     mesh.normals[index + 1],
                     mesh.normals[index + 2],
                 );
@@ -65,7 +65,7 @@ impl Mesh {
             }
         }
 
-        let vertex_buffer = VertexBuffer::new(&device, allocator, &vertices)?;
+        let vertex_buffer = VertexBuffer::new(device, allocator, &vertices)?;
 
         Ok(Self {
             vertices: vertices.clone(),
@@ -74,7 +74,7 @@ impl Mesh {
     }
 
     pub fn cleanup(&mut self, device: &Device, allocator: &mut vulkan::Allocator) {
-        self.vertex_buffer.cleanup(&device, allocator);
+        self.vertex_buffer.cleanup(device, allocator);
     }
 
     pub fn vertices(&self) -> &Vec<Vertex> {

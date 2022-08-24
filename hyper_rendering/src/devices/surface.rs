@@ -20,8 +20,8 @@ pub struct Surface {
 
 impl Surface {
     pub fn new(window: &Window, entry: &ash::Entry, instance: &Instance) -> Result<Self, Error> {
-        let surface_loader = SurfaceLoader::new(&entry, &instance.instance());
-        let surface = window.create_window_surface(&instance.instance());
+        let surface_loader = SurfaceLoader::new(entry, instance.instance());
+        let surface = window.create_window_surface(instance.instance());
 
         debug!("Created vulkan surface");
         Ok(Self {

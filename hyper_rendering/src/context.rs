@@ -34,8 +34,8 @@ pub struct RenderContext {
 impl RenderContext {
     pub fn new(window: &Window) -> Result<Self, Error> {
         let entry = unsafe { ash::Entry::load()? };
-        let instance = Instance::new(&window, &entry)?;
-        let surface = Surface::new(&window, &entry, &instance)?;
+        let instance = Instance::new(window, &entry)?;
+        let surface = Surface::new(window, &entry, &instance)?;
         let device = Device::new(&instance, &surface)?;
 
         let debug_enabled = cfg!(debug_assertions);
@@ -58,7 +58,7 @@ impl RenderContext {
         // TODO: Abstract allocator into own class
         let mut allocator = vulkan::Allocator::new(&allocator_create_description)?;
 
-        let swapchain = Swapchain::new(&window, &instance, &surface, &device, &mut allocator)?;
+        let swapchain = Swapchain::new(window, &instance, &surface, &device, &mut allocator)?;
         let pipeline = Pipeline::new(&device, &swapchain)?;
         let renderer = Renderer::new(&device, &mut allocator)?;
 
@@ -81,7 +81,7 @@ impl RenderContext {
     pub fn begin_frame(&mut self, window: &Window) {
         self.renderer
             .begin_frame(
-                &window,
+                window,
                 &self.surface,
                 &self.device,
                 &mut self.allocator,
@@ -100,7 +100,7 @@ impl RenderContext {
     pub fn submit(&mut self, window: &Window) {
         self.renderer
             .submit(
-                &window,
+                window,
                 &self.surface,
                 &self.device,
                 &mut self.allocator,
@@ -110,7 +110,7 @@ impl RenderContext {
     }
 
     pub fn draw(&self, window: &Window) {
-        self.renderer.draw(&window, &self.device, &self.pipeline);
+        self.renderer.draw(window, &self.device, &self.pipeline);
     }
 }
 

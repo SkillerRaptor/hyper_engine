@@ -28,12 +28,12 @@ impl Instance {
     const VALIDATION_LAYER: &'static str = "VK_LAYER_KHRONOS_validation";
 
     pub fn new(window: &Window, entry: &ash::Entry) -> Result<Self, Error> {
-        let validation_layer_enabled = Self::check_validation_layers(&entry)?;
+        let validation_layer_enabled = Self::check_validation_layers(entry)?;
 
-        let instance = Self::create_instance(&window, &entry, validation_layer_enabled)?;
+        let instance = Self::create_instance(window, entry, validation_layer_enabled)?;
 
         let (debug_loader, debug_messenger) =
-            Self::create_debug_messenger(&entry, &instance, validation_layer_enabled)?;
+            Self::create_debug_messenger(entry, &instance, validation_layer_enabled)?;
 
         Ok(Self {
             validation_layer_enabled,
@@ -46,7 +46,7 @@ impl Instance {
     }
 
     fn check_validation_layers(entry: &ash::Entry) -> Result<bool, Error> {
-        if !(cfg!(debug_assertions)) {
+        if !cfg!(debug_assertions) {
             return Ok(false);
         }
 
@@ -73,9 +73,9 @@ impl Instance {
     ) -> Result<ash::Instance, Error> {
         let title = CStr::from_bytes_with_nul(b"HyperEngine\0")?;
         let application_info = vk::ApplicationInfo::builder()
-            .application_name(&title)
+            .application_name(title)
             .application_version(vk::make_api_version(0, 1, 0, 0))
-            .engine_name(&title)
+            .engine_name(title)
             .engine_version(vk::make_api_version(0, 1, 0, 0))
             .api_version(vk::API_VERSION_1_3);
 
@@ -135,7 +135,7 @@ impl Instance {
         instance: &ash::Instance,
         validation_enabled: bool,
     ) -> Result<(DebugLoader, vk::DebugUtilsMessengerEXT), Error> {
-        let debug_utils = DebugLoader::new(&entry, &instance);
+        let debug_utils = DebugLoader::new(entry, instance);
 
         if !validation_enabled {
             return Ok((debug_utils, vk::DebugUtilsMessengerEXT::null()));

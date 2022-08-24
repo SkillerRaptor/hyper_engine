@@ -15,17 +15,14 @@ use super::mouse_code::MouseCode;
 use glfw::{Action, WindowEvent};
 use log::debug;
 
+type Listeners = Vec<Box<dyn FnMut(&Event)>>;
+
+#[derive(Default)]
 pub struct EventBus {
-    listeners: Vec<Box<dyn FnMut(&Event)>>,
+    listeners: Listeners,
 }
 
 impl EventBus {
-    pub fn new() -> Self {
-        Self {
-            listeners: Vec::new(),
-        }
-    }
-
     pub fn invoke(&mut self, window_event: &WindowEvent) {
         let event = match window_event {
             WindowEvent::Pos(x, y) => Event::WindowMove(*x, *y),

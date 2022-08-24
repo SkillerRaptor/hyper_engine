@@ -48,7 +48,7 @@ impl CommandBuffer {
     ) -> Result<(), Error> {
         let begin_info = vk::CommandBufferBeginInfo::builder()
             .flags(usage_flags)
-            .inheritance_info(&inheritance_info);
+            .inheritance_info(inheritance_info);
 
         unsafe {
             device

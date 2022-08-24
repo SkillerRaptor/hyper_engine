@@ -34,7 +34,7 @@ impl Application {
             }
         };
 
-        let event_bus = EventBus::new();
+        let event_bus = EventBus::default();
 
         let render_context = match RenderContext::new(&window) {
             Ok(render_context) => render_context,

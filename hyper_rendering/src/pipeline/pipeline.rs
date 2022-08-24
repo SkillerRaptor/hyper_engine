@@ -32,7 +32,7 @@ impl Pipeline {
 
         let vertex = include_bytes!("../../../assets/shaders/default_shader_vertex.spv");
         let vertex_shader_module =
-            Self::create_shader_module(&device, ShaderStage::Vertex, vertex)?;
+            Self::create_shader_module(device, ShaderStage::Vertex, vertex)?;
         let vertex_stage = vk::PipelineShaderStageCreateInfo::builder()
             .stage(vk::ShaderStageFlags::VERTEX)
             .module(vertex_shader_module)
@@ -41,7 +41,7 @@ impl Pipeline {
 
         let fragment = include_bytes!("../../../assets/shaders/default_shader_fragment.spv");
         let fragment_shader_module =
-            Self::create_shader_module(&device, ShaderStage::Fragment, fragment)?;
+            Self::create_shader_module(device, ShaderStage::Fragment, fragment)?;
         let fragment_stage = vk::PipelineShaderStageCreateInfo::builder()
             .stage(vk::ShaderStageFlags::FRAGMENT)
             .module(fragment_shader_module)
