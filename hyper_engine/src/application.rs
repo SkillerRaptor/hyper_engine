@@ -26,7 +26,14 @@ impl Application {
 
         panic::init();
 
-        let window = Window::new("HyperEngine", 1280, 720);
+        let window = match Window::new("HyperEngine", 1280, 720) {
+            Ok(window) => window,
+            Err(error) => {
+                error!("Failed to create window: {}", error);
+                return None;
+            }
+        };
+
         let event_bus = EventBus::new();
 
         let render_context = match RenderContext::new(&window) {
