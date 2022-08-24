@@ -6,9 +6,11 @@
 
 use hyper_engine::application;
 
-fn main() -> Result<(), String> {
-    let mut application = application::Application::new();
-    application.run();
+fn main() {
+    let mut application = match application::Application::new() {
+        Some(application) => application,
+        None => return,
+    };
 
-    Ok(())
+    application.run();
 }

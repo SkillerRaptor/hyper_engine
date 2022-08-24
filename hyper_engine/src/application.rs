@@ -17,13 +17,11 @@ pub struct Application {
 }
 
 impl Application {
-    pub fn new() -> Self {
-        match logger::init() {
-            Ok(render_context) => render_context,
-            Err(error) => {
-                error!("Failed to create logger: {}", error);
-                std::process::exit(1);
-            }
+    pub fn new() -> Option<Self> {
+        if let Err(error) = logger::init() {
+            // NOTE: Using `eprintln` here if logger failed to initialize
+            eprintln!("Failed to create logger: {}", error);
+            return None;
         };
 
         panic::init();
@@ -35,15 +33,15 @@ impl Application {
             Ok(render_context) => render_context,
             Err(error) => {
                 error!("Failed to create render context: {}", error);
-                std::process::exit(1);
+                return None;
             }
         };
 
-        Self {
+        Some(Self {
             render_context,
             event_bus,
             window,
-        }
+        })
     }
 
     pub fn run(&mut self) {

@@ -4,31 +4,34 @@
  * SPDX-License-Identifier: MIT
  */
 
+use chrono::Local;
 use colored::Colorize;
+use fern::Dispatch;
 use log::{Level, LevelFilter};
-use std::{fmt::Display, fs, path::Path};
 
 const LOG_FOLDER: &str = "./logs/";
 
 pub enum LoggerError {
-    DispatchCreationError,
+    DispatchApplyError,
     FolderCreationError,
 }
 
-impl Display for LoggerError {
+impl std::fmt::Display for LoggerError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            LoggerError::DispatchCreationError => {
-                write!(formatter, "Failed to create logger dispatch")
+            LoggerError::DispatchApplyError => {
+                write!(formatter, "Applying dispatch has failed")
             }
-            LoggerError::FolderCreationError => write!(formatter, "Failed to create logs folder"),
+            LoggerError::FolderCreationError => {
+                write!(formatter, "Creating logs folder has failed")
+            }
         }
     }
 }
 
 pub fn init() -> Result<(), LoggerError> {
-    if !Path::new(LOG_FOLDER).exists() {
-        fs::create_dir(LOG_FOLDER).map_err(|_| LoggerError::FolderCreationError)?;
+    if !std::path::Path::new(LOG_FOLDER).exists() {
+        std::fs::create_dir(LOG_FOLDER).map_err(|_| LoggerError::FolderCreationError)?;
     }
 
     let log_level = if cfg!(debug_assertions) {
@@ -37,12 +40,12 @@ pub fn init() -> Result<(), LoggerError> {
         LevelFilter::Info
     };
 
-    fern::Dispatch::new()
+    Dispatch::new()
         .level(log_level)
         .chain(
-            fern::Dispatch::new()
+            Dispatch::new()
                 .format(|out, message, record| {
-                    let time = chrono::Local::now().format("%H:%M:%S");
+                    let time = Local::now().format("%H:%M:%S");
                     let level = match record.level() {
                         Level::Error => "error".red(),
                         Level::Warn => "warn".bright_yellow(),
@@ -56,9 +59,9 @@ pub fn init() -> Result<(), LoggerError> {
                 .chain(std::io::stdout()),
         )
         .chain(
-            fern::Dispatch::new()
+            Dispatch::new()
                 .format(|out, message, record| {
-                    let time = chrono::Local::now().format("%H:%M:%S");
+                    let time = Local::now().format("%H:%M:%S");
                     let level = match record.level() {
                         Level::Error => "error",
                         Level::Warn => "warn",
@@ -72,13 +75,13 @@ pub fn init() -> Result<(), LoggerError> {
                 .chain(
                     fern::log_file(format!(
                         "./logs/hyper_engine_{}.log",
-                        chrono::Local::now().format("%d-%m-%Y_%H-%M-%S")
+                        Local::now().format("%d-%m-%Y_%H-%M-%S")
                     ))
                     .expect("Failed to create log file"),
                 ),
         )
         .apply()
-        .map_err(|_| LoggerError::DispatchCreationError)?;
+        .map_err(|_| LoggerError::DispatchApplyError)?;
 
     Ok(())
 }
