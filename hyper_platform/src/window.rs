@@ -6,18 +6,24 @@
 
 use super::event_bus::EventBus;
 
-use ash::vk;
-use ash::vk::Handle;
+use ash::{
+    vk::{Handle, SurfaceKHR},
+    Instance,
+};
+use glfw::{ClientApiHint, Glfw, WindowEvent, WindowHint, WindowMode};
 use log::info;
-use std::sync::mpsc::Receiver;
+use std::{
+    fmt::{self, Display, Formatter},
+    sync::mpsc::Receiver,
+};
 
 pub enum WindowError {
     GlfwInitializationError,
     WindowCreationError,
 }
 
-impl std::fmt::Display for WindowError {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for WindowError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
         match self {
             WindowError::GlfwInitializationError => {
                 write!(formatter, "Initializating GLFW has failed")
@@ -32,20 +38,20 @@ impl std::fmt::Display for WindowError {
 pub struct Window {
     title: String,
 
-    events: Receiver<(f64, glfw::WindowEvent)>,
+    events: Receiver<(f64, WindowEvent)>,
     native_window: glfw::Window,
 
-    glfw: glfw::Glfw,
+    glfw: Glfw,
 }
 
 impl Window {
     pub fn new(title: &str, width: u32, height: u32) -> Result<Self, WindowError> {
         let mut glfw =
             glfw::init(glfw::FAIL_ON_ERRORS).map_err(|_| WindowError::GlfwInitializationError)?;
-        glfw.window_hint(glfw::WindowHint::ClientApi(glfw::ClientApiHint::NoApi));
+        glfw.window_hint(WindowHint::ClientApi(ClientApiHint::NoApi));
 
         let (mut native_window, events) = glfw
-            .create_window(width, height, title, glfw::WindowMode::Windowed)
+            .create_window(width, height, title, WindowMode::Windowed)
             .ok_or(WindowError::WindowCreationError)?;
 
         native_window.set_all_polling(true);
@@ -77,7 +83,7 @@ impl Window {
         self.glfw.get_time()
     }
 
-    pub fn create_window_surface(&self, instance: &ash::Instance) -> vk::SurfaceKHR {
+    pub fn create_window_surface(&self, instance: &Instance) -> SurfaceKHR {
         let mut surface = 0;
         self.native_window.create_window_surface(
             instance.handle().as_raw() as usize,
@@ -85,7 +91,7 @@ impl Window {
             &mut surface,
         );
 
-        vk::SurfaceKHR::from_raw(surface)
+        SurfaceKHR::from_raw(surface)
     }
 
     pub fn required_instance_extensions(&self) -> Vec<String> {

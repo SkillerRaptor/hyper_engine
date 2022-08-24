@@ -9,6 +9,7 @@ use hyper_platform::{event_bus::EventBus, window::Window};
 use hyper_rendering::context::RenderContext;
 
 use log::error;
+use std::time::Instant;
 
 pub struct Application {
     render_context: RenderContext,
@@ -53,10 +54,10 @@ impl Application {
 
     pub fn run(&mut self) {
         let mut fps: u32 = 0;
-        let mut last_frame = std::time::Instant::now();
-        let mut last_fps_frame = std::time::Instant::now();
+        let mut last_frame = Instant::now();
+        let mut last_fps_frame = Instant::now();
         while !self.window.should_close() {
-            let current_frame = std::time::Instant::now();
+            let current_frame = Instant::now();
             let delta_time = current_frame.duration_since(last_frame).as_secs_f64();
 
             while current_frame.duration_since(last_fps_frame).as_secs_f64() >= 1.0 {

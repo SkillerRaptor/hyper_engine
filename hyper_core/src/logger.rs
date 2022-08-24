@@ -8,6 +8,11 @@ use chrono::Local;
 use colored::Colorize;
 use fern::Dispatch;
 use log::{Level, LevelFilter};
+use std::{
+    fmt::{self, Display, Formatter},
+    fs, io,
+    path::Path,
+};
 
 const LOG_FOLDER: &str = "./logs/";
 
@@ -16,8 +21,8 @@ pub enum LoggerError {
     FolderCreationError,
 }
 
-impl std::fmt::Display for LoggerError {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for LoggerError {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
         match self {
             LoggerError::DispatchApplyError => {
                 write!(formatter, "Applying dispatch has failed")
@@ -30,8 +35,8 @@ impl std::fmt::Display for LoggerError {
 }
 
 pub fn init() -> Result<(), LoggerError> {
-    if !std::path::Path::new(LOG_FOLDER).exists() {
-        std::fs::create_dir(LOG_FOLDER).map_err(|_| LoggerError::FolderCreationError)?;
+    if !Path::new(LOG_FOLDER).exists() {
+        fs::create_dir(LOG_FOLDER).map_err(|_| LoggerError::FolderCreationError)?;
     }
 
     let log_level = if cfg!(debug_assertions) {
@@ -56,7 +61,7 @@ pub fn init() -> Result<(), LoggerError> {
 
                     out.finish(format_args!("{} | {}: {}", time, level, message))
                 })
-                .chain(std::io::stdout()),
+                .chain(io::stdout()),
         )
         .chain(
             Dispatch::new()
