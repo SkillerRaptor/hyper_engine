@@ -4,13 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-use hyper_engine::application;
+use hyper_engine::application::Application;
 
 fn main() {
-    let mut application = match application::Application::new() {
-        Some(application) => application,
-        None => return,
-    };
-
+    let mut application = Application::default();
     application.run();
 }

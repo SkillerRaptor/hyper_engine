@@ -8,35 +8,13 @@ use chrono::Local;
 use colored::Colorize;
 use fern::Dispatch;
 use log::{Level, LevelFilter};
-use std::{
-    fmt::{self, Display, Formatter},
-    fs, io,
-    path::Path,
-};
+use std::{fs, io, path::Path};
 
 const LOG_FOLDER: &str = "./logs/";
 
-pub enum LoggerError {
-    DispatchApplyError,
-    FolderCreationError,
-}
-
-impl Display for LoggerError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            LoggerError::DispatchApplyError => {
-                write!(formatter, "Applying dispatch has failed")
-            }
-            LoggerError::FolderCreationError => {
-                write!(formatter, "Creating logs folder has failed")
-            }
-        }
-    }
-}
-
-pub fn init() -> Result<(), LoggerError> {
+pub fn init() {
     if !Path::new(LOG_FOLDER).exists() {
-        fs::create_dir(LOG_FOLDER).map_err(|_| LoggerError::FolderCreationError)?;
+        fs::create_dir(LOG_FOLDER).unwrap_or_else(|_| panic!("Failed to create {}", LOG_FOLDER));
     }
 
     let log_level = if cfg!(debug_assertions) {
@@ -86,7 +64,5 @@ pub fn init() -> Result<(), LoggerError> {
                 ),
         )
         .apply()
-        .map_err(|_| LoggerError::DispatchApplyError)?;
-
-    Ok(())
+        .expect("Failed to apply logger dispatch");
 }

@@ -8,7 +8,6 @@ use hyper_core::{logger, panic};
 use hyper_platform::{event_bus::EventBus, window::Window};
 use hyper_rendering::context::RenderContext;
 
-use log::error;
 use std::time::Instant;
 
 pub struct Application {
@@ -18,32 +17,19 @@ pub struct Application {
 }
 
 impl Application {
-    pub fn new() -> Option<Self> {
-        if let Err(error) = logger::init() {
-            // NOTE: Using `eprintln` here if logger failed to initialize
-            eprintln!("Failed to create logger: {}", error);
-            return None;
-        };
-
+    pub fn new() -> Self {
+        logger::init();
         panic::init();
 
-        let window = match Window::new("HyperEngine", 1280, 720) {
-            Ok(window) => window,
-            Err(error) => {
-                error!("Failed to create window: {}", error);
-                return None;
-            }
-        };
-
+        let window = Window::new("HyperEngine", 1280, 720);
         let event_bus = EventBus::default();
-
         let render_context = RenderContext::new(&window);
 
-        Some(Self {
+        Self {
             render_context,
             event_bus,
             window,
-        })
+        }
     }
 
     pub fn run(&mut self) {
@@ -74,5 +60,11 @@ impl Application {
             fps += 1;
             last_frame = current_frame;
         }
+    }
+}
+
+impl Default for Application {
+    fn default() -> Self {
+        Application::new()
     }
 }

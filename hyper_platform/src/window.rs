@@ -12,28 +12,7 @@ use ash::{
 };
 use glfw::{ClientApiHint, Glfw, WindowEvent, WindowHint, WindowMode};
 use log::info;
-use std::{
-    fmt::{self, Display, Formatter},
-    sync::mpsc::Receiver,
-};
-
-pub enum WindowError {
-    GlfwInitializationError,
-    WindowCreationError,
-}
-
-impl Display for WindowError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            WindowError::GlfwInitializationError => {
-                write!(formatter, "Initializating GLFW has failed")
-            }
-            WindowError::WindowCreationError => {
-                write!(formatter, "Creating GLFW window has failed")
-            }
-        }
-    }
-}
+use std::sync::mpsc::Receiver;
 
 pub struct Window {
     title: String,
@@ -45,14 +24,13 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new(title: &str, width: u32, height: u32) -> Result<Self, WindowError> {
-        let mut glfw =
-            glfw::init(glfw::FAIL_ON_ERRORS).map_err(|_| WindowError::GlfwInitializationError)?;
+    pub fn new(title: &str, width: u32, height: u32) -> Self {
+        let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).expect("Failed to initialize GLFW");
         glfw.window_hint(WindowHint::ClientApi(ClientApiHint::NoApi));
 
         let (mut native_window, events) = glfw
             .create_window(width, height, title, WindowMode::Windowed)
-            .ok_or(WindowError::WindowCreationError)?;
+            .expect("Failed to create GLFW window");
 
         native_window.set_all_polling(true);
 
@@ -61,14 +39,14 @@ impl Window {
             title, width, height
         );
 
-        Ok(Self {
+        Self {
             title: String::from(title),
 
             events,
             native_window,
 
             glfw,
-        })
+        }
     }
 
     pub fn handle_events(&mut self, event_bus: &mut EventBus) {
