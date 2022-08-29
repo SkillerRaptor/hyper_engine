@@ -44,7 +44,6 @@ jobs:
           override: true
 
       - name: Update Rust-Toolchain
-        uses: actions-rs/toolchain@v1
         run: |
           rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
 
@@ -53,26 +52,31 @@ jobs:
 
       - name: Cargo Build Debug
         uses: actions-rs/cargo@v1
-        run: |
-          cargo build --verbose --workspace
+        with:
+          command: build
+          args: --verbose --workspace
 
       - name: Cargo Build Release
         uses: actions-rs/cargo@v1
-        run: |
-          cargo build --verbose --workspace --release
+        with:
+          command: build
+          args: --verbose --workspace --release
 
       - name: Cargo Formatter
         uses: actions-rs/cargo@v1
-        run: |
-          cargo fmt --all -- --check
+        with:
+          command: fmt
+          args: --all -- --check
 
       - name: Cargo Clippy
         uses: actions-rs/cargo@v1
-        run: |
-          cargo clippy --all-targets --all-features -- -D warnings
+        with:
+          command: clippy
+          args: --all-targets --all-features -- -D warnings
 
       - name: Cargo Test
         uses: actions-rs/cargo@v1
-        run: |
-          cargo test --verbose --workspace
+        with:
+          command: test
+          args: --verbose --workspace
 
