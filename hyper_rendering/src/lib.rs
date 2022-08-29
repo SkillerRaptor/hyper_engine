@@ -8,7 +8,6 @@ pub mod buffers;
 pub mod commands;
 pub mod context;
 pub mod devices;
-pub mod error;
 pub mod mesh;
 pub mod pipeline;
 pub mod renderer;

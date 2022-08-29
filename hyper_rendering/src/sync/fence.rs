@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::devices::device::Device;
-use super::super::error::Error;
+use crate::devices::device::Device;
 
-use ash::vk;
+use ash::vk::{self, FenceCreateFlags, FenceCreateInfo};
 use log::debug;
 
 pub struct Fence {
@@ -15,18 +14,19 @@ pub struct Fence {
 }
 
 impl Fence {
-    pub fn new(device: &Device) -> Result<Self, Error> {
-        let fence_create_info =
-            vk::FenceCreateInfo::builder().flags(vk::FenceCreateFlags::SIGNALED);
+    pub fn new(device: &Device) -> Self {
+        let fence_create_info = FenceCreateInfo::builder().flags(FenceCreateFlags::SIGNALED);
 
         let fence = unsafe {
             device
                 .logical_device()
-                .create_fence(&fence_create_info, None)?
+                .create_fence(&fence_create_info, None)
+                .expect("Failed to create fence")
         };
 
         debug!("Created fence");
-        Ok(Self { fence })
+
+        Self { fence }
     }
 
     pub fn cleanup(&mut self, device: &Device) {
@@ -39,21 +39,21 @@ impl Fence {
         &self.fence
     }
 
-    pub fn wait(&self, device: &Device, timeout: u64) -> Result<(), Error> {
+    pub fn wait(&self, device: &Device) {
         unsafe {
             device
                 .logical_device()
-                .wait_for_fences(&[self.fence], true, timeout)?;
+                .wait_for_fences(&[self.fence], true, u64::MAX)
+                .expect("Failed to wait for fence");
         }
-
-        Ok(())
     }
 
-    pub fn reset(&self, device: &Device) -> Result<(), Error> {
+    pub fn reset(&self, device: &Device) {
         unsafe {
-            device.logical_device().reset_fences(&[self.fence])?;
+            device
+                .logical_device()
+                .reset_fences(&[self.fence])
+                .expect("Failed to reset fence");
         }
-
-        Ok(())
     }
 }

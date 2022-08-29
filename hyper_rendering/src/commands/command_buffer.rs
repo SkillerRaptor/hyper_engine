@@ -4,24 +4,25 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::devices::device::Device;
-use super::super::error::Error;
-use super::command_pool::CommandPool;
+use crate::{commands::command_pool::CommandPool, devices::device::Device};
 
-use ash::vk;
+use ash::vk::{
+    self, Buffer, BufferMemoryBarrier, CommandBufferAllocateInfo, CommandBufferBeginInfo,
+    CommandBufferInheritanceInfo, CommandBufferLevel, CommandBufferResetFlags,
+    CommandBufferUsageFlags, DependencyFlags, DeviceSize, ImageMemoryBarrier, MemoryBarrier,
+    Pipeline, PipelineBindPoint, PipelineLayout, PipelineStageFlags, Rect2D, RenderingInfo,
+    ShaderStageFlags, Viewport,
+};
 use log::debug;
+use std::{mem, slice};
 
 pub struct CommandBuffer {
     command_buffer: vk::CommandBuffer,
 }
 
 impl CommandBuffer {
-    pub fn new(
-        device: &Device,
-        command_pool: &CommandPool,
-        level: vk::CommandBufferLevel,
-    ) -> Result<Self, Error> {
-        let allocate_info = vk::CommandBufferAllocateInfo::builder()
+    pub fn new(device: &Device, command_pool: &CommandPool, level: CommandBufferLevel) -> Self {
+        let allocate_info = CommandBufferAllocateInfo::builder()
             .command_pool(*command_pool.command_pool())
             .level(level)
             .command_buffer_count(1);
@@ -29,11 +30,13 @@ impl CommandBuffer {
         let command_buffer = unsafe {
             device
                 .logical_device()
-                .allocate_command_buffers(&allocate_info)?[0]
+                .allocate_command_buffers(&allocate_info)
+                .expect("Failed to allocate command buffer")[0]
         };
 
         debug!("Created command buffer");
-        Ok(Self { command_buffer })
+
+        Self { command_buffer }
     }
 
     pub fn command_buffer(&self) -> &vk::CommandBuffer {
@@ -43,47 +46,40 @@ impl CommandBuffer {
     pub fn begin(
         &self,
         device: &Device,
-        usage_flags: vk::CommandBufferUsageFlags,
-        inheritance_info: &vk::CommandBufferInheritanceInfo,
-    ) -> Result<(), Error> {
-        let begin_info = vk::CommandBufferBeginInfo::builder()
+        usage_flags: CommandBufferUsageFlags,
+        inheritance_info: &CommandBufferInheritanceInfo,
+    ) {
+        let begin_info = CommandBufferBeginInfo::builder()
             .flags(usage_flags)
             .inheritance_info(inheritance_info);
 
         unsafe {
             device
                 .logical_device()
-                .begin_command_buffer(self.command_buffer, &begin_info)?;
+                .begin_command_buffer(self.command_buffer, &begin_info)
+                .expect("Failed to begin command buffer");
         }
-
-        Ok(())
     }
 
-    pub fn end(&self, device: &Device) -> Result<(), Error> {
+    pub fn end(&self, device: &Device) {
         unsafe {
             device
                 .logical_device()
-                .end_command_buffer(self.command_buffer)?;
+                .end_command_buffer(self.command_buffer)
+                .expect("Failed to end command buffer");
         }
-
-        Ok(())
     }
 
-    pub fn reset(
-        &self,
-        device: &Device,
-        reset_flags: vk::CommandBufferResetFlags,
-    ) -> Result<(), Error> {
+    pub fn reset(&self, device: &Device, reset_flags: CommandBufferResetFlags) {
         unsafe {
             device
                 .logical_device()
-                .reset_command_buffer(self.command_buffer, reset_flags)?;
+                .reset_command_buffer(self.command_buffer, reset_flags)
+                .expect("Failed to reset command buffer");
         }
-
-        Ok(())
     }
 
-    pub fn begin_rendering(&self, device: &Device, rendering_info: &vk::RenderingInfo) {
+    pub fn begin_rendering(&self, device: &Device, rendering_info: &RenderingInfo) {
         unsafe {
             device
                 .logical_device()
@@ -99,15 +95,16 @@ impl CommandBuffer {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn pipeline_barrier(
         &self,
         device: &Device,
-        src_stage_mask: vk::PipelineStageFlags,
-        dst_stage_mask: vk::PipelineStageFlags,
-        dependency_flags: vk::DependencyFlags,
-        memory_barriers: &[vk::MemoryBarrier],
-        buffer_memory_barriers: &[vk::BufferMemoryBarrier],
-        image_memory_barriers: &[vk::ImageMemoryBarrier],
+        src_stage_mask: PipelineStageFlags,
+        dst_stage_mask: PipelineStageFlags,
+        dependency_flags: DependencyFlags,
+        memory_barriers: &[MemoryBarrier],
+        buffer_memory_barriers: &[BufferMemoryBarrier],
+        image_memory_barriers: &[ImageMemoryBarrier],
     ) {
         unsafe {
             device.logical_device().cmd_pipeline_barrier(
@@ -125,8 +122,8 @@ impl CommandBuffer {
     pub fn bind_pipeline(
         &self,
         device: &Device,
-        pipeline_bind_point: vk::PipelineBindPoint,
-        pipeline: vk::Pipeline,
+        pipeline_bind_point: PipelineBindPoint,
+        pipeline: Pipeline,
     ) {
         unsafe {
             device.logical_device().cmd_bind_pipeline(
@@ -141,8 +138,8 @@ impl CommandBuffer {
         &self,
         device: &Device,
         first_binding: u32,
-        buffers: &[vk::Buffer],
-        offsets: &[vk::DeviceSize],
+        buffers: &[Buffer],
+        offsets: &[DeviceSize],
     ) {
         unsafe {
             device.logical_device().cmd_bind_vertex_buffers(
@@ -157,8 +154,8 @@ impl CommandBuffer {
     pub fn push_constants<T>(
         &self,
         device: &Device,
-        pipeline_layout: vk::PipelineLayout,
-        stage_flags: vk::ShaderStageFlags,
+        pipeline_layout: PipelineLayout,
+        stage_flags: ShaderStageFlags,
         offset: u32,
         constants: &T,
     ) {
@@ -168,15 +165,12 @@ impl CommandBuffer {
                 pipeline_layout,
                 stage_flags,
                 offset,
-                std::slice::from_raw_parts(
-                    constants as *const T as *const u8,
-                    std::mem::size_of::<T>(),
-                ),
+                slice::from_raw_parts(constants as *const T as *const u8, mem::size_of::<T>()),
             );
         }
     }
 
-    pub fn set_scissor(&self, device: &Device, first_scissor: u32, scissors: &[vk::Rect2D]) {
+    pub fn set_scissor(&self, device: &Device, first_scissor: u32, scissors: &[Rect2D]) {
         unsafe {
             device
                 .logical_device()
@@ -184,7 +178,7 @@ impl CommandBuffer {
         }
     }
 
-    pub fn set_viewport(&self, device: &Device, first_viewport: u32, viewports: &[vk::Viewport]) {
+    pub fn set_viewport(&self, device: &Device, first_viewport: u32, viewports: &[Viewport]) {
         unsafe {
             device.logical_device().cmd_set_viewport(
                 self.command_buffer,

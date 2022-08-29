@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::devices::device::Device;
-use super::super::error::Error;
+use crate::devices::device::Device;
 
-use ash::vk;
+use ash::vk::{self, SemaphoreCreateInfo};
 use log::debug;
 
 pub struct Semaphore {
@@ -15,17 +14,19 @@ pub struct Semaphore {
 }
 
 impl Semaphore {
-    pub fn new(device: &Device) -> Result<Self, Error> {
-        let semaphore_create_info = vk::SemaphoreCreateInfo::builder();
+    pub fn new(device: &Device) -> Self {
+        let semaphore_create_info = SemaphoreCreateInfo::builder();
 
         let semaphore = unsafe {
             device
                 .logical_device()
-                .create_semaphore(&semaphore_create_info, None)?
+                .create_semaphore(&semaphore_create_info, None)
+                .expect("Failed to create semaphore")
         };
 
         debug!("Created semaphore");
-        Ok(Self { semaphore })
+
+        Self { semaphore }
     }
 
     pub fn cleanup(&mut self, device: &Device) {

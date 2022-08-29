@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::devices::device::Device;
-use super::super::error::Error;
+use crate::devices::device::Device;
 
-use ash::vk;
+use ash::vk::{self, CommandPoolCreateFlags, CommandPoolCreateInfo};
 use log::debug;
 
 pub struct CommandPool {
@@ -15,19 +14,21 @@ pub struct CommandPool {
 }
 
 impl CommandPool {
-    pub fn new(device: &Device) -> Result<Self, Error> {
-        let command_pool_create_info = vk::CommandPoolCreateInfo::builder()
-            .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
+    pub fn new(device: &Device) -> Self {
+        let command_pool_create_info = CommandPoolCreateInfo::builder()
+            .flags(CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
             .queue_family_index(*device.graphics_queue_index());
 
         let command_pool = unsafe {
             device
                 .logical_device()
-                .create_command_pool(&command_pool_create_info, None)?
+                .create_command_pool(&command_pool_create_info, None)
+                .expect("Failed to create command pool")
         };
 
         debug!("Created command pool");
-        Ok(Self { command_pool })
+
+        Self { command_pool }
     }
 
     pub fn cleanup(&mut self, device: &Device) {

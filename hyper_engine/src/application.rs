@@ -37,13 +37,7 @@ impl Application {
 
         let event_bus = EventBus::default();
 
-        let render_context = match RenderContext::new(&window) {
-            Ok(render_context) => render_context,
-            Err(error) => {
-                error!("Failed to create render context: {}", error);
-                return None;
-            }
-        };
+        let render_context = RenderContext::new(&window);
 
         Some(Self {
             render_context,

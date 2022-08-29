@@ -4,77 +4,112 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::devices::device::Device;
-use super::super::error::Error;
-use super::super::vertex::Vertex;
+use crate::{devices::device::Device, vertex::Vertex};
 
-use ash::vk;
-use gpu_allocator::vulkan;
+use ash::vk::{Buffer, BufferCreateInfo, BufferUsageFlags, SharingMode};
+use gpu_allocator::{
+    vulkan::{Allocation, AllocationCreateDesc, Allocator},
+    MemoryLocation,
+};
 use log::debug;
-use std::mem::size_of;
+use std::mem;
 
 pub struct VertexBuffer {
-    buffer: vk::Buffer,
-    allocation: Option<vulkan::Allocation>,
+    internal_buffer: Buffer,
+    allocation: Option<Allocation>,
 }
 
 impl VertexBuffer {
-    pub fn new(
-        device: &Device,
-        allocator: &mut vulkan::Allocator,
-        vertices: &Vec<Vertex>,
-    ) -> Result<Self, Error> {
-        let create_info = vk::BufferCreateInfo::builder()
-            .size((size_of::<Vertex>() * vertices.len()) as u64)
-            .usage(vk::BufferUsageFlags::VERTEX_BUFFER)
-            .sharing_mode(vk::SharingMode::EXCLUSIVE);
+    pub fn new(device: &Device, allocator: &mut Allocator, vertices: &Vec<Vertex>) -> Self {
+        let internal_buffer = Self::create_internal_buffer(vertices.len(), device);
+        let allocation = Self::allocate_memory(&internal_buffer, vertices, device, allocator);
 
-        let buffer = unsafe { device.logical_device().create_buffer(&create_info, None)? };
+        debug!("Created vertex buffer");
 
-        let requirements = unsafe {
+        Self {
+            internal_buffer,
+            allocation: Some(allocation),
+        }
+    }
+
+    fn create_internal_buffer(vertex_count: usize, device: &Device) -> Buffer {
+        let buffer_create_info = BufferCreateInfo::builder()
+            .size((mem::size_of::<Vertex>() * vertex_count) as u64)
+            .usage(BufferUsageFlags::VERTEX_BUFFER)
+            .sharing_mode(SharingMode::EXCLUSIVE)
+            .queue_family_indices(&[]);
+
+        let internal_buffer = unsafe {
             device
                 .logical_device()
-                .get_buffer_memory_requirements(buffer)
+                .create_buffer(&buffer_create_info, None)
+                .expect("Failed to create internal vertex buffer")
         };
 
-        let allocation_create_description = vulkan::AllocationCreateDesc {
+        debug!("Created internal vertex buffer");
+
+        internal_buffer
+    }
+
+    fn allocate_memory(
+        internal_buffer: &Buffer,
+        vertices: &[Vertex],
+        device: &Device,
+        allocator: &mut Allocator,
+    ) -> Allocation {
+        let memory_requirements = unsafe {
+            device
+                .logical_device()
+                .get_buffer_memory_requirements(*internal_buffer)
+        };
+
+        let allocation_create_description = AllocationCreateDesc {
             name: "Vertex Buffer",
-            requirements,
-            location: gpu_allocator::MemoryLocation::CpuToGpu,
+            requirements: memory_requirements,
+            location: MemoryLocation::CpuToGpu,
             linear: true,
         };
-        let allocation = allocator.allocate(&allocation_create_description)?;
+
+        let allocation = allocator
+            .allocate(&allocation_create_description)
+            .expect("Failed to allocate vertex buffer memory");
+
+        debug!("Allocated vertex buffer memory");
 
         unsafe {
-            device.logical_device().bind_buffer_memory(
-                buffer,
-                allocation.memory(),
-                allocation.offset(),
-            )?;
+            device
+                .logical_device()
+                .bind_buffer_memory(*internal_buffer, allocation.memory(), allocation.offset())
+                .expect("Failed to bind vertex buffer memory");
         }
 
-        // NOTE: We use unwrap() because we need to mapped ptr to be available
-        let memory = allocation.mapped_ptr().unwrap().as_ptr() as *mut Vertex;
+        let memory = allocation
+            .mapped_ptr()
+            .expect("Failed to map vertex buffer memory")
+            .as_ptr() as *mut Vertex;
+
         unsafe {
             memory.copy_from_nonoverlapping(vertices.as_ptr(), vertices.len());
         }
 
-        debug!("Created vertex buffer");
-        Ok(Self {
-            buffer,
-            allocation: Some(allocation),
-        })
+        debug!("Mapped vertex buffer memory");
+
+        allocation
     }
 
-    pub fn cleanup(&mut self, device: &Device, allocator: &mut vulkan::Allocator) {
-        allocator.free(self.allocation.take().unwrap()).unwrap();
+    pub fn cleanup(&mut self, device: &Device, allocator: &mut Allocator) {
+        allocator
+            .free(self.allocation.take().unwrap())
+            .expect("Failed to free vertex buffer memory");
 
         unsafe {
-            device.logical_device().destroy_buffer(self.buffer, None);
+            device
+                .logical_device()
+                .destroy_buffer(self.internal_buffer, None);
         }
     }
 
-    pub fn buffer(&self) -> &vk::Buffer {
-        &self.buffer
+    pub fn internal_buffer(&self) -> &Buffer {
+        &self.internal_buffer
     }
 }

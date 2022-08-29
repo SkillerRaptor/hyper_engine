@@ -4,27 +4,28 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::devices::device::Device;
-use super::devices::instance::Instance;
-use super::devices::surface::Surface;
-use super::error::Error;
-use super::pipeline::pipeline::Pipeline;
-use super::pipeline::swapchain::Swapchain;
-use super::renderer::Renderer;
+use crate::{
+    devices::{device::Device, instance::Instance, surface::Surface},
+    pipeline::{pipeline::Pipeline, swapchain::Swapchain},
+    renderer::Renderer,
+};
 
 use hyper_platform::window::Window;
 
-use gpu_allocator::vulkan;
+use gpu_allocator::{
+    vulkan::{Allocator, AllocatorCreateDesc},
+    AllocatorDebugSettings,
+};
 use log::info;
+use std::mem::ManuallyDrop;
 
-// NOTE: Using Rc for ref-counting, replace with Arc when multithreading
 pub struct RenderContext {
     _entry: ash::Entry,
     instance: Instance,
     surface: Surface,
     device: Device,
 
-    allocator: std::mem::ManuallyDrop<vulkan::Allocator>,
+    allocator: ManuallyDrop<Allocator>,
 
     swapchain: Swapchain,
     pipeline: Pipeline,
@@ -32,14 +33,14 @@ pub struct RenderContext {
 }
 
 impl RenderContext {
-    pub fn new(window: &Window) -> Result<Self, Error> {
-        let entry = unsafe { ash::Entry::load()? };
-        let instance = Instance::new(window, &entry)?;
-        let surface = Surface::new(window, &entry, &instance)?;
-        let device = Device::new(&instance, &surface)?;
+    pub fn new(window: &Window) -> Self {
+        let entry = unsafe { ash::Entry::load().expect("Failed to load vulkan") };
+        let instance = Instance::new(window, &entry);
+        let surface = Surface::new(window, &entry, &instance);
+        let device = Device::new(&instance, &surface);
 
         let debug_enabled = cfg!(debug_assertions);
-        let allocator_debug_settings = gpu_allocator::AllocatorDebugSettings {
+        let allocator_debug_settings = AllocatorDebugSettings {
             log_memory_information: debug_enabled,
             log_leaks_on_shutdown: debug_enabled,
             store_stack_traces: false,
@@ -47,7 +48,7 @@ impl RenderContext {
             log_frees: debug_enabled,
             log_stack_traces: false,
         };
-        let allocator_create_description = vulkan::AllocatorCreateDesc {
+        let allocator_create_description = AllocatorCreateDesc {
             instance: instance.instance().clone(),
             device: device.logical_device().clone(),
             physical_device: *device.physical_device(),
@@ -56,57 +57,52 @@ impl RenderContext {
         };
 
         // TODO: Abstract allocator into own class
-        let mut allocator = vulkan::Allocator::new(&allocator_create_description)?;
+        let mut allocator = Allocator::new(&allocator_create_description)
+            .expect("Failed to create vulkan allocator");
 
-        let swapchain = Swapchain::new(window, &instance, &surface, &device, &mut allocator)?;
-        let pipeline = Pipeline::new(&device, &swapchain)?;
-        let renderer = Renderer::new(&device, &mut allocator)?;
+        let swapchain = Swapchain::new(window, &instance, &surface, &device, &mut allocator);
+        let pipeline = Pipeline::new(&device, &swapchain);
+        let renderer = Renderer::new(&device, &mut allocator);
 
         info!("Created render context");
-        Ok(Self {
+        Self {
             _entry: entry,
             instance,
             surface,
             device,
 
-            allocator: std::mem::ManuallyDrop::new(allocator),
+            allocator: ManuallyDrop::new(allocator),
 
             swapchain,
             pipeline,
 
             renderer,
-        })
+        }
     }
 
     pub fn begin_frame(&mut self, window: &Window) {
-        self.renderer
-            .begin_frame(
-                window,
-                &self.surface,
-                &self.device,
-                &mut self.allocator,
-                &mut self.swapchain,
-                &self.pipeline,
-            )
-            .unwrap();
+        self.renderer.begin_frame(
+            window,
+            &self.surface,
+            &self.device,
+            &mut self.allocator,
+            &mut self.swapchain,
+            &self.pipeline,
+        );
     }
 
     pub fn end_frame(&self) {
-        self.renderer
-            .end_frame(&self.device, &self.swapchain)
-            .unwrap();
+        self.renderer.end_frame(&self.device, &self.swapchain);
     }
 
     pub fn submit(&mut self, window: &Window) {
-        self.renderer
-            .submit(
-                window,
-                &self.surface,
-                &self.device,
-                &mut self.allocator,
-                &mut self.swapchain,
-            )
-            .unwrap();
+        self.renderer.submit(
+            window,
+            &self.surface,
+            &self.device,
+            &mut self.allocator,
+            &mut self.swapchain,
+        );
     }
 
     pub fn draw(&self, window: &Window) {
@@ -123,7 +119,7 @@ impl Drop for RenderContext {
             self.pipeline.cleanup(&self.device);
             self.swapchain.cleanup(&self.device, &mut self.allocator);
 
-            std::mem::ManuallyDrop::drop(&mut self.allocator);
+            ManuallyDrop::drop(&mut self.allocator);
 
             self.device.cleanup();
             self.surface.cleanup();

@@ -4,13 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::buffers::vertex_buffer::VertexBuffer;
-use super::devices::device::Device;
-use super::error::Error;
-use super::vertex::Vertex;
+use crate::{buffers::vertex_buffer::VertexBuffer, devices::device::Device, vertex::Vertex};
 
-use gpu_allocator::vulkan;
+use gpu_allocator::vulkan::Allocator;
 use nalgebra_glm as glm;
+use tobj::LoadOptions;
 
 pub struct Mesh {
     vertices: Vec<Vertex>,
@@ -18,25 +16,18 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn new(
-        device: &Device,
-        allocator: &mut vulkan::Allocator,
-        vertices: &Vec<Vertex>,
-    ) -> Result<Self, Error> {
-        let vertex_buffer = VertexBuffer::new(device, allocator, vertices)?;
+    pub fn new(device: &Device, allocator: &mut Allocator, vertices: &Vec<Vertex>) -> Self {
+        let vertex_buffer = VertexBuffer::new(device, allocator, vertices);
 
-        Ok(Self {
+        Self {
             vertices: vertices.clone(),
             vertex_buffer,
-        })
+        }
     }
 
-    pub fn load(
-        device: &Device,
-        allocator: &mut vulkan::Allocator,
-        file_name: &str,
-    ) -> Result<Self, Error> {
-        let (models, _) = tobj::load_obj(&file_name, &tobj::LoadOptions::default())?;
+    pub fn load(device: &Device, allocator: &mut Allocator, file_name: &str) -> Self {
+        let (models, _) = tobj::load_obj(&file_name, &LoadOptions::default())
+            .expect("Failed to load object file");
 
         let mut vertices = Vec::new();
         for model in models {
@@ -65,15 +56,15 @@ impl Mesh {
             }
         }
 
-        let vertex_buffer = VertexBuffer::new(device, allocator, &vertices)?;
+        let vertex_buffer = VertexBuffer::new(device, allocator, &vertices);
 
-        Ok(Self {
+        Self {
             vertices: vertices.clone(),
             vertex_buffer,
-        })
+        }
     }
 
-    pub fn cleanup(&mut self, device: &Device, allocator: &mut vulkan::Allocator) {
+    pub fn cleanup(&mut self, device: &Device, allocator: &mut Allocator) {
         self.vertex_buffer.cleanup(device, allocator);
     }
 

@@ -4,32 +4,38 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::devices::device::Device;
-use super::super::devices::device::SwapchainSupport;
-use super::super::devices::instance::Instance;
-use super::super::devices::surface::Surface;
-use super::super::error::Error;
+use crate::devices::{
+    device::Device, device::SwapchainSupport, instance::Instance, surface::Surface,
+};
 
 use hyper_platform::window::Window;
 
-use ash::extensions::khr::Swapchain as SwapchainLoader;
-use ash::vk;
+use ash::{
+    extensions::khr::Swapchain as SwapchainLoader,
+    vk::{
+        ColorSpaceKHR, ComponentMapping, ComponentSwizzle, CompositeAlphaFlagsKHR, Extent2D,
+        Extent3D, Format, Image, ImageAspectFlags, ImageCreateInfo, ImageLayout,
+        ImageSubresourceRange, ImageTiling, ImageType, ImageUsageFlags, ImageView,
+        ImageViewCreateInfo, ImageViewType, PresentModeKHR, SampleCountFlags, SharingMode,
+        SurfaceCapabilitiesKHR, SurfaceFormatKHR, SwapchainCreateInfoKHR, SwapchainKHR,
+    },
+};
 use gpu_allocator::vulkan;
 use log::debug;
 
 pub struct Swapchain {
     swapchain_loader: SwapchainLoader,
-    swapchain: vk::SwapchainKHR,
+    swapchain: SwapchainKHR,
 
-    format: vk::Format,
-    extent: vk::Extent2D,
+    format: Format,
+    extent: Extent2D,
 
-    images: Vec<vk::Image>,
-    image_views: Vec<vk::ImageView>,
+    images: Vec<Image>,
+    image_views: Vec<ImageView>,
 
-    depth_image: vk::Image,
-    depth_image_view: vk::ImageView,
-    depth_format: vk::Format,
+    depth_image: Image,
+    depth_image_view: ImageView,
+    depth_format: Format,
     depth_image_allocation: Option<vulkan::Allocation>,
 }
 
@@ -40,19 +46,23 @@ impl Swapchain {
         surface: &Surface,
         device: &Device,
         allocator: &mut vulkan::Allocator,
-    ) -> Result<Self, Error> {
+    ) -> Self {
         let swapchain_loader = SwapchainLoader::new(instance.instance(), device.logical_device());
         let (swapchain, extent, format) =
-            Self::create_swapchain(window, surface, device, &swapchain_loader, false)?;
+            Self::create_swapchain(window, surface, device, &swapchain_loader, false);
 
-        let images = unsafe { swapchain_loader.get_swapchain_images(swapchain)? };
-        let image_views = Self::create_image_views(device, &format, &images)?;
+        let images = unsafe {
+            swapchain_loader
+                .get_swapchain_images(swapchain)
+                .expect("Failed to get swapchain images")
+        };
+        let image_views = Self::create_image_views(device, &format, &images);
 
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
-            Self::create_depth_image(window, device, allocator)?;
+            Self::create_depth_image(window, device, allocator);
 
         debug!("Created vulkan swapchain");
-        Ok(Self {
+        Self {
             swapchain_loader,
             swapchain,
 
@@ -66,7 +76,7 @@ impl Swapchain {
             depth_image_view,
             depth_format,
             depth_image_allocation: Some(depth_image_allocation),
-        })
+        }
     }
 
     fn create_swapchain(
@@ -75,8 +85,8 @@ impl Swapchain {
         device: &Device,
         swapchain_loader: &SwapchainLoader,
         recreate: bool,
-    ) -> Result<(vk::SwapchainKHR, vk::Extent2D, vk::Format), Error> {
-        let support = SwapchainSupport::new(surface, device.physical_device())?;
+    ) -> (SwapchainKHR, Extent2D, Format) {
+        let support = SwapchainSupport::new(surface, device.physical_device());
 
         let extent = Self::choose_extent(window, support.capabilities());
         let format = Self::choose_surface_format(support.formats());
@@ -94,25 +104,29 @@ impl Swapchain {
         };
 
         // NOTE: Using exlusive sharing mode cause graphics & present queue are the same
-        let image_sharing_mode = vk::SharingMode::EXCLUSIVE;
+        let image_sharing_mode = SharingMode::EXCLUSIVE;
 
-        let swapchain_create_info = vk::SwapchainCreateInfoKHR::builder()
+        let swapchain_create_info = SwapchainCreateInfoKHR::builder()
             .surface(*surface.surface())
             .min_image_count(image_count)
             .image_format(format.format)
             .image_color_space(format.color_space)
             .image_extent(extent)
             .image_array_layers(1)
-            .image_usage(vk::ImageUsageFlags::COLOR_ATTACHMENT)
+            .image_usage(ImageUsageFlags::COLOR_ATTACHMENT)
             .image_sharing_mode(image_sharing_mode)
             .queue_family_indices(&[])
             .pre_transform(support.capabilities().current_transform)
-            .composite_alpha(vk::CompositeAlphaFlagsKHR::OPAQUE)
+            .composite_alpha(CompositeAlphaFlagsKHR::OPAQUE)
             .present_mode(present_mode)
             .clipped(true)
-            .old_swapchain(vk::SwapchainKHR::null());
+            .old_swapchain(SwapchainKHR::null());
 
-        let swapchain = unsafe { swapchain_loader.create_swapchain(&swapchain_create_info, None)? };
+        let swapchain = unsafe {
+            swapchain_loader
+                .create_swapchain(&swapchain_create_info, None)
+                .expect("Failed to create swapchain")
+        };
 
         if !recreate {
             debug!("Swapchain Info:");
@@ -151,10 +165,10 @@ impl Swapchain {
             debug!("  Clipped: {}", swapchain_create_info.clipped != 0);
         }
 
-        Ok((swapchain, extent, format.format))
+        (swapchain, extent, format.format)
     }
 
-    fn choose_extent(window: &Window, capabilities: &vk::SurfaceCapabilitiesKHR) -> vk::Extent2D {
+    fn choose_extent(window: &Window, capabilities: &SurfaceCapabilitiesKHR) -> Extent2D {
         if capabilities.current_extent.width != u32::MAX
             || capabilities.current_extent.height != u32::MAX
         {
@@ -163,7 +177,7 @@ impl Swapchain {
 
         let clamp = |min: u32, max: u32, value: u32| min.max(max.min(value));
 
-        vk::Extent2D {
+        Extent2D {
             width: clamp(
                 capabilities.min_image_extent.width,
                 capabilities.max_image_extent.width,
@@ -177,49 +191,45 @@ impl Swapchain {
         }
     }
 
-    fn choose_surface_format(formats: &[vk::SurfaceFormatKHR]) -> vk::SurfaceFormatKHR {
+    fn choose_surface_format(formats: &[SurfaceFormatKHR]) -> SurfaceFormatKHR {
         formats
             .iter()
             .cloned()
             .find(|format| {
-                format.format == vk::Format::B8G8R8A8_SRGB
-                    && format.color_space == vk::ColorSpaceKHR::SRGB_NONLINEAR
+                format.format == Format::B8G8R8A8_SRGB
+                    && format.color_space == ColorSpaceKHR::SRGB_NONLINEAR
             })
             .unwrap_or_else(|| formats[0])
     }
 
-    fn choose_present_mode(present_modes: &[vk::PresentModeKHR]) -> vk::PresentModeKHR {
+    fn choose_present_mode(present_modes: &[PresentModeKHR]) -> PresentModeKHR {
         present_modes
             .iter()
             .cloned()
-            .find(|present_mode| *present_mode == vk::PresentModeKHR::MAILBOX)
-            .unwrap_or(vk::PresentModeKHR::FIFO)
+            .find(|present_mode| *present_mode == PresentModeKHR::MAILBOX)
+            .unwrap_or(PresentModeKHR::FIFO)
     }
 
-    fn create_image_views(
-        device: &Device,
-        format: &vk::Format,
-        images: &[vk::Image],
-    ) -> Result<Vec<vk::ImageView>, Error> {
+    fn create_image_views(device: &Device, format: &Format, images: &[Image]) -> Vec<ImageView> {
         let image_views = images
             .iter()
             .map(|image| {
-                let components = vk::ComponentMapping::builder()
-                    .r(vk::ComponentSwizzle::IDENTITY)
-                    .g(vk::ComponentSwizzle::IDENTITY)
-                    .b(vk::ComponentSwizzle::IDENTITY)
-                    .a(vk::ComponentSwizzle::IDENTITY);
+                let components = ComponentMapping::builder()
+                    .r(ComponentSwizzle::IDENTITY)
+                    .g(ComponentSwizzle::IDENTITY)
+                    .b(ComponentSwizzle::IDENTITY)
+                    .a(ComponentSwizzle::IDENTITY);
 
-                let subsource_range = vk::ImageSubresourceRange::builder()
-                    .aspect_mask(vk::ImageAspectFlags::COLOR)
+                let subsource_range = ImageSubresourceRange::builder()
+                    .aspect_mask(ImageAspectFlags::COLOR)
                     .base_mip_level(0)
                     .level_count(1)
                     .base_array_layer(0)
                     .layer_count(1);
 
-                let image_view_create_info = vk::ImageViewCreateInfo::builder()
+                let image_view_create_info = ImageViewCreateInfo::builder()
                     .image(*image)
-                    .view_type(vk::ImageViewType::TYPE_2D)
+                    .view_type(ImageViewType::TYPE_2D)
                     .format(*format)
                     .components(*components)
                     .subresource_range(*subsource_range);
@@ -230,41 +240,43 @@ impl Swapchain {
                         .create_image_view(&image_view_create_info, None)
                 }
             })
-            .collect::<Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()
+            .expect("Failed to create image views");
 
-        Ok(image_views)
+        image_views
     }
 
     fn create_depth_image(
         window: &Window,
         device: &Device,
         allocator: &mut vulkan::Allocator,
-    ) -> Result<(vk::Image, vk::ImageView, vk::Format, vulkan::Allocation), Error> {
-        let extent = vk::Extent3D::builder()
+    ) -> (Image, ImageView, Format, vulkan::Allocation) {
+        let extent = Extent3D::builder()
             .width(window.framebuffer_width() as u32)
             .height(window.framebuffer_height() as u32)
             .depth(1);
 
-        let format = vk::Format::D32_SFLOAT;
+        let format = Format::D32_SFLOAT;
 
         // NOTE: Hardcoding the depth format to 32 bit float
-        let image_create_info = vk::ImageCreateInfo::builder()
-            .image_type(vk::ImageType::TYPE_2D)
+        let image_create_info = ImageCreateInfo::builder()
+            .image_type(ImageType::TYPE_2D)
             .format(format)
             .extent(*extent)
             .mip_levels(1)
             .array_layers(1)
-            .samples(vk::SampleCountFlags::TYPE_1)
-            .tiling(vk::ImageTiling::OPTIMAL)
-            .usage(vk::ImageUsageFlags::DEPTH_STENCIL_ATTACHMENT)
-            .sharing_mode(vk::SharingMode::EXCLUSIVE)
+            .samples(SampleCountFlags::TYPE_1)
+            .tiling(ImageTiling::OPTIMAL)
+            .usage(ImageUsageFlags::DEPTH_STENCIL_ATTACHMENT)
+            .sharing_mode(SharingMode::EXCLUSIVE)
             .queue_family_indices(&[])
-            .initial_layout(vk::ImageLayout::UNDEFINED);
+            .initial_layout(ImageLayout::UNDEFINED);
 
         let image = unsafe {
             device
                 .logical_device()
-                .create_image(&image_create_info, None)?
+                .create_image(&image_create_info, None)
+                .expect("Failed to create image")
         };
 
         let requirements = unsafe { device.logical_device().get_image_memory_requirements(image) };
@@ -275,38 +287,40 @@ impl Swapchain {
             location: gpu_allocator::MemoryLocation::GpuOnly,
             linear: true,
         };
-        let allocation = allocator.allocate(&allocation_create_description)?;
+        let allocation = allocator
+            .allocate(&allocation_create_description)
+            .expect("Failed to allocate depth image");
 
         unsafe {
-            device.logical_device().bind_image_memory(
-                image,
-                allocation.memory(),
-                allocation.offset(),
-            )?;
+            device
+                .logical_device()
+                .bind_image_memory(image, allocation.memory(), allocation.offset())
+                .expect("Failed to bind depth image memory")
         }
 
-        let subsource_range = vk::ImageSubresourceRange::builder()
-            .aspect_mask(vk::ImageAspectFlags::DEPTH)
+        let subsource_range = ImageSubresourceRange::builder()
+            .aspect_mask(ImageAspectFlags::DEPTH)
             .base_mip_level(0)
             .level_count(1)
             .base_array_layer(0)
             .layer_count(1);
 
-        let image_view_create_info = vk::ImageViewCreateInfo::builder()
+        let image_view_create_info = ImageViewCreateInfo::builder()
             .image(image)
-            .view_type(vk::ImageViewType::TYPE_2D)
+            .view_type(ImageViewType::TYPE_2D)
             .format(format)
-            .components(vk::ComponentMapping::default())
+            .components(ComponentMapping::default())
             .subresource_range(*subsource_range);
 
         let image_view = unsafe {
             device
                 .logical_device()
-                .create_image_view(&image_view_create_info, None)?
+                .create_image_view(&image_view_create_info, None)
+                .expect("Failed to create depth image view")
         };
 
         debug!("Created depth image");
-        Ok((image, image_view, format, allocation))
+        (image, image_view, format, allocation)
     }
 
     pub fn cleanup(&mut self, device: &Device, allocator: &mut vulkan::Allocator) {
@@ -336,7 +350,7 @@ impl Swapchain {
         surface: &Surface,
         device: &Device,
         allocator: &mut vulkan::Allocator,
-    ) -> Result<(), Error> {
+    ) {
         unsafe {
             device.logical_device().device_wait_idle().unwrap();
         }
@@ -344,59 +358,61 @@ impl Swapchain {
         self.cleanup(device, allocator);
 
         let (swapchain, extent, format) =
-            Self::create_swapchain(window, surface, device, &self.swapchain_loader, true)?;
+            Self::create_swapchain(window, surface, device, &self.swapchain_loader, true);
 
         self.swapchain = swapchain;
 
         self.extent = extent;
         self.format = format;
 
-        let images = unsafe { self.swapchain_loader.get_swapchain_images(swapchain)? };
-        let image_views = Self::create_image_views(device, &format, &images)?;
+        let images = unsafe {
+            self.swapchain_loader
+                .get_swapchain_images(swapchain)
+                .expect("Failed to get swapchain images")
+        };
+        let image_views = Self::create_image_views(device, &format, &images);
 
         self.images = images;
         self.image_views = image_views;
 
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
-            Self::create_depth_image(window, device, allocator)?;
+            Self::create_depth_image(window, device, allocator);
 
         self.depth_image = depth_image;
         self.depth_image_view = depth_image_view;
         self.depth_format = depth_format;
         self.depth_image_allocation = Some(depth_image_allocation);
-
-        Ok(())
     }
 
     pub fn swapchain_loader(&self) -> &SwapchainLoader {
         &self.swapchain_loader
     }
 
-    pub fn swapchain(&self) -> &vk::SwapchainKHR {
+    pub fn swapchain(&self) -> &SwapchainKHR {
         &self.swapchain
     }
 
-    pub fn extent(&self) -> &vk::Extent2D {
+    pub fn extent(&self) -> &Extent2D {
         &self.extent
     }
 
-    pub fn format(&self) -> &vk::Format {
+    pub fn format(&self) -> &Format {
         &self.format
     }
 
-    pub fn images(&self) -> &Vec<vk::Image> {
+    pub fn images(&self) -> &Vec<Image> {
         &self.images
     }
 
-    pub fn image_views(&self) -> &Vec<vk::ImageView> {
+    pub fn image_views(&self) -> &Vec<ImageView> {
         &self.image_views
     }
 
-    pub fn depth_image_view(&self) -> &vk::ImageView {
+    pub fn depth_image_view(&self) -> &ImageView {
         &self.depth_image_view
     }
 
-    pub fn depth_format(&self) -> &vk::Format {
+    pub fn depth_format(&self) -> &Format {
         &self.depth_format
     }
 }

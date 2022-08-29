@@ -4,30 +4,28 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::super::error::Error;
-use super::instance::Instance;
+use crate::devices::instance::Instance;
 
 use hyper_platform::window::Window;
 
-use ash::extensions::khr::Surface as SurfaceLoader;
-use ash::vk;
+use ash::{extensions::khr::Surface as SurfaceLoader, vk::SurfaceKHR, Entry};
 use log::debug;
 
 pub struct Surface {
     surface_loader: SurfaceLoader,
-    surface: vk::SurfaceKHR,
+    surface: SurfaceKHR,
 }
 
 impl Surface {
-    pub fn new(window: &Window, entry: &ash::Entry, instance: &Instance) -> Result<Self, Error> {
+    pub fn new(window: &Window, entry: &Entry, instance: &Instance) -> Self {
         let surface_loader = SurfaceLoader::new(entry, instance.instance());
         let surface = window.create_window_surface(instance.instance());
 
         debug!("Created vulkan surface");
-        Ok(Self {
+        Self {
             surface,
             surface_loader,
-        })
+        }
     }
 
     pub fn cleanup(&mut self) {
@@ -40,7 +38,7 @@ impl Surface {
         &self.surface_loader
     }
 
-    pub fn surface(&self) -> &vk::SurfaceKHR {
+    pub fn surface(&self) -> &SurfaceKHR {
         &self.surface
     }
 }

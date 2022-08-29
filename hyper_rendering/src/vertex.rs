@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-use ash::vk;
+use ash::vk::{
+    Format, VertexInputAttributeDescription, VertexInputBindingDescription, VertexInputRate,
+};
 use nalgebra_glm as glm;
-use std::mem::size_of;
+use std::mem;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -25,36 +27,36 @@ impl Vertex {
         }
     }
 
-    pub fn binding_descriptions() -> Vec<vk::VertexInputBindingDescription> {
-        let binding_description = vk::VertexInputBindingDescription::builder()
+    pub fn binding_descriptions() -> Vec<VertexInputBindingDescription> {
+        let binding_description = VertexInputBindingDescription::builder()
             .binding(0)
-            .stride(size_of::<Vertex>() as u32)
-            .input_rate(vk::VertexInputRate::VERTEX)
+            .stride(mem::size_of::<Vertex>() as u32)
+            .input_rate(VertexInputRate::VERTEX)
             .build();
 
         vec![binding_description]
     }
 
-    pub fn attribute_descriptions() -> Vec<vk::VertexInputAttributeDescription> {
-        let position_description = vk::VertexInputAttributeDescription::builder()
+    pub fn attribute_descriptions() -> Vec<VertexInputAttributeDescription> {
+        let position_description = VertexInputAttributeDescription::builder()
             .binding(0)
             .location(0)
-            .format(vk::Format::R32G32B32_SFLOAT)
+            .format(Format::R32G32B32_SFLOAT)
             .offset(0)
             .build();
 
-        let color_description = vk::VertexInputAttributeDescription::builder()
+        let color_description = VertexInputAttributeDescription::builder()
             .binding(0)
             .location(1)
-            .format(vk::Format::R32G32B32_SFLOAT)
-            .offset(size_of::<glm::Vec3>() as u32)
+            .format(Format::R32G32B32_SFLOAT)
+            .offset(mem::size_of::<glm::Vec3>() as u32)
             .build();
 
-        let normal_description = vk::VertexInputAttributeDescription::builder()
+        let normal_description = VertexInputAttributeDescription::builder()
             .binding(0)
             .location(2)
-            .format(vk::Format::R32G32B32_SFLOAT)
-            .offset((size_of::<glm::Vec3>() * 2) as u32)
+            .format(Format::R32G32B32_SFLOAT)
+            .offset((mem::size_of::<glm::Vec3>() * 2) as u32)
             .build();
 
         vec![position_description, color_description, normal_description]
