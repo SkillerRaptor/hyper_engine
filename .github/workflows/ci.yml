@@ -9,9 +9,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config:
-          - debug
-          - release
         toolchain:
           - stable
           - beta
@@ -39,24 +36,30 @@ jobs:
             wayland-protocols \
             xorg-dev  \
 
-      - name: Update
+      - name: Update Rust-Toolchain
         run: |
           rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
 
       - name: Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Build Debug
-        if: matrix.config == 'debug'
+      - name: Cargo Build Debug
         run: |
           cargo build --verbose --workspace
 
-      - name: Build Release
-        if: matrix.config == 'release'
+      - name: Cargo Build Release
         run: |
           cargo build --verbose --workspace --release
 
-      - name: Test
+      - name: Cargo Formatter
+        run: |
+          cargo fmt --all -- --check
+
+      - name: Cargo Clippy
+        run: |
+          cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Cargo Test
         run: |
           cargo test --verbose --workspace
 
