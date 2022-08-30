@@ -10,6 +10,7 @@ pub mod context;
 pub mod devices;
 pub mod mesh;
 pub mod pipeline;
+pub mod render_object;
 pub mod renderer;
 pub mod sync;
 pub mod vertex;

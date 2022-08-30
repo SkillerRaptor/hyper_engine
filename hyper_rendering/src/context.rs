@@ -62,7 +62,7 @@ impl RenderContext {
 
         let swapchain = Swapchain::new(window, &instance, &surface, &device, &mut allocator);
         let pipeline = Pipeline::new(&device, &swapchain);
-        let renderer = Renderer::new(&device, &mut allocator);
+        let renderer = Renderer::new(&device, &pipeline, &mut allocator);
 
         info!("Created render context");
         Self {
@@ -106,7 +106,8 @@ impl RenderContext {
     }
 
     pub fn draw(&self, window: &Window) {
-        self.renderer.draw(window, &self.device, &self.pipeline);
+        self.renderer
+            .draw(window, &self.device, &self.swapchain, &self.pipeline);
     }
 }
 

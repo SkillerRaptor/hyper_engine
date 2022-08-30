@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+use std::collections::HashMap;
+
 use crate::{
     commands::{command_buffer::CommandBuffer, command_pool::CommandPool},
     devices::{device::Device, surface::Surface},
@@ -12,9 +14,12 @@ use crate::{
         pipeline::{MeshPushConstants, Pipeline},
         swapchain::Swapchain,
     },
+    render_object::{Material, RenderObject},
     sync::{fence::Fence, semaphore::Semaphore},
+    vertex::Vertex,
 };
 
+use glm::vec3;
 use hyper_platform::window::Window;
 
 use ash::vk::{
@@ -39,11 +44,13 @@ pub struct Renderer {
     present_semaphore: Semaphore,
     render_semaphore: Semaphore,
 
-    mesh: Mesh,
+    materials: HashMap<String, Material>,
+    meshes: HashMap<String, Mesh>,
+    renderables: Vec<RenderObject>,
 }
 
 impl Renderer {
-    pub fn new(device: &Device, allocator: &mut Allocator) -> Self {
+    pub fn new(device: &Device, pipeline: &Pipeline, allocator: &mut Allocator) -> Self {
         let command_pool = CommandPool::new(device);
         let command_buffer = CommandBuffer::new(device, &command_pool, CommandBufferLevel::PRIMARY);
 
@@ -51,7 +58,79 @@ impl Renderer {
         let present_semaphore = Semaphore::new(device);
         let render_semaphore = Semaphore::new(device);
 
-        let mesh = Mesh::load(device, allocator, "assets/models/monkey_smooth.obj");
+        let material = Material {
+            pipeline: *pipeline.pipeline(),
+            pipeline_layout: *pipeline.pipeline_layout(),
+        };
+
+        let mut materials = HashMap::new();
+        materials.insert(String::from("default"), material);
+
+        // NOTE: This is temporary mesh loading
+        let triangle_vertices = vec![
+            Vertex::new(
+                vec3(1.0, 1.0, 0.5),
+                vec3(1.0, 0.0, 0.0),
+                vec3(0.0, 0.0, 0.0),
+            ),
+            Vertex::new(
+                vec3(-1.0, 1.0, 0.5),
+                vec3(0.0, 1.0, 0.0),
+                vec3(0.0, 0.0, 0.0),
+            ),
+            Vertex::new(
+                vec3(0.0, -1.0, 0.5),
+                vec3(0.0, 0.0, 1.0),
+                vec3(0.0, 0.0, 0.0),
+            ),
+        ];
+
+        let triangle_mesh = Mesh::new(device, allocator, &triangle_vertices);
+        let monkey_mesh = Mesh::load(device, allocator, "assets/models/monkey_smooth.obj");
+
+        let mut meshes = HashMap::new();
+        meshes.insert(String::from("triangle"), triangle_mesh);
+        meshes.insert(String::from("monkey"), monkey_mesh);
+
+        let mut renderables = Vec::new();
+
+        let monkey_render_object = RenderObject {
+            mesh: String::from("monkey"),
+            material: String::from("default"),
+            transform: glm::mat4(
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            ),
+        };
+
+        renderables.push(monkey_render_object);
+
+        for x in -20..20 {
+            for z in -20..20 {
+                let translation = glm::translate(
+                    &glm::mat4(
+                        1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                        1.0,
+                    ),
+                    &vec3(x as f32, 0.0, z as f32),
+                );
+
+                let scale = glm::scale(
+                    &glm::mat4(
+                        1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                        1.0,
+                    ),
+                    &vec3(0.2, 0.2, 0.2),
+                );
+
+                let triangle_render_object = RenderObject {
+                    mesh: String::from("triangle"),
+                    material: String::from("default"),
+                    transform: translation * scale,
+                };
+
+                renderables.push(triangle_render_object);
+            }
+        }
 
         info!("Created renderer");
         Self {
@@ -64,12 +143,16 @@ impl Renderer {
             present_semaphore,
             render_semaphore,
 
-            mesh,
+            materials,
+            meshes,
+            renderables,
         }
     }
 
     pub fn cleanup(&mut self, device: &Device, allocator: &mut Allocator) {
-        self.mesh.cleanup(device, allocator);
+        for mesh in &mut self.meshes.values_mut() {
+            mesh.cleanup(device, allocator);
+        }
 
         self.render_semaphore.cleanup(device);
         self.present_semaphore.cleanup(device);
@@ -84,7 +167,7 @@ impl Renderer {
         device: &Device,
         allocator: &mut Allocator,
         swapchain: &mut Swapchain,
-        pipeline: &Pipeline,
+        _pipeline: &Pipeline,
     ) {
         self.render_fence.wait(device);
         self.render_fence.reset(device);
@@ -193,25 +276,6 @@ impl Renderer {
             .stencil_attachment(&stencil_attachment_info);
 
         self.command_buffer.begin_rendering(device, &rendering_info);
-        self.command_buffer.bind_pipeline(
-            device,
-            PipelineBindPoint::GRAPHICS,
-            *pipeline.pipeline(),
-        );
-
-        let extent = swapchain.extent();
-        let viewport = Viewport::builder()
-            .x(0.0)
-            .y(0.0)
-            .width(extent.width as f32)
-            .height(extent.height as f32)
-            .min_depth(0.0)
-            .max_depth(1.0);
-        self.command_buffer.set_viewport(device, 0, &[*viewport]);
-
-        let offset = Offset2D::builder();
-        let scissor = Rect2D::builder().offset(*offset).extent(*extent);
-        self.command_buffer.set_scissor(device, 0, &[*scissor]);
     }
 
     pub fn end_frame(&self, device: &Device, swapchain: &Swapchain) {
@@ -304,15 +368,13 @@ impl Renderer {
         }
     }
 
-    pub fn draw(&self, window: &Window, device: &Device, pipeline: &Pipeline) {
-        let mut projection_matrix = glm::perspective(
-            f32::to_radians(90.0),
-            window.framebuffer_width() as f32 / window.framebuffer_height() as f32,
-            0.1,
-            200.0,
-        );
-        projection_matrix.m22 *= -1_f32;
-
+    pub fn draw(
+        &self,
+        window: &Window,
+        device: &Device,
+        swapchain: &Swapchain,
+        _pipeline: &Pipeline,
+    ) {
         let camera_position = glm::vec3(0.0, 0.0, -2.0);
 
         let view_matrix = glm::translate(
@@ -322,36 +384,65 @@ impl Renderer {
             &camera_position,
         );
 
-        let model_matrix = glm::rotate(
-            &glm::mat4(
-                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-            ),
-            f32::to_radians(window.time() as f32 * 150.0),
-            &glm::vec3(0.0, 1.0, 0.0),
+        let mut projection_matrix = glm::perspective(
+            f32::to_radians(90.0),
+            window.framebuffer_width() as f32 / window.framebuffer_height() as f32,
+            0.1,
+            200.0,
         );
 
-        let mesh_matrix = projection_matrix * view_matrix * model_matrix;
+        projection_matrix.m22 *= -1_f32;
 
-        let push_constants = MeshPushConstants {
-            data: glm::vec4(0.0, 0.0, 0.0, 0.0),
-            render_matrix: mesh_matrix,
-        };
+        //
+        for render_object in &self.renderables {
+            let mesh = self.meshes.get(&render_object.mesh).unwrap();
 
-        self.command_buffer.push_constants(
-            device,
-            *pipeline.pipeline_layout(),
-            ShaderStageFlags::VERTEX,
-            0,
-            &push_constants,
-        );
+            let material = self.materials.get(&render_object.material).unwrap();
+            let pipeline = material.pipeline;
+            let pipeline_layout = material.pipeline_layout;
 
-        let buffers = &[*self.mesh.vertex_buffer().internal_buffer()];
-        let offsets = &[0];
+            self.command_buffer
+                .bind_pipeline(device, PipelineBindPoint::GRAPHICS, pipeline);
 
-        self.command_buffer
-            .bind_vertex_buffers(device, 0, buffers, offsets);
+            let extent = swapchain.extent();
+            let viewport = Viewport::builder()
+                .x(0.0)
+                .y(0.0)
+                .width(extent.width as f32)
+                .height(extent.height as f32)
+                .min_depth(0.0)
+                .max_depth(1.0);
+            self.command_buffer.set_viewport(device, 0, &[*viewport]);
 
-        self.command_buffer
-            .draw(device, self.mesh.vertices().len() as u32, 1, 0, 0);
+            let offset = Offset2D::builder();
+            let scissor = Rect2D::builder().offset(*offset).extent(*extent);
+            self.command_buffer.set_scissor(device, 0, &[*scissor]);
+
+            let model_matrix = render_object.transform;
+
+            let mesh_matrix = projection_matrix * view_matrix * model_matrix;
+
+            let push_constants = MeshPushConstants {
+                data: glm::vec4(0.0, 0.0, 0.0, 0.0),
+                render_matrix: mesh_matrix,
+            };
+
+            self.command_buffer.push_constants(
+                device,
+                pipeline_layout,
+                ShaderStageFlags::VERTEX,
+                0,
+                &push_constants,
+            );
+
+            let buffers = &[*mesh.vertex_buffer().internal_buffer()];
+            let offsets = &[0];
+
+            self.command_buffer
+                .bind_vertex_buffers(device, 0, buffers, offsets);
+
+            self.command_buffer
+                .draw(device, mesh.vertices().len() as u32, 1, 0, 0);
+        }
     }
 }
