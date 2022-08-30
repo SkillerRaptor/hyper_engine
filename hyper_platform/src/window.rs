@@ -18,8 +18,8 @@ pub struct Window {
     title: String,
 
     events: Receiver<(f64, WindowEvent)>,
-    native_window: glfw::Window,
 
+    native_window: glfw::Window,
     glfw: Glfw,
 }
 
@@ -43,8 +43,8 @@ impl Window {
             title: String::from(title),
 
             events,
-            native_window,
 
+            native_window,
             glfw,
         }
     }
