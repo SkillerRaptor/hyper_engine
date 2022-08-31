@@ -4,24 +4,32 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::devices::instance::Instance;
-
 use hyper_platform::window::Window;
 
-use ash::{extensions::khr::Surface as SurfaceLoader, vk::SurfaceKHR, Entry};
+use ash::{extensions::khr::Surface as SurfaceLoader, vk::SurfaceKHR, Entry, Instance};
 use log::debug;
 
+pub(crate) struct SurfaceCreateInfo<'a> {
+    pub window: &'a Window,
+    pub entry: &'a Entry,
+    pub instance: &'a Instance,
+}
+
 pub(crate) struct Surface {
-    surface_loader: SurfaceLoader,
     surface: SurfaceKHR,
+    surface_loader: SurfaceLoader,
 }
 
 impl Surface {
-    pub fn new(window: &Window, entry: &Entry, instance: &Instance) -> Self {
-        let surface_loader = SurfaceLoader::new(entry, instance.instance());
-        let surface = window.create_window_surface(instance.instance());
+    pub fn new(create_info: &SurfaceCreateInfo) -> Self {
+        let surface_loader = SurfaceLoader::new(create_info.entry, create_info.instance);
+
+        let surface = create_info
+            .window
+            .create_window_surface(create_info.instance);
 
         debug!("Created vulkan surface");
+
         Self {
             surface,
             surface_loader,

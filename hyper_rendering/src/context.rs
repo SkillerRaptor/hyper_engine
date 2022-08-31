@@ -9,7 +9,7 @@ use crate::{
     devices::{
         device::Device,
         instance::{Instance, InstanceCreateInfo},
-        surface::Surface,
+        surface::{Surface, SurfaceCreateInfo},
     },
     pipeline::{pipeline::Pipeline, swapchain::Swapchain},
     renderer::Renderer,
@@ -42,7 +42,13 @@ impl RenderContext {
 
         let instance = Instance::new(&instance_create_info);
 
-        let surface = Surface::new(window, &entry, &instance);
+        let surface_create_info = SurfaceCreateInfo {
+            window,
+            entry: &entry,
+            instance: instance.instance(),
+        };
+
+        let surface = Surface::new(&surface_create_info);
         let device = Device::new(&instance, &surface);
 
         let allocate_create_info = AllocatorCreateInfo {

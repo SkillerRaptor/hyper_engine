@@ -23,8 +23,8 @@ use std::{
 };
 
 pub(crate) struct InstanceCreateInfo<'a> {
-    pub(crate) window: &'a Window,
-    pub(crate) entry: &'a Entry,
+    pub window: &'a Window,
+    pub entry: &'a Entry,
 }
 
 pub(crate) struct Instance {
@@ -39,21 +39,17 @@ pub(crate) struct Instance {
 impl Instance {
     const VALIDATION_LAYER: &'static str = "VK_LAYER_KHRONOS_validation";
 
-    pub fn new(instance_create_info: &InstanceCreateInfo) -> Self {
-        let validation_layer_enabled =
-            Self::check_validation_layer_support(instance_create_info.entry);
+    pub fn new(create_info: &InstanceCreateInfo) -> Self {
+        let validation_layer_enabled = Self::check_validation_layer_support(create_info.entry);
 
         let instance = Self::create_instance(
-            instance_create_info.window,
-            instance_create_info.entry,
+            create_info.window,
+            create_info.entry,
             validation_layer_enabled,
         );
 
-        let (debug_loader, debug_messenger) = Self::create_debug_messenger(
-            instance_create_info.entry,
-            &instance,
-            validation_layer_enabled,
-        );
+        let (debug_loader, debug_messenger) =
+            Self::create_debug_messenger(create_info.entry, &instance, validation_layer_enabled);
 
         Self {
             debug_messenger,
