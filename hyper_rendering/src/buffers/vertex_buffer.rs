@@ -15,7 +15,7 @@ use gpu_allocator::vulkan::Allocation;
 use log::debug;
 use std::mem;
 
-pub struct VertexBuffer {
+pub(crate) struct VertexBuffer {
     internal_buffer: Buffer,
     allocation: Option<Allocation>,
 }

@@ -16,7 +16,7 @@ use ash::vk::{
 use log::debug;
 use std::{mem, slice};
 
-pub struct CommandBuffer {
+pub(crate) struct CommandBuffer {
     command_buffer: vk::CommandBuffer,
 }
 

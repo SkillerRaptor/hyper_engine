@@ -24,7 +24,7 @@ use ash::{
 };
 use log::debug;
 
-pub struct Swapchain {
+pub(crate) struct Swapchain {
     swapchain_loader: SwapchainLoader,
     swapchain: SwapchainKHR,
 

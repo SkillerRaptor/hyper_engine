@@ -22,12 +22,12 @@ use std::{
     os::raw::c_void,
 };
 
-pub struct InstanceCreateInfo<'a> {
-    pub window: &'a Window,
-    pub entry: &'a Entry,
+pub(crate) struct InstanceCreateInfo<'a> {
+    pub(crate) window: &'a Window,
+    pub(crate) entry: &'a Entry,
 }
 
-pub struct Instance {
+pub(crate) struct Instance {
     debug_messenger: DebugUtilsMessengerEXT,
     debug_loader: DebugLoader,
 

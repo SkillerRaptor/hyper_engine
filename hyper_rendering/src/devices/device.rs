@@ -17,7 +17,7 @@ use ash::{
 use log::debug;
 use std::{collections::HashSet, ffi::CStr};
 
-pub struct Device {
+pub(crate) struct Device {
     physical_device: PhysicalDevice,
     logical_device: ash::Device,
 
@@ -330,7 +330,7 @@ impl Device {
     }
 }
 
-pub struct SwapchainSupport {
+pub(crate) struct SwapchainSupport {
     capabilities: SurfaceCapabilitiesKHR,
     formats: Vec<SurfaceFormatKHR>,
     present_modes: Vec<PresentModeKHR>,

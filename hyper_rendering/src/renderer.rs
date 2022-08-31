@@ -34,7 +34,7 @@ use glm::vec3;
 use log::info;
 use nalgebra_glm as glm;
 
-pub struct Renderer {
+pub(crate) struct Renderer {
     current_image_index: usize,
 
     command_pool: CommandPool,

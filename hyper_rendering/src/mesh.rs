@@ -12,7 +12,7 @@ use crate::{
 use nalgebra_glm as glm;
 use tobj::LoadOptions;
 
-pub struct Mesh {
+pub(crate) struct Mesh {
     vertices: Vec<Vertex>,
     vertex_buffer: VertexBuffer,
 }

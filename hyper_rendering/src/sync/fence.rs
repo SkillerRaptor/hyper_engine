@@ -9,7 +9,7 @@ use crate::devices::device::Device;
 use ash::vk::{self, FenceCreateFlags, FenceCreateInfo};
 use log::debug;
 
-pub struct Fence {
+pub(crate) struct Fence {
     fence: vk::Fence,
 }
 

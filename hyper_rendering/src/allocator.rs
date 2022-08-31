@@ -14,6 +14,7 @@ use gpu_allocator::{
 };
 use std::mem::ManuallyDrop;
 
+#[allow(dead_code)]
 pub enum MemoryLocation {
     Unknown,
     GpuOnly,

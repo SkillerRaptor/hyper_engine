@@ -4,14 +4,15 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub mod allocator;
-pub mod buffers;
-pub mod commands;
 pub mod context;
-pub mod devices;
-pub mod mesh;
-pub mod pipeline;
-pub mod render_object;
-pub mod renderer;
-pub mod sync;
-pub mod vertex;
+
+mod allocator;
+mod buffers;
+mod commands;
+mod devices;
+mod mesh;
+mod pipeline;
+mod render_object;
+mod renderer;
+mod sync;
+mod vertex;

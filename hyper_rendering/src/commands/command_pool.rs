@@ -9,7 +9,7 @@ use crate::devices::device::Device;
 use ash::vk::{self, CommandPoolCreateFlags, CommandPoolCreateInfo};
 use log::debug;
 
-pub struct CommandPool {
+pub(crate) struct CommandPool {
     command_pool: vk::CommandPool,
 }
 

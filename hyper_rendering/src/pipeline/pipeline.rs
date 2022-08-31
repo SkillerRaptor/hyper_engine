@@ -29,7 +29,7 @@ enum ShaderStage {
     Fragment,
 }
 
-pub struct Pipeline {
+pub(crate) struct Pipeline {
     pipeline: vk::Pipeline,
     pipeline_layout: PipelineLayout,
 }

@@ -9,7 +9,7 @@ use crate::devices::device::Device;
 use ash::vk::{self, SemaphoreCreateInfo};
 use log::debug;
 
-pub struct Semaphore {
+pub(crate) struct Semaphore {
     semaphore: vk::Semaphore,
 }
 

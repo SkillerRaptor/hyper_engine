@@ -11,7 +11,7 @@ use hyper_platform::window::Window;
 use ash::{extensions::khr::Surface as SurfaceLoader, vk::SurfaceKHR, Entry};
 use log::debug;
 
-pub struct Surface {
+pub(crate) struct Surface {
     surface_loader: SurfaceLoader,
     surface: SurfaceKHR,
 }

@@ -12,7 +12,7 @@ use std::mem;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
-pub struct Vertex {
+pub(crate) struct Vertex {
     position: glm::Vec3,
     color: glm::Vec3,
     normal: glm::Vec3,
