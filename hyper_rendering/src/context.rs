@@ -6,7 +6,11 @@
 
 use crate::{
     allocator::{Allocator, AllocatorCreateInfo},
-    devices::{device::Device, instance::Instance, surface::Surface},
+    devices::{
+        device::Device,
+        instance::{Instance, InstanceCreateInfo},
+        surface::Surface,
+    },
     pipeline::{pipeline::Pipeline, swapchain::Swapchain},
     renderer::Renderer,
 };
@@ -31,7 +35,13 @@ impl RenderContext {
     pub fn new(window: &Window) -> Self {
         let entry = Self::create_entry();
 
-        let instance = Instance::new(window, &entry);
+        let instance_create_info = InstanceCreateInfo {
+            window,
+            entry: &entry,
+        };
+
+        let instance = Instance::new(&instance_create_info);
+
         let surface = Surface::new(window, &entry, &instance);
         let device = Device::new(&instance, &surface);
 
