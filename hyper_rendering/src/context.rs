@@ -13,22 +13,24 @@ use crate::{
 
 use hyper_platform::window::Window;
 
+use ash::Entry;
 use log::info;
 
 pub struct RenderContext {
-    _entry: ash::Entry,
-    instance: Instance,
-    surface: Surface,
-    device: Device,
-    allocator: Allocator,
-    swapchain: Swapchain,
-    pipeline: Pipeline,
     renderer: Renderer,
+    pipeline: Pipeline,
+    swapchain: Swapchain,
+    allocator: Allocator,
+    device: Device,
+    surface: Surface,
+    instance: Instance,
+    _entry: Entry,
 }
 
 impl RenderContext {
     pub fn new(window: &Window) -> Self {
-        let entry = unsafe { ash::Entry::load().expect("Failed to load vulkan") };
+        let entry = Self::create_entry();
+
         let instance = Instance::new(window, &entry);
         let surface = Surface::new(window, &entry, &instance);
         let device = Device::new(&instance, &surface);
@@ -45,18 +47,23 @@ impl RenderContext {
         let pipeline = Pipeline::new(&device, &swapchain);
         let renderer = Renderer::new(&device, &pipeline, &mut allocator);
 
-        info!("Created render context");
-        Self {
-            _entry: entry,
-            instance,
-            surface,
-            device,
-            allocator,
-            swapchain,
-            pipeline,
+        info!("Created vulkan render context");
 
+        Self {
             renderer,
+
+            pipeline,
+            swapchain,
+            allocator,
+            device,
+            surface,
+            instance,
+            _entry: entry,
         }
+    }
+
+    pub fn create_entry() -> Entry {
+        unsafe { Entry::load().expect("Failed to load vulkan") }
     }
 
     pub fn begin_frame(&mut self, window: &Window) {
