@@ -6,3 +6,6 @@ members = [
     "hyper_platform",
     "hyper_rendering",
 ]
+
+[profile.dev]
+opt-level = 1
