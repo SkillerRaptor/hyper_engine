@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{buffers::vertex_buffer::VertexBuffer, devices::device::Device, vertex::Vertex};
+use crate::{
+    allocator::Allocator, buffers::vertex_buffer::VertexBuffer, devices::device::Device,
+    vertex::Vertex,
+};
 
-use gpu_allocator::vulkan::Allocator;
 use nalgebra_glm as glm;
 use tobj::LoadOptions;
 

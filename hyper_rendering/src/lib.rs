@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+pub mod allocator;
 pub mod buffers;
 pub mod commands;
 pub mod context;

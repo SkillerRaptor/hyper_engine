@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{devices::device::Device, vertex::Vertex};
+use crate::{
+    allocator::{Allocator, MemoryLocation},
+    devices::device::Device,
+    vertex::Vertex,
+};
 
 use ash::vk::{Buffer, BufferCreateInfo, BufferUsageFlags, SharingMode};
-use gpu_allocator::{
-    vulkan::{Allocation, AllocationCreateDesc, Allocator},
-    MemoryLocation,
-};
+use gpu_allocator::vulkan::Allocation;
 use log::debug;
 use std::mem;
 
@@ -63,16 +64,7 @@ impl VertexBuffer {
                 .get_buffer_memory_requirements(*internal_buffer)
         };
 
-        let allocation_create_description = AllocationCreateDesc {
-            name: "Vertex Buffer",
-            requirements: memory_requirements,
-            location: MemoryLocation::CpuToGpu,
-            linear: true,
-        };
-
-        let allocation = allocator
-            .allocate(&allocation_create_description)
-            .expect("Failed to allocate vertex buffer memory");
+        let allocation = allocator.allocate(memory_requirements, MemoryLocation::CpuToGpu);
 
         debug!("Allocated vertex buffer memory");
 
@@ -98,9 +90,7 @@ impl VertexBuffer {
     }
 
     pub fn cleanup(&mut self, device: &Device, allocator: &mut Allocator) {
-        allocator
-            .free(self.allocation.take().unwrap())
-            .expect("Failed to free vertex buffer memory");
+        allocator.free(self.allocation.take().unwrap());
 
         unsafe {
             device

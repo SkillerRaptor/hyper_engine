@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::devices::{
-    device::Device, device::SwapchainSupport, instance::Instance, surface::Surface,
+use crate::{
+    allocator::{Allocator, MemoryLocation},
+    devices::{device::Device, device::SwapchainSupport, instance::Instance, surface::Surface},
 };
 
+use gpu_allocator::vulkan::Allocation;
 use hyper_platform::window::Window;
 
 use ash::{
@@ -20,7 +22,6 @@ use ash::{
         SurfaceCapabilitiesKHR, SurfaceFormatKHR, SwapchainCreateInfoKHR, SwapchainKHR,
     },
 };
-use gpu_allocator::vulkan;
 use log::debug;
 
 pub struct Swapchain {
@@ -36,7 +37,7 @@ pub struct Swapchain {
     depth_image: Image,
     depth_image_view: ImageView,
     depth_format: Format,
-    depth_image_allocation: Option<vulkan::Allocation>,
+    depth_image_allocation: Option<Allocation>,
 }
 
 impl Swapchain {
@@ -45,7 +46,7 @@ impl Swapchain {
         instance: &Instance,
         surface: &Surface,
         device: &Device,
-        allocator: &mut vulkan::Allocator,
+        allocator: &mut Allocator,
     ) -> Self {
         let swapchain_loader = SwapchainLoader::new(instance.instance(), device.logical_device());
         let (swapchain, extent, format) =
@@ -249,8 +250,8 @@ impl Swapchain {
     fn create_depth_image(
         window: &Window,
         device: &Device,
-        allocator: &mut vulkan::Allocator,
-    ) -> (Image, ImageView, Format, vulkan::Allocation) {
+        allocator: &mut Allocator,
+    ) -> (Image, ImageView, Format, Allocation) {
         let extent = Extent3D::builder()
             .width(window.framebuffer_width() as u32)
             .height(window.framebuffer_height() as u32)
@@ -279,17 +280,10 @@ impl Swapchain {
                 .expect("Failed to create image")
         };
 
-        let requirements = unsafe { device.logical_device().get_image_memory_requirements(image) };
+        let memory_requirements =
+            unsafe { device.logical_device().get_image_memory_requirements(image) };
 
-        let allocation_create_description = vulkan::AllocationCreateDesc {
-            name: "Depth Image",
-            requirements,
-            location: gpu_allocator::MemoryLocation::GpuOnly,
-            linear: true,
-        };
-        let allocation = allocator
-            .allocate(&allocation_create_description)
-            .expect("Failed to allocate depth image");
+        let allocation = allocator.allocate(memory_requirements, MemoryLocation::GpuOnly);
 
         unsafe {
             device
@@ -323,14 +317,12 @@ impl Swapchain {
         (image, image_view, format, allocation)
     }
 
-    pub fn cleanup(&mut self, device: &Device, allocator: &mut vulkan::Allocator) {
+    pub fn cleanup(&mut self, device: &Device, allocator: &mut Allocator) {
         unsafe {
             device
                 .logical_device()
                 .destroy_image_view(self.depth_image_view, None);
-            allocator
-                .free(self.depth_image_allocation.take().unwrap())
-                .unwrap();
+            allocator.free(self.depth_image_allocation.take().unwrap());
             device
                 .logical_device()
                 .destroy_image(self.depth_image, None);
@@ -349,7 +341,7 @@ impl Swapchain {
         window: &Window,
         surface: &Surface,
         device: &Device,
-        allocator: &mut vulkan::Allocator,
+        allocator: &mut Allocator,
     ) {
         unsafe {
             device.logical_device().device_wait_idle().unwrap();

@@ -7,6 +7,7 @@
 use std::collections::HashMap;
 
 use crate::{
+    allocator::Allocator,
     commands::{command_buffer::CommandBuffer, command_pool::CommandPool},
     devices::{device::Device, surface::Surface},
     mesh::Mesh,
@@ -19,7 +20,6 @@ use crate::{
     vertex::Vertex,
 };
 
-use glm::vec3;
 use hyper_platform::window::Window;
 
 use ash::vk::{
@@ -30,7 +30,7 @@ use ash::vk::{
     PresentInfoKHR, Rect2D, RenderingAttachmentInfo, RenderingInfo, ResolveModeFlags,
     ShaderStageFlags, SubmitInfo, Viewport,
 };
-use gpu_allocator::vulkan::Allocator;
+use glm::vec3;
 use log::info;
 use nalgebra_glm as glm;
 
