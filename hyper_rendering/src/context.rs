@@ -36,21 +36,8 @@ impl RenderContext {
     #[instrument(skip_all)]
     pub fn new(window: &Window) -> Self {
         let entry = Self::create_entry();
-
-        let instance_create_info = InstanceCreateInfo {
-            window,
-            entry: &entry,
-        };
-
-        let instance = Instance::new(&instance_create_info);
-
-        let surface_create_info = SurfaceCreateInfo {
-            window,
-            entry: &entry,
-            instance: instance.instance(),
-        };
-
-        let surface = Surface::new(&surface_create_info);
+        let instance = Self::create_instance(window, &entry);
+        let surface = Self::create_surface(window, &entry, &instance);
         let device = Device::new(&instance, &surface);
 
         let allocate_create_info = AllocatorCreateInfo {
@@ -81,8 +68,26 @@ impl RenderContext {
     }
 
     #[instrument(skip_all)]
-    pub fn create_entry() -> Entry {
+    fn create_entry() -> Entry {
         unsafe { Entry::load().expect("Failed to load vulkan") }
+    }
+
+    #[instrument(skip_all)]
+    fn create_instance(window: &Window, entry: &Entry) -> Instance {
+        let instance_create_info = InstanceCreateInfo { window, entry };
+
+        Instance::new(&instance_create_info)
+    }
+
+    #[instrument(skip_all)]
+    fn create_surface(window: &Window, entry: &Entry, instance: &Instance) -> Surface {
+        let surface_create_info = SurfaceCreateInfo {
+            window,
+            entry,
+            instance: instance.instance(),
+        };
+
+        Surface::new(&surface_create_info)
     }
 
     #[instrument(skip_all)]
