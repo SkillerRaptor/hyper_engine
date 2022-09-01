@@ -38,18 +38,20 @@ impl Surface {
         }
     }
 
-    #[instrument(skip_all)]
-    pub fn cleanup(&mut self) {
-        unsafe {
-            self.surface_loader.destroy_surface(self.surface, None);
-        }
-    }
-
     pub fn surface_loader(&self) -> &SurfaceLoader {
         &self.surface_loader
     }
 
     pub fn surface(&self) -> &SurfaceKHR {
         &self.surface
+    }
+}
+
+impl Drop for Surface {
+    #[instrument(skip_all)]
+    fn drop(&mut self) {
+        unsafe {
+            self.surface_loader.destroy_surface(self.surface, None);
+        }
     }
 }

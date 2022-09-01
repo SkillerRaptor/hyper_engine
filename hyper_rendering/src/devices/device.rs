@@ -4,60 +4,133 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::devices::{instance::Instance, surface::Surface};
-
 use ash::{
-    extensions::khr,
+    extensions::khr::{Surface as SurfaceLoader, Swapchain},
     vk::{
-        self, DeviceCreateInfo, DeviceQueueCreateInfo, PhysicalDevice,
-        PhysicalDeviceDynamicRenderingFeatures, PhysicalDeviceFeatures, PhysicalDeviceType,
-        PresentModeKHR, Queue, QueueFlags, SurfaceCapabilitiesKHR, SurfaceFormatKHR,
+        self, DeviceQueueCreateInfo, PhysicalDevice, PhysicalDeviceDynamicRenderingFeatures,
+        PhysicalDeviceFeatures, PhysicalDeviceType, PresentModeKHR, Queue, QueueFlags,
+        SurfaceCapabilitiesKHR, SurfaceFormatKHR, SurfaceKHR,
     },
+    Instance,
 };
-use log::debug;
+use log::{debug, warn};
 use std::{collections::HashSet, ffi::CStr};
 use tracing::instrument;
 
-pub(crate) struct Device {
-    physical_device: PhysicalDevice,
-    logical_device: ash::Device,
+pub(crate) struct SwapchainSupport {
+    capabilities: SurfaceCapabilitiesKHR,
+    formats: Vec<SurfaceFormatKHR>,
+    present_modes: Vec<PresentModeKHR>,
+}
 
+impl SwapchainSupport {
+    #[instrument(skip_all)]
+    pub fn new(
+        surface_loader: &SurfaceLoader,
+        surface: &SurfaceKHR,
+        physical_device: &PhysicalDevice,
+    ) -> Self {
+        let capabilities = unsafe {
+            surface_loader
+                .get_physical_device_surface_capabilities(*physical_device, *surface)
+                .expect("Failed to get physical device surface capabilities")
+        };
+
+        let formats = unsafe {
+            surface_loader
+                .get_physical_device_surface_formats(*physical_device, *surface)
+                .expect("Failed to get physical device surface formats")
+        };
+
+        let present_modes = unsafe {
+            surface_loader
+                .get_physical_device_surface_present_modes(*physical_device, *surface)
+                .expect("Failed to get physical device surface present modes")
+        };
+
+        Self {
+            capabilities,
+            formats,
+            present_modes,
+        }
+    }
+
+    pub fn capabilities(&self) -> &SurfaceCapabilitiesKHR {
+        &self.capabilities
+    }
+
+    pub fn formats(&self) -> &Vec<SurfaceFormatKHR> {
+        &self.formats
+    }
+
+    pub fn present_modes(&self) -> &Vec<PresentModeKHR> {
+        &self.present_modes
+    }
+}
+
+pub(crate) struct DeviceCreateInfo<'a> {
+    pub instance: &'a Instance,
+    pub surface_loader: &'a SurfaceLoader,
+    pub surface: &'a SurfaceKHR,
+}
+
+pub(crate) struct Device {
     graphics_queue_index: u32,
     graphics_queue: Queue,
+
+    logical_device: ash::Device,
+    physical_device: PhysicalDevice,
 }
 
 impl Device {
-    const DEVICE_EXTENSIONS: &'static [&'static CStr] = &[khr::Swapchain::name()];
+    const DEVICE_EXTENSIONS: &'static [&'static CStr] = &[Swapchain::name()];
 
     #[instrument(skip_all)]
-    pub fn new(instance: &Instance, surface: &Surface) -> Self {
-        let physical_device = Self::pick_physical_device(instance, surface);
-        let logical_device = Self::create_logical_device(instance, surface, &physical_device);
+    pub fn new(create_info: &DeviceCreateInfo) -> Self {
+        let physical_device = Self::pick_physical_device(
+            create_info.instance,
+            create_info.surface_loader,
+            create_info.surface,
+        )
+        .expect("Failed to find suitable physical device");
 
-        let graphics_queue_index = Self::find_graphics_queue(instance, surface, &physical_device);
+        let logical_device = Self::create_logical_device(
+            create_info.instance,
+            create_info.surface_loader,
+            create_info.surface,
+            &physical_device,
+        );
+
+        let graphics_queue_index = Self::find_graphics_queue(
+            create_info.instance,
+            create_info.surface_loader,
+            create_info.surface,
+            &physical_device,
+        )
+        .expect("Failed to find graphics queue");
+
         let graphics_queue = unsafe { logical_device.get_device_queue(graphics_queue_index, 0) };
 
         Self {
-            graphics_queue,
             graphics_queue_index,
+            graphics_queue,
             logical_device,
             physical_device,
         }
     }
 
     #[instrument(skip_all)]
-    fn pick_physical_device(instance: &Instance, surface: &Surface) -> PhysicalDevice {
+    fn pick_physical_device(
+        instance: &Instance,
+        surface_loader: &SurfaceLoader,
+        surface: &SurfaceKHR,
+    ) -> Option<PhysicalDevice> {
         for physical_device in unsafe {
             instance
-                .instance()
                 .enumerate_physical_devices()
                 .expect("Failed to enumerate physical devices")
         } {
-            let properties = unsafe {
-                instance
-                    .instance()
-                    .get_physical_device_properties(physical_device)
-            };
+            let properties = unsafe { instance.get_physical_device_properties(physical_device) };
 
             let device_name = unsafe {
                 CStr::from_ptr(properties.device_name.as_ptr())
@@ -65,40 +138,28 @@ impl Device {
                     .expect("Failed to create CStr")
             };
 
-            if !Self::check_physical_device(instance, surface, &physical_device) {
+            if Self::check_physical_device(instance, surface_loader, surface, &physical_device)
+                .is_none()
+            {
+                warn!("Skipped unsuitable physical device ({})", device_name);
                 continue;
             }
-
-            /*
-            if let Err(error) = Self::check_physical_device(instance, surface, &physical_device) {
-                warn!("Skipped physical device ({}): {}", device_name, error);
-                continue;
-            }
-            */
 
             debug!("Selected physical device ({})", device_name);
-            return physical_device;
+            return Some(physical_device);
         }
 
-        unreachable!();
-
-        // TODO: Add back SuitabilityError
-        //Err(Error::SuitabilityError(SuitabilityError(
-        //    "Failed to find suitable physical device",
-        //)))
+        None
     }
 
     #[instrument(skip_all)]
     fn check_physical_device(
         instance: &Instance,
-        surface: &Surface,
+        surface_loader: &SurfaceLoader,
+        surface: &SurfaceKHR,
         physical_device: &PhysicalDevice,
-    ) -> bool {
-        let properties = unsafe {
-            instance
-                .instance()
-                .get_physical_device_properties(*physical_device)
-        };
+    ) -> Option<()> {
+        let properties = unsafe { instance.get_physical_device_properties(*physical_device) };
 
         let device_name = unsafe {
             CStr::from_ptr(properties.device_name.as_ptr())
@@ -128,11 +189,8 @@ impl Device {
         Self::check_physical_device_extensions(instance, physical_device);
         debug!("  Requested Extensions: {:?}", Self::DEVICE_EXTENSIONS);
 
-        let queue_families = unsafe {
-            instance
-                .instance()
-                .get_physical_device_queue_family_properties(*physical_device)
-        };
+        let queue_families =
+            unsafe { instance.get_physical_device_queue_family_properties(*physical_device) };
         debug!("  Queue Family Count: {}", queue_families.len());
         debug!("  Count | Graphics | Compute | Transfer | Sparse Binding");
         for queue_family in queue_families.iter() {
@@ -173,30 +231,29 @@ impl Device {
             );
         }
 
-        let grahics_queue_index = Self::find_graphics_queue(instance, surface, physical_device);
+        let grahics_queue_index =
+            Self::find_graphics_queue(instance, surface_loader, surface, physical_device)
+                .expect("Failed to find graphics queueu");
         debug!("  Graphics Queue Index: {}", grahics_queue_index);
 
-        let support = SwapchainSupport::new(surface, physical_device);
+        let support = SwapchainSupport::new(surface_loader, surface, physical_device);
         if support.formats.is_empty() || support.present_modes.is_empty() {
-            /*
-            return Err(Error::SuitabilityError(SuitabilityError(
-                "Insufficient swapchain support",
-            )));
-            */
-            return false;
+            return None;
         }
 
         debug!("  Surface Format Count: {}", support.formats.len());
         debug!("  Present Mode Count: {}", support.present_modes.len());
 
-        true
+        Some(())
     }
 
     #[instrument(skip_all)]
-    fn check_physical_device_extensions(instance: &Instance, physical_device: &PhysicalDevice) {
+    fn check_physical_device_extensions(
+        instance: &Instance,
+        physical_device: &PhysicalDevice,
+    ) -> Option<()> {
         let properties = unsafe {
             instance
-                .instance()
                 .enumerate_device_extension_properties(*physical_device)
                 .expect("Failed to enumerate device extension properties")
         };
@@ -210,25 +267,21 @@ impl Device {
             .iter()
             .all(|extension| extensions.contains(extension))
         {
-            /*
-            return Err(Error::SuitabilityError(SuitabilityError(
-                "Missing required device extensions",
-            )));
-            */
+            return None;
         }
+
+        Some(())
     }
 
     #[instrument(skip_all)]
     fn find_graphics_queue(
         instance: &Instance,
-        surface: &Surface,
+        surface_loader: &SurfaceLoader,
+        surface: &SurfaceKHR,
         physical_device: &PhysicalDevice,
-    ) -> u32 {
-        let queue_families = unsafe {
-            instance
-                .instance()
-                .get_physical_device_queue_family_properties(*physical_device)
-        };
+    ) -> Option<u32> {
+        let queue_families =
+            unsafe { instance.get_physical_device_queue_family_properties(*physical_device) };
 
         let mut graphics = None;
         for (i, properties) in queue_families.iter().enumerate() {
@@ -237,13 +290,8 @@ impl Device {
             }
 
             if unsafe {
-                !surface
-                    .surface_loader()
-                    .get_physical_device_surface_support(
-                        *physical_device,
-                        i as u32,
-                        *surface.surface(),
-                    )
+                !surface_loader
+                    .get_physical_device_surface_support(*physical_device, i as u32, *surface)
                     .expect("Failed to get physical device surface support")
             } {
                 continue;
@@ -252,27 +300,24 @@ impl Device {
             graphics = Some(i as u32);
         }
 
-        /*
-        if graphics.is_none() {
-            return Err(Error::SuitabilityError(SuitabilityError(
-                "Missing graphics & present queue",
-            )));
-        }
-        */
+        graphics?;
 
-        graphics.unwrap()
+        Some(graphics.unwrap())
     }
 
     #[instrument(skip_all)]
     fn create_logical_device(
         instance: &Instance,
-        surface: &Surface,
+        surface_loader: &SurfaceLoader,
+        surface: &SurfaceKHR,
         physical_device: &PhysicalDevice,
     ) -> ash::Device {
-        // NOTE: Using HashSet for compute and transfer queue later
+        // TODO: Using HashSet for compute and transfer queue later
         let mut unique_queues = HashSet::new();
 
-        let grahics_queue_index = Self::find_graphics_queue(instance, surface, physical_device);
+        let grahics_queue_index =
+            Self::find_graphics_queue(instance, surface_loader, surface, physical_device)
+                .expect("Failed to find graphics queue");
         unique_queues.insert(grahics_queue_index);
 
         let queue_priorities = &[1.0];
@@ -295,7 +340,7 @@ impl Device {
         let mut dynamic_rendering_feature =
             PhysicalDeviceDynamicRenderingFeatures::builder().dynamic_rendering(true);
 
-        let device_create_info = DeviceCreateInfo::builder()
+        let device_create_info = vk::DeviceCreateInfo::builder()
             .push_next(&mut dynamic_rendering_feature)
             .queue_create_infos(&queue_create_infos)
             .enabled_layer_names(&[])
@@ -304,7 +349,6 @@ impl Device {
 
         let logical_device = unsafe {
             instance
-                .instance()
                 .create_device(*physical_device, &device_create_info, None)
                 .expect("Failed to create logical device")
         };
@@ -312,13 +356,6 @@ impl Device {
         debug!("Created vulkan logical device");
 
         logical_device
-    }
-
-    #[instrument(skip_all)]
-    pub fn cleanup(&mut self) {
-        unsafe {
-            self.logical_device.destroy_device(None);
-        }
     }
 
     pub fn physical_device(&self) -> &PhysicalDevice {
@@ -329,61 +366,20 @@ impl Device {
         &self.logical_device
     }
 
-    pub fn graphics_queue_index(&self) -> &u32 {
-        &self.graphics_queue_index
-    }
-
     pub fn graphics_queue(&self) -> &Queue {
         &self.graphics_queue
     }
+
+    pub fn graphics_queue_index(&self) -> &u32 {
+        &self.graphics_queue_index
+    }
 }
 
-pub(crate) struct SwapchainSupport {
-    capabilities: SurfaceCapabilitiesKHR,
-    formats: Vec<SurfaceFormatKHR>,
-    present_modes: Vec<PresentModeKHR>,
-}
-
-impl SwapchainSupport {
+impl Drop for Device {
     #[instrument(skip_all)]
-    pub fn new(surface: &Surface, physical_device: &PhysicalDevice) -> Self {
-        let capabilities = unsafe {
-            surface
-                .surface_loader()
-                .get_physical_device_surface_capabilities(*physical_device, *surface.surface())
-                .expect("Failed to get physical device surface capabilities")
-        };
-
-        let formats = unsafe {
-            surface
-                .surface_loader()
-                .get_physical_device_surface_formats(*physical_device, *surface.surface())
-                .expect("Failed to get physical device surface formats")
-        };
-
-        let present_modes = unsafe {
-            surface
-                .surface_loader()
-                .get_physical_device_surface_present_modes(*physical_device, *surface.surface())
-                .expect("Failed to get physical device surface present modes")
-        };
-
-        Self {
-            capabilities,
-            formats,
-            present_modes,
+    fn drop(&mut self) {
+        unsafe {
+            self.logical_device.destroy_device(None);
         }
-    }
-
-    pub fn capabilities(&self) -> &SurfaceCapabilitiesKHR {
-        &self.capabilities
-    }
-
-    pub fn formats(&self) -> &Vec<SurfaceFormatKHR> {
-        &self.formats
-    }
-
-    pub fn present_modes(&self) -> &Vec<PresentModeKHR> {
-        &self.present_modes
     }
 }

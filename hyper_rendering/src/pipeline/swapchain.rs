@@ -90,7 +90,11 @@ impl Swapchain {
         swapchain_loader: &SwapchainLoader,
         recreate: bool,
     ) -> (SwapchainKHR, Extent2D, Format) {
-        let support = SwapchainSupport::new(surface, device.physical_device());
+        let support = SwapchainSupport::new(
+            surface.surface_loader(),
+            surface.surface(),
+            device.physical_device(),
+        );
 
         let extent = Self::choose_extent(window, support.capabilities());
         let format = Self::choose_surface_format(support.formats());

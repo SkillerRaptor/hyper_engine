@@ -208,18 +208,6 @@ impl Instance {
         (debug_utils, debug_messenger)
     }
 
-    #[instrument(skip_all)]
-    pub fn cleanup(&mut self) {
-        unsafe {
-            if self.validation_layer_enabled {
-                self.debug_loader
-                    .destroy_debug_utils_messenger(self.debug_messenger, None);
-            }
-
-            self.instance.destroy_instance(None);
-        }
-    }
-
     unsafe extern "system" fn debug_callback(
         severity: DebugUtilsMessageSeverityFlagsEXT,
         _type: DebugUtilsMessageTypeFlagsEXT,
@@ -248,5 +236,19 @@ impl Instance {
 
     pub fn instance(&self) -> &ash::Instance {
         &self.instance
+    }
+}
+
+impl Drop for Instance {
+    #[instrument(skip_all)]
+    fn drop(&mut self) {
+        unsafe {
+            if self.validation_layer_enabled {
+                self.debug_loader
+                    .destroy_debug_utils_messenger(self.debug_messenger, None);
+            }
+
+            self.instance.destroy_instance(None);
+        }
     }
 }

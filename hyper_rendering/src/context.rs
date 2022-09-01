@@ -7,7 +7,7 @@
 use crate::{
     allocator::{Allocator, AllocatorCreateInfo},
     devices::{
-        device::Device,
+        device::{Device, DeviceCreateInfo},
         instance::{Instance, InstanceCreateInfo},
         surface::{Surface, SurfaceCreateInfo},
     },
@@ -28,7 +28,7 @@ pub struct RenderContext {
     allocator: Allocator,
     device: Device,
     surface: Surface,
-    instance: Instance,
+    _instance: Instance,
     _entry: Entry,
 }
 
@@ -38,15 +38,8 @@ impl RenderContext {
         let entry = Self::create_entry();
         let instance = Self::create_instance(window, &entry);
         let surface = Self::create_surface(window, &entry, &instance);
-        let device = Device::new(&instance, &surface);
-
-        let allocate_create_info = AllocatorCreateInfo {
-            instance: instance.instance(),
-            logical_device: device.logical_device(),
-            physical_device: device.physical_device(),
-        };
-
-        let mut allocator = Allocator::new(&allocate_create_info);
+        let device = Self::create_device(&instance, &surface);
+        let mut allocator = Self::create_allocator(&instance, &device);
 
         let swapchain = Swapchain::new(window, &instance, &surface, &device, &mut allocator);
         let pipeline = Pipeline::new(&device, &swapchain);
@@ -62,7 +55,7 @@ impl RenderContext {
             allocator,
             device,
             surface,
-            instance,
+            _instance: instance,
             _entry: entry,
         }
     }
@@ -88,6 +81,28 @@ impl RenderContext {
         };
 
         Surface::new(&surface_create_info)
+    }
+
+    #[instrument(skip_all)]
+    fn create_device(instance: &Instance, surface: &Surface) -> Device {
+        let device_create_info = DeviceCreateInfo {
+            instance: instance.instance(),
+            surface_loader: surface.surface_loader(),
+            surface: surface.surface(),
+        };
+
+        Device::new(&device_create_info)
+    }
+
+    #[instrument(skip_all)]
+    fn create_allocator(instance: &Instance, device: &Device) -> Allocator {
+        let allocate_create_info = AllocatorCreateInfo {
+            instance: instance.instance(),
+            logical_device: device.logical_device(),
+            physical_device: device.physical_device(),
+        };
+
+        Allocator::new(&allocate_create_info)
     }
 
     #[instrument(skip_all)]
@@ -135,9 +150,6 @@ impl Drop for RenderContext {
             self.pipeline.cleanup(&self.device);
             self.swapchain.cleanup(&self.device, &mut self.allocator);
             self.allocator.cleanup();
-            self.device.cleanup();
-            self.surface.cleanup();
-            self.instance.cleanup();
         }
     }
 }
