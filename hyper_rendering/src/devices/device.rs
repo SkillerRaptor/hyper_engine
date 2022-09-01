@@ -16,6 +16,7 @@ use ash::{
 };
 use log::debug;
 use std::{collections::HashSet, ffi::CStr};
+use tracing::instrument;
 
 pub(crate) struct Device {
     physical_device: PhysicalDevice,
@@ -28,6 +29,7 @@ pub(crate) struct Device {
 impl Device {
     const DEVICE_EXTENSIONS: &'static [&'static CStr] = &[khr::Swapchain::name()];
 
+    #[instrument(skip_all)]
     pub fn new(instance: &Instance, surface: &Surface) -> Self {
         let physical_device = Self::pick_physical_device(instance, surface);
         let logical_device = Self::create_logical_device(instance, surface, &physical_device);
@@ -43,6 +45,7 @@ impl Device {
         }
     }
 
+    #[instrument(skip_all)]
     fn pick_physical_device(instance: &Instance, surface: &Surface) -> PhysicalDevice {
         for physical_device in unsafe {
             instance
@@ -85,6 +88,7 @@ impl Device {
         //)))
     }
 
+    #[instrument(skip_all)]
     fn check_physical_device(
         instance: &Instance,
         surface: &Surface,
@@ -188,6 +192,7 @@ impl Device {
         true
     }
 
+    #[instrument(skip_all)]
     fn check_physical_device_extensions(instance: &Instance, physical_device: &PhysicalDevice) {
         let properties = unsafe {
             instance
@@ -213,6 +218,7 @@ impl Device {
         }
     }
 
+    #[instrument(skip_all)]
     fn find_graphics_queue(
         instance: &Instance,
         surface: &Surface,
@@ -257,6 +263,7 @@ impl Device {
         graphics.unwrap()
     }
 
+    #[instrument(skip_all)]
     fn create_logical_device(
         instance: &Instance,
         surface: &Surface,
@@ -307,6 +314,7 @@ impl Device {
         logical_device
     }
 
+    #[instrument(skip_all)]
     pub fn cleanup(&mut self) {
         unsafe {
             self.logical_device.destroy_device(None);
@@ -337,6 +345,7 @@ pub(crate) struct SwapchainSupport {
 }
 
 impl SwapchainSupport {
+    #[instrument(skip_all)]
     pub fn new(surface: &Surface, physical_device: &PhysicalDevice) -> Self {
         let capabilities = unsafe {
             surface

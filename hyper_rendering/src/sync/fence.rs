@@ -8,12 +8,14 @@ use crate::devices::device::Device;
 
 use ash::vk::{self, FenceCreateFlags, FenceCreateInfo};
 use log::debug;
+use tracing::instrument;
 
 pub(crate) struct Fence {
     fence: vk::Fence,
 }
 
 impl Fence {
+    #[instrument(skip_all)]
     pub fn new(device: &Device) -> Self {
         let fence_create_info = FenceCreateInfo::builder().flags(FenceCreateFlags::SIGNALED);
 
@@ -29,6 +31,7 @@ impl Fence {
         Self { fence }
     }
 
+    #[instrument(skip_all)]
     pub fn cleanup(&mut self, device: &Device) {
         unsafe {
             device.logical_device().destroy_fence(self.fence, None);
@@ -39,6 +42,7 @@ impl Fence {
         &self.fence
     }
 
+    #[instrument(skip_all)]
     pub fn wait(&self, device: &Device) {
         unsafe {
             device
@@ -48,6 +52,7 @@ impl Fence {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn reset(&self, device: &Device) {
         unsafe {
             device

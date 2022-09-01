@@ -8,12 +8,14 @@ use crate::devices::device::Device;
 
 use ash::vk::{self, CommandPoolCreateFlags, CommandPoolCreateInfo};
 use log::debug;
+use tracing::instrument;
 
 pub(crate) struct CommandPool {
     command_pool: vk::CommandPool,
 }
 
 impl CommandPool {
+    #[instrument(skip_all)]
     pub fn new(device: &Device) -> Self {
         let command_pool_create_info = CommandPoolCreateInfo::builder()
             .flags(CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
@@ -31,6 +33,7 @@ impl CommandPool {
         Self { command_pool }
     }
 
+    #[instrument(skip_all)]
     pub fn cleanup(&mut self, device: &Device) {
         unsafe {
             device

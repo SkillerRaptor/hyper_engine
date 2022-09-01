@@ -8,12 +8,14 @@ use crate::devices::device::Device;
 
 use ash::vk::{self, SemaphoreCreateInfo};
 use log::debug;
+use tracing::instrument;
 
 pub(crate) struct Semaphore {
     semaphore: vk::Semaphore,
 }
 
 impl Semaphore {
+    #[instrument(skip_all)]
     pub fn new(device: &Device) -> Self {
         let semaphore_create_info = SemaphoreCreateInfo::builder();
 
@@ -29,6 +31,7 @@ impl Semaphore {
         Self { semaphore }
     }
 
+    #[instrument(skip_all)]
     pub fn cleanup(&mut self, device: &Device) {
         unsafe {
             device

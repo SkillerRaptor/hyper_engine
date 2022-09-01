@@ -13,6 +13,7 @@ use gpu_allocator::{
     AllocatorDebugSettings,
 };
 use std::mem::ManuallyDrop;
+use tracing::instrument;
 
 #[allow(dead_code)]
 pub enum MemoryLocation {
@@ -33,6 +34,7 @@ pub struct Allocator {
 }
 
 impl Allocator {
+    #[instrument(skip_all)]
     pub fn new(allocator_create_info: &AllocatorCreateInfo) -> Self {
         let debug_enabled = cfg!(debug_assertions);
 
@@ -61,6 +63,7 @@ impl Allocator {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn cleanup(&mut self) {
         unsafe {
             ManuallyDrop::drop(&mut self.allocator);
@@ -68,6 +71,7 @@ impl Allocator {
     }
 
     // TODO: Replace Allocation with wrapper type
+    #[instrument(skip_all)]
     pub fn allocate(
         &mut self,
         memory_requirements: MemoryRequirements,
@@ -92,6 +96,7 @@ impl Allocator {
             .expect("Failed to allocate vulkan memory")
     }
 
+    #[instrument(skip_all)]
     pub fn free(&mut self, allocation: Allocation) {
         self.allocator
             .free(allocation)

@@ -33,6 +33,7 @@ use ash::vk::{
 use glm::vec3;
 use log::info;
 use nalgebra_glm as glm;
+use tracing::instrument;
 
 pub(crate) struct Renderer {
     current_image_index: usize,
@@ -50,6 +51,7 @@ pub(crate) struct Renderer {
 }
 
 impl Renderer {
+    #[instrument(skip_all)]
     pub fn new(device: &Device, pipeline: &Pipeline, allocator: &mut Allocator) -> Self {
         let command_pool = CommandPool::new(device);
         let command_buffer = CommandBuffer::new(device, &command_pool, CommandBufferLevel::PRIMARY);
@@ -149,6 +151,7 @@ impl Renderer {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn cleanup(&mut self, device: &Device, allocator: &mut Allocator) {
         for mesh in &mut self.meshes.values_mut() {
             mesh.cleanup(device, allocator);
@@ -160,6 +163,7 @@ impl Renderer {
         self.command_pool.cleanup(device);
     }
 
+    #[instrument(skip_all)]
     pub fn begin_frame(
         &mut self,
         window: &Window,
@@ -278,6 +282,7 @@ impl Renderer {
         self.command_buffer.begin_rendering(device, &rendering_info);
     }
 
+    #[instrument(skip_all)]
     pub fn end_frame(&self, device: &Device, swapchain: &Swapchain) {
         self.command_buffer.end_rendering(device);
 
@@ -311,6 +316,7 @@ impl Renderer {
         self.command_buffer.end(device);
     }
 
+    #[instrument(skip_all)]
     pub fn submit(
         &mut self,
         window: &Window,
@@ -368,6 +374,7 @@ impl Renderer {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn draw(
         &self,
         window: &Window,

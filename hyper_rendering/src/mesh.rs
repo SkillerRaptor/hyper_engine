@@ -11,6 +11,7 @@ use crate::{
 
 use nalgebra_glm as glm;
 use tobj::LoadOptions;
+use tracing::instrument;
 
 pub(crate) struct Mesh {
     vertices: Vec<Vertex>,
@@ -18,6 +19,7 @@ pub(crate) struct Mesh {
 }
 
 impl Mesh {
+    #[instrument(skip_all)]
     pub fn new(device: &Device, allocator: &mut Allocator, vertices: &Vec<Vertex>) -> Self {
         let vertex_buffer = VertexBuffer::new(device, allocator, vertices);
 
@@ -27,6 +29,7 @@ impl Mesh {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn load(device: &Device, allocator: &mut Allocator, file_name: &str) -> Self {
         let (models, _) = tobj::load_obj(&file_name, &LoadOptions::default())
             .expect("Failed to load object file");
@@ -66,6 +69,7 @@ impl Mesh {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn cleanup(&mut self, device: &Device, allocator: &mut Allocator) {
         self.vertex_buffer.cleanup(device, allocator);
     }

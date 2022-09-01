@@ -9,6 +9,7 @@ use ash::vk::{
 };
 use nalgebra_glm as glm;
 use std::mem;
+use tracing::instrument;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -19,6 +20,7 @@ pub(crate) struct Vertex {
 }
 
 impl Vertex {
+    #[instrument(skip_all)]
     pub fn new(position: glm::Vec3, color: glm::Vec3, normal: glm::Vec3) -> Self {
         Self {
             position,

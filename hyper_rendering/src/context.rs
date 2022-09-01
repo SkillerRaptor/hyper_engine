@@ -19,6 +19,7 @@ use hyper_platform::window::Window;
 
 use ash::Entry;
 use log::info;
+use tracing::instrument;
 
 pub struct RenderContext {
     renderer: Renderer,
@@ -32,6 +33,7 @@ pub struct RenderContext {
 }
 
 impl RenderContext {
+    #[instrument(skip_all)]
     pub fn new(window: &Window) -> Self {
         let entry = Self::create_entry();
 
@@ -78,10 +80,12 @@ impl RenderContext {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn create_entry() -> Entry {
         unsafe { Entry::load().expect("Failed to load vulkan") }
     }
 
+    #[instrument(skip_all)]
     pub fn begin_frame(&mut self, window: &Window) {
         self.renderer.begin_frame(
             window,
@@ -93,10 +97,12 @@ impl RenderContext {
         );
     }
 
+    #[instrument(skip_all)]
     pub fn end_frame(&self) {
         self.renderer.end_frame(&self.device, &self.swapchain);
     }
 
+    #[instrument(skip_all)]
     pub fn submit(&mut self, window: &Window) {
         self.renderer.submit(
             window,
@@ -107,6 +113,7 @@ impl RenderContext {
         );
     }
 
+    #[instrument(skip_all)]
     pub fn draw(&self, window: &Window) {
         self.renderer
             .draw(window, &self.device, &self.swapchain, &self.pipeline);
@@ -114,6 +121,7 @@ impl RenderContext {
 }
 
 impl Drop for RenderContext {
+    #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
             self.device.logical_device().device_wait_idle().unwrap();

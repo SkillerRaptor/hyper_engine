@@ -23,6 +23,7 @@ use ash::vk::{
 use log::debug;
 use nalgebra_glm as glm;
 use std::{ffi::CString, mem};
+use tracing::instrument;
 
 enum ShaderStage {
     Vertex,
@@ -35,6 +36,7 @@ pub(crate) struct Pipeline {
 }
 
 impl Pipeline {
+    #[instrument(skip_all)]
     pub fn new(device: &Device, swapchain: &Swapchain) -> Self {
         let entry_point = CString::new("main").expect("Failed to create CString");
 
@@ -331,6 +333,7 @@ impl Pipeline {
         }
     }
 
+    #[instrument(skip_all)]
     fn create_shader_module(
         device: &Device,
         shader_stage: ShaderStage,
@@ -365,6 +368,7 @@ impl Pipeline {
         shader_module
     }
 
+    #[instrument(skip_all)]
     pub fn cleanup(&mut self, device: &Device) {
         unsafe {
             device

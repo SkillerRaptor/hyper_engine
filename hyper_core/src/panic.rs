@@ -7,7 +7,9 @@
 use backtrace::Backtrace;
 use log::error;
 use std::{panic, thread};
+use tracing::instrument;
 
+#[instrument(skip_all)]
 pub fn init() {
     panic::set_hook(Box::new(move |panic_info| {
         let backtrace = if cfg!(debug_assertions) {

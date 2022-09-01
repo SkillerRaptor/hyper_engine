@@ -13,6 +13,7 @@ use ash::{
 use glfw::{ClientApiHint, Glfw, WindowEvent, WindowHint, WindowMode};
 use log::info;
 use std::sync::mpsc::Receiver;
+use tracing::instrument;
 
 pub struct Window {
     title: String,
@@ -24,6 +25,7 @@ pub struct Window {
 }
 
 impl Window {
+    #[instrument(skip_all)]
     pub fn new(title: &str, width: u32, height: u32) -> Self {
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).expect("Failed to initialize GLFW");
         glfw.window_hint(WindowHint::ClientApi(ClientApiHint::NoApi));
@@ -49,6 +51,7 @@ impl Window {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn handle_events(&mut self, event_bus: &mut EventBus) {
         self.glfw.poll_events();
 
@@ -57,10 +60,7 @@ impl Window {
         }
     }
 
-    pub fn time(&self) -> f64 {
-        self.glfw.get_time()
-    }
-
+    #[instrument(skip_all)]
     pub fn create_window_surface(&self, instance: &Instance) -> SurfaceKHR {
         let mut surface = 0;
         self.native_window.create_window_surface(
@@ -130,5 +130,9 @@ impl Window {
 
     pub fn should_close(&self) -> bool {
         self.native_window.should_close()
+    }
+
+    pub fn time(&self) -> f64 {
+        self.glfw.get_time()
     }
 }

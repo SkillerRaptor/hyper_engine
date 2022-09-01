@@ -21,6 +21,7 @@ use std::{
     ffi::{CStr, CString},
     os::raw::c_void,
 };
+use tracing::instrument;
 
 pub(crate) struct InstanceCreateInfo<'a> {
     pub window: &'a Window,
@@ -39,6 +40,7 @@ pub(crate) struct Instance {
 impl Instance {
     const VALIDATION_LAYER: &'static str = "VK_LAYER_KHRONOS_validation";
 
+    #[instrument(skip_all)]
     pub fn new(create_info: &InstanceCreateInfo) -> Self {
         let validation_layer_enabled = Self::check_validation_layer_support(create_info.entry);
 
@@ -61,6 +63,7 @@ impl Instance {
         }
     }
 
+    #[instrument(skip_all)]
     fn check_validation_layer_support(entry: &Entry) -> bool {
         if !cfg!(debug_assertions) {
             return false;
@@ -90,6 +93,7 @@ impl Instance {
         true
     }
 
+    #[instrument(skip_all)]
     fn create_instance(
         window: &Window,
         entry: &Entry,
@@ -169,6 +173,7 @@ impl Instance {
         instance
     }
 
+    #[instrument(skip_all)]
     fn create_debug_messenger(
         entry: &Entry,
         instance: &ash::Instance,
@@ -203,6 +208,7 @@ impl Instance {
         (debug_utils, debug_messenger)
     }
 
+    #[instrument(skip_all)]
     pub fn cleanup(&mut self) {
         unsafe {
             if self.validation_layer_enabled {

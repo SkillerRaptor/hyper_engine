@@ -7,8 +7,11 @@
 use hyper_core::{logger, panic};
 use hyper_platform::{event_bus::EventBus, window::Window};
 use hyper_rendering::context::RenderContext;
+use tracing::{instrument, subscriber};
+use tracing_tracy::TracyLayer;
 
 use std::time::Instant;
+use tracing_subscriber::layer::SubscriberExt;
 
 pub struct Application {
     render_context: RenderContext,
@@ -18,6 +21,8 @@ pub struct Application {
 
 impl Application {
     pub fn new() -> Self {
+        Self::setup_tracing();
+
         logger::init();
         panic::init();
 
@@ -32,6 +37,12 @@ impl Application {
         }
     }
 
+    fn setup_tracing() {
+        subscriber::set_global_default(tracing_subscriber::registry().with(TracyLayer::new()))
+            .expect("Failed to set tracy layer");
+    }
+
+    #[instrument(skip_all)]
     pub fn run(&mut self) {
         let mut fps: u32 = 0;
         let mut last_frame = Instant::now();
@@ -48,18 +59,25 @@ impl Application {
                 last_fps_frame = current_frame;
             }
 
-            // NOTE: Update
-            self.window.handle_events(&mut self.event_bus);
-
-            // NOTE: Render
-            self.render_context.begin_frame(&self.window);
-            self.render_context.draw(&self.window);
-            self.render_context.end_frame();
-            self.render_context.submit(&self.window);
+            self.update();
+            self.render();
 
             fps += 1;
             last_frame = current_frame;
         }
+    }
+
+    #[instrument(skip_all)]
+    fn update(&mut self) {
+        self.window.handle_events(&mut self.event_bus);
+    }
+
+    #[instrument(skip_all)]
+    fn render(&mut self) {
+        self.render_context.begin_frame(&self.window);
+        self.render_context.draw(&self.window);
+        self.render_context.end_frame();
+        self.render_context.submit(&self.window);
     }
 }
 

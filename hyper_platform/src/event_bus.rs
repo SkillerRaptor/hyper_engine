@@ -14,6 +14,7 @@ use super::mouse_code::MouseCode;
 
 use glfw::{Action, WindowEvent};
 use log::debug;
+use tracing::instrument;
 
 type Listeners = Vec<Box<dyn FnMut(&Event)>>;
 
@@ -23,6 +24,7 @@ pub struct EventBus {
 }
 
 impl EventBus {
+    #[instrument(skip_all)]
     pub fn invoke(&mut self, window_event: &WindowEvent) {
         let event = match window_event {
             WindowEvent::Pos(x, y) => Event::WindowMove(*x, *y),
@@ -53,6 +55,7 @@ impl EventBus {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn register_listener<F>(&mut self, name: &str, listener: F)
     where
         F: FnMut(&Event) + 'static,

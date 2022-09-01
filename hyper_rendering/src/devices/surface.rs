@@ -8,6 +8,7 @@ use hyper_platform::window::Window;
 
 use ash::{extensions::khr::Surface as SurfaceLoader, vk::SurfaceKHR, Entry, Instance};
 use log::debug;
+use tracing::instrument;
 
 pub(crate) struct SurfaceCreateInfo<'a> {
     pub window: &'a Window,
@@ -21,6 +22,7 @@ pub(crate) struct Surface {
 }
 
 impl Surface {
+    #[instrument(skip_all)]
     pub fn new(create_info: &SurfaceCreateInfo) -> Self {
         let surface_loader = SurfaceLoader::new(create_info.entry, create_info.instance);
 
@@ -36,6 +38,7 @@ impl Surface {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn cleanup(&mut self) {
         unsafe {
             self.surface_loader.destroy_surface(self.surface, None);

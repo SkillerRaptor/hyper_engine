@@ -15,12 +15,14 @@ use ash::vk::{
 };
 use log::debug;
 use std::{mem, slice};
+use tracing::instrument;
 
 pub(crate) struct CommandBuffer {
     command_buffer: vk::CommandBuffer,
 }
 
 impl CommandBuffer {
+    #[instrument(skip_all)]
     pub fn new(device: &Device, command_pool: &CommandPool, level: CommandBufferLevel) -> Self {
         let allocate_info = CommandBufferAllocateInfo::builder()
             .command_pool(*command_pool.command_pool())
@@ -43,6 +45,7 @@ impl CommandBuffer {
         &self.command_buffer
     }
 
+    #[instrument(skip_all)]
     pub fn begin(
         &self,
         device: &Device,
@@ -61,6 +64,7 @@ impl CommandBuffer {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn end(&self, device: &Device) {
         unsafe {
             device
@@ -70,6 +74,7 @@ impl CommandBuffer {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn reset(&self, device: &Device, reset_flags: CommandBufferResetFlags) {
         unsafe {
             device
@@ -79,6 +84,7 @@ impl CommandBuffer {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn begin_rendering(&self, device: &Device, rendering_info: &RenderingInfo) {
         unsafe {
             device
@@ -87,6 +93,7 @@ impl CommandBuffer {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn end_rendering(&self, device: &Device) {
         unsafe {
             device
@@ -96,6 +103,7 @@ impl CommandBuffer {
     }
 
     #[allow(clippy::too_many_arguments)]
+    #[instrument(skip_all)]
     pub fn pipeline_barrier(
         &self,
         device: &Device,
@@ -119,6 +127,7 @@ impl CommandBuffer {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn bind_pipeline(
         &self,
         device: &Device,
@@ -134,6 +143,7 @@ impl CommandBuffer {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn bind_vertex_buffers(
         &self,
         device: &Device,
@@ -151,6 +161,7 @@ impl CommandBuffer {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn push_constants<T>(
         &self,
         device: &Device,
@@ -170,6 +181,7 @@ impl CommandBuffer {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn set_scissor(&self, device: &Device, first_scissor: u32, scissors: &[Rect2D]) {
         unsafe {
             device
@@ -178,6 +190,7 @@ impl CommandBuffer {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn set_viewport(&self, device: &Device, first_viewport: u32, viewports: &[Viewport]) {
         unsafe {
             device.logical_device().cmd_set_viewport(
@@ -188,6 +201,7 @@ impl CommandBuffer {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn draw(
         &self,
         device: &Device,

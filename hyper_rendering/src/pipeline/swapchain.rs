@@ -23,6 +23,7 @@ use ash::{
     },
 };
 use log::debug;
+use tracing::instrument;
 
 pub(crate) struct Swapchain {
     swapchain_loader: SwapchainLoader,
@@ -41,6 +42,7 @@ pub(crate) struct Swapchain {
 }
 
 impl Swapchain {
+    #[instrument(skip_all)]
     pub fn new(
         window: &Window,
         instance: &Instance,
@@ -80,6 +82,7 @@ impl Swapchain {
         }
     }
 
+    #[instrument(skip_all)]
     fn create_swapchain(
         window: &Window,
         surface: &Surface,
@@ -169,6 +172,7 @@ impl Swapchain {
         (swapchain, extent, format.format)
     }
 
+    #[instrument(skip_all)]
     fn choose_extent(window: &Window, capabilities: &SurfaceCapabilitiesKHR) -> Extent2D {
         if capabilities.current_extent.width != u32::MAX
             || capabilities.current_extent.height != u32::MAX
@@ -192,6 +196,7 @@ impl Swapchain {
         }
     }
 
+    #[instrument(skip_all)]
     fn choose_surface_format(formats: &[SurfaceFormatKHR]) -> SurfaceFormatKHR {
         formats
             .iter()
@@ -203,6 +208,7 @@ impl Swapchain {
             .unwrap_or_else(|| formats[0])
     }
 
+    #[instrument(skip_all)]
     fn choose_present_mode(present_modes: &[PresentModeKHR]) -> PresentModeKHR {
         present_modes
             .iter()
@@ -211,6 +217,7 @@ impl Swapchain {
             .unwrap_or(PresentModeKHR::FIFO)
     }
 
+    #[instrument(skip_all)]
     fn create_image_views(device: &Device, format: &Format, images: &[Image]) -> Vec<ImageView> {
         let image_views = images
             .iter()
@@ -247,6 +254,7 @@ impl Swapchain {
         image_views
     }
 
+    #[instrument(skip_all)]
     fn create_depth_image(
         window: &Window,
         device: &Device,
@@ -317,6 +325,7 @@ impl Swapchain {
         (image, image_view, format, allocation)
     }
 
+    #[instrument(skip_all)]
     pub fn cleanup(&mut self, device: &Device, allocator: &mut Allocator) {
         unsafe {
             device
@@ -336,6 +345,7 @@ impl Swapchain {
         }
     }
 
+    #[instrument(skip_all)]
     pub fn recreate(
         &mut self,
         window: &Window,

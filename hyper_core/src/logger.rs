@@ -9,9 +9,11 @@ use colored::Colorize;
 use fern::Dispatch;
 use log::{Level, LevelFilter};
 use std::{fs, io, path::Path};
+use tracing::instrument;
 
 const LOG_FOLDER: &str = "./logs/";
 
+#[instrument(skip_all)]
 pub fn init() {
     if !Path::new(LOG_FOLDER).exists() {
         fs::create_dir(LOG_FOLDER).unwrap_or_else(|_| panic!("Failed to create {}", LOG_FOLDER));
