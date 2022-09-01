@@ -400,7 +400,8 @@ impl Renderer {
 
         projection_matrix.m22 *= -1_f32;
 
-        //
+        let mut last_mesh = String::new();
+        let mut last_material = String::new();
         for render_object in &self.renderables {
             let mesh = self.meshes.get(&render_object.mesh).unwrap();
 
@@ -408,26 +409,28 @@ impl Renderer {
             let pipeline = material.pipeline;
             let pipeline_layout = material.pipeline_layout;
 
-            self.command_buffer
-                .bind_pipeline(device, PipelineBindPoint::GRAPHICS, pipeline);
+            if render_object.material != last_material {
+                self.command_buffer
+                    .bind_pipeline(device, PipelineBindPoint::GRAPHICS, pipeline);
 
-            let extent = swapchain.extent();
-            let viewport = Viewport::builder()
-                .x(0.0)
-                .y(0.0)
-                .width(extent.width as f32)
-                .height(extent.height as f32)
-                .min_depth(0.0)
-                .max_depth(1.0);
-            self.command_buffer.set_viewport(device, 0, &[*viewport]);
+                let extent = swapchain.extent();
+                let viewport = Viewport::builder()
+                    .x(0.0)
+                    .y(0.0)
+                    .width(extent.width as f32)
+                    .height(extent.height as f32)
+                    .min_depth(0.0)
+                    .max_depth(1.0);
+                self.command_buffer.set_viewport(device, 0, &[*viewport]);
 
-            let offset = Offset2D::builder();
-            let scissor = Rect2D::builder().offset(*offset).extent(*extent);
-            self.command_buffer.set_scissor(device, 0, &[*scissor]);
+                let offset = Offset2D::builder();
+                let scissor = Rect2D::builder().offset(*offset).extent(*extent);
+                self.command_buffer.set_scissor(device, 0, &[*scissor]);
 
-            let model_matrix = render_object.transform;
+                last_material = render_object.material.clone();
+            }
 
-            let mesh_matrix = projection_matrix * view_matrix * model_matrix;
+            let mesh_matrix = projection_matrix * view_matrix * render_object.transform;
 
             let push_constants = MeshPushConstants {
                 data: glm::vec4(0.0, 0.0, 0.0, 0.0),
@@ -445,8 +448,12 @@ impl Renderer {
             let buffers = &[*mesh.vertex_buffer().internal_buffer()];
             let offsets = &[0];
 
-            self.command_buffer
-                .bind_vertex_buffers(device, 0, buffers, offsets);
+            if render_object.mesh != last_mesh {
+                self.command_buffer
+                    .bind_vertex_buffers(device, 0, buffers, offsets);
+
+                last_mesh = render_object.mesh.clone();
+            }
 
             self.command_buffer
                 .draw(device, mesh.vertices().len() as u32, 1, 0, 0);
