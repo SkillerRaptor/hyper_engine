@@ -149,7 +149,6 @@ impl Drop for RenderContext {
             self.renderer.cleanup(&self.device, &mut self.allocator);
             self.pipeline.cleanup(&self.device);
             self.swapchain.cleanup(&self.device, &mut self.allocator);
-            self.allocator.cleanup();
         }
     }
 }

@@ -12,7 +12,7 @@ use gpu_allocator::{
     vulkan::{self, Allocation, AllocationCreateDesc, AllocatorCreateDesc},
     AllocatorDebugSettings,
 };
-use std::mem::ManuallyDrop;
+
 use tracing::instrument;
 
 #[allow(dead_code)]
@@ -30,7 +30,7 @@ pub struct AllocatorCreateInfo<'a> {
 }
 
 pub struct Allocator {
-    allocator: ManuallyDrop<vulkan::Allocator>,
+    allocator: vulkan::Allocator,
 }
 
 impl Allocator {
@@ -58,16 +58,7 @@ impl Allocator {
         let allocator = vulkan::Allocator::new(&allocator_create_description)
             .expect("Failed to create vulkan allocator");
 
-        Self {
-            allocator: ManuallyDrop::new(allocator),
-        }
-    }
-
-    #[instrument(skip_all)]
-    pub fn cleanup(&mut self) {
-        unsafe {
-            ManuallyDrop::drop(&mut self.allocator);
-        }
+        Self { allocator }
     }
 
     // TODO: Replace Allocation with wrapper type
