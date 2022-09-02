@@ -36,10 +36,7 @@ impl Window {
 
         native_window.set_all_polling(true);
 
-        info!(
-            "Created window with title '{}' and size {}x{}",
-            title, width, height
-        );
+        info!("Created window '{}' ({}x{})", title, width, height);
 
         Self {
             title: String::from(title),

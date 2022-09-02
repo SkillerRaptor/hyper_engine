@@ -45,7 +45,7 @@ impl RenderContext {
         let pipeline = Pipeline::new(&device, &swapchain);
         let renderer = Renderer::new(&device, &pipeline, &mut allocator);
 
-        info!("Created vulkan render context");
+        info!("Created render context");
 
         Self {
             renderer,

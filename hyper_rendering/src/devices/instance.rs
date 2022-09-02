@@ -83,7 +83,7 @@ impl Instance {
 
         if !unqiue_instance_layers.contains(&validation_layer) {
             warn!(
-                "The requested validation layer '{}' is not supported",
+                "Requested unsupported validation layer '{}'",
                 Self::VALIDATION_LAYER
             );
 
@@ -165,10 +165,10 @@ impl Instance {
         let instance = unsafe {
             entry
                 .create_instance(&instance_create_info, None)
-                .expect("Failed to create vulkan instance")
+                .expect("Failed to create instance")
         };
 
-        debug!("Created vulkan instance");
+        debug!("Created instance");
 
         instance
     }
@@ -200,10 +200,10 @@ impl Instance {
         let debug_messenger = unsafe {
             debug_utils
                 .create_debug_utils_messenger(&debug_utils_messenger_create_info, None)
-                .expect("Failed to create vulkan debug utils messenger")
+                .expect("Failed to create debug utils messenger")
         };
 
-        debug!("Created vulkan debug utils messenger");
+        debug!("Created debug utils messenger");
 
         (debug_utils, debug_messenger)
     }

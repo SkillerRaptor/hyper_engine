@@ -142,10 +142,7 @@ impl Device {
                 surface,
                 &physical_device,
             ) {
-                warn!(
-                    "Skipped unsuitable physical device with name '{}'",
-                    device_name
-                );
+                warn!("Skipped unsuitable physical device '{}'", device_name);
                 continue;
             }
 
@@ -369,7 +366,7 @@ impl Device {
                 .expect("Failed to create logical device")
         };
 
-        debug!("Created vulkan logical device");
+        debug!("Created logical device");
 
         logical_device
     }

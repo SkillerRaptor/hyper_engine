@@ -30,7 +30,7 @@ impl Surface {
             .window
             .create_window_surface(create_info.instance);
 
-        debug!("Created vulkan surface");
+        debug!("Created surface");
 
         Self {
             surface,
