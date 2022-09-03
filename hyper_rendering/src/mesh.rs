@@ -37,8 +37,8 @@ impl Mesh {
 
     #[instrument(skip_all)]
     pub fn load(device: &Device, allocator: &Rc<RefCell<Allocator>>, file_name: &str) -> Self {
-        let (models, _) = tobj::load_obj(&file_name, &LoadOptions::default())
-            .expect("Failed to load object file");
+        let (models, _) =
+            tobj::load_obj(file_name, &LoadOptions::default()).expect("Failed to load object file");
 
         let mut vertices = Vec::new();
         for model in models {
