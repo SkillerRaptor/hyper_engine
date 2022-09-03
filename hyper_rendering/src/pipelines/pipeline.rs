@@ -4,20 +4,23 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{devices::device::Device, pipelines::swapchain::Swapchain, vertex::Vertex};
+use crate::vertex::Vertex;
 
-use ash::vk::{
-    self, BlendFactor, BlendOp, ColorComponentFlags, CompareOp, CullModeFlags, DynamicState,
-    Format, FrontFace, GraphicsPipelineCreateInfo, LogicOp, PipelineCache,
-    PipelineColorBlendAttachmentState, PipelineColorBlendStateCreateInfo,
-    PipelineDepthStencilStateCreateInfo, PipelineDynamicStateCreateInfo,
-    PipelineInputAssemblyStateCreateInfo, PipelineLayout, PipelineLayoutCreateInfo,
-    PipelineMultisampleStateCreateInfo, PipelineRasterizationStateCreateInfo,
-    PipelineRenderingCreateInfo, PipelineShaderStageCreateInfo,
-    PipelineTessellationStateCreateInfo, PipelineVertexInputStateCreateInfo,
-    PipelineViewportStateCreateInfo, PolygonMode, PrimitiveTopology, PushConstantRange, RenderPass,
-    SampleCountFlags, ShaderModule, ShaderModuleCreateInfo, ShaderStageFlags, SpecializationInfo,
-    StencilOpState,
+use ash::{
+    vk::{
+        self, BlendFactor, BlendOp, ColorComponentFlags, CompareOp, CullModeFlags, DynamicState,
+        Format, FrontFace, GraphicsPipelineCreateInfo, LogicOp, PipelineCache,
+        PipelineColorBlendAttachmentState, PipelineColorBlendStateCreateInfo,
+        PipelineDepthStencilStateCreateInfo, PipelineDynamicStateCreateInfo,
+        PipelineInputAssemblyStateCreateInfo, PipelineLayout, PipelineLayoutCreateInfo,
+        PipelineMultisampleStateCreateInfo, PipelineRasterizationStateCreateInfo,
+        PipelineRenderingCreateInfo, PipelineShaderStageCreateInfo,
+        PipelineTessellationStateCreateInfo, PipelineVertexInputStateCreateInfo,
+        PipelineViewportStateCreateInfo, PolygonMode, PrimitiveTopology, PushConstantRange,
+        RenderPass, SampleCountFlags, ShaderModule, ShaderModuleCreateInfo, ShaderStageFlags,
+        SpecializationInfo, StencilOpState,
+    },
+    Device,
 };
 //use ash::vk;
 use log::debug;
@@ -30,20 +33,97 @@ enum ShaderStage {
     Fragment,
 }
 
+pub struct MeshPushConstants {
+    pub data: glm::Vec4,
+    pub render_matrix: glm::Mat4,
+}
+
+pub(crate) struct PipelineCreateInfo<'a> {
+    pub logical_device: &'a Device,
+    pub image_format: &'a Format,
+    pub depth_image_format: &'a Format,
+}
+
 pub(crate) struct Pipeline {
     pipeline: vk::Pipeline,
     pipeline_layout: PipelineLayout,
+
+    logical_device: Device,
 }
 
 impl Pipeline {
     #[instrument(skip_all)]
-    pub fn new(device: &Device, swapchain: &Swapchain) -> Self {
-        let entry_point = CString::new("main").expect("Failed to create CString");
+    pub fn new(create_info: &PipelineCreateInfo) -> Self {
+        let pipeline_layout = Self::create_pipeline_layout(create_info.logical_device);
+        let pipeline = Self::create_pipeline(
+            create_info.logical_device,
+            create_info.image_format,
+            create_info.depth_image_format,
+            &pipeline_layout,
+        );
+
+        Self {
+            pipeline,
+            pipeline_layout,
+
+            logical_device: create_info.logical_device.clone(),
+        }
+    }
+
+    #[instrument(skip_all)]
+    fn create_pipeline_layout(logical_device: &Device) -> PipelineLayout {
+        let push_constant = PushConstantRange::builder()
+            .stage_flags(ShaderStageFlags::VERTEX)
+            .offset(0)
+            .size(mem::size_of::<MeshPushConstants>() as u32);
+
+        let set_layouts = &[];
+        let push_constant_ranges = &[*push_constant];
+        let pipeline_layout_info_create_info = PipelineLayoutCreateInfo::builder()
+            .set_layouts(set_layouts)
+            .push_constant_ranges(push_constant_ranges);
+
+        let pipeline_layout = unsafe {
+            logical_device
+                .create_pipeline_layout(&pipeline_layout_info_create_info, None)
+                .expect("Failed to create pipeline layout")
+        };
+
+        debug!("Created pipeline layout");
+
+        Self::print_pipeline_layout_information(&pipeline_layout_info_create_info);
+
+        pipeline_layout
+    }
+    #[instrument(skip_all)]
+    fn print_pipeline_layout_information(
+        pipeline_layout_info_create_info: &PipelineLayoutCreateInfo,
+    ) {
+        debug!("Pipeline Layout Info:");
+        debug!(
+            "  Descriptor Set Layout Count: {}",
+            pipeline_layout_info_create_info.set_layout_count
+        );
+        debug!(
+            "  Push Constant Range Count: {}",
+            pipeline_layout_info_create_info.push_constant_range_count
+        );
+    }
+
+    #[instrument(skip_all)]
+    fn create_pipeline(
+        logical_device: &Device,
+        image_format: &Format,
+        depth_image_format: &Format,
+        pipeline_layout: &PipelineLayout,
+    ) -> vk::Pipeline {
+        let entry_point = CString::new("main").expect("Failed to create entry point string");
 
         let specialization_info = SpecializationInfo::builder();
 
         let vertex = include_bytes!("../../../assets/shaders/default_shader_vertex.spv");
-        let vertex_shader_module = Self::create_shader_module(device, ShaderStage::Vertex, vertex);
+        let vertex_shader_module =
+            Self::create_shader_module(logical_device, ShaderStage::Vertex, vertex);
         let vertex_stage = PipelineShaderStageCreateInfo::builder()
             .stage(ShaderStageFlags::VERTEX)
             .module(vertex_shader_module)
@@ -52,7 +132,7 @@ impl Pipeline {
 
         let fragment = include_bytes!("../../../assets/shaders/default_shader_fragment.spv");
         let fragment_shader_module =
-            Self::create_shader_module(device, ShaderStage::Fragment, fragment);
+            Self::create_shader_module(logical_device, ShaderStage::Fragment, fragment);
         let fragment_stage = PipelineShaderStageCreateInfo::builder()
             .stage(ShaderStageFlags::FRAGMENT)
             .module(fragment_shader_module)
@@ -129,26 +209,8 @@ impl Pipeline {
         let dynamic_state_create_info =
             PipelineDynamicStateCreateInfo::builder().dynamic_states(dynamic_states);
 
-        let push_constant = PushConstantRange::builder()
-            .stage_flags(ShaderStageFlags::VERTEX)
-            .offset(0)
-            .size(mem::size_of::<MeshPushConstants>() as u32);
-
-        let set_layouts = &[];
-        let push_constant_ranges = &[*push_constant];
-        let pipeline_layout_info_create_info = PipelineLayoutCreateInfo::builder()
-            .set_layouts(set_layouts)
-            .push_constant_ranges(push_constant_ranges);
-
-        let pipeline_layout = unsafe {
-            device
-                .logical_device()
-                .create_pipeline_layout(&pipeline_layout_info_create_info, None)
-                .expect("Failed to create pipeline layout")
-        };
-
-        let color_attachment_formats = &[*swapchain.format()];
-        let depth_attachment_format = *swapchain.depth_format();
+        let color_attachment_formats = &[*image_format];
+        let depth_attachment_format = *depth_image_format;
         let mut pipeline_rendering_create_info = PipelineRenderingCreateInfo::builder()
             .view_mask(0)
             .color_attachment_formats(color_attachment_formats)
@@ -168,15 +230,14 @@ impl Pipeline {
             .depth_stencil_state(&depth_stencil_state_create_info)
             .color_blend_state(&color_blend_state_create_info)
             .dynamic_state(&dynamic_state_create_info)
-            .layout(pipeline_layout)
+            .layout(*pipeline_layout)
             .render_pass(RenderPass::null())
             .subpass(0)
             .base_pipeline_handle(vk::Pipeline::null())
             .base_pipeline_index(-1);
 
         let pipeline = unsafe {
-            device
-                .logical_device()
+            logical_device
                 .create_graphics_pipelines(
                     PipelineCache::null(),
                     &[*graphics_pipeline_create_info],
@@ -186,6 +247,36 @@ impl Pipeline {
                 .expect("Failed to create pipeline")[0]
         };
 
+        unsafe {
+            logical_device.destroy_shader_module(fragment_shader_module, None);
+            logical_device.destroy_shader_module(vertex_shader_module, None);
+        }
+
+        debug!("Created pipeline");
+
+        Self::print_pipeline_information(
+            &input_assembly_state_create_info,
+            &rasterization_state_create_info,
+            &multisample_state_create_info,
+            &attachment_state,
+            &color_blend_state_create_info,
+            &pipeline_rendering_create_info,
+            dynamic_states,
+        );
+
+        pipeline
+    }
+
+    #[instrument(skip_all)]
+    fn print_pipeline_information(
+        input_assembly_state_create_info: &PipelineInputAssemblyStateCreateInfo,
+        rasterization_state_create_info: &PipelineRasterizationStateCreateInfo,
+        multisample_state_create_info: &PipelineMultisampleStateCreateInfo,
+        attachment_state: &PipelineColorBlendAttachmentState,
+        color_blend_state_create_info: &PipelineColorBlendStateCreateInfo,
+        pipeline_rendering_create_info: &PipelineRenderingCreateInfo,
+        dynamic_states: &[DynamicState],
+    ) {
         debug!("Pipeline Info:");
         debug!(
             "  Topology: {:?}",
@@ -291,15 +382,6 @@ impl Pipeline {
             "  Attachment Count: {:?}",
             color_blend_state_create_info.attachment_count
         );
-        debug!("  Dynamic States: {:?}", dynamic_states);
-        debug!(
-            "  Descriptor Set Layout Count: {}",
-            pipeline_layout_info_create_info.set_layout_count
-        );
-        debug!(
-            "  Push Constant Range Count: {}",
-            pipeline_layout_info_create_info.push_constant_range_count
-        );
         debug!(
             "  View Mask: {:?}",
             pipeline_rendering_create_info.view_mask
@@ -316,44 +398,25 @@ impl Pipeline {
             "  Stencil Attachment Format: {:?}",
             pipeline_rendering_create_info.stencil_attachment_format
         );
-
-        unsafe {
-            device
-                .logical_device()
-                .destroy_shader_module(fragment_shader_module, None);
-            device
-                .logical_device()
-                .destroy_shader_module(vertex_shader_module, None);
-        }
-
-        debug!("Created vulkan pipeline");
-        Self {
-            pipeline,
-            pipeline_layout,
-        }
+        debug!("  Dynamic States: {:?}", dynamic_states);
     }
 
     #[instrument(skip_all)]
     fn create_shader_module(
-        device: &Device,
+        logical_device: &Device,
         shader_stage: ShaderStage,
         bytecode: &[u8],
     ) -> ShaderModule {
         let bytecode = Vec::<u8>::from(bytecode);
         let (prefix, code, suffix) = unsafe { bytecode.align_to::<u32>() };
         if !prefix.is_empty() || !suffix.is_empty() {
-            /*
-            return Err(Error::AlignError(AlignError(
-                "Shader bytecode is not properly aligned.",
-            )));
-            */
+            panic!("Failed to align shader bytecode");
         }
 
         let shader_module_create_info = ShaderModuleCreateInfo::builder().code(code);
 
         let shader_module = unsafe {
-            device
-                .logical_device()
+            logical_device
                 .create_shader_module(&shader_module_create_info, None)
                 .expect("Failed to create shader module")
         };
@@ -368,18 +431,6 @@ impl Pipeline {
         shader_module
     }
 
-    #[instrument(skip_all)]
-    pub fn cleanup(&mut self, device: &Device) {
-        unsafe {
-            device
-                .logical_device()
-                .destroy_pipeline(self.pipeline, None);
-            device
-                .logical_device()
-                .destroy_pipeline_layout(self.pipeline_layout, None);
-        }
-    }
-
     pub fn pipeline(&self) -> &vk::Pipeline {
         &self.pipeline
     }
@@ -389,7 +440,12 @@ impl Pipeline {
     }
 }
 
-pub struct MeshPushConstants {
-    pub data: glm::Vec4,
-    pub render_matrix: glm::Mat4,
+impl Drop for Pipeline {
+    fn drop(&mut self) {
+        unsafe {
+            self.logical_device.destroy_pipeline(self.pipeline, None);
+            self.logical_device
+                .destroy_pipeline_layout(self.pipeline_layout, None);
+        }
+    }
 }

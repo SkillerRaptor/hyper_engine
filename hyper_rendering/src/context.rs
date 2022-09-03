@@ -14,7 +14,7 @@ use crate::{
         surface::{Surface, SurfaceCreateInfo},
     },
     pipelines::{
-        pipeline::Pipeline,
+        pipeline::{Pipeline, PipelineCreateInfo},
         swapchain::{Swapchain, SwapchainCreateInfo},
     },
     renderer::Renderer,
@@ -46,7 +46,8 @@ impl RenderContext {
         let device = Self::create_device(&instance, &surface);
         let allocator = Rc::new(RefCell::new(Self::create_allocator(&instance, &device)));
         let swapchain = Self::create_swapchain(window, &instance, &surface, &device, &allocator);
-        let pipeline = Pipeline::new(&device, &swapchain);
+        let pipeline = Self::create_pipeline(&device, &swapchain);
+
         let renderer = Renderer::new(&device, &pipeline, &allocator);
 
         info!("Created render context");
@@ -131,6 +132,17 @@ impl RenderContext {
     }
 
     #[instrument(skip_all)]
+    fn create_pipeline(device: &Device, swapchain: &Swapchain) -> Pipeline {
+        let pipeline_create_info = PipelineCreateInfo {
+            logical_device: device.logical_device(),
+            image_format: swapchain.format(),
+            depth_image_format: swapchain.depth_format(),
+        };
+
+        Pipeline::new(&pipeline_create_info)
+    }
+
+    #[instrument(skip_all)]
     pub fn begin_frame(&mut self, window: &Window) {
         self.renderer.begin_frame(
             window,
@@ -172,7 +184,6 @@ impl Drop for RenderContext {
             self.device.logical_device().device_wait_idle().unwrap();
 
             self.renderer.cleanup(&self.device, &self.allocator);
-            self.pipeline.cleanup(&self.device);
         }
     }
 }
