@@ -49,17 +49,22 @@ pub(crate) struct RendererCreateInfo<'a> {
     pub allocator: &'a Rc<RefCell<Allocator>>,
 }
 
-pub(crate) struct Renderer {
-    renderables: Vec<RenderObject>,
-    meshes: HashMap<String, Mesh>,
-    materials: HashMap<String, Material>,
-
+struct FrameData {
     render_semaphore: Semaphore,
     present_semaphore: Semaphore,
     render_fence: Fence,
 
     command_buffer: CommandBuffer,
     _command_pool: CommandPool,
+}
+
+pub(crate) struct Renderer {
+    renderables: Vec<RenderObject>,
+    meshes: HashMap<String, Mesh>,
+    materials: HashMap<String, Material>,
+
+    frames: Vec<FrameData>,
+    frame_number: usize,
 
     current_image_index: usize,
 
@@ -68,20 +73,12 @@ pub(crate) struct Renderer {
 }
 
 impl Renderer {
+    const FRAME_OVERLAP: usize = 2;
+
     #[instrument(skip_all)]
     pub fn new(create_info: &RendererCreateInfo) -> Self {
-        let command_pool =
-            Self::create_command_pool(create_info.logical_device, create_info.graphics_queue_index);
-
-        let command_buffer = Self::create_command_buffer(
-            create_info.logical_device,
-            &command_pool,
-            CommandBufferLevel::PRIMARY,
-        );
-
-        let render_fence = Self::create_fence(create_info.logical_device);
-        let present_semaphore = Self::create_semaphore(create_info.logical_device);
-        let render_semaphore = Self::create_semaphore(create_info.logical_device);
+        let frames =
+            Self::create_frames(create_info.logical_device, create_info.graphics_queue_index);
 
         let material = Material {
             pipeline: *create_info.pipeline,
@@ -177,18 +174,46 @@ impl Renderer {
             meshes,
             materials,
 
-            render_semaphore,
-            present_semaphore,
-            render_fence,
-
-            command_buffer,
-            _command_pool: command_pool,
+            frames,
+            frame_number: 0,
 
             current_image_index: 0,
 
             logical_device: create_info.logical_device.clone(),
             graphics_queue: *create_info.graphics_queue,
         }
+    }
+
+    #[instrument(skip_all)]
+    fn create_frames(logical_device: &Device, graphics_queue_index: &u32) -> Vec<FrameData> {
+        let mut frames = Vec::new();
+
+        for _i in 0..Self::FRAME_OVERLAP {
+            let command_pool = Self::create_command_pool(logical_device, graphics_queue_index);
+
+            let command_buffer = Self::create_command_buffer(
+                logical_device,
+                &command_pool,
+                CommandBufferLevel::PRIMARY,
+            );
+
+            let render_fence = Self::create_fence(logical_device);
+            let present_semaphore = Self::create_semaphore(logical_device);
+            let render_semaphore = Self::create_semaphore(logical_device);
+
+            let frame_data = FrameData {
+                render_semaphore,
+                present_semaphore,
+                render_fence,
+
+                command_buffer,
+                _command_pool: command_pool,
+            };
+
+            frames.push(frame_data);
+        }
+
+        frames
     }
 
     #[instrument(skip_all)]
@@ -232,15 +257,19 @@ impl Renderer {
 
     #[instrument(skip_all)]
     pub fn begin_frame(&mut self, window: &Window, swapchain: &mut Swapchain) {
-        self.render_fence.wait();
-        self.render_fence.reset();
+        {
+            let current_frame = self.current_frame();
+
+            current_frame.render_fence.wait();
+            current_frame.render_fence.reset();
+        }
 
         unsafe {
             // TODO: Move this to swapchain class
             match swapchain.swapchain_loader().acquire_next_image(
                 *swapchain.swapchain(),
                 u64::MAX,
-                *self.present_semaphore.semaphore(),
+                *self.current_frame().present_semaphore.semaphore(),
                 vk::Fence::null(),
             ) {
                 Ok((image_index, _)) => self.current_image_index = image_index as usize,
@@ -252,9 +281,13 @@ impl Renderer {
             }
         }
 
-        self.command_buffer.reset(CommandBufferResetFlags::empty());
+        let current_frame = self.current_frame();
 
-        self.command_buffer.begin(
+        current_frame
+            .command_buffer
+            .reset(CommandBufferResetFlags::empty());
+
+        current_frame.command_buffer.begin(
             CommandBufferUsageFlags::ONE_TIME_SUBMIT,
             &vk::CommandBufferInheritanceInfo::default(),
         );
@@ -276,7 +309,7 @@ impl Renderer {
             .image(swapchain.images()[self.current_image_index as usize])
             .subresource_range(*image_subresource_range);
 
-        self.command_buffer.pipeline_barrier(
+        current_frame.command_buffer.pipeline_barrier(
             PipelineStageFlags::TOP_OF_PIPE,
             PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
             DependencyFlags::empty(),
@@ -335,12 +368,16 @@ impl Renderer {
             .depth_attachment(&depth_attachment_info)
             .stencil_attachment(&stencil_attachment_info);
 
-        self.command_buffer.begin_rendering(&rendering_info);
+        current_frame
+            .command_buffer
+            .begin_rendering(&rendering_info);
     }
 
     #[instrument(skip_all)]
     pub fn end_frame(&self, swapchain: &Swapchain) {
-        self.command_buffer.end_rendering();
+        let current_frame = self.current_frame();
+
+        current_frame.command_buffer.end_rendering();
 
         let image_subresource_range = ImageSubresourceRange::builder()
             .aspect_mask(ImageAspectFlags::COLOR)
@@ -359,7 +396,7 @@ impl Renderer {
             .image(swapchain.images()[self.current_image_index as usize])
             .subresource_range(*image_subresource_range);
 
-        self.command_buffer.pipeline_barrier(
+        current_frame.command_buffer.pipeline_barrier(
             PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
             PipelineStageFlags::BOTTOM_OF_PIPE,
             DependencyFlags::empty(),
@@ -368,15 +405,17 @@ impl Renderer {
             &[*image_memory_barrier],
         );
 
-        self.command_buffer.end();
+        current_frame.command_buffer.end();
     }
 
     #[instrument(skip_all)]
     pub fn submit(&mut self, window: &Window, swapchain: &mut Swapchain) {
-        let wait_semaphores = &[*self.present_semaphore.semaphore()];
+        let current_frame = self.current_frame();
+
+        let wait_semaphores = &[*current_frame.present_semaphore.semaphore()];
         let wait_stages = &[PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
-        let command_buffers = &[*self.command_buffer.command_buffer()];
-        let signal_semaphores = &[*self.render_semaphore.semaphore()];
+        let command_buffers = &[*current_frame.command_buffer.command_buffer()];
+        let signal_semaphores = &[*current_frame.render_semaphore.semaphore()];
         let submit_info = SubmitInfo::builder()
             .wait_semaphores(wait_semaphores)
             .wait_dst_stage_mask(wait_stages)
@@ -387,11 +426,15 @@ impl Renderer {
         unsafe {
             // TODO: Create queue class and move this to queue class
             self.logical_device
-                .queue_submit(self.graphics_queue, submits, *self.render_fence.fence())
+                .queue_submit(
+                    self.graphics_queue,
+                    submits,
+                    *current_frame.render_fence.fence(),
+                )
                 .expect("Failed to submit to queue");
         }
 
-        let wait_semaphores = &[*self.render_semaphore.semaphore()];
+        let wait_semaphores = &[*current_frame.render_semaphore.semaphore()];
         let swapchains = &[*swapchain.swapchain()];
         let image_indices = &[self.current_image_index as u32];
 
@@ -415,10 +458,14 @@ impl Renderer {
                 swapchain.recreate(window);
             }
         }
+
+        self.frame_number += 1;
     }
 
     #[instrument(skip_all)]
     pub fn draw(&self, window: &Window, swapchain: &Swapchain) {
+        let current_frame = self.current_frame();
+
         let camera_position = glm::vec3(0.0, 0.0, -2.0);
 
         let view_matrix = glm::translate(
@@ -447,7 +494,8 @@ impl Renderer {
             let pipeline_layout = material.pipeline_layout;
 
             if render_object.material != last_material {
-                self.command_buffer
+                current_frame
+                    .command_buffer
                     .bind_pipeline(PipelineBindPoint::GRAPHICS, pipeline);
 
                 let extent = swapchain.extent();
@@ -458,11 +506,11 @@ impl Renderer {
                     .height(extent.height as f32)
                     .min_depth(0.0)
                     .max_depth(1.0);
-                self.command_buffer.set_viewport(0, &[*viewport]);
+                current_frame.command_buffer.set_viewport(0, &[*viewport]);
 
                 let offset = Offset2D::builder();
                 let scissor = Rect2D::builder().offset(*offset).extent(*extent);
-                self.command_buffer.set_scissor(0, &[*scissor]);
+                current_frame.command_buffer.set_scissor(0, &[*scissor]);
 
                 last_material = render_object.material.clone();
             }
@@ -474,7 +522,7 @@ impl Renderer {
                 render_matrix: mesh_matrix,
             };
 
-            self.command_buffer.push_constants(
+            current_frame.command_buffer.push_constants(
                 pipeline_layout,
                 ShaderStageFlags::VERTEX,
                 0,
@@ -485,13 +533,21 @@ impl Renderer {
             let offsets = &[0];
 
             if render_object.mesh != last_mesh {
-                self.command_buffer.bind_vertex_buffers(0, buffers, offsets);
+                current_frame
+                    .command_buffer
+                    .bind_vertex_buffers(0, buffers, offsets);
 
                 last_mesh = render_object.mesh.clone();
             }
 
-            self.command_buffer
+            current_frame
+                .command_buffer
                 .draw(mesh.vertices().len() as u32, 1, 0, 0);
         }
+    }
+
+    #[instrument(skip_all)]
+    fn current_frame(&self) -> &FrameData {
+        &self.frames[self.frame_number % Self::FRAME_OVERLAP]
     }
 }
