@@ -4,41 +4,56 @@
  * SPDX-License-Identifier: MIT
  */
 
-use std::{cell::RefCell, rc::Rc};
-
 use crate::{
-    allocator::Allocator, buffers::vertex_buffer::VertexBuffer, devices::device::Device,
+    allocator::Allocator,
+    buffers::vertex_buffer::{VertexBuffer, VertexBufferCreateInfo},
     vertex::Vertex,
 };
 
+use ash::Device;
 use nalgebra_glm as glm;
+use std::{cell::RefCell, rc::Rc};
 use tobj::LoadOptions;
 use tracing::instrument;
 
+pub(crate) struct MeshCreateInfo<'a> {
+    pub logical_device: &'a Device,
+    pub allocator: &'a Rc<RefCell<Allocator>>,
+    pub vertices: &'a [Vertex],
+}
+
+pub(crate) struct MeshLoadInfo<'a> {
+    pub logical_device: &'a Device,
+    pub allocator: &'a Rc<RefCell<Allocator>>,
+    pub file_name: &'a str,
+}
+
 pub(crate) struct Mesh {
-    vertices: Vec<Vertex>,
     vertex_buffer: VertexBuffer,
+    vertices: Vec<Vertex>,
 }
 
 impl Mesh {
     #[instrument(skip_all)]
-    pub fn new(
-        device: &Device,
-        allocator: &Rc<RefCell<Allocator>>,
-        vertices: &Vec<Vertex>,
-    ) -> Self {
-        let vertex_buffer = VertexBuffer::new(device, allocator, vertices);
+    pub fn new(create_info: &MeshCreateInfo) -> Self {
+        let vertex_buffer_create_info = VertexBufferCreateInfo {
+            logical_device: create_info.logical_device,
+            allocator: create_info.allocator,
+            vertices: create_info.vertices,
+        };
+
+        let vertex_buffer = VertexBuffer::new(&vertex_buffer_create_info);
 
         Self {
-            vertices: vertices.clone(),
             vertex_buffer,
+            vertices: create_info.vertices.to_vec(),
         }
     }
 
     #[instrument(skip_all)]
-    pub fn load(device: &Device, allocator: &Rc<RefCell<Allocator>>, file_name: &str) -> Self {
-        let (models, _) =
-            tobj::load_obj(file_name, &LoadOptions::default()).expect("Failed to load object file");
+    pub fn load(load_info: &MeshLoadInfo) -> Self {
+        let (models, _) = tobj::load_obj(load_info.file_name, &LoadOptions::default())
+            .expect("Failed to load object file");
 
         let mut vertices = Vec::new();
         for model in models {
@@ -67,17 +82,18 @@ impl Mesh {
             }
         }
 
-        let vertex_buffer = VertexBuffer::new(device, allocator, &vertices);
+        let vertex_buffer_create_info = VertexBufferCreateInfo {
+            logical_device: load_info.logical_device,
+            allocator: load_info.allocator,
+            vertices: vertices.as_slice(),
+        };
+
+        let vertex_buffer = VertexBuffer::new(&vertex_buffer_create_info);
 
         Self {
             vertices: vertices.clone(),
             vertex_buffer,
         }
-    }
-
-    #[instrument(skip_all)]
-    pub fn cleanup(&mut self, device: &Device, allocator: &Rc<RefCell<Allocator>>) {
-        self.vertex_buffer.cleanup(device, allocator);
     }
 
     pub fn vertices(&self) -> &Vec<Vertex> {

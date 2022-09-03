@@ -56,6 +56,9 @@ pub(crate) struct Swapchain {
 
     allocator: Rc<RefCell<Allocator>>,
     logical_device: Device,
+    physical_device: PhysicalDevice,
+    surface: SurfaceKHR,
+    surface_loader: SurfaceLoader,
 }
 
 impl Swapchain {
@@ -103,6 +106,9 @@ impl Swapchain {
 
             allocator: create_info.allocator.clone(),
             logical_device: create_info.logical_device.clone(),
+            physical_device: *create_info.physical_device,
+            surface: *create_info.surface,
+            surface_loader: create_info.surface_loader.clone(),
         }
     }
 
@@ -395,7 +401,7 @@ impl Swapchain {
     }
 
     #[instrument(skip_all)]
-    pub fn cleanup(&mut self) {
+    fn cleanup(&mut self) {
         unsafe {
             self.logical_device
                 .destroy_image_view(self.depth_image_view, None);
@@ -412,13 +418,7 @@ impl Swapchain {
     }
 
     #[instrument(skip_all)]
-    pub fn recreate(
-        &mut self,
-        window: &Window,
-        surface_loader: &SurfaceLoader,
-        surface: &SurfaceKHR,
-        physical_device: &PhysicalDevice,
-    ) {
+    pub fn recreate(&mut self, window: &Window) {
         unsafe {
             self.logical_device.device_wait_idle().unwrap();
         }
@@ -427,9 +427,9 @@ impl Swapchain {
 
         let (swapchain, extent, format) = Self::create_swapchain(
             window,
-            surface_loader,
-            surface,
-            physical_device,
+            &self.surface_loader,
+            &self.surface,
+            &self.physical_device,
             &self.swapchain_loader,
             true,
         );
@@ -489,6 +489,7 @@ impl Swapchain {
 }
 
 impl Drop for Swapchain {
+    #[instrument(skip_all)]
     fn drop(&mut self) {
         self.cleanup();
     }

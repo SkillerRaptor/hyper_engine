@@ -95,6 +95,7 @@ impl Pipeline {
 
         pipeline_layout
     }
+
     #[instrument(skip_all)]
     fn print_pipeline_layout_information(
         pipeline_layout_info_create_info: &PipelineLayoutCreateInfo,
@@ -441,6 +442,7 @@ impl Pipeline {
 }
 
 impl Drop for Pipeline {
+    #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
             self.logical_device.destroy_pipeline(self.pipeline, None);

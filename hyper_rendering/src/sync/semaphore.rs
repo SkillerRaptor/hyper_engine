@@ -4,43 +4,50 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::devices::device::Device;
-
-use ash::vk::{self, SemaphoreCreateInfo};
+use ash::{vk, Device};
 use log::debug;
 use tracing::instrument;
 
+pub(crate) struct SemaphoreCreateInfo<'a> {
+    pub logical_device: &'a Device,
+}
+
 pub(crate) struct Semaphore {
     semaphore: vk::Semaphore,
+
+    logical_device: Device,
 }
 
 impl Semaphore {
     #[instrument(skip_all)]
-    pub fn new(device: &Device) -> Self {
-        let semaphore_create_info = SemaphoreCreateInfo::builder();
+    pub fn new(create_info: &SemaphoreCreateInfo) -> Self {
+        let semaphore_create_info = vk::SemaphoreCreateInfo::builder();
 
         let semaphore = unsafe {
-            device
-                .logical_device()
+            create_info
+                .logical_device
                 .create_semaphore(&semaphore_create_info, None)
                 .expect("Failed to create semaphore")
         };
 
         debug!("Created semaphore");
 
-        Self { semaphore }
-    }
-
-    #[instrument(skip_all)]
-    pub fn cleanup(&mut self, device: &Device) {
-        unsafe {
-            device
-                .logical_device()
-                .destroy_semaphore(self.semaphore, None);
+        Self {
+            semaphore,
+            logical_device: create_info.logical_device.clone(),
         }
     }
 
     pub fn semaphore(&self) -> &vk::Semaphore {
         &self.semaphore
+    }
+}
+
+impl Drop for Semaphore {
+    #[instrument(skip_all)]
+    fn drop(&mut self) {
+        unsafe {
+            self.logical_device.destroy_semaphore(self.semaphore, None);
+        }
     }
 }

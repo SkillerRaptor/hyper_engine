@@ -17,7 +17,7 @@ use crate::{
         pipeline::{Pipeline, PipelineCreateInfo},
         swapchain::{Swapchain, SwapchainCreateInfo},
     },
-    renderer::Renderer,
+    renderer::{Renderer, RendererCreateInfo},
 };
 
 use hyper_platform::window::Window;
@@ -28,11 +28,11 @@ use tracing::instrument;
 
 pub struct RenderContext {
     renderer: Renderer,
-    pipeline: Pipeline,
+    _pipeline: Pipeline,
     swapchain: Swapchain,
-    allocator: Rc<RefCell<Allocator>>,
+    _allocator: Rc<RefCell<Allocator>>,
     device: Device,
-    surface: Surface,
+    _surface: Surface,
     _instance: Instance,
     _entry: Entry,
 }
@@ -48,18 +48,18 @@ impl RenderContext {
         let swapchain = Self::create_swapchain(window, &instance, &surface, &device, &allocator);
         let pipeline = Self::create_pipeline(&device, &swapchain);
 
-        let renderer = Renderer::new(&device, &pipeline, &allocator);
+        let renderer = Self::create_renderer(&device, &pipeline, &allocator);
 
         info!("Created render context");
 
         Self {
             renderer,
 
-            pipeline,
+            _pipeline: pipeline,
             swapchain,
-            allocator,
+            _allocator: allocator,
             device,
-            surface,
+            _surface: surface,
             _instance: instance,
             _entry: entry,
         }
@@ -143,37 +143,41 @@ impl RenderContext {
     }
 
     #[instrument(skip_all)]
+    fn create_renderer(
+        device: &Device,
+        pipeline: &Pipeline,
+        allocator: &Rc<RefCell<Allocator>>,
+    ) -> Renderer {
+        let renderer_create_info = RendererCreateInfo {
+            logical_device: device.logical_device(),
+            graphics_queue_index: device.graphics_queue_index(),
+            graphics_queue: device.graphics_queue(),
+            pipeline_layout: pipeline.pipeline_layout(),
+            pipeline: pipeline.pipeline(),
+            allocator,
+        };
+
+        Renderer::new(&renderer_create_info)
+    }
+
+    #[instrument(skip_all)]
     pub fn begin_frame(&mut self, window: &Window) {
-        self.renderer.begin_frame(
-            window,
-            &self.surface,
-            &self.device,
-            &self.allocator,
-            &mut self.swapchain,
-            &self.pipeline,
-        );
+        self.renderer.begin_frame(window, &mut self.swapchain);
     }
 
     #[instrument(skip_all)]
     pub fn end_frame(&self) {
-        self.renderer.end_frame(&self.device, &self.swapchain);
+        self.renderer.end_frame(&self.swapchain);
     }
 
     #[instrument(skip_all)]
     pub fn submit(&mut self, window: &Window) {
-        self.renderer.submit(
-            window,
-            &self.surface,
-            &self.device,
-            &self.allocator,
-            &mut self.swapchain,
-        );
+        self.renderer.submit(window, &mut self.swapchain);
     }
 
     #[instrument(skip_all)]
     pub fn draw(&self, window: &Window) {
-        self.renderer
-            .draw(window, &self.device, &self.swapchain, &self.pipeline);
+        self.renderer.draw(window, &self.swapchain);
     }
 }
 
@@ -182,8 +186,6 @@ impl Drop for RenderContext {
     fn drop(&mut self) {
         unsafe {
             self.device.logical_device().device_wait_idle().unwrap();
-
-            self.renderer.cleanup(&self.device, &self.allocator);
         }
     }
 }
