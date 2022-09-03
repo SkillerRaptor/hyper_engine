@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     allocator::Allocator,
     commands::{command_buffer::CommandBuffer, command_pool::CommandPool},
     devices::{device::Device, surface::Surface},
     mesh::Mesh,
-    pipeline::{
+    pipelines::{
         pipeline::{MeshPushConstants, Pipeline},
         swapchain::Swapchain,
     },
@@ -52,7 +52,7 @@ pub(crate) struct Renderer {
 
 impl Renderer {
     #[instrument(skip_all)]
-    pub fn new(device: &Device, pipeline: &Pipeline, allocator: &mut Allocator) -> Self {
+    pub fn new(device: &Device, pipeline: &Pipeline, allocator: &Rc<RefCell<Allocator>>) -> Self {
         let command_pool = CommandPool::new(device);
         let command_buffer = CommandBuffer::new(device, &command_pool, CommandBufferLevel::PRIMARY);
 
@@ -152,7 +152,7 @@ impl Renderer {
     }
 
     #[instrument(skip_all)]
-    pub fn cleanup(&mut self, device: &Device, allocator: &mut Allocator) {
+    pub fn cleanup(&mut self, device: &Device, allocator: &Rc<RefCell<Allocator>>) {
         for mesh in &mut self.meshes.values_mut() {
             mesh.cleanup(device, allocator);
         }
@@ -169,7 +169,7 @@ impl Renderer {
         window: &Window,
         surface: &Surface,
         device: &Device,
-        allocator: &mut Allocator,
+        _allocator: &Rc<RefCell<Allocator>>,
         swapchain: &mut Swapchain,
         _pipeline: &Pipeline,
     ) {
@@ -186,7 +186,12 @@ impl Renderer {
             ) {
                 Ok((image_index, _)) => self.current_image_index = image_index as usize,
                 Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => {
-                    swapchain.recreate(window, surface, device, allocator);
+                    swapchain.recreate(
+                        window,
+                        surface.surface_loader(),
+                        surface.surface(),
+                        device.physical_device(),
+                    );
                     return;
                 }
                 Err(_error) => panic!(),
@@ -322,7 +327,7 @@ impl Renderer {
         window: &Window,
         surface: &Surface,
         device: &Device,
-        allocator: &mut Allocator,
+        _allocator: &Rc<RefCell<Allocator>>,
         swapchain: &mut Swapchain,
     ) {
         let wait_semaphores = &[*self.present_semaphore.semaphore()];
@@ -369,7 +374,12 @@ impl Renderer {
             };
 
             if changed {
-                swapchain.recreate(window, surface, device, allocator);
+                swapchain.recreate(
+                    window,
+                    surface.surface_loader(),
+                    surface.surface(),
+                    device.physical_device(),
+                );
             }
         }
     }

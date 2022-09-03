@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+use std::{cell::RefCell, rc::Rc};
+
 use crate::{
     allocator::{Allocator, AllocatorCreateInfo},
     devices::{
@@ -11,7 +13,10 @@ use crate::{
         instance::{Instance, InstanceCreateInfo},
         surface::{Surface, SurfaceCreateInfo},
     },
-    pipeline::{pipeline::Pipeline, swapchain::Swapchain},
+    pipelines::{
+        pipeline::Pipeline,
+        swapchain::{Swapchain, SwapchainCreateInfo},
+    },
     renderer::Renderer,
 };
 
@@ -25,7 +30,7 @@ pub struct RenderContext {
     renderer: Renderer,
     pipeline: Pipeline,
     swapchain: Swapchain,
-    allocator: Allocator,
+    allocator: Rc<RefCell<Allocator>>,
     device: Device,
     surface: Surface,
     _instance: Instance,
@@ -39,11 +44,10 @@ impl RenderContext {
         let instance = Self::create_instance(window, &entry);
         let surface = Self::create_surface(window, &entry, &instance);
         let device = Self::create_device(&instance, &surface);
-        let mut allocator = Self::create_allocator(&instance, &device);
-
-        let swapchain = Swapchain::new(window, &instance, &surface, &device, &mut allocator);
+        let allocator = Rc::new(RefCell::new(Self::create_allocator(&instance, &device)));
+        let swapchain = Self::create_swapchain(window, &instance, &surface, &device, &allocator);
         let pipeline = Pipeline::new(&device, &swapchain);
-        let renderer = Renderer::new(&device, &pipeline, &mut allocator);
+        let renderer = Renderer::new(&device, &pipeline, &allocator);
 
         info!("Created render context");
 
@@ -106,12 +110,33 @@ impl RenderContext {
     }
 
     #[instrument(skip_all)]
+    fn create_swapchain(
+        window: &Window,
+        instance: &Instance,
+        surface: &Surface,
+        device: &Device,
+        allocator: &Rc<RefCell<Allocator>>,
+    ) -> Swapchain {
+        let swapchain_create_info = SwapchainCreateInfo {
+            window,
+            instance: instance.instance(),
+            surface_loader: surface.surface_loader(),
+            surface: surface.surface(),
+            physical_device: device.physical_device(),
+            logical_device: device.logical_device(),
+            allocator,
+        };
+
+        Swapchain::new(&swapchain_create_info)
+    }
+
+    #[instrument(skip_all)]
     pub fn begin_frame(&mut self, window: &Window) {
         self.renderer.begin_frame(
             window,
             &self.surface,
             &self.device,
-            &mut self.allocator,
+            &self.allocator,
             &mut self.swapchain,
             &self.pipeline,
         );
@@ -128,7 +153,7 @@ impl RenderContext {
             window,
             &self.surface,
             &self.device,
-            &mut self.allocator,
+            &self.allocator,
             &mut self.swapchain,
         );
     }
@@ -146,9 +171,8 @@ impl Drop for RenderContext {
         unsafe {
             self.device.logical_device().device_wait_idle().unwrap();
 
-            self.renderer.cleanup(&self.device, &mut self.allocator);
+            self.renderer.cleanup(&self.device, &self.allocator);
             self.pipeline.cleanup(&self.device);
-            self.swapchain.cleanup(&self.device, &mut self.allocator);
         }
     }
 }

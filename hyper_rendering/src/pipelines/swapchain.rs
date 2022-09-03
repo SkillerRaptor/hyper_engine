@@ -4,97 +4,118 @@
  * SPDX-License-Identifier: MIT
  */
 
+use std::{cell::RefCell, rc::Rc};
+
 use crate::{
     allocator::{Allocator, MemoryLocation},
-    devices::{device::Device, device::SwapchainSupport, instance::Instance, surface::Surface},
+    devices::device::SwapchainSupport,
 };
 
-use gpu_allocator::vulkan::Allocation;
 use hyper_platform::window::Window;
 
 use ash::{
-    extensions::khr::Swapchain as SwapchainLoader,
+    extensions::khr::{Surface as SurfaceLoader, Swapchain as SwapchainLoader},
     vk::{
         ColorSpaceKHR, ComponentMapping, ComponentSwizzle, CompositeAlphaFlagsKHR, Extent2D,
         Extent3D, Format, Image, ImageAspectFlags, ImageCreateInfo, ImageLayout,
         ImageSubresourceRange, ImageTiling, ImageType, ImageUsageFlags, ImageView,
-        ImageViewCreateInfo, ImageViewType, PresentModeKHR, SampleCountFlags, SharingMode,
-        SurfaceCapabilitiesKHR, SurfaceFormatKHR, SwapchainCreateInfoKHR, SwapchainKHR,
+        ImageViewCreateInfo, ImageViewType, PhysicalDevice, PresentModeKHR, SampleCountFlags,
+        SharingMode, SurfaceCapabilitiesKHR, SurfaceFormatKHR, SurfaceKHR, SwapchainCreateInfoKHR,
+        SwapchainKHR,
     },
+    Device, Instance,
 };
+use gpu_allocator::vulkan::Allocation;
 use log::debug;
 use tracing::instrument;
 
+pub(crate) struct SwapchainCreateInfo<'a> {
+    pub window: &'a Window,
+    pub instance: &'a Instance,
+    pub surface_loader: &'a SurfaceLoader,
+    pub surface: &'a SurfaceKHR,
+    pub physical_device: &'a PhysicalDevice,
+    pub logical_device: &'a Device,
+    pub allocator: &'a Rc<RefCell<Allocator>>,
+}
+
 pub(crate) struct Swapchain {
-    swapchain_loader: SwapchainLoader,
-    swapchain: SwapchainKHR,
-
-    format: Format,
-    extent: Extent2D,
-
-    images: Vec<Image>,
-    image_views: Vec<ImageView>,
-
-    depth_image: Image,
-    depth_image_view: ImageView,
-    depth_format: Format,
     depth_image_allocation: Option<Allocation>,
+    depth_format: Format,
+    depth_image_view: ImageView,
+    depth_image: Image,
+
+    image_views: Vec<ImageView>,
+    images: Vec<Image>,
+
+    extent: Extent2D,
+    format: Format,
+
+    swapchain: SwapchainKHR,
+    swapchain_loader: SwapchainLoader,
+
+    allocator: Rc<RefCell<Allocator>>,
+    logical_device: Device,
 }
 
 impl Swapchain {
     #[instrument(skip_all)]
-    pub fn new(
-        window: &Window,
-        instance: &Instance,
-        surface: &Surface,
-        device: &Device,
-        allocator: &mut Allocator,
-    ) -> Self {
-        let swapchain_loader = SwapchainLoader::new(instance.instance(), device.logical_device());
-        let (swapchain, extent, format) =
-            Self::create_swapchain(window, surface, device, &swapchain_loader, false);
+    pub fn new(create_info: &SwapchainCreateInfo) -> Self {
+        let swapchain_loader =
+            SwapchainLoader::new(create_info.instance, create_info.logical_device);
 
-        let images = unsafe {
-            swapchain_loader
-                .get_swapchain_images(swapchain)
-                .expect("Failed to get swapchain images")
-        };
-        let image_views = Self::create_image_views(device, &format, &images);
+        let (swapchain, extent, format) = Self::create_swapchain(
+            create_info.window,
+            create_info.surface_loader,
+            create_info.surface,
+            create_info.physical_device,
+            &swapchain_loader,
+            false,
+        );
+
+        let images = Self::create_images(&swapchain_loader, &swapchain, false);
+
+        let image_views =
+            Self::create_image_views(create_info.logical_device, &format, &images, false);
 
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
-            Self::create_depth_image(window, device, allocator);
+            Self::create_depth_image(
+                create_info.window,
+                create_info.logical_device,
+                create_info.allocator,
+                false,
+            );
 
-        debug!("Created vulkan swapchain");
         Self {
-            swapchain_loader,
-            swapchain,
-
-            format,
-            extent,
-
-            images,
-            image_views,
-
-            depth_image,
-            depth_image_view,
-            depth_format,
             depth_image_allocation: Some(depth_image_allocation),
+            depth_format,
+            depth_image_view,
+            depth_image,
+
+            image_views,
+            images,
+
+            extent,
+            format,
+
+            swapchain,
+            swapchain_loader,
+
+            allocator: create_info.allocator.clone(),
+            logical_device: create_info.logical_device.clone(),
         }
     }
 
     #[instrument(skip_all)]
     fn create_swapchain(
         window: &Window,
-        surface: &Surface,
-        device: &Device,
+        surface_loader: &SurfaceLoader,
+        surface: &SurfaceKHR,
+        physical_device: &PhysicalDevice,
         swapchain_loader: &SwapchainLoader,
-        recreate: bool,
+        recreated: bool,
     ) -> (SwapchainKHR, Extent2D, Format) {
-        let support = SwapchainSupport::new(
-            surface.surface_loader(),
-            surface.surface(),
-            device.physical_device(),
-        );
+        let support = SwapchainSupport::new(surface_loader, surface, physical_device);
 
         let extent = Self::choose_extent(window, support.capabilities());
         let format = Self::choose_surface_format(support.formats());
@@ -115,7 +136,7 @@ impl Swapchain {
         let image_sharing_mode = SharingMode::EXCLUSIVE;
 
         let swapchain_create_info = SwapchainCreateInfoKHR::builder()
-            .surface(*surface.surface())
+            .surface(*surface)
             .min_image_count(image_count)
             .image_format(format.format)
             .image_color_space(format.color_space)
@@ -136,41 +157,10 @@ impl Swapchain {
                 .expect("Failed to create swapchain")
         };
 
-        if !recreate {
-            debug!("Swapchain Info:");
-            debug!(
-                "  Min Image Count: {}",
-                swapchain_create_info.min_image_count
-            );
-            debug!(
-                "  Max Image Count: {}",
-                support.capabilities().max_image_count
-            );
-            debug!("  Image Format: {:?}", swapchain_create_info.image_format);
-            debug!(
-                "  Image Color Space: {:?}",
-                swapchain_create_info.image_color_space
-            );
-            debug!(
-                "  Image Extent: width={}, height={}",
-                swapchain_create_info.image_extent.width, swapchain_create_info.image_extent.height
-            );
-            debug!(
-                "  Image Array Layers: {}",
-                swapchain_create_info.image_array_layers
-            );
-            debug!("  Image Usage: {:?}", swapchain_create_info.image_usage);
-            debug!(
-                "  Image Sharing Mode: {:?}",
-                swapchain_create_info.image_sharing_mode
-            );
-            debug!("  Pre Transform: {:?}", swapchain_create_info.pre_transform);
-            debug!(
-                "  Composite Alpha: {:?}",
-                swapchain_create_info.composite_alpha
-            );
-            debug!("  Present Mode: {:?}", swapchain_create_info.present_mode);
-            debug!("  Clipped: {}", swapchain_create_info.clipped != 0);
+        if !recreated {
+            debug!("Created swapchain");
+
+            Self::print_swapchain_information(&support, &swapchain_create_info);
         }
 
         (swapchain, extent, format.format)
@@ -222,7 +212,72 @@ impl Swapchain {
     }
 
     #[instrument(skip_all)]
-    fn create_image_views(device: &Device, format: &Format, images: &[Image]) -> Vec<ImageView> {
+    fn print_swapchain_information(
+        swapchain_support: &SwapchainSupport,
+        swapchain_create_info: &SwapchainCreateInfoKHR,
+    ) {
+        debug!("Swapchain Info:");
+        debug!(
+            "  Min Image Count: {}",
+            swapchain_create_info.min_image_count
+        );
+        debug!(
+            "  Max Image Count: {}",
+            swapchain_support.capabilities().max_image_count
+        );
+        debug!("  Image Format: {:?}", swapchain_create_info.image_format);
+        debug!(
+            "  Image Color Space: {:?}",
+            swapchain_create_info.image_color_space
+        );
+        debug!(
+            "  Image Extent: width={}, height={}",
+            swapchain_create_info.image_extent.width, swapchain_create_info.image_extent.height
+        );
+        debug!(
+            "  Image Array Layers: {}",
+            swapchain_create_info.image_array_layers
+        );
+        debug!("  Image Usage: {:?}", swapchain_create_info.image_usage);
+        debug!(
+            "  Image Sharing Mode: {:?}",
+            swapchain_create_info.image_sharing_mode
+        );
+        debug!("  Pre Transform: {:?}", swapchain_create_info.pre_transform);
+        debug!(
+            "  Composite Alpha: {:?}",
+            swapchain_create_info.composite_alpha
+        );
+        debug!("  Present Mode: {:?}", swapchain_create_info.present_mode);
+        debug!("  Clipped: {}", swapchain_create_info.clipped != 0);
+    }
+
+    #[instrument(skip_all)]
+    fn create_images(
+        swapchain_loader: &SwapchainLoader,
+        swapchain: &SwapchainKHR,
+        recreated: bool,
+    ) -> Vec<Image> {
+        let images = unsafe {
+            swapchain_loader
+                .get_swapchain_images(*swapchain)
+                .expect("Failed to get images")
+        };
+
+        if !recreated {
+            debug!("Created images");
+        }
+
+        images
+    }
+
+    #[instrument(skip_all)]
+    fn create_image_views(
+        logical_device: &Device,
+        format: &Format,
+        images: &[Image],
+        recreated: bool,
+    ) -> Vec<ImageView> {
         let image_views = images
             .iter()
             .map(|image| {
@@ -246,14 +301,14 @@ impl Swapchain {
                     .components(*components)
                     .subresource_range(*subsource_range);
 
-                unsafe {
-                    device
-                        .logical_device()
-                        .create_image_view(&image_view_create_info, None)
-                }
+                unsafe { logical_device.create_image_view(&image_view_create_info, None) }
             })
             .collect::<Result<Vec<_>, _>>()
             .expect("Failed to create image views");
+
+        if !recreated {
+            debug!("Created image views");
+        }
 
         image_views
     }
@@ -261,8 +316,9 @@ impl Swapchain {
     #[instrument(skip_all)]
     fn create_depth_image(
         window: &Window,
-        device: &Device,
-        allocator: &mut Allocator,
+        logical_device: &Device,
+        allocator: &Rc<RefCell<Allocator>>,
+        recreated: bool,
     ) -> (Image, ImageView, Format, Allocation) {
         let extent = Extent3D::builder()
             .width(window.framebuffer_width() as u32)
@@ -286,22 +342,29 @@ impl Swapchain {
             .initial_layout(ImageLayout::UNDEFINED);
 
         let image = unsafe {
-            device
-                .logical_device()
+            logical_device
                 .create_image(&image_create_info, None)
-                .expect("Failed to create image")
+                .expect("Failed to create depth image")
         };
 
-        let memory_requirements =
-            unsafe { device.logical_device().get_image_memory_requirements(image) };
+        if !recreated {
+            debug!("Created depth image");
+        }
 
-        let allocation = allocator.allocate(memory_requirements, MemoryLocation::GpuOnly);
+        let memory_requirements = unsafe { logical_device.get_image_memory_requirements(image) };
+
+        let allocation = allocator
+            .borrow_mut()
+            .allocate(memory_requirements, MemoryLocation::GpuOnly);
 
         unsafe {
-            device
-                .logical_device()
+            logical_device
                 .bind_image_memory(image, allocation.memory(), allocation.offset())
                 .expect("Failed to bind depth image memory")
+        }
+
+        if !recreated {
+            debug!("Binded depth image memory");
         }
 
         let subsource_range = ImageSubresourceRange::builder()
@@ -319,31 +382,30 @@ impl Swapchain {
             .subresource_range(*subsource_range);
 
         let image_view = unsafe {
-            device
-                .logical_device()
+            logical_device
                 .create_image_view(&image_view_create_info, None)
                 .expect("Failed to create depth image view")
         };
 
-        debug!("Created depth image");
+        if !recreated {
+            debug!("Create depth image view");
+        }
+
         (image, image_view, format, allocation)
     }
 
     #[instrument(skip_all)]
-    pub fn cleanup(&mut self, device: &Device, allocator: &mut Allocator) {
+    pub fn cleanup(&mut self) {
         unsafe {
-            device
-                .logical_device()
+            self.logical_device
                 .destroy_image_view(self.depth_image_view, None);
-            allocator.free(self.depth_image_allocation.take().unwrap());
-            device
-                .logical_device()
-                .destroy_image(self.depth_image, None);
-            self.image_views.iter().for_each(|image_view| {
-                device
-                    .logical_device()
-                    .destroy_image_view(*image_view, None)
-            });
+            self.allocator
+                .borrow_mut()
+                .free(self.depth_image_allocation.take().unwrap());
+            self.logical_device.destroy_image(self.depth_image, None);
+            self.image_views
+                .iter()
+                .for_each(|image_view| self.logical_device.destroy_image_view(*image_view, None));
             self.swapchain_loader
                 .destroy_swapchain(self.swapchain, None);
         }
@@ -353,36 +415,39 @@ impl Swapchain {
     pub fn recreate(
         &mut self,
         window: &Window,
-        surface: &Surface,
-        device: &Device,
-        allocator: &mut Allocator,
+        surface_loader: &SurfaceLoader,
+        surface: &SurfaceKHR,
+        physical_device: &PhysicalDevice,
     ) {
         unsafe {
-            device.logical_device().device_wait_idle().unwrap();
+            self.logical_device.device_wait_idle().unwrap();
         }
 
-        self.cleanup(device, allocator);
+        self.cleanup();
 
-        let (swapchain, extent, format) =
-            Self::create_swapchain(window, surface, device, &self.swapchain_loader, true);
+        let (swapchain, extent, format) = Self::create_swapchain(
+            window,
+            surface_loader,
+            surface,
+            physical_device,
+            &self.swapchain_loader,
+            true,
+        );
 
         self.swapchain = swapchain;
 
         self.extent = extent;
         self.format = format;
 
-        let images = unsafe {
-            self.swapchain_loader
-                .get_swapchain_images(swapchain)
-                .expect("Failed to get swapchain images")
-        };
-        let image_views = Self::create_image_views(device, &format, &images);
+        let images = Self::create_images(&self.swapchain_loader, &swapchain, true);
+
+        let image_views = Self::create_image_views(&self.logical_device, &format, &images, true);
 
         self.images = images;
         self.image_views = image_views;
 
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
-            Self::create_depth_image(window, device, allocator);
+            Self::create_depth_image(window, &self.logical_device, &self.allocator, true);
 
         self.depth_image = depth_image;
         self.depth_image_view = depth_image_view;
@@ -420,5 +485,11 @@ impl Swapchain {
 
     pub fn depth_format(&self) -> &Format {
         &self.depth_format
+    }
+}
+
+impl Drop for Swapchain {
+    fn drop(&mut self) {
+        self.cleanup();
     }
 }

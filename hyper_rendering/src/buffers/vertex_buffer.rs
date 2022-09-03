@@ -13,7 +13,7 @@ use crate::{
 use ash::vk::{Buffer, BufferCreateInfo, BufferUsageFlags, SharingMode};
 use gpu_allocator::vulkan::Allocation;
 use log::debug;
-use std::mem;
+use std::{cell::RefCell, mem, rc::Rc};
 use tracing::instrument;
 
 pub(crate) struct VertexBuffer {
@@ -23,7 +23,11 @@ pub(crate) struct VertexBuffer {
 
 impl VertexBuffer {
     #[instrument(skip_all)]
-    pub fn new(device: &Device, allocator: &mut Allocator, vertices: &Vec<Vertex>) -> Self {
+    pub fn new(
+        device: &Device,
+        allocator: &Rc<RefCell<Allocator>>,
+        vertices: &Vec<Vertex>,
+    ) -> Self {
         let internal_buffer = Self::create_internal_buffer(vertices.len(), device);
         let allocation = Self::allocate_memory(&internal_buffer, vertices, device, allocator);
 
@@ -60,7 +64,7 @@ impl VertexBuffer {
         internal_buffer: &Buffer,
         vertices: &[Vertex],
         device: &Device,
-        allocator: &mut Allocator,
+        allocator: &Rc<RefCell<Allocator>>,
     ) -> Allocation {
         let memory_requirements = unsafe {
             device
@@ -68,7 +72,9 @@ impl VertexBuffer {
                 .get_buffer_memory_requirements(*internal_buffer)
         };
 
-        let allocation = allocator.allocate(memory_requirements, MemoryLocation::CpuToGpu);
+        let allocation = allocator
+            .borrow_mut()
+            .allocate(memory_requirements, MemoryLocation::CpuToGpu);
 
         debug!("Allocated vertex buffer memory");
 
@@ -94,8 +100,8 @@ impl VertexBuffer {
     }
 
     #[instrument(skip_all)]
-    pub fn cleanup(&mut self, device: &Device, allocator: &mut Allocator) {
-        allocator.free(self.allocation.take().unwrap());
+    pub fn cleanup(&mut self, device: &Device, allocator: &Rc<RefCell<Allocator>>) {
+        allocator.borrow_mut().free(self.allocation.take().unwrap());
 
         unsafe {
             device

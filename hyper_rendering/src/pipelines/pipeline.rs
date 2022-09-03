@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{devices::device::Device, pipeline::swapchain::Swapchain, vertex::Vertex};
+use crate::{devices::device::Device, pipelines::swapchain::Swapchain, vertex::Vertex};
 
 use ash::vk::{
     self, BlendFactor, BlendOp, ColorComponentFlags, CompareOp, CullModeFlags, DynamicState,

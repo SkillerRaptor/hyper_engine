@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+use std::{cell::RefCell, rc::Rc};
+
 use crate::{
     allocator::Allocator, buffers::vertex_buffer::VertexBuffer, devices::device::Device,
     vertex::Vertex,
@@ -20,7 +22,11 @@ pub(crate) struct Mesh {
 
 impl Mesh {
     #[instrument(skip_all)]
-    pub fn new(device: &Device, allocator: &mut Allocator, vertices: &Vec<Vertex>) -> Self {
+    pub fn new(
+        device: &Device,
+        allocator: &Rc<RefCell<Allocator>>,
+        vertices: &Vec<Vertex>,
+    ) -> Self {
         let vertex_buffer = VertexBuffer::new(device, allocator, vertices);
 
         Self {
@@ -30,7 +36,7 @@ impl Mesh {
     }
 
     #[instrument(skip_all)]
-    pub fn load(device: &Device, allocator: &mut Allocator, file_name: &str) -> Self {
+    pub fn load(device: &Device, allocator: &Rc<RefCell<Allocator>>, file_name: &str) -> Self {
         let (models, _) = tobj::load_obj(&file_name, &LoadOptions::default())
             .expect("Failed to load object file");
 
@@ -70,7 +76,7 @@ impl Mesh {
     }
 
     #[instrument(skip_all)]
-    pub fn cleanup(&mut self, device: &Device, allocator: &mut Allocator) {
+    pub fn cleanup(&mut self, device: &Device, allocator: &Rc<RefCell<Allocator>>) {
         self.vertex_buffer.cleanup(device, allocator);
     }
 

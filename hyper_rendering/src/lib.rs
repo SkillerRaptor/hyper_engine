@@ -11,7 +11,7 @@ mod buffers;
 mod commands;
 mod devices;
 mod mesh;
-mod pipeline;
+mod pipelines;
 mod render_object;
 mod renderer;
 mod sync;
