@@ -11,7 +11,7 @@ use log::{Level, LevelFilter};
 use std::{fs, io, path::Path};
 use tracing::instrument;
 
-const LOG_FOLDER: &str = "./logs/";
+const LOG_FOLDER: &str = "./logs";
 
 #[instrument(skip_all)]
 pub fn init() {
@@ -59,10 +59,15 @@ pub fn init() {
                 })
                 .chain(
                     fern::log_file(format!(
-                        "./logs/hyper_engine_{}.log",
+                        "{}/hyper_engine_{}.log",
+                        LOG_FOLDER,
                         Local::now().format("%d-%m-%Y_%H-%M-%S")
                     ))
                     .expect("Failed to create log file"),
+                )
+                .chain(
+                    fern::log_file(format!("{}/latest.log", LOG_FOLDER))
+                        .expect("Failed to create latest log file"),
                 ),
         )
         .apply()
