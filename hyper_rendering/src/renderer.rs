@@ -11,7 +11,7 @@ use crate::{
         command_pool::{CommandPool, CommandPoolCreateInfo},
     },
     mesh::{Mesh, MeshCreateInfo, MeshLoadInfo},
-    pipelines::{pipeline::MeshPushConstants, swapchain::Swapchain},
+    pipelines::{pipeline::BindingsOffset, swapchain::Swapchain},
     render_object::{Material, RenderObject},
     sync::{
         fence::{Fence, FenceCreateInfo},
@@ -26,7 +26,7 @@ use ash::{
     vk::{
         self, AccessFlags, AttachmentLoadOp, AttachmentStoreOp, ClearColorValue,
         ClearDepthStencilValue, ClearValue, CommandBufferLevel, CommandBufferResetFlags,
-        CommandBufferUsageFlags, DependencyFlags, ImageAspectFlags, ImageLayout,
+        CommandBufferUsageFlags, DependencyFlags, DescriptorSet, ImageAspectFlags, ImageLayout,
         ImageMemoryBarrier, ImageSubresourceRange, ImageView, Offset2D, Pipeline,
         PipelineBindPoint, PipelineLayout, PipelineStageFlags, PresentInfoKHR, Queue, Rect2D,
         RenderingAttachmentInfo, RenderingInfo, ResolveModeFlags, ShaderStageFlags, SubmitInfo,
@@ -93,17 +93,17 @@ impl Renderer {
             Vertex::new(
                 vec3(1.0, 1.0, 0.5),
                 vec3(1.0, 0.0, 0.0),
-                vec3(0.0, 0.0, 0.0),
+                //vec3(0.0, 0.0, 0.0),
             ),
             Vertex::new(
                 vec3(-1.0, 1.0, 0.5),
                 vec3(0.0, 1.0, 0.0),
-                vec3(0.0, 0.0, 0.0),
+                //vec3(0.0, 0.0, 0.0),
             ),
             Vertex::new(
                 vec3(0.0, -1.0, 0.5),
                 vec3(0.0, 0.0, 1.0),
-                vec3(0.0, 0.0, 0.0),
+                //vec3(0.0, 0.0, 0.0),
             ),
         ];
 
@@ -129,7 +129,7 @@ impl Renderer {
 
         let mut renderables = Vec::new();
 
-        let monkey_render_object = RenderObject {
+        let _monkey_render_object = RenderObject {
             mesh: String::from("monkey"),
             material: String::from("default"),
             transform: glm::mat4(
@@ -137,10 +137,12 @@ impl Renderer {
             ),
         };
 
-        renderables.push(monkey_render_object);
+        //renderables.push(monkey_render_object);
 
-        for x in -20..20 {
-            for z in -20..20 {
+        //for x in -20..20 {
+        //    for z in -20..20 {
+        for x in 0..1 {
+            for z in 0..1 {
                 let translation = glm::translate(
                     &glm::mat4(
                         1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
@@ -463,7 +465,7 @@ impl Renderer {
     }
 
     #[instrument(skip_all)]
-    pub fn draw(&self, window: &Window, swapchain: &Swapchain) {
+    pub fn draw(&self, window: &Window, descriptor_sets: &[DescriptorSet], swapchain: &Swapchain) {
         let current_frame = self.current_frame();
 
         let camera_position = glm::vec3(0.0, 0.0, -2.0);
@@ -498,6 +500,14 @@ impl Renderer {
                     .command_buffer
                     .bind_pipeline(PipelineBindPoint::GRAPHICS, pipeline);
 
+                current_frame.command_buffer.bind_descriptor_sets(
+                    PipelineBindPoint::GRAPHICS,
+                    pipeline_layout,
+                    0,
+                    descriptor_sets,
+                    &[],
+                );
+
                 let extent = swapchain.extent();
                 let viewport = Viewport::builder()
                     .x(0.0)
@@ -512,22 +522,25 @@ impl Renderer {
                 let scissor = Rect2D::builder().offset(*offset).extent(*extent);
                 current_frame.command_buffer.set_scissor(0, &[*scissor]);
 
+                // TODO: Change hardcoded binding offset
+                let bindings_offset = BindingsOffset {
+                    bindings_offset: 0,
+                    unused0: 0,
+                    unused1: 0,
+                    unused2: 0,
+                };
+
+                current_frame.command_buffer.push_constants(
+                    pipeline_layout,
+                    ShaderStageFlags::ALL,
+                    0,
+                    &bindings_offset,
+                );
+
                 last_material = render_object.material.clone();
             }
 
-            let mesh_matrix = projection_matrix * view_matrix * render_object.transform;
-
-            let push_constants = MeshPushConstants {
-                data: glm::vec4(0.0, 0.0, 0.0, 0.0),
-                render_matrix: mesh_matrix,
-            };
-
-            current_frame.command_buffer.push_constants(
-                pipeline_layout,
-                ShaderStageFlags::VERTEX,
-                0,
-                &push_constants,
-            );
+            let _mesh_matrix = projection_matrix * view_matrix * render_object.transform;
 
             let buffers = &[*mesh.vertex_buffer().internal_buffer()];
             let offsets = &[0];
@@ -540,9 +553,10 @@ impl Renderer {
                 last_mesh = render_object.mesh.clone();
             }
 
-            current_frame
-                .command_buffer
-                .draw(mesh.vertices().len() as u32, 1, 0, 0);
+            //current_frame
+            //    .command_buffer
+            //    .draw(mesh.vertices().len() as u32, 1, 0, 0);
+            current_frame.command_buffer.draw(3, 1, 0, 0);
         }
     }
 

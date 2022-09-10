@@ -16,16 +16,16 @@ use tracing::instrument;
 pub(crate) struct Vertex {
     position: glm::Vec3,
     color: glm::Vec3,
-    normal: glm::Vec3,
+    //normal: glm::Vec3,
 }
 
 impl Vertex {
     #[instrument(skip_all)]
-    pub fn new(position: glm::Vec3, color: glm::Vec3, normal: glm::Vec3) -> Self {
+    pub fn new(position: glm::Vec3, color: glm::Vec3 /* , normal: glm::Vec3*/) -> Self {
         Self {
             position,
             color,
-            normal,
+            //normal,
         }
     }
 
@@ -54,13 +54,18 @@ impl Vertex {
             .offset(mem::size_of::<glm::Vec3>() as u32)
             .build();
 
+        /*
         let normal_description = VertexInputAttributeDescription::builder()
             .binding(0)
             .location(2)
             .format(Format::R32G32B32_SFLOAT)
             .offset((mem::size_of::<glm::Vec3>() * 2) as u32)
-            .build();
+            .build();#
+            */
 
-        vec![position_description, color_description, normal_description]
+        vec![
+            position_description,
+            color_description, /* , normal_description*/
+        ]
     }
 }

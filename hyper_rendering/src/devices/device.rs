@@ -7,9 +7,9 @@
 use ash::{
     extensions::khr::{Surface as SurfaceLoader, Swapchain},
     vk::{
-        self, DeviceQueueCreateInfo, PhysicalDevice, PhysicalDeviceDynamicRenderingFeatures,
-        PhysicalDeviceFeatures, PhysicalDeviceType, PresentModeKHR, Queue, QueueFlags,
-        SurfaceCapabilitiesKHR, SurfaceFormatKHR, SurfaceKHR,
+        self, DeviceQueueCreateInfo, PhysicalDevice, PhysicalDeviceDescriptorIndexingFeatures,
+        PhysicalDeviceDynamicRenderingFeatures, PhysicalDeviceFeatures2, PhysicalDeviceType,
+        PresentModeKHR, Queue, QueueFlags, SurfaceCapabilitiesKHR, SurfaceFormatKHR, SurfaceKHR,
     },
     Instance,
 };
@@ -167,6 +167,10 @@ impl Device {
             return false;
         }
 
+        if !Self::check_physical_device_features(instance, physical_device) {
+            return false;
+        }
+
         let support = SwapchainSupport::new(surface_loader, surface, physical_device);
         if support.formats.is_empty() || support.present_modes.is_empty() {
             return false;
@@ -194,6 +198,69 @@ impl Device {
         if !Self::DEVICE_EXTENSIONS
             .iter()
             .all(|extension| extensions.contains(extension))
+        {
+            return false;
+        }
+
+        true
+    }
+
+    #[instrument(skip_all)]
+    fn check_physical_device_features(
+        instance: &Instance,
+        physical_device: &PhysicalDevice,
+    ) -> bool {
+        let mut dynamic_rendering_feature = PhysicalDeviceDynamicRenderingFeatures::builder();
+
+        let mut descriptor_indexing_features = PhysicalDeviceDescriptorIndexingFeatures::builder();
+
+        let mut physical_device_features = PhysicalDeviceFeatures2::builder()
+            .push_next(&mut dynamic_rendering_feature)
+            .push_next(&mut descriptor_indexing_features);
+
+        unsafe {
+            instance.get_physical_device_features2(*physical_device, &mut physical_device_features)
+        }
+
+        if dynamic_rendering_feature.dynamic_rendering == vk::FALSE {
+            return false;
+        }
+
+        // TODO: Clean this up and give more information on which feature is not supported
+        if descriptor_indexing_features.shader_uniform_texel_buffer_array_dynamic_indexing
+            == vk::FALSE
+            || descriptor_indexing_features.shader_storage_texel_buffer_array_dynamic_indexing
+                == vk::FALSE
+            || descriptor_indexing_features.shader_uniform_buffer_array_non_uniform_indexing
+                == vk::FALSE
+            || descriptor_indexing_features.shader_sampled_image_array_non_uniform_indexing
+                == vk::FALSE
+            || descriptor_indexing_features.shader_storage_buffer_array_non_uniform_indexing
+                == vk::FALSE
+            || descriptor_indexing_features.shader_storage_image_array_non_uniform_indexing
+                == vk::FALSE
+            || descriptor_indexing_features.shader_uniform_texel_buffer_array_non_uniform_indexing
+                == vk::FALSE
+            || descriptor_indexing_features.shader_storage_texel_buffer_array_non_uniform_indexing
+                == vk::FALSE
+            || descriptor_indexing_features.descriptor_binding_sampled_image_update_after_bind
+                == vk::FALSE
+            || descriptor_indexing_features.descriptor_binding_storage_image_update_after_bind
+                == vk::FALSE
+            || descriptor_indexing_features.descriptor_binding_storage_buffer_update_after_bind
+                == vk::FALSE
+            || descriptor_indexing_features
+                .descriptor_binding_uniform_texel_buffer_update_after_bind
+                == vk::FALSE
+            || descriptor_indexing_features
+                .descriptor_binding_storage_texel_buffer_update_after_bind
+                == vk::FALSE
+            || descriptor_indexing_features.descriptor_binding_update_unused_while_pending
+                == vk::FALSE
+            || descriptor_indexing_features.descriptor_binding_partially_bound == vk::FALSE
+            || descriptor_indexing_features.descriptor_binding_variable_descriptor_count
+                == vk::FALSE
+            || descriptor_indexing_features.runtime_descriptor_array == vk::FALSE
         {
             return false;
         }
@@ -343,22 +410,26 @@ impl Device {
             })
             .collect::<Vec<_>>();
 
-        let physical_device_features = PhysicalDeviceFeatures::builder();
-
         let extensions = Self::DEVICE_EXTENSIONS
             .iter()
             .map(|extension| extension.as_ptr())
             .collect::<Vec<_>>();
 
-        let mut dynamic_rendering_feature =
-            PhysicalDeviceDynamicRenderingFeatures::builder().dynamic_rendering(true);
+        let mut dynamic_rendering_feature = PhysicalDeviceDynamicRenderingFeatures::builder();
+        let mut descriptor_indexing_features = PhysicalDeviceDescriptorIndexingFeatures::builder();
+
+        let mut physical_device_features = PhysicalDeviceFeatures2::builder()
+            .push_next(&mut dynamic_rendering_feature)
+            .push_next(&mut descriptor_indexing_features);
+
+        unsafe {
+            instance.get_physical_device_features2(*physical_device, &mut physical_device_features)
+        }
 
         let device_create_info = vk::DeviceCreateInfo::builder()
-            .push_next(&mut dynamic_rendering_feature)
+            .push_next(&mut physical_device_features)
             .queue_create_infos(&queue_create_infos)
-            .enabled_layer_names(&[])
-            .enabled_extension_names(&extensions)
-            .enabled_features(&physical_device_features);
+            .enabled_extension_names(&extensions);
 
         let logical_device = unsafe {
             instance

@@ -9,6 +9,7 @@ pub mod context;
 mod allocator;
 mod buffers;
 mod commands;
+mod descriptors;
 mod devices;
 mod mesh;
 mod pipelines;

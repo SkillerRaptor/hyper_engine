@@ -4,5 +4,5 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub mod buffer;
-pub mod vertex_buffer;
+pub mod descriptor_pool;
+pub mod descriptor_set;

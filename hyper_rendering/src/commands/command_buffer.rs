@@ -8,9 +8,9 @@ use ash::{
     vk::{
         self, Buffer, BufferMemoryBarrier, CommandBufferAllocateInfo, CommandBufferBeginInfo,
         CommandBufferInheritanceInfo, CommandBufferLevel, CommandBufferResetFlags,
-        CommandBufferUsageFlags, CommandPool, DependencyFlags, DeviceSize, ImageMemoryBarrier,
-        MemoryBarrier, Pipeline, PipelineBindPoint, PipelineLayout, PipelineStageFlags, Rect2D,
-        RenderingInfo, ShaderStageFlags, Viewport,
+        CommandBufferUsageFlags, CommandPool, DependencyFlags, DescriptorSet, DeviceSize,
+        ImageMemoryBarrier, MemoryBarrier, Pipeline, PipelineBindPoint, PipelineLayout,
+        PipelineStageFlags, Rect2D, RenderingInfo, ShaderStageFlags, Viewport,
     },
     Device,
 };
@@ -128,6 +128,27 @@ impl CommandBuffer {
                 buffer_memory_barriers,
                 image_memory_barriers,
             );
+        }
+    }
+
+    #[instrument(skip_all)]
+    pub fn bind_descriptor_sets(
+        &self,
+        pipeline_bind_point: PipelineBindPoint,
+        layout: PipelineLayout,
+        first_set: u32,
+        descriptor_sets: &[DescriptorSet],
+        dynamic_offsets: &[u32],
+    ) {
+        unsafe {
+            self.logical_device.cmd_bind_descriptor_sets(
+                self.command_buffer,
+                pipeline_bind_point,
+                layout,
+                first_set,
+                descriptor_sets,
+                dynamic_offsets,
+            )
         }
     }
 

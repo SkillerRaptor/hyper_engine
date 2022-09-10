@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-use std::{cell::RefCell, rc::Rc};
-
 use crate::{
     allocator::{Allocator, AllocatorCreateInfo},
+    descriptors::{
+        descriptor_pool::{DescriptorPool, DescriptorPoolCreateInfo},
+        descriptor_set::{DescriptorSet, DescriptorSetCreateInfo},
+    },
     devices::{
         device::{Device, DeviceCreateInfo},
         instance::{Instance, InstanceCreateInfo},
@@ -24,11 +26,14 @@ use hyper_platform::window::Window;
 
 use ash::Entry;
 use log::info;
+use std::{cell::RefCell, rc::Rc};
 use tracing::instrument;
 
 pub struct RenderContext {
     renderer: Renderer,
     _pipeline: Pipeline,
+    descriptor_sets: Vec<DescriptorSet>,
+    _descriptor_pool: DescriptorPool,
     swapchain: Swapchain,
     _allocator: Rc<RefCell<Allocator>>,
     device: Device,
@@ -46,7 +51,10 @@ impl RenderContext {
         let device = Self::create_device(&instance, &surface);
         let allocator = Rc::new(RefCell::new(Self::create_allocator(&instance, &device)));
         let swapchain = Self::create_swapchain(window, &instance, &surface, &device, &allocator);
-        let pipeline = Self::create_pipeline(&device, &swapchain);
+        let descriptor_pool = Self::create_descriptor_pool(&instance, &device);
+        let descriptor_sets =
+            Self::create_descriptor_sets(&instance, &device, &allocator, &descriptor_pool);
+        let pipeline = Self::create_pipeline(&instance, &device, &descriptor_pool, &swapchain);
 
         let renderer = Self::create_renderer(&device, &pipeline, &allocator);
 
@@ -56,6 +64,8 @@ impl RenderContext {
             renderer,
 
             _pipeline: pipeline,
+            descriptor_sets,
+            _descriptor_pool: descriptor_pool,
             swapchain,
             _allocator: allocator,
             device,
@@ -132,9 +142,63 @@ impl RenderContext {
     }
 
     #[instrument(skip_all)]
-    fn create_pipeline(device: &Device, swapchain: &Swapchain) -> Pipeline {
+    fn create_descriptor_pool(instance: &Instance, device: &Device) -> DescriptorPool {
+        let descriptor_pool_create_info = DescriptorPoolCreateInfo {
+            instance: instance.instance(),
+            physical_device: device.physical_device(),
+            logical_device: device.logical_device(),
+        };
+
+        DescriptorPool::new(&descriptor_pool_create_info)
+    }
+
+    #[instrument(skip_all)]
+    fn create_descriptor_sets(
+        instance: &Instance,
+        device: &Device,
+        allocator: &Rc<RefCell<Allocator>>,
+        descriptor_pool: &DescriptorPool,
+    ) -> Vec<DescriptorSet> {
+        let properties = unsafe {
+            instance
+                .instance()
+                .get_physical_device_properties(*device.physical_device())
+        };
+        let limits = properties.limits;
+
+        // TODO: Make this cleaner
+        let mut descriptor_sets = Vec::new();
+        for (i, descriptor_set_layout) in
+            descriptor_pool.descriptor_set_layouts().iter().enumerate()
+        {
+            let descriptor_set_create_info = DescriptorSetCreateInfo {
+                logical_device: device.logical_device(),
+                allocator,
+
+                descriptor_pool: descriptor_pool.descriptor_pool(),
+                descriptor_set_layout,
+                descriptor_type: &DescriptorPool::DESCRIPTOR_TYPES[i],
+
+                limits: &limits,
+            };
+
+            let descriptor_set = DescriptorSet::new(&descriptor_set_create_info);
+            descriptor_sets.push(descriptor_set);
+        }
+
+        descriptor_sets
+    }
+
+    #[instrument(skip_all)]
+    fn create_pipeline(
+        _instance: &Instance,
+        device: &Device,
+        descriptor_pool: &DescriptorPool,
+        swapchain: &Swapchain,
+    ) -> Pipeline {
         let pipeline_create_info = PipelineCreateInfo {
             logical_device: device.logical_device(),
+            descriptor_set_layouts: descriptor_pool.descriptor_set_layouts(),
             image_format: swapchain.format(),
             depth_image_format: swapchain.depth_format(),
         };
@@ -177,7 +241,14 @@ impl RenderContext {
 
     #[instrument(skip_all)]
     pub fn draw(&self, window: &Window) {
-        self.renderer.draw(window, &self.swapchain);
+        let descriptor_sets = self
+            .descriptor_sets
+            .iter()
+            .map(|descriptor_set| *descriptor_set.descriptor_set())
+            .collect::<Vec<_>>();
+
+        self.renderer
+            .draw(window, descriptor_sets.as_slice(), &self.swapchain);
     }
 }
 

@@ -8,9 +8,9 @@ use crate::vertex::Vertex;
 
 use ash::{
     vk::{
-        self, BlendFactor, BlendOp, ColorComponentFlags, CompareOp, CullModeFlags, DynamicState,
-        Format, FrontFace, GraphicsPipelineCreateInfo, LogicOp, PipelineCache,
-        PipelineColorBlendAttachmentState, PipelineColorBlendStateCreateInfo,
+        self, BlendFactor, BlendOp, ColorComponentFlags, CompareOp, CullModeFlags,
+        DescriptorSetLayout, DynamicState, Format, FrontFace, GraphicsPipelineCreateInfo, LogicOp,
+        PipelineCache, PipelineColorBlendAttachmentState, PipelineColorBlendStateCreateInfo,
         PipelineDepthStencilStateCreateInfo, PipelineDynamicStateCreateInfo,
         PipelineInputAssemblyStateCreateInfo, PipelineLayout, PipelineLayoutCreateInfo,
         PipelineMultisampleStateCreateInfo, PipelineRasterizationStateCreateInfo,
@@ -28,6 +28,14 @@ use nalgebra_glm as glm;
 use std::{ffi::CString, mem};
 use tracing::instrument;
 
+#[repr(C)]
+pub(crate) struct BindingsOffset {
+    pub bindings_offset: u32,
+    pub unused0: u32,
+    pub unused1: u32,
+    pub unused2: u32,
+}
+
 enum ShaderStage {
     Vertex,
     Fragment,
@@ -40,6 +48,7 @@ pub struct MeshPushConstants {
 
 pub(crate) struct PipelineCreateInfo<'a> {
     pub logical_device: &'a Device,
+    pub descriptor_set_layouts: &'a [DescriptorSetLayout],
     pub image_format: &'a Format,
     pub depth_image_format: &'a Format,
 }
@@ -54,7 +63,11 @@ pub(crate) struct Pipeline {
 impl Pipeline {
     #[instrument(skip_all)]
     pub fn new(create_info: &PipelineCreateInfo) -> Self {
-        let pipeline_layout = Self::create_pipeline_layout(create_info.logical_device);
+        let pipeline_layout = Self::create_pipeline_layout(
+            create_info.logical_device,
+            create_info.descriptor_set_layouts,
+        );
+
         let pipeline = Self::create_pipeline(
             create_info.logical_device,
             create_info.image_format,
@@ -71,17 +84,21 @@ impl Pipeline {
     }
 
     #[instrument(skip_all)]
-    fn create_pipeline_layout(logical_device: &Device) -> PipelineLayout {
+    fn create_pipeline_layout(
+        logical_device: &Device,
+        descriptor_set_layouts: &[DescriptorSetLayout],
+    ) -> PipelineLayout {
+        // TODO: Don't hardcode this instead replace it with a struct
         let push_constant = PushConstantRange::builder()
-            .stage_flags(ShaderStageFlags::VERTEX)
+            .stage_flags(ShaderStageFlags::ALL)
             .offset(0)
-            .size(mem::size_of::<MeshPushConstants>() as u32);
+            .size(mem::size_of::<BindingsOffset>() as u32);
 
-        let set_layouts = &[];
-        let push_constant_ranges = &[*push_constant];
+        let set_layouts = descriptor_set_layouts;
+        let push_constant_ranges = [*push_constant];
         let pipeline_layout_info_create_info = PipelineLayoutCreateInfo::builder()
             .set_layouts(set_layouts)
-            .push_constant_ranges(push_constant_ranges);
+            .push_constant_ranges(&push_constant_ranges);
 
         let pipeline_layout = unsafe {
             logical_device
@@ -122,7 +139,7 @@ impl Pipeline {
 
         let specialization_info = SpecializationInfo::builder();
 
-        let vertex = include_bytes!("../../../assets/shaders/default_shader_vertex.spv");
+        let vertex = include_bytes!("../../../assets/shaders/compiled/default_shader_vs.spv");
         let vertex_shader_module =
             Self::create_shader_module(logical_device, ShaderStage::Vertex, vertex);
         let vertex_stage = PipelineShaderStageCreateInfo::builder()
@@ -131,7 +148,7 @@ impl Pipeline {
             .name(&entry_point)
             .specialization_info(&specialization_info);
 
-        let fragment = include_bytes!("../../../assets/shaders/default_shader_fragment.spv");
+        let fragment = include_bytes!("../../../assets/shaders/compiled/default_shader_ps.spv");
         let fragment_shader_module =
             Self::create_shader_module(logical_device, ShaderStage::Fragment, fragment);
         let fragment_stage = PipelineShaderStageCreateInfo::builder()
@@ -140,11 +157,12 @@ impl Pipeline {
             .name(&entry_point)
             .specialization_info(&specialization_info);
 
-        let binding_description = Vertex::binding_descriptions();
-        let attribute_description = Vertex::attribute_descriptions();
-        let vertex_input_state_create_info = PipelineVertexInputStateCreateInfo::builder()
-            .vertex_binding_descriptions(&binding_description)
-            .vertex_attribute_descriptions(&attribute_description);
+        // FIXME: REMOVE COMMENTS
+        let _binding_description = Vertex::binding_descriptions();
+        let _attribute_description = Vertex::attribute_descriptions();
+        let vertex_input_state_create_info = PipelineVertexInputStateCreateInfo::builder();
+        //.vertex_binding_descriptions(&binding_description)
+        //.vertex_attribute_descriptions(&attribute_description);
 
         let input_assembly_state_create_info = PipelineInputAssemblyStateCreateInfo::builder()
             .topology(PrimitiveTopology::TRIANGLE_LIST)
@@ -237,6 +255,7 @@ impl Pipeline {
             .base_pipeline_handle(vk::Pipeline::null())
             .base_pipeline_index(-1);
 
+        /*
         let pipeline = unsafe {
             logical_device
                 .create_graphics_pipelines(
@@ -246,6 +265,17 @@ impl Pipeline {
                 )
                 .map_err(|error| error.1)
                 .expect("Failed to create pipeline")[0]
+        };
+        */
+
+        let pipeline = unsafe {
+            logical_device
+                .create_graphics_pipelines(
+                    PipelineCache::null(),
+                    &[*graphics_pipeline_create_info],
+                    None,
+                )
+                .unwrap()[0]
         };
 
         unsafe {
@@ -427,7 +457,7 @@ impl Pipeline {
             ShaderStage::Fragment => "fragment",
         };
 
-        debug!("Created {} shader module", shader_stage,);
+        debug!("Created {} shader module", shader_stage);
 
         shader_module
     }

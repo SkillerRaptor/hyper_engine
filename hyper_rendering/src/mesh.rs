@@ -71,13 +71,13 @@ impl Mesh {
                     mesh.normals[index + 1],
                     mesh.normals[index + 2],
                 );
-                let normal = glm::vec3(
+                let _normal = glm::vec3(
                     mesh.normals[index],
                     mesh.normals[index + 1],
                     mesh.normals[index + 2],
                 );
 
-                let vertex = Vertex::new(position, color, normal);
+                let vertex = Vertex::new(position, color /*, normal*/);
                 vertices.push(vertex);
             }
         }
