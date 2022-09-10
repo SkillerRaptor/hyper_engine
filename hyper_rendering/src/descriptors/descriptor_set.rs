@@ -25,8 +25,8 @@ use crate::{
 
 // NOTE: TEMP
 pub(crate) struct Bindings {
-    pub vertices: u32,
-    pub transforms: u32,
+    pub _vertices: u32,
+    pub _transforms: u32,
 }
 
 pub(crate) struct DescriptorSetCreateInfo<'a> {
@@ -41,9 +41,9 @@ pub(crate) struct DescriptorSetCreateInfo<'a> {
 }
 
 pub(crate) struct DescriptorSet {
-    first_buffer: Buffer,
-    second_buffer: Buffer,
-    third_buffer: Buffer,
+    _first_buffer: Buffer,
+    _second_buffer: Buffer,
+    _third_buffer: Buffer,
 
     descriptor_set: vk::DescriptorSet,
 }
@@ -107,8 +107,8 @@ impl DescriptorSet {
             // TODO: Abstract and more flexible
             {
                 let bindings = Bindings {
-                    vertices: 1,
-                    transforms: 2,
+                    _vertices: 1,
+                    _transforms: 2,
                 };
 
                 first_buffer.set_data(&[bindings]);
@@ -221,9 +221,9 @@ impl DescriptorSet {
         debug!("Created descriptor set");
 
         Self {
-            first_buffer,
-            second_buffer,
-            third_buffer,
+            _first_buffer: first_buffer,
+            _second_buffer: second_buffer,
+            _third_buffer: third_buffer,
             descriptor_set,
         }
     }

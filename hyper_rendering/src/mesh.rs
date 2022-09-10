@@ -30,7 +30,7 @@ pub(crate) struct MeshLoadInfo<'a> {
 
 pub(crate) struct Mesh {
     vertex_buffer: VertexBuffer,
-    vertices: Vec<Vertex>,
+    _vertices: Vec<Vertex>,
 }
 
 impl Mesh {
@@ -46,7 +46,7 @@ impl Mesh {
 
         Self {
             vertex_buffer,
-            vertices: create_info.vertices.to_vec(),
+            _vertices: create_info.vertices.to_vec(),
         }
     }
 
@@ -91,14 +91,16 @@ impl Mesh {
         let vertex_buffer = VertexBuffer::new(&vertex_buffer_create_info);
 
         Self {
-            vertices: vertices.clone(),
+            _vertices: vertices.clone(),
             vertex_buffer,
         }
     }
 
+    /*
     pub fn vertices(&self) -> &Vec<Vertex> {
-        &self.vertices
+        &self._vertices
     }
+    */
 
     pub fn vertex_buffer(&self) -> &VertexBuffer {
         &self.vertex_buffer

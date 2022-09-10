@@ -24,7 +24,7 @@ use ash::{
 };
 //use ash::vk;
 use log::debug;
-use nalgebra_glm as glm;
+
 use std::{ffi::CString, mem};
 use tracing::instrument;
 
@@ -39,11 +39,6 @@ pub(crate) struct BindingsOffset {
 enum ShaderStage {
     Vertex,
     Fragment,
-}
-
-pub struct MeshPushConstants {
-    pub data: glm::Vec4,
-    pub render_matrix: glm::Mat4,
 }
 
 pub(crate) struct PipelineCreateInfo<'a> {
