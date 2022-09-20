@@ -18,6 +18,7 @@ use std::{collections::HashSet, ffi::CStr, str::Utf8Error};
 use thiserror::Error;
 use tracing::instrument;
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, Error)]
 pub enum SwapchainSupportCreationError {
     #[error("Failed to aquire physical device surface capabilities")]
@@ -81,6 +82,7 @@ impl SwapchainSupport {
     }
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, Error)]
 pub enum DeviceCreationError {
     #[error("Failed to aquire graphics queue")]

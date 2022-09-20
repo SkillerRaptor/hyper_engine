@@ -40,6 +40,7 @@ enum ShaderStage {
     Fragment,
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, Error)]
 pub enum PipelineCreationError {
     #[error("Failed to create vulkan pipeline")]
