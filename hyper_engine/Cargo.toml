@@ -9,6 +9,5 @@ hyper_platform = { path = "../hyper_platform" }
 hyper_rendering = { path = "../hyper_rendering" }
 
 log = "0.4.17"
+thiserror = "1.0.35"
 tracing = "0.1.36"
-tracing-subscriber = "0.3.15"
-tracing-tracy = "0.10.0"

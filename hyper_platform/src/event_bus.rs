@@ -18,12 +18,20 @@ use tracing::instrument;
 
 type Listeners = Vec<Box<dyn FnMut(&Event)>>;
 
-#[derive(Default)]
 pub struct EventBus {
     listeners: Listeners,
 }
 
 impl EventBus {
+    #[instrument(skip_all)]
+    pub fn new() -> Self {
+        debug!("Created event bus");
+
+        Self {
+            listeners: Vec::new(),
+        }
+    }
+
     #[instrument(skip_all)]
     pub fn invoke(&mut self, window_event: &WindowEvent) {
         let event = match window_event {
@@ -62,6 +70,6 @@ impl EventBus {
     {
         self.listeners.push(Box::new(listener));
 
-        debug!("Registered event listener with name '{}'", name);
+        debug!("Registered event listener '{}'", name);
     }
 }

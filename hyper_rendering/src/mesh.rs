@@ -52,8 +52,9 @@ impl Mesh {
 
     #[instrument(skip_all)]
     pub fn load(load_info: &MeshLoadInfo) -> Self {
-        let (models, _) = tobj::load_obj(load_info.file_name, &LoadOptions::default())
-            .expect("Failed to load object file");
+        // TODO: Propagate error
+        let (models, _) =
+            tobj::load_obj(load_info.file_name, &LoadOptions::default()).expect("FIXME");
 
         let mut vertices = Vec::new();
         for model in models {

@@ -7,18 +7,46 @@
 use chrono::Local;
 use colored::Colorize;
 use fern::Dispatch;
-use log::{Level, LevelFilter};
+use log::{info, Level, LevelFilter};
 use std::{fs, io, path::Path};
+use thiserror::Error;
 use tracing::instrument;
 
 const LOG_FOLDER: &str = "./logs";
 
+#[derive(Debug, Error)]
+pub enum LoggerInitializationError {
+    #[error("Failed to create log folder")]
+    LogFolderCreation(io::Error),
+
+    #[error("Failed to create log file")]
+    LogFileCreation(io::Error),
+
+    #[error("Failed to set new logger")]
+    LoggerCreation(#[from] log::SetLoggerError),
+}
+
 #[instrument(skip_all)]
-pub fn init() {
+pub fn init() -> Result<(), LoggerInitializationError> {
+    create_logs_folder()?;
+    create_dispatches()?;
+
+    info!("Initialized logger");
+
+    Ok(())
+}
+
+#[instrument(skip_all)]
+fn create_logs_folder() -> Result<(), LoggerInitializationError> {
     if !Path::new(LOG_FOLDER).exists() {
-        fs::create_dir(LOG_FOLDER).unwrap_or_else(|_| panic!("Failed to create {}", LOG_FOLDER));
+        fs::create_dir(LOG_FOLDER).map_err(LoggerInitializationError::LogFolderCreation)?;
     }
 
+    Ok(())
+}
+
+#[instrument(skip_all)]
+fn create_dispatches() -> Result<(), LoggerInitializationError> {
     let log_level = if cfg!(debug_assertions) {
         LevelFilter::Debug
     } else {
@@ -63,13 +91,14 @@ pub fn init() {
                         LOG_FOLDER,
                         Local::now().format("%d-%m-%Y_%H-%M-%S")
                     ))
-                    .expect("Failed to create log file"),
+                    .map_err(LoggerInitializationError::LogFileCreation)?,
                 )
                 .chain(
                     fern::log_file(format!("{}/latest.log", LOG_FOLDER))
-                        .expect("Failed to create latest log file"),
+                        .map_err(LoggerInitializationError::LogFileCreation)?,
                 ),
         )
-        .apply()
-        .expect("Failed to apply logger dispatch");
+        .apply()?;
+
+    Ok(())
 }

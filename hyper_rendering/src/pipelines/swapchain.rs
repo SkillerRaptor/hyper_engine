@@ -4,11 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-use std::{cell::RefCell, rc::Rc};
-
 use crate::{
-    allocator::{Allocator, MemoryLocation},
-    devices::device::SwapchainSupport,
+    allocator::{AllocationError, Allocator, MemoryLocation},
+    devices::device::{SwapchainSupport, SwapchainSupportCreationError},
 };
 
 use hyper_platform::window::Window;
@@ -16,7 +14,7 @@ use hyper_platform::window::Window;
 use ash::{
     extensions::khr::{Surface as SurfaceLoader, Swapchain as SwapchainLoader},
     vk::{
-        ColorSpaceKHR, ComponentMapping, ComponentSwizzle, CompositeAlphaFlagsKHR, Extent2D,
+        self, ColorSpaceKHR, ComponentMapping, ComponentSwizzle, CompositeAlphaFlagsKHR, Extent2D,
         Extent3D, Format, Image, ImageAspectFlags, ImageCreateInfo, ImageLayout,
         ImageSubresourceRange, ImageTiling, ImageType, ImageUsageFlags, ImageView,
         ImageViewCreateInfo, ImageViewType, PhysicalDevice, PresentModeKHR, SampleCountFlags,
@@ -27,7 +25,36 @@ use ash::{
 };
 use gpu_allocator::vulkan::Allocation;
 use log::debug;
+use std::{cell::RefCell, rc::Rc};
+use thiserror::Error;
 use tracing::instrument;
+
+#[derive(Debug, Error)]
+pub enum SwapchainCreationError {
+    #[error("Failed to allocate depth image memory")]
+    Allocation(#[from] AllocationError),
+
+    #[error("Failed to aquire swapchain images")]
+    SwapchainImagesAcquisition(vk::Result),
+
+    #[error("Failed to bind image memory")]
+    ImageMemoryBinding(vk::Result),
+
+    #[error("Failed to create depth image")]
+    DepthImageCreation(vk::Result),
+
+    #[error("Failed to create depth image view")]
+    DepthImageViewCreation(vk::Result),
+
+    #[error("Failed to create swapchain image view")]
+    ImageViewCreation(vk::Result),
+
+    #[error("Failed to create vulkan swapchain")]
+    SwapchainCreation(vk::Result),
+
+    #[error("Failed to create swapchain support")]
+    SwapchainSupportCreation(#[from] SwapchainSupportCreationError),
+}
 
 pub(crate) struct SwapchainCreateInfo<'a> {
     pub window: &'a Window,
@@ -38,7 +65,6 @@ pub(crate) struct SwapchainCreateInfo<'a> {
     pub logical_device: &'a Device,
     pub allocator: &'a Rc<RefCell<Allocator>>,
 }
-
 pub(crate) struct Swapchain {
     depth_image_allocation: Option<Allocation>,
     depth_format: Format,
@@ -63,7 +89,7 @@ pub(crate) struct Swapchain {
 
 impl Swapchain {
     #[instrument(skip_all)]
-    pub fn new(create_info: &SwapchainCreateInfo) -> Self {
+    pub fn new(create_info: &SwapchainCreateInfo) -> Result<Self, SwapchainCreationError> {
         let swapchain_loader =
             SwapchainLoader::new(create_info.instance, create_info.logical_device);
 
@@ -74,12 +100,12 @@ impl Swapchain {
             create_info.physical_device,
             &swapchain_loader,
             false,
-        );
+        )?;
 
-        let images = Self::create_images(&swapchain_loader, &swapchain, false);
+        let images = Self::create_images(&swapchain_loader, &swapchain, false)?;
 
         let image_views =
-            Self::create_image_views(create_info.logical_device, &format, &images, false);
+            Self::create_image_views(create_info.logical_device, &format, &images, false)?;
 
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
             Self::create_depth_image(
@@ -87,9 +113,9 @@ impl Swapchain {
                 create_info.logical_device,
                 create_info.allocator,
                 false,
-            );
+            )?;
 
-        Self {
+        Ok(Self {
             depth_image_allocation: Some(depth_image_allocation),
             depth_format,
             depth_image_view,
@@ -109,7 +135,7 @@ impl Swapchain {
             physical_device: *create_info.physical_device,
             surface: *create_info.surface,
             surface_loader: create_info.surface_loader.clone(),
-        }
+        })
     }
 
     #[instrument(skip_all)]
@@ -120,8 +146,8 @@ impl Swapchain {
         physical_device: &PhysicalDevice,
         swapchain_loader: &SwapchainLoader,
         recreated: bool,
-    ) -> (SwapchainKHR, Extent2D, Format) {
-        let support = SwapchainSupport::new(surface_loader, surface, physical_device);
+    ) -> Result<(SwapchainKHR, Extent2D, Format), SwapchainCreationError> {
+        let support = SwapchainSupport::new(surface_loader, surface, physical_device)?;
 
         let extent = Self::choose_extent(window, support.capabilities());
         let format = Self::choose_surface_format(support.formats());
@@ -160,7 +186,7 @@ impl Swapchain {
         let swapchain = unsafe {
             swapchain_loader
                 .create_swapchain(&swapchain_create_info, None)
-                .expect("Failed to create swapchain")
+                .map_err(SwapchainCreationError::SwapchainCreation)?
         };
 
         if !recreated {
@@ -169,7 +195,7 @@ impl Swapchain {
             Self::print_swapchain_information(&support, &swapchain_create_info);
         }
 
-        (swapchain, extent, format.format)
+        Ok((swapchain, extent, format.format))
     }
 
     #[instrument(skip_all)]
@@ -263,18 +289,18 @@ impl Swapchain {
         swapchain_loader: &SwapchainLoader,
         swapchain: &SwapchainKHR,
         recreated: bool,
-    ) -> Vec<Image> {
+    ) -> Result<Vec<Image>, SwapchainCreationError> {
         let images = unsafe {
             swapchain_loader
                 .get_swapchain_images(*swapchain)
-                .expect("Failed to get images")
+                .map_err(SwapchainCreationError::SwapchainImagesAcquisition)?
         };
 
         if !recreated {
             debug!("Created images");
         }
 
-        images
+        Ok(images)
     }
 
     #[instrument(skip_all)]
@@ -283,7 +309,7 @@ impl Swapchain {
         format: &Format,
         images: &[Image],
         recreated: bool,
-    ) -> Vec<ImageView> {
+    ) -> Result<Vec<ImageView>, SwapchainCreationError> {
         let image_views = images
             .iter()
             .map(|image| {
@@ -310,13 +336,13 @@ impl Swapchain {
                 unsafe { logical_device.create_image_view(&image_view_create_info, None) }
             })
             .collect::<Result<Vec<_>, _>>()
-            .expect("Failed to create image views");
+            .map_err(SwapchainCreationError::ImageViewCreation)?;
 
         if !recreated {
             debug!("Created image views");
         }
 
-        image_views
+        Ok(image_views)
     }
 
     #[instrument(skip_all)]
@@ -325,7 +351,7 @@ impl Swapchain {
         logical_device: &Device,
         allocator: &Rc<RefCell<Allocator>>,
         recreated: bool,
-    ) -> (Image, ImageView, Format, Allocation) {
+    ) -> Result<(Image, ImageView, Format, Allocation), SwapchainCreationError> {
         let extent = Extent3D::builder()
             .width(window.framebuffer_width() as u32)
             .height(window.framebuffer_height() as u32)
@@ -350,7 +376,7 @@ impl Swapchain {
         let image = unsafe {
             logical_device
                 .create_image(&image_create_info, None)
-                .expect("Failed to create depth image")
+                .map_err(SwapchainCreationError::DepthImageCreation)?
         };
 
         if !recreated {
@@ -361,12 +387,12 @@ impl Swapchain {
 
         let allocation = allocator
             .borrow_mut()
-            .allocate(memory_requirements, MemoryLocation::GpuOnly);
+            .allocate(memory_requirements, MemoryLocation::GpuOnly)?;
 
         unsafe {
             logical_device
                 .bind_image_memory(image, allocation.memory(), allocation.offset())
-                .expect("Failed to bind depth image memory")
+                .map_err(SwapchainCreationError::ImageMemoryBinding)?;
         }
 
         if !recreated {
@@ -390,14 +416,14 @@ impl Swapchain {
         let image_view = unsafe {
             logical_device
                 .create_image_view(&image_view_create_info, None)
-                .expect("Failed to create depth image view")
+                .map_err(SwapchainCreationError::DepthImageViewCreation)?
         };
 
         if !recreated {
             debug!("Create depth image view");
         }
 
-        (image, image_view, format, allocation)
+        Ok((image, image_view, format, allocation))
     }
 
     #[instrument(skip_all)]
@@ -405,9 +431,11 @@ impl Swapchain {
         unsafe {
             self.logical_device
                 .destroy_image_view(self.depth_image_view, None);
+            // TODO: Handle error
             self.allocator
                 .borrow_mut()
-                .free(self.depth_image_allocation.take().unwrap());
+                .free(self.depth_image_allocation.take().expect("FIXME"))
+                .expect("FIXME");
             self.logical_device.destroy_image(self.depth_image, None);
             self.image_views
                 .iter()
@@ -419,12 +447,14 @@ impl Swapchain {
 
     #[instrument(skip_all)]
     pub fn recreate(&mut self, window: &Window) {
+        // TODO: Handle error
         unsafe {
-            self.logical_device.device_wait_idle().unwrap();
+            self.logical_device.device_wait_idle().expect("FIXME");
         }
 
         self.cleanup();
 
+        // TODO: Propagate error
         let (swapchain, extent, format) = Self::create_swapchain(
             window,
             &self.surface_loader,
@@ -432,22 +462,28 @@ impl Swapchain {
             &self.physical_device,
             &self.swapchain_loader,
             true,
-        );
+        )
+        .expect("FIXME");
 
         self.swapchain = swapchain;
 
         self.extent = extent;
         self.format = format;
 
-        let images = Self::create_images(&self.swapchain_loader, &swapchain, true);
+        // TODO: Propagate error
+        let images = Self::create_images(&self.swapchain_loader, &swapchain, true).expect("FIXME");
 
-        let image_views = Self::create_image_views(&self.logical_device, &format, &images, true);
+        // TODO: Propagate error
+        let image_views =
+            Self::create_image_views(&self.logical_device, &format, &images, true).expect("FIXME");
 
         self.images = images;
         self.image_views = image_views;
 
+        // TODO: Propagate error
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
-            Self::create_depth_image(window, &self.logical_device, &self.allocator, true);
+            Self::create_depth_image(window, &self.logical_device, &self.allocator, true)
+                .expect("FIXME");
 
         self.depth_image = depth_image;
         self.depth_image_view = depth_image_view;

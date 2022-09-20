@@ -26,11 +26,12 @@ impl Fence {
     pub fn new(create_info: &FenceCreateInfo) -> Self {
         let fence_create_info = vk::FenceCreateInfo::builder().flags(FenceCreateFlags::SIGNALED);
 
+        // TODO: Propagate error
         let fence = unsafe {
             create_info
                 .logical_device
                 .create_fence(&fence_create_info, None)
-                .expect("Failed to create fence")
+                .expect("FIXME")
         };
 
         debug!("Created fence");
@@ -47,19 +48,21 @@ impl Fence {
 
     #[instrument(skip_all)]
     pub fn wait(&self) {
+        // TODO: Propagate error
         unsafe {
             self.logical_device
                 .wait_for_fences(&[self.fence], true, u64::MAX)
-                .expect("Failed to wait for fence");
+                .expect("FIXME");
         }
     }
 
     #[instrument(skip_all)]
     pub fn reset(&self) {
+        // TODO: Propagate error
         unsafe {
             self.logical_device
                 .reset_fences(&[self.fence])
-                .expect("Failed to reset fence");
+                .expect("FIXME");
         }
     }
 }

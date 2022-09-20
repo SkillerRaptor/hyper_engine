@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 hyper_core = { path = "../hyper_core" }
 
-ash = "0.37.0"
 glfw = { version = "0.45.0", features = ["vulkan"] }
 log = "0.4.17"
+thiserror = "1.0.35"
 tracing = "0.1.36"

@@ -6,9 +6,20 @@
 
 use hyper_platform::window::Window;
 
-use ash::{extensions::khr::Surface as SurfaceLoader, vk::SurfaceKHR, Entry, Instance};
+use ash::{
+    extensions::khr::Surface as SurfaceLoader,
+    vk::{self, Handle, SurfaceKHR},
+    Entry, Instance,
+};
 use log::debug;
+use thiserror::Error;
 use tracing::instrument;
+
+#[derive(Debug, Error)]
+pub enum SurfaceCreationError {
+    #[error("Failed to create vulkan surface")]
+    SurfaceCreation(#[from] vk::Result),
+}
 
 pub(crate) struct SurfaceCreateInfo<'a> {
     pub window: &'a Window,
@@ -23,19 +34,22 @@ pub(crate) struct Surface {
 
 impl Surface {
     #[instrument(skip_all)]
-    pub fn new(create_info: &SurfaceCreateInfo) -> Self {
+    pub fn new(create_info: &SurfaceCreateInfo) -> Result<Self, SurfaceCreationError> {
         let surface_loader = SurfaceLoader::new(create_info.entry, create_info.instance);
 
-        let surface = create_info
+        let (surface, result) = create_info
             .window
-            .create_window_surface(create_info.instance);
+            .create_window_surface(create_info.instance.handle().as_raw() as usize);
 
-        debug!("Created surface");
+        let result = vk::Result::from_raw(result as i32);
+        result.result()?;
 
-        Self {
-            surface,
+        debug!("Created vulkan surface");
+
+        Ok(Self {
+            surface: SurfaceKHR::from_raw(surface),
             surface_loader,
-        }
+        })
     }
 
     pub fn surface_loader(&self) -> &SurfaceLoader {

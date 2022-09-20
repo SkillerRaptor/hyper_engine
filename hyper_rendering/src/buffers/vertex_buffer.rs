@@ -63,10 +63,11 @@ impl VertexBuffer {
             .sharing_mode(SharingMode::EXCLUSIVE)
             .queue_family_indices(&[]);
 
+        // TODO: Propagate error
         let internal_buffer = unsafe {
             logical_device
                 .create_buffer(&buffer_create_info, None)
-                .expect("Failed to create internal vertex buffer")
+                .expect("FIXME")
         };
 
         debug!("Created internal vertex buffer");
@@ -84,22 +85,23 @@ impl VertexBuffer {
         let memory_requirements =
             unsafe { logical_device.get_buffer_memory_requirements(*internal_buffer) };
 
+        // TODO: Propagate error
         let allocation = allocator
             .borrow_mut()
-            .allocate(memory_requirements, MemoryLocation::CpuToGpu);
+            .allocate(memory_requirements, MemoryLocation::CpuToGpu)
+            .expect("FIXME");
 
         debug!("Allocated vertex buffer memory");
 
+        // TODO: Propagate error
         unsafe {
             logical_device
                 .bind_buffer_memory(*internal_buffer, allocation.memory(), allocation.offset())
-                .expect("Failed to bind vertex buffer memory");
+                .expect("FIXME");
         }
 
-        let memory = allocation
-            .mapped_ptr()
-            .expect("Failed to map vertex buffer memory")
-            .as_ptr() as *mut Vertex;
+        // TODO: Propagate error
+        let memory = allocation.mapped_ptr().expect("FIXME").as_ptr() as *mut Vertex;
 
         unsafe {
             memory.copy_from_nonoverlapping(vertices.as_ptr(), vertices.len());
@@ -118,9 +120,11 @@ impl VertexBuffer {
 impl Drop for VertexBuffer {
     #[instrument(skip_all)]
     fn drop(&mut self) {
+        // TODO: Handle error
         self.allocator
             .borrow_mut()
-            .free(self.allocation.take().unwrap());
+            .free(self.allocation.take().expect("FIXME"))
+            .expect("FIXME");
 
         unsafe {
             self.logical_device

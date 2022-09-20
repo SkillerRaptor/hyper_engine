@@ -5,19 +5,19 @@
  */
 
 use crate::{
-    allocator::{Allocator, AllocatorCreateInfo},
+    allocator::{Allocator, AllocatorCreateInfo, AllocatorCreationError},
     descriptors::{
-        descriptor_pool::{DescriptorPool, DescriptorPoolCreateInfo},
-        descriptor_set::{DescriptorSet, DescriptorSetCreateInfo},
+        descriptor_pool::{DescriptorPool, DescriptorPoolCreateInfo, DescriptorPoolCreationError},
+        descriptor_set::{DescriptorSet, DescriptorSetCreateInfo, DescriptorSetCreationError},
     },
     devices::{
-        device::{Device, DeviceCreateInfo},
-        instance::{Instance, InstanceCreateInfo},
-        surface::{Surface, SurfaceCreateInfo},
+        device::{Device, DeviceCreateInfo, DeviceCreationError},
+        instance::{Instance, InstanceCreateInfo, InstanceCreationError},
+        surface::{Surface, SurfaceCreateInfo, SurfaceCreationError},
     },
     pipelines::{
-        pipeline::{Pipeline, PipelineCreateInfo},
-        swapchain::{Swapchain, SwapchainCreateInfo},
+        pipeline::{Pipeline, PipelineCreateInfo, PipelineCreationError},
+        swapchain::{Swapchain, SwapchainCreateInfo, SwapchainCreationError},
     },
     renderer::{Renderer, RendererCreateInfo},
 };
@@ -25,9 +25,40 @@ use crate::{
 use hyper_platform::window::Window;
 
 use ash::Entry;
-use log::info;
+use log::{debug, info};
 use std::{cell::RefCell, rc::Rc};
+use thiserror::Error;
 use tracing::instrument;
+
+#[derive(Debug, Error)]
+pub enum RenderContextCreationError {
+    #[error("Failed to create allocator")]
+    AllocatorCreation(#[from] AllocatorCreationError),
+
+    #[error("Failed to create descriptor pool")]
+    DescriptorPoolCreation(#[from] DescriptorPoolCreationError),
+
+    #[error("Failed to create descriptor set")]
+    DescriptorSetCreation(#[from] DescriptorSetCreationError),
+
+    #[error("Failed to create device")]
+    DeviceCreation(#[from] DeviceCreationError),
+
+    #[error("Failed to create instance")]
+    InstanceCreation(#[from] InstanceCreationError),
+
+    #[error("Failed to create pipeline")]
+    PipelineCreation(#[from] PipelineCreationError),
+
+    #[error("Failed to create surface")]
+    SurfaceCreation(#[from] SurfaceCreationError),
+
+    #[error("Failed to create swapchain")]
+    SwapchainCreation(#[from] SwapchainCreationError),
+
+    #[error("Failed to load vulkan entry")]
+    EntryLoading(#[from] ash::LoadingError),
+}
 
 pub struct RenderContext {
     renderer: Renderer,
@@ -44,23 +75,23 @@ pub struct RenderContext {
 
 impl RenderContext {
     #[instrument(skip_all)]
-    pub fn new(window: &Window) -> Self {
-        let entry = Self::create_entry();
-        let instance = Self::create_instance(window, &entry);
-        let surface = Self::create_surface(window, &entry, &instance);
-        let device = Self::create_device(&instance, &surface);
-        let allocator = Rc::new(RefCell::new(Self::create_allocator(&instance, &device)));
-        let swapchain = Self::create_swapchain(window, &instance, &surface, &device, &allocator);
-        let descriptor_pool = Self::create_descriptor_pool(&instance, &device);
+    pub fn new(window: &Window) -> Result<Self, RenderContextCreationError> {
+        let entry = Self::create_entry()?;
+        let instance = Self::create_instance(window, &entry)?;
+        let surface = Self::create_surface(window, &entry, &instance)?;
+        let device = Self::create_device(&instance, &surface)?;
+        let allocator = Rc::new(RefCell::new(Self::create_allocator(&instance, &device)?));
+        let swapchain = Self::create_swapchain(window, &instance, &surface, &device, &allocator)?;
+        let descriptor_pool = Self::create_descriptor_pool(&instance, &device)?;
         let descriptor_sets =
-            Self::create_descriptor_sets(&instance, &device, &allocator, &descriptor_pool);
-        let pipeline = Self::create_pipeline(&instance, &device, &descriptor_pool, &swapchain);
+            Self::create_descriptor_sets(&instance, &device, &allocator, &descriptor_pool)?;
+        let pipeline = Self::create_pipeline(&instance, &device, &descriptor_pool, &swapchain)?;
 
         let renderer = Self::create_renderer(&device, &pipeline, &allocator);
 
-        info!("Created render context");
+        info!("Created vulkan render context");
 
-        Self {
+        Ok(Self {
             renderer,
 
             _pipeline: pipeline,
@@ -72,23 +103,31 @@ impl RenderContext {
             _surface: surface,
             _instance: instance,
             _entry: entry,
-        }
+        })
     }
 
     #[instrument(skip_all)]
-    fn create_entry() -> Entry {
-        unsafe { Entry::load().expect("Failed to load vulkan") }
+    fn create_entry() -> Result<Entry, ash::LoadingError> {
+        let entry = unsafe { Entry::load()? };
+
+        debug!("Loaded vulkan entry");
+
+        Ok(entry)
     }
 
     #[instrument(skip_all)]
-    fn create_instance(window: &Window, entry: &Entry) -> Instance {
+    fn create_instance(window: &Window, entry: &Entry) -> Result<Instance, InstanceCreationError> {
         let instance_create_info = InstanceCreateInfo { window, entry };
 
         Instance::new(&instance_create_info)
     }
 
     #[instrument(skip_all)]
-    fn create_surface(window: &Window, entry: &Entry, instance: &Instance) -> Surface {
+    fn create_surface(
+        window: &Window,
+        entry: &Entry,
+        instance: &Instance,
+    ) -> Result<Surface, SurfaceCreationError> {
         let surface_create_info = SurfaceCreateInfo {
             window,
             entry,
@@ -99,7 +138,10 @@ impl RenderContext {
     }
 
     #[instrument(skip_all)]
-    fn create_device(instance: &Instance, surface: &Surface) -> Device {
+    fn create_device(
+        instance: &Instance,
+        surface: &Surface,
+    ) -> Result<Device, DeviceCreationError> {
         let device_create_info = DeviceCreateInfo {
             instance: instance.instance(),
             surface_loader: surface.surface_loader(),
@@ -110,7 +152,10 @@ impl RenderContext {
     }
 
     #[instrument(skip_all)]
-    fn create_allocator(instance: &Instance, device: &Device) -> Allocator {
+    fn create_allocator(
+        instance: &Instance,
+        device: &Device,
+    ) -> Result<Allocator, AllocatorCreationError> {
         let allocate_create_info = AllocatorCreateInfo {
             instance: instance.instance(),
             logical_device: device.logical_device(),
@@ -127,7 +172,7 @@ impl RenderContext {
         surface: &Surface,
         device: &Device,
         allocator: &Rc<RefCell<Allocator>>,
-    ) -> Swapchain {
+    ) -> Result<Swapchain, SwapchainCreationError> {
         let swapchain_create_info = SwapchainCreateInfo {
             window,
             instance: instance.instance(),
@@ -142,7 +187,10 @@ impl RenderContext {
     }
 
     #[instrument(skip_all)]
-    fn create_descriptor_pool(instance: &Instance, device: &Device) -> DescriptorPool {
+    fn create_descriptor_pool(
+        instance: &Instance,
+        device: &Device,
+    ) -> Result<DescriptorPool, DescriptorPoolCreationError> {
         let descriptor_pool_create_info = DescriptorPoolCreateInfo {
             instance: instance.instance(),
             physical_device: device.physical_device(),
@@ -158,7 +206,7 @@ impl RenderContext {
         device: &Device,
         allocator: &Rc<RefCell<Allocator>>,
         descriptor_pool: &DescriptorPool,
-    ) -> Vec<DescriptorSet> {
+    ) -> Result<Vec<DescriptorSet>, DescriptorSetCreationError> {
         let properties = unsafe {
             instance
                 .instance()
@@ -182,11 +230,11 @@ impl RenderContext {
                 limits: &limits,
             };
 
-            let descriptor_set = DescriptorSet::new(&descriptor_set_create_info);
+            let descriptor_set = DescriptorSet::new(&descriptor_set_create_info)?;
             descriptor_sets.push(descriptor_set);
         }
 
-        descriptor_sets
+        Ok(descriptor_sets)
     }
 
     #[instrument(skip_all)]
@@ -195,7 +243,7 @@ impl RenderContext {
         device: &Device,
         descriptor_pool: &DescriptorPool,
         swapchain: &Swapchain,
-    ) -> Pipeline {
+    ) -> Result<Pipeline, PipelineCreationError> {
         let pipeline_create_info = PipelineCreateInfo {
             logical_device: device.logical_device(),
             descriptor_set_layouts: descriptor_pool.descriptor_set_layouts(),
@@ -256,7 +304,11 @@ impl Drop for RenderContext {
     #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
-            self.device.logical_device().device_wait_idle().unwrap();
+            // TODO: Handle error
+            self.device
+                .logical_device()
+                .device_wait_idle()
+                .expect("FIXME");
         }
     }
 }

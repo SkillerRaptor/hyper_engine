@@ -6,7 +6,13 @@
 
 use hyper_engine::application::Application;
 
-fn main() {
-    let mut application = Application::default();
-    application.run();
+use color_eyre::Result;
+
+fn main() -> Result<()> {
+    color_eyre::install()?;
+
+    let mut application = Application::new()?;
+    application.run()?;
+
+    Ok(())
 }

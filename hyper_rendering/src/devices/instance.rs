@@ -18,10 +18,29 @@ use ash::{
 use log::{debug, error, warn};
 use std::{
     collections::HashSet,
-    ffi::{CStr, CString},
+    ffi::{CStr, CString, FromBytesWithNulError, NulError},
     os::raw::c_void,
 };
+use thiserror::Error;
 use tracing::instrument;
+
+#[derive(Debug, Error)]
+pub enum InstanceCreationError {
+    #[error("Failed to create vulkan debug utils messenger")]
+    DebugUtilsMessengerCreation(#[source] vk::Result),
+
+    #[error("Failed to create vulkan instance")]
+    InstanceCreation(#[source] vk::Result),
+
+    #[error("Failed to enumerate instance layer properties")]
+    InstanceLayerPropertiesEnumeration(#[source] vk::Result),
+
+    #[error("Failed to create CString")]
+    FromBytesWithNul(#[from] FromBytesWithNulError),
+
+    #[error("Failed to create CString")]
+    Nul(#[from] NulError),
+}
 
 pub(crate) struct InstanceCreateInfo<'a> {
     pub window: &'a Window,
@@ -41,45 +60,50 @@ impl Instance {
     const VALIDATION_LAYER: &'static str = "VK_LAYER_KHRONOS_validation";
 
     #[instrument(skip_all)]
-    pub fn new(create_info: &InstanceCreateInfo) -> Self {
-        let validation_layer_enabled = Self::check_validation_layer_support(create_info.entry);
+    pub fn new(create_info: &InstanceCreateInfo) -> Result<Self, InstanceCreationError> {
+        let validation_layer_enabled = Self::check_validation_layer_support(create_info.entry)?;
+
+        if validation_layer_enabled {
+            debug!("Enabled validation layers");
+        } else {
+            debug!("Disabled validation layers");
+        }
 
         let instance = Self::create_instance(
             create_info.window,
             create_info.entry,
             validation_layer_enabled,
-        );
+        )?;
 
         let (debug_loader, debug_messenger) =
-            Self::create_debug_messenger(create_info.entry, &instance, validation_layer_enabled);
+            Self::create_debug_messenger(create_info.entry, &instance, validation_layer_enabled)?;
 
-        Self {
+        Ok(Self {
             debug_messenger,
             debug_loader,
 
             instance,
 
             validation_layer_enabled,
-        }
+        })
     }
 
     #[instrument(skip_all)]
-    fn check_validation_layer_support(entry: &Entry) -> bool {
+    fn check_validation_layer_support(entry: &Entry) -> Result<bool, InstanceCreationError> {
         if !cfg!(debug_assertions) {
-            return false;
+            return Ok(false);
         }
 
         let instance_layers = entry
             .enumerate_instance_layer_properties()
-            .expect("Failed to enumerate instance layer properties");
+            .map_err(InstanceCreationError::InstanceLayerPropertiesEnumeration)?;
 
         let unqiue_instance_layers = instance_layers
             .iter()
             .map(|properties| unsafe { CStr::from_ptr(properties.layer_name.as_ptr()).to_owned() })
             .collect::<HashSet<_>>();
 
-        let validation_layer =
-            CString::new(Self::VALIDATION_LAYER).expect("Failed to create validation layer string");
+        let validation_layer = CString::new(Self::VALIDATION_LAYER)?;
 
         if !unqiue_instance_layers.contains(&validation_layer) {
             warn!(
@@ -87,10 +111,10 @@ impl Instance {
                 Self::VALIDATION_LAYER
             );
 
-            return false;
+            return Ok(false);
         }
 
-        true
+        Ok(true)
     }
 
     #[instrument(skip_all)]
@@ -98,9 +122,8 @@ impl Instance {
         window: &Window,
         entry: &Entry,
         validation_layer_enabled: bool,
-    ) -> ash::Instance {
-        let title =
-            CStr::from_bytes_with_nul(b"HyperEngine\0").expect("Failed to create title string");
+    ) -> Result<ash::Instance, InstanceCreationError> {
+        let title = CStr::from_bytes_with_nul(b"HyperEngine\0")?;
 
         let application_info = ApplicationInfo::builder()
             .application_name(title)
@@ -111,10 +134,8 @@ impl Instance {
 
         let raw_validation_layers = vec![Self::VALIDATION_LAYER]
             .iter()
-            .map(|layer_name| {
-                CString::new(*layer_name).expect("Failed to create validation layer string")
-            })
-            .collect::<Vec<_>>();
+            .map(|layer_name| CString::new(*layer_name))
+            .collect::<Result<Vec<_>, _>>()?;
 
         let validation_layers = raw_validation_layers
             .iter()
@@ -130,10 +151,8 @@ impl Instance {
         let raw_extensions = window
             .required_instance_extensions()
             .iter()
-            .map(|extension| {
-                CString::new(extension.clone()).expect("Failed to create extension string")
-            })
-            .collect::<Vec<_>>();
+            .map(|extension| CString::new(extension.clone()))
+            .collect::<Result<Vec<_>, _>>()?;
 
         let mut extensions = raw_extensions
             .iter()
@@ -165,12 +184,12 @@ impl Instance {
         let instance = unsafe {
             entry
                 .create_instance(&instance_create_info, None)
-                .expect("Failed to create instance")
+                .map_err(InstanceCreationError::InstanceCreation)?
         };
 
         debug!("Created instance");
 
-        instance
+        Ok(instance)
     }
 
     #[instrument(skip_all)]
@@ -178,11 +197,11 @@ impl Instance {
         entry: &Entry,
         instance: &ash::Instance,
         validation_layer_enabled: bool,
-    ) -> (DebugLoader, DebugUtilsMessengerEXT) {
+    ) -> Result<(DebugLoader, DebugUtilsMessengerEXT), InstanceCreationError> {
         let debug_utils = DebugLoader::new(entry, instance);
 
         if !validation_layer_enabled {
-            return (debug_utils, DebugUtilsMessengerEXT::null());
+            return Ok((debug_utils, DebugUtilsMessengerEXT::null()));
         }
 
         let debug_utils_messenger_create_info = DebugUtilsMessengerCreateInfoEXT::builder()
@@ -200,12 +219,12 @@ impl Instance {
         let debug_messenger = unsafe {
             debug_utils
                 .create_debug_utils_messenger(&debug_utils_messenger_create_info, None)
-                .expect("Failed to create debug utils messenger")
+                .map_err(InstanceCreationError::DebugUtilsMessengerCreation)?
         };
 
         debug!("Created debug utils messenger");
 
-        (debug_utils, debug_messenger)
+        Ok((debug_utils, debug_messenger))
     }
 
     unsafe extern "system" fn debug_callback(

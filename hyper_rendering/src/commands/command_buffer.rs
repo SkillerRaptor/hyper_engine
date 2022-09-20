@@ -38,11 +38,12 @@ impl CommandBuffer {
             .level(create_info.level)
             .command_buffer_count(1);
 
+        // TODO: Propagate error
         let command_buffer = unsafe {
             create_info
                 .logical_device
                 .allocate_command_buffers(&allocate_info)
-                .expect("Failed to allocate command buffer")[0]
+                .expect("FIXME")[0]
         };
 
         debug!("Created command buffer");
@@ -67,28 +68,31 @@ impl CommandBuffer {
             .flags(usage_flags)
             .inheritance_info(inheritance_info);
 
+        // TODO: Propagate error
         unsafe {
             self.logical_device
                 .begin_command_buffer(self.command_buffer, &begin_info)
-                .expect("Failed to begin command buffer");
+                .expect("FIXME");
         }
     }
 
     #[instrument(skip_all)]
     pub fn end(&self) {
+        // TODO: Propagate error
         unsafe {
             self.logical_device
                 .end_command_buffer(self.command_buffer)
-                .expect("Failed to end command buffer");
+                .expect("FIXME");
         }
     }
 
     #[instrument(skip_all)]
     pub fn reset(&self, reset_flags: CommandBufferResetFlags) {
+        // TODO: Propagate error
         unsafe {
             self.logical_device
                 .reset_command_buffer(self.command_buffer, reset_flags)
-                .expect("Failed to reset command buffer");
+                .expect("FIXME");
         }
     }
 

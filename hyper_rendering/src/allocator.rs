@@ -12,7 +12,8 @@ use gpu_allocator::{
     vulkan::{self, Allocation, AllocationCreateDesc, AllocatorCreateDesc},
     AllocatorDebugSettings,
 };
-
+use std::fmt;
+use thiserror::Error;
 use tracing::instrument;
 
 #[allow(dead_code)]
@@ -21,6 +22,21 @@ pub enum MemoryLocation {
     GpuOnly,
     CpuToGpu,
     GpuToCpu,
+}
+
+#[derive(Debug, Error)]
+pub struct AllocationError(gpu_allocator::AllocationError);
+
+impl fmt::Display for AllocationError {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(fmt, "{}", self.0)
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum AllocatorCreationError {
+    #[error("Failed to create gpu allocator")]
+    AllocatorCreation(#[from] gpu_allocator::AllocationError),
 }
 
 pub struct AllocatorCreateInfo<'a> {
@@ -35,7 +51,9 @@ pub struct Allocator {
 
 impl Allocator {
     #[instrument(skip_all)]
-    pub fn new(allocator_create_info: &AllocatorCreateInfo) -> Self {
+    pub fn new(
+        allocator_create_info: &AllocatorCreateInfo,
+    ) -> Result<Self, AllocatorCreationError> {
         let debug_enabled = cfg!(debug_assertions);
 
         let allocator_debug_settings = AllocatorDebugSettings {
@@ -55,10 +73,9 @@ impl Allocator {
             buffer_device_address: false,
         };
 
-        let allocator = vulkan::Allocator::new(&allocator_create_description)
-            .expect("Failed to create vulkan allocator");
+        let allocator = vulkan::Allocator::new(&allocator_create_description)?;
 
-        Self { allocator }
+        Ok(Self { allocator })
     }
 
     // TODO: Replace Allocation with wrapper type
@@ -67,7 +84,7 @@ impl Allocator {
         &mut self,
         memory_requirements: MemoryRequirements,
         memory_location: MemoryLocation,
-    ) -> Allocation {
+    ) -> Result<Allocation, AllocationError> {
         let location = match memory_location {
             MemoryLocation::Unknown => gpu_allocator::MemoryLocation::Unknown,
             MemoryLocation::GpuOnly => gpu_allocator::MemoryLocation::GpuOnly,
@@ -84,13 +101,11 @@ impl Allocator {
 
         self.allocator
             .allocate(&allocation_create_description)
-            .expect("Failed to allocate vulkan memory")
+            .map_err(AllocationError)
     }
 
     #[instrument(skip_all)]
-    pub fn free(&mut self, allocation: Allocation) {
-        self.allocator
-            .free(allocation)
-            .expect("Failed to free vulkan memory");
+    pub fn free(&mut self, allocation: Allocation) -> Result<(), AllocationError> {
+        self.allocator.free(allocation).map_err(AllocationError)
     }
 }

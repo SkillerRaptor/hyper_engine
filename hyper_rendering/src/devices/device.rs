@@ -14,8 +14,21 @@ use ash::{
     Instance,
 };
 use log::{debug, warn};
-use std::{collections::HashSet, ffi::CStr};
+use std::{collections::HashSet, ffi::CStr, str::Utf8Error};
+use thiserror::Error;
 use tracing::instrument;
+
+#[derive(Debug, Error)]
+pub enum SwapchainSupportCreationError {
+    #[error("Failed to aquire physical device surface capabilities")]
+    CapabilitiesAcquisition(vk::Result),
+
+    #[error("Failed to aquire physical device surface formates")]
+    FormatsAcquisition(vk::Result),
+
+    #[error("Failed to aquire physical device surface present modes")]
+    PresentModesAcquisition(vk::Result),
+}
 
 pub(crate) struct SwapchainSupport {
     capabilities: SurfaceCapabilitiesKHR,
@@ -29,30 +42,30 @@ impl SwapchainSupport {
         surface_loader: &SurfaceLoader,
         surface: &SurfaceKHR,
         physical_device: &PhysicalDevice,
-    ) -> Self {
+    ) -> Result<Self, SwapchainSupportCreationError> {
         let capabilities = unsafe {
             surface_loader
                 .get_physical_device_surface_capabilities(*physical_device, *surface)
-                .expect("Failed to get physical device surface capabilities")
+                .map_err(SwapchainSupportCreationError::CapabilitiesAcquisition)?
         };
 
         let formats = unsafe {
             surface_loader
                 .get_physical_device_surface_formats(*physical_device, *surface)
-                .expect("Failed to get physical device surface formats")
+                .map_err(SwapchainSupportCreationError::FormatsAcquisition)?
         };
 
         let present_modes = unsafe {
             surface_loader
                 .get_physical_device_surface_present_modes(*physical_device, *surface)
-                .expect("Failed to get physical device surface present modes")
+                .map_err(SwapchainSupportCreationError::PresentModesAcquisition)?
         };
 
-        Self {
+        Ok(Self {
             capabilities,
             formats,
             present_modes,
-        }
+        })
     }
 
     pub fn capabilities(&self) -> &SurfaceCapabilitiesKHR {
@@ -66,6 +79,30 @@ impl SwapchainSupport {
     pub fn present_modes(&self) -> &Vec<PresentModeKHR> {
         &self.present_modes
     }
+}
+
+#[derive(Debug, Error)]
+pub enum DeviceCreationError {
+    #[error("Failed to aquire graphics queue")]
+    GraphicsQueueAcquisition,
+
+    #[error("Failed to aquire physical device surface support")]
+    PhysicalDeviceSurfaceSupportAcquisition(#[source] vk::Result),
+
+    #[error("Failed to create vulkan logical device")]
+    LogicalDeviceCreation(#[source] vk::Result),
+
+    #[error("Failed to create swapchain support")]
+    SwapchainSupportCreation(#[from] SwapchainSupportCreationError),
+
+    #[error("Failed to enumerate device extension properties")]
+    DeviceExtensionPropertiesEnumeration(#[source] vk::Result),
+
+    #[error("Failed to enumerate physical devices")]
+    PhysicalDevicesEnumeration(#[source] vk::Result),
+
+    #[error("Failed to create utf8 string")]
+    Utf8(#[from] Utf8Error),
 }
 
 pub(crate) struct DeviceCreateInfo<'a> {
@@ -86,35 +123,35 @@ impl Device {
     const DEVICE_EXTENSIONS: &'static [&'static CStr] = &[Swapchain::name()];
 
     #[instrument(skip_all)]
-    pub fn new(create_info: &DeviceCreateInfo) -> Self {
+    pub fn new(create_info: &DeviceCreateInfo) -> Result<Self, DeviceCreationError> {
         let physical_device = Self::pick_physical_device(
             create_info.instance,
             create_info.surface_loader,
             create_info.surface,
-        );
+        )?;
 
         let logical_device = Self::create_logical_device(
             create_info.instance,
             create_info.surface_loader,
             create_info.surface,
             &physical_device,
-        );
+        )?;
 
         let graphics_queue_index = Self::find_graphics_queue(
             create_info.instance,
             create_info.surface_loader,
             create_info.surface,
             &physical_device,
-        );
+        )?;
 
         let graphics_queue = unsafe { logical_device.get_device_queue(graphics_queue_index, 0) };
 
-        Self {
+        Ok(Self {
             graphics_queue_index,
             graphics_queue,
             logical_device,
             physical_device,
-        }
+        })
     }
 
     #[instrument(skip_all)]
@@ -122,35 +159,31 @@ impl Device {
         instance: &Instance,
         surface_loader: &SurfaceLoader,
         surface: &SurfaceKHR,
-    ) -> PhysicalDevice {
+    ) -> Result<PhysicalDevice, DeviceCreationError> {
         for physical_device in unsafe {
             instance
                 .enumerate_physical_devices()
-                .expect("Failed to enumerate physical devices")
+                .map_err(DeviceCreationError::PhysicalDevicesEnumeration)?
         } {
             let properties = unsafe { instance.get_physical_device_properties(physical_device) };
 
-            let device_name = unsafe {
-                CStr::from_ptr(properties.device_name.as_ptr())
-                    .to_str()
-                    .expect("Failed to create device name string")
-            };
+            let device_name = unsafe { CStr::from_ptr(properties.device_name.as_ptr()).to_str()? };
 
             if !Self::is_physical_device_suitable(
                 instance,
                 surface_loader,
                 surface,
                 &physical_device,
-            ) {
+            )? {
                 warn!("Skipped unsuitable physical device '{}'", device_name);
                 continue;
             }
 
             debug!("Selected physical device");
 
-            Self::print_device_information(instance, surface_loader, surface, &physical_device);
+            Self::print_device_information(instance, surface_loader, surface, &physical_device)?;
 
-            return physical_device;
+            return Ok(physical_device);
         }
 
         panic!("Failed to find suitable physical device");
@@ -162,32 +195,32 @@ impl Device {
         surface_loader: &SurfaceLoader,
         surface: &SurfaceKHR,
         physical_device: &PhysicalDevice,
-    ) -> bool {
-        if !Self::check_physical_device_extensions(instance, physical_device) {
-            return false;
+    ) -> Result<bool, DeviceCreationError> {
+        if !Self::check_physical_device_extensions(instance, physical_device)? {
+            return Ok(false);
         }
 
         if !Self::check_physical_device_features(instance, physical_device) {
-            return false;
+            return Ok(false);
         }
 
-        let support = SwapchainSupport::new(surface_loader, surface, physical_device);
+        let support = SwapchainSupport::new(surface_loader, surface, physical_device)?;
         if support.formats.is_empty() || support.present_modes.is_empty() {
-            return false;
+            return Ok(false);
         }
 
-        true
+        Ok(true)
     }
 
     #[instrument(skip_all)]
     fn check_physical_device_extensions(
         instance: &Instance,
         physical_device: &PhysicalDevice,
-    ) -> bool {
+    ) -> Result<bool, DeviceCreationError> {
         let properties = unsafe {
             instance
                 .enumerate_device_extension_properties(*physical_device)
-                .expect("Failed to enumerate device extension properties")
+                .map_err(DeviceCreationError::DeviceExtensionPropertiesEnumeration)?
         };
 
         let extensions = properties
@@ -199,10 +232,10 @@ impl Device {
             .iter()
             .all(|extension| extensions.contains(extension))
         {
-            return false;
+            return Ok(false);
         }
 
-        true
+        Ok(true)
     }
 
     #[instrument(skip_all)]
@@ -274,7 +307,7 @@ impl Device {
         surface_loader: &SurfaceLoader,
         surface: &SurfaceKHR,
         physical_device: &PhysicalDevice,
-    ) -> u32 {
+    ) -> Result<u32, DeviceCreationError> {
         let queue_families =
             unsafe { instance.get_physical_device_queue_family_properties(*physical_device) };
 
@@ -287,7 +320,9 @@ impl Device {
             if unsafe {
                 !surface_loader
                     .get_physical_device_surface_support(*physical_device, i as u32, *surface)
-                    .expect("Failed to get physical device surface support")
+                    .map_err(|error| {
+                        DeviceCreationError::PhysicalDeviceSurfaceSupportAcquisition(error)
+                    })?
             } {
                 continue;
             }
@@ -295,7 +330,7 @@ impl Device {
             graphics = Some(i as u32);
         }
 
-        graphics.expect("Failed to find graphics queue")
+        graphics.ok_or(DeviceCreationError::GraphicsQueueAcquisition)
     }
 
     #[instrument(skip_all)]
@@ -304,14 +339,10 @@ impl Device {
         surface_loader: &SurfaceLoader,
         surface: &SurfaceKHR,
         physical_device: &PhysicalDevice,
-    ) {
+    ) -> Result<(), DeviceCreationError> {
         let properties = unsafe { instance.get_physical_device_properties(*physical_device) };
 
-        let device_name = unsafe {
-            CStr::from_ptr(properties.device_name.as_ptr())
-                .to_str()
-                .expect("Failed to create device name string")
-        };
+        let device_name = unsafe { CStr::from_ptr(properties.device_name.as_ptr()).to_str()? };
         debug!("  Name: {}", device_name);
 
         let device_type = match properties.device_type {
@@ -378,12 +409,14 @@ impl Device {
         }
 
         let grahics_queue_index =
-            Self::find_graphics_queue(instance, surface_loader, surface, physical_device);
+            Self::find_graphics_queue(instance, surface_loader, surface, physical_device)?;
         debug!("  Graphics Queue Index: {}", grahics_queue_index);
 
-        let support = SwapchainSupport::new(surface_loader, surface, physical_device);
+        let support = SwapchainSupport::new(surface_loader, surface, physical_device)?;
         debug!("  Surface Format Count: {}", support.formats.len());
         debug!("  Present Mode Count: {}", support.present_modes.len());
+
+        Ok(())
     }
 
     #[instrument(skip_all)]
@@ -392,12 +425,12 @@ impl Device {
         surface_loader: &SurfaceLoader,
         surface: &SurfaceKHR,
         physical_device: &PhysicalDevice,
-    ) -> ash::Device {
+    ) -> Result<ash::Device, DeviceCreationError> {
         // TODO: Using HashSet for compute and transfer queue later
         let mut unique_queues = HashSet::new();
 
         let grahics_queue_index =
-            Self::find_graphics_queue(instance, surface_loader, surface, physical_device);
+            Self::find_graphics_queue(instance, surface_loader, surface, physical_device)?;
         unique_queues.insert(grahics_queue_index);
 
         let queue_priorities = &[1.0];
@@ -434,12 +467,12 @@ impl Device {
         let logical_device = unsafe {
             instance
                 .create_device(*physical_device, &device_create_info, None)
-                .expect("Failed to create logical device")
+                .map_err(DeviceCreationError::LogicalDeviceCreation)?
         };
 
         debug!("Created logical device");
 
-        logical_device
+        Ok(logical_device)
     }
 
     pub fn physical_device(&self) -> &PhysicalDevice {

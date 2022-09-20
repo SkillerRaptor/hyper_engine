@@ -5,4 +5,4 @@
  */
 
 pub mod logger;
-pub mod panic;
+pub mod tracer;

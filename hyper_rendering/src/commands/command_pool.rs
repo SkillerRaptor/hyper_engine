@@ -29,11 +29,12 @@ impl CommandPool {
             .flags(CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
             .queue_family_index(*create_info.graphics_queue_index);
 
+        // TODO: Propagate error
         let command_pool = unsafe {
             create_info
                 .logical_device
                 .create_command_pool(&command_pool_create_info, None)
-                .expect("Failed to create command pool")
+                .expect("FIXME")
         };
 
         debug!("Created command pool");

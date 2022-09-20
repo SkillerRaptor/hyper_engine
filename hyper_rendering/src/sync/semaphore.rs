@@ -23,11 +23,12 @@ impl Semaphore {
     pub fn new(create_info: &SemaphoreCreateInfo) -> Self {
         let semaphore_create_info = vk::SemaphoreCreateInfo::builder();
 
+        // TODO: Propagate error
         let semaphore = unsafe {
             create_info
                 .logical_device
                 .create_semaphore(&semaphore_create_info, None)
-                .expect("Failed to create semaphore")
+                .expect("FIXME")
         };
 
         debug!("Created semaphore");

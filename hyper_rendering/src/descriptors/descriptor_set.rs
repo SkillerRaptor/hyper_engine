@@ -4,6 +4,13 @@
  * SPDX-License-Identifier: MIT
  */
 
+use crate::{
+    allocator::Allocator,
+    buffers::buffer::{Buffer, BufferCreateInfo},
+    descriptors::descriptor_pool::DescriptorPool,
+    vertex::Vertex,
+};
+
 use ash::{
     vk::{
         self, BufferUsageFlags, DescriptorBufferInfo, DescriptorSetAllocateInfo,
@@ -14,19 +21,19 @@ use ash::{
 };
 use log::debug;
 use std::{cell::RefCell, mem, rc::Rc};
+use thiserror::Error;
 use tracing::instrument;
-
-use crate::{
-    allocator::Allocator,
-    buffers::buffer::{Buffer, BufferCreateInfo},
-    descriptors::descriptor_pool::DescriptorPool,
-    vertex::Vertex,
-};
 
 // NOTE: TEMP
 pub(crate) struct Bindings {
     pub _vertices: u32,
     pub _transforms: u32,
+}
+
+#[derive(Debug, Error)]
+pub enum DescriptorSetCreationError {
+    #[error("Failed to allocate descriptor set")]
+    DescriptorSetAllocation(vk::Result),
 }
 
 pub(crate) struct DescriptorSetCreateInfo<'a> {
@@ -50,7 +57,7 @@ pub(crate) struct DescriptorSet {
 
 impl DescriptorSet {
     #[instrument(skip_all)]
-    pub fn new(create_info: &DescriptorSetCreateInfo) -> Self {
+    pub fn new(create_info: &DescriptorSetCreateInfo) -> Result<Self, DescriptorSetCreationError> {
         let count = DescriptorPool::find_descriptor_type_limit(
             create_info.descriptor_type,
             create_info.limits,
@@ -73,7 +80,7 @@ impl DescriptorSet {
             create_info
                 .logical_device
                 .allocate_descriptor_sets(&descriptor_set_allocate_info)
-                .expect("Failed to allocate descriptor set")[0]
+                .map_err(DescriptorSetCreationError::DescriptorSetAllocation)?[0]
         };
 
         let buffer_create_info = BufferCreateInfo {
@@ -220,12 +227,12 @@ impl DescriptorSet {
 
         debug!("Created descriptor set");
 
-        Self {
+        Ok(Self {
             _first_buffer: first_buffer,
             _second_buffer: second_buffer,
             _third_buffer: third_buffer,
             descriptor_set,
-        }
+        })
     }
 
     pub fn descriptor_set(&self) -> &vk::DescriptorSet {

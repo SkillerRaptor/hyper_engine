@@ -4,9 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-backtrace = "0.3.66"
 chrono = "0.4.22"
 colored = "2.0.0"
 fern = "0.6.1"
 log = "0.4.17"
+thiserror = "1.0.35"
+
 tracing = "0.1.36"
+tracing-subscriber = "0.3.15"
+tracing-tracy = "0.10.0"

@@ -22,10 +22,9 @@ use ash::{
     },
     Device,
 };
-//use ash::vk;
 use log::debug;
-
 use std::{ffi::CString, mem};
+use thiserror::Error;
 use tracing::instrument;
 
 #[repr(C)]
@@ -39,6 +38,18 @@ pub(crate) struct BindingsOffset {
 enum ShaderStage {
     Vertex,
     Fragment,
+}
+
+#[derive(Debug, Error)]
+pub enum PipelineCreationError {
+    #[error("Failed to create vulkan pipeline")]
+    PipelineCreation(vk::Result),
+
+    #[error("Failed to create vulkan pipeline layout")]
+    PipelineLayoutCreation(vk::Result),
+
+    #[error("Failed to create vulkan shader module")]
+    ShaderModuleCreation(vk::Result),
 }
 
 pub(crate) struct PipelineCreateInfo<'a> {
@@ -57,32 +68,32 @@ pub(crate) struct Pipeline {
 
 impl Pipeline {
     #[instrument(skip_all)]
-    pub fn new(create_info: &PipelineCreateInfo) -> Self {
+    pub fn new(create_info: &PipelineCreateInfo) -> Result<Self, PipelineCreationError> {
         let pipeline_layout = Self::create_pipeline_layout(
             create_info.logical_device,
             create_info.descriptor_set_layouts,
-        );
+        )?;
 
         let pipeline = Self::create_pipeline(
             create_info.logical_device,
             create_info.image_format,
             create_info.depth_image_format,
             &pipeline_layout,
-        );
+        )?;
 
-        Self {
+        Ok(Self {
             pipeline,
             pipeline_layout,
 
             logical_device: create_info.logical_device.clone(),
-        }
+        })
     }
 
     #[instrument(skip_all)]
     fn create_pipeline_layout(
         logical_device: &Device,
         descriptor_set_layouts: &[DescriptorSetLayout],
-    ) -> PipelineLayout {
+    ) -> Result<PipelineLayout, PipelineCreationError> {
         // TODO: Don't hardcode this instead replace it with a struct
         let push_constant = PushConstantRange::builder()
             .stage_flags(ShaderStageFlags::ALL)
@@ -98,14 +109,14 @@ impl Pipeline {
         let pipeline_layout = unsafe {
             logical_device
                 .create_pipeline_layout(&pipeline_layout_info_create_info, None)
-                .expect("Failed to create pipeline layout")
+                .map_err(PipelineCreationError::PipelineLayoutCreation)?
         };
 
         debug!("Created pipeline layout");
 
         Self::print_pipeline_layout_information(&pipeline_layout_info_create_info);
 
-        pipeline_layout
+        Ok(pipeline_layout)
     }
 
     #[instrument(skip_all)]
@@ -129,14 +140,15 @@ impl Pipeline {
         image_format: &Format,
         depth_image_format: &Format,
         pipeline_layout: &PipelineLayout,
-    ) -> vk::Pipeline {
-        let entry_point = CString::new("main").expect("Failed to create entry point string");
+    ) -> Result<vk::Pipeline, PipelineCreationError> {
+        // TODO: Propagate error
+        let entry_point = CString::new("main").expect("FIXME");
 
         let specialization_info = SpecializationInfo::builder();
 
         let vertex = include_bytes!("../../../assets/shaders/compiled/default_shader_vs.spv");
         let vertex_shader_module =
-            Self::create_shader_module(logical_device, ShaderStage::Vertex, vertex);
+            Self::create_shader_module(logical_device, ShaderStage::Vertex, vertex)?;
         let vertex_stage = PipelineShaderStageCreateInfo::builder()
             .stage(ShaderStageFlags::VERTEX)
             .module(vertex_shader_module)
@@ -145,7 +157,7 @@ impl Pipeline {
 
         let fragment = include_bytes!("../../../assets/shaders/compiled/default_shader_ps.spv");
         let fragment_shader_module =
-            Self::create_shader_module(logical_device, ShaderStage::Fragment, fragment);
+            Self::create_shader_module(logical_device, ShaderStage::Fragment, fragment)?;
         let fragment_stage = PipelineShaderStageCreateInfo::builder()
             .stage(ShaderStageFlags::FRAGMENT)
             .module(fragment_shader_module)
@@ -250,7 +262,6 @@ impl Pipeline {
             .base_pipeline_handle(vk::Pipeline::null())
             .base_pipeline_index(-1);
 
-        /*
         let pipeline = unsafe {
             logical_device
                 .create_graphics_pipelines(
@@ -258,19 +269,7 @@ impl Pipeline {
                     &[*graphics_pipeline_create_info],
                     None,
                 )
-                .map_err(|error| error.1)
-                .expect("Failed to create pipeline")[0]
-        };
-        */
-
-        let pipeline = unsafe {
-            logical_device
-                .create_graphics_pipelines(
-                    PipelineCache::null(),
-                    &[*graphics_pipeline_create_info],
-                    None,
-                )
-                .unwrap()[0]
+                .map_err(|error| PipelineCreationError::PipelineCreation(error.1))?[0]
         };
 
         unsafe {
@@ -290,7 +289,7 @@ impl Pipeline {
             dynamic_states,
         );
 
-        pipeline
+        Ok(pipeline)
     }
 
     #[instrument(skip_all)]
@@ -432,7 +431,7 @@ impl Pipeline {
         logical_device: &Device,
         shader_stage: ShaderStage,
         bytecode: &[u8],
-    ) -> ShaderModule {
+    ) -> Result<ShaderModule, PipelineCreationError> {
         let bytecode = Vec::<u8>::from(bytecode);
         let (prefix, code, suffix) = unsafe { bytecode.align_to::<u32>() };
         if !prefix.is_empty() || !suffix.is_empty() {
@@ -444,7 +443,7 @@ impl Pipeline {
         let shader_module = unsafe {
             logical_device
                 .create_shader_module(&shader_module_create_info, None)
-                .expect("Failed to create shader module")
+                .map_err(PipelineCreationError::ShaderModuleCreation)?
         };
 
         let shader_stage = match shader_stage {
@@ -454,7 +453,7 @@ impl Pipeline {
 
         debug!("Created {} shader module", shader_stage);
 
-        shader_module
+        Ok(shader_module)
     }
 
     pub fn pipeline(&self) -> &vk::Pipeline {

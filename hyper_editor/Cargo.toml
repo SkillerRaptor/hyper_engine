@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 hyper_engine = { path = "../hyper_engine" }
+
+color-eyre = "0.6.2"

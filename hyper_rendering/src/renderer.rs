@@ -427,13 +427,14 @@ impl Renderer {
         let submits = &[*submit_info];
         unsafe {
             // TODO: Create queue class and move this to queue class
+            // TODO: Propagate error
             self.logical_device
                 .queue_submit(
                     self.graphics_queue,
                     submits,
                     *current_frame.render_fence.fence(),
                 )
-                .expect("Failed to submit to queue");
+                .expect("FIXME");
         }
 
         let wait_semaphores = &[*current_frame.render_semaphore.semaphore()];
@@ -489,9 +490,11 @@ impl Renderer {
         let mut last_mesh = String::new();
         let mut last_material = String::new();
         for render_object in &self.renderables {
-            let mesh = self.meshes.get(&render_object.mesh).unwrap();
+            // TODO: Handle error
+            let mesh = self.meshes.get(&render_object.mesh).expect("FIXME");
 
-            let material = self.materials.get(&render_object.material).unwrap();
+            // TODO: Handle error
+            let material = self.materials.get(&render_object.material).expect("FIXME");
             let pipeline = material.pipeline;
             let pipeline_layout = material.pipeline_layout;
 

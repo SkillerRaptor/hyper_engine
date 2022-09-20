@@ -14,8 +14,17 @@ use ash::{
     Device, Instance,
 };
 use log::debug;
-
+use thiserror::Error;
 use tracing::instrument;
+
+#[derive(Debug, Error)]
+pub enum DescriptorPoolCreationError {
+    #[error("Failed to create descriptor pool")]
+    DescriptorPoolCreation(vk::Result),
+
+    #[error("Failed to create descriptor set layout")]
+    DescriptorSetLayoutCreation(vk::Result),
+}
 
 pub(crate) struct DescriptorPoolCreateInfo<'a> {
     pub instance: &'a Instance,
@@ -39,25 +48,27 @@ impl DescriptorPool {
     ];
 
     #[instrument(skip_all)]
-    pub fn new(create_info: &DescriptorPoolCreateInfo) -> Self {
+    pub fn new(
+        create_info: &DescriptorPoolCreateInfo,
+    ) -> Result<Self, DescriptorPoolCreationError> {
         let descriptor_pool = Self::create_descriptor_pool(
             create_info.instance,
             create_info.physical_device,
             create_info.logical_device,
-        );
+        )?;
 
         let descriptor_set_layouts = Self::create_descriptor_set_layouts(
             create_info.instance,
             create_info.physical_device,
             create_info.logical_device,
-        );
+        )?;
 
-        Self {
+        Ok(Self {
             descriptor_set_layouts,
             descriptor_pool,
 
             logical_device: create_info.logical_device.clone(),
-        }
+        })
     }
 
     #[instrument(skip_all)]
@@ -65,7 +76,7 @@ impl DescriptorPool {
         instance: &Instance,
         physical_device: &PhysicalDevice,
         logical_device: &Device,
-    ) -> vk::DescriptorPool {
+    ) -> Result<vk::DescriptorPool, DescriptorPoolCreationError> {
         let descriptor_pool_sizes = Self::collect_descriptor_pool_sizes(instance, physical_device);
 
         let descriptor_pool_create_info = vk::DescriptorPoolCreateInfo::builder()
@@ -76,12 +87,12 @@ impl DescriptorPool {
         let descriptor_pool = unsafe {
             logical_device
                 .create_descriptor_pool(&descriptor_pool_create_info, None)
-                .expect("Failed to create descriptor pool")
+                .map_err(DescriptorPoolCreationError::DescriptorPoolCreation)?
         };
 
         debug!("Created descriptor pool");
 
-        descriptor_pool
+        Ok(descriptor_pool)
     }
 
     #[instrument(skip_all)]
@@ -131,13 +142,13 @@ impl DescriptorPool {
         instance: &Instance,
         physical_device: &PhysicalDevice,
         logical_device: &Device,
-    ) -> Vec<DescriptorSetLayout> {
+    ) -> Result<Vec<DescriptorSetLayout>, DescriptorPoolCreationError> {
         let properties = unsafe { instance.get_physical_device_properties(*physical_device) };
         let limits = properties.limits;
 
         let mut descriptor_set_layouts = Vec::new();
 
-        Self::DESCRIPTOR_TYPES.iter().for_each(|descriptor_type| {
+        for descriptor_type in &Self::DESCRIPTOR_TYPES {
             let count = Self::find_descriptor_type_limit(descriptor_type, &limits);
 
             let descriptor_set_layout_binding = DescriptorSetLayoutBinding::builder()
@@ -166,15 +177,17 @@ impl DescriptorPool {
             let descriptor_set_layout = unsafe {
                 logical_device
                     .create_descriptor_set_layout(&descriptor_set_layout_create_info, None)
-                    .expect("Failed to create descriptor set layout")
+                    .map_err(|error| {
+                        DescriptorPoolCreationError::DescriptorSetLayoutCreation(error)
+                    })?
             };
 
             descriptor_set_layouts.push(descriptor_set_layout);
 
             debug!("Created descriptor set layout");
-        });
+        }
 
-        descriptor_set_layouts
+        Ok(descriptor_set_layouts)
     }
 
     pub fn descriptor_pool(&self) -> &vk::DescriptorPool {

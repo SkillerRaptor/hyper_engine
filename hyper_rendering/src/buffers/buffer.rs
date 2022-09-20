@@ -66,10 +66,11 @@ impl Buffer {
             .size(allocation_size)
             .usage(usage);
 
+        // TODO: Propagate error
         let internal_buffer = unsafe {
             logical_device
                 .create_buffer(&buffer_create_info, None)
-                .expect("Failed to create internal buffer")
+                .expect("FIXME")
         };
 
         debug!("Created internal buffer");
@@ -86,16 +87,19 @@ impl Buffer {
         let memory_requirements =
             unsafe { logical_device.get_buffer_memory_requirements(*internal_buffer) };
 
+        // TODO: Propagate error
         let allocation = allocator
             .borrow_mut()
-            .allocate(memory_requirements, MemoryLocation::CpuToGpu);
+            .allocate(memory_requirements, MemoryLocation::CpuToGpu)
+            .expect("FIXME");
 
         debug!("Allocated buffer memory");
 
+        // TODO: Propagate error
         unsafe {
             logical_device
                 .bind_buffer_memory(*internal_buffer, allocation.memory(), allocation.offset())
-                .expect("Failed to bind buffer memory");
+                .expect("FIXME");
         }
 
         debug!("Bound buffer memory");
@@ -109,12 +113,13 @@ impl Buffer {
 
     #[instrument(skip_all)]
     pub fn set_data<T>(&self, data: &[T]) {
+        // TODO: Propagate error
         let memory = self
             .allocation
             .as_ref()
-            .unwrap()
+            .expect("FIXME")
             .mapped_ptr()
-            .expect("Failed to map buffer memory")
+            .expect("FIXME")
             .as_ptr() as *mut T;
 
         unsafe {
@@ -126,9 +131,11 @@ impl Buffer {
 impl Drop for Buffer {
     #[instrument(skip_all)]
     fn drop(&mut self) {
+        // TODO: Handle error
         self.allocator
             .borrow_mut()
-            .free(self.allocation.take().unwrap());
+            .free(self.allocation.take().expect("FIXME"))
+            .expect("FIXME");
 
         unsafe {
             self.logical_device
