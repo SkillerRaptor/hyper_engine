@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use hyper_core::{
-    logger::{self, LoggerInitializationError},
-    tracer::{self, TracerInitializationError},
-};
+use hyper_core::logger::{self, LoggerInitError};
 use hyper_platform::{
     event_bus::EventBus,
     window::{Window, WindowCreationError},
@@ -21,13 +18,10 @@ use tracing::instrument;
 #[derive(Debug, Error)]
 pub enum ApplicationCreationError {
     #[error("Failed to initialize logger")]
-    LoggerInitialization(#[from] LoggerInitializationError),
+    LoggerInitFailure(#[from] LoggerInitError),
 
     #[error("Failed to create render context")]
     RenderContextCreation(#[from] RenderContextCreationError),
-
-    #[error("Failed to initialize tracer")]
-    TracerInitialization(#[from] TracerInitializationError),
 
     #[error("Failed to create window")]
     WindowCreation(#[from] WindowCreationError),
@@ -56,7 +50,6 @@ pub struct Application {
 
 impl Application {
     pub fn new() -> Result<Self, ApplicationCreationError> {
-        tracer::init()?;
         logger::init()?;
 
         let window = Window::new("HyperEngine", 1280, 720)?;

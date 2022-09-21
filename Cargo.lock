@@ -304,8 +304,6 @@ dependencies = [
  "log",
  "thiserror",
  "tracing",
- "tracing-subscriber",
- "tracing-tracy",
 ]
 
 [[package]]
@@ -314,6 +312,9 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "hyper_engine",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-tracy",
 ]
 
 [[package]]

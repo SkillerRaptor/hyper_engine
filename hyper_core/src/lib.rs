@@ -4,5 +4,5 @@
  * SPDX-License-Identifier: MIT
  */
 
+pub mod error;
 pub mod logger;
-pub mod tracer;

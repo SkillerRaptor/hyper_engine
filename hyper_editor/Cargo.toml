@@ -7,3 +7,6 @@ edition = "2021"
 hyper_engine = { path = "../hyper_engine" }
 
 color-eyre = "0.6.2"
+tracing = "0.1.36"
+tracing-subscriber = "0.3.15"
+tracing-tracy = "0.10.0"
