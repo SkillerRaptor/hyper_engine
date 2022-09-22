@@ -9,3 +9,9 @@ members = [
 
 [profile.dev]
 opt-level = 1
+
+[profile.production]
+inherits = "release"
+codegen-units = 1
+strip = true
+lto = true

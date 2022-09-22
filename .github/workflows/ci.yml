@@ -59,6 +59,12 @@ jobs:
           command: build
           args: --verbose --workspace --release
 
+      - name: Cargo Build Production
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --verbose --workspace --profile production
+
       - name: Cargo Formatter
         uses: actions-rs/cargo@v1
         with:
