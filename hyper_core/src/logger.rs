@@ -42,6 +42,14 @@ fn create_dispatches() -> Result<(), LoggerInitError> {
         LevelFilter::Info
     };
 
+    let latest_log_file = format!("{}/latest.log", LOG_FOLDER,);
+
+    let current_log_file = format!(
+        "{}/hyper_engine_{}.log",
+        LOG_FOLDER,
+        Local::now().format("%d-%m-%Y_%H-%M-%S")
+    );
+
     Dispatch::new()
         .level(log_level)
         .chain(
@@ -75,20 +83,18 @@ fn create_dispatches() -> Result<(), LoggerInitError> {
                     out.finish(format_args!("{} | {}: {}", time, level, message))
                 })
                 .chain(
-                    fern::log_file(format!(
-                        "{}/hyper_engine_{}.log",
-                        LOG_FOLDER,
-                        Local::now().format("%d-%m-%Y_%H-%M-%S")
-                    ))
-                    .map_err(|error| {
-                        let file = format!(
-                            "{}/hyper_engine_{}.log",
-                            LOG_FOLDER,
-                            Local::now().format("%d-%m-%Y_%H-%M-%S")
-                        );
-                        LoggerInitError::FileCreationFailure(file, error)
-                    })?,
-                ),
+                    std::fs::OpenOptions::new()
+                        .write(true)
+                        .create(true)
+                        .truncate(true)
+                        .open(&latest_log_file)
+                        .map_err(|error| {
+                            LoggerInitError::FileCreationFailure(latest_log_file, error)
+                        })?,
+                )
+                .chain(fern::log_file(&current_log_file).map_err(|error| {
+                    LoggerInitError::FileCreationFailure(current_log_file, error)
+                })?),
         )
         .apply()?;
     Ok(())
