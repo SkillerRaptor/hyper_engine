@@ -70,9 +70,11 @@ impl Application {
         let mut last_frame = Instant::now();
         let mut last_fps_frame = Instant::now();
         while !self.window.should_close() {
+            // Calculates delta time based on the time passed between the last frame
             let current_frame = Instant::now();
             let _delta_time = current_frame.duration_since(last_frame).as_secs_f64();
 
+            // Calculates the average frames in a second
             while current_frame.duration_since(last_fps_frame).as_secs_f64() >= 1.0 {
                 let window_title = format!("HyperEngine (FPS: {})", fps);
                 self.window.set_title(window_title.as_str());
