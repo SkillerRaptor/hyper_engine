@@ -6,6 +6,7 @@
 
 use glfw::Key;
 
+#[derive(Debug)]
 pub enum KeyCode {
     Space = 32,
     Apostrophe = 39,

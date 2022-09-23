@@ -148,8 +148,10 @@ impl Instance {
             Vec::new()
         };
 
+        // TODO: Handle error
         let raw_extensions = window
             .required_instance_extensions()
+            .expect("FIXME")
             .iter()
             .map(|extension| CString::new(extension.clone()))
             .collect::<Result<Vec<_>, _>>()?;

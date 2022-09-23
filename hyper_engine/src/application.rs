@@ -11,6 +11,7 @@ use hyper_platform::{
 };
 use hyper_rendering::context::{RenderContext, RenderContextCreationError};
 
+use log::{error, warn};
 use std::time::Instant;
 use thiserror::Error;
 use tracing::instrument;
@@ -24,7 +25,7 @@ pub enum ApplicationCreationError {
     RenderContextCreation(#[from] RenderContextCreationError),
 
     #[error("Failed to create window")]
-    WindowCreation(#[from] WindowCreationError),
+    WindowCreationFailure(#[from] WindowCreationError),
 }
 
 #[derive(Debug, Error)]

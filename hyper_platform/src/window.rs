@@ -4,29 +4,26 @@
  * SPDX-License-Identifier: MIT
  */
 
+pub use crate::error::WindowCreationError;
+
 use crate::event_bus::EventBus;
 
+use ash::{
+    prelude::VkResult,
+    vk::{self, Handle, SurfaceKHR},
+    Instance,
+};
 use glfw::{ClientApiHint, Glfw, WindowEvent, WindowHint, WindowMode};
 use log::{debug, info};
 use std::sync::mpsc::Receiver;
-use thiserror::Error;
 use tracing::instrument;
-
-#[derive(Debug, Error)]
-pub enum WindowCreationError {
-    #[error("Failed to initialize GLFW")]
-    GlfwInitialization(#[from] glfw::InitError),
-
-    #[error("Failed to create native window")]
-    NativeWindowCreation,
-}
 
 pub struct Window {
     title: String,
 
-    events: Receiver<(f64, WindowEvent)>,
-
+    event_receiver: Receiver<(f64, WindowEvent)>,
     native_window: glfw::Window,
+
     glfw: Glfw,
 }
 
@@ -34,20 +31,20 @@ impl Window {
     #[instrument(skip_all)]
     pub fn new(title: &str, width: u32, height: u32) -> Result<Self, WindowCreationError> {
         let glfw = Self::initialize_glfw()?;
-        let (native_window, events) = Self::create_window(&glfw, title, width, height)?;
+        let (native_window, event_receiver) = Self::create_window(&glfw, title, width, height)?;
 
         Ok(Self {
             title: String::from(title),
 
-            events,
-
+            event_receiver,
             native_window,
+
             glfw,
         })
     }
 
     #[instrument(skip_all)]
-    fn initialize_glfw() -> Result<glfw::Glfw, glfw::InitError> {
+    fn initialize_glfw() -> Result<glfw::Glfw, WindowCreationError> {
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
         glfw.window_hint(WindowHint::ClientApi(ClientApiHint::NoApi));
 
@@ -63,9 +60,9 @@ impl Window {
         width: u32,
         height: u32,
     ) -> Result<(glfw::Window, Receiver<(f64, WindowEvent)>), WindowCreationError> {
-        let (mut native_window, events) = glfw
+        let (mut native_window, event_receiver) = glfw
             .create_window(width, height, title, WindowMode::Windowed)
-            .ok_or(WindowCreationError::NativeWindowCreation)?;
+            .ok_or(WindowCreationError::NativeWindowCreationFailure)?;
 
         native_window.set_all_polling(true);
 
@@ -74,32 +71,37 @@ impl Window {
             title, width, height
         );
 
-        Ok((native_window, events))
+        Ok((native_window, event_receiver))
     }
 
     #[instrument(skip_all)]
     pub fn handle_events(&mut self, event_bus: &mut EventBus) {
         self.glfw.poll_events();
 
-        for (_, event) in glfw::flush_messages(&self.events) {
+        for (_, event) in glfw::flush_messages(&self.event_receiver) {
             event_bus.invoke(&event);
         }
     }
 
     #[instrument(skip_all)]
-    pub fn create_window_surface(&self, instance: usize) -> (u64, u32) {
+    pub fn create_window_surface(&self, instance: &Instance) -> VkResult<SurfaceKHR> {
+        let instance = instance.handle().as_raw() as usize;
+
         let mut surface = 0;
         let result =
             self.native_window
                 .create_window_surface(instance, std::ptr::null(), &mut surface);
 
-        (surface, result)
+        let result = vk::Result::from_raw(result as i32);
+        result.result()?;
+
+        let surface = SurfaceKHR::from_raw(surface);
+        Ok(surface)
     }
 
     #[instrument(skip_all)]
-    pub fn required_instance_extensions(&self) -> Vec<String> {
-        // TODO: Handle error
-        self.glfw.get_required_instance_extensions().expect("FIXME")
+    pub fn required_instance_extensions(&self) -> Option<Vec<String>> {
+        self.glfw.get_required_instance_extensions()
     }
 
     pub fn set_title(&mut self, title: &str) {

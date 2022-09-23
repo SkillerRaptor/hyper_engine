@@ -333,6 +333,7 @@ dependencies = [
 name = "hyper_platform"
 version = "0.1.0"
 dependencies = [
+ "ash",
  "glfw",
  "hyper_core",
  "log",

@@ -8,9 +8,9 @@
  * TODO: Make this event bus to be multithreadable
  */
 
-use super::event::Event;
-use super::key_code::KeyCode;
-use super::mouse_code::MouseCode;
+use crate::event::Event;
+use crate::key_code::KeyCode;
+use crate::mouse_code::MouseCode;
 
 use glfw::{Action, WindowEvent};
 use log::debug;
@@ -44,7 +44,7 @@ impl EventBus {
             WindowEvent::MouseButton(mouse_button, action, _) => match action {
                 Action::Release => Event::MouseRelease(MouseCode::from(*mouse_button)),
                 Action::Press => Event::MousePress(MouseCode::from(*mouse_button)),
-                _ => panic!(),
+                _ => unreachable!(),
             },
             WindowEvent::CursorPos(x, y) => Event::MouseMove(*x as f32, *y as f32),
             WindowEvent::Scroll(x_offset, y_offset) => {

@@ -8,7 +8,7 @@ use hyper_platform::window::Window;
 
 use ash::{
     extensions::khr::Surface as SurfaceLoader,
-    vk::{self, Handle, SurfaceKHR},
+    vk::{self, SurfaceKHR},
     Entry, Instance,
 };
 use log::debug;
@@ -37,17 +37,14 @@ impl Surface {
     pub fn new(create_info: &SurfaceCreateInfo) -> Result<Self, SurfaceCreationError> {
         let surface_loader = SurfaceLoader::new(create_info.entry, create_info.instance);
 
-        let (surface, result) = create_info
+        let surface = create_info
             .window
-            .create_window_surface(create_info.instance.handle().as_raw() as usize);
-
-        let result = vk::Result::from_raw(result as i32);
-        result.result()?;
+            .create_window_surface(create_info.instance)?;
 
         debug!("Created vulkan surface");
 
         Ok(Self {
-            surface: SurfaceKHR::from_raw(surface),
+            surface,
             surface_loader,
         })
     }

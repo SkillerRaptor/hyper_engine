@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+pub mod error;
 pub mod event;
 pub mod event_bus;
 pub mod key_code;

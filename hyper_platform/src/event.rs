@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-use super::key_code::KeyCode;
-use super::mouse_code::MouseCode;
+use crate::key_code::KeyCode;
+use crate::mouse_code::MouseCode;
 
 pub enum Event {
     KeyPress(bool, KeyCode),

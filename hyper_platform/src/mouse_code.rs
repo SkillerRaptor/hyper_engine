@@ -6,6 +6,7 @@
 
 use glfw::MouseButton;
 
+#[derive(Debug)]
 pub enum MouseCode {
     Left = 1,
     Right = 2,
