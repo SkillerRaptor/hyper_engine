@@ -9,6 +9,8 @@ use crate::{
     vertex::Vertex,
 };
 
+use hyper_core::ignore::Ignore;
+
 use ash::{
     vk::{Buffer, BufferCreateInfo, BufferUsageFlags, SharingMode},
     Device,
@@ -120,11 +122,12 @@ impl VertexBuffer {
 impl Drop for VertexBuffer {
     #[instrument(skip_all)]
     fn drop(&mut self) {
-        // TODO: Handle error
+        // Frees vertex buffer allocation
         self.allocator
             .borrow_mut()
-            .free(self.allocation.take().expect("FIXME"))
-            .expect("FIXME");
+            // Uses unwrap because it is guaranteed that the allocation exists
+            .free(self.allocation.take().unwrap())
+            .ignore();
 
         unsafe {
             self.logical_device

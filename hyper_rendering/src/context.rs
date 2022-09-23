@@ -22,6 +22,7 @@ use crate::{
     renderer::{Renderer, RendererCreateInfo},
 };
 
+use hyper_core::ignore::Ignore;
 use hyper_platform::window::Window;
 
 use ash::Entry;
@@ -304,11 +305,8 @@ impl Drop for RenderContext {
     #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
-            // TODO: Handle error
-            self.device
-                .logical_device()
-                .device_wait_idle()
-                .expect("FIXME");
+            // Blocks process till the device has finished making the last operation
+            self.device.logical_device().device_wait_idle().ignore();
         }
     }
 }

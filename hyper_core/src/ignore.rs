@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub mod ignore;
-pub mod logger;
+pub trait Ignore: Sized {
+    fn ignore(self) {}
+}
 
-mod error;
+impl<T, E> Ignore for Result<T, E> {}
