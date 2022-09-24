@@ -4,44 +4,17 @@
  * SPDX-License-Identifier: MIT
  */
 
-use hyper_core::logger::{self, LoggerInitError};
-use hyper_platform::{
-    event_bus::EventBus,
-    window::{Window, WindowCreationError},
+use crate::error::{
+    ApplicationCreationError, ApplicationRenderError, ApplicationRunError, ApplicationUpdateError,
 };
-use hyper_rendering::context::{RenderContext, RenderContextCreationError};
 
-use log::{error, warn};
+use hyper_core::logger;
+use hyper_platform::{event_bus::EventBus, window::Window};
+use hyper_rendering::context::RenderContext;
+
+use log::warn;
 use std::time::Instant;
-use thiserror::Error;
 use tracing::instrument;
-
-#[derive(Debug, Error)]
-pub enum ApplicationCreationError {
-    #[error("Failed to initialize logger")]
-    LoggerInitFailure(#[from] LoggerInitError),
-
-    #[error("Failed to create render context")]
-    RenderContextCreation(#[from] RenderContextCreationError),
-
-    #[error("Failed to create window")]
-    WindowCreationFailure(#[from] WindowCreationError),
-}
-
-#[derive(Debug, Error)]
-pub enum ApplicationRunError {
-    #[error("Failed to update application")]
-    Update(#[from] ApplicationUpdateError),
-
-    #[error("Failed to render application")]
-    Render(#[from] ApplicationRenderError),
-}
-
-#[derive(Debug, Error)]
-pub enum ApplicationUpdateError {}
-
-#[derive(Debug, Error)]
-pub enum ApplicationRenderError {}
 
 pub struct Application {
     render_context: RenderContext,
@@ -69,6 +42,7 @@ impl Application {
         let mut fps: u32 = 0;
         let mut last_frame = Instant::now();
         let mut last_fps_frame = Instant::now();
+
         while !self.window.should_close() {
             // Calculates delta time based on the time passed between the last frame
             let current_frame = Instant::now();
