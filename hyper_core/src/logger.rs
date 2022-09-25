@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub use crate::error::LoggerInitError;
+pub use crate::errors::LoggerInitError;
 
 use chrono::Local;
 use colored::Colorize;

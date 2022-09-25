@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::error::{
+use crate::errors::{
     ApplicationCreationError, ApplicationRenderError, ApplicationRunError, ApplicationUpdateError,
 };
 

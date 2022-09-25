@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub use crate::error::WindowCreationError;
+pub use crate::errors::WindowCreationError;
 
 use crate::event_bus::EventBus;
 

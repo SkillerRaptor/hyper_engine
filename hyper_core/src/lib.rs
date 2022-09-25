@@ -7,4 +7,4 @@
 pub mod ignore;
 pub mod logger;
 
-mod error;
+mod errors;

@@ -6,4 +6,4 @@
 
 pub mod application;
 
-mod error;
+mod errors;

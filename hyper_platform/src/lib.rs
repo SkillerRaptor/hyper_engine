@@ -10,4 +10,4 @@ pub mod key_code;
 pub mod mouse_code;
 pub mod window;
 
-mod error;
+mod errors;
