@@ -5,9 +5,7 @@
  */
 
 pub trait Ignore: Sized {
-    fn ignore(self) {
-        // Consumes self and satisfies clippy
-    }
+    fn ignore(self) {}
 }
 
 impl<T, E> Ignore for Result<T, E> {}

@@ -12,7 +12,7 @@ pub enum LoggerInitError {
     #[error("Failed to create log folder")]
     FolderCreationFailure(io::Error),
 
-    #[error("Failed to create log file: {0}")]
+    #[error("Failed to create log file '{0}'")]
     FileCreationFailure(String, io::Error),
 
     #[error("Failed to set new global logger")]

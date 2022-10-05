@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use hyper_core::logger::LoggerInitError;
+use hyper_core::errors::LoggerInitError;
 use hyper_platform::window::WindowCreationError;
 use hyper_rendering::context::RenderContextCreationError;
 
