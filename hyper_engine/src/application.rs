@@ -25,7 +25,7 @@ impl Application {
         logger::init()?;
 
         let window = Window::new("HyperEngine", 1280, 720)?;
-        let event_bus = EventBus::new();
+        let event_bus = EventBus::default();
         let render_context = RenderContext::new(&window)?;
 
         Ok(Self {

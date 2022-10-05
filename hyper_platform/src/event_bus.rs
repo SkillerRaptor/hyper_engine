@@ -72,3 +72,9 @@ impl EventBus {
         debug!("Registered event listener '{}'", name);
     }
 }
+
+impl Default for EventBus {
+    fn default() -> Self {
+        Self::new()
+    }
+}
