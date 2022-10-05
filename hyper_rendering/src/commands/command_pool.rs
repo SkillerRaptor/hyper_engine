@@ -9,7 +9,6 @@ use ash::{
     Device,
 };
 use log::debug;
-use tracing::instrument;
 
 pub(crate) struct CommandPoolCreateInfo<'a> {
     pub logical_device: &'a Device,
@@ -23,7 +22,6 @@ pub(crate) struct CommandPool {
 }
 
 impl CommandPool {
-    #[instrument(skip_all)]
     pub fn new(create_info: &CommandPoolCreateInfo) -> Self {
         let command_pool_create_info = vk::CommandPoolCreateInfo::builder()
             .flags(CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
@@ -51,7 +49,6 @@ impl CommandPool {
 }
 
 impl Drop for CommandPool {
-    #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
             self.logical_device

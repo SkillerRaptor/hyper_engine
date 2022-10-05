@@ -22,7 +22,6 @@ use std::{
     os::raw::c_void,
 };
 use thiserror::Error;
-use tracing::instrument;
 
 #[derive(Debug, Error)]
 pub enum InstanceCreationError {
@@ -59,7 +58,6 @@ pub(crate) struct Instance {
 impl Instance {
     const VALIDATION_LAYER: &'static str = "VK_LAYER_KHRONOS_validation";
 
-    #[instrument(skip_all)]
     pub fn new(create_info: &InstanceCreateInfo) -> Result<Self, InstanceCreationError> {
         let validation_layer_enabled = Self::check_validation_layer_support(create_info.entry)?;
 
@@ -88,7 +86,6 @@ impl Instance {
         })
     }
 
-    #[instrument(skip_all)]
     fn check_validation_layer_support(entry: &Entry) -> Result<bool, InstanceCreationError> {
         if !cfg!(debug_assertions) {
             return Ok(false);
@@ -117,7 +114,6 @@ impl Instance {
         Ok(true)
     }
 
-    #[instrument(skip_all)]
     fn create_instance(
         window: &Window,
         entry: &Entry,
@@ -194,7 +190,6 @@ impl Instance {
         Ok(instance)
     }
 
-    #[instrument(skip_all)]
     fn create_debug_messenger(
         entry: &Entry,
         instance: &ash::Instance,
@@ -261,7 +256,6 @@ impl Instance {
 }
 
 impl Drop for Instance {
-    #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
             if self.validation_layer_enabled {

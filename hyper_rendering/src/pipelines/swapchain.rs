@@ -27,7 +27,6 @@ use gpu_allocator::vulkan::Allocation;
 use log::debug;
 use std::{cell::RefCell, rc::Rc};
 use thiserror::Error;
-use tracing::instrument;
 
 #[derive(Debug, Error)]
 pub enum SwapchainCreationError {
@@ -88,7 +87,6 @@ pub(crate) struct Swapchain {
 }
 
 impl Swapchain {
-    #[instrument(skip_all)]
     pub fn new(create_info: &SwapchainCreateInfo) -> Result<Self, SwapchainCreationError> {
         let swapchain_loader =
             SwapchainLoader::new(create_info.instance, create_info.logical_device);
@@ -138,7 +136,6 @@ impl Swapchain {
         })
     }
 
-    #[instrument(skip_all)]
     fn create_swapchain(
         window: &Window,
         surface_loader: &SurfaceLoader,
@@ -198,7 +195,6 @@ impl Swapchain {
         Ok((swapchain, extent, format.format))
     }
 
-    #[instrument(skip_all)]
     fn choose_extent(window: &Window, capabilities: &SurfaceCapabilitiesKHR) -> Extent2D {
         if capabilities.current_extent.width != u32::MAX
             || capabilities.current_extent.height != u32::MAX
@@ -222,7 +218,6 @@ impl Swapchain {
         }
     }
 
-    #[instrument(skip_all)]
     fn choose_surface_format(formats: &[SurfaceFormatKHR]) -> SurfaceFormatKHR {
         formats
             .iter()
@@ -234,7 +229,6 @@ impl Swapchain {
             .unwrap_or_else(|| formats[0])
     }
 
-    #[instrument(skip_all)]
     fn choose_present_mode(present_modes: &[PresentModeKHR]) -> PresentModeKHR {
         present_modes
             .iter()
@@ -243,7 +237,6 @@ impl Swapchain {
             .unwrap_or(PresentModeKHR::FIFO)
     }
 
-    #[instrument(skip_all)]
     fn print_swapchain_information(
         swapchain_support: &SwapchainSupport,
         swapchain_create_info: &SwapchainCreateInfoKHR,
@@ -284,7 +277,6 @@ impl Swapchain {
         debug!("  Clipped: {}", swapchain_create_info.clipped != 0);
     }
 
-    #[instrument(skip_all)]
     fn create_images(
         swapchain_loader: &SwapchainLoader,
         swapchain: &SwapchainKHR,
@@ -303,7 +295,6 @@ impl Swapchain {
         Ok(images)
     }
 
-    #[instrument(skip_all)]
     fn create_image_views(
         logical_device: &Device,
         format: &Format,
@@ -345,7 +336,6 @@ impl Swapchain {
         Ok(image_views)
     }
 
-    #[instrument(skip_all)]
     fn create_depth_image(
         window: &Window,
         logical_device: &Device,
@@ -426,7 +416,6 @@ impl Swapchain {
         Ok((image, image_view, format, allocation))
     }
 
-    #[instrument(skip_all)]
     fn cleanup(&mut self) {
         unsafe {
             self.logical_device
@@ -445,7 +434,6 @@ impl Swapchain {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn recreate(&mut self, window: &Window) {
         // TODO: Handle error
         unsafe {
@@ -525,7 +513,6 @@ impl Swapchain {
 }
 
 impl Drop for Swapchain {
-    #[instrument(skip_all)]
     fn drop(&mut self) {
         self.cleanup();
     }

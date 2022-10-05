@@ -16,7 +16,6 @@ use ash::{
 };
 use log::debug;
 use std::{mem, slice};
-use tracing::instrument;
 
 pub(crate) struct CommandBufferCreateInfo<'a> {
     pub logical_device: &'a Device,
@@ -31,7 +30,6 @@ pub(crate) struct CommandBuffer {
 }
 
 impl CommandBuffer {
-    #[instrument(skip_all)]
     pub fn new(create_info: &CommandBufferCreateInfo) -> Self {
         let allocate_info = CommandBufferAllocateInfo::builder()
             .command_pool(*create_info.command_pool)
@@ -58,7 +56,6 @@ impl CommandBuffer {
         &self.command_buffer
     }
 
-    #[instrument(skip_all)]
     pub fn begin(
         &self,
         usage_flags: CommandBufferUsageFlags,
@@ -76,7 +73,6 @@ impl CommandBuffer {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn end(&self) {
         // TODO: Propagate error
         unsafe {
@@ -86,7 +82,6 @@ impl CommandBuffer {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn reset(&self, reset_flags: CommandBufferResetFlags) {
         // TODO: Propagate error
         unsafe {
@@ -96,7 +91,6 @@ impl CommandBuffer {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn begin_rendering(&self, rendering_info: &RenderingInfo) {
         unsafe {
             self.logical_device
@@ -104,7 +98,6 @@ impl CommandBuffer {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn end_rendering(&self) {
         unsafe {
             self.logical_device.cmd_end_rendering(self.command_buffer);
@@ -112,7 +105,7 @@ impl CommandBuffer {
     }
 
     #[allow(clippy::too_many_arguments)]
-    #[instrument(skip_all)]
+
     pub fn pipeline_barrier(
         &self,
         src_stage_mask: PipelineStageFlags,
@@ -135,7 +128,6 @@ impl CommandBuffer {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn bind_descriptor_sets(
         &self,
         pipeline_bind_point: PipelineBindPoint,
@@ -156,7 +148,6 @@ impl CommandBuffer {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn bind_pipeline(&self, pipeline_bind_point: PipelineBindPoint, pipeline: Pipeline) {
         unsafe {
             self.logical_device.cmd_bind_pipeline(
@@ -167,7 +158,6 @@ impl CommandBuffer {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn bind_vertex_buffers(
         &self,
         first_binding: u32,
@@ -184,7 +174,6 @@ impl CommandBuffer {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn push_constants<T>(
         &self,
         pipeline_layout: PipelineLayout,
@@ -203,7 +192,6 @@ impl CommandBuffer {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn set_scissor(&self, first_scissor: u32, scissors: &[Rect2D]) {
         unsafe {
             self.logical_device
@@ -211,7 +199,6 @@ impl CommandBuffer {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn set_viewport(&self, first_viewport: u32, viewports: &[Viewport]) {
         unsafe {
             self.logical_device
@@ -219,7 +206,6 @@ impl CommandBuffer {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn draw(
         &self,
         vertex_count: u32,

@@ -12,9 +12,7 @@ use hyper_core::logger;
 use hyper_platform::{event_bus::EventBus, window::Window};
 use hyper_rendering::context::RenderContext;
 
-use log::warn;
 use std::time::Instant;
-use tracing::instrument;
 
 pub struct Application {
     render_context: RenderContext,
@@ -37,7 +35,6 @@ impl Application {
         })
     }
 
-    #[instrument(skip_all)]
     pub fn run(&mut self) -> Result<(), ApplicationRunError> {
         let mut fps: u32 = 0;
         let mut last_frame = Instant::now();
@@ -67,14 +64,12 @@ impl Application {
         Ok(())
     }
 
-    #[instrument(skip_all)]
     fn update(&mut self) -> Result<(), ApplicationUpdateError> {
         self.window.handle_events(&mut self.event_bus);
 
         Ok(())
     }
 
-    #[instrument(skip_all)]
     fn render(&mut self) -> Result<(), ApplicationRenderError> {
         self.render_context.begin_frame(&self.window);
         self.render_context.draw(&self.window);

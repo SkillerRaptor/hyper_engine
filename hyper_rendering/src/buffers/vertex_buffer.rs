@@ -18,7 +18,6 @@ use ash::{
 use gpu_allocator::vulkan::Allocation;
 use log::debug;
 use std::{cell::RefCell, mem, rc::Rc};
-use tracing::instrument;
 
 pub(crate) struct VertexBufferCreateInfo<'a> {
     pub logical_device: &'a Device,
@@ -35,7 +34,6 @@ pub(crate) struct VertexBuffer {
 }
 
 impl VertexBuffer {
-    #[instrument(skip_all)]
     pub fn new(create_info: &VertexBufferCreateInfo) -> Self {
         let internal_buffer =
             Self::create_internal_buffer(create_info.logical_device, create_info.vertices.len());
@@ -57,7 +55,6 @@ impl VertexBuffer {
         }
     }
 
-    #[instrument(skip_all)]
     fn create_internal_buffer(logical_device: &Device, vertex_count: usize) -> Buffer {
         let buffer_create_info = BufferCreateInfo::builder()
             .size((mem::size_of::<Vertex>() * vertex_count) as u64)
@@ -77,7 +74,6 @@ impl VertexBuffer {
         internal_buffer
     }
 
-    #[instrument(skip_all)]
     fn allocate_memory(
         logical_device: &Device,
         allocator: &Rc<RefCell<Allocator>>,
@@ -120,7 +116,6 @@ impl VertexBuffer {
 }
 
 impl Drop for VertexBuffer {
-    #[instrument(skip_all)]
     fn drop(&mut self) {
         // Frees vertex buffer allocation
         self.allocator

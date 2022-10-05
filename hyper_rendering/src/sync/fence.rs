@@ -9,7 +9,6 @@ use ash::{
     Device,
 };
 use log::debug;
-use tracing::instrument;
 
 pub(crate) struct FenceCreateInfo<'a> {
     pub logical_device: &'a Device,
@@ -22,7 +21,6 @@ pub(crate) struct Fence {
 }
 
 impl Fence {
-    #[instrument(skip_all)]
     pub fn new(create_info: &FenceCreateInfo) -> Self {
         let fence_create_info = vk::FenceCreateInfo::builder().flags(FenceCreateFlags::SIGNALED);
 
@@ -46,7 +44,6 @@ impl Fence {
         &self.fence
     }
 
-    #[instrument(skip_all)]
     pub fn wait(&self) {
         // TODO: Propagate error
         unsafe {
@@ -56,7 +53,6 @@ impl Fence {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn reset(&self) {
         // TODO: Propagate error
         unsafe {
@@ -68,7 +64,6 @@ impl Fence {
 }
 
 impl Drop for Fence {
-    #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
             self.logical_device.destroy_fence(self.fence, None);

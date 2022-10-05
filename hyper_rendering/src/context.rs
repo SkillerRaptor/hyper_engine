@@ -29,7 +29,6 @@ use ash::Entry;
 use log::{debug, info};
 use std::{cell::RefCell, rc::Rc};
 use thiserror::Error;
-use tracing::instrument;
 
 #[derive(Debug, Error)]
 pub enum RenderContextCreationError {
@@ -75,7 +74,6 @@ pub struct RenderContext {
 }
 
 impl RenderContext {
-    #[instrument(skip_all)]
     pub fn new(window: &Window) -> Result<Self, RenderContextCreationError> {
         let entry = Self::create_entry()?;
         let instance = Self::create_instance(window, &entry)?;
@@ -107,7 +105,6 @@ impl RenderContext {
         })
     }
 
-    #[instrument(skip_all)]
     fn create_entry() -> Result<Entry, ash::LoadingError> {
         let entry = unsafe { Entry::load()? };
 
@@ -116,14 +113,12 @@ impl RenderContext {
         Ok(entry)
     }
 
-    #[instrument(skip_all)]
     fn create_instance(window: &Window, entry: &Entry) -> Result<Instance, InstanceCreationError> {
         let instance_create_info = InstanceCreateInfo { window, entry };
 
         Instance::new(&instance_create_info)
     }
 
-    #[instrument(skip_all)]
     fn create_surface(
         window: &Window,
         entry: &Entry,
@@ -138,7 +133,6 @@ impl RenderContext {
         Surface::new(&surface_create_info)
     }
 
-    #[instrument(skip_all)]
     fn create_device(
         instance: &Instance,
         surface: &Surface,
@@ -152,7 +146,6 @@ impl RenderContext {
         Device::new(&device_create_info)
     }
 
-    #[instrument(skip_all)]
     fn create_allocator(
         instance: &Instance,
         device: &Device,
@@ -166,7 +159,6 @@ impl RenderContext {
         Allocator::new(&allocate_create_info)
     }
 
-    #[instrument(skip_all)]
     fn create_swapchain(
         window: &Window,
         instance: &Instance,
@@ -187,7 +179,6 @@ impl RenderContext {
         Swapchain::new(&swapchain_create_info)
     }
 
-    #[instrument(skip_all)]
     fn create_descriptor_pool(
         instance: &Instance,
         device: &Device,
@@ -201,7 +192,6 @@ impl RenderContext {
         DescriptorPool::new(&descriptor_pool_create_info)
     }
 
-    #[instrument(skip_all)]
     fn create_descriptor_sets(
         instance: &Instance,
         device: &Device,
@@ -238,7 +228,6 @@ impl RenderContext {
         Ok(descriptor_sets)
     }
 
-    #[instrument(skip_all)]
     fn create_pipeline(
         _instance: &Instance,
         device: &Device,
@@ -255,7 +244,6 @@ impl RenderContext {
         Pipeline::new(&pipeline_create_info)
     }
 
-    #[instrument(skip_all)]
     fn create_renderer(
         device: &Device,
         pipeline: &Pipeline,
@@ -273,22 +261,18 @@ impl RenderContext {
         Renderer::new(&renderer_create_info)
     }
 
-    #[instrument(skip_all)]
     pub fn begin_frame(&mut self, window: &Window) {
         self.renderer.begin_frame(window, &mut self.swapchain);
     }
 
-    #[instrument(skip_all)]
     pub fn end_frame(&self) {
         self.renderer.end_frame(&self.swapchain);
     }
 
-    #[instrument(skip_all)]
     pub fn submit(&mut self, window: &Window) {
         self.renderer.submit(window, &mut self.swapchain);
     }
 
-    #[instrument(skip_all)]
     pub fn draw(&self, window: &Window) {
         let descriptor_sets = self
             .descriptor_sets
@@ -302,7 +286,6 @@ impl RenderContext {
 }
 
 impl Drop for RenderContext {
-    #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
             // Blocks process till the device has finished making the last operation

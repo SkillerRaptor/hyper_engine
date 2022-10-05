@@ -25,7 +25,6 @@ use ash::{
 use log::debug;
 use std::{ffi::CString, mem};
 use thiserror::Error;
-use tracing::instrument;
 
 #[repr(C)]
 pub(crate) struct BindingsOffset {
@@ -68,7 +67,6 @@ pub(crate) struct Pipeline {
 }
 
 impl Pipeline {
-    #[instrument(skip_all)]
     pub fn new(create_info: &PipelineCreateInfo) -> Result<Self, PipelineCreationError> {
         let pipeline_layout = Self::create_pipeline_layout(
             create_info.logical_device,
@@ -90,7 +88,6 @@ impl Pipeline {
         })
     }
 
-    #[instrument(skip_all)]
     fn create_pipeline_layout(
         logical_device: &Device,
         descriptor_set_layouts: &[DescriptorSetLayout],
@@ -120,7 +117,6 @@ impl Pipeline {
         Ok(pipeline_layout)
     }
 
-    #[instrument(skip_all)]
     fn print_pipeline_layout_information(
         pipeline_layout_info_create_info: &PipelineLayoutCreateInfo,
     ) {
@@ -135,7 +131,6 @@ impl Pipeline {
         );
     }
 
-    #[instrument(skip_all)]
     fn create_pipeline(
         logical_device: &Device,
         image_format: &Format,
@@ -293,7 +288,6 @@ impl Pipeline {
         Ok(pipeline)
     }
 
-    #[instrument(skip_all)]
     fn print_pipeline_information(
         input_assembly_state_create_info: &PipelineInputAssemblyStateCreateInfo,
         rasterization_state_create_info: &PipelineRasterizationStateCreateInfo,
@@ -427,7 +421,6 @@ impl Pipeline {
         debug!("  Dynamic States: {:?}", dynamic_states);
     }
 
-    #[instrument(skip_all)]
     fn create_shader_module(
         logical_device: &Device,
         shader_stage: ShaderStage,
@@ -467,7 +460,6 @@ impl Pipeline {
 }
 
 impl Drop for Pipeline {
-    #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
             self.logical_device.destroy_pipeline(self.pipeline, None);

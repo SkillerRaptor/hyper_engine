@@ -15,7 +15,6 @@ use ash::{
 };
 use log::debug;
 use thiserror::Error;
-use tracing::instrument;
 
 #[derive(Debug, Error)]
 pub enum DescriptorPoolCreationError {
@@ -47,7 +46,6 @@ impl DescriptorPool {
         DescriptorType::SAMPLER,
     ];
 
-    #[instrument(skip_all)]
     pub fn new(
         create_info: &DescriptorPoolCreateInfo,
     ) -> Result<Self, DescriptorPoolCreationError> {
@@ -71,7 +69,6 @@ impl DescriptorPool {
         })
     }
 
-    #[instrument(skip_all)]
     fn create_descriptor_pool(
         instance: &Instance,
         physical_device: &PhysicalDevice,
@@ -95,7 +92,6 @@ impl DescriptorPool {
         Ok(descriptor_pool)
     }
 
-    #[instrument(skip_all)]
     fn collect_descriptor_pool_sizes(
         instance: &Instance,
         physical_device: &PhysicalDevice,
@@ -117,7 +113,6 @@ impl DescriptorPool {
         descriptor_pool_sizes
     }
 
-    #[instrument(skip_all)]
     pub fn find_descriptor_type_limit(
         descriptor_type: &DescriptorType,
         limits: &PhysicalDeviceLimits,
@@ -137,7 +132,6 @@ impl DescriptorPool {
         clamp(MAX_DESCRIPTOR_COUNT, limit, MAX_DESCRIPTOR_COUNT)
     }
 
-    #[instrument(skip_all)]
     fn create_descriptor_set_layouts(
         instance: &Instance,
         physical_device: &PhysicalDevice,
@@ -200,7 +194,6 @@ impl DescriptorPool {
 }
 
 impl Drop for DescriptorPool {
-    #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
             self.descriptor_set_layouts

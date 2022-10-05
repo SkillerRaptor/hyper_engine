@@ -13,7 +13,6 @@ use ash::{
 };
 use log::debug;
 use thiserror::Error;
-use tracing::instrument;
 
 #[derive(Debug, Error)]
 pub enum SurfaceCreationError {
@@ -33,7 +32,6 @@ pub(crate) struct Surface {
 }
 
 impl Surface {
-    #[instrument(skip_all)]
     pub fn new(create_info: &SurfaceCreateInfo) -> Result<Self, SurfaceCreationError> {
         let surface_loader = SurfaceLoader::new(create_info.entry, create_info.instance);
 
@@ -59,7 +57,6 @@ impl Surface {
 }
 
 impl Drop for Surface {
-    #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
             self.surface_loader.destroy_surface(self.surface, None);

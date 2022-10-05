@@ -10,4 +10,3 @@ hyper_rendering = { path = "../hyper_rendering" }
 
 log = "0.4.17"
 thiserror = "1.0.35"
-tracing = "0.1.36"

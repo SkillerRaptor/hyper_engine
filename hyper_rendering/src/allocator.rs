@@ -14,7 +14,6 @@ use gpu_allocator::{
 };
 use std::fmt;
 use thiserror::Error;
-use tracing::instrument;
 
 #[allow(dead_code)]
 pub enum MemoryLocation {
@@ -50,7 +49,6 @@ pub struct Allocator {
 }
 
 impl Allocator {
-    #[instrument(skip_all)]
     pub fn new(
         allocator_create_info: &AllocatorCreateInfo,
     ) -> Result<Self, AllocatorCreationError> {
@@ -79,7 +77,7 @@ impl Allocator {
     }
 
     // TODO: Replace Allocation with wrapper type
-    #[instrument(skip_all)]
+
     pub fn allocate(
         &mut self,
         memory_requirements: MemoryRequirements,
@@ -104,7 +102,6 @@ impl Allocator {
             .map_err(AllocationError)
     }
 
-    #[instrument(skip_all)]
     pub fn free(&mut self, allocation: Allocation) -> Result<(), AllocationError> {
         self.allocator.free(allocation).map_err(AllocationError)
     }

@@ -303,7 +303,6 @@ dependencies = [
  "fern",
  "log",
  "thiserror",
- "tracing",
 ]
 
 [[package]]
@@ -326,7 +325,6 @@ dependencies = [
  "hyper_rendering",
  "log",
  "thiserror",
- "tracing",
 ]
 
 [[package]]
@@ -338,7 +336,6 @@ dependencies = [
  "hyper_core",
  "log",
  "thiserror",
- "tracing",
 ]
 
 [[package]]
@@ -353,7 +350,6 @@ dependencies = [
  "nalgebra-glm",
  "thiserror",
  "tobj",
- "tracing",
 ]
 
 [[package]]

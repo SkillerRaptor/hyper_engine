@@ -22,7 +22,6 @@ use ash::{
 use log::debug;
 use std::{cell::RefCell, mem, rc::Rc};
 use thiserror::Error;
-use tracing::instrument;
 
 // NOTE: TEMP
 pub(crate) struct Bindings {
@@ -56,7 +55,6 @@ pub(crate) struct DescriptorSet {
 }
 
 impl DescriptorSet {
-    #[instrument(skip_all)]
     pub fn new(create_info: &DescriptorSetCreateInfo) -> Result<Self, DescriptorSetCreationError> {
         let count = DescriptorPool::find_descriptor_type_limit(
             create_info.descriptor_type,

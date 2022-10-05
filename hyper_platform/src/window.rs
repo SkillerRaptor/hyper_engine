@@ -16,7 +16,6 @@ use ash::{
 use glfw::{ClientApiHint, Glfw, WindowEvent, WindowHint, WindowMode};
 use log::{debug, info};
 use std::sync::mpsc::Receiver;
-use tracing::instrument;
 
 pub struct Window {
     title: String,
@@ -28,7 +27,6 @@ pub struct Window {
 }
 
 impl Window {
-    #[instrument(skip_all)]
     pub fn new(title: &str, width: u32, height: u32) -> Result<Self, WindowCreationError> {
         let glfw = Self::initialize_glfw()?;
         let (native_window, event_receiver) = Self::create_window(&glfw, title, width, height)?;
@@ -43,7 +41,6 @@ impl Window {
         })
     }
 
-    #[instrument(skip_all)]
     fn initialize_glfw() -> Result<glfw::Glfw, WindowCreationError> {
         // Initializes GLFW with no client api
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
@@ -54,7 +51,6 @@ impl Window {
         Ok(glfw)
     }
 
-    #[instrument(skip_all)]
     fn create_window(
         glfw: &Glfw,
         title: &str,
@@ -77,7 +73,6 @@ impl Window {
         Ok((native_window, event_receiver))
     }
 
-    #[instrument(skip_all)]
     pub fn handle_events(&mut self, event_bus: &mut EventBus) {
         // Polls latest events from the window
         self.glfw.poll_events();
@@ -88,7 +83,6 @@ impl Window {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn create_window_surface(&self, instance: &Instance) -> VkResult<SurfaceKHR> {
         // Converts ash instance into the raw handle
         let instance = instance.handle().as_raw() as usize;
@@ -108,7 +102,6 @@ impl Window {
         Ok(surface)
     }
 
-    #[instrument(skip_all)]
     pub fn required_instance_extensions(&self) -> Option<Vec<String>> {
         self.glfw.get_required_instance_extensions()
     }

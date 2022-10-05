@@ -14,7 +14,6 @@ use ash::Device;
 use nalgebra_glm as glm;
 use std::{cell::RefCell, rc::Rc};
 use tobj::LoadOptions;
-use tracing::instrument;
 
 pub(crate) struct MeshCreateInfo<'a> {
     pub logical_device: &'a Device,
@@ -34,7 +33,6 @@ pub(crate) struct Mesh {
 }
 
 impl Mesh {
-    #[instrument(skip_all)]
     pub fn new(create_info: &MeshCreateInfo) -> Self {
         let vertex_buffer_create_info = VertexBufferCreateInfo {
             logical_device: create_info.logical_device,
@@ -50,7 +48,6 @@ impl Mesh {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn load(load_info: &MeshLoadInfo) -> Self {
         // TODO: Propagate error
         let (models, _) =

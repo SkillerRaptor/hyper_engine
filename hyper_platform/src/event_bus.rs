@@ -14,7 +14,6 @@ use crate::mouse_code::MouseCode;
 
 use glfw::{Action, WindowEvent};
 use log::debug;
-use tracing::instrument;
 
 type Listeners = Vec<Box<dyn FnMut(&Event)>>;
 
@@ -23,7 +22,6 @@ pub struct EventBus {
 }
 
 impl EventBus {
-    #[instrument(skip_all)]
     pub fn new() -> Self {
         debug!("Created event bus");
 
@@ -32,7 +30,6 @@ impl EventBus {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn invoke(&mut self, window_event: &WindowEvent) {
         // Maps the GLFW event into custom event type
         let event = match window_event {
@@ -65,7 +62,6 @@ impl EventBus {
         }
     }
 
-    #[instrument(skip_all)]
     pub fn register_listener<F>(&mut self, name: &str, listener: F)
     where
         F: FnMut(&Event) + 'static,

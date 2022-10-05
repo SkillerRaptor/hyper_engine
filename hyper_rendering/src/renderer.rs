@@ -38,7 +38,6 @@ use glm::vec3;
 use log::info;
 use nalgebra_glm as glm;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
-use tracing::instrument;
 
 pub(crate) struct RendererCreateInfo<'a> {
     pub logical_device: &'a Device,
@@ -75,7 +74,6 @@ pub(crate) struct Renderer {
 impl Renderer {
     const FRAME_OVERLAP: usize = 2;
 
-    #[instrument(skip_all)]
     pub fn new(create_info: &RendererCreateInfo) -> Self {
         let frames =
             Self::create_frames(create_info.logical_device, create_info.graphics_queue_index);
@@ -186,7 +184,6 @@ impl Renderer {
         }
     }
 
-    #[instrument(skip_all)]
     fn create_frames(logical_device: &Device, graphics_queue_index: &u32) -> Vec<FrameData> {
         let mut frames = Vec::new();
 
@@ -218,7 +215,6 @@ impl Renderer {
         frames
     }
 
-    #[instrument(skip_all)]
     fn create_command_pool(logical_device: &Device, graphics_queue_index: &u32) -> CommandPool {
         let command_pool_create_info = CommandPoolCreateInfo {
             logical_device,
@@ -228,7 +224,6 @@ impl Renderer {
         CommandPool::new(&command_pool_create_info)
     }
 
-    #[instrument(skip_all)]
     fn create_command_buffer(
         logical_device: &Device,
         command_pool: &CommandPool,
@@ -243,21 +238,18 @@ impl Renderer {
         CommandBuffer::new(&command_buffer_create_info)
     }
 
-    #[instrument(skip_all)]
     fn create_fence(logical_device: &Device) -> Fence {
         let fence_create_info = FenceCreateInfo { logical_device };
 
         Fence::new(&fence_create_info)
     }
 
-    #[instrument(skip_all)]
     fn create_semaphore(logical_device: &Device) -> Semaphore {
         let semaphore_create_info = SemaphoreCreateInfo { logical_device };
 
         Semaphore::new(&semaphore_create_info)
     }
 
-    #[instrument(skip_all)]
     pub fn begin_frame(&mut self, window: &Window, swapchain: &mut Swapchain) {
         {
             let current_frame = self.current_frame();
@@ -375,7 +367,6 @@ impl Renderer {
             .begin_rendering(&rendering_info);
     }
 
-    #[instrument(skip_all)]
     pub fn end_frame(&self, swapchain: &Swapchain) {
         let current_frame = self.current_frame();
 
@@ -410,7 +401,6 @@ impl Renderer {
         current_frame.command_buffer.end();
     }
 
-    #[instrument(skip_all)]
     pub fn submit(&mut self, window: &Window, swapchain: &mut Swapchain) {
         let current_frame = self.current_frame();
 
@@ -465,7 +455,6 @@ impl Renderer {
         self.frame_number += 1;
     }
 
-    #[instrument(skip_all)]
     pub fn draw(&self, window: &Window, descriptor_sets: &[DescriptorSet], swapchain: &Swapchain) {
         let current_frame = self.current_frame();
 
@@ -563,7 +552,6 @@ impl Renderer {
         }
     }
 
-    #[instrument(skip_all)]
     fn current_frame(&self) -> &FrameData {
         &self.frames[self.frame_number % Self::FRAME_OVERLAP]
     }

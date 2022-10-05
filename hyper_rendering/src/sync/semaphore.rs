@@ -6,7 +6,6 @@
 
 use ash::{vk, Device};
 use log::debug;
-use tracing::instrument;
 
 pub(crate) struct SemaphoreCreateInfo<'a> {
     pub logical_device: &'a Device,
@@ -19,7 +18,6 @@ pub(crate) struct Semaphore {
 }
 
 impl Semaphore {
-    #[instrument(skip_all)]
     pub fn new(create_info: &SemaphoreCreateInfo) -> Self {
         let semaphore_create_info = vk::SemaphoreCreateInfo::builder();
 
@@ -45,7 +43,6 @@ impl Semaphore {
 }
 
 impl Drop for Semaphore {
-    #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
             self.logical_device.destroy_semaphore(self.semaphore, None);

@@ -11,11 +11,9 @@ use colored::Colorize;
 use fern::Dispatch;
 use log::{info, Level, LevelFilter};
 use std::{fs, io, path::Path};
-use tracing::instrument;
 
 const LOG_FOLDER: &str = "./logs";
 
-#[instrument(skip_all)]
 pub fn init() -> Result<(), LoggerInitError> {
     create_logs_folder()?;
     create_dispatches()?;
@@ -25,7 +23,6 @@ pub fn init() -> Result<(), LoggerInitError> {
     Ok(())
 }
 
-#[instrument(skip_all)]
 fn create_logs_folder() -> Result<(), LoggerInitError> {
     if !Path::new(LOG_FOLDER).exists() {
         fs::create_dir(LOG_FOLDER).map_err(LoggerInitError::FolderCreationFailure)?;
@@ -34,7 +31,6 @@ fn create_logs_folder() -> Result<(), LoggerInitError> {
     Ok(())
 }
 
-#[instrument(skip_all)]
 fn create_dispatches() -> Result<(), LoggerInitError> {
     let log_level = if cfg!(debug_assertions) {
         LevelFilter::Debug

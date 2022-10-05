@@ -16,7 +16,6 @@ use ash::{
 use log::{debug, warn};
 use std::{collections::HashSet, ffi::CStr, str::Utf8Error};
 use thiserror::Error;
-use tracing::instrument;
 
 #[allow(clippy::enum_variant_names)]
 #[derive(Debug, Error)]
@@ -38,7 +37,6 @@ pub(crate) struct SwapchainSupport {
 }
 
 impl SwapchainSupport {
-    #[instrument(skip_all)]
     pub fn new(
         surface_loader: &SurfaceLoader,
         surface: &SurfaceKHR,
@@ -124,7 +122,6 @@ pub(crate) struct Device {
 impl Device {
     const DEVICE_EXTENSIONS: &'static [&'static CStr] = &[Swapchain::name()];
 
-    #[instrument(skip_all)]
     pub fn new(create_info: &DeviceCreateInfo) -> Result<Self, DeviceCreationError> {
         let physical_device = Self::pick_physical_device(
             create_info.instance,
@@ -156,7 +153,6 @@ impl Device {
         })
     }
 
-    #[instrument(skip_all)]
     fn pick_physical_device(
         instance: &Instance,
         surface_loader: &SurfaceLoader,
@@ -191,7 +187,6 @@ impl Device {
         panic!("Failed to find suitable physical device");
     }
 
-    #[instrument(skip_all)]
     fn is_physical_device_suitable(
         instance: &Instance,
         surface_loader: &SurfaceLoader,
@@ -214,7 +209,6 @@ impl Device {
         Ok(true)
     }
 
-    #[instrument(skip_all)]
     fn check_physical_device_extensions(
         instance: &Instance,
         physical_device: &PhysicalDevice,
@@ -240,7 +234,6 @@ impl Device {
         Ok(true)
     }
 
-    #[instrument(skip_all)]
     fn check_physical_device_features(
         instance: &Instance,
         physical_device: &PhysicalDevice,
@@ -303,7 +296,6 @@ impl Device {
         true
     }
 
-    #[instrument(skip_all)]
     fn find_graphics_queue(
         instance: &Instance,
         surface_loader: &SurfaceLoader,
@@ -335,7 +327,6 @@ impl Device {
         graphics.ok_or(DeviceCreationError::GraphicsQueueAcquisition)
     }
 
-    #[instrument(skip_all)]
     fn print_device_information(
         instance: &Instance,
         surface_loader: &SurfaceLoader,
@@ -421,7 +412,6 @@ impl Device {
         Ok(())
     }
 
-    #[instrument(skip_all)]
     fn create_logical_device(
         instance: &Instance,
         surface_loader: &SurfaceLoader,
@@ -495,7 +485,6 @@ impl Device {
 }
 
 impl Drop for Device {
-    #[instrument(skip_all)]
     fn drop(&mut self) {
         unsafe {
             self.logical_device.destroy_device(None);

@@ -15,7 +15,6 @@ use ash::{
 use gpu_allocator::vulkan::Allocation;
 use log::debug;
 use std::{cell::RefCell, rc::Rc};
-use tracing::instrument;
 
 pub(crate) struct BufferCreateInfo<'a> {
     pub logical_device: &'a Device,
@@ -33,7 +32,6 @@ pub(crate) struct Buffer {
 }
 
 impl Buffer {
-    #[instrument(skip_all)]
     pub fn new(create_info: &BufferCreateInfo) -> Self {
         let internal_buffer = Self::create_internal_buffer(
             create_info.logical_device,
@@ -58,7 +56,6 @@ impl Buffer {
         }
     }
 
-    #[instrument(skip_all)]
     fn create_internal_buffer(
         logical_device: &Device,
         allocation_size: u64,
@@ -80,7 +77,6 @@ impl Buffer {
         internal_buffer
     }
 
-    #[instrument(skip_all)]
     fn allocate_memory(
         logical_device: &Device,
         allocator: &Rc<RefCell<Allocator>>,
@@ -113,7 +109,6 @@ impl Buffer {
         &self.internal_buffer
     }
 
-    #[instrument(skip_all)]
     pub fn set_data<T>(&self, data: &[T]) {
         // TODO: Propagate error
         let memory = self
@@ -131,7 +126,6 @@ impl Buffer {
 }
 
 impl Drop for Buffer {
-    #[instrument(skip_all)]
     fn drop(&mut self) {
         // Frees buffer allocation
         self.allocator
