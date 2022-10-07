@@ -38,34 +38,32 @@ fn create_dispatches() -> Result<(), LoggerInitError> {
         LevelFilter::Info
     };
 
-    let mut dispatch = Dispatch::new().level(log_level);
-
-    dispatch = dispatch.chain(
-        Dispatch::new()
-            .format(|out, message, record| {
-                let time = Local::now().format("%H:%M:%S");
-                let level = match record.level() {
-                    Level::Error => "error".red(),
-                    Level::Warn => "warn".bright_yellow(),
-                    Level::Info => "info".green(),
-                    Level::Debug => "debug".cyan(),
-                    Level::Trace => "trace".purple(),
-                };
-
-                out.finish(format_args!("{} | {}: {}", time, level, message))
-            })
-            .chain(io::stdout()),
-    );
-
-    let latest_log_file = format!("{}/latest.log", LOG_FOLDER,);
+    let latest_log_file = format!("{}/latest.log", LOG_FOLDER);
     let current_log_file = format!(
         "{}/hyper_engine_{}.log",
         LOG_FOLDER,
         Local::now().format("%d-%m-%Y_%H-%M-%S")
     );
 
-    dispatch =
-        dispatch.chain(
+    Dispatch::new()
+        .level(log_level)
+        .chain(
+            Dispatch::new()
+                .format(|out, message, record| {
+                    let time = Local::now().format("%H:%M:%S");
+                    let level = match record.level() {
+                        Level::Error => "error".red(),
+                        Level::Warn => "warn".bright_yellow(),
+                        Level::Info => "info".green(),
+                        Level::Debug => "debug".cyan(),
+                        Level::Trace => "trace".purple(),
+                    };
+
+                    out.finish(format_args!("{} | {}: {}", time, level, message))
+                })
+                .chain(io::stdout()),
+        )
+        .chain(
             Dispatch::new()
                 .format(|out, message, record| {
                     let time = Local::now().format("%H:%M:%S");
@@ -92,9 +90,8 @@ fn create_dispatches() -> Result<(), LoggerInitError> {
                 .chain(fern::log_file(&current_log_file).map_err(|error| {
                     LoggerInitError::FileCreationFailure(current_log_file, error)
                 })?),
-        );
-
-    dispatch.apply()?;
+        )
+        .apply()?;
 
     Ok(())
 }
