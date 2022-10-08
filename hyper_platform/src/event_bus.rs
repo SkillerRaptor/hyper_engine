@@ -31,7 +31,6 @@ impl EventBus {
     }
 
     pub fn invoke(&mut self, window_event: &WindowEvent) {
-        // Maps the GLFW event into custom event type
         let event = match window_event {
             WindowEvent::Pos(x, y) => Event::WindowMove(*x, *y),
             WindowEvent::Size(width, height) => Event::WindowResize(*width, *height),
@@ -56,7 +55,6 @@ impl EventBus {
             _ => return,
         };
 
-        // Invokes all listeners with custom event type
         for listener in &mut self.listeners {
             listener(&event);
         }
@@ -66,7 +64,6 @@ impl EventBus {
     where
         F: FnMut(&Event) + 'static,
     {
-        // Registers new event listener
         self.listeners.push(Box::new(listener));
 
         debug!("Registered event listener '{}'", name);

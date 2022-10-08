@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub use crate::errors::WindowCreationError;
-
+use crate::errors::WindowCreationError;
 use crate::event_bus::EventBus;
 
 use ash::{
@@ -42,7 +41,6 @@ impl Window {
     }
 
     fn initialize_glfw() -> Result<glfw::Glfw, WindowCreationError> {
-        // Initializes GLFW with no client api
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
         glfw.window_hint(WindowHint::ClientApi(ClientApiHint::NoApi));
 
@@ -62,7 +60,6 @@ impl Window {
             .create_window(width, height, title, WindowMode::Windowed)
             .ok_or(WindowCreationError::NativeWindowCreationFailure)?;
 
-        // Enables all event types to be polled
         native_window.set_all_polling(true);
 
         info!(
@@ -74,30 +71,24 @@ impl Window {
     }
 
     pub fn handle_events(&mut self, event_bus: &mut EventBus) {
-        // Polls latest events from the window
         self.glfw.poll_events();
 
-        // Flushes all events in the event queue and invokes them
         for (_, event) in glfw::flush_messages(&self.event_receiver) {
             event_bus.invoke(&event);
         }
     }
 
     pub fn create_window_surface(&self, instance: &Instance) -> VkResult<SurfaceKHR> {
-        // Converts ash instance into the raw handle
         let instance = instance.handle().as_raw() as usize;
 
-        // Creates vulkan window surface via GLFW api
         let mut surface = 0;
         let result =
             self.native_window
                 .create_window_surface(instance, std::ptr::null(), &mut surface);
 
-        // Converts result integer into result enum
         let result = vk::Result::from_raw(result as i32);
         result.result()?;
 
-        // Converts raw surface into ash surface
         let surface = SurfaceKHR::from_raw(surface);
         Ok(surface)
     }

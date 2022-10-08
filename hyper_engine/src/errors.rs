@@ -5,7 +5,7 @@
  */
 
 use hyper_core::errors::LoggerInitError;
-use hyper_platform::window::WindowCreationError;
+use hyper_platform::errors::WindowCreationError;
 use hyper_rendering::context::RenderContextCreationError;
 
 use thiserror::Error;
