@@ -5,5 +5,3 @@
  */
 
 pub mod application;
-
-mod errors;

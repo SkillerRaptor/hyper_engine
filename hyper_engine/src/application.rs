@@ -4,15 +4,42 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::errors::{
-    ApplicationCreationError, ApplicationRenderError, ApplicationRunError, ApplicationUpdateError,
+use hyper_core::logger::{self, LoggerInitError};
+use hyper_platform::{
+    event_bus::EventBus,
+    window::{Window, WindowCreationError},
 };
-
-use hyper_core::logger;
-use hyper_platform::{event_bus::EventBus, window::Window};
-use hyper_rendering::context::RenderContext;
+use hyper_rendering::context::{RenderContext, RenderContextCreationError};
 
 use std::time::Instant;
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum ApplicationCreationError {
+    #[error("Failed to initialize logger")]
+    LoggerInitFailure(#[from] LoggerInitError),
+
+    #[error("Failed to create render context")]
+    RenderContextCreation(#[from] RenderContextCreationError),
+
+    #[error("Failed to create window")]
+    WindowCreationFailure(#[from] WindowCreationError),
+}
+
+#[derive(Debug, Error)]
+pub enum ApplicationRunError {
+    #[error("Failed to update application")]
+    Update(#[from] ApplicationUpdateError),
+
+    #[error("Failed to render application")]
+    Render(#[from] ApplicationRenderError),
+}
+
+#[derive(Debug, Error)]
+pub enum ApplicationUpdateError {}
+
+#[derive(Debug, Error)]
+pub enum ApplicationRenderError {}
 
 pub struct Application {
     render_context: RenderContext,

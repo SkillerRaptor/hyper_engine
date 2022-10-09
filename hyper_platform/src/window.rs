@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::errors::WindowCreationError;
 use crate::event_bus::EventBus;
 
 use ash::{
@@ -15,6 +14,16 @@ use ash::{
 use glfw::{ClientApiHint, Glfw, WindowEvent, WindowHint, WindowMode};
 use log::{debug, info};
 use std::sync::mpsc::Receiver;
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum WindowCreationError {
+    #[error("Failed to initialize GLFW")]
+    GlfwInitFailure(#[from] glfw::InitError),
+
+    #[error("Failed to create native window")]
+    NativeWindowCreationFailure,
+}
 
 pub struct Window {
     title: String,

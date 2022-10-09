@@ -4,13 +4,24 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::errors::LoggerInitError;
-
 use chrono::Local;
 use colored::Colorize;
 use fern::Dispatch;
 use log::{info, Level, LevelFilter};
 use std::{fs, io, path::Path};
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum LoggerInitError {
+    #[error("Failed to create log folder")]
+    FolderCreationFailure(io::Error),
+
+    #[error("Failed to create log file '{0}'")]
+    FileCreationFailure(String, io::Error),
+
+    #[error("Failed to set new global logger")]
+    LoggerOverrideFailure(#[from] log::SetLoggerError),
+}
 
 const LOG_FOLDER: &str = "./logs";
 
