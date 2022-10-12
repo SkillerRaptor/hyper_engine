@@ -24,7 +24,7 @@ use std::{
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum InstanceCreationError {
+pub enum CreationError {
     #[error("Failed to create vulkan debug utils messenger")]
     DebugUtilsMessengerCreation(#[source] vk::Result),
 
@@ -41,24 +41,24 @@ pub enum InstanceCreationError {
     Nul(#[from] NulError),
 }
 
-pub(crate) struct InstanceCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub window: &'a Window,
     pub entry: &'a Entry,
 }
 
 pub(crate) struct Instance {
-    debug_messenger: DebugUtilsMessengerEXT,
-    debug_loader: DebugLoader,
+    validation_layer_enabled: bool,
 
     instance: ash::Instance,
 
-    validation_layer_enabled: bool,
+    debug_loader: DebugLoader,
+    debug_messenger: DebugUtilsMessengerEXT,
 }
 
 impl Instance {
     const VALIDATION_LAYER: &'static str = "VK_LAYER_KHRONOS_validation";
 
-    pub fn new(create_info: &InstanceCreateInfo) -> Result<Self, InstanceCreationError> {
+    pub fn new(create_info: &CreateInfo) -> Result<Self, CreationError> {
         let validation_layer_enabled = Self::check_validation_layer_support(create_info.entry)?;
 
         if validation_layer_enabled {
@@ -86,14 +86,14 @@ impl Instance {
         })
     }
 
-    fn check_validation_layer_support(entry: &Entry) -> Result<bool, InstanceCreationError> {
+    fn check_validation_layer_support(entry: &Entry) -> Result<bool, CreationError> {
         if !cfg!(debug_assertions) {
             return Ok(false);
         }
 
         let instance_layers = entry
             .enumerate_instance_layer_properties()
-            .map_err(InstanceCreationError::InstanceLayerPropertiesEnumeration)?;
+            .map_err(CreationError::InstanceLayerPropertiesEnumeration)?;
 
         let unqiue_instance_layers = instance_layers
             .iter()
@@ -118,7 +118,7 @@ impl Instance {
         window: &Window,
         entry: &Entry,
         validation_layer_enabled: bool,
-    ) -> Result<ash::Instance, InstanceCreationError> {
+    ) -> Result<ash::Instance, CreationError> {
         let title = CStr::from_bytes_with_nul(b"HyperEngine\0")?;
 
         let application_info = ApplicationInfo::builder()
@@ -182,7 +182,7 @@ impl Instance {
         let instance = unsafe {
             entry
                 .create_instance(&instance_create_info, None)
-                .map_err(InstanceCreationError::InstanceCreation)?
+                .map_err(CreationError::InstanceCreation)?
         };
 
         debug!("Created instance");
@@ -194,7 +194,7 @@ impl Instance {
         entry: &Entry,
         instance: &ash::Instance,
         validation_layer_enabled: bool,
-    ) -> Result<(DebugLoader, DebugUtilsMessengerEXT), InstanceCreationError> {
+    ) -> Result<(DebugLoader, DebugUtilsMessengerEXT), CreationError> {
         let debug_utils = DebugLoader::new(entry, instance);
 
         if !validation_layer_enabled {
@@ -216,7 +216,7 @@ impl Instance {
         let debug_messenger = unsafe {
             debug_utils
                 .create_debug_utils_messenger(&debug_utils_messenger_create_info, None)
-                .map_err(InstanceCreationError::DebugUtilsMessengerCreation)?
+                .map_err(CreationError::DebugUtilsMessengerCreation)?
         };
 
         debug!("Created debug utils messenger");
@@ -226,14 +226,12 @@ impl Instance {
 
     unsafe extern "system" fn debug_callback(
         severity: DebugUtilsMessageSeverityFlagsEXT,
-        _type: DebugUtilsMessageTypeFlagsEXT,
+        _: DebugUtilsMessageTypeFlagsEXT,
         callback_data: *const DebugUtilsMessengerCallbackDataEXT,
-        _user_data: *mut c_void,
+        _: *mut c_void,
     ) -> Bool32 {
         let callback_data = *callback_data;
-
         let message = CStr::from_ptr(callback_data.p_message).to_string_lossy();
-
         match severity {
             DebugUtilsMessageSeverityFlagsEXT::INFO => {
                 debug!("{}", message)

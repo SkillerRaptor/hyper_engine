@@ -12,7 +12,7 @@ use crate::{
     },
     devices::{
         device::{Device, DeviceCreateInfo, DeviceCreationError},
-        instance::{Instance, InstanceCreateInfo, InstanceCreationError},
+        instance::{self, Instance},
         surface::{Surface, SurfaceCreateInfo, SurfaceCreationError},
     },
     pipelines::{
@@ -45,7 +45,7 @@ pub enum RenderContextCreationError {
     DeviceCreation(#[from] DeviceCreationError),
 
     #[error("Failed to create instance")]
-    InstanceCreation(#[from] InstanceCreationError),
+    InstanceCreation(#[from] instance::CreationError),
 
     #[error("Failed to create pipeline")]
     PipelineCreation(#[from] PipelineCreationError),
@@ -113,8 +113,11 @@ impl RenderContext {
         Ok(entry)
     }
 
-    fn create_instance(window: &Window, entry: &Entry) -> Result<Instance, InstanceCreationError> {
-        let instance_create_info = InstanceCreateInfo { window, entry };
+    fn create_instance(
+        window: &Window,
+        entry: &Entry,
+    ) -> Result<Instance, instance::CreationError> {
+        let instance_create_info = instance::CreateInfo { window, entry };
 
         Instance::new(&instance_create_info)
     }
