@@ -13,7 +13,7 @@ use crate::{
     devices::{
         device::{Device, DeviceCreateInfo, DeviceCreationError},
         instance::{self, Instance},
-        surface::{Surface, SurfaceCreateInfo, SurfaceCreationError},
+        surface::{self, Surface},
     },
     pipelines::{
         pipeline::{Pipeline, PipelineCreateInfo, PipelineCreationError},
@@ -51,7 +51,7 @@ pub enum RenderContextCreationError {
     PipelineCreation(#[from] PipelineCreationError),
 
     #[error("Failed to create surface")]
-    SurfaceCreation(#[from] SurfaceCreationError),
+    SurfaceCreation(#[from] surface::CreationError),
 
     #[error("Failed to create swapchain")]
     SwapchainCreation(#[from] SwapchainCreationError),
@@ -126,8 +126,8 @@ impl RenderContext {
         window: &Window,
         entry: &Entry,
         instance: &Instance,
-    ) -> Result<Surface, SurfaceCreationError> {
-        let surface_create_info = SurfaceCreateInfo {
+    ) -> Result<Surface, surface::CreationError> {
+        let surface_create_info = surface::CreateInfo {
             window,
             entry,
             instance: instance.instance(),

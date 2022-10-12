@@ -15,12 +15,12 @@ use log::debug;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum SurfaceCreationError {
+pub enum CreationError {
     #[error("Failed to create vulkan surface")]
     SurfaceCreation(#[from] vk::Result),
 }
 
-pub(crate) struct SurfaceCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub window: &'a Window,
     pub entry: &'a Entry,
     pub instance: &'a Instance,
@@ -32,7 +32,7 @@ pub(crate) struct Surface {
 }
 
 impl Surface {
-    pub fn new(create_info: &SurfaceCreateInfo) -> Result<Self, SurfaceCreationError> {
+    pub fn new(create_info: &CreateInfo) -> Result<Self, CreationError> {
         let surface_loader = SurfaceLoader::new(create_info.entry, create_info.instance);
 
         let surface = create_info
