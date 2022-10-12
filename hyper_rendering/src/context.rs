@@ -11,7 +11,7 @@ use crate::{
         descriptor_set::{DescriptorSet, DescriptorSetCreateInfo, DescriptorSetCreationError},
     },
     devices::{
-        device::{Device, DeviceCreateInfo, DeviceCreationError},
+        device::{self, Device},
         instance::{self, Instance},
         surface::{self, Surface},
     },
@@ -42,7 +42,7 @@ pub enum RenderContextCreationError {
     DescriptorSetCreation(#[from] DescriptorSetCreationError),
 
     #[error("Failed to create device")]
-    DeviceCreation(#[from] DeviceCreationError),
+    DeviceCreation(#[from] device::CreationError),
 
     #[error("Failed to create instance")]
     InstanceCreation(#[from] instance::CreationError),
@@ -139,8 +139,8 @@ impl RenderContext {
     fn create_device(
         instance: &Instance,
         surface: &Surface,
-    ) -> Result<Device, DeviceCreationError> {
-        let device_create_info = DeviceCreateInfo {
+    ) -> Result<Device, device::CreationError> {
+        let device_create_info = device::CreateInfo {
             instance: instance.instance(),
             surface_loader: surface.surface_loader(),
             surface: surface.surface(),

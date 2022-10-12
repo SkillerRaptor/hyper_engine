@@ -82,7 +82,7 @@ impl SwapchainSupport {
 
 #[allow(clippy::enum_variant_names)]
 #[derive(Debug, Error)]
-pub enum DeviceCreationError {
+pub enum CreationError {
     #[error("Failed to aquire graphics queue")]
     GraphicsQueueAcquisition,
 
@@ -105,7 +105,7 @@ pub enum DeviceCreationError {
     Utf8(#[from] Utf8Error),
 }
 
-pub(crate) struct DeviceCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub instance: &'a Instance,
     pub surface_loader: &'a SurfaceLoader,
     pub surface: &'a SurfaceKHR,
@@ -122,7 +122,7 @@ pub(crate) struct Device {
 impl Device {
     const DEVICE_EXTENSIONS: &'static [&'static CStr] = &[Swapchain::name()];
 
-    pub fn new(create_info: &DeviceCreateInfo) -> Result<Self, DeviceCreationError> {
+    pub fn new(create_info: &CreateInfo) -> Result<Self, CreationError> {
         let physical_device = Self::pick_physical_device(
             create_info.instance,
             create_info.surface_loader,
@@ -157,11 +157,11 @@ impl Device {
         instance: &Instance,
         surface_loader: &SurfaceLoader,
         surface: &SurfaceKHR,
-    ) -> Result<PhysicalDevice, DeviceCreationError> {
+    ) -> Result<PhysicalDevice, CreationError> {
         for physical_device in unsafe {
             instance
                 .enumerate_physical_devices()
-                .map_err(DeviceCreationError::PhysicalDevicesEnumeration)?
+                .map_err(CreationError::PhysicalDevicesEnumeration)?
         } {
             let properties = unsafe { instance.get_physical_device_properties(physical_device) };
 
@@ -192,7 +192,7 @@ impl Device {
         surface_loader: &SurfaceLoader,
         surface: &SurfaceKHR,
         physical_device: &PhysicalDevice,
-    ) -> Result<bool, DeviceCreationError> {
+    ) -> Result<bool, CreationError> {
         if !Self::check_physical_device_extensions(instance, physical_device)? {
             return Ok(false);
         }
@@ -212,11 +212,11 @@ impl Device {
     fn check_physical_device_extensions(
         instance: &Instance,
         physical_device: &PhysicalDevice,
-    ) -> Result<bool, DeviceCreationError> {
+    ) -> Result<bool, CreationError> {
         let properties = unsafe {
             instance
                 .enumerate_device_extension_properties(*physical_device)
-                .map_err(DeviceCreationError::DeviceExtensionPropertiesEnumeration)?
+                .map_err(CreationError::DeviceExtensionPropertiesEnumeration)?
         };
 
         let extensions = properties
@@ -301,7 +301,7 @@ impl Device {
         surface_loader: &SurfaceLoader,
         surface: &SurfaceKHR,
         physical_device: &PhysicalDevice,
-    ) -> Result<u32, DeviceCreationError> {
+    ) -> Result<u32, CreationError> {
         let queue_families =
             unsafe { instance.get_physical_device_queue_family_properties(*physical_device) };
 
@@ -315,7 +315,7 @@ impl Device {
                 !surface_loader
                     .get_physical_device_surface_support(*physical_device, i as u32, *surface)
                     .map_err(|error| {
-                        DeviceCreationError::PhysicalDeviceSurfaceSupportAcquisition(error)
+                        CreationError::PhysicalDeviceSurfaceSupportAcquisition(error)
                     })?
             } {
                 continue;
@@ -324,7 +324,7 @@ impl Device {
             graphics = Some(i as u32);
         }
 
-        graphics.ok_or(DeviceCreationError::GraphicsQueueAcquisition)
+        graphics.ok_or(CreationError::GraphicsQueueAcquisition)
     }
 
     fn print_device_information(
@@ -332,7 +332,7 @@ impl Device {
         surface_loader: &SurfaceLoader,
         surface: &SurfaceKHR,
         physical_device: &PhysicalDevice,
-    ) -> Result<(), DeviceCreationError> {
+    ) -> Result<(), CreationError> {
         let properties = unsafe { instance.get_physical_device_properties(*physical_device) };
 
         let device_name = unsafe { CStr::from_ptr(properties.device_name.as_ptr()).to_str()? };
@@ -417,7 +417,7 @@ impl Device {
         surface_loader: &SurfaceLoader,
         surface: &SurfaceKHR,
         physical_device: &PhysicalDevice,
-    ) -> Result<ash::Device, DeviceCreationError> {
+    ) -> Result<ash::Device, CreationError> {
         // TODO: Using HashSet for compute and transfer queue later
         let mut unique_queues = HashSet::new();
 
@@ -459,7 +459,7 @@ impl Device {
         let logical_device = unsafe {
             instance
                 .create_device(*physical_device, &device_create_info, None)
-                .map_err(DeviceCreationError::LogicalDeviceCreation)?
+                .map_err(CreationError::LogicalDeviceCreation)?
         };
 
         debug!("Created logical device");
