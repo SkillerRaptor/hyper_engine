@@ -15,16 +15,11 @@ use std::mem;
 pub(crate) struct Vertex {
     position: glm::Vec3,
     color: glm::Vec3,
-    //normal: glm::Vec3,
 }
 
 impl Vertex {
-    pub fn new(position: glm::Vec3, color: glm::Vec3 /* , normal: glm::Vec3*/) -> Self {
-        Self {
-            position,
-            color,
-            //normal,
-        }
+    pub fn new(position: glm::Vec3, color: glm::Vec3) -> Self {
+        Self { position, color }
     }
 
     pub fn binding_descriptions() -> Vec<VertexInputBindingDescription> {
@@ -52,18 +47,6 @@ impl Vertex {
             .offset(mem::size_of::<glm::Vec3>() as u32)
             .build();
 
-        /*
-        let normal_description = VertexInputAttributeDescription::builder()
-            .binding(0)
-            .location(2)
-            .format(Format::R32G32B32_SFLOAT)
-            .offset((mem::size_of::<glm::Vec3>() * 2) as u32)
-            .build();#
-            */
-
-        vec![
-            position_description,
-            color_description, /* , normal_description*/
-        ]
+        vec![position_description, color_description]
     }
 }

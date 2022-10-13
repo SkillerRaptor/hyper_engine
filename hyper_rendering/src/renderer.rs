@@ -88,21 +88,9 @@ impl Renderer {
 
         // NOTE: This is temporary mesh loading
         let triangle_vertices = vec![
-            Vertex::new(
-                vec3(1.0, 1.0, 0.5),
-                vec3(1.0, 0.0, 0.0),
-                //vec3(0.0, 0.0, 0.0),
-            ),
-            Vertex::new(
-                vec3(-1.0, 1.0, 0.5),
-                vec3(0.0, 1.0, 0.0),
-                //vec3(0.0, 0.0, 0.0),
-            ),
-            Vertex::new(
-                vec3(0.0, -1.0, 0.5),
-                vec3(0.0, 0.0, 1.0),
-                //vec3(0.0, 0.0, 0.0),
-            ),
+            Vertex::new(vec3(1.0, 1.0, 0.5), vec3(1.0, 0.0, 0.0)),
+            Vertex::new(vec3(-1.0, 1.0, 0.5), vec3(0.0, 1.0, 0.0)),
+            Vertex::new(vec3(0.0, -1.0, 0.5), vec3(0.0, 0.0, 1.0)),
         ];
 
         let mesh_create_info = MeshCreateInfo {
@@ -137,8 +125,6 @@ impl Renderer {
 
         //renderables.push(monkey_render_object);
 
-        //for x in -20..20 {
-        //    for z in -20..20 {
         for x in 0..1 {
             for z in 0..1 {
                 let translation = glm::translate(
