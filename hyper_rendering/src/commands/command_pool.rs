@@ -10,7 +10,7 @@ use ash::{
 };
 use log::debug;
 
-pub(crate) struct CommandPoolCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub logical_device: &'a Device,
     pub graphics_queue_index: &'a u32,
 }
@@ -22,7 +22,7 @@ pub(crate) struct CommandPool {
 }
 
 impl CommandPool {
-    pub fn new(create_info: &CommandPoolCreateInfo) -> Self {
+    pub fn new(create_info: &CreateInfo) -> Self {
         let command_pool_create_info = vk::CommandPoolCreateInfo::builder()
             .flags(CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
             .queue_family_index(*create_info.graphics_queue_index);

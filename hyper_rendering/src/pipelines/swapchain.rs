@@ -29,7 +29,7 @@ use std::{cell::RefCell, rc::Rc};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum SwapchainCreationError {
+pub enum CreationError {
     #[error("Failed to allocate depth image memory")]
     Allocation(#[from] AllocationError),
 
@@ -55,7 +55,7 @@ pub enum SwapchainCreationError {
     SwapchainSupportCreation(#[from] SwapchainSupportCreationError),
 }
 
-pub(crate) struct SwapchainCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub window: &'a Window,
     pub instance: &'a Instance,
     pub surface_loader: &'a SurfaceLoader,
@@ -64,6 +64,7 @@ pub(crate) struct SwapchainCreateInfo<'a> {
     pub logical_device: &'a Device,
     pub allocator: &'a Rc<RefCell<Allocator>>,
 }
+
 pub(crate) struct Swapchain {
     depth_image_allocation: Option<Allocation>,
     depth_format: Format,
@@ -87,7 +88,7 @@ pub(crate) struct Swapchain {
 }
 
 impl Swapchain {
-    pub fn new(create_info: &SwapchainCreateInfo) -> Result<Self, SwapchainCreationError> {
+    pub fn new(create_info: &CreateInfo) -> Result<Self, CreationError> {
         let swapchain_loader =
             SwapchainLoader::new(create_info.instance, create_info.logical_device);
 
@@ -143,7 +144,7 @@ impl Swapchain {
         physical_device: &PhysicalDevice,
         swapchain_loader: &SwapchainLoader,
         recreated: bool,
-    ) -> Result<(SwapchainKHR, Extent2D, Format), SwapchainCreationError> {
+    ) -> Result<(SwapchainKHR, Extent2D, Format), CreationError> {
         let support = SwapchainSupport::new(surface_loader, surface, physical_device)?;
 
         let extent = Self::choose_extent(window, support.capabilities());
@@ -183,7 +184,7 @@ impl Swapchain {
         let swapchain = unsafe {
             swapchain_loader
                 .create_swapchain(&swapchain_create_info, None)
-                .map_err(SwapchainCreationError::SwapchainCreation)?
+                .map_err(CreationError::SwapchainCreation)?
         };
 
         if !recreated {
@@ -281,11 +282,11 @@ impl Swapchain {
         swapchain_loader: &SwapchainLoader,
         swapchain: &SwapchainKHR,
         recreated: bool,
-    ) -> Result<Vec<Image>, SwapchainCreationError> {
+    ) -> Result<Vec<Image>, CreationError> {
         let images = unsafe {
             swapchain_loader
                 .get_swapchain_images(*swapchain)
-                .map_err(SwapchainCreationError::SwapchainImagesAcquisition)?
+                .map_err(CreationError::SwapchainImagesAcquisition)?
         };
 
         if !recreated {
@@ -300,7 +301,7 @@ impl Swapchain {
         format: &Format,
         images: &[Image],
         recreated: bool,
-    ) -> Result<Vec<ImageView>, SwapchainCreationError> {
+    ) -> Result<Vec<ImageView>, CreationError> {
         let image_views = images
             .iter()
             .map(|image| {
@@ -327,7 +328,7 @@ impl Swapchain {
                 unsafe { logical_device.create_image_view(&image_view_create_info, None) }
             })
             .collect::<Result<Vec<_>, _>>()
-            .map_err(SwapchainCreationError::ImageViewCreation)?;
+            .map_err(CreationError::ImageViewCreation)?;
 
         if !recreated {
             debug!("Created image views");
@@ -341,7 +342,7 @@ impl Swapchain {
         logical_device: &Device,
         allocator: &Rc<RefCell<Allocator>>,
         recreated: bool,
-    ) -> Result<(Image, ImageView, Format, Allocation), SwapchainCreationError> {
+    ) -> Result<(Image, ImageView, Format, Allocation), CreationError> {
         let extent = Extent3D::builder()
             .width(window.framebuffer_width() as u32)
             .height(window.framebuffer_height() as u32)
@@ -366,7 +367,7 @@ impl Swapchain {
         let image = unsafe {
             logical_device
                 .create_image(&image_create_info, None)
-                .map_err(SwapchainCreationError::DepthImageCreation)?
+                .map_err(CreationError::DepthImageCreation)?
         };
 
         if !recreated {
@@ -382,7 +383,7 @@ impl Swapchain {
         unsafe {
             logical_device
                 .bind_image_memory(image, allocation.memory(), allocation.offset())
-                .map_err(SwapchainCreationError::ImageMemoryBinding)?;
+                .map_err(CreationError::ImageMemoryBinding)?;
         }
 
         if !recreated {
@@ -406,7 +407,7 @@ impl Swapchain {
         let image_view = unsafe {
             logical_device
                 .create_image_view(&image_view_create_info, None)
-                .map_err(SwapchainCreationError::DepthImageViewCreation)?
+                .map_err(CreationError::DepthImageViewCreation)?
         };
 
         if !recreated {

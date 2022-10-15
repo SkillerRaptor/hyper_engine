@@ -10,7 +10,7 @@ use ash::{
 };
 use log::debug;
 
-pub(crate) struct FenceCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub logical_device: &'a Device,
 }
 
@@ -21,7 +21,7 @@ pub(crate) struct Fence {
 }
 
 impl Fence {
-    pub fn new(create_info: &FenceCreateInfo) -> Self {
+    pub fn new(create_info: &CreateInfo) -> Self {
         let fence_create_info = vk::FenceCreateInfo::builder().flags(FenceCreateFlags::SIGNALED);
 
         // TODO: Propagate error

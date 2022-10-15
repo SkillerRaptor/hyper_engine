@@ -16,7 +16,7 @@ use gpu_allocator::vulkan::Allocation;
 use log::debug;
 use std::{cell::RefCell, rc::Rc};
 
-pub(crate) struct BufferCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub logical_device: &'a Device,
     pub allocator: &'a Rc<RefCell<Allocator>>,
     pub allocation_size: u64,
@@ -32,7 +32,7 @@ pub(crate) struct Buffer {
 }
 
 impl Buffer {
-    pub fn new(create_info: &BufferCreateInfo) -> Self {
+    pub fn new(create_info: &CreateInfo) -> Self {
         let internal_buffer = Self::create_internal_buffer(
             create_info.logical_device,
             create_info.allocation_size,

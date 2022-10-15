@@ -17,7 +17,7 @@ use ash::{
 use log::debug;
 use std::{mem, slice};
 
-pub(crate) struct CommandBufferCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub logical_device: &'a Device,
     pub command_pool: &'a CommandPool,
     pub level: CommandBufferLevel,
@@ -30,7 +30,7 @@ pub(crate) struct CommandBuffer {
 }
 
 impl CommandBuffer {
-    pub fn new(create_info: &CommandBufferCreateInfo) -> Self {
+    pub fn new(create_info: &CreateInfo) -> Self {
         let allocate_info = CommandBufferAllocateInfo::builder()
             .command_pool(*create_info.command_pool)
             .level(create_info.level)

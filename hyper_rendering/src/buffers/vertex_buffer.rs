@@ -19,7 +19,7 @@ use gpu_allocator::vulkan::Allocation;
 use log::debug;
 use std::{cell::RefCell, mem, rc::Rc};
 
-pub(crate) struct VertexBufferCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub logical_device: &'a Device,
     pub allocator: &'a Rc<RefCell<Allocator>>,
     pub vertices: &'a [Vertex],
@@ -34,7 +34,7 @@ pub(crate) struct VertexBuffer {
 }
 
 impl VertexBuffer {
-    pub fn new(create_info: &VertexBufferCreateInfo) -> Self {
+    pub fn new(create_info: &CreateInfo) -> Self {
         let internal_buffer =
             Self::create_internal_buffer(create_info.logical_device, create_info.vertices.len());
         let allocation = Self::allocate_memory(

@@ -6,7 +6,7 @@
 
 use crate::{
     allocator::Allocator,
-    buffers::buffer::{Buffer, BufferCreateInfo},
+    buffers::buffer::{self, Buffer},
     descriptors::descriptor_pool::DescriptorPool,
     vertex::Vertex,
 };
@@ -30,12 +30,12 @@ pub(crate) struct Bindings {
 }
 
 #[derive(Debug, Error)]
-pub enum DescriptorSetCreationError {
+pub enum CreationError {
     #[error("Failed to allocate descriptor set")]
     DescriptorSetAllocation(vk::Result),
 }
 
-pub(crate) struct DescriptorSetCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub logical_device: &'a Device,
     pub allocator: &'a Rc<RefCell<Allocator>>,
 
@@ -55,7 +55,7 @@ pub(crate) struct DescriptorSet {
 }
 
 impl DescriptorSet {
-    pub fn new(create_info: &DescriptorSetCreateInfo) -> Result<Self, DescriptorSetCreationError> {
+    pub fn new(create_info: &CreateInfo) -> Result<Self, CreationError> {
         let count = DescriptorPool::find_descriptor_type_limit(
             create_info.descriptor_type,
             create_info.limits,
@@ -78,10 +78,10 @@ impl DescriptorSet {
             create_info
                 .logical_device
                 .allocate_descriptor_sets(&descriptor_set_allocate_info)
-                .map_err(DescriptorSetCreationError::DescriptorSetAllocation)?[0]
+                .map_err(CreationError::DescriptorSetAllocation)?[0]
         };
 
-        let buffer_create_info = BufferCreateInfo {
+        let buffer_create_info = buffer::CreateInfo {
             logical_device: create_info.logical_device,
             allocator: create_info.allocator,
             allocation_size: mem::size_of::<Bindings>() as u64,
@@ -90,7 +90,7 @@ impl DescriptorSet {
 
         let first_buffer = Buffer::new(&buffer_create_info);
 
-        let buffer_create_info = BufferCreateInfo {
+        let buffer_create_info = buffer::CreateInfo {
             logical_device: create_info.logical_device,
             allocator: create_info.allocator,
             allocation_size: (mem::size_of::<Vertex>() * 3) as u64,
@@ -99,7 +99,7 @@ impl DescriptorSet {
 
         let second_buffer = Buffer::new(&buffer_create_info);
 
-        let buffer_create_info = BufferCreateInfo {
+        let buffer_create_info = buffer::CreateInfo {
             logical_device: create_info.logical_device,
             allocator: create_info.allocator,
             allocation_size: mem::size_of::<nalgebra_glm::Mat4>() as u64,

@@ -6,7 +6,7 @@
 
 use crate::{
     allocator::Allocator,
-    buffers::vertex_buffer::{VertexBuffer, VertexBufferCreateInfo},
+    buffers::vertex_buffer::{self, VertexBuffer},
     vertex::Vertex,
 };
 
@@ -15,13 +15,13 @@ use nalgebra_glm as glm;
 use std::{cell::RefCell, rc::Rc};
 use tobj::LoadOptions;
 
-pub(crate) struct MeshCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub logical_device: &'a Device,
     pub allocator: &'a Rc<RefCell<Allocator>>,
     pub vertices: &'a [Vertex],
 }
 
-pub(crate) struct MeshLoadInfo<'a> {
+pub(crate) struct LoadInfo<'a> {
     pub logical_device: &'a Device,
     pub allocator: &'a Rc<RefCell<Allocator>>,
     pub file_name: &'a str,
@@ -33,8 +33,8 @@ pub(crate) struct Mesh {
 }
 
 impl Mesh {
-    pub fn new(create_info: &MeshCreateInfo) -> Self {
-        let vertex_buffer_create_info = VertexBufferCreateInfo {
+    pub fn new(create_info: &CreateInfo) -> Self {
+        let vertex_buffer_create_info = vertex_buffer::CreateInfo {
             logical_device: create_info.logical_device,
             allocator: create_info.allocator,
             vertices: create_info.vertices,
@@ -48,7 +48,7 @@ impl Mesh {
         }
     }
 
-    pub fn load(load_info: &MeshLoadInfo) -> Self {
+    pub fn load(load_info: &LoadInfo) -> Self {
         // TODO: Propagate error
         let (models, _) =
             tobj::load_obj(load_info.file_name, &LoadOptions::default()).expect("FIXME");
@@ -80,7 +80,7 @@ impl Mesh {
             }
         }
 
-        let vertex_buffer_create_info = VertexBufferCreateInfo {
+        let vertex_buffer_create_info = vertex_buffer::CreateInfo {
             logical_device: load_info.logical_device,
             allocator: load_info.allocator,
             vertices: vertices.as_slice(),

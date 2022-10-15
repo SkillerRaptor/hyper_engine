@@ -33,12 +33,12 @@ impl fmt::Display for AllocationError {
 }
 
 #[derive(Debug, Error)]
-pub enum AllocatorCreationError {
+pub enum CreationError {
     #[error("Failed to create gpu allocator")]
     AllocatorCreation(#[from] gpu_allocator::AllocationError),
 }
 
-pub struct AllocatorCreateInfo<'a> {
+pub struct CreateInfo<'a> {
     pub instance: &'a Instance,
     pub logical_device: &'a Device,
     pub physical_device: &'a PhysicalDevice,
@@ -49,9 +49,7 @@ pub struct Allocator {
 }
 
 impl Allocator {
-    pub fn new(
-        allocator_create_info: &AllocatorCreateInfo,
-    ) -> Result<Self, AllocatorCreationError> {
+    pub fn new(allocator_create_info: &CreateInfo) -> Result<Self, CreationError> {
         let debug_enabled = cfg!(debug_assertions);
 
         let allocator_debug_settings = AllocatorDebugSettings {

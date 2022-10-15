@@ -17,7 +17,7 @@ use log::debug;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum DescriptorPoolCreationError {
+pub enum CreationError {
     #[error("Failed to create descriptor pool")]
     DescriptorPoolCreation(vk::Result),
 
@@ -25,7 +25,7 @@ pub enum DescriptorPoolCreationError {
     DescriptorSetLayoutCreation(vk::Result),
 }
 
-pub(crate) struct DescriptorPoolCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub instance: &'a Instance,
     pub physical_device: &'a PhysicalDevice,
     pub logical_device: &'a Device,
@@ -46,9 +46,7 @@ impl DescriptorPool {
         DescriptorType::SAMPLER,
     ];
 
-    pub fn new(
-        create_info: &DescriptorPoolCreateInfo,
-    ) -> Result<Self, DescriptorPoolCreationError> {
+    pub fn new(create_info: &CreateInfo) -> Result<Self, CreationError> {
         let descriptor_pool = Self::create_descriptor_pool(
             create_info.instance,
             create_info.physical_device,
@@ -73,7 +71,7 @@ impl DescriptorPool {
         instance: &Instance,
         physical_device: &PhysicalDevice,
         logical_device: &Device,
-    ) -> Result<vk::DescriptorPool, DescriptorPoolCreationError> {
+    ) -> Result<vk::DescriptorPool, CreationError> {
         let descriptor_pool_sizes = Self::collect_descriptor_pool_sizes(instance, physical_device);
 
         let descriptor_pool_create_info = vk::DescriptorPoolCreateInfo::builder()
@@ -84,7 +82,7 @@ impl DescriptorPool {
         let descriptor_pool = unsafe {
             logical_device
                 .create_descriptor_pool(&descriptor_pool_create_info, None)
-                .map_err(DescriptorPoolCreationError::DescriptorPoolCreation)?
+                .map_err(CreationError::DescriptorPoolCreation)?
         };
 
         debug!("Created descriptor pool");
@@ -136,7 +134,7 @@ impl DescriptorPool {
         instance: &Instance,
         physical_device: &PhysicalDevice,
         logical_device: &Device,
-    ) -> Result<Vec<DescriptorSetLayout>, DescriptorPoolCreationError> {
+    ) -> Result<Vec<DescriptorSetLayout>, CreationError> {
         let properties = unsafe { instance.get_physical_device_properties(*physical_device) };
         let limits = properties.limits;
 
@@ -171,9 +169,7 @@ impl DescriptorPool {
             let descriptor_set_layout = unsafe {
                 logical_device
                     .create_descriptor_set_layout(&descriptor_set_layout_create_info, None)
-                    .map_err(|error| {
-                        DescriptorPoolCreationError::DescriptorSetLayoutCreation(error)
-                    })?
+                    .map_err(CreationError::DescriptorSetLayoutCreation)?
             };
 
             descriptor_set_layouts.push(descriptor_set_layout);

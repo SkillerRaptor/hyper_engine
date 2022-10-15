@@ -7,15 +7,15 @@
 use crate::{
     allocator::Allocator,
     commands::{
-        command_buffer::{CommandBuffer, CommandBufferCreateInfo},
-        command_pool::{CommandPool, CommandPoolCreateInfo},
+        command_buffer::{self, CommandBuffer},
+        command_pool::{self, CommandPool},
     },
-    mesh::{Mesh, MeshCreateInfo, MeshLoadInfo},
+    mesh::{self, Mesh},
     pipelines::{pipeline::BindingsOffset, swapchain::Swapchain},
     render_object::{Material, RenderObject},
     sync::{
-        fence::{Fence, FenceCreateInfo},
-        semaphore::{Semaphore, SemaphoreCreateInfo},
+        fence::{self, Fence},
+        semaphore::{self, Semaphore},
     },
     vertex::Vertex,
 };
@@ -39,7 +39,7 @@ use log::info;
 use nalgebra_glm as glm;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-pub(crate) struct RendererCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub logical_device: &'a Device,
     pub graphics_queue_index: &'a u32,
     pub graphics_queue: &'a Queue,
@@ -74,7 +74,7 @@ pub(crate) struct Renderer {
 impl Renderer {
     const FRAME_OVERLAP: usize = 2;
 
-    pub fn new(create_info: &RendererCreateInfo) -> Self {
+    pub fn new(create_info: &CreateInfo) -> Self {
         let frames =
             Self::create_frames(create_info.logical_device, create_info.graphics_queue_index);
 
@@ -93,7 +93,7 @@ impl Renderer {
             Vertex::new(vec3(0.0, -1.0, 0.5), vec3(0.0, 0.0, 1.0)),
         ];
 
-        let mesh_create_info = MeshCreateInfo {
+        let mesh_create_info = mesh::CreateInfo {
             logical_device: create_info.logical_device,
             allocator: create_info.allocator,
             vertices: &triangle_vertices,
@@ -101,7 +101,7 @@ impl Renderer {
 
         let triangle_mesh = Mesh::new(&mesh_create_info);
 
-        let mesh_load_info = MeshLoadInfo {
+        let mesh_load_info = mesh::LoadInfo {
             logical_device: create_info.logical_device,
             allocator: create_info.allocator,
             file_name: "assets/models/monkey_smooth.obj",
@@ -202,7 +202,7 @@ impl Renderer {
     }
 
     fn create_command_pool(logical_device: &Device, graphics_queue_index: &u32) -> CommandPool {
-        let command_pool_create_info = CommandPoolCreateInfo {
+        let command_pool_create_info = command_pool::CreateInfo {
             logical_device,
             graphics_queue_index,
         };
@@ -215,7 +215,7 @@ impl Renderer {
         command_pool: &CommandPool,
         level: CommandBufferLevel,
     ) -> CommandBuffer {
-        let command_buffer_create_info = CommandBufferCreateInfo {
+        let command_buffer_create_info = command_buffer::CreateInfo {
             logical_device,
             command_pool: command_pool.command_pool(),
             level,
@@ -225,13 +225,13 @@ impl Renderer {
     }
 
     fn create_fence(logical_device: &Device) -> Fence {
-        let fence_create_info = FenceCreateInfo { logical_device };
+        let fence_create_info = fence::CreateInfo { logical_device };
 
         Fence::new(&fence_create_info)
     }
 
     fn create_semaphore(logical_device: &Device) -> Semaphore {
-        let semaphore_create_info = SemaphoreCreateInfo { logical_device };
+        let semaphore_create_info = semaphore::CreateInfo { logical_device };
 
         Semaphore::new(&semaphore_create_info)
     }

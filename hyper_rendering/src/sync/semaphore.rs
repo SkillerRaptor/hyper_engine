@@ -7,7 +7,7 @@
 use ash::{vk, Device};
 use log::debug;
 
-pub(crate) struct SemaphoreCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub logical_device: &'a Device,
 }
 
@@ -18,7 +18,7 @@ pub(crate) struct Semaphore {
 }
 
 impl Semaphore {
-    pub fn new(create_info: &SemaphoreCreateInfo) -> Self {
+    pub fn new(create_info: &CreateInfo) -> Self {
         let semaphore_create_info = vk::SemaphoreCreateInfo::builder();
 
         // TODO: Propagate error

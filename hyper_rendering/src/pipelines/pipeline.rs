@@ -41,7 +41,7 @@ enum ShaderStage {
 
 #[allow(clippy::enum_variant_names)]
 #[derive(Debug, Error)]
-pub enum PipelineCreationError {
+pub enum CreationError {
     #[error("Failed to create vulkan pipeline")]
     PipelineCreation(vk::Result),
 
@@ -52,7 +52,7 @@ pub enum PipelineCreationError {
     ShaderModuleCreation(vk::Result),
 }
 
-pub(crate) struct PipelineCreateInfo<'a> {
+pub(crate) struct CreateInfo<'a> {
     pub logical_device: &'a Device,
     pub descriptor_set_layouts: &'a [DescriptorSetLayout],
     pub image_format: &'a Format,
@@ -67,7 +67,7 @@ pub(crate) struct Pipeline {
 }
 
 impl Pipeline {
-    pub fn new(create_info: &PipelineCreateInfo) -> Result<Self, PipelineCreationError> {
+    pub fn new(create_info: &CreateInfo) -> Result<Self, CreationError> {
         let pipeline_layout = Self::create_pipeline_layout(
             create_info.logical_device,
             create_info.descriptor_set_layouts,
@@ -91,7 +91,7 @@ impl Pipeline {
     fn create_pipeline_layout(
         logical_device: &Device,
         descriptor_set_layouts: &[DescriptorSetLayout],
-    ) -> Result<PipelineLayout, PipelineCreationError> {
+    ) -> Result<PipelineLayout, CreationError> {
         // TODO: Don't hardcode this instead replace it with a struct
         let push_constant = PushConstantRange::builder()
             .stage_flags(ShaderStageFlags::ALL)
@@ -107,7 +107,7 @@ impl Pipeline {
         let pipeline_layout = unsafe {
             logical_device
                 .create_pipeline_layout(&pipeline_layout_info_create_info, None)
-                .map_err(PipelineCreationError::PipelineLayoutCreation)?
+                .map_err(CreationError::PipelineLayoutCreation)?
         };
 
         debug!("Created pipeline layout");
@@ -136,7 +136,7 @@ impl Pipeline {
         image_format: &Format,
         depth_image_format: &Format,
         pipeline_layout: &PipelineLayout,
-    ) -> Result<vk::Pipeline, PipelineCreationError> {
+    ) -> Result<vk::Pipeline, CreationError> {
         // TODO: Propagate error
         let entry_point = CString::new("main").expect("FIXME");
 
@@ -265,7 +265,7 @@ impl Pipeline {
                     &[*graphics_pipeline_create_info],
                     None,
                 )
-                .map_err(|error| PipelineCreationError::PipelineCreation(error.1))?[0]
+                .map_err(|error| CreationError::PipelineCreation(error.1))?[0]
         };
 
         unsafe {
@@ -425,7 +425,7 @@ impl Pipeline {
         logical_device: &Device,
         shader_stage: ShaderStage,
         bytecode: &[u8],
-    ) -> Result<ShaderModule, PipelineCreationError> {
+    ) -> Result<ShaderModule, CreationError> {
         let bytecode = Vec::<u8>::from(bytecode);
         let (prefix, code, suffix) = unsafe { bytecode.align_to::<u32>() };
         if !prefix.is_empty() || !suffix.is_empty() {
@@ -437,7 +437,7 @@ impl Pipeline {
         let shader_module = unsafe {
             logical_device
                 .create_shader_module(&shader_module_create_info, None)
-                .map_err(PipelineCreationError::ShaderModuleCreation)?
+                .map_err(CreationError::ShaderModuleCreation)?
         };
 
         let shader_stage = match shader_stage {
