@@ -286,7 +286,7 @@ impl Renderer {
             .new_layout(ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
             .src_queue_family_index(0)
             .dst_queue_family_index(0)
-            .image(swapchain.images()[self.current_image_index as usize])
+            .image(swapchain.images()[self.current_image_index])
             .subresource_range(*image_subresource_range);
 
         current_frame.command_buffer.pipeline_barrier(
@@ -311,7 +311,7 @@ impl Renderer {
             .extent(*swapchain.extent());
 
         let color_attachment_info = RenderingAttachmentInfo::builder()
-            .image_view(swapchain.image_views()[self.current_image_index as usize])
+            .image_view(swapchain.image_views()[self.current_image_index])
             .image_layout(ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
             .resolve_mode(ResolveModeFlags::NONE)
             .resolve_image_view(ImageView::null())
@@ -372,7 +372,7 @@ impl Renderer {
             .new_layout(ImageLayout::PRESENT_SRC_KHR)
             .src_queue_family_index(0)
             .dst_queue_family_index(0)
-            .image(swapchain.images()[self.current_image_index as usize])
+            .image(swapchain.images()[self.current_image_index])
             .subresource_range(*image_subresource_range);
 
         current_frame.command_buffer.pipeline_barrier(
