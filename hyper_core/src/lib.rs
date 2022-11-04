@@ -5,4 +5,3 @@
  */
 
 pub mod ignore;
-pub mod logger;

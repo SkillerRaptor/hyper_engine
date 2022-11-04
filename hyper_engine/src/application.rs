@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-use hyper_core::logger::{self, LoggerInitError};
 use hyper_platform::{
     event_bus::EventBus,
     window::{Window, WindowCreationError},
@@ -16,9 +15,6 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ApplicationCreationError {
-    #[error("Failed to initialize logger")]
-    LoggerInitFailure(#[from] LoggerInitError),
-
     #[error("Failed to create render context")]
     RenderContextCreation(#[from] RenderContextCreationError),
 
@@ -49,8 +45,6 @@ pub struct Application {
 
 impl Application {
     pub fn new() -> Result<Self, ApplicationCreationError> {
-        logger::init()?;
-
         let window = Window::new("HyperEngine", 1280, 720)?;
         let event_bus = EventBus::default();
         let render_context = RenderContext::new(&window)?;
