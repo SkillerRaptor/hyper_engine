@@ -27,20 +27,20 @@ pub fn init(verbosity: usize) -> Result<()> {
         let reset = "\x1B[0m";
 
         let time = {
-            let current_time = Local::now().format("%d-%m-%Y %H:%M:%S");
+            let current_time = Local::now().format("%Y-%m-%d %H:%M:%S");
             let black = format!("\x1B[{}m", Color::BrightBlack.to_fg_str());
-            format!("{black}{current_time}{reset}")
+            format!("{black}[{current_time}]{reset}")
         };
 
         let level = {
-            let current_level = record.level().as_str().to_lowercase();
+            let current_level = record.level();
             let color = format!("\x1B[{}m", levels.get_color(&record.level()).to_fg_str());
-            format!("{color}{current_level}{reset}")
+            format!("{color}{current_level:<5}{reset}")
         };
 
         let message = format!("{reset}{message}");
 
-        out.finish(format_args!("{time} | {level}: {message}"))
+        out.finish(format_args!("{time} {level} {message}"))
     });
 
     logger = match verbosity {
