@@ -7,9 +7,9 @@ edition = "2021"
 hyper_core = { path = "../hyper_core" }
 hyper_platform = { path = "../hyper_platform" }
 
-ash = "0.37.0"
-gpu-allocator = "0.18.0"
-log = "0.4.17"
-nalgebra-glm = "0.17.0"
-thiserror = "1.0.35"
-tobj = "3.2.3"
+ash = "0.37"
+gpu-allocator = "0.21"
+log = "0.4"
+nalgebra-glm = "0.17"
+thiserror = "1.0"
+tobj = "3.2"

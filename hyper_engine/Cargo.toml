@@ -8,5 +8,5 @@ hyper_core = { path = "../hyper_core" }
 hyper_platform = { path = "../hyper_platform" }
 hyper_rendering = { path = "../hyper_rendering" }
 
-log = "0.4.17"
-thiserror = "1.0.35"
+log = "0.4"
+thiserror = "1.0"

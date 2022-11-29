@@ -6,10 +6,10 @@ edition = "2021"
 [dependencies]
 hyper_engine = { path = "../hyper_engine" }
 
-chrono = "0.4.22"
-color-eyre = "0.6.2"
-fern = { version = "0.6.1", features = [ "colored" ] }
-log = "0.4.17"
-tracing = "0.1.36"
-tracing-subscriber = "0.3.15"
-tracing-tracy = "0.10.0"
+chrono = "0.4"
+color-eyre = "0.6"
+fern = { version = "0.6", features = [ "colored" ] }
+log = "0.4"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+tracing-tracy = "0.10"
