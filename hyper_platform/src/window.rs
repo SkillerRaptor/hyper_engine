@@ -36,8 +36,8 @@ pub struct Window {
 
 impl Window {
     pub fn new(title: &str, width: u32, height: u32) -> Result<Self, WindowCreationError> {
-        let glfw = Self::initialize_glfw()?;
-        let (native_window, event_receiver) = Self::create_window(&glfw, title, width, height)?;
+        let mut glfw = Self::initialize_glfw()?;
+        let (native_window, event_receiver) = Self::create_window(&mut glfw, title, width, height)?;
 
         Ok(Self {
             title: String::from(title),
@@ -59,7 +59,7 @@ impl Window {
     }
 
     fn create_window(
-        glfw: &Glfw,
+        glfw: &mut Glfw,
         title: &str,
         width: u32,
         height: u32,
