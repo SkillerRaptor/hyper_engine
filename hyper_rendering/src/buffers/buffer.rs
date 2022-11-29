@@ -6,8 +6,6 @@
 
 use crate::allocator::{Allocator, MemoryLocation};
 
-use hyper_core::ignore::Ignore;
-
 use ash::{
     vk::{self, BufferUsageFlags},
     Device,
@@ -128,11 +126,11 @@ impl Buffer {
 impl Drop for Buffer {
     fn drop(&mut self) {
         // Frees buffer allocation
-        self.allocator
+        _ = self
+            .allocator
             .borrow_mut()
             // Uses unwrap because it is guaranteed that the allocation exists
-            .free(self.allocation.take().unwrap())
-            .ignore();
+            .free(self.allocation.take().unwrap());
 
         unsafe {
             self.logical_device
