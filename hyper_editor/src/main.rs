@@ -12,7 +12,10 @@ use color_eyre::Result;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
-    logger::init(3)?; // Using hardcoded value until cli parsing is added
+
+    // We are using a hardcoded value for the logger
+    // until we have a CLI to parse it
+    logger::init(3)?;
 
     let mut application = Application::new()?;
     application.run()?;
