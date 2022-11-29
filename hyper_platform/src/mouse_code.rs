@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, SkillerRaptor <skillerraptor@protonmail.com>
+ * Copyright (c) 2022, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
