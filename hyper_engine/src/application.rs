@@ -22,21 +22,6 @@ pub enum ApplicationCreationError {
     WindowCreationFailure(#[from] WindowCreationError),
 }
 
-#[derive(Debug, Error)]
-pub enum ApplicationRunError {
-    #[error("Failed to update application")]
-    Update(#[from] ApplicationUpdateError),
-
-    #[error("Failed to render application")]
-    Render(#[from] ApplicationRenderError),
-}
-
-#[derive(Debug, Error)]
-pub enum ApplicationUpdateError {}
-
-#[derive(Debug, Error)]
-pub enum ApplicationRenderError {}
-
 pub struct Application {
     render_context: RenderContext,
     event_bus: EventBus,
@@ -56,7 +41,7 @@ impl Application {
         })
     }
 
-    pub fn run(&mut self) -> Result<(), ApplicationRunError> {
+    pub fn run(&mut self) {
         let mut fps: u32 = 0;
         let mut last_frame = Instant::now();
         let mut last_fps_frame = Instant::now();
@@ -75,28 +60,26 @@ impl Application {
                 last_fps_frame = current_frame;
             }
 
-            self.update()?;
-            self.render()?;
+            self.update();
+            self.render();
 
             fps += 1;
             last_frame = current_frame;
         }
-
-        Ok(())
     }
 
-    fn update(&mut self) -> Result<(), ApplicationUpdateError> {
+    fn update(&mut self) {
         self.window.handle_events(&mut self.event_bus);
-
-        Ok(())
     }
 
-    fn render(&mut self) -> Result<(), ApplicationRenderError> {
+    fn render(&mut self) {
         self.render_context.begin_frame(&self.window);
+
+        // TODO: Add render graph to the rendering system
+        // TODO: Use entity component system
         self.render_context.draw(&self.window);
+
         self.render_context.end_frame();
         self.render_context.submit(&self.window);
-
-        Ok(())
     }
 }

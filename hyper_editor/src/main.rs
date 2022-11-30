@@ -18,7 +18,7 @@ fn main() -> Result<()> {
     logger::init(3)?;
 
     let mut application = Application::new()?;
-    application.run()?;
+    application.run();
 
     Ok(())
 }
