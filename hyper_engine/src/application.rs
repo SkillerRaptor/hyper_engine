@@ -8,22 +8,17 @@ use hyper_platform::{
     event_bus::EventBus,
     window::{Window, WindowCreationError},
 };
-use hyper_rendering::context::{RenderContext, RenderContextCreationError};
 
 use std::time::Instant;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ApplicationCreationError {
-    #[error("Failed to create render context")]
-    RenderContextCreation(#[from] RenderContextCreationError),
-
     #[error("Failed to create window")]
     WindowCreationFailure(#[from] WindowCreationError),
 }
 
 pub struct Application {
-    render_context: RenderContext,
     event_bus: EventBus,
     window: Window,
 }
@@ -32,13 +27,8 @@ impl Application {
     pub fn new() -> Result<Self, ApplicationCreationError> {
         let window = Window::new("HyperEngine", 1280, 720)?;
         let event_bus = EventBus::default();
-        let render_context = RenderContext::new(&window)?;
 
-        Ok(Self {
-            render_context,
-            event_bus,
-            window,
-        })
+        Ok(Self { event_bus, window })
     }
 
     pub fn run(&mut self) {
@@ -72,14 +62,5 @@ impl Application {
         self.window.handle_events(&mut self.event_bus);
     }
 
-    fn render(&mut self) {
-        self.render_context.begin_frame(&self.window);
-
-        // TODO: Add render graph to the rendering system
-        // TODO: Use entity component system
-        self.render_context.draw(&self.window);
-
-        self.render_context.end_frame();
-        self.render_context.submit(&self.window);
-    }
+    fn render(&mut self) {}
 }

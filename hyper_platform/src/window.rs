@@ -102,8 +102,13 @@ impl Window {
         Ok(surface)
     }
 
-    pub fn required_instance_extensions(&self) -> Option<Vec<String>> {
-        self.glfw.get_required_instance_extensions()
+    pub fn instance_extensions(&self) -> Vec<String> {
+        let Some(instance_extensions) = self.glfw.get_required_instance_extensions() else {
+            // TODO: Handle the case when the api can't find any required instance extensions
+            panic!();
+        };
+
+        instance_extensions
     }
 
     pub fn set_title(&mut self, title: &str) {
