@@ -5,62 +5,35 @@
  */
 
 use hyper_platform::{
-    event_bus::EventBus,
-    window::{Window, WindowCreationError},
+    event_loop::EventLoop,
+    window::{self, Window, WindowBuilder},
 };
-
-use std::time::Instant;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ApplicationCreationError {
-    #[error("Failed to create window")]
-    WindowCreationFailure(#[from] WindowCreationError),
+    #[error("failed to create window")]
+    WindowCreationFailure(#[from] window::CreationError),
 }
 
 pub struct Application {
-    event_bus: EventBus,
+    event_loop: EventLoop,
     window: Window,
 }
 
 impl Application {
     pub fn new() -> Result<Self, ApplicationCreationError> {
-        let window = Window::new("HyperEngine", 1280, 720)?;
-        let event_bus = EventBus::default();
+        let event_loop = EventLoop::new();
+        let window = WindowBuilder::new()
+            .title("HyperEngine")
+            .width(1280)
+            .height(720)
+            .build(&event_loop)?;
 
-        Ok(Self { event_bus, window })
+        Ok(Self { event_loop, window })
     }
 
-    pub fn run(&mut self) {
-        let mut fps: u32 = 0;
-        let mut last_frame = Instant::now();
-        let mut last_fps_frame = Instant::now();
-
-        while !self.window.should_close() {
-            // Calculates delta time based on the time passed between the last frame
-            let current_frame = Instant::now();
-            let _delta_time = current_frame.duration_since(last_frame).as_secs_f64();
-
-            // Calculates the average frames in a second
-            while current_frame.duration_since(last_fps_frame).as_secs_f64() >= 1.0 {
-                let window_title = format!("HyperEngine (FPS: {})", fps);
-                self.window.set_title(window_title.as_str());
-
-                fps = 0;
-                last_fps_frame = current_frame;
-            }
-
-            self.update();
-            self.render();
-
-            fps += 1;
-            last_frame = current_frame;
-        }
+    pub fn run(self) -> ! {
+        self.event_loop.run(|_event, _, _control_flow| {})
     }
-
-    fn update(&mut self) {
-        self.window.handle_events(&mut self.event_bus);
-    }
-
-    fn render(&mut self) {}
 }

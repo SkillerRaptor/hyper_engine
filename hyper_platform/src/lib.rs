@@ -4,8 +4,5 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub mod event;
-pub mod event_bus;
-pub mod key_code;
-pub mod mouse_code;
+pub mod event_loop;
 pub mod window;

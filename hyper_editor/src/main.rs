@@ -10,6 +10,8 @@ use hyper_engine::application::Application;
 
 use color_eyre::Result;
 
+// TODO: Implement Game Trait for the engine to make it easier to communicate and adapt to the engine
+
 fn main() -> Result<()> {
     color_eyre::install()?;
 
@@ -19,6 +21,4 @@ fn main() -> Result<()> {
     // FIXME: Don't pack everything into the Application class to improve flexibility
     let mut application = Application::new()?;
     application.run();
-
-    Ok(())
 }
