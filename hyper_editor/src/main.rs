@@ -13,10 +13,10 @@ use color_eyre::Result;
 fn main() -> Result<()> {
     color_eyre::install()?;
 
-    // We are using a hardcoded value for the logger
-    // until we have a CLI to parse it
+    // TODO: Implement CLI for '-debug' or '-trace' options
     logger::init(3)?;
 
+    // FIXME: Don't pack everything into the Application class to improve flexibility
     let mut application = Application::new()?;
     application.run();
 

@@ -13,7 +13,7 @@ use fern::{
 use log::LevelFilter;
 use std::io;
 
-pub fn init(verbosity: usize) -> Result<()> {
+pub(crate) fn init(verbosity: usize) -> Result<()> {
     let levels = ColoredLevelConfig::new()
         .error(Color::Red)
         .warn(Color::BrightYellow)
@@ -32,14 +32,6 @@ pub fn init(verbosity: usize) -> Result<()> {
             format!("{black}[{current_time}]{reset}")
         };
 
-        // TODO: Add command line option to disable thread id for sync code
-        let thread_id = {
-            let current_thread_id = std::thread::current().id();
-            let white = format!("\x1B[{}m", Color::BrightMagenta.to_fg_str());
-            let current_thread_id = format!("{current_thread_id:?}");
-            format!("{white}{current_thread_id:<12}{reset}")
-        };
-
         let level = {
             let current_level = record.level();
             let color = format!("\x1B[{}m", levels.get_color(&record.level()).to_fg_str());
@@ -47,11 +39,10 @@ pub fn init(verbosity: usize) -> Result<()> {
         };
 
         let message = format!("{reset}{message}");
-
-        out.finish(format_args!("{time} {thread_id} {level} {message}"))
+        out.finish(format_args!("{time} {level} {message}"))
     });
 
-    // TODO: Disable any logging from other crates
+    // NOTE: Disable any logging from other crates
 
     logger = match verbosity {
         0 => logger.level(LevelFilter::Warn),
