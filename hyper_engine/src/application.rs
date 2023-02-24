@@ -9,7 +9,7 @@ use std::time::Instant;
 use hyper_platform::{
     event::Event,
     event_loop::EventLoop,
-    window::{self, Window, WindowBuilder},
+    window::{self, Window},
 };
 use thiserror::Error;
 
@@ -41,8 +41,8 @@ impl Application {
     where
         T: Game + 'static,
     {
-        let event_loop = EventLoop::new();
-        let window = WindowBuilder::new()
+        let event_loop = EventLoop::default();
+        let window = Window::builder()
             .title(&title)
             .width(width)
             .height(height)
@@ -76,9 +76,13 @@ impl Application {
             Event::Render => game.render(),
         })
     }
+
+    pub fn builder() -> ApplicationBuilder {
+        ApplicationBuilder::default()
+    }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct ApplicationBuilder {
     title: Option<String>,
     width: u32,

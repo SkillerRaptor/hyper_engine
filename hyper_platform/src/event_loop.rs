@@ -11,7 +11,7 @@ use winit::{
     event_loop::{self, ControlFlow},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct EventLoop {
     internal: event_loop::EventLoop<()>,
 }

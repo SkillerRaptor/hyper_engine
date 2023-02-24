@@ -42,9 +42,13 @@ impl Window {
     pub fn request_redraw(&self) {
         self.internal.request_redraw();
     }
+
+    pub fn builder() -> WindowBuilder {
+        WindowBuilder::default()
+    }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct WindowBuilder {
     title: Option<String>,
     width: Option<u32>,
@@ -99,6 +103,6 @@ impl WindowBuilder {
             return Err(CreationError::UninitializedField("resizable"));
         };
 
-        Ok(Window::new(event_loop, title, width, height, resizable)?)
+        Window::new(event_loop, title, width, height, resizable)
     }
 }
