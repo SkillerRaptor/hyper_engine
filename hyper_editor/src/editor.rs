@@ -6,6 +6,8 @@
 
 use hyper_engine::game::Game;
 
+use std::time::Duration;
+
 #[derive(Debug)]
 pub(crate) struct Editor {}
 
@@ -16,7 +18,7 @@ impl Editor {
 }
 
 impl Game for Editor {
-    fn update(&mut self) {}
+    fn update(&mut self, _delta_time: Duration) {}
 
     fn render(&mut self) {}
 }

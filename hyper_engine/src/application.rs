@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
+use std::time::Instant;
+
 use hyper_platform::{
+    event::Event,
     event_loop::EventLoop,
     window::{self, Window, WindowBuilder},
 };
@@ -24,7 +27,7 @@ pub enum CreationError {
 pub struct Application {
     game: Box<dyn Game>,
     event_loop: EventLoop,
-    _window: Window,
+    window: Window,
 }
 
 impl Application {
@@ -49,14 +52,28 @@ impl Application {
         Ok(Self {
             game: Box::new(game),
             event_loop,
-            _window: window,
+            window,
         })
     }
 
-    pub fn run(mut self) -> ! {
-        self.event_loop.run(move |_event, _, _control_flow| {
-            self.game.update();
-            self.game.render();
+    pub fn run(self) -> ! {
+        let Application {
+            mut game,
+            event_loop,
+            window,
+        } = self;
+
+        let mut last_frame = Instant::now();
+        event_loop.run(move |event| match event {
+            Event::EventsCleared => window.request_redraw(),
+            Event::Update => {
+                let current_frame = Instant::now();
+                let delta_time = current_frame - last_frame;
+                last_frame = current_frame;
+
+                game.update(delta_time);
+            }
+            Event::Render => game.render(),
         })
     }
 }

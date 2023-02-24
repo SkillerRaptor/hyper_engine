@@ -20,7 +20,7 @@ pub enum CreationError {
 
 #[derive(Debug)]
 pub struct Window {
-    _internal: window::Window,
+    internal: window::Window,
 }
 
 impl Window {
@@ -36,7 +36,11 @@ impl Window {
             .with_inner_size(LogicalSize::new(width, height))
             .with_resizable(resizable)
             .build(event_loop.internal())?;
-        Ok(Self { _internal: window })
+        Ok(Self { internal: window })
+    }
+
+    pub fn request_redraw(&self) {
+        self.internal.request_redraw();
     }
 }
 
