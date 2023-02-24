@@ -4,5 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub mod application;
-pub mod game;
+pub trait Game {
+    fn update(&mut self);
+
+    fn render(&mut self);
+}

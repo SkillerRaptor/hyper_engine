@@ -10,30 +10,109 @@ use hyper_platform::{
 };
 use thiserror::Error;
 
+use crate::game::Game;
+
 #[derive(Debug, Error)]
-pub enum ApplicationCreationError {
+pub enum CreationError {
+    #[error("uninitialized field: {0}")]
+    UninitializedField(&'static str),
+
     #[error("failed to create window")]
     WindowCreationFailure(#[from] window::CreationError),
 }
 
 pub struct Application {
+    game: Box<dyn Game>,
     event_loop: EventLoop,
-    window: Window,
+    _window: Window,
 }
 
 impl Application {
-    pub fn new() -> Result<Self, ApplicationCreationError> {
+    pub fn new<T>(
+        game: T,
+        title: String,
+        width: u32,
+        height: u32,
+        resizable: bool,
+    ) -> Result<Self, CreationError>
+    where
+        T: Game + 'static,
+    {
         let event_loop = EventLoop::new();
         let window = WindowBuilder::new()
-            .title("HyperEngine")
-            .width(1280)
-            .height(720)
+            .title(&title)
+            .width(width)
+            .height(height)
+            .resizable(resizable)
             .build(&event_loop)?;
 
-        Ok(Self { event_loop, window })
+        Ok(Self {
+            game: Box::new(game),
+            event_loop,
+            _window: window,
+        })
     }
 
-    pub fn run(self) -> ! {
-        self.event_loop.run(|_event, _, _control_flow| {})
+    pub fn run(mut self) -> ! {
+        self.event_loop.run(move |_event, _, _control_flow| {
+            self.game.update();
+            self.game.render();
+        })
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct ApplicationBuilder {
+    title: Option<String>,
+    width: u32,
+    height: u32,
+    resizable: bool,
+}
+
+impl ApplicationBuilder {
+    pub fn new() -> Self {
+        Self {
+            title: None,
+            width: 1280,
+            height: 720,
+            resizable: true,
+        }
+    }
+
+    pub fn title(mut self, title: &str) -> Self {
+        self.title = Some(title.to_owned());
+        self
+    }
+
+    pub fn width(mut self, width: u32) -> Self {
+        self.width = width;
+        self
+    }
+
+    pub fn height(mut self, height: u32) -> Self {
+        self.height = height;
+        self
+    }
+
+    pub fn resizable(mut self, resizable: bool) -> Self {
+        self.resizable = resizable;
+        self
+    }
+
+    pub fn build<T>(self, game: T) -> Result<Application, CreationError>
+    where
+        T: Game + 'static,
+    {
+        let Some(title) = self.title else {
+            return Err(CreationError::UninitializedField("title"));
+        };
+
+        Ok(Application::new(
+            game,
+            title,
+            self.width,
+            self.height,
+            self.resizable,
+        )?)
     }
 }

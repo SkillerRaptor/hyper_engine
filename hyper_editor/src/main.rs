@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
+mod editor;
 mod logger;
 
-use hyper_engine::application::Application;
+use editor::Editor;
+use hyper_engine::application::ApplicationBuilder;
 
 use color_eyre::Result;
 
@@ -18,7 +20,11 @@ fn main() -> Result<()> {
     // TODO: Implement CLI for '-debug' or '-trace' options
     logger::init(3)?;
 
-    // FIXME: Don't pack everything into the Application class to improve flexibility
-    let mut application = Application::new()?;
-    application.run();
+    ApplicationBuilder::new()
+        .title("HyperEditor")
+        .width(1280)
+        .height(720)
+        .resizable(true)
+        .build(Editor::new())?
+        .run();
 }

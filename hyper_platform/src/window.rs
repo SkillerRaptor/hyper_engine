@@ -18,8 +18,9 @@ pub enum CreationError {
     WindowFailure(#[from] OsError),
 }
 
+#[derive(Debug)]
 pub struct Window {
-    internal: window::Window,
+    _internal: window::Window,
 }
 
 impl Window {
@@ -28,12 +29,14 @@ impl Window {
         title: String,
         width: u32,
         height: u32,
+        resizable: bool,
     ) -> Result<Self, CreationError> {
         let window = window::WindowBuilder::new()
             .with_title(title)
             .with_inner_size(LogicalSize::new(width, height))
+            .with_resizable(resizable)
             .build(event_loop.internal())?;
-        Ok(Self { internal: window })
+        Ok(Self { _internal: window })
     }
 }
 
@@ -42,6 +45,7 @@ pub struct WindowBuilder {
     title: Option<String>,
     width: Option<u32>,
     height: Option<u32>,
+    resizable: Option<bool>,
 }
 
 impl WindowBuilder {
@@ -50,6 +54,7 @@ impl WindowBuilder {
             title: None,
             width: None,
             height: None,
+            resizable: None,
         }
     }
 
@@ -68,6 +73,11 @@ impl WindowBuilder {
         self
     }
 
+    pub fn resizable(mut self, resizable: bool) -> Self {
+        self.resizable = Some(resizable);
+        self
+    }
+
     pub fn build(self, event_loop: &EventLoop) -> Result<Window, CreationError> {
         let Some(title) = self.title else {
             return Err(CreationError::UninitializedField("title"));
@@ -81,6 +91,10 @@ impl WindowBuilder {
             return Err(CreationError::UninitializedField("height"));
         };
 
-        Ok(Window::new(event_loop, title, width, height)?)
+        let Some(resizable) = self.resizable else {
+            return Err(CreationError::UninitializedField("resizable"));
+        };
+
+        Ok(Window::new(event_loop, title, width, height, resizable)?)
     }
 }
