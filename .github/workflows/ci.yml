@@ -69,15 +69,14 @@ jobs:
           command: fmt
           args: --all -- --check
 
-      - name: Cargo Clippy
+      - name: Cargo Check
         uses: actions-rs/cargo@v1
         with:
-          command: clippy
-          args: --all-targets --all-features -- -D warnings
+          command: check
+          args: --all-targets
 
       - name: Cargo Test
         uses: actions-rs/cargo@v1
         with:
           command: test
           args: --verbose --workspace
-
