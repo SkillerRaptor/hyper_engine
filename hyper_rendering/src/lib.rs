@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, SkillerRaptor
+ * Copyright (c) 2022-2023 SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
