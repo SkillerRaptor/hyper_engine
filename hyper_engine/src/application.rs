@@ -66,14 +66,17 @@ impl Application {
         let mut last_frame = Instant::now();
         event_loop.run(move |event| match event {
             Event::EventsCleared => window.request_redraw(),
-            Event::Update => {
+            Event::UpdateFrame => {
                 let current_frame = Instant::now();
                 let delta_time = current_frame - last_frame;
                 last_frame = current_frame;
 
                 game.update(delta_time);
             }
-            Event::Render => game.render(),
+            Event::RenderFrame => {
+                game.render();
+            }
+            _ => {}
         })
     }
 
@@ -128,12 +131,6 @@ impl ApplicationBuilder {
             return Err(CreationError::UninitializedField("title"));
         };
 
-        Ok(Application::new(
-            game,
-            title,
-            self.width,
-            self.height,
-            self.resizable,
-        )?)
+        Application::new(game, title, self.width, self.height, self.resizable)
     }
 }

@@ -36,6 +36,7 @@ impl Window {
             .with_inner_size(LogicalSize::new(width, height))
             .with_resizable(resizable)
             .build(event_loop.internal())?;
+
         Ok(Self { internal: window })
     }
 
