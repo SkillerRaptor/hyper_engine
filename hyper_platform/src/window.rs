@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
+use crate::event_loop::EventLoop;
+
+use raw_window_handle::{HasRawDisplayHandle, RawDisplayHandle};
 use thiserror::Error;
 use winit::{dpi::LogicalSize, error::OsError, window};
-
-use crate::event_loop::EventLoop;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
@@ -42,6 +43,10 @@ impl Window {
 
     pub fn request_redraw(&self) {
         self.internal.request_redraw();
+    }
+
+    pub fn raw_display_handle(&self) -> RawDisplayHandle {
+        self.internal.raw_display_handle()
     }
 
     pub fn builder() -> WindowBuilder {

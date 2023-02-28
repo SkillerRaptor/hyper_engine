@@ -4,16 +4,17 @@
  * SPDX-License-Identifier: MIT
  */
 
-use std::time::Instant;
+use crate::game::Game;
 
 use hyper_platform::{
     event::Event,
     event_loop::EventLoop,
     window::{self, Window},
 };
-use thiserror::Error;
+use hyper_rendering::render_context::{self, RenderContext};
 
-use crate::game::Game;
+use std::time::Instant;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
@@ -22,12 +23,16 @@ pub enum CreationError {
 
     #[error("failed to create window")]
     WindowCreationFailure(#[from] window::CreationError),
+
+    #[error("failed to create render context")]
+    RenderContextCreationFailure(#[from] render_context::CreationError),
 }
 
 pub struct Application {
     game: Box<dyn Game>,
     event_loop: EventLoop,
     window: Window,
+    render_context: RenderContext,
 }
 
 impl Application {
@@ -49,18 +54,23 @@ impl Application {
             .resizable(resizable)
             .build(&event_loop)?;
 
+        let render_context = RenderContext::new(&window)?;
+
         Ok(Self {
             game: Box::new(game),
             event_loop,
             window,
+            render_context,
         })
     }
 
     pub fn run(self) -> ! {
+        #[allow(unused_variables)]
         let Application {
             mut game,
             event_loop,
             window,
+            render_context,
         } = self;
 
         let mut last_frame = Instant::now();

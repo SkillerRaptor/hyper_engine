@@ -14,6 +14,7 @@ hyper_core = { path = "../hyper_core" }
 hyper_platform = { path = "../hyper_platform" }
 
 ash = "0.37"
+ash-window = "0.12"
 gpu-allocator = "0.22"
 log = "0.4"
 glam = "0.23"
