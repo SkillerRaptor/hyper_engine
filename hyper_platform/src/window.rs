@@ -6,7 +6,8 @@
 
 use crate::event_loop::EventLoop;
 
-use raw_window_handle::{HasRawDisplayHandle, RawDisplayHandle};
+use ash::vk;
+use raw_window_handle::HasRawDisplayHandle;
 use thiserror::Error;
 use winit::{dpi::LogicalSize, error::OsError, window};
 
@@ -45,8 +46,10 @@ impl Window {
         self.internal.request_redraw();
     }
 
-    pub fn raw_display_handle(&self) -> RawDisplayHandle {
-        self.internal.raw_display_handle()
+    pub fn enumerate_required_extensions(&self) -> Result<Vec<*const i8>, vk::Result> {
+        let required_extensions =
+            ash_window::enumerate_required_extensions(self.internal.raw_display_handle())?;
+        Ok(required_extensions.to_vec())
     }
 
     pub fn builder() -> WindowBuilder {

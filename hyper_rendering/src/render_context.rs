@@ -47,10 +47,10 @@ impl RenderContext {
             .engine_version(vk::make_api_version(0, 1, 0, 0))
             .api_version(vk::API_VERSION_1_3);
 
-        let enabled_extensions =
-            ash_window::enumerate_required_extensions(window.raw_display_handle())
-                .map_err(CreationError::RequiredExtensionEnumerationFailure)?
-                .to_vec();
+        let enabled_extensions = window
+            .enumerate_required_extensions()
+            .map_err(CreationError::RequiredExtensionEnumerationFailure)?
+            .to_vec();
 
         let instance_create_info = InstanceCreateInfo::builder()
             .enabled_extension_names(&enabled_extensions)

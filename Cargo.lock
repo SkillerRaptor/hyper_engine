@@ -557,6 +557,8 @@ dependencies = [
 name = "hyper_platform"
 version = "0.1.0"
 dependencies = [
+ "ash",
+ "ash-window",
  "hyper_core",
  "log",
  "raw-window-handle",
@@ -569,7 +571,6 @@ name = "hyper_rendering"
 version = "0.1.0"
 dependencies = [
  "ash",
- "ash-window",
  "glam",
  "gpu-allocator",
  "hyper_core",
