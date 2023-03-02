@@ -27,4 +27,6 @@ fn main() -> Result<()> {
         .resizable(true)
         .build(Editor::new())?
         .run();
+
+    Ok(())
 }

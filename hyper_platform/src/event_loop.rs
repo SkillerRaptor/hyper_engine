@@ -10,6 +10,7 @@ use winit::{
     dpi::PhysicalPosition,
     event::{self, DeviceEvent, ElementState, MouseButton, MouseScrollDelta, WindowEvent},
     event_loop::{self, ControlFlow},
+    platform::run_return::EventLoopExtRunReturn,
 };
 
 #[derive(Debug, Default)]
@@ -24,11 +25,11 @@ impl EventLoop {
         }
     }
 
-    pub fn run<F>(self, mut event_handler: F) -> !
+    pub fn run<F>(&mut self, mut event_handler: F)
     where
-        F: FnMut(Event) + 'static,
+        F: FnMut(Event),
     {
-        self.internal.run(move |event, _, control_flow| {
+        self.internal.run_return(|event, _, control_flow| {
             *control_flow = ControlFlow::Poll;
             match event {
                 event::Event::MainEventsCleared => event_handler(Event::EventsCleared),
@@ -100,7 +101,7 @@ impl EventLoop {
                 }
                 _ => {}
             }
-        })
+        });
     }
 
     pub(crate) fn internal(&self) -> &event_loop::EventLoop<()> {

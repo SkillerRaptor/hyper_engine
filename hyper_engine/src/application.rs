@@ -32,7 +32,7 @@ pub struct Application {
     game: Box<dyn Game>,
     event_loop: EventLoop,
     window: Window,
-    render_context: RenderContext,
+    _render_context: RenderContext,
 }
 
 impl Application {
@@ -60,34 +60,26 @@ impl Application {
             game: Box::new(game),
             event_loop,
             window,
-            render_context,
+            _render_context: render_context,
         })
     }
 
-    pub fn run(self) -> ! {
-        #[allow(unused_variables)]
-        let Application {
-            mut game,
-            event_loop,
-            window,
-            render_context,
-        } = self;
-
+    pub fn run(&mut self) {
         let mut last_frame = Instant::now();
-        event_loop.run(move |event| match event {
-            Event::EventsCleared => window.request_redraw(),
+        self.event_loop.run(|event| match event {
+            Event::EventsCleared => self.window.request_redraw(),
             Event::UpdateFrame => {
                 let current_frame = Instant::now();
                 let delta_time = current_frame - last_frame;
                 last_frame = current_frame;
 
-                game.update(delta_time);
+                self.game.update(delta_time);
             }
             Event::RenderFrame => {
-                game.render();
+                self.game.render();
             }
             _ => {}
-        })
+        });
     }
 
     pub fn builder() -> ApplicationBuilder {
