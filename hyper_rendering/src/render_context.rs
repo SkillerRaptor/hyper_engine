@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+use hyper_platform::window::Window;
+
 use ash::{
     extensions::ext::DebugUtils,
     vk::{
@@ -13,7 +15,7 @@ use ash::{
     },
     Entry, Instance, LoadingError,
 };
-use hyper_platform::window::Window;
+use log::Level;
 use std::{
     collections::HashSet,
     ffi::{c_void, CStr, CString, NulError},
@@ -41,12 +43,16 @@ pub enum CreationError {
     DebugUtilsMessengerCreationFailure(#[source] vk::Result),
 }
 
+struct DebugExtension {
+    debug_loader: DebugUtils,
+    debug_messenger: DebugUtilsMessengerEXT,
+}
+
 pub struct RenderContext {
     validation_layer_enabled: bool,
     _entry: Entry,
     instance: Instance,
-    debug_loader: DebugUtils,
-    debug_messenger: DebugUtilsMessengerEXT,
+    debug_extension: Option<DebugExtension>,
 }
 
 impl RenderContext {
@@ -58,20 +64,19 @@ impl RenderContext {
         let validation_layer_enabled = Self::check_validation_layer_support(&entry)?;
 
         let instance = Self::create_instance(&window, &entry, validation_layer_enabled)?;
-        let (debug_loader, debug_messenger) =
-            Self::create_debug_messenger(&entry, &instance, validation_layer_enabled)?;
+        let debug_extension =
+            Self::create_debug_extension(&entry, &instance, validation_layer_enabled)?;
 
         Ok(Self {
             validation_layer_enabled,
             _entry: entry,
             instance,
-            debug_loader,
-            debug_messenger,
+            debug_extension,
         })
     }
 
     fn check_validation_layer_support(entry: &Entry) -> Result<bool, CreationError> {
-        // TODO: Change the check of debug assertions to a seperate external option
+        // TODO: Exchange the check of debug assertions to a seperate external option
         if !cfg!(debug_assertions) {
             return Ok(false);
         }
@@ -87,7 +92,7 @@ impl RenderContext {
 
         if !unique_instance_layer_names.contains(&validation_layer) {
             log::warn!(
-                "failed to find requested validation layer '{}'",
+                "couldn't find the requested validation layer '{}'",
                 Self::VALIDATION_LAYER
             );
 
@@ -123,11 +128,6 @@ impl RenderContext {
             enabled_layers.push(validation_layer.as_ptr());
         }
 
-        let mut instance_create_info = InstanceCreateInfo::builder()
-            .enabled_extension_names(&enabled_extensions)
-            .enabled_layer_names(&enabled_layers)
-            .application_info(&application_info);
-
         let mut debug_utils_messenger_create_info = DebugUtilsMessengerCreateInfoEXT::builder()
             .message_severity(
                 DebugUtilsMessageSeverityFlagsEXT::ERROR
@@ -139,6 +139,12 @@ impl RenderContext {
                     | DebugUtilsMessageTypeFlagsEXT::PERFORMANCE,
             )
             .pfn_user_callback(Some(Self::debug_callback));
+
+        let mut instance_create_info = InstanceCreateInfo::builder()
+            .enabled_extension_names(&enabled_extensions)
+            .enabled_layer_names(&enabled_layers)
+            .application_info(&application_info);
+
         if validation_layer_enabled {
             instance_create_info =
                 instance_create_info.push_next(&mut debug_utils_messenger_create_info);
@@ -151,16 +157,16 @@ impl RenderContext {
         }
     }
 
-    fn create_debug_messenger(
+    fn create_debug_extension(
         entry: &Entry,
         instance: &Instance,
         validation_layer_enabled: bool,
-    ) -> Result<(DebugUtils, DebugUtilsMessengerEXT), CreationError> {
-        let debug_utils = DebugUtils::new(entry, instance);
-
+    ) -> Result<Option<DebugExtension>, CreationError> {
         if !validation_layer_enabled {
-            return Ok((debug_utils, DebugUtilsMessengerEXT::null()));
+            return Ok(None);
         }
+
+        let debug_utils = DebugUtils::new(entry, instance);
 
         let debug_utils_messenger_create_info = DebugUtilsMessengerCreateInfoEXT::builder()
             .message_severity(
@@ -180,7 +186,12 @@ impl RenderContext {
                 .map_err(CreationError::DebugUtilsMessengerCreationFailure)?
         };
 
-        Ok((debug_utils, debug_messenger))
+        let debug_extension = DebugExtension {
+            debug_loader: debug_utils,
+            debug_messenger,
+        };
+
+        Ok(Some(debug_extension))
     }
 
     unsafe extern "system" fn debug_callback(
@@ -191,18 +202,14 @@ impl RenderContext {
     ) -> Bool32 {
         let callback_data = *callback_data;
         let message = CStr::from_ptr(callback_data.p_message).to_string_lossy();
-        match severity {
-            DebugUtilsMessageSeverityFlagsEXT::INFO => {
-                log::debug!("{}", message)
-            }
-            DebugUtilsMessageSeverityFlagsEXT::WARNING => {
-                log::warn!("{}", message)
-            }
-            DebugUtilsMessageSeverityFlagsEXT::ERROR => {
-                log::error!("{}", message)
-            }
-            _ => (),
+        let level = match severity {
+            DebugUtilsMessageSeverityFlagsEXT::INFO => Level::Info,
+            DebugUtilsMessageSeverityFlagsEXT::WARNING => Level::Warn,
+            DebugUtilsMessageSeverityFlagsEXT::ERROR => Level::Error,
+            _ => Level::Trace,
         };
+
+        log::log!(level, "{message}");
 
         vk::FALSE
     }
@@ -211,9 +218,12 @@ impl RenderContext {
 impl Drop for RenderContext {
     fn drop(&mut self) {
         unsafe {
-            if self.validation_layer_enabled {
-                self.debug_loader
-                    .destroy_debug_utils_messenger(self.debug_messenger, None);
+            if self.validation_layer_enabled && self.debug_extension.is_some() {
+                let debug_extension = self.debug_extension.as_ref().unwrap();
+
+                debug_extension
+                    .debug_loader
+                    .destroy_debug_utils_messenger(debug_extension.debug_messenger, None);
             }
 
             self.instance.destroy_instance(None);
