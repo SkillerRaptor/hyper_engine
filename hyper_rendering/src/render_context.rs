@@ -12,6 +12,7 @@ use ash::{
         self, ApplicationInfo, Bool32, DebugUtilsMessageSeverityFlagsEXT,
         DebugUtilsMessageTypeFlagsEXT, DebugUtilsMessengerCallbackDataEXT,
         DebugUtilsMessengerCreateInfoEXT, DebugUtilsMessengerEXT, InstanceCreateInfo,
+        PhysicalDevice, QueueFlags,
     },
     Entry, Instance, LoadingError,
 };
@@ -33,6 +34,9 @@ pub enum CreationError {
     #[error("failed to enumerate {1}")]
     Enumeration(#[source] vk::Result, &'static str),
 
+    #[error("failed to find suitable physical device")]
+    Unsuitable,
+
     #[error("failed to create c-string")]
     NulError(#[from] NulError),
 }
@@ -42,11 +46,22 @@ struct DebugExtension {
     debug_messenger: DebugUtilsMessengerEXT,
 }
 
+struct QueueFamilyIndices {
+    graphics_family: Option<u32>,
+}
+
+impl QueueFamilyIndices {
+    fn is_complete(&self) -> bool {
+        self.graphics_family.is_some()
+    }
+}
+
 pub struct RenderContext {
     validation_layer_enabled: bool,
     _entry: Entry,
     instance: Instance,
     debug_extension: Option<DebugExtension>,
+    physical_device: PhysicalDevice,
 }
 
 impl RenderContext {
@@ -61,11 +76,14 @@ impl RenderContext {
         let debug_extension =
             Self::create_debug_extension(&entry, &instance, validation_layer_enabled)?;
 
+        let physical_device = Self::pick_physical_device(&instance)?;
+
         Ok(Self {
             validation_layer_enabled,
             _entry: entry,
             instance,
             debug_extension,
+            physical_device,
         })
     }
 
@@ -186,6 +204,56 @@ impl RenderContext {
         };
 
         Ok(Some(debug_extension))
+    }
+
+    fn pick_physical_device(instance: &Instance) -> Result<PhysicalDevice, CreationError> {
+        let physical_devices = unsafe {
+            instance
+                .enumerate_physical_devices()
+                .map_err(|error| CreationError::Enumeration(error, "physical devices"))
+        }?;
+
+        let physical_device = physical_devices
+            .iter()
+            .find(|&physical_device| Self::is_physical_device_suitable(&instance, physical_device));
+
+        // FIXME: Make this cleaner. (Can't use .ok_or, because the type contains a reference)
+        if let Some(physical_device) = physical_device {
+            Ok(*physical_device)
+        } else {
+            Err(CreationError::Unsuitable)
+        }
+    }
+
+    fn is_physical_device_suitable(instance: &Instance, physical_device: &PhysicalDevice) -> bool {
+        let queue_family_indices = Self::find_queue_families(instance, physical_device);
+
+        queue_family_indices.is_complete()
+    }
+
+    fn find_queue_families(
+        instance: &Instance,
+        physical_device: &PhysicalDevice,
+    ) -> QueueFamilyIndices {
+        let queue_family_properties =
+            unsafe { instance.get_physical_device_queue_family_properties(*physical_device) };
+
+        let graphics_family = queue_family_properties
+            .iter()
+            .position(|queue_family_property| {
+                queue_family_property
+                    .queue_flags
+                    .contains(QueueFlags::GRAPHICS)
+            });
+
+        // FIXME: Make this cleaner. (The graphics family type is usually usize, but it needs to be u32)
+        let graphics_family = if graphics_family.is_some() {
+            Some(graphics_family.unwrap() as u32)
+        } else {
+            None
+        };
+
+        QueueFamilyIndices { graphics_family }
     }
 
     unsafe extern "system" fn debug_callback(
