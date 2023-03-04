@@ -25,22 +25,16 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum CreationError {
     #[error("failed to load vulkan")]
-    LoadingFailure(#[from] LoadingError),
+    Loading(#[from] LoadingError),
 
-    #[error("failed to enumerate instance layer properties")]
-    InstanceLayerPropertiesEnumerationFailure(#[source] vk::Result),
+    #[error("failed to create {1}")]
+    Creation(#[source] vk::Result, &'static str),
 
-    #[error("failed to create instance")]
-    InstanceCreationFailure(#[source] vk::Result),
-
-    #[error("failed to enumerate required extensions")]
-    RequiredExtensionEnumerationFailure(#[source] vk::Result),
+    #[error("failed to enumerate {1}")]
+    Enumeration(#[source] vk::Result, &'static str),
 
     #[error("failed to create c-string")]
     NulError(#[from] NulError),
-
-    #[error("failed to create debug utils messenger")]
-    DebugUtilsMessengerCreationFailure(#[source] vk::Result),
 }
 
 struct DebugExtension {
@@ -83,7 +77,7 @@ impl RenderContext {
 
         let unique_instance_layer_names = entry
             .enumerate_instance_layer_properties()
-            .map_err(CreationError::InstanceLayerPropertiesEnumerationFailure)?
+            .map_err(|error| CreationError::Enumeration(error, "instance layer properties"))?
             .iter()
             .map(|properties| unsafe { CStr::from_ptr(properties.layer_name.as_ptr()).to_owned() })
             .collect::<HashSet<_>>();
@@ -118,7 +112,7 @@ impl RenderContext {
 
         let mut enabled_extensions = window
             .enumerate_required_extensions()
-            .map_err(CreationError::RequiredExtensionEnumerationFailure)?
+            .map_err(|error| CreationError::Enumeration(error, "required window extensions"))?
             .to_vec();
 
         let validation_layer = CString::new(Self::VALIDATION_LAYER)?;
@@ -153,7 +147,7 @@ impl RenderContext {
         unsafe {
             entry
                 .create_instance(&instance_create_info, None)
-                .map_err(CreationError::InstanceCreationFailure)
+                .map_err(|error| CreationError::Creation(error, "instance"))
         }
     }
 
@@ -183,7 +177,7 @@ impl RenderContext {
         let debug_messenger = unsafe {
             debug_utils
                 .create_debug_utils_messenger(&debug_utils_messenger_create_info, None)
-                .map_err(CreationError::DebugUtilsMessengerCreationFailure)?
+                .map_err(|error| CreationError::Creation(error, "debug utils messenger"))?
         };
 
         let debug_extension = DebugExtension {
