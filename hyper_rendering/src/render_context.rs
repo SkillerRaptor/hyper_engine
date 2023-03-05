@@ -11,10 +11,11 @@ use ash::{
     vk::{
         self, ApplicationInfo, Bool32, DebugUtilsMessageSeverityFlagsEXT,
         DebugUtilsMessageTypeFlagsEXT, DebugUtilsMessengerCallbackDataEXT,
-        DebugUtilsMessengerCreateInfoEXT, DebugUtilsMessengerEXT, InstanceCreateInfo,
-        PhysicalDevice, QueueFlags,
+        DebugUtilsMessengerCreateInfoEXT, DebugUtilsMessengerEXT, DeviceCreateInfo,
+        DeviceQueueCreateInfo, InstanceCreateInfo, PhysicalDevice, PhysicalDeviceFeatures,
+        QueueFlags,
     },
-    Entry, Instance, LoadingError,
+    Device, Entry, Instance, LoadingError,
 };
 use log::Level;
 use std::{
@@ -51,6 +52,28 @@ struct QueueFamilyIndices {
 }
 
 impl QueueFamilyIndices {
+    fn new(instance: &Instance, physical_device: &PhysicalDevice) -> Self {
+        let queue_family_properties =
+            unsafe { instance.get_physical_device_queue_family_properties(*physical_device) };
+
+        let graphics_family = queue_family_properties
+            .iter()
+            .position(|queue_family_property| {
+                queue_family_property
+                    .queue_flags
+                    .contains(QueueFlags::GRAPHICS)
+            });
+
+        // FIXME: Make this cleaner. (The graphics family type is usually usize, but it needs to be u32)
+        let graphics_family = if graphics_family.is_some() {
+            Some(graphics_family.unwrap() as u32)
+        } else {
+            None
+        };
+
+        QueueFamilyIndices { graphics_family }
+    }
+
     fn is_complete(&self) -> bool {
         self.graphics_family.is_some()
     }
@@ -61,7 +84,8 @@ pub struct RenderContext {
     _entry: Entry,
     instance: Instance,
     debug_extension: Option<DebugExtension>,
-    physical_device: PhysicalDevice,
+    _physical_device: PhysicalDevice,
+    device: Device,
 }
 
 impl RenderContext {
@@ -77,13 +101,15 @@ impl RenderContext {
             Self::create_debug_extension(&entry, &instance, validation_layer_enabled)?;
 
         let physical_device = Self::pick_physical_device(&instance)?;
+        let device = Self::create_device(&instance, &physical_device)?;
 
         Ok(Self {
             validation_layer_enabled,
             _entry: entry,
             instance,
             debug_extension,
-            physical_device,
+            _physical_device: physical_device,
+            device,
         })
     }
 
@@ -226,34 +252,36 @@ impl RenderContext {
     }
 
     fn is_physical_device_suitable(instance: &Instance, physical_device: &PhysicalDevice) -> bool {
-        let queue_family_indices = Self::find_queue_families(instance, physical_device);
+        let queue_family_indices = QueueFamilyIndices::new(instance, physical_device);
 
         queue_family_indices.is_complete()
     }
 
-    fn find_queue_families(
+    fn create_device(
         instance: &Instance,
         physical_device: &PhysicalDevice,
-    ) -> QueueFamilyIndices {
-        let queue_family_properties =
-            unsafe { instance.get_physical_device_queue_family_properties(*physical_device) };
+    ) -> Result<Device, CreationError> {
+        let queue_family_indices = QueueFamilyIndices::new(instance, physical_device);
 
-        let graphics_family = queue_family_properties
-            .iter()
-            .position(|queue_family_property| {
-                queue_family_property
-                    .queue_flags
-                    .contains(QueueFlags::GRAPHICS)
-            });
+        // We already made sure that the queue family has a graphics family so we can safely unwrap
+        let device_queue_create_info = DeviceQueueCreateInfo::builder()
+            .queue_family_index(queue_family_indices.graphics_family.unwrap())
+            .queue_priorities(&[1.0])
+            .build();
 
-        // FIXME: Make this cleaner. (The graphics family type is usually usize, but it needs to be u32)
-        let graphics_family = if graphics_family.is_some() {
-            Some(graphics_family.unwrap() as u32)
-        } else {
-            None
-        };
+        let queue_create_infos = [device_queue_create_info];
 
-        QueueFamilyIndices { graphics_family }
+        let physical_device_features = PhysicalDeviceFeatures::builder();
+
+        let device_create_info = DeviceCreateInfo::builder()
+            .queue_create_infos(&queue_create_infos)
+            .enabled_features(&physical_device_features);
+
+        unsafe {
+            instance
+                .create_device(*physical_device, &device_create_info, None)
+                .map_err(|error| CreationError::Creation(error, "logical device"))
+        }
     }
 
     unsafe extern "system" fn debug_callback(
@@ -280,6 +308,8 @@ impl RenderContext {
 impl Drop for RenderContext {
     fn drop(&mut self) {
         unsafe {
+            self.device.destroy_device(None);
+
             if self.validation_layer_enabled && self.debug_extension.is_some() {
                 let debug_extension = self.debug_extension.as_ref().unwrap();
 
