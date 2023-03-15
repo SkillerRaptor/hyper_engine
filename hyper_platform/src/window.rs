@@ -6,8 +6,11 @@
 
 use crate::event_loop::EventLoop;
 
-use ash::vk;
-use raw_window_handle::HasRawDisplayHandle;
+use ash::{
+    vk::{self, SurfaceKHR},
+    Entry, Instance,
+};
+use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
 use thiserror::Error;
 use winit::{dpi::LogicalSize, error::OsError, window};
 
@@ -50,6 +53,22 @@ impl Window {
         let required_extensions =
             ash_window::enumerate_required_extensions(self.internal.raw_display_handle())?;
         Ok(required_extensions.to_vec())
+    }
+
+    pub fn create_surface(
+        &self,
+        entry: &Entry,
+        instance: &Instance,
+    ) -> Result<SurfaceKHR, vk::Result> {
+        unsafe {
+            ash_window::create_surface(
+                entry,
+                instance,
+                self.internal.raw_display_handle(),
+                self.internal.raw_window_handle(),
+                None,
+            )
+        }
     }
 
     pub fn builder() -> WindowBuilder {

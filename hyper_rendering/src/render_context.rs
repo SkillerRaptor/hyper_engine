@@ -7,13 +7,13 @@
 use hyper_platform::window::Window;
 
 use ash::{
-    extensions::ext::DebugUtils,
+    extensions::{ext::DebugUtils as DebugLoader, khr::Surface as SurfaceLoader},
     vk::{
         self, ApplicationInfo, Bool32, DebugUtilsMessageSeverityFlagsEXT,
         DebugUtilsMessageTypeFlagsEXT, DebugUtilsMessengerCallbackDataEXT,
         DebugUtilsMessengerCreateInfoEXT, DebugUtilsMessengerEXT, DeviceCreateInfo,
-        DeviceQueueCreateInfo, InstanceCreateInfo, PhysicalDevice, PhysicalDeviceFeatures,
-        QueueFlags,
+        DeviceQueueCreateInfo, InstanceCreateInfo, PhysicalDevice, PhysicalDeviceFeatures, Queue,
+        QueueFlags, SurfaceKHR,
     },
     Device, Entry, Instance, LoadingError,
 };
@@ -35,6 +35,9 @@ pub enum CreationError {
     #[error("failed to enumerate {1}")]
     Enumeration(#[source] vk::Result, &'static str),
 
+    #[error("failed to find feature {0}")]
+    Unsupported(#[source] vk::Result, &'static str),
+
     #[error("failed to find suitable physical device")]
     Unsuitable,
 
@@ -43,39 +46,64 @@ pub enum CreationError {
 }
 
 struct DebugExtension {
-    debug_loader: DebugUtils,
+    debug_loader: DebugLoader,
     debug_messenger: DebugUtilsMessengerEXT,
+}
+
+struct Surface {
+    surface_loader: SurfaceLoader,
+    surface: SurfaceKHR,
 }
 
 struct QueueFamilyIndices {
     graphics_family: Option<u32>,
+    present_family: Option<u32>,
 }
 
 impl QueueFamilyIndices {
-    fn new(instance: &Instance, physical_device: &PhysicalDevice) -> Self {
+    fn new(
+        instance: &Instance,
+        surface: &Surface,
+        physical_device: &PhysicalDevice,
+    ) -> Result<Self, CreationError> {
         let queue_family_properties =
             unsafe { instance.get_physical_device_queue_family_properties(*physical_device) };
 
-        let graphics_family = queue_family_properties
-            .iter()
-            .position(|queue_family_property| {
-                queue_family_property
-                    .queue_flags
-                    .contains(QueueFlags::GRAPHICS)
-            });
-
-        // FIXME: Make this cleaner. (The graphics family type is usually usize, but it needs to be u32)
-        let graphics_family = if graphics_family.is_some() {
-            Some(graphics_family.unwrap() as u32)
-        } else {
-            None
+        let mut queue_family_indices = Self {
+            graphics_family: None,
+            present_family: None,
         };
 
-        QueueFamilyIndices { graphics_family }
+        for (i, queue_family) in queue_family_properties.iter().enumerate() {
+            if queue_family.queue_flags.contains(QueueFlags::GRAPHICS) {
+                queue_family_indices.graphics_family = Some(i as u32);
+            }
+
+            let present_support = unsafe {
+                surface
+                    .surface_loader
+                    .get_physical_device_surface_support(
+                        *physical_device,
+                        i as u32,
+                        surface.surface,
+                    )
+                    .map_err(|error| CreationError::Unsupported(error, "surface"))?
+            };
+
+            if present_support {
+                queue_family_indices.present_family = Some(i as u32);
+            }
+
+            if queue_family_indices.is_complete() {
+                break;
+            }
+        }
+
+        Ok(queue_family_indices)
     }
 
     fn is_complete(&self) -> bool {
-        self.graphics_family.is_some()
+        self.graphics_family.is_some() && self.present_family.is_some()
     }
 }
 
@@ -84,8 +112,12 @@ pub struct RenderContext {
     _entry: Entry,
     instance: Instance,
     debug_extension: Option<DebugExtension>,
+    surface: Surface,
     _physical_device: PhysicalDevice,
     device: Device,
+
+    graphics_queue: Queue,
+    present_queue: Queue,
 }
 
 impl RenderContext {
@@ -100,16 +132,23 @@ impl RenderContext {
         let debug_extension =
             Self::create_debug_extension(&entry, &instance, validation_layer_enabled)?;
 
-        let physical_device = Self::pick_physical_device(&instance)?;
-        let device = Self::create_device(&instance, &physical_device)?;
+        let surface = Self::create_surface(window, &entry, &instance)?;
+
+        let physical_device = Self::pick_physical_device(&instance, &surface)?;
+        let (device, graphics_queue, present_queue) =
+            Self::create_device(&instance, &surface, &physical_device)?;
 
         Ok(Self {
             validation_layer_enabled,
             _entry: entry,
             instance,
             debug_extension,
+            surface,
             _physical_device: physical_device,
             device,
+
+            graphics_queue,
+            present_queue,
         })
     }
 
@@ -162,7 +201,7 @@ impl RenderContext {
         let validation_layer = CString::new(Self::VALIDATION_LAYER)?;
         let mut enabled_layers = Vec::new();
         if validation_layer_enabled {
-            enabled_extensions.push(DebugUtils::name().as_ptr());
+            enabled_extensions.push(DebugLoader::name().as_ptr());
             enabled_layers.push(validation_layer.as_ptr());
         }
 
@@ -204,7 +243,7 @@ impl RenderContext {
             return Ok(None);
         }
 
-        let debug_utils = DebugUtils::new(entry, instance);
+        let debug_loader = DebugLoader::new(entry, instance);
 
         let debug_utils_messenger_create_info = DebugUtilsMessengerCreateInfoEXT::builder()
             .message_severity(
@@ -219,29 +258,51 @@ impl RenderContext {
             .pfn_user_callback(Some(Self::debug_callback));
 
         let debug_messenger = unsafe {
-            debug_utils
+            debug_loader
                 .create_debug_utils_messenger(&debug_utils_messenger_create_info, None)
                 .map_err(|error| CreationError::Creation(error, "debug utils messenger"))?
         };
 
         let debug_extension = DebugExtension {
-            debug_loader: debug_utils,
+            debug_loader,
             debug_messenger,
         };
 
         Ok(Some(debug_extension))
     }
 
-    fn pick_physical_device(instance: &Instance) -> Result<PhysicalDevice, CreationError> {
+    fn create_surface(
+        window: &Window,
+        entry: &Entry,
+        instance: &Instance,
+    ) -> Result<Surface, CreationError> {
+        let surface_loader = SurfaceLoader::new(entry, instance);
+        let surface = window
+            .create_surface(entry, instance)
+            .map_err(|error| CreationError::Creation(error, "surface"))?;
+
+        Ok(Surface {
+            surface_loader,
+            surface,
+        })
+    }
+
+    fn pick_physical_device(
+        instance: &Instance,
+        surface: &Surface,
+    ) -> Result<PhysicalDevice, CreationError> {
         let physical_devices = unsafe {
             instance
                 .enumerate_physical_devices()
                 .map_err(|error| CreationError::Enumeration(error, "physical devices"))
         }?;
 
-        let physical_device = physical_devices
-            .iter()
-            .find(|&physical_device| Self::is_physical_device_suitable(&instance, physical_device));
+        let mut physical_device = None;
+        for current_physical_device in physical_devices.iter() {
+            if Self::is_physical_device_suitable(instance, surface, current_physical_device)? {
+                physical_device = Some(current_physical_device);
+            }
+        }
 
         // FIXME: Make this cleaner. (Can't use .ok_or, because the type contains a reference)
         if let Some(physical_device) = physical_device {
@@ -251,37 +312,57 @@ impl RenderContext {
         }
     }
 
-    fn is_physical_device_suitable(instance: &Instance, physical_device: &PhysicalDevice) -> bool {
-        let queue_family_indices = QueueFamilyIndices::new(instance, physical_device);
+    fn is_physical_device_suitable(
+        instance: &Instance,
+        surface: &Surface,
+        physical_device: &PhysicalDevice,
+    ) -> Result<bool, CreationError> {
+        let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
 
-        queue_family_indices.is_complete()
+        Ok(queue_family_indices.is_complete())
     }
 
     fn create_device(
         instance: &Instance,
+        surface: &Surface,
         physical_device: &PhysicalDevice,
-    ) -> Result<Device, CreationError> {
-        let queue_family_indices = QueueFamilyIndices::new(instance, physical_device);
+    ) -> Result<(Device, Queue, Queue), CreationError> {
+        // We already made sure that the queue family has a graphics & present family so we can safely unwrap
+        let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
 
-        // We already made sure that the queue family has a graphics family so we can safely unwrap
-        let device_queue_create_info = DeviceQueueCreateInfo::builder()
-            .queue_family_index(queue_family_indices.graphics_family.unwrap())
-            .queue_priorities(&[1.0])
-            .build();
+        let mut hash_set = HashSet::new();
+        hash_set.insert(queue_family_indices.graphics_family.unwrap());
+        hash_set.insert(queue_family_indices.present_family.unwrap());
 
-        let queue_create_infos = [device_queue_create_info];
+        let device_queue_create_infos = hash_set
+            .iter()
+            .map(|&queue_family| {
+                DeviceQueueCreateInfo::builder()
+                    .queue_family_index(queue_family)
+                    .queue_priorities(&[1.0])
+                    .build()
+            })
+            .collect::<Vec<_>>();
 
         let physical_device_features = PhysicalDeviceFeatures::builder();
 
         let device_create_info = DeviceCreateInfo::builder()
-            .queue_create_infos(&queue_create_infos)
+            .queue_create_infos(&device_queue_create_infos)
             .enabled_features(&physical_device_features);
 
-        unsafe {
+        let device = unsafe {
             instance
                 .create_device(*physical_device, &device_create_info, None)
                 .map_err(|error| CreationError::Creation(error, "logical device"))
-        }
+        }?;
+
+        let graphics_queue =
+            unsafe { device.get_device_queue(queue_family_indices.graphics_family.unwrap(), 0) };
+
+        let present_queue =
+            unsafe { device.get_device_queue(queue_family_indices.present_family.unwrap(), 0) };
+
+        Ok((device, graphics_queue, present_queue))
     }
 
     unsafe extern "system" fn debug_callback(
@@ -309,6 +390,10 @@ impl Drop for RenderContext {
     fn drop(&mut self) {
         unsafe {
             self.device.destroy_device(None);
+
+            self.surface
+                .surface_loader
+                .destroy_surface(self.surface.surface, None);
 
             if self.validation_layer_enabled && self.debug_extension.is_some() {
                 let debug_extension = self.debug_extension.as_ref().unwrap();
