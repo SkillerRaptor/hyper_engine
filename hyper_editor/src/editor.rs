@@ -8,11 +8,13 @@ use hyper_engine::game::Game;
 
 use std::time::Duration;
 
+/// A struct representing the game engines editor interface
 #[derive(Debug)]
 pub(crate) struct Editor {}
 
 impl Editor {
-    pub fn new() -> Self {
+    /// Constructs a new editor struct
+    pub(crate) fn new() -> Self {
         Self {}
     }
 }

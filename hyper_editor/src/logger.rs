@@ -13,7 +13,32 @@ use fern::{
 use log::LevelFilter;
 use std::io;
 
-pub(crate) fn init(verbosity: usize) -> Result<()> {
+/// An enum representing the logger verbosity
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum Verbosity {
+    /// Error log level
+    Error,
+
+    /// Warning log level
+    Warning,
+
+    /// Info log level
+    Info,
+
+    /// Debug log level
+    Debug,
+
+    /// Trace log level
+    Trace,
+}
+
+/// Initializes the global logger
+///
+/// Arguments:
+///
+/// * `verbosity`: The verbosity log level
+pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
     let levels = ColoredLevelConfig::new()
         .error(Color::Red)
         .warn(Color::BrightYellow)
@@ -42,14 +67,12 @@ pub(crate) fn init(verbosity: usize) -> Result<()> {
         out.finish(format_args!("{time} {level} {message}"))
     });
 
-    // NOTE: Disable any logging from other crates
-
     logger = match verbosity {
-        0 => logger.level(LevelFilter::Warn),
-        1 => logger.level(LevelFilter::Info),
-        2 => logger.level(LevelFilter::Debug),
-        3 => logger.level(LevelFilter::Trace),
-        _ => logger.level(LevelFilter::Error),
+        Verbosity::Error => logger.level(LevelFilter::Error),
+        Verbosity::Warning => logger.level(LevelFilter::Warn),
+        Verbosity::Info => logger.level(LevelFilter::Info),
+        Verbosity::Debug => logger.level(LevelFilter::Debug),
+        Verbosity::Trace => logger.level(LevelFilter::Trace),
     };
 
     logger = logger.chain(io::stdout());
