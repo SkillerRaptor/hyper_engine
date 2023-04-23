@@ -24,12 +24,12 @@ pub enum CreationError {
     UninitializedField(&'static str),
 
     /// Window couldn't be constructed
-    #[error("failed to create window")]
-    WindowCreationFailure(#[from] window::CreationError),
+    #[error("window failed to construct")]
+    WindowFailed(#[from] window::CreationError),
 
     /// Render Context couldn't be constructed
-    #[error("failed to create render context")]
-    RenderContextCreationFailure(#[from] render_context::CreationError),
+    #[error("render context failed to construct")]
+    RenderContextFailed(#[from] render_context::CreationError),
 }
 
 /// A struct representing the application itself
@@ -57,7 +57,7 @@ impl Application {
     /// * `width`: Window width
     /// * `height`: Window height
     /// * `resizable`: If the window is resizeable
-    pub fn new<T>(
+    fn new<T>(
         game: T,
         title: String,
         width: u32,
