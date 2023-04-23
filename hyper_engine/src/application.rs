@@ -57,16 +57,13 @@ impl Application {
     /// * `width`: Window width
     /// * `height`: Window height
     /// * `resizable`: If the window is resizeable
-    fn new<T>(
-        game: T,
+    fn new(
+        game: Box<dyn Game>,
         title: String,
         width: u32,
         height: u32,
         resizable: bool,
-    ) -> Result<Self, CreationError>
-    where
-        T: Game + 'static,
-    {
+    ) -> Result<Self, CreationError> {
         let event_loop = EventLoop::default();
         let window = Window::builder()
             .title(&title)
@@ -78,7 +75,7 @@ impl Application {
         let render_context = RenderContext::new(&window)?;
 
         Ok(Self {
-            game: Box::new(game),
+            game: game,
             event_loop,
             window,
             _render_context: render_context,
@@ -182,10 +179,7 @@ impl ApplicationBuilder {
     /// Arguments:
     ///
     /// * `game`: Game itself
-    pub fn build<T>(self, game: T) -> Result<Application, CreationError>
-    where
-        T: Game + 'static,
-    {
+    pub fn build(self, game: Box<dyn Game>) -> Result<Application, CreationError> {
         let Some(title) = self.title else {
             return Err(CreationError::UninitializedField("title"));
         };
