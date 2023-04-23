@@ -84,13 +84,26 @@ impl Application {
 
     /// Runs the application
     pub fn run(&mut self) {
-        let mut last_frame = Instant::now();
+        // Fixed at 60 frames per second
+        let mut time = 0.0;
+        let delta_time = 1.0 / 60.0;
+
+        let mut current_time = Instant::now();
+        let mut accumulator = 0.0;
         self.event_loop.run(|event| match event {
             Event::EventsCleared => self.window.request_redraw(),
             Event::UpdateFrame => {
-                let current_frame = Instant::now();
-                let _delta_time = current_frame - last_frame;
-                last_frame = current_frame;
+                let new_time = Instant::now();
+                let frame_time = (new_time - current_time).as_secs_f32();
+                current_time = new_time;
+
+                accumulator += frame_time;
+
+                while accumulator >= delta_time {
+                    self.game.update_fixed(delta_time, time);
+                    accumulator -= delta_time;
+                    time += delta_time;
+                }
 
                 self.game.update();
             }

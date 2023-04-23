@@ -20,7 +20,7 @@ pub trait Game {
     /// Arguments:
     ///
     /// * `delta_time`: Time since the last fixed update
-    /// * `time`: Time since the begin of the current frame
+    /// * `time`: Time since the begin of updating
     fn update_fixed(&mut self, delta_time: f32, time: f32);
 
     /// Renders the current frame
