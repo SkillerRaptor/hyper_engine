@@ -6,6 +6,7 @@
 
 use crate::{key_code::KeyCode, mouse_code::MouseCode};
 
+/// An enum representing the wrapped winit events
 #[derive(Clone, Copy, Debug)]
 pub enum Event {
     EventsCleared,

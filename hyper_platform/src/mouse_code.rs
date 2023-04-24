@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+/// An enum representing the wrapped winit mouse codes
 #[derive(Clone, Copy, Debug)]
 pub enum MouseCode {
     Left,
