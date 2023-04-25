@@ -16,9 +16,11 @@ use thiserror::Error;
 /// An enum representing the errors that can occur while constructing an instance
 #[derive(Debug, Error)]
 pub enum CreationError {
+    /// Creation of a vulkan object failed
     #[error("creation of vulkan {1} failed")]
     Creation(#[source] vk::Result, &'static str),
 
+    /// Enumeration of a vulkan array failed
     #[error("enumeration of vulkan {1} failed")]
     Enumeration(#[source] vk::Result, &'static str),
 
@@ -39,6 +41,7 @@ impl Instance {
     /// Arguments:
     ///
     /// * `window`: Application window
+    /// * `entry`: Vulkan Entry
     pub(crate) fn new(window: &Window, entry: &Entry) -> Result<Self, CreationError> {
         let application_name =
             CString::new(window.title()).map_err(|_| CreationError::CStringCreation)?;
