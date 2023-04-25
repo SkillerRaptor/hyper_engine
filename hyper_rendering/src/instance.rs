@@ -11,8 +11,8 @@ use ash::{
     vk::{
         self, ApplicationInfo, Bool32, DebugUtilsMessageSeverityFlagsEXT,
         DebugUtilsMessageTypeFlagsEXT, DebugUtilsMessengerCallbackDataEXT,
-        DebugUtilsMessengerCreateInfoEXT, DebugUtilsMessengerEXT, InstanceCreateInfo,
-        PhysicalDevice, QueueFamilyProperties,
+        DebugUtilsMessengerCreateInfoEXT, DebugUtilsMessengerEXT, DeviceCreateInfo,
+        InstanceCreateInfo, PhysicalDevice, QueueFamilyProperties,
     },
     Entry,
 };
@@ -248,6 +248,25 @@ impl Instance {
         Ok(Some(debug_extension))
     }
 
+    /// Creates a new logical device
+    ///
+    /// This function is a wrapper to not expose the internal handle
+    ///
+    /// Aruments:
+    ///
+    /// * `physical_device`: The used physical device
+    /// * `device_create_info`: Info for the device
+    pub(crate) fn create_device(
+        &self,
+        physical_device: &PhysicalDevice,
+        device_create_info: &DeviceCreateInfo,
+    ) -> Result<ash::Device, vk::Result> {
+        unsafe {
+            self.handle
+                .create_device(*physical_device, device_create_info, None)
+        }
+    }
+
     /// Returns all physical devices with vulkan support
     ///
     /// This function is a wrapper to not expose the internal handle
@@ -258,6 +277,10 @@ impl Instance {
     /// Returns the queue family properties about a physical device
     ///
     /// This function is a wrapper to not expose the internal handle
+    ///
+    /// Aruments:
+    ///
+    /// * `physical_device`: The physical device to be searched
     pub(crate) fn get_physical_device_queue_family_properties(
         &self,
         physical_device: &PhysicalDevice,
