@@ -20,6 +20,7 @@ struct QueueFamilyIndices {
 }
 
 impl QueueFamilyIndices {
+    /// Checks if every queue is available
     fn is_complete(&self) -> bool {
         self.graphics_family.is_some()
     }
