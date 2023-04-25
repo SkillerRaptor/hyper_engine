@@ -47,14 +47,14 @@ struct DebugExtension {
 
 /// A struct representing a wrapper for the vulkan instance
 pub(crate) struct Instance {
-    /// Internal ash instance handle
-    handle: ash::Instance,
+    /// If the validation layers were enabled
+    validation_layers_enabled: bool,
 
     /// Debug extension for validation layers
     debug_extension: Option<DebugExtension>,
 
-    /// If the validation layers were enabled
-    validation_layers_enabled: bool,
+    /// Internal ash instance handle
+    handle: ash::Instance,
 }
 
 impl Instance {
@@ -83,9 +83,9 @@ impl Instance {
             Self::create_debug_extension(validation_layers_enabled, entry, &instance)?;
 
         Ok(Self {
-            handle: instance,
-            debug_extension,
             validation_layers_enabled,
+            debug_extension,
+            handle: instance,
         })
     }
 
