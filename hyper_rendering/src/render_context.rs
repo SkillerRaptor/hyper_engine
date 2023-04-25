@@ -42,8 +42,10 @@ impl RenderContext {
     ///
     /// * `window`: Application window
     pub fn new(window: &Window) -> Result<Self, CreationError> {
+        let validation_layers_requested = cfg!(debug_assertions);
+
         let entry = unsafe { Entry::load() }?;
-        let instance = Instance::new(window, &entry)?;
+        let instance = Instance::new(window, validation_layers_requested, &entry)?;
 
         Ok(Self {
             _entry: entry,
