@@ -12,6 +12,7 @@ use ash::{
         self, ApplicationInfo, Bool32, DebugUtilsMessageSeverityFlagsEXT,
         DebugUtilsMessageTypeFlagsEXT, DebugUtilsMessengerCallbackDataEXT,
         DebugUtilsMessengerCreateInfoEXT, DebugUtilsMessengerEXT, InstanceCreateInfo,
+        PhysicalDevice, QueueFamilyProperties,
     },
     Entry,
 };
@@ -245,6 +246,26 @@ impl Instance {
         };
 
         Ok(Some(debug_extension))
+    }
+
+    /// Returns all physical devices with vulkan support
+    ///
+    /// This function is a wrapper to not expose the internal handle
+    pub(crate) fn enumerate_physical_devices(&self) -> Result<Vec<PhysicalDevice>, vk::Result> {
+        unsafe { self.handle.enumerate_physical_devices() }
+    }
+
+    /// Returns the queue family properties about a physical device
+    ///
+    /// This function is a wrapper to not expose the internal handle
+    pub(crate) fn get_physical_device_queue_family_properties(
+        &self,
+        physical_device: &PhysicalDevice,
+    ) -> Vec<QueueFamilyProperties> {
+        unsafe {
+            self.handle
+                .get_physical_device_queue_family_properties(*physical_device)
+        }
     }
 
     /// The vulkan debug callback

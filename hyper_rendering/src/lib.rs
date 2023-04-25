@@ -6,4 +6,5 @@
 
 pub mod render_context;
 
+pub(crate) mod device;
 pub(crate) mod instance;
