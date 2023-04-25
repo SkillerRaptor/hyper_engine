@@ -14,7 +14,7 @@ use winit::{
 };
 
 /// A struct representing the internal winit event loop
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct EventLoop {
     /// Internal winit event loop
     internal: event_loop::EventLoop<()>,

@@ -7,7 +7,6 @@
 use hyper_engine::game::Game;
 
 /// A struct representing the game engines editor interface
-#[derive(Debug)]
 pub(crate) struct Editor {}
 
 impl Editor {

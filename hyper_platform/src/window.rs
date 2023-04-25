@@ -27,7 +27,6 @@ pub enum CreationError {
 }
 
 /// A struct representing a window
-#[derive(Debug)]
 pub struct Window {
     /// Internal winit window
     internal: window::Window,
