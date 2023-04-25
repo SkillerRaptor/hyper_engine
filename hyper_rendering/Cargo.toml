@@ -16,5 +16,4 @@ hyper_platform = { path = "../hyper_platform" }
 ash = "0.37"
 gpu-allocator = "0.22"
 log = "0.4"
-glam = "0.23"
 thiserror = "1.0"

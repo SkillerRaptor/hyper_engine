@@ -24,12 +24,12 @@ pub enum CreationError {
     UninitializedField(&'static str),
 
     /// Window couldn't be constructed
-    #[error("window failed to construct")]
-    WindowFailed(#[from] window::CreationError),
+    #[error("couldn't create window")]
+    WindowFailure(#[from] window::CreationError),
 
     /// Render Context couldn't be constructed
-    #[error("render context failed to construct")]
-    RenderContextFailed(#[from] render_context::CreationError),
+    #[error("couldn't create render context")]
+    RenderContextFailure(#[from] render_context::CreationError),
 }
 
 /// A struct representing the application itself
@@ -75,7 +75,7 @@ impl Application {
         let render_context = RenderContext::new(&window)?;
 
         Ok(Self {
-            game: game,
+            game,
             event_loop,
             window,
             _render_context: render_context,

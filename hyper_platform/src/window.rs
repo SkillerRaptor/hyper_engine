@@ -63,14 +63,10 @@ impl Window {
         self.internal.request_redraw();
     }
 
-    /// Returns all required extensions for a window to be written on for vulkan
-    pub fn enumerate_required_extensions(&self) -> Result<Vec<*const i8>, vk::Result> {
-        let required_extensions =
-            ash_window::enumerate_required_extensions(self.internal.raw_display_handle())?;
-        Ok(required_extensions.to_vec())
-    }
-
     /// Creates the vulkan surface
+    ///
+    /// This function is a wrapper around the ash window crate, so that the
+    /// window doesn't have to expose the internal handle.
     ///
     /// Arguments:
     ///
@@ -90,6 +86,21 @@ impl Window {
                 None,
             )
         }
+    }
+
+    /// Returns all required extensions to support a window interface
+    ///
+    /// This function is a wrapper around the ash window crate, so that the
+    /// window doesn't have to expose the internal handle.
+    pub fn required_extensions(&self) -> Result<Vec<*const i8>, vk::Result> {
+        let required_extensions =
+            ash_window::enumerate_required_extensions(self.internal.raw_display_handle())?;
+        Ok(required_extensions.to_vec())
+    }
+
+    /// Returns the window title
+    pub fn title(&self) -> String {
+        self.internal.title()
     }
 
     /// Constructs a new window builder
