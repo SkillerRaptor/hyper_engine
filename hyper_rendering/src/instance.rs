@@ -7,12 +7,11 @@
 use hyper_platform::window::Window;
 
 use ash::{
-    extensions::{ext::DebugUtils, khr::Surface},
+    extensions::ext::DebugUtils,
     vk::{
         self, ApplicationInfo, Bool32, DebugUtilsMessageSeverityFlagsEXT,
         DebugUtilsMessageTypeFlagsEXT, DebugUtilsMessengerCallbackDataEXT,
-        DebugUtilsMessengerCreateInfoEXT, DebugUtilsMessengerEXT, DeviceCreateInfo,
-        ExtensionProperties, InstanceCreateInfo, PhysicalDevice, QueueFamilyProperties, SurfaceKHR,
+        DebugUtilsMessengerCreateInfoEXT, DebugUtilsMessengerEXT, InstanceCreateInfo,
     },
     Entry,
 };
@@ -248,94 +247,7 @@ impl Instance {
         Ok(Some(debug_extension))
     }
 
-    /// Creates a new logical device
-    ///
-    /// This function is a wrapper to not expose the internal handle
-    ///
-    /// Arguments:
-    ///
-    /// * `physical_device`: The used physical device
-    /// * `device_create_info`: Info for the device
-    pub(crate) fn create_device(
-        &self,
-        physical_device: &PhysicalDevice,
-        device_create_info: &DeviceCreateInfo,
-    ) -> Result<ash::Device, vk::Result> {
-        unsafe {
-            self.handle
-                .create_device(*physical_device, device_create_info, None)
-        }
-    }
-
-    /// Creates a new surface
-    ///
-    /// This function is a wrapper to not expose the internal handle
-    ///
-    /// Arguments:
-    ///
-    /// * `window`: Window of the application
-    /// * `entry`: Ash entry loader
-    pub(crate) fn create_surface(
-        &self,
-        window: &Window,
-        entry: &Entry,
-    ) -> Result<SurfaceKHR, vk::Result> {
-        window.create_surface(entry, &self.handle)
-    }
-
-    /// Creates a new surface loader
-    ///
-    /// This function is a wrapper to not expose the internal handle
-    ///
-    /// Arguments:
-    ///
-    /// * `entry`: Ash entry loader
-    pub(crate) fn create_surface_loader(&self, entry: &Entry) -> Surface {
-        Surface::new(entry, &self.handle)
-    }
-
-    /// Returns all physical devices with vulkan support
-    ///
-    /// This function is a wrapper to not expose the internal handle
-    pub(crate) fn enumerate_physical_devices(&self) -> Result<Vec<PhysicalDevice>, vk::Result> {
-        unsafe { self.handle.enumerate_physical_devices() }
-    }
-
-    /// Returns all extensions that are supported by a device
-    ///
-    /// This function is a wrapper to not expose the internal handle
-    ///
-    /// Arguments:
-    ///
-    /// * `physical_device`: The physical device to be searched
-    pub(crate) fn enumerate_device_extension_properties(
-        &self,
-        physical_device: &PhysicalDevice,
-    ) -> Result<Vec<ExtensionProperties>, vk::Result> {
-        unsafe {
-            self.handle
-                .enumerate_device_extension_properties(*physical_device)
-        }
-    }
-
-    /// Returns the queue family properties about a physical device
-    ///
-    /// This function is a wrapper to not expose the internal handle
-    ///
-    /// Arguments:
-    ///
-    /// * `physical_device`: The physical device to be searched
-    pub(crate) fn get_physical_device_queue_family_properties(
-        &self,
-        physical_device: &PhysicalDevice,
-    ) -> Vec<QueueFamilyProperties> {
-        unsafe {
-            self.handle
-                .get_physical_device_queue_family_properties(*physical_device)
-        }
-    }
-
-    /// NOTE: Temp
+    /// Returns the vulkan instance handle
     pub(crate) fn handle(&self) -> &ash::Instance {
         &self.handle
     }

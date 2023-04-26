@@ -55,13 +55,16 @@ pub(crate) mod queue_family_indices {
         /// * `instance`: Instance wrapper
         /// * `surface`: Window surface
         /// * `physical_device`: Device to be searched
-        pub(super) fn new(
+        pub(crate) fn new(
             instance: &Instance,
             surface: &Surface,
             physical_device: &PhysicalDevice,
         ) -> Result<Self, CreationError> {
-            let physical_device_queue_family_properties =
-                instance.get_physical_device_queue_family_properties(physical_device);
+            let physical_device_queue_family_properties = unsafe {
+                instance
+                    .handle()
+                    .get_physical_device_queue_family_properties(*physical_device)
+            };
 
             let mut queue_family_indices = QueueFamilyIndices::default();
             for (i, physical_device_queue_family_property) in
@@ -74,10 +77,16 @@ pub(crate) mod queue_family_indices {
                     queue_family_indices.graphics_family = Some(i as u32);
                 }
 
-                if surface
-                    .get_physical_device_surface_support(physical_device, i as u32)
-                    .map_err(CreationError::SurfaceLost)?
-                {
+                if unsafe {
+                    surface
+                        .loader()
+                        .get_physical_device_surface_support(
+                            *physical_device,
+                            i as u32,
+                            *surface.handle(),
+                        )
+                        .map_err(CreationError::SurfaceLost)
+                }? {
                     queue_family_indices.present_family = Some(i as u32);
                 }
             }
@@ -139,19 +148,28 @@ pub(crate) mod swapchain_support_details {
         ///
         /// * `surface`: Window surface
         /// * `physical_device`: Device to be searched
-        pub(super) fn new(
+        pub(crate) fn new(
             surface: &Surface,
             physical_device: &PhysicalDevice,
         ) -> Result<Self, CreationError> {
-            let capabilities = surface
-                .get_physical_device_surface_capabilities(physical_device)
-                .map_err(CreationError::SurfaceLost)?;
-            let formats = surface
-                .get_physical_device_surface_formats(physical_device)
-                .map_err(CreationError::SurfaceLost)?;
-            let present_modes = surface
-                .get_physical_device_surface_present_modes(physical_device)
-                .map_err(CreationError::SurfaceLost)?;
+            let capabilities = unsafe {
+                surface
+                    .loader()
+                    .get_physical_device_surface_capabilities(*physical_device, *surface.handle())
+                    .map_err(CreationError::SurfaceLost)
+            }?;
+            let formats = unsafe {
+                surface
+                    .loader()
+                    .get_physical_device_surface_formats(*physical_device, *surface.handle())
+                    .map_err(CreationError::SurfaceLost)
+            }?;
+            let present_modes = unsafe {
+                surface
+                    .loader()
+                    .get_physical_device_surface_present_modes(*physical_device, *surface.handle())
+                    .map_err(CreationError::SurfaceLost)
+            }?;
 
             Ok(Self {
                 capabilities,
@@ -257,9 +275,12 @@ impl Device {
         instance: &Instance,
         surface: &Surface,
     ) -> Result<PhysicalDevice, CreationError> {
-        let physical_devices = instance
-            .enumerate_physical_devices()
-            .map_err(|error| CreationError::Enumeration(error, "physical devices"))?;
+        let physical_devices = unsafe {
+            instance
+                .handle()
+                .enumerate_physical_devices()
+                .map_err(|error| CreationError::Enumeration(error, "physical devices"))
+        }?;
 
         let mut chosen_physical_device = None;
         for physical_device in physical_devices {
@@ -312,9 +333,12 @@ impl Device {
         instance: &Instance,
         physical_device: &PhysicalDevice,
     ) -> Result<bool, CreationError> {
-        let physical_device_extension_properties = instance
-            .enumerate_device_extension_properties(physical_device)
-            .map_err(|error| CreationError::Enumeration(error, "device extension properties"))?;
+        let physical_device_extension_properties = unsafe {
+            instance
+                .handle()
+                .enumerate_device_extension_properties(*physical_device)
+                .map_err(|error| CreationError::Enumeration(error, "device extension properties"))
+        }?;
 
         let physical_device_extensions = physical_device_extension_properties
             .iter()
@@ -371,43 +395,24 @@ impl Device {
             .enabled_extension_names(&extension_names)
             .enabled_features(&phyiscal_device_features);
 
-        let device = instance
-            .create_device(physical_device, &device_create_info)
-            .map_err(|error| CreationError::Creation(error, "device"))?;
+        let device = unsafe {
+            instance
+                .handle()
+                .create_device(*physical_device, &device_create_info, None)
+                .map_err(|error| CreationError::Creation(error, "device"))
+        }?;
 
         Ok(device)
     }
 
-    /// Returns the swapchain support details for the selected physical device
-    ///
-    /// Arguments:
-    ///
-    /// * `surface`: Window surface
-    pub(crate) fn get_swapchain_support_details(
-        &self,
-        surface: &Surface,
-    ) -> Result<SwapchainSupportDetails, swapchain_support_details::CreationError> {
-        SwapchainSupportDetails::new(surface, &self.physical_device)
-    }
-
-    /// Returns the queue family indices for the selected physical device
-    ///
-    /// Arguments:
-    ///
-    ///
-    /// * `instance`: Instance wrapper
-    /// * `surface`: Window surface
-    pub(crate) fn get_queue_family_indices(
-        &self,
-        instance: &Instance,
-        surface: &Surface,
-    ) -> Result<QueueFamilyIndices, queue_family_indices::CreationError> {
-        QueueFamilyIndices::new(instance, surface, &self.physical_device)
-    }
-
-    /// NOTE: Temp
+    /// Returns the vulkan device handle
     pub(crate) fn handle(&self) -> &ash::Device {
         &self.handle
+    }
+
+    /// Returns the vulkan device handle
+    pub(crate) fn physical_device(&self) -> &PhysicalDevice {
+        &self.physical_device
     }
 }
 

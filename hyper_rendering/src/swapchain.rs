@@ -5,7 +5,11 @@
  */
 
 use crate::{
-    device::{queue_family_indices, swapchain_support_details, Device},
+    device::{
+        queue_family_indices::{self, QueueFamilyIndices},
+        swapchain_support_details::{self, SwapchainSupportDetails},
+        Device,
+    },
     instance::Instance,
     surface::Surface,
 };
@@ -16,7 +20,8 @@ use ash::{
     extensions::khr,
     vk::{
         self, ColorSpaceKHR, CompositeAlphaFlagsKHR, Extent2D, Format, ImageUsageFlags,
-        PresentModeKHR, SharingMode, SurfaceCapabilitiesKHR, SurfaceFormatKHR, SwapchainKHR,
+        PresentModeKHR, SharingMode, SurfaceCapabilitiesKHR, SurfaceFormatKHR,
+        SwapchainCreateInfoKHR, SwapchainKHR,
     },
 };
 use thiserror::Error;
@@ -54,7 +59,8 @@ impl Swapchain {
         surface: &Surface,
         device: &Device,
     ) -> Result<Self, CreationError> {
-        let swapchain_support_details = device.get_swapchain_support_details(surface)?;
+        let swapchain_support_details =
+            SwapchainSupportDetails::new(surface, device.physical_device())?;
 
         let capabilities = swapchain_support_details.capabilities();
 
@@ -67,7 +73,8 @@ impl Swapchain {
             image_count = capabilities.max_image_count;
         }
 
-        let queue_family_indices = device.get_queue_family_indices(instance, surface)?;
+        let queue_family_indices =
+            QueueFamilyIndices::new(instance, surface, device.physical_device())?;
         let queue_families = [
             queue_family_indices.graphics_family().unwrap(),
             queue_family_indices.present_family().unwrap(),
@@ -80,8 +87,8 @@ impl Swapchain {
                 (SharingMode::EXCLUSIVE, &[])
             };
 
-        let swapchain_create_info = surface
-            .create_swapchain_create_info_builder()
+        let swapchain_create_info = SwapchainCreateInfoKHR::builder()
+            .surface(*surface.handle())
             .min_image_count(image_count)
             .image_format(surface_format.format)
             .image_color_space(surface_format.color_space)
