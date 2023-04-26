@@ -10,7 +10,10 @@ use hyper_platform::window::Window;
 
 use ash::{
     extensions::khr,
-    vk::{self, PhysicalDevice, SurfaceKHR},
+    vk::{
+        self, PhysicalDevice, PresentModeKHR, SurfaceCapabilitiesKHR, SurfaceFormatKHR, SurfaceKHR,
+        SwapchainCreateInfoKHR, SwapchainCreateInfoKHRBuilder,
+    },
     Entry,
 };
 use thiserror::Error;
@@ -56,6 +59,66 @@ impl Surface {
         })
     }
 
+    /// Creates a new swapchain create info builder
+    ///
+    /// This function is a wrapper to not expose the internal handle
+    pub(crate) fn create_swapchain_create_info_builder(&self) -> SwapchainCreateInfoKHRBuilder {
+        SwapchainCreateInfoKHR::builder().surface(self.handle)
+    }
+
+    /// Returns the surface capabilities of the physical device
+    ///
+    /// This function is a wrapper to not expose the internal handle
+    ///
+    /// Arguments:
+    ///
+    /// * `physical_device`: Current physical device
+
+    pub(crate) fn get_physical_device_surface_capabilities(
+        &self,
+        physical_device: &PhysicalDevice,
+    ) -> Result<SurfaceCapabilitiesKHR, vk::Result> {
+        unsafe {
+            self.surface_loader
+                .get_physical_device_surface_capabilities(*physical_device, self.handle)
+        }
+    }
+
+    /// Returns the surface present modes of the physical device
+    ///
+    /// This function is a wrapper to not expose the internal handle
+    ///
+    /// Arguments:
+    ///
+    /// * `physical_device`: Current physical device
+
+    pub(crate) fn get_physical_device_surface_present_modes(
+        &self,
+        physical_device: &PhysicalDevice,
+    ) -> Result<Vec<PresentModeKHR>, vk::Result> {
+        unsafe {
+            self.surface_loader
+                .get_physical_device_surface_present_modes(*physical_device, self.handle)
+        }
+    }
+
+    /// Returns the surface formats of the physical device
+    ///
+    /// This function is a wrapper to not expose the internal handle
+    ///
+    /// Arguments:
+    ///
+    /// * `physical_device`: Current physical device
+    pub(crate) fn get_physical_device_surface_formats(
+        &self,
+        physical_device: &PhysicalDevice,
+    ) -> Result<Vec<SurfaceFormatKHR>, vk::Result> {
+        unsafe {
+            self.surface_loader
+                .get_physical_device_surface_formats(*physical_device, self.handle)
+        }
+    }
+
     /// Checks if the physical device supports a surface presentation queue
     ///
     /// This function is a wrapper to not expose the internal handle
@@ -64,7 +127,7 @@ impl Surface {
     ///
     /// * `physical_device`: Current physical device
     /// * `queue_family_index`: Queue index
-    pub fn get_physical_device_surface_support(
+    pub(crate) fn get_physical_device_surface_support(
         &self,
         physical_device: &PhysicalDevice,
         queue_family_index: u32,

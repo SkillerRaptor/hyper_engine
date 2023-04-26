@@ -8,6 +8,7 @@ use crate::{
     device::{self, Device},
     instance::{self, Instance},
     surface::{self, Surface},
+    swapchain::{self, Swapchain},
 };
 
 use hyper_platform::window::Window;
@@ -33,6 +34,10 @@ pub enum CreationError {
     /// Device couldn't be constructed
     #[error("couldn't create device")]
     DeviceFailure(#[from] device::CreationError),
+
+    /// Swapchain couldn't be constructed
+    #[error("couldn't create swapchain")]
+    SwapchainFailure(#[from] swapchain::CreationError),
 }
 
 /// A struct representing the vulkan render context
@@ -40,6 +45,9 @@ pub enum CreationError {
 /// The members are ordered in reverse order to guarantee that the objects are
 /// destroyed in the right order
 pub struct RenderContext {
+    /// Vulkan swapchain
+    _swapchain: Swapchain,
+
     /// Vulkan physical and logical device
     _device: Device,
 
@@ -66,8 +74,10 @@ impl RenderContext {
         let instance = Instance::new(window, validation_layers_requested, &entry)?;
         let surface = Surface::new(window, &entry, &instance)?;
         let device = Device::new(&instance, &surface)?;
+        let swapchain = Swapchain::new(window, &instance, &surface, &device)?;
 
         Ok(Self {
+            _swapchain: swapchain,
             _device: device,
             _surface: surface,
             _instance: instance,

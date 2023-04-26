@@ -12,7 +12,7 @@ use ash::{
         self, ApplicationInfo, Bool32, DebugUtilsMessageSeverityFlagsEXT,
         DebugUtilsMessageTypeFlagsEXT, DebugUtilsMessengerCallbackDataEXT,
         DebugUtilsMessengerCreateInfoEXT, DebugUtilsMessengerEXT, DeviceCreateInfo,
-        InstanceCreateInfo, PhysicalDevice, QueueFamilyProperties, SurfaceKHR,
+        ExtensionProperties, InstanceCreateInfo, PhysicalDevice, QueueFamilyProperties, SurfaceKHR,
     },
     Entry,
 };
@@ -301,6 +301,23 @@ impl Instance {
         unsafe { self.handle.enumerate_physical_devices() }
     }
 
+    /// Returns all extensions that are supported by a device
+    ///
+    /// This function is a wrapper to not expose the internal handle
+    ///
+    /// Arguments:
+    ///
+    /// * `physical_device`: The physical device to be searched
+    pub(crate) fn enumerate_device_extension_properties(
+        &self,
+        physical_device: &PhysicalDevice,
+    ) -> Result<Vec<ExtensionProperties>, vk::Result> {
+        unsafe {
+            self.handle
+                .enumerate_device_extension_properties(*physical_device)
+        }
+    }
+
     /// Returns the queue family properties about a physical device
     ///
     /// This function is a wrapper to not expose the internal handle
@@ -316,6 +333,11 @@ impl Instance {
             self.handle
                 .get_physical_device_queue_family_properties(*physical_device)
         }
+    }
+
+    /// NOTE: Temp
+    pub(crate) fn handle(&self) -> &ash::Instance {
+        &self.handle
     }
 
     /// The vulkan debug callback

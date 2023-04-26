@@ -103,6 +103,12 @@ impl Window {
         self.internal.title()
     }
 
+    /// Returns the framebuffer size
+    pub fn framebuffer_size(&self) -> (u32, u32) {
+        let inner_size = self.internal.inner_size();
+        (inner_size.width, inner_size.height)
+    }
+
     /// Constructs a new window builder
     pub fn builder() -> WindowBuilder {
         WindowBuilder::default()
