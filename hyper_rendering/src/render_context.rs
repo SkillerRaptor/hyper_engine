@@ -7,6 +7,7 @@
 use crate::{
     device::{self, Device},
     instance::{self, Instance},
+    surface::{self, Surface},
 };
 
 use hyper_platform::window::Window;
@@ -25,6 +26,10 @@ pub enum CreationError {
     #[error("couldn't create instance")]
     InstanceFailure(#[from] instance::CreationError),
 
+    /// Surface couldn't be constructed
+    #[error("couldn't create surface")]
+    SurfaceFailure(#[from] surface::CreationError),
+
     /// Device couldn't be constructed
     #[error("couldn't create device")]
     DeviceFailure(#[from] device::CreationError),
@@ -37,6 +42,9 @@ pub enum CreationError {
 pub struct RenderContext {
     /// Vulkan physical and logical device
     _device: Device,
+
+    /// Vulkan surface
+    _surface: Surface,
 
     /// Vulkan instance
     _instance: Instance,
@@ -56,11 +64,12 @@ impl RenderContext {
 
         let entry = unsafe { Entry::load() }?;
         let instance = Instance::new(window, validation_layers_requested, &entry)?;
-
-        let device = Device::new(&instance)?;
+        let surface = Surface::new(window, &entry, &instance)?;
+        let device = Device::new(&instance, &surface)?;
 
         Ok(Self {
             _device: device,
+            _surface: surface,
             _instance: instance,
             _entry: entry,
         })

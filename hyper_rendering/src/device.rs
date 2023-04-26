@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::instance::Instance;
+use std::collections::HashSet;
+
+use crate::{instance::Instance, surface::Surface};
 
 use ash::vk::{
     self, DeviceCreateInfo, DeviceQueueCreateInfo, PhysicalDevice, PhysicalDeviceFeatures, Queue,
@@ -17,12 +19,15 @@ use thiserror::Error;
 struct QueueFamilyIndices {
     /// Dedicated graphics queue
     graphics_family: Option<u32>,
+
+    /// Dedicated presentation queue
+    present_family: Option<u32>,
 }
 
 impl QueueFamilyIndices {
     /// Checks if every queue is available
     fn is_complete(&self) -> bool {
-        self.graphics_family.is_some()
+        self.graphics_family.is_some() && self.present_family.is_some()
     }
 }
 
@@ -40,10 +45,17 @@ pub enum CreationError {
     /// System doesn't have a vulkan capable graphical unit
     #[error("couldn't find gpu with vulkan support")]
     Unsupported,
+
+    /// Surface was lost
+    #[error("the surface was lost")]
+    SurfaceLost(#[source] vk::Result),
 }
 
 /// A struct representing a wrapper for the vulkan logical and physical device
 pub(crate) struct Device {
+    /// Present queue
+    _present_queue: Queue,
+
     /// Graphics queue
     _graphics_queue: Queue,
 
@@ -60,15 +72,18 @@ impl Device {
     /// Arguments:
     ///
     /// * `instance`: Instance wrapper
-    pub(crate) fn new(instance: &Instance) -> Result<Self, CreationError> {
-        let physical_device = Self::pick_physical_device(instance)?;
-        let device = Self::create_device(instance, &physical_device)?;
+    pub(crate) fn new(instance: &Instance, surface: &Surface) -> Result<Self, CreationError> {
+        let physical_device = Self::pick_physical_device(instance, surface)?;
+        let device = Self::create_device(instance, surface, &physical_device)?;
 
-        let queue_family_indices = Self::find_queue_families(instance, &physical_device);
+        let queue_family_indices = Self::find_queue_families(instance, surface, &physical_device)?;
         let graphics_queue =
             unsafe { device.get_device_queue(queue_family_indices.graphics_family.unwrap(), 0) };
+        let present_queue =
+            unsafe { device.get_device_queue(queue_family_indices.present_family.unwrap(), 0) };
 
         Ok(Self {
+            _present_queue: present_queue,
             _graphics_queue: graphics_queue,
             handle: device,
             _physical_device: physical_device,
@@ -80,20 +95,26 @@ impl Device {
     /// Arguments:
     ///
     /// * `instance`: Instance wrapper
-    fn pick_physical_device(instance: &Instance) -> Result<PhysicalDevice, CreationError> {
+    fn pick_physical_device(
+        instance: &Instance,
+        surface: &Surface,
+    ) -> Result<PhysicalDevice, CreationError> {
         let physical_devices = instance
             .enumerate_physical_devices()
             .map_err(|error| CreationError::Enumeration(error, "physical devices"))?;
 
-        let physical_device = physical_devices.iter().find(|&physical_device| {
-            Self::check_physical_device_suitability(instance, physical_device)
-        });
+        let mut chosen_physical_device = None;
+        for physical_device in physical_devices {
+            if Self::check_physical_device_suitability(instance, surface, &physical_device)? {
+                chosen_physical_device = Some(physical_device);
+            }
+        }
 
-        if physical_device.is_none() {
+        if chosen_physical_device.is_none() {
             return Err(CreationError::Unsupported);
         }
 
-        Ok(*physical_device.unwrap())
+        Ok(chosen_physical_device.unwrap())
     }
 
     /// Checks how suitable a physical device is
@@ -104,11 +125,12 @@ impl Device {
     /// * `physical_device`: Device to be checked
     fn check_physical_device_suitability(
         instance: &Instance,
+        surface: &Surface,
         physical_device: &PhysicalDevice,
-    ) -> bool {
-        let queue_family_indices = Self::find_queue_families(instance, physical_device);
+    ) -> Result<bool, CreationError> {
+        let queue_family_indices = Self::find_queue_families(instance, surface, physical_device)?;
 
-        queue_family_indices.is_complete()
+        Ok(queue_family_indices.is_complete())
     }
 
     /// Finds all supported queues of a device
@@ -119,8 +141,9 @@ impl Device {
     /// * `physical_device`: Device to be searched
     fn find_queue_families(
         instance: &Instance,
+        surface: &Surface,
         physical_device: &PhysicalDevice,
-    ) -> QueueFamilyIndices {
+    ) -> Result<QueueFamilyIndices, CreationError> {
         let physical_device_queue_family_properties =
             instance.get_physical_device_queue_family_properties(physical_device);
 
@@ -134,9 +157,16 @@ impl Device {
             {
                 queue_family_indices.graphics_family = Some(i as u32);
             }
+
+            if surface
+                .get_physical_device_surface_support(physical_device, i as u32)
+                .map_err(CreationError::SurfaceLost)?
+            {
+                queue_family_indices.present_family = Some(i as u32);
+            }
         }
 
-        queue_family_indices
+        Ok(queue_family_indices)
     }
 
     /// Creates an internal ash
@@ -147,21 +177,29 @@ impl Device {
     /// * `physical_device`: Used physical device
     fn create_device(
         instance: &Instance,
+        surface: &Surface,
         physical_device: &PhysicalDevice,
     ) -> Result<ash::Device, CreationError> {
-        let queue_family_indices = Self::find_queue_families(instance, physical_device);
+        let queue_family_indices = Self::find_queue_families(instance, surface, physical_device)?;
 
-        let device_queue_create_info = DeviceQueueCreateInfo::builder()
-            .queue_family_index(queue_family_indices.graphics_family.unwrap())
-            .queue_priorities(&[1.0])
-            .build();
+        let mut unique_queue_families = HashSet::new();
+        unique_queue_families.insert(queue_family_indices.graphics_family.unwrap());
+        unique_queue_families.insert(queue_family_indices.present_family.unwrap());
 
-        let device_queue_create_infos = &[device_queue_create_info];
+        let mut device_queue_create_infos = Vec::new();
+        for queue_family in unique_queue_families {
+            let device_queue_create_info = DeviceQueueCreateInfo::builder()
+                .queue_family_index(queue_family)
+                .queue_priorities(&[1.0])
+                .build();
+
+            device_queue_create_infos.push(device_queue_create_info);
+        }
 
         let phyiscal_device_features = PhysicalDeviceFeatures::builder();
 
         let device_create_info = DeviceCreateInfo::builder()
-            .queue_create_infos(device_queue_create_infos)
+            .queue_create_infos(&device_queue_create_infos)
             .enabled_layer_names(&[])
             .enabled_extension_names(&[])
             .enabled_features(&phyiscal_device_features);

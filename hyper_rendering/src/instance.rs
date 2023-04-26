@@ -7,12 +7,12 @@
 use hyper_platform::window::Window;
 
 use ash::{
-    extensions::ext::DebugUtils,
+    extensions::{ext::DebugUtils, khr::Surface},
     vk::{
         self, ApplicationInfo, Bool32, DebugUtilsMessageSeverityFlagsEXT,
         DebugUtilsMessageTypeFlagsEXT, DebugUtilsMessengerCallbackDataEXT,
         DebugUtilsMessengerCreateInfoEXT, DebugUtilsMessengerEXT, DeviceCreateInfo,
-        InstanceCreateInfo, PhysicalDevice, QueueFamilyProperties,
+        InstanceCreateInfo, PhysicalDevice, QueueFamilyProperties, SurfaceKHR,
     },
     Entry,
 };
@@ -252,7 +252,7 @@ impl Instance {
     ///
     /// This function is a wrapper to not expose the internal handle
     ///
-    /// Aruments:
+    /// Arguments:
     ///
     /// * `physical_device`: The used physical device
     /// * `device_create_info`: Info for the device
@@ -267,6 +267,33 @@ impl Instance {
         }
     }
 
+    /// Creates a new surface
+    ///
+    /// This function is a wrapper to not expose the internal handle
+    ///
+    /// Arguments:
+    ///
+    /// * `window`: Window of the application
+    /// * `entry`: Ash entry loader
+    pub(crate) fn create_surface(
+        &self,
+        window: &Window,
+        entry: &Entry,
+    ) -> Result<SurfaceKHR, vk::Result> {
+        window.create_surface(entry, &self.handle)
+    }
+
+    /// Creates a new surface loader
+    ///
+    /// This function is a wrapper to not expose the internal handle
+    ///
+    /// Arguments:
+    ///
+    /// * `entry`: Ash entry loader
+    pub(crate) fn create_surface_loader(&self, entry: &Entry) -> Surface {
+        Surface::new(entry, &self.handle)
+    }
+
     /// Returns all physical devices with vulkan support
     ///
     /// This function is a wrapper to not expose the internal handle
@@ -278,7 +305,7 @@ impl Instance {
     ///
     /// This function is a wrapper to not expose the internal handle
     ///
-    /// Aruments:
+    /// Arguments:
     ///
     /// * `physical_device`: The physical device to be searched
     pub(crate) fn get_physical_device_queue_family_properties(
