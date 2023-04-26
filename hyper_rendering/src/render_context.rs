@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+use std::sync::Arc;
+
 use crate::{
     device::{self, Device},
     instance::{self, Instance},
@@ -49,7 +51,7 @@ pub struct RenderContext {
     _swapchain: Swapchain,
 
     /// Vulkan physical and logical device
-    _device: Device,
+    _device: Arc<Device>,
 
     /// Vulkan surface
     _surface: Surface,
@@ -73,7 +75,7 @@ impl RenderContext {
         let entry = unsafe { Entry::load() }?;
         let instance = Instance::new(window, validation_layers_requested, &entry)?;
         let surface = Surface::new(window, &entry, &instance)?;
-        let device = Device::new(&instance, &surface)?;
+        let device = Arc::new(Device::new(&instance, &surface)?);
         let swapchain = Swapchain::new(window, &instance, &surface, &device)?;
 
         Ok(Self {

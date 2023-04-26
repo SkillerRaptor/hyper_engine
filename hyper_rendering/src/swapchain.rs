@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+use std::sync::Arc;
+
 use crate::{
     device::{
         queue_family_indices::{self, QueueFamilyIndices},
@@ -19,9 +21,10 @@ use hyper_platform::window::Window;
 use ash::{
     extensions::khr,
     vk::{
-        self, ColorSpaceKHR, CompositeAlphaFlagsKHR, Extent2D, Format, ImageUsageFlags,
-        PresentModeKHR, SharingMode, SurfaceCapabilitiesKHR, SurfaceFormatKHR,
-        SwapchainCreateInfoKHR, SwapchainKHR,
+        self, ColorSpaceKHR, ComponentMapping, ComponentSwizzle, CompositeAlphaFlagsKHR, Extent2D,
+        Format, Image, ImageAspectFlags, ImageSubresourceRange, ImageUsageFlags, ImageView,
+        ImageViewCreateInfo, ImageViewType, PresentModeKHR, SharingMode, SurfaceCapabilitiesKHR,
+        SurfaceFormatKHR, SwapchainCreateInfoKHR, SwapchainKHR,
     },
 };
 use thiserror::Error;
@@ -32,6 +35,10 @@ pub enum CreationError {
     /// Creation of a vulkan object failed
     #[error("creation of vulkan {1} failed")]
     Creation(#[source] vk::Result, &'static str),
+
+    /// Device out of memory
+    #[error("device is out of memory")]
+    OutOfMemory(#[source] vk::Result),
 
     /// Creation of a queue family indices failed
     #[error("creation of queue family indices failed")]
@@ -44,11 +51,26 @@ pub enum CreationError {
 
 /// A struct representing a wrapper for the vulkan swapchain
 pub(crate) struct Swapchain {
+    /// Image view handles of the images
+    image_views: Vec<ImageView>,
+
+    /// Image handles of the swapchain
+    _images: Vec<Image>,
+
+    /// Swapchain extent
+    _extent: Extent2D,
+
+    /// Swapchain format
+    _format: Format,
+
     /// Vulkan swapchain handle
     handle: SwapchainKHR,
 
     /// Ash swapchain loader
     swapchain_loader: khr::Swapchain,
+
+    /// Device Wrapper
+    device: Arc<Device>,
 }
 
 impl Swapchain {
@@ -57,7 +79,7 @@ impl Swapchain {
         window: &Window,
         instance: &Instance,
         surface: &Surface,
-        device: &Device,
+        device: &Arc<Device>,
     ) -> Result<Self, CreationError> {
         let swapchain_support_details =
             SwapchainSupportDetails::new(surface, device.physical_device())?;
@@ -111,9 +133,52 @@ impl Swapchain {
                 .map_err(|error| CreationError::Creation(error, "swapchain"))
         }?;
 
+        let swapchain_images = unsafe {
+            swapchain_loader
+                .get_swapchain_images(swapchain)
+                .map_err(CreationError::OutOfMemory)
+        }?;
+
+        let mut swapchain_image_views = Vec::new();
+        for image in &swapchain_images {
+            let component_mapping = ComponentMapping::builder()
+                .r(ComponentSwizzle::IDENTITY)
+                .g(ComponentSwizzle::IDENTITY)
+                .b(ComponentSwizzle::IDENTITY)
+                .a(ComponentSwizzle::IDENTITY);
+
+            let subresource_range = ImageSubresourceRange::builder()
+                .aspect_mask(ImageAspectFlags::COLOR)
+                .base_mip_level(0)
+                .level_count(1)
+                .base_array_layer(0)
+                .layer_count(1);
+
+            let image_view_create_info = ImageViewCreateInfo::builder()
+                .image(*image)
+                .view_type(ImageViewType::TYPE_2D)
+                .format(surface_format.format)
+                .components(*component_mapping)
+                .subresource_range(*subresource_range);
+
+            let image_view = unsafe {
+                device
+                    .handle()
+                    .create_image_view(&image_view_create_info, None)
+                    .map_err(|error| CreationError::Creation(error, "image view"))
+            }?;
+
+            swapchain_image_views.push(image_view);
+        }
+
         Ok(Self {
+            image_views: swapchain_image_views,
+            _images: swapchain_images,
+            _extent: extent,
+            _format: surface_format.format,
             handle: swapchain,
             swapchain_loader,
+            device: device.clone(),
         })
     }
 
@@ -175,6 +240,10 @@ impl Swapchain {
 impl Drop for Swapchain {
     fn drop(&mut self) {
         unsafe {
+            for image_view in &self.image_views {
+                self.device.handle().destroy_image_view(*image_view, None);
+            }
+
             self.swapchain_loader.destroy_swapchain(self.handle, None);
         }
     }
