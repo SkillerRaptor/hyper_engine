@@ -8,6 +8,7 @@ use std::sync::Arc;
 
 use crate::{
     device::{self, Device},
+    framebuffer::{self, Framebuffer},
     instance::{self, Instance},
     pipeline::{self, Pipeline},
     surface::{self, Surface},
@@ -45,6 +46,10 @@ pub enum CreationError {
     /// Pipeline couldn't be constructed
     #[error("couldn't create pipeline")]
     PipelineFailure(#[from] pipeline::CreationError),
+
+    /// Framebuffer couldn't be constructed
+    #[error("couldn't create framebuffer")]
+    FramebufferFailure(#[from] framebuffer::CreationError),
 }
 
 /// A struct representing the vulkan render context
@@ -52,6 +57,8 @@ pub enum CreationError {
 /// The members are ordered in reverse order to guarantee that the objects are
 /// destroyed in the right order
 pub struct RenderContext {
+    _framebuffers: Vec<Framebuffer>,
+
     /// Vulkan pipeline
     _pipeline: Pipeline,
 
@@ -87,7 +94,15 @@ impl RenderContext {
         let swapchain = Swapchain::new(window, &instance, &surface, &device)?;
         let pipeline = Pipeline::new(&device, &swapchain)?;
 
+        let mut framebuffers = Vec::new();
+        for swapchain_image_view in swapchain.image_views() {
+            let framebuffer =
+                Framebuffer::new(&device, &swapchain, &pipeline, swapchain_image_view)?;
+            framebuffers.push(framebuffer);
+        }
+
         Ok(Self {
+            _framebuffers: framebuffers,
             _pipeline: pipeline,
             _swapchain: swapchain,
             _device: device,

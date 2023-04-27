@@ -326,6 +326,11 @@ impl Pipeline {
 
         Ok(shader_module)
     }
+
+    /// Returns the render pass
+    pub(crate) fn render_pass(&self) -> &RenderPass {
+        &self.render_pass
+    }
 }
 
 impl Drop for Pipeline {

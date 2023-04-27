@@ -245,6 +245,11 @@ impl Swapchain {
     pub(crate) fn extent(&self) -> &Extent2D {
         &self.extent
     }
+
+    /// Returns the swapchain image views
+    pub(crate) fn image_views(&self) -> &[ImageView] {
+        &self.image_views
+    }
 }
 
 impl Drop for Swapchain {
