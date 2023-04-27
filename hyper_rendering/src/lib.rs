@@ -6,6 +6,7 @@
 
 pub mod render_context;
 
+pub(crate) mod command_pool;
 pub(crate) mod device;
 pub(crate) mod framebuffer;
 pub(crate) mod instance;
