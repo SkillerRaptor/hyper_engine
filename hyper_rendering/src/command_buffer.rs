@@ -16,9 +16,9 @@ use thiserror::Error;
 /// An enum representing the errors that can occur while constructing a command buffer
 #[derive(Debug, Error)]
 pub enum CreationError {
-    /// Creation of a vulkan object failed
-    #[error("creation of vulkan {1} failed")]
-    Creation(#[source] vk::Result, &'static str),
+    /// Allocation of a vulkan object failed
+    #[error("Allocation of vulkan {1} failed")]
+    Allocation(#[source] vk::Result, &'static str),
 
     /// Creation of a queue family indices failed
     #[error("creation of queue family indices failed")]
@@ -45,7 +45,7 @@ impl CommandBuffer {
             device
                 .handle()
                 .allocate_command_buffers(&command_buffer_allocate_info)
-                .map_err(|error| CreationError::Creation(error, "command pool"))
+                .map_err(|error| CreationError::Allocation(error, "command buffer"))
         }?;
 
         Ok(Self {
