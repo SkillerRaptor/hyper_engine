@@ -63,6 +63,11 @@ impl CommandPool {
             device: device.clone(),
         })
     }
+
+    /// Returns the vulkan instance command pool
+    pub(crate) fn handle(&self) -> &vk::CommandPool {
+        &self.handle
+    }
 }
 
 impl Drop for CommandPool {

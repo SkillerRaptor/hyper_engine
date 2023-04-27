@@ -7,6 +7,7 @@
 use std::sync::Arc;
 
 use crate::{
+    command_buffer::{self, CommandBuffer},
     command_pool::{self, CommandPool},
     device::{self, Device},
     framebuffer::{self, Framebuffer},
@@ -55,6 +56,10 @@ pub enum CreationError {
     /// Command Pool couldn't be constructed
     #[error("couldn't create command pool")]
     CommandPoolFailure(#[from] command_pool::CreationError),
+
+    /// Command Buffer couldn't be constructed
+    #[error("couldn't create command buffer")]
+    CommandBufferFailure(#[from] command_buffer::CreationError),
 }
 
 /// A struct representing the vulkan render context
@@ -62,6 +67,9 @@ pub enum CreationError {
 /// The members are ordered in reverse order to guarantee that the objects are
 /// destroyed in the right order
 pub struct RenderContext {
+    /// Vulkan command buffer
+    _command_buffer: CommandBuffer,
+
     /// Vulkan command pool
     _command_pool: CommandPool,
 
@@ -111,8 +119,10 @@ impl RenderContext {
         }
 
         let command_pool = CommandPool::new(&instance, &surface, &device)?;
+        let command_buffer = CommandBuffer::new(&device, &command_pool)?;
 
         Ok(Self {
+            _command_buffer: command_buffer,
             _command_pool: command_pool,
             _framebuffers: framebuffers,
             _pipeline: pipeline,
