@@ -9,6 +9,7 @@ use std::sync::Arc;
 use crate::{
     device::{self, Device},
     instance::{self, Instance},
+    pipeline::{self, Pipeline},
     surface::{self, Surface},
     swapchain::{self, Swapchain},
 };
@@ -40,6 +41,10 @@ pub enum CreationError {
     /// Swapchain couldn't be constructed
     #[error("couldn't create swapchain")]
     SwapchainFailure(#[from] swapchain::CreationError),
+
+    /// Pipeline couldn't be constructed
+    #[error("couldn't create pipeline")]
+    PipelineFailure(#[from] pipeline::CreationError),
 }
 
 /// A struct representing the vulkan render context
@@ -47,6 +52,9 @@ pub enum CreationError {
 /// The members are ordered in reverse order to guarantee that the objects are
 /// destroyed in the right order
 pub struct RenderContext {
+    /// Vulkan pipeline
+    _pipeline: Pipeline,
+
     /// Vulkan swapchain
     _swapchain: Swapchain,
 
@@ -77,8 +85,10 @@ impl RenderContext {
         let surface = Surface::new(window, &entry, &instance)?;
         let device = Arc::new(Device::new(&instance, &surface)?);
         let swapchain = Swapchain::new(window, &instance, &surface, &device)?;
+        let pipeline = Pipeline::new(&device, &swapchain)?;
 
         Ok(Self {
+            _pipeline: pipeline,
             _swapchain: swapchain,
             _device: device,
             _surface: surface,

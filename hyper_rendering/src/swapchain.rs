@@ -58,10 +58,10 @@ pub(crate) struct Swapchain {
     _images: Vec<Image>,
 
     /// Swapchain extent
-    _extent: Extent2D,
+    extent: Extent2D,
 
     /// Swapchain format
-    _format: Format,
+    format: Format,
 
     /// Vulkan swapchain handle
     handle: SwapchainKHR,
@@ -174,8 +174,8 @@ impl Swapchain {
         Ok(Self {
             image_views: swapchain_image_views,
             _images: swapchain_images,
-            _extent: extent,
-            _format: surface_format.format,
+            extent,
+            format: surface_format.format,
             handle: swapchain,
             swapchain_loader,
             device: device.clone(),
@@ -234,6 +234,16 @@ impl Swapchain {
             .iter()
             .find(|&present_mode| *present_mode == PresentModeKHR::MAILBOX)
             .unwrap_or(&PresentModeKHR::FIFO)
+    }
+
+    /// Returns the swapchain format
+    pub(crate) fn format(&self) -> &Format {
+        &self.format
+    }
+
+    /// Returns the swapchain extent
+    pub(crate) fn extent(&self) -> &Extent2D {
+        &self.extent
     }
 }
 
