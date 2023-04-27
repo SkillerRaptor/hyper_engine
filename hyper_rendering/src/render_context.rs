@@ -13,6 +13,7 @@ use crate::{
     framebuffer::{self, Framebuffer},
     instance::{self, Instance},
     pipeline::{self, Pipeline},
+    semaphore::{self, Semaphore},
     surface::{self, Surface},
     swapchain::{self, Swapchain},
 };
@@ -60,6 +61,10 @@ pub enum CreationError {
     /// Command Buffer couldn't be constructed
     #[error("couldn't create command buffer")]
     CommandBufferFailure(#[from] command_buffer::CreationError),
+
+    /// Semaphore couldn't be constructed
+    #[error("couldn't create semaphore")]
+    SemaphoreFailure(#[from] semaphore::CreationError),
 }
 
 /// A struct representing the vulkan render context
@@ -67,6 +72,12 @@ pub enum CreationError {
 /// The members are ordered in reverse order to guarantee that the objects are
 /// destroyed in the right order
 pub struct RenderContext {
+    /// Render semaphore
+    _render_semaphore: Semaphore,
+
+    /// Present semaphore
+    _present_semaphore: Semaphore,
+
     /// Vulkan command buffer
     _command_buffer: CommandBuffer,
 
@@ -121,7 +132,12 @@ impl RenderContext {
         let command_pool = CommandPool::new(&instance, &surface, &device)?;
         let command_buffer = CommandBuffer::new(&device, &command_pool)?;
 
+        let present_semaphore = Semaphore::new(&device)?;
+        let render_semaphore = Semaphore::new(&device)?;
+
         Ok(Self {
+            _render_semaphore: render_semaphore,
+            _present_semaphore: present_semaphore,
             _command_buffer: command_buffer,
             _command_pool: command_pool,
             _framebuffers: framebuffers,
