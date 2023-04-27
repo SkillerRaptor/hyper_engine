@@ -57,7 +57,7 @@ pub(crate) struct Swapchain {
     image_views: Vec<ImageView>,
 
     /// Image handles of the swapchain
-    _images: Vec<Image>,
+    images: Vec<Image>,
 
     /// Swapchain extent
     extent: Extent2D,
@@ -175,7 +175,7 @@ impl Swapchain {
 
         Ok(Self {
             image_views: swapchain_image_views,
-            _images: swapchain_images,
+            images: swapchain_images,
             extent,
             format: surface_format.format,
             handle: swapchain,
@@ -294,6 +294,11 @@ impl Swapchain {
     /// Returns the swapchain extent
     pub(crate) fn extent(&self) -> &Extent2D {
         &self.extent
+    }
+
+    /// Returns the swapchain images
+    pub(crate) fn images(&self) -> &[Image] {
+        &self.images
     }
 
     /// Returns the swapchain image views

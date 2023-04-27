@@ -19,8 +19,9 @@ use crate::{
 use ash::{
     extensions::khr::Swapchain,
     vk::{
-        self, DeviceCreateInfo, DeviceQueueCreateInfo, PhysicalDevice, PhysicalDeviceFeatures,
-        PipelineStageFlags, Queue, SubmitInfo,
+        self, DeviceCreateInfo, DeviceQueueCreateInfo, PhysicalDevice,
+        PhysicalDeviceDynamicRenderingFeatures, PhysicalDeviceFeatures2, PipelineStageFlags, Queue,
+        SubmitInfo,
     },
 };
 use std::{collections::HashSet, ffi::CStr};
@@ -319,6 +320,8 @@ impl Device {
 
         let extensions_supported = Self::check_extension_support(instance, physical_device)?;
 
+        let features_supported = Self::check_feature_support(instance, physical_device);
+
         let swapchain_adequate = if extensions_supported {
             let swapchain_support_details = SwapchainSupportDetails::new(surface, physical_device)?;
             !swapchain_support_details.formats().is_empty()
@@ -327,7 +330,10 @@ impl Device {
             false
         };
 
-        Ok(queue_family_indices.is_complete() && extensions_supported && swapchain_adequate)
+        Ok(queue_family_indices.is_complete()
+            && extensions_supported
+            && features_supported
+            && swapchain_adequate)
     }
 
     /// Checks if physical device supportes all extensions
@@ -335,7 +341,7 @@ impl Device {
     /// Arguments:
     ///
     /// * `instance`: Instance wrapper
-    /// * `physical_device`: Device to be searched
+    /// * `physical_device`: Device to be checked
     fn check_extension_support(
         instance: &Instance,
         physical_device: &PhysicalDevice,
@@ -359,6 +365,28 @@ impl Device {
         });
 
         Ok(available)
+    }
+
+    /// Checks if physical device supports required features
+    ///
+    /// Arguments:
+    ///
+    /// * `instance`: Instance wrapper
+    /// * `physical_device`: Device to be checked
+    fn check_feature_support(instance: &Instance, physical_device: &PhysicalDevice) -> bool {
+        let mut physical_device_dynamic_rendering_feature =
+            PhysicalDeviceDynamicRenderingFeatures::builder();
+
+        let mut physical_device_features = PhysicalDeviceFeatures2::builder()
+            .push_next(&mut physical_device_dynamic_rendering_feature);
+
+        unsafe {
+            instance
+                .handle()
+                .get_physical_device_features2(*physical_device, &mut physical_device_features);
+        }
+
+        physical_device_dynamic_rendering_feature.dynamic_rendering == vk::TRUE
     }
 
     /// Creates an internal ash
@@ -389,18 +417,27 @@ impl Device {
             device_queue_create_infos.push(device_queue_create_info);
         }
 
-        let phyiscal_device_features = PhysicalDeviceFeatures::builder();
+        let mut dynamic_rendering_feature = PhysicalDeviceDynamicRenderingFeatures::builder();
+
+        let mut physical_device_features =
+            PhysicalDeviceFeatures2::builder().push_next(&mut dynamic_rendering_feature);
+
+        unsafe {
+            instance
+                .handle()
+                .get_physical_device_features2(*physical_device, &mut physical_device_features);
+        }
 
         let extension_names = Self::EXTENSIONS
             .iter()
             .map(|&extension| extension.as_ptr())
             .collect::<Vec<_>>();
 
-        let device_create_info = DeviceCreateInfo::builder()
+        let device_create_info: vk::DeviceCreateInfoBuilder = DeviceCreateInfo::builder()
+            .push_next(&mut physical_device_features)
             .queue_create_infos(&device_queue_create_infos)
             .enabled_layer_names(&[])
-            .enabled_extension_names(&extension_names)
-            .enabled_features(&phyiscal_device_features);
+            .enabled_extension_names(&extension_names);
 
         let device = unsafe {
             instance

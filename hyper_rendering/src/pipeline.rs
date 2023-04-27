@@ -4,23 +4,21 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    command_buffer::CommandBuffer, device::Device, framebuffer::Framebuffer, swapchain::Swapchain,
-};
+use crate::{command_buffer::CommandBuffer, device::Device, swapchain::Swapchain};
 
 use ash::vk::{
-    self, AccessFlags, AttachmentDescription, AttachmentLoadOp, AttachmentReference,
-    AttachmentStoreOp, BlendFactor, BlendOp, ClearValue, ColorComponentFlags, CullModeFlags,
-    DynamicState, FrontFace, GraphicsPipelineCreateInfo, ImageLayout, LogicOp, Offset2D,
-    PipelineBindPoint, PipelineCache, PipelineColorBlendAttachmentState,
-    PipelineColorBlendStateCreateInfo, PipelineDynamicStateCreateInfo,
-    PipelineInputAssemblyStateCreateInfo, PipelineLayout, PipelineLayoutCreateInfo,
-    PipelineMultisampleStateCreateInfo, PipelineRasterizationStateCreateInfo,
+    self, AccessFlags, AttachmentLoadOp, AttachmentStoreOp, BlendFactor, BlendOp, ClearValue,
+    ColorComponentFlags, CullModeFlags, DependencyFlags, DynamicState, FrontFace,
+    GraphicsPipelineCreateInfo, Image, ImageAspectFlags, ImageLayout, ImageMemoryBarrier,
+    ImageSubresourceRange, ImageView, LogicOp, Offset2D, PipelineBindPoint, PipelineCache,
+    PipelineColorBlendAttachmentState, PipelineColorBlendStateCreateInfo,
+    PipelineDynamicStateCreateInfo, PipelineInputAssemblyStateCreateInfo, PipelineLayout,
+    PipelineLayoutCreateInfo, PipelineMultisampleStateCreateInfo,
+    PipelineRasterizationStateCreateInfo, PipelineRenderingCreateInfoKHR,
     PipelineShaderStageCreateInfo, PipelineStageFlags, PipelineVertexInputStateCreateInfo,
     PipelineViewportStateCreateInfo, PolygonMode, PrimitiveTopology, Rect2D, RenderPass,
-    RenderPassBeginInfo, RenderPassCreateInfo, SampleCountFlags, ShaderModule,
-    ShaderModuleCreateInfo, ShaderStageFlags, SubpassContents, SubpassDependency,
-    SubpassDescription,
+    RenderingAttachmentInfoKHR, RenderingInfoKHR, SampleCountFlags, ShaderModule,
+    ShaderModuleCreateInfo, ShaderStageFlags,
 };
 use std::{
     ffi::CStr,
@@ -58,9 +56,6 @@ pub(crate) struct Pipeline {
     /// Layout of the pipeline
     graphics_pipeline_layout: PipelineLayout,
 
-    /// Render pass transitions
-    render_pass: RenderPass,
-
     /// Device Wrapper
     device: Arc<Device>,
 }
@@ -73,75 +68,15 @@ impl Pipeline {
     /// * `device`: Device wrapper
     /// * `swapchain`: Swapchain wrapper
     pub(crate) fn new(device: &Arc<Device>, swapchain: &Swapchain) -> Result<Self, CreationError> {
-        let render_pass = Self::create_render_pass(device, swapchain)?;
         let graphics_pipeline_layout = Self::create_graphics_pipeline_layout(device)?;
         let graphics_pipeline =
-            Self::create_graphics_pipeline(device, &render_pass, &graphics_pipeline_layout)?;
+            Self::create_graphics_pipeline(device, swapchain, &graphics_pipeline_layout)?;
 
         Ok(Self {
             graphics_pipeline,
             graphics_pipeline_layout,
-            render_pass,
             device: device.clone(),
         })
-    }
-
-    /// Creates a render pass
-    ///
-    /// Arguments:
-    ///
-    /// * `device`: Device wrapper
-    /// * `swapchain`: Swapchain wrapper
-    fn create_render_pass(
-        device: &Arc<Device>,
-        swapchain: &Swapchain,
-    ) -> Result<RenderPass, CreationError> {
-        let color_attachment_description = AttachmentDescription::builder()
-            .format(*swapchain.format())
-            .samples(SampleCountFlags::TYPE_1)
-            .load_op(AttachmentLoadOp::CLEAR)
-            .store_op(AttachmentStoreOp::STORE)
-            .stencil_load_op(AttachmentLoadOp::DONT_CARE)
-            .stencil_store_op(AttachmentStoreOp::DONT_CARE)
-            .initial_layout(ImageLayout::UNDEFINED)
-            .final_layout(ImageLayout::PRESENT_SRC_KHR);
-
-        let color_attachment_reference = AttachmentReference::builder()
-            .attachment(0)
-            .layout(ImageLayout::COLOR_ATTACHMENT_OPTIMAL);
-
-        let color_attachments = &[*color_attachment_reference];
-
-        let color_subpass = SubpassDescription::builder()
-            .pipeline_bind_point(PipelineBindPoint::GRAPHICS)
-            .color_attachments(color_attachments);
-
-        let render_pass_attachments = &[*color_attachment_description];
-        let subpasses = &[*color_subpass];
-
-        let subpass_dependency = SubpassDependency::builder()
-            .src_subpass(vk::SUBPASS_EXTERNAL)
-            .dst_subpass(0)
-            .src_stage_mask(PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT)
-            .src_access_mask(AccessFlags::empty())
-            .dst_stage_mask(PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT)
-            .dst_access_mask(AccessFlags::COLOR_ATTACHMENT_WRITE);
-
-        let subpass_dependencies = &[*subpass_dependency];
-
-        let render_pass_create_info = RenderPassCreateInfo::builder()
-            .attachments(render_pass_attachments)
-            .subpasses(subpasses)
-            .dependencies(subpass_dependencies);
-
-        let render_pass = unsafe {
-            device
-                .handle()
-                .create_render_pass(&render_pass_create_info, None)
-                .map_err(|error| CreationError::Creation(error, "render pass"))
-        }?;
-
-        Ok(render_pass)
     }
 
     /// Creates a new graphics pipeline layout
@@ -175,7 +110,7 @@ impl Pipeline {
     /// * `pipeline_layout`: Layout of the pipeline
     fn create_graphics_pipeline(
         device: &Arc<Device>,
-        render_pass: &RenderPass,
+        swapchain: &Swapchain,
         pipeline_layout: &PipelineLayout,
     ) -> Result<vk::Pipeline, CreationError> {
         let vertex_shader_code = Self::parse_shader("./assets/shaders/compiled/triangle_vert.spv")?;
@@ -259,7 +194,12 @@ impl Pipeline {
             .attachments(attachments)
             .blend_constants([0.0; 4]);
 
+        let color_attachment_formats = &[*swapchain.format()];
+        let mut pipeline_rendering_create_info = PipelineRenderingCreateInfoKHR::builder()
+            .color_attachment_formats(color_attachment_formats);
+
         let graphics_pipeline_create_info = GraphicsPipelineCreateInfo::builder()
+            .push_next(&mut pipeline_rendering_create_info)
             .stages(&shader_stages)
             .vertex_input_state(&pipeline_vertex_input_state_create_info)
             .input_assembly_state(&pipeline_input_assembly_state_create_info)
@@ -270,7 +210,7 @@ impl Pipeline {
             .color_blend_state(&pipeline_color_blend_state_create_info)
             .dynamic_state(&pipeline_dynamic_state_create_info)
             .layout(*pipeline_layout)
-            .render_pass(*render_pass)
+            .render_pass(RenderPass::null())
             .subpass(0)
             .base_pipeline_handle(vk::Pipeline::null())
             .base_pipeline_index(-1);
@@ -342,14 +282,41 @@ impl Pipeline {
         Ok(shader_module)
     }
 
-    /// Begins the render pass
-    pub(crate) fn begin_render_pass(
+    /// Begins the rendering
+    pub(crate) fn begin_rendering(
         &self,
         swapchain: &Swapchain,
-        framebuffer: &Framebuffer,
         command_buffer: &CommandBuffer,
+        image: &Image,
+        image_view: &ImageView,
         clear_value: ClearValue,
     ) {
+        let subresource_range = ImageSubresourceRange::builder()
+            .aspect_mask(ImageAspectFlags::COLOR)
+            .base_mip_level(0)
+            .level_count(1)
+            .base_array_layer(0)
+            .layer_count(1);
+
+        let image_memory_barrier = ImageMemoryBarrier::builder()
+            .dst_access_mask(AccessFlags::COLOR_ATTACHMENT_WRITE)
+            .old_layout(ImageLayout::UNDEFINED)
+            .new_layout(ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+            .image(*image)
+            .subresource_range(*subresource_range);
+
+        unsafe {
+            self.device.handle().cmd_pipeline_barrier(
+                *command_buffer.handle(),
+                PipelineStageFlags::TOP_OF_PIPE,
+                PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
+                DependencyFlags::empty(),
+                &[],
+                &[],
+                &[*image_memory_barrier],
+            );
+        }
+
         let render_area_extent = swapchain.extent();
         let render_area_offset = Offset2D::builder().x(0).y(0);
 
@@ -357,29 +324,58 @@ impl Pipeline {
             .extent(*render_area_extent)
             .offset(*render_area_offset);
 
-        let clear_values = &[clear_value];
+        let color_attachment_info = RenderingAttachmentInfoKHR::builder()
+            .image_view(*image_view)
+            .image_layout(ImageLayout::ATTACHMENT_OPTIMAL_KHR)
+            .load_op(AttachmentLoadOp::CLEAR)
+            .store_op(AttachmentStoreOp::STORE)
+            .clear_value(clear_value);
 
-        let render_pass_begin_info = RenderPassBeginInfo::builder()
-            .render_pass(self.render_pass)
+        let color_attachments = &[*color_attachment_info];
+        let rendering_info = RenderingInfoKHR::builder()
             .render_area(*render_area)
-            .framebuffer(*framebuffer.handle())
-            .clear_values(clear_values);
+            .layer_count(1)
+            .color_attachments(color_attachments);
 
-        unsafe {
-            self.device.handle().cmd_begin_render_pass(
-                *command_buffer.handle(),
-                &render_pass_begin_info,
-                SubpassContents::INLINE,
-            )
-        }
-    }
-
-    /// Ends the render pass
-    pub(crate) fn end_render_pass(&self, command_buffer: &CommandBuffer) {
         unsafe {
             self.device
                 .handle()
-                .cmd_end_render_pass(*command_buffer.handle());
+                .cmd_begin_rendering(*command_buffer.handle(), &rendering_info);
+        }
+    }
+
+    /// Ends the rendering
+    pub(crate) fn end_rendering(&self, command_buffer: &CommandBuffer, image: &Image) {
+        unsafe {
+            self.device
+                .handle()
+                .cmd_end_rendering(*command_buffer.handle());
+        }
+
+        let subresource_range = ImageSubresourceRange::builder()
+            .aspect_mask(ImageAspectFlags::COLOR)
+            .base_mip_level(0)
+            .level_count(1)
+            .base_array_layer(0)
+            .layer_count(1);
+
+        let image_memory_barrier = ImageMemoryBarrier::builder()
+            .src_access_mask(AccessFlags::COLOR_ATTACHMENT_WRITE)
+            .old_layout(ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+            .new_layout(ImageLayout::PRESENT_SRC_KHR)
+            .image(*image)
+            .subresource_range(*subresource_range);
+
+        unsafe {
+            self.device.handle().cmd_pipeline_barrier(
+                *command_buffer.handle(),
+                PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
+                PipelineStageFlags::BOTTOM_OF_PIPE,
+                DependencyFlags::empty(),
+                &[],
+                &[],
+                &[*image_memory_barrier],
+            );
         }
     }
 
@@ -393,11 +389,6 @@ impl Pipeline {
             )
         }
     }
-
-    /// Returns the render pass
-    pub(crate) fn render_pass(&self) -> &RenderPass {
-        &self.render_pass
-    }
 }
 
 impl Drop for Pipeline {
@@ -410,10 +401,6 @@ impl Drop for Pipeline {
             self.device
                 .handle()
                 .destroy_pipeline_layout(self.graphics_pipeline_layout, None);
-
-            self.device
-                .handle()
-                .destroy_render_pass(self.render_pass, None);
         }
     }
 }

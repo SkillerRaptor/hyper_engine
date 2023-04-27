@@ -10,7 +10,6 @@ pub(crate) mod command_buffer;
 pub(crate) mod command_pool;
 pub(crate) mod device;
 pub(crate) mod fence;
-pub(crate) mod framebuffer;
 pub(crate) mod instance;
 pub(crate) mod pipeline;
 pub(crate) mod semaphore;

@@ -11,7 +11,6 @@ use crate::{
     command_pool::{self, CommandPool},
     device::{self, Device},
     fence::{self, Fence},
-    framebuffer::{self, Framebuffer},
     instance::{self, Instance},
     pipeline::{self, Pipeline},
     semaphore::{self, Semaphore},
@@ -54,10 +53,6 @@ pub enum CreationError {
     #[error("couldn't create pipeline")]
     PipelineFailure(#[from] pipeline::CreationError),
 
-    /// Framebuffer couldn't be constructed
-    #[error("couldn't create framebuffer")]
-    FramebufferFailure(#[from] framebuffer::CreationError),
-
     /// Command Pool couldn't be constructed
     #[error("couldn't create command pool")]
     CommandPoolFailure(#[from] command_pool::CreationError),
@@ -98,9 +93,6 @@ pub struct RenderContext {
     /// Vulkan command pool
     _command_pool: CommandPool,
 
-    /// Framebuffers of the screen
-    framebuffers: Vec<Framebuffer>,
-
     /// Vulkan pipeline
     pipeline: Pipeline,
 
@@ -136,13 +128,6 @@ impl RenderContext {
         let swapchain = Swapchain::new(window, &instance, &surface, &device)?;
         let pipeline = Pipeline::new(&device, &swapchain)?;
 
-        let mut framebuffers = Vec::new();
-        for swapchain_image_view in swapchain.image_views() {
-            let framebuffer =
-                Framebuffer::new(&device, &swapchain, &pipeline, swapchain_image_view)?;
-            framebuffers.push(framebuffer);
-        }
-
         let command_pool = CommandPool::new(&instance, &surface, &device)?;
         let command_buffer = CommandBuffer::new(&device, &command_pool)?;
 
@@ -158,7 +143,6 @@ impl RenderContext {
             present_semaphore,
             command_buffer,
             _command_pool: command_pool,
-            framebuffers: framebuffers,
             pipeline,
             swapchain,
             device,
@@ -187,10 +171,11 @@ impl RenderContext {
             },
         };
 
-        self.pipeline.begin_render_pass(
+        self.pipeline.begin_rendering(
             &self.swapchain,
-            &self.framebuffers[self.swapchain_image_index as usize],
             &self.command_buffer,
+            &self.swapchain.images()[self.swapchain_image_index as usize],
+            &self.swapchain.image_views()[self.swapchain_image_index as usize],
             clear_value,
         );
 
@@ -225,7 +210,10 @@ impl RenderContext {
 
     /// Ends the frame
     pub fn end(&self) {
-        self.pipeline.end_render_pass(&self.command_buffer);
+        self.pipeline.end_rendering(
+            &self.command_buffer,
+            &self.swapchain.images()[self.swapchain_image_index as usize],
+        );
         self.command_buffer.end();
     }
 
