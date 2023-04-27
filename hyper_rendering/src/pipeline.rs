@@ -4,19 +4,23 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{device::Device, swapchain::Swapchain};
+use crate::{
+    command_buffer::CommandBuffer, device::Device, framebuffer::Framebuffer, swapchain::Swapchain,
+};
 
 use ash::vk::{
-    self, AttachmentDescription, AttachmentLoadOp, AttachmentReference, AttachmentStoreOp,
-    BlendFactor, BlendOp, ColorComponentFlags, CullModeFlags, DynamicState, FrontFace,
-    GraphicsPipelineCreateInfo, ImageLayout, LogicOp, PipelineBindPoint, PipelineCache,
-    PipelineColorBlendAttachmentState, PipelineColorBlendStateCreateInfo,
-    PipelineDynamicStateCreateInfo, PipelineInputAssemblyStateCreateInfo, PipelineLayout,
-    PipelineLayoutCreateInfo, PipelineMultisampleStateCreateInfo,
-    PipelineRasterizationStateCreateInfo, PipelineShaderStageCreateInfo,
-    PipelineVertexInputStateCreateInfo, PipelineViewportStateCreateInfo, PolygonMode,
-    PrimitiveTopology, RenderPass, RenderPassCreateInfo, SampleCountFlags, ShaderModule,
-    ShaderModuleCreateInfo, ShaderStageFlags, SubpassDescription,
+    self, AccessFlags, AttachmentDescription, AttachmentLoadOp, AttachmentReference,
+    AttachmentStoreOp, BlendFactor, BlendOp, ClearValue, ColorComponentFlags, CullModeFlags,
+    DynamicState, FrontFace, GraphicsPipelineCreateInfo, ImageLayout, LogicOp, Offset2D,
+    PipelineBindPoint, PipelineCache, PipelineColorBlendAttachmentState,
+    PipelineColorBlendStateCreateInfo, PipelineDynamicStateCreateInfo,
+    PipelineInputAssemblyStateCreateInfo, PipelineLayout, PipelineLayoutCreateInfo,
+    PipelineMultisampleStateCreateInfo, PipelineRasterizationStateCreateInfo,
+    PipelineShaderStageCreateInfo, PipelineStageFlags, PipelineVertexInputStateCreateInfo,
+    PipelineViewportStateCreateInfo, PolygonMode, PrimitiveTopology, Rect2D, RenderPass,
+    RenderPassBeginInfo, RenderPassCreateInfo, SampleCountFlags, ShaderModule,
+    ShaderModuleCreateInfo, ShaderStageFlags, SubpassContents, SubpassDependency,
+    SubpassDescription,
 };
 use std::{
     ffi::CStr,
@@ -97,8 +101,8 @@ impl Pipeline {
             .samples(SampleCountFlags::TYPE_1)
             .load_op(AttachmentLoadOp::CLEAR)
             .store_op(AttachmentStoreOp::STORE)
-            .stencil_load_op(AttachmentLoadOp::CLEAR)
-            .stencil_store_op(AttachmentStoreOp::STORE)
+            .stencil_load_op(AttachmentLoadOp::DONT_CARE)
+            .stencil_store_op(AttachmentStoreOp::DONT_CARE)
             .initial_layout(ImageLayout::UNDEFINED)
             .final_layout(ImageLayout::PRESENT_SRC_KHR);
 
@@ -115,9 +119,20 @@ impl Pipeline {
         let render_pass_attachments = &[*color_attachment_description];
         let subpasses = &[*color_subpass];
 
+        let subpass_dependency = SubpassDependency::builder()
+            .src_subpass(vk::SUBPASS_EXTERNAL)
+            .dst_subpass(0)
+            .src_stage_mask(PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT)
+            .src_access_mask(AccessFlags::empty())
+            .dst_stage_mask(PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT)
+            .dst_access_mask(AccessFlags::COLOR_ATTACHMENT_WRITE);
+
+        let subpass_dependencies = &[*subpass_dependency];
+
         let render_pass_create_info = RenderPassCreateInfo::builder()
             .attachments(render_pass_attachments)
-            .subpasses(subpasses);
+            .subpasses(subpasses)
+            .dependencies(subpass_dependencies);
 
         let render_pass = unsafe {
             device
@@ -325,6 +340,58 @@ impl Pipeline {
         }?;
 
         Ok(shader_module)
+    }
+
+    /// Begins the render pass
+    pub(crate) fn begin_render_pass(
+        &self,
+        swapchain: &Swapchain,
+        framebuffer: &Framebuffer,
+        command_buffer: &CommandBuffer,
+        clear_value: ClearValue,
+    ) {
+        let render_area_extent = swapchain.extent();
+        let render_area_offset = Offset2D::builder().x(0).y(0);
+
+        let render_area = Rect2D::builder()
+            .extent(*render_area_extent)
+            .offset(*render_area_offset);
+
+        let clear_values = &[clear_value];
+
+        let render_pass_begin_info = RenderPassBeginInfo::builder()
+            .render_pass(self.render_pass)
+            .render_area(*render_area)
+            .framebuffer(*framebuffer.handle())
+            .clear_values(clear_values);
+
+        unsafe {
+            self.device.handle().cmd_begin_render_pass(
+                *command_buffer.handle(),
+                &render_pass_begin_info,
+                SubpassContents::INLINE,
+            )
+        }
+    }
+
+    /// Ends the render pass
+    pub(crate) fn end_render_pass(&self, command_buffer: &CommandBuffer) {
+        unsafe {
+            self.device
+                .handle()
+                .cmd_end_render_pass(*command_buffer.handle());
+        }
+    }
+
+    /// Binds the pipeline
+    pub(crate) fn bind(&self, command_buffer: &CommandBuffer) {
+        unsafe {
+            self.device.handle().cmd_bind_pipeline(
+                *command_buffer.handle(),
+                PipelineBindPoint::GRAPHICS,
+                self.graphics_pipeline,
+            )
+        }
     }
 
     /// Returns the render pass

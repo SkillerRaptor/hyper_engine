@@ -21,7 +21,10 @@ use crate::{
 
 use hyper_platform::window::Window;
 
-use ash::{Entry, LoadingError};
+use ash::{
+    vk::{ClearColorValue, ClearValue, CommandBufferUsageFlags, Offset2D, Rect2D, Viewport},
+    Entry, LoadingError,
+};
 use thiserror::Error;
 
 /// An enum representing the errors that can occur while constructing the render context
@@ -77,32 +80,35 @@ pub enum CreationError {
 /// The members are ordered in reverse order to guarantee that the objects are
 /// destroyed in the right order
 pub struct RenderContext {
-    /// Rendewr fence,
-    _render_fence: Fence,
+    /// Current swapchain image index
+    swapchain_image_index: u32,
+
+    /// Render fence,
+    render_fence: Fence,
 
     /// Render semaphore
-    _render_semaphore: Semaphore,
+    render_semaphore: Semaphore,
 
     /// Present semaphore
-    _present_semaphore: Semaphore,
+    present_semaphore: Semaphore,
 
     /// Vulkan command buffer
-    _command_buffer: CommandBuffer,
+    command_buffer: CommandBuffer,
 
     /// Vulkan command pool
     _command_pool: CommandPool,
 
     /// Framebuffers of the screen
-    _framebuffers: Vec<Framebuffer>,
+    framebuffers: Vec<Framebuffer>,
 
     /// Vulkan pipeline
-    _pipeline: Pipeline,
+    pipeline: Pipeline,
 
     /// Vulkan swapchain
-    _swapchain: Swapchain,
+    swapchain: Swapchain,
 
     /// Vulkan physical and logical device
-    _device: Arc<Device>,
+    device: Arc<Device>,
 
     /// Vulkan surface
     _surface: Surface,
@@ -146,18 +152,110 @@ impl RenderContext {
         let render_fence = Fence::new(&device)?;
 
         Ok(Self {
-            _render_fence: render_fence,
-            _render_semaphore: render_semaphore,
-            _present_semaphore: present_semaphore,
-            _command_buffer: command_buffer,
+            swapchain_image_index: 0,
+            render_fence,
+            render_semaphore,
+            present_semaphore,
+            command_buffer,
             _command_pool: command_pool,
-            _framebuffers: framebuffers,
-            _pipeline: pipeline,
-            _swapchain: swapchain,
-            _device: device,
+            framebuffers: framebuffers,
+            pipeline,
+            swapchain,
+            device,
             _surface: surface,
             _instance: instance,
             _entry: entry,
         })
+    }
+
+    /// Begins the frame
+    pub fn begin(&mut self) {
+        self.render_fence.wait();
+        self.render_fence.reset();
+
+        self.swapchain_image_index = self
+            .swapchain
+            .acquire_next_image(&self.present_semaphore, None);
+
+        self.command_buffer.reset();
+        self.command_buffer
+            .begin(CommandBufferUsageFlags::ONE_TIME_SUBMIT);
+
+        let clear_value = ClearValue {
+            color: ClearColorValue {
+                float32: [0.12941, 0.06275, 0.13725, 1.0],
+            },
+        };
+
+        self.pipeline.begin_render_pass(
+            &self.swapchain,
+            &self.framebuffers[self.swapchain_image_index as usize],
+            &self.command_buffer,
+            clear_value,
+        );
+
+        self.pipeline.bind(&self.command_buffer);
+
+        let viewport = Viewport::builder()
+            .x(0.0)
+            .y(0.0)
+            .width(self.swapchain.extent().width as f32)
+            .height(self.swapchain.extent().height as f32)
+            .min_depth(0.0)
+            .max_depth(1.0);
+
+        unsafe {
+            self.device
+                .handle()
+                .cmd_set_viewport(*self.command_buffer.handle(), 0, &[*viewport]);
+        }
+
+        let offset = Offset2D::builder().x(0).y(0);
+
+        let scissor = Rect2D::builder()
+            .offset(*offset)
+            .extent(*self.swapchain.extent());
+
+        unsafe {
+            self.device
+                .handle()
+                .cmd_set_scissor(*self.command_buffer.handle(), 0, &[*scissor]);
+        }
+    }
+
+    /// Ends the frame
+    pub fn end(&self) {
+        self.pipeline.end_render_pass(&self.command_buffer);
+        self.command_buffer.end();
+    }
+
+    /// Submits the current data to the gpu
+    pub fn submit(&self) {
+        self.device.submit_queue(
+            &self.command_buffer,
+            &self.present_semaphore,
+            &self.render_semaphore,
+            &self.render_fence,
+        );
+
+        self.swapchain.present_queue(
+            self.device.present_queue(),
+            &self.render_semaphore,
+            self.swapchain_image_index,
+        );
+    }
+
+    /// Draws the triangle!
+    pub fn draw(&self) {
+        unsafe {
+            self.device
+                .handle()
+                .cmd_draw(*self.command_buffer.handle(), 3, 1, 0, 0)
+        }
+    }
+
+    /// Waits for the device to be finished
+    pub fn wait_idle(&self) {
+        self.device.wait_idle();
     }
 }

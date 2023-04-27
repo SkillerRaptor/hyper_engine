@@ -9,7 +9,10 @@ use crate::{
     device::{queue_family_indices, Device},
 };
 
-use ash::vk::{self, CommandBufferAllocateInfo, CommandBufferLevel};
+use ash::vk::{
+    self, CommandBufferAllocateInfo, CommandBufferBeginInfo, CommandBufferLevel,
+    CommandBufferResetFlags, CommandBufferUsageFlags,
+};
 use std::sync::Arc;
 use thiserror::Error;
 
@@ -28,10 +31,19 @@ pub enum CreationError {
 /// A struct representing a wrapper for the vulkan command buffer
 pub(crate) struct CommandBuffer {
     /// Vulkan command buffer handle
-    _handle: vk::CommandBuffer,
+    handle: vk::CommandBuffer,
+
+    /// Device Wrapper
+    device: Arc<Device>,
 }
 
 impl CommandBuffer {
+    /// Constructs a new command pool
+    ///
+    /// Arguments:
+    ///
+    /// * `device`: Vulkan device
+    /// * `command_pool`: Command pool handle
     pub(crate) fn new(
         device: &Arc<Device>,
         command_pool: &CommandPool,
@@ -49,7 +61,48 @@ impl CommandBuffer {
         }?;
 
         Ok(Self {
-            _handle: command_buffers[0],
+            handle: command_buffers[0],
+            device: device.clone(),
         })
+    }
+
+    /// Resets the command buffer
+    pub(crate) fn reset(&self) {
+        // TODO: Propagate error
+        unsafe {
+            self.device
+                .handle()
+                .reset_command_buffer(self.handle, CommandBufferResetFlags::from_raw(0))
+                .unwrap();
+        }
+    }
+
+    /// Begins the command buffer recording
+    pub(crate) fn begin(&self, usage_flags: CommandBufferUsageFlags) {
+        // TODO: Propagate error
+        let command_buffer_begin_info = CommandBufferBeginInfo::builder().flags(usage_flags);
+
+        unsafe {
+            self.device
+                .handle()
+                .begin_command_buffer(self.handle, &command_buffer_begin_info)
+                .unwrap();
+        }
+    }
+
+    /// Ends the command buffer recording
+    pub(crate) fn end(&self) {
+        // TODO: Propagate error
+        unsafe {
+            self.device
+                .handle()
+                .end_command_buffer(self.handle)
+                .unwrap();
+        }
+    }
+
+    /// Returns the vulkan command buffer handle
+    pub(crate) fn handle(&self) -> &vk::CommandBuffer {
+        &self.handle
     }
 }

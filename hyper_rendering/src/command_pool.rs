@@ -39,6 +39,13 @@ pub(crate) struct CommandPool {
 }
 
 impl CommandPool {
+    /// Constructs a new command pool
+    ///
+    /// Arguments:
+    ///
+    /// * `instance`: Vulkan instance
+    /// * `surface`: Vulkan surface
+    /// * `device`: Vulkan device
     pub(crate) fn new(
         instance: &Instance,
         surface: &Surface,
@@ -64,7 +71,7 @@ impl CommandPool {
         })
     }
 
-    /// Returns the vulkan instance command pool
+    /// Returns the vulkan command pool handle
     pub(crate) fn handle(&self) -> &vk::CommandPool {
         &self.handle
     }

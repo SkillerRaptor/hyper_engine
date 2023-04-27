@@ -5,11 +5,14 @@
  */
 
 use crate::{
+    command_buffer::CommandBuffer,
     device::{
         queue_family_indices::QueueFamilyIndices,
         swapchain_support_details::SwapchainSupportDetails,
     },
+    fence::Fence,
     instance::Instance,
+    semaphore::Semaphore,
     surface::Surface,
 };
 
@@ -17,7 +20,7 @@ use ash::{
     extensions::khr::Swapchain,
     vk::{
         self, DeviceCreateInfo, DeviceQueueCreateInfo, PhysicalDevice, PhysicalDeviceFeatures,
-        Queue,
+        PipelineStageFlags, Queue, SubmitInfo,
     },
 };
 use std::{collections::HashSet, ffi::CStr};
@@ -88,6 +91,10 @@ pub(crate) mod queue_family_indices {
                         .map_err(CreationError::SurfaceLost)
                 }? {
                     queue_family_indices.present_family = Some(i as u32);
+                }
+
+                if queue_family_indices.is_complete() {
+                    break;
                 }
             }
 
@@ -225,10 +232,10 @@ pub enum CreationError {
 /// A struct representing a wrapper for the vulkan logical and physical device
 pub(crate) struct Device {
     /// Present queue
-    _present_queue: Queue,
+    present_queue: Queue,
 
     /// Graphics queue
-    _graphics_queue: Queue,
+    graphics_queue: Queue,
 
     /// Internal ash device handle
     handle: ash::Device,
@@ -258,8 +265,8 @@ impl Device {
             unsafe { device.get_device_queue(queue_family_indices.present_family().unwrap(), 0) };
 
         Ok(Self {
-            _present_queue: present_queue,
-            _graphics_queue: graphics_queue,
+            present_queue,
+            graphics_queue,
             handle: device,
             physical_device,
         })
@@ -405,6 +412,48 @@ impl Device {
         Ok(device)
     }
 
+    /// Submits to the queue
+    ///
+    /// Arguments:
+    ///
+    /// * `command_buffer`: Command buffer to submit to
+    /// * `present_semaphore`: Semaphore for presenting
+    /// * `render_semaphore`: Semaphore for rendering
+    /// * `wait_fence`: Fence to wait for
+    pub(crate) fn submit_queue(
+        &self,
+        command_buffer: &CommandBuffer,
+        present_semaphore: &Semaphore,
+        render_semaphore: &Semaphore,
+        wait_fence: &Fence,
+    ) {
+        // TODO: Propagate error
+        let wait_dst_stage_mask = &[PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
+        let wait_semaphores = &[*present_semaphore.handle()];
+        let signal_semaphores = &[*render_semaphore.handle()];
+        let command_buffers = &[*command_buffer.handle()];
+
+        let submit_info = SubmitInfo::builder()
+            .wait_dst_stage_mask(wait_dst_stage_mask)
+            .wait_semaphores(wait_semaphores)
+            .signal_semaphores(signal_semaphores)
+            .command_buffers(command_buffers);
+
+        unsafe {
+            self.handle
+                .queue_submit(self.graphics_queue, &[*submit_info], *wait_fence.handle())
+                .unwrap();
+        }
+    }
+
+    /// Waits for the device to be finished
+    pub(crate) fn wait_idle(&self) {
+        // TODO: Propagate error
+        unsafe {
+            self.handle.device_wait_idle().unwrap();
+        }
+    }
+
     /// Returns the vulkan device handle
     pub(crate) fn handle(&self) -> &ash::Device {
         &self.handle
@@ -413,6 +462,11 @@ impl Device {
     /// Returns the vulkan device handle
     pub(crate) fn physical_device(&self) -> &PhysicalDevice {
         &self.physical_device
+    }
+
+    /// Returns the vulkan present queue handle
+    pub(crate) fn present_queue(&self) -> &Queue {
+        &self.present_queue
     }
 }
 

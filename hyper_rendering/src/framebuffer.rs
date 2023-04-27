@@ -28,6 +28,14 @@ pub(crate) struct Framebuffer {
 }
 
 impl Framebuffer {
+    /// Constructs a new command pool
+    ///
+    /// Arguments:
+    ///
+    /// * `device`: Vulkan device
+    /// * `swapchain`: Vulkan swapchain
+    /// * `pipeline`: Vulkan pipeline
+    /// * `image_view`: Framebuffer image view
     pub(crate) fn new(
         device: &Arc<Device>,
         swapchain: &Swapchain,
@@ -54,6 +62,11 @@ impl Framebuffer {
             handle: framebuffer,
             device: device.clone(),
         })
+    }
+
+    /// Returns the vulkan framebuffer handle
+    pub(crate) fn handle(&self) -> &vk::Framebuffer {
+        &self.handle
     }
 }
 

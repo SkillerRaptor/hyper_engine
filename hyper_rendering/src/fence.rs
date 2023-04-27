@@ -28,6 +28,11 @@ pub(crate) struct Fence {
 }
 
 impl Fence {
+    /// Constructs a new fence
+    ///
+    /// Arguments:
+    ///
+    /// * `device`: Vulkan device
     pub(crate) fn new(device: &Arc<Device>) -> Result<Self, CreationError> {
         let fence_create_info = FenceCreateInfo::builder().flags(FenceCreateFlags::SIGNALED);
 
@@ -42,6 +47,30 @@ impl Fence {
             handle: fence,
             device: device.clone(),
         })
+    }
+
+    /// Waits for the fence
+    pub(crate) fn wait(&self) {
+        // TODO: Propagate error
+        unsafe {
+            self.device
+                .handle()
+                .wait_for_fences(&[self.handle], true, 1_000_000_000)
+                .unwrap();
+        }
+    }
+
+    /// Resets the fence
+    pub(crate) fn reset(&self) {
+        // TODO: Propagate error
+        unsafe {
+            self.device.handle().reset_fences(&[self.handle]).unwrap();
+        }
+    }
+
+    /// Returns the vulkan fence handle
+    pub(crate) fn handle(&self) -> &vk::Fence {
+        &self.handle
     }
 }
 

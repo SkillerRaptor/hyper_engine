@@ -44,7 +44,7 @@ pub struct Application {
     window: Window,
 
     /// Application render Context
-    _render_context: RenderContext,
+    render_context: RenderContext,
 }
 
 impl Application {
@@ -78,7 +78,7 @@ impl Application {
             game,
             event_loop,
             window,
-            _render_context: render_context,
+            render_context,
         })
     }
 
@@ -108,10 +108,17 @@ impl Application {
                 self.game.update();
             }
             Event::RenderFrame => {
+                self.render_context.begin();
+                self.render_context.draw();
+                self.render_context.end();
+                self.render_context.submit();
+
                 self.game.render();
             }
             _ => {}
         });
+
+        self.render_context.wait_idle();
     }
 
     /// Constructs a new application builder

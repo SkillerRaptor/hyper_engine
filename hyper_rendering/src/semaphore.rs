@@ -28,6 +28,11 @@ pub(crate) struct Semaphore {
 }
 
 impl Semaphore {
+    /// Constructs a new semaphore
+    ///
+    /// Arguments:
+    ///
+    /// * `device`: Vulkan device
     pub(crate) fn new(device: &Arc<Device>) -> Result<Self, CreationError> {
         let semaphore_create_info =
             SemaphoreCreateInfo::builder().flags(SemaphoreCreateFlags::from_raw(0));
@@ -43,6 +48,11 @@ impl Semaphore {
             handle: semaphore,
             device: device.clone(),
         })
+    }
+
+    /// Returns the vulkan semaphore handle
+    pub(crate) fn handle(&self) -> &vk::Semaphore {
+        &self.handle
     }
 }
 

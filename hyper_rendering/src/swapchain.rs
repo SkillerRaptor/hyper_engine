@@ -12,7 +12,9 @@ use crate::{
         swapchain_support_details::{self, SwapchainSupportDetails},
         Device,
     },
+    fence::Fence,
     instance::Instance,
+    semaphore::Semaphore,
     surface::Surface,
 };
 
@@ -23,8 +25,8 @@ use ash::{
     vk::{
         self, ColorSpaceKHR, ComponentMapping, ComponentSwizzle, CompositeAlphaFlagsKHR, Extent2D,
         Format, Image, ImageAspectFlags, ImageSubresourceRange, ImageUsageFlags, ImageView,
-        ImageViewCreateInfo, ImageViewType, PresentModeKHR, SharingMode, SurfaceCapabilitiesKHR,
-        SurfaceFormatKHR, SwapchainCreateInfoKHR, SwapchainKHR,
+        ImageViewCreateInfo, ImageViewType, PresentInfoKHR, PresentModeKHR, Queue, SharingMode,
+        SurfaceCapabilitiesKHR, SurfaceFormatKHR, SwapchainCreateInfoKHR, SwapchainKHR,
     },
 };
 use thiserror::Error;
@@ -234,6 +236,54 @@ impl Swapchain {
             .iter()
             .find(|&present_mode| *present_mode == PresentModeKHR::MAILBOX)
             .unwrap_or(&PresentModeKHR::FIFO)
+    }
+
+    /// Acquires the next swapchain image
+    ///
+    /// Arguments:
+    ///
+    /// * `semaphore`: Semaphore to wait for
+    /// * `fence`: Fence to wait for
+    pub(crate) fn acquire_next_image(&self, semaphore: &Semaphore, fence: Option<&Fence>) -> u32 {
+        // TODO: Propagate error
+        unsafe {
+            let fence = if fence.is_some() {
+                *fence.as_ref().unwrap().handle()
+            } else {
+                vk::Fence::null()
+            };
+
+            let (index, _recreate) = self
+                .swapchain_loader
+                .acquire_next_image(self.handle, 1_000_000_000, *semaphore.handle(), fence)
+                .unwrap();
+
+            index
+        }
+    }
+
+    pub(crate) fn present_queue(
+        &self,
+        queue: &Queue,
+        render_semaphore: &Semaphore,
+        swapchain_image_index: u32,
+    ) {
+        // TODO: Propagte error
+
+        let swapchains = &[self.handle];
+        let wait_semaphores = &[*render_semaphore.handle()];
+        let image_indices = &[swapchain_image_index];
+
+        let present_info = PresentInfoKHR::builder()
+            .swapchains(swapchains)
+            .wait_semaphores(wait_semaphores)
+            .image_indices(image_indices);
+
+        unsafe {
+            self.swapchain_loader
+                .queue_present(*queue, &present_info)
+                .unwrap();
+        }
     }
 
     /// Returns the swapchain format
