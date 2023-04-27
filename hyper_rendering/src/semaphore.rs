@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-use std::sync::Arc;
+use crate::device::Device;
 
 use ash::vk::{self, SemaphoreCreateFlags, SemaphoreCreateInfo};
+use std::sync::Arc;
 use thiserror::Error;
-
-use crate::device::Device;
 
 /// An enum representing the errors that can occur while constructing a semaphore
 #[derive(Debug, Error)]

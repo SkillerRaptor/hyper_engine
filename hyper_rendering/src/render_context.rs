@@ -10,6 +10,7 @@ use crate::{
     command_buffer::{self, CommandBuffer},
     command_pool::{self, CommandPool},
     device::{self, Device},
+    fence::{self, Fence},
     framebuffer::{self, Framebuffer},
     instance::{self, Instance},
     pipeline::{self, Pipeline},
@@ -65,6 +66,10 @@ pub enum CreationError {
     /// Semaphore couldn't be constructed
     #[error("couldn't create semaphore")]
     SemaphoreFailure(#[from] semaphore::CreationError),
+
+    /// Fence couldn't be constructed
+    #[error("couldn't create fence")]
+    FenceFailure(#[from] fence::CreationError),
 }
 
 /// A struct representing the vulkan render context
@@ -72,6 +77,9 @@ pub enum CreationError {
 /// The members are ordered in reverse order to guarantee that the objects are
 /// destroyed in the right order
 pub struct RenderContext {
+    /// Rendewr fence,
+    _render_fence: Fence,
+
     /// Render semaphore
     _render_semaphore: Semaphore,
 
@@ -135,7 +143,10 @@ impl RenderContext {
         let present_semaphore = Semaphore::new(&device)?;
         let render_semaphore = Semaphore::new(&device)?;
 
+        let render_fence = Fence::new(&device)?;
+
         Ok(Self {
+            _render_fence: render_fence,
             _render_semaphore: render_semaphore,
             _present_semaphore: present_semaphore,
             _command_buffer: command_buffer,
