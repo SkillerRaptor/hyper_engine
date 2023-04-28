@@ -13,29 +13,18 @@ use winit::{
     platform::run_return::EventLoopExtRunReturn,
 };
 
-/// A struct representing the internal winit event loop
 #[derive(Default)]
 pub struct EventLoop {
-    /// Internal winit event loop
     internal: event_loop::EventLoop<()>,
 }
 
 impl EventLoop {
-    /// Constructs a new event loop
     pub fn new() -> Self {
         Self {
             internal: event_loop::EventLoop::new(),
         }
     }
 
-    /// Runs the event loop
-    ///
-    /// This function will run the event loop of winit till it receives a close
-    /// event. After ending the last iteration it will give back control to the caller
-    ///
-    /// Arguments:
-    ///
-    /// * `event_handler`: Event handler of the engine
     pub fn run<F>(&mut self, mut event_handler: F)
     where
         F: FnMut(Event),
@@ -115,7 +104,6 @@ impl EventLoop {
         });
     }
 
-    /// Returns the internal event loop
     pub(crate) fn internal(&self) -> &event_loop::EventLoop<()> {
         &self.internal
     }

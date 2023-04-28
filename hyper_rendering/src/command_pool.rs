@@ -17,35 +17,21 @@ use ash::vk::{self, CommandPoolCreateFlags, CommandPoolCreateInfo};
 use std::sync::Arc;
 use thiserror::Error;
 
-/// An enum representing the errors that can occur while constructing a command pool
 #[derive(Debug, Error)]
 pub enum CreationError {
-    /// Creation of a vulkan object failed
     #[error("creation of vulkan {1} failed")]
     Creation(#[source] vk::Result, &'static str),
 
-    /// Creation of a queue family indices failed
     #[error("creation of queue family indices failed")]
     QueueFamilyIndicesFailure(#[from] queue_family_indices::CreationError),
 }
 
-/// A struct representing a wrapper for the vulkan command pool
 pub(crate) struct CommandPool {
-    /// Vulkan command pool handle
     handle: vk::CommandPool,
-
-    /// Device Wrapper
     device: Arc<Device>,
 }
 
 impl CommandPool {
-    /// Constructs a new command pool
-    ///
-    /// Arguments:
-    ///
-    /// * `instance`: Vulkan instance
-    /// * `surface`: Vulkan surface
-    /// * `device`: Vulkan device
     pub(crate) fn new(
         instance: &Instance,
         surface: &Surface,
@@ -71,7 +57,6 @@ impl CommandPool {
         })
     }
 
-    /// Returns the vulkan command pool handle
     pub(crate) fn handle(&self) -> &vk::CommandPool {
         &self.handle
     }

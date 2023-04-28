@@ -28,45 +28,28 @@ use std::{
 };
 use thiserror::Error;
 
-/// An enum representing the errors that can occur while constructing a pipeline
 #[derive(Debug, Error)]
 pub enum CreationError {
-    /// Creation of a vulkan object failed
     #[error("creation of vulkan {1} failed")]
     Creation(#[source] vk::Result, &'static str),
 
-    /// Open of file failed
     #[error("file failed to open")]
     OpenFailure(#[source] io::Error),
 
-    /// Read of file failed
     #[error("file failed to be read")]
     ReadFailure(#[source] io::Error),
 
-    /// Unaligned shader code
     #[error("shader is unaligned")]
     Unaligned,
 }
 
-/// A struct representing a wrapper for the vulkan pipeline
 pub(crate) struct Pipeline {
-    /// Pipeline itself
     graphics_pipeline: vk::Pipeline,
-
-    /// Layout of the pipeline
     graphics_pipeline_layout: PipelineLayout,
-
-    /// Device Wrapper
     device: Arc<Device>,
 }
 
 impl Pipeline {
-    /// Constructs a new pipeline
-    ///
-    /// Arguments:
-    ///
-    /// * `device`: Device wrapper
-    /// * `swapchain`: Swapchain wrapper
     pub(crate) fn new(device: &Arc<Device>, swapchain: &Swapchain) -> Result<Self, CreationError> {
         let graphics_pipeline_layout = Self::create_graphics_pipeline_layout(device)?;
         let graphics_pipeline =
@@ -79,11 +62,6 @@ impl Pipeline {
         })
     }
 
-    /// Creates a new graphics pipeline layout
-    ///
-    /// Arguments:
-    ///
-    /// * `device`: Device wrapper
     fn create_graphics_pipeline_layout(
         device: &Arc<Device>,
     ) -> Result<PipelineLayout, CreationError> {
@@ -101,13 +79,6 @@ impl Pipeline {
         Ok(pipeline_layout)
     }
 
-    /// Creates a new graphics pipeline
-    ///
-    /// Arguments:
-    ///
-    /// * `device`: Device wrapper
-    /// * `render_pass`: Render pass of the pipeline
-    /// * `pipeline_layout`: Layout of the pipeline
     fn create_graphics_pipeline(
         device: &Arc<Device>,
         swapchain: &Swapchain,
@@ -238,11 +209,6 @@ impl Pipeline {
         Ok(graphics_pipeline[0])
     }
 
-    /// Parses the bytes of a shader
-    ///
-    /// Arguments:
-    ///
-    /// * `file`: Shader file to parse
     fn parse_shader(file: &str) -> Result<Vec<u8>, CreationError> {
         let file = File::open(file).map_err(CreationError::OpenFailure)?;
         let mut reader = BufReader::new(file);
@@ -255,12 +221,6 @@ impl Pipeline {
         Ok(buffer)
     }
 
-    /// Creates a new shader module
-    ///
-    /// Arguments:
-    ///
-    /// * `device`: Device wrapper
-    /// * `shader_bytes`: Bytes of the shader
     fn create_shader_module(
         device: &Arc<Device>,
         shader_bytes: &[u8],
@@ -282,7 +242,6 @@ impl Pipeline {
         Ok(shader_module)
     }
 
-    /// Begins the rendering
     pub(crate) fn begin_rendering(
         &self,
         swapchain: &Swapchain,
@@ -344,7 +303,6 @@ impl Pipeline {
         }
     }
 
-    /// Ends the rendering
     pub(crate) fn end_rendering(&self, command_buffer: &CommandBuffer, image: &Image) {
         unsafe {
             self.device
@@ -379,7 +337,6 @@ impl Pipeline {
         }
     }
 
-    /// Binds the pipeline
     pub(crate) fn bind(&self, command_buffer: &CommandBuffer) {
         unsafe {
             self.device.handle().cmd_bind_pipeline(

@@ -13,31 +13,16 @@ use fern::{
 use log::LevelFilter;
 use std::io;
 
-/// An enum representing the logger verbosity
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Verbosity {
-    /// Error log level
     Error,
-
-    /// Warning log level
     Warning,
-
-    /// Info log level
     Info,
-
-    /// Debug log level
     Debug,
-
-    /// Trace log level
     Trace,
 }
 
-/// Initializes the global logger
-///
-/// Arguments:
-///
-/// * `verbosity`: The verbosity log level
 pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
     let levels = ColoredLevelConfig::new()
         .error(Color::Red)

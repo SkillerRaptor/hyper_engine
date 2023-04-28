@@ -31,52 +31,32 @@ use ash::{
 };
 use thiserror::Error;
 
-/// An enum representing the errors that can occur while constructing a swapchain
 #[derive(Debug, Error)]
 pub enum CreationError {
-    /// Creation of a vulkan object failed
     #[error("creation of vulkan {1} failed")]
     Creation(#[source] vk::Result, &'static str),
 
-    /// Device out of memory
     #[error("device is out of memory")]
     OutOfMemory(#[source] vk::Result),
 
-    /// Creation of a queue family indices failed
     #[error("creation of queue family indices failed")]
     QueueFamilyIndicesFailure(#[from] queue_family_indices::CreationError),
 
-    /// Creation of a swapchain support details failed
     #[error("creation of swapchain support details failed")]
     SwapchainSupportDetailsFailure(#[from] swapchain_support_details::CreationError),
 }
 
-/// A struct representing a wrapper for the vulkan swapchain
 pub(crate) struct Swapchain {
-    /// Image view handles of the images
     image_views: Vec<ImageView>,
-
-    /// Image handles of the swapchain
     images: Vec<Image>,
-
-    /// Swapchain extent
     extent: Extent2D,
-
-    /// Swapchain format
     format: Format,
-
-    /// Vulkan swapchain handle
     handle: SwapchainKHR,
-
-    /// Ash swapchain loader
     swapchain_loader: khr::Swapchain,
-
-    /// Device Wrapper
     device: Arc<Device>,
 }
 
 impl Swapchain {
-    /// Constructs a new swapchain
     pub(crate) fn new(
         window: &Window,
         instance: &Instance,
@@ -184,12 +164,6 @@ impl Swapchain {
         })
     }
 
-    /// Chooses the right window extent
-    ///
-    /// Arguments:
-    ///
-    /// * `window`: Application window
-    /// * `capabilities`: Surface capabilities
     fn choose_extent(window: &Window, capabilities: &SurfaceCapabilitiesKHR) -> Extent2D {
         if capabilities.current_extent.width != u32::MAX
             || capabilities.current_extent.height != u32::MAX
@@ -211,11 +185,6 @@ impl Swapchain {
         }
     }
 
-    /// Chooses the right surface format
-    ///
-    /// Arguments:
-    ///
-    /// * `formats`: Surface formats
     fn choose_surface_format(formats: &[SurfaceFormatKHR]) -> SurfaceFormatKHR {
         *formats
             .iter()
@@ -226,11 +195,6 @@ impl Swapchain {
             .unwrap_or_else(|| &formats[0])
     }
 
-    /// Chooses the right present mode
-    ///
-    /// Arguments:
-    ///
-    /// * `present_modes`: Surface present modes
     fn choose_present_mode(present_modes: &[PresentModeKHR]) -> PresentModeKHR {
         *present_modes
             .iter()
@@ -238,12 +202,6 @@ impl Swapchain {
             .unwrap_or(&PresentModeKHR::FIFO)
     }
 
-    /// Acquires the next swapchain image
-    ///
-    /// Arguments:
-    ///
-    /// * `semaphore`: Semaphore to wait for
-    /// * `fence`: Fence to wait for
     pub(crate) fn acquire_next_image(&self, semaphore: &Semaphore, fence: Option<&Fence>) -> u32 {
         // TODO: Propagate error
         unsafe {
@@ -286,22 +244,18 @@ impl Swapchain {
         }
     }
 
-    /// Returns the swapchain format
     pub(crate) fn format(&self) -> &Format {
         &self.format
     }
 
-    /// Returns the swapchain extent
     pub(crate) fn extent(&self) -> &Extent2D {
         &self.extent
     }
 
-    /// Returns the swapchain images
     pub(crate) fn images(&self) -> &[Image] {
         &self.images
     }
 
-    /// Returns the swapchain image views
     pub(crate) fn image_views(&self) -> &[ImageView] {
         &self.image_views
     }

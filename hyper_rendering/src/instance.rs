@@ -19,53 +19,32 @@ use log::Level;
 use std::ffi::{c_void, CStr, CString};
 use thiserror::Error;
 
-/// An enum representing the errors that can occur while constructing an instance
 #[derive(Debug, Error)]
 pub enum CreationError {
-    /// Creation of a vulkan object failed
     #[error("creation of vulkan {1} failed")]
     Creation(#[source] vk::Result, &'static str),
 
-    /// Enumeration of a vulkan array failed
     #[error("enumeration of vulkan {1} failed")]
     Enumeration(#[source] vk::Result, &'static str),
 
-    /// C-String failed to be constructed
     #[error("c-string construction failed")]
     CStringCreation,
 }
 
-/// A struct representing the vulkan debug functionality
 struct DebugExtension {
-    /// Ash debug loader
     debug_loader: DebugUtils,
-
-    /// Debug messenger itself
     debug_messenger: DebugUtilsMessengerEXT,
 }
 
-/// A struct representing a wrapper for the vulkan instance
 pub(crate) struct Instance {
-    /// If the validation layers were enabled
     validation_layers_enabled: bool,
-
-    /// Debug extension for validation layers
     debug_extension: Option<DebugExtension>,
-
-    /// Internal ash instance handle
     handle: ash::Instance,
 }
 
 impl Instance {
-    /// The validation layer extension from the vulkan library
     const VALIDATION_LAYERS: [&'static str; 1] = ["VK_LAYER_KHRONOS_validation"];
 
-    /// Constructs a new instance
-    ///
-    /// Arguments:
-    ///
-    /// * `window`: Application window
-    /// * `entry`: Vulkan entry
     pub(crate) fn new(
         window: &Window,
         validation_layers_requested: bool,
@@ -88,13 +67,6 @@ impl Instance {
         })
     }
 
-    /// Creates a new vulkan instance
-    ///
-    /// Arguments:
-    ///
-    /// * `window`: Application window
-    /// * `validation_layers_enabled`: If the validation layers were enabled
-    /// * `entry`: Vulkan entry
     fn create_instance(
         window: &Window,
         validation_layers_enabled: bool,
@@ -169,11 +141,6 @@ impl Instance {
         Ok(instance)
     }
 
-    /// Checks if the validation layers are supported
-    ///
-    /// Arguments:
-    ///
-    /// * `entry`: Vulkan entry
     fn check_validation_layer_support(entry: &Entry) -> Result<bool, CreationError> {
         let instance_layer_properties = entry
             .enumerate_instance_layer_properties()
@@ -203,13 +170,6 @@ impl Instance {
         Ok(true)
     }
 
-    /// Creates a new debug extension
-    ///
-    /// Arguments:
-    ///
-    /// * `validation_layers_enabled`: If the validation layers were enabled
-    /// * `entry`: Vulkan entry
-    /// * `instance`: Vulkan instance
     fn create_debug_extension(
         validation_layers_enabled: bool,
         entry: &Entry,
@@ -247,12 +207,10 @@ impl Instance {
         Ok(Some(debug_extension))
     }
 
-    /// Returns the vulkan instance handle
     pub(crate) fn handle(&self) -> &ash::Instance {
         &self.handle
     }
 
-    /// The vulkan debug callback
     unsafe extern "system" fn debug_callback(
         severity: DebugUtilsMessageSeverityFlagsEXT,
         _: DebugUtilsMessageTypeFlagsEXT,

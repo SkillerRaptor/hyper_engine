@@ -33,32 +33,19 @@ pub(crate) mod queue_family_indices {
     use ash::vk::{self, PhysicalDevice, QueueFlags};
     use thiserror::Error;
 
-    /// An enum representing the errors that can occur while constructing queue family indices
     #[derive(Debug, Error)]
     pub enum CreationError {
-        /// Surface was lost
         #[error("the vulkan surface was lost")]
         SurfaceLost(#[source] vk::Result),
     }
 
-    /// A struct representing the index of all the used queues
     #[derive(Clone, Copy, Debug, Default)]
     pub(crate) struct QueueFamilyIndices {
-        /// Dedicated graphics queue
         graphics_family: Option<u32>,
-
-        /// Dedicated presentation queue
         present_family: Option<u32>,
     }
 
     impl QueueFamilyIndices {
-        /// Constructs new queue family indices
-        ///
-        /// Arguments:
-        ///
-        /// * `instance`: Instance wrapper
-        /// * `surface`: Window surface
-        /// * `physical_device`: Device to be searched
         pub(crate) fn new(
             instance: &Instance,
             surface: &Surface,
@@ -102,19 +89,16 @@ pub(crate) mod queue_family_indices {
             Ok(queue_family_indices)
         }
 
-        /// Checks if every queue is available
         #[inline(always)]
         pub(super) fn is_complete(&self) -> bool {
             self.graphics_family.is_some() && self.present_family.is_some()
         }
 
-        /// Returns dedicated graphics queue
         #[inline(always)]
         pub(crate) fn graphics_family(&self) -> &Option<u32> {
             &self.graphics_family
         }
 
-        /// Returns dedicated present queue
         #[inline(always)]
         pub(crate) fn present_family(&self) -> &Option<u32> {
             &self.present_family
@@ -128,34 +112,20 @@ pub(crate) mod swapchain_support_details {
     use ash::vk::{self, PhysicalDevice, PresentModeKHR, SurfaceCapabilitiesKHR, SurfaceFormatKHR};
     use thiserror::Error;
 
-    /// An enum representing the errors that can occur while constructing queue family indices
     #[derive(Debug, Error)]
     pub enum CreationError {
-        /// Surface was lost
         #[error("the vulkan surface was lost")]
         SurfaceLost(#[source] vk::Result),
     }
 
-    /// A struct representing all the details, which are supported by the swapchain
     #[derive(Clone, Debug, Default)]
     pub(crate) struct SwapchainSupportDetails {
-        /// Supported surface capabilities
         capabilities: SurfaceCapabilitiesKHR,
-
-        /// Supported surface formats
         formats: Vec<SurfaceFormatKHR>,
-
-        /// Supported surface present modes
         present_modes: Vec<PresentModeKHR>,
     }
 
     impl SwapchainSupportDetails {
-        /// Constructs new swapchain support details
-        ///
-        /// Arguments:
-        ///
-        /// * `surface`: Window surface
-        /// * `physical_device`: Device to be searched
         pub(crate) fn new(
             surface: &Surface,
             physical_device: &PhysicalDevice,
@@ -186,19 +156,16 @@ pub(crate) mod swapchain_support_details {
             })
         }
 
-        /// Returns supported surface capabilities
         #[inline(always)]
         pub(crate) fn capabilities(&self) -> SurfaceCapabilitiesKHR {
             self.capabilities
         }
 
-        /// Returns supported surface formats
         #[inline(always)]
         pub(crate) fn formats(&self) -> &[SurfaceFormatKHR] {
             &self.formats
         }
 
-        /// Returns supported surface present modes
         #[inline(always)]
         pub(crate) fn present_modes(&self) -> &[PresentModeKHR] {
             &self.present_modes
@@ -206,55 +173,34 @@ pub(crate) mod swapchain_support_details {
     }
 }
 
-/// An enum representing the errors that can occur while constructing a device
 #[derive(Debug, Error)]
 pub enum CreationError {
-    /// Creation of a vulkan object failed
     #[error("creation of vulkan {1} failed")]
     Creation(#[source] vk::Result, &'static str),
 
-    /// Enumeration of a vulkan array failed
     #[error("enumeration of vulkan {1} failed")]
     Enumeration(#[source] vk::Result, &'static str),
 
-    /// System doesn't have a vulkan capable graphical unit
     #[error("couldn't find gpu with vulkan support")]
     Unsupported,
 
-    /// Creation of a queue family indices failed
     #[error("creation of queue family indices failed")]
     QueueFamilyIndicesFailure(#[from] queue_family_indices::CreationError),
 
-    /// Creation of a swapchain support details failed
     #[error("creation of swapchain support details failed")]
     SwapchainSupportDetailsFailure(#[from] swapchain_support_details::CreationError),
 }
 
-/// A struct representing a wrapper for the vulkan logical and physical device
 pub(crate) struct Device {
-    /// Present queue
     present_queue: Queue,
-
-    /// Graphics queue
     graphics_queue: Queue,
-
-    /// Internal ash device handle
     handle: ash::Device,
-
-    /// Handle to real physical device
     physical_device: PhysicalDevice,
 }
 
 impl Device {
-    /// Required extensions by the program
     const EXTENSIONS: [&'static CStr; 1] = [Swapchain::name()];
 
-    /// Constructs a new device
-    ///
-    /// Arguments:
-    ///
-    /// * `instance`: Instance wrapper
-    /// * `surface`: Window surface
     pub(crate) fn new(instance: &Instance, surface: &Surface) -> Result<Self, CreationError> {
         let physical_device = Self::pick_physical_device(instance, surface)?;
         let device = Self::create_device(instance, surface, &physical_device)?;
@@ -273,12 +219,6 @@ impl Device {
         })
     }
 
-    /// Picks the best physical device
-    ///
-    /// Arguments:
-    ///
-    /// * `instance`: Instance wrapper
-    /// * `surface`: Window surface
     fn pick_physical_device(
         instance: &Instance,
         surface: &Surface,
@@ -304,13 +244,6 @@ impl Device {
         Ok(chosen_physical_device.unwrap())
     }
 
-    /// Checks how suitable a physical device is
-    ///
-    /// Arguments:
-    ///
-    /// * `instance`: Instance wrapper
-    /// * `surface`: Window surface
-    /// * `physical_device`: Device to be checked
     fn check_physical_device_suitability(
         instance: &Instance,
         surface: &Surface,
@@ -336,12 +269,6 @@ impl Device {
             && swapchain_adequate)
     }
 
-    /// Checks if physical device supportes all extensions
-    ///
-    /// Arguments:
-    ///
-    /// * `instance`: Instance wrapper
-    /// * `physical_device`: Device to be checked
     fn check_extension_support(
         instance: &Instance,
         physical_device: &PhysicalDevice,
@@ -367,12 +294,6 @@ impl Device {
         Ok(available)
     }
 
-    /// Checks if physical device supports required features
-    ///
-    /// Arguments:
-    ///
-    /// * `instance`: Instance wrapper
-    /// * `physical_device`: Device to be checked
     fn check_feature_support(instance: &Instance, physical_device: &PhysicalDevice) -> bool {
         let mut physical_device_dynamic_rendering_feature =
             PhysicalDeviceDynamicRenderingFeatures::builder();
@@ -389,13 +310,6 @@ impl Device {
         physical_device_dynamic_rendering_feature.dynamic_rendering == vk::TRUE
     }
 
-    /// Creates an internal ash
-    ///
-    /// Arguments:
-    ///
-    /// * `instance`: Instance wrapper
-    /// * `surface`: Window surface
-    /// * `physical_device`: Used physical device
     fn create_device(
         instance: &Instance,
         surface: &Surface,
@@ -449,14 +363,6 @@ impl Device {
         Ok(device)
     }
 
-    /// Submits to the queue
-    ///
-    /// Arguments:
-    ///
-    /// * `command_buffer`: Command buffer to submit to
-    /// * `present_semaphore`: Semaphore for presenting
-    /// * `render_semaphore`: Semaphore for rendering
-    /// * `wait_fence`: Fence to wait for
     pub(crate) fn submit_queue(
         &self,
         command_buffer: &CommandBuffer,
@@ -483,7 +389,6 @@ impl Device {
         }
     }
 
-    /// Waits for the device to be finished
     pub(crate) fn wait_idle(&self) {
         // TODO: Propagate error
         unsafe {
@@ -491,17 +396,14 @@ impl Device {
         }
     }
 
-    /// Returns the vulkan device handle
     pub(crate) fn handle(&self) -> &ash::Device {
         &self.handle
     }
 
-    /// Returns the vulkan device handle
     pub(crate) fn physical_device(&self) -> &PhysicalDevice {
         &self.physical_device
     }
 
-    /// Returns the vulkan present queue handle
     pub(crate) fn present_queue(&self) -> &Queue {
         &self.present_queue
     }

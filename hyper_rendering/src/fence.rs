@@ -10,29 +10,18 @@ use ash::vk::{self, FenceCreateFlags, FenceCreateInfo};
 use std::sync::Arc;
 use thiserror::Error;
 
-/// An enum representing the errors that can occur while constructing a fence
 #[derive(Debug, Error)]
 pub enum CreationError {
-    /// Creation of a vulkan object failed
     #[error("creation of vulkan {1} failed")]
     Creation(#[source] vk::Result, &'static str),
 }
 
-/// A struct representing a wrapper for the vulkan fence
 pub(crate) struct Fence {
-    /// Vulkan fence handle
     handle: vk::Fence,
-
-    /// Device Wrapper
     device: Arc<Device>,
 }
 
 impl Fence {
-    /// Constructs a new fence
-    ///
-    /// Arguments:
-    ///
-    /// * `device`: Vulkan device
     pub(crate) fn new(device: &Arc<Device>) -> Result<Self, CreationError> {
         let fence_create_info = FenceCreateInfo::builder().flags(FenceCreateFlags::SIGNALED);
 
@@ -49,7 +38,6 @@ impl Fence {
         })
     }
 
-    /// Waits for the fence
     pub(crate) fn wait(&self) {
         // TODO: Propagate error
         unsafe {
@@ -60,7 +48,6 @@ impl Fence {
         }
     }
 
-    /// Resets the fence
     pub(crate) fn reset(&self) {
         // TODO: Propagate error
         unsafe {
@@ -68,7 +55,6 @@ impl Fence {
         }
     }
 
-    /// Returns the vulkan fence handle
     pub(crate) fn handle(&self) -> &vk::Fence {
         &self.handle
     }

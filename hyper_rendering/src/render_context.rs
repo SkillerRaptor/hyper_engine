@@ -26,98 +26,55 @@ use ash::{
 };
 use thiserror::Error;
 
-/// An enum representing the errors that can occur while constructing the render context
 #[derive(Debug, Error)]
 pub enum CreationError {
-    /// Vulkan library failed to be loaded
     #[error("couldn't load vulkan entry")]
     EntryLoadingFailure(#[from] LoadingError),
 
-    /// Instance couldn't be constructed
     #[error("couldn't create instance")]
     InstanceFailure(#[from] instance::CreationError),
 
-    /// Surface couldn't be constructed
     #[error("couldn't create surface")]
     SurfaceFailure(#[from] surface::CreationError),
 
-    /// Device couldn't be constructed
     #[error("couldn't create device")]
     DeviceFailure(#[from] device::CreationError),
 
-    /// Swapchain couldn't be constructed
     #[error("couldn't create swapchain")]
     SwapchainFailure(#[from] swapchain::CreationError),
 
-    /// Pipeline couldn't be constructed
     #[error("couldn't create pipeline")]
     PipelineFailure(#[from] pipeline::CreationError),
 
-    /// Command Pool couldn't be constructed
     #[error("couldn't create command pool")]
     CommandPoolFailure(#[from] command_pool::CreationError),
 
-    /// Command Buffer couldn't be constructed
     #[error("couldn't create command buffer")]
     CommandBufferFailure(#[from] command_buffer::CreationError),
 
-    /// Semaphore couldn't be constructed
     #[error("couldn't create semaphore")]
     SemaphoreFailure(#[from] semaphore::CreationError),
 
-    /// Fence couldn't be constructed
     #[error("couldn't create fence")]
     FenceFailure(#[from] fence::CreationError),
 }
 
-/// A struct representing the vulkan render context
-///
-/// The members are ordered in reverse order to guarantee that the objects are
-/// destroyed in the right order
 pub struct RenderContext {
-    /// Current swapchain image index
     swapchain_image_index: u32,
-
-    /// Render fence,
     render_fence: Fence,
-
-    /// Render semaphore
     render_semaphore: Semaphore,
-
-    /// Present semaphore
     present_semaphore: Semaphore,
-
-    /// Vulkan command buffer
     command_buffer: CommandBuffer,
-
-    /// Vulkan command pool
     _command_pool: CommandPool,
-
-    /// Vulkan pipeline
     pipeline: Pipeline,
-
-    /// Vulkan swapchain
     swapchain: Swapchain,
-
-    /// Vulkan physical and logical device
     device: Arc<Device>,
-
-    /// Vulkan surface
     _surface: Surface,
-
-    /// Vulkan instance
     _instance: Instance,
-
-    /// Vulkan library entry
     _entry: Entry,
 }
 
 impl RenderContext {
-    /// Constructs a new render context
-    ///
-    /// Arguments:
-    ///
-    /// * `window`: Application window
     pub fn new(window: &Window) -> Result<Self, CreationError> {
         let validation_layers_requested = cfg!(debug_assertions);
 
@@ -152,7 +109,6 @@ impl RenderContext {
         })
     }
 
-    /// Begins the frame
     pub fn begin(&mut self) {
         self.render_fence.wait();
         self.render_fence.reset();
@@ -208,7 +164,6 @@ impl RenderContext {
         }
     }
 
-    /// Ends the frame
     pub fn end(&self) {
         self.pipeline.end_rendering(
             &self.command_buffer,
@@ -217,7 +172,6 @@ impl RenderContext {
         self.command_buffer.end();
     }
 
-    /// Submits the current data to the gpu
     pub fn submit(&self) {
         self.device.submit_queue(
             &self.command_buffer,
@@ -233,7 +187,6 @@ impl RenderContext {
         );
     }
 
-    /// Draws the triangle!
     pub fn draw(&self) {
         unsafe {
             self.device
@@ -242,7 +195,6 @@ impl RenderContext {
         }
     }
 
-    /// Waits for the device to be finished
     pub fn wait_idle(&self) {
         self.device.wait_idle();
     }

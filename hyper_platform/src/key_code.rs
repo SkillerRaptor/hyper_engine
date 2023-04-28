@@ -6,7 +6,6 @@
 
 use winit::event::VirtualKeyCode;
 
-/// An enum representing the wrapped winit key codes
 #[derive(Clone, Copy, Debug)]
 pub enum KeyCode {
     Key1,

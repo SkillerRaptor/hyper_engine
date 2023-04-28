@@ -6,11 +6,9 @@
 
 use hyper_engine::game::Game;
 
-/// A struct representing the game engines editor interface
 pub(crate) struct Editor {}
 
 impl Editor {
-    /// Constructs a new editor struct
     pub(crate) fn new() -> Self {
         Self {}
     }
