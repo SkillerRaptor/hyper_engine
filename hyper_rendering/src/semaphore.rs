@@ -22,7 +22,7 @@ pub(crate) struct Semaphore {
 }
 
 impl Semaphore {
-    pub(crate) fn new(device: &Arc<Device>) -> Result<Self, CreationError> {
+    pub(crate) fn new(device: Arc<Device>) -> Result<Self, CreationError> {
         let semaphore_create_info =
             SemaphoreCreateInfo::builder().flags(SemaphoreCreateFlags::from_raw(0));
 
@@ -35,7 +35,7 @@ impl Semaphore {
 
         Ok(Self {
             handle: semaphore,
-            device: device.clone(),
+            device,
         })
     }
 

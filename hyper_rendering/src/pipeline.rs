@@ -50,10 +50,10 @@ pub(crate) struct Pipeline {
 }
 
 impl Pipeline {
-    pub(crate) fn new(device: &Arc<Device>, swapchain: &Swapchain) -> Result<Self, CreationError> {
-        let graphics_pipeline_layout = Self::create_graphics_pipeline_layout(device)?;
+    pub(crate) fn new(device: Arc<Device>, swapchain: &Swapchain) -> Result<Self, CreationError> {
+        let graphics_pipeline_layout = Self::create_graphics_pipeline_layout(&device)?;
         let graphics_pipeline =
-            Self::create_graphics_pipeline(device, swapchain, &graphics_pipeline_layout)?;
+            Self::create_graphics_pipeline(&device, swapchain, &graphics_pipeline_layout)?;
 
         Ok(Self {
             graphics_pipeline,
@@ -62,9 +62,7 @@ impl Pipeline {
         })
     }
 
-    fn create_graphics_pipeline_layout(
-        device: &Arc<Device>,
-    ) -> Result<PipelineLayout, CreationError> {
+    fn create_graphics_pipeline_layout(device: &Device) -> Result<PipelineLayout, CreationError> {
         let pipeline_layout_create_info = PipelineLayoutCreateInfo::builder()
             .set_layouts(&[])
             .push_constant_ranges(&[]);
@@ -80,7 +78,7 @@ impl Pipeline {
     }
 
     fn create_graphics_pipeline(
-        device: &Arc<Device>,
+        device: &Device,
         swapchain: &Swapchain,
         pipeline_layout: &PipelineLayout,
     ) -> Result<vk::Pipeline, CreationError> {
@@ -222,7 +220,7 @@ impl Pipeline {
     }
 
     fn create_shader_module(
-        device: &Arc<Device>,
+        device: &Device,
         shader_bytes: &[u8],
     ) -> Result<ShaderModule, CreationError> {
         let (prefix, code, suffix) = unsafe { shader_bytes.align_to::<u32>() };

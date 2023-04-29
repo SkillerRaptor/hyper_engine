@@ -35,7 +35,7 @@ impl CommandPool {
     pub(crate) fn new(
         instance: &Instance,
         surface: &Surface,
-        device: &Arc<Device>,
+        device: Arc<Device>,
     ) -> Result<Self, CreationError> {
         let queue_family_indices =
             QueueFamilyIndices::new(instance, surface, device.physical_device())?;
@@ -53,7 +53,7 @@ impl CommandPool {
 
         Ok(Self {
             handle: command_pool,
-            device: device.clone(),
+            device,
         })
     }
 

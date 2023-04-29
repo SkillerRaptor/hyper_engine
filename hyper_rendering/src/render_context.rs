@@ -82,16 +82,16 @@ impl RenderContext {
         let instance = Instance::new(window, validation_layers_requested, &entry)?;
         let surface = Surface::new(window, &entry, &instance)?;
         let device = Arc::new(Device::new(&instance, &surface)?);
-        let swapchain = Swapchain::new(window, &instance, &surface, &device)?;
-        let pipeline = Pipeline::new(&device, &swapchain)?;
+        let swapchain = Swapchain::new(window, &instance, &surface, device.clone())?;
+        let pipeline = Pipeline::new(device.clone(), &swapchain)?;
 
-        let command_pool = CommandPool::new(&instance, &surface, &device)?;
-        let command_buffer = CommandBuffer::new(&device, &command_pool)?;
+        let command_pool = CommandPool::new(&instance, &surface, device.clone())?;
+        let command_buffer = CommandBuffer::new(device.clone(), &command_pool)?;
 
-        let present_semaphore = Semaphore::new(&device)?;
-        let render_semaphore = Semaphore::new(&device)?;
+        let present_semaphore = Semaphore::new(device.clone())?;
+        let render_semaphore = Semaphore::new(device.clone())?;
 
-        let render_fence = Fence::new(&device)?;
+        let render_fence = Fence::new(device.clone())?;
 
         Ok(Self {
             swapchain_image_index: 0,

@@ -32,7 +32,7 @@ pub(crate) struct CommandBuffer {
 
 impl CommandBuffer {
     pub(crate) fn new(
-        device: &Arc<Device>,
+        device: Arc<Device>,
         command_pool: &CommandPool,
     ) -> Result<Self, CreationError> {
         let command_buffer_allocate_info = CommandBufferAllocateInfo::builder()
@@ -49,7 +49,7 @@ impl CommandBuffer {
 
         Ok(Self {
             handle: command_buffers[0],
-            device: device.clone(),
+            device,
         })
     }
 

@@ -22,7 +22,7 @@ pub(crate) struct Fence {
 }
 
 impl Fence {
-    pub(crate) fn new(device: &Arc<Device>) -> Result<Self, CreationError> {
+    pub(crate) fn new(device: Arc<Device>) -> Result<Self, CreationError> {
         let fence_create_info = FenceCreateInfo::builder().flags(FenceCreateFlags::SIGNALED);
 
         let fence = unsafe {
@@ -34,7 +34,7 @@ impl Fence {
 
         Ok(Self {
             handle: fence,
-            device: device.clone(),
+            device,
         })
     }
 

@@ -61,7 +61,7 @@ impl Swapchain {
         window: &Window,
         instance: &Instance,
         surface: &Surface,
-        device: &Arc<Device>,
+        device: Arc<Device>,
     ) -> Result<Self, CreationError> {
         let swapchain_support_details =
             SwapchainSupportDetails::new(surface, device.physical_device())?;
