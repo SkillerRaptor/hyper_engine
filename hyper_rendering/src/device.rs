@@ -295,13 +295,13 @@ impl Device {
 
     fn check_feature_support(instance: &Instance, physical_device: &PhysicalDevice) -> bool {
         let mut dynamic_rendering_feature = PhysicalDeviceDynamicRenderingFeatures::builder();
-        let mut timline_semaphore_features = PhysicalDeviceTimelineSemaphoreFeatures::builder();
-        let mut synchronization2_features = PhysicalDeviceSynchronization2Features::builder();
+        let mut timline_semaphore_feature = PhysicalDeviceTimelineSemaphoreFeatures::builder();
+        let mut synchronization2_feature = PhysicalDeviceSynchronization2Features::builder();
 
         let mut device_features = PhysicalDeviceFeatures2::builder()
             .push_next(&mut dynamic_rendering_feature)
-            .push_next(&mut timline_semaphore_features)
-            .push_next(&mut synchronization2_features);
+            .push_next(&mut timline_semaphore_feature)
+            .push_next(&mut synchronization2_feature);
 
         unsafe {
             instance
@@ -310,8 +310,8 @@ impl Device {
         }
 
         dynamic_rendering_feature.dynamic_rendering == vk::TRUE
-            && timline_semaphore_features.timeline_semaphore == vk::TRUE
-            && synchronization2_features.synchronization2 == vk::TRUE
+            && timline_semaphore_feature.timeline_semaphore == vk::TRUE
+            && synchronization2_feature.synchronization2 == vk::TRUE
     }
 
     fn create_device(
@@ -335,20 +335,17 @@ impl Device {
             queue_create_infos.push(queue_create_info);
         }
 
-        let mut dynamic_rendering_feature = PhysicalDeviceDynamicRenderingFeatures::builder();
-        let mut timline_semaphore_features = PhysicalDeviceTimelineSemaphoreFeatures::builder();
-        let mut synchronization2_features = PhysicalDeviceSynchronization2Features::builder();
+        let mut dynamic_rendering_feature =
+            PhysicalDeviceDynamicRenderingFeatures::builder().dynamic_rendering(true);
+        let mut timline_semaphore_feature =
+            PhysicalDeviceTimelineSemaphoreFeatures::builder().timeline_semaphore(true);
+        let mut synchronization2_feature =
+            PhysicalDeviceSynchronization2Features::builder().synchronization2(true);
 
         let mut physical_device_features = PhysicalDeviceFeatures2::builder()
             .push_next(&mut dynamic_rendering_feature)
-            .push_next(&mut timline_semaphore_features)
-            .push_next(&mut synchronization2_features);
-
-        unsafe {
-            instance
-                .handle()
-                .get_physical_device_features2(*physical_device, &mut physical_device_features);
-        }
+            .push_next(&mut timline_semaphore_feature)
+            .push_next(&mut synchronization2_feature);
 
         let extension_names = Self::EXTENSIONS
             .iter()
