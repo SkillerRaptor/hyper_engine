@@ -7,15 +7,15 @@
 use crate::{command_buffer::CommandBuffer, device::Device, swapchain::Swapchain};
 
 use ash::vk::{
-    self, AccessFlags, AttachmentLoadOp, AttachmentStoreOp, BlendFactor, BlendOp, ClearValue,
-    ColorComponentFlags, CullModeFlags, DependencyFlags, DynamicState, FrontFace,
-    GraphicsPipelineCreateInfo, Image, ImageAspectFlags, ImageLayout, ImageMemoryBarrier,
+    self, AccessFlags2, AttachmentLoadOp, AttachmentStoreOp, BlendFactor, BlendOp, ClearValue,
+    ColorComponentFlags, CullModeFlags, DependencyFlags, DependencyInfo, DynamicState, FrontFace,
+    GraphicsPipelineCreateInfo, Image, ImageAspectFlags, ImageLayout, ImageMemoryBarrier2,
     ImageSubresourceRange, ImageView, LogicOp, Offset2D, PipelineBindPoint, PipelineCache,
     PipelineColorBlendAttachmentState, PipelineColorBlendStateCreateInfo,
     PipelineDynamicStateCreateInfo, PipelineInputAssemblyStateCreateInfo, PipelineLayout,
     PipelineLayoutCreateInfo, PipelineMultisampleStateCreateInfo,
     PipelineRasterizationStateCreateInfo, PipelineRenderingCreateInfoKHR,
-    PipelineShaderStageCreateInfo, PipelineStageFlags, PipelineVertexInputStateCreateInfo,
+    PipelineShaderStageCreateInfo, PipelineStageFlags2, PipelineVertexInputStateCreateInfo,
     PipelineViewportStateCreateInfo, PolygonMode, PrimitiveTopology, Rect2D, RenderPass,
     RenderingAttachmentInfoKHR, RenderingInfoKHR, SampleCountFlags, ShaderModule,
     ShaderModuleCreateInfo, ShaderStageFlags,
@@ -255,23 +255,28 @@ impl Pipeline {
             .base_array_layer(0)
             .layer_count(1);
 
-        let image_memory_barrier = ImageMemoryBarrier::builder()
-            .dst_access_mask(AccessFlags::COLOR_ATTACHMENT_WRITE)
+        let image_memory_barrier = ImageMemoryBarrier2::builder()
+            .src_stage_mask(PipelineStageFlags2::TOP_OF_PIPE)
+            .dst_stage_mask(PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .dst_access_mask(AccessFlags2::COLOR_ATTACHMENT_WRITE)
             .old_layout(ImageLayout::UNDEFINED)
             .new_layout(ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+            .src_queue_family_index(0)
+            .dst_queue_family_index(0)
             .image(*image)
             .subresource_range(*subresource_range);
 
+        let image_memory_barriers = [*image_memory_barrier];
+        let dependency_info = DependencyInfo::builder()
+            .dependency_flags(DependencyFlags::empty())
+            .memory_barriers(&[])
+            .buffer_memory_barriers(&[])
+            .image_memory_barriers(&image_memory_barriers);
+
         unsafe {
-            self.device.handle().cmd_pipeline_barrier(
-                *command_buffer.handle(),
-                PipelineStageFlags::TOP_OF_PIPE,
-                PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
-                DependencyFlags::empty(),
-                &[],
-                &[],
-                &[*image_memory_barrier],
-            );
+            self.device
+                .handle()
+                .cmd_pipeline_barrier2(*command_buffer.handle(), &dependency_info);
         }
 
         let render_area_extent = swapchain.extent();
@@ -315,23 +320,29 @@ impl Pipeline {
             .base_array_layer(0)
             .layer_count(1);
 
-        let image_memory_barrier = ImageMemoryBarrier::builder()
-            .src_access_mask(AccessFlags::COLOR_ATTACHMENT_WRITE)
+        let image_memory_barrier = ImageMemoryBarrier2::builder()
+            .src_stage_mask(PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .src_access_mask(AccessFlags2::COLOR_ATTACHMENT_WRITE)
+            .dst_stage_mask(PipelineStageFlags2::BOTTOM_OF_PIPE)
             .old_layout(ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
             .new_layout(ImageLayout::PRESENT_SRC_KHR)
+            .src_queue_family_index(0)
+            .dst_queue_family_index(0)
             .image(*image)
             .subresource_range(*subresource_range);
 
+        let image_memory_barriers = [*image_memory_barrier];
+
+        let dependency_info = DependencyInfo::builder()
+            .dependency_flags(DependencyFlags::empty())
+            .memory_barriers(&[])
+            .buffer_memory_barriers(&[])
+            .image_memory_barriers(&image_memory_barriers);
+
         unsafe {
-            self.device.handle().cmd_pipeline_barrier(
-                *command_buffer.handle(),
-                PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT,
-                PipelineStageFlags::BOTTOM_OF_PIPE,
-                DependencyFlags::empty(),
-                &[],
-                &[],
-                &[*image_memory_barrier],
-            );
+            self.device
+                .handle()
+                .cmd_pipeline_barrier2(*command_buffer.handle(), &dependency_info);
         }
     }
 

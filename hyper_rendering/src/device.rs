@@ -18,10 +18,10 @@ use crate::{
 use ash::{
     extensions::khr::Swapchain,
     vk::{
-        self, DeviceCreateInfo, DeviceQueueCreateInfo, PhysicalDevice,
+        self, CommandBufferSubmitInfo, DeviceCreateInfo, DeviceQueueCreateInfo, PhysicalDevice,
         PhysicalDeviceDynamicRenderingFeatures, PhysicalDeviceFeatures2,
-        PhysicalDeviceTimelineSemaphoreFeatures, PipelineStageFlags, Queue, SubmitInfo,
-        TimelineSemaphoreSubmitInfo,
+        PhysicalDeviceSynchronization2Features, PhysicalDeviceTimelineSemaphoreFeatures,
+        PipelineStageFlags2, Queue, SemaphoreSubmitInfo, SubmitInfo2,
     },
 };
 use std::{collections::HashSet, ffi::CStr};
@@ -295,23 +295,26 @@ impl Device {
     }
 
     fn check_feature_support(instance: &Instance, physical_device: &PhysicalDevice) -> bool {
-        let mut physical_device_dynamic_rendering_feature =
-            PhysicalDeviceDynamicRenderingFeatures::builder();
+        let mut dynamic_rendering_feature = PhysicalDeviceDynamicRenderingFeatures::builder();
 
-        let mut physical_device_timline_semaphore_features =
-            PhysicalDeviceTimelineSemaphoreFeatures::builder();
+        let mut timline_semaphore_features = PhysicalDeviceTimelineSemaphoreFeatures::builder();
 
-        let mut physical_device_features = PhysicalDeviceFeatures2::builder()
-            .push_next(&mut physical_device_dynamic_rendering_feature)
-            .push_next(&mut physical_device_timline_semaphore_features);
+        let mut synchronization2_features = PhysicalDeviceSynchronization2Features::builder();
+
+        let mut device_features = PhysicalDeviceFeatures2::builder()
+            .push_next(&mut dynamic_rendering_feature)
+            .push_next(&mut timline_semaphore_features)
+            .push_next(&mut synchronization2_features);
 
         unsafe {
             instance
                 .handle()
-                .get_physical_device_features2(*physical_device, &mut physical_device_features);
+                .get_physical_device_features2(*physical_device, &mut device_features);
         }
 
-        physical_device_dynamic_rendering_feature.dynamic_rendering == vk::TRUE
+        dynamic_rendering_feature.dynamic_rendering == vk::TRUE
+            && timline_semaphore_features.timeline_semaphore == vk::TRUE
+            && synchronization2_features.synchronization2 == vk::TRUE
     }
 
     fn create_device(
@@ -339,9 +342,12 @@ impl Device {
 
         let mut timline_semaphore_features = PhysicalDeviceTimelineSemaphoreFeatures::builder();
 
+        let mut synchronization2_features = PhysicalDeviceSynchronization2Features::builder();
+
         let mut physical_device_features = PhysicalDeviceFeatures2::builder()
             .push_next(&mut dynamic_rendering_feature)
-            .push_next(&mut timline_semaphore_features);
+            .push_next(&mut timline_semaphore_features)
+            .push_next(&mut synchronization2_features);
 
         unsafe {
             instance
@@ -379,25 +385,41 @@ impl Device {
         frame_id: u64,
     ) {
         // TODO: Propagate error
-        let wait_dst_stage_mask = &[PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
-        let wait_semaphores = &[*present_semaphore.handle()];
-        let signal_semaphores = &[*submit_semaphore.handle(), *render_semaphore.handle()];
-        let command_buffers = &[*command_buffer.handle()];
 
-        let wait_values = [frame_id, 0];
-        let mut timeline_submit_info =
-            TimelineSemaphoreSubmitInfo::builder().signal_semaphore_values(&wait_values);
+        let present_wait_semaphore_info = SemaphoreSubmitInfo::builder()
+            .semaphore(*present_semaphore.handle())
+            .value(0)
+            .stage_mask(PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
 
-        let submit_info = SubmitInfo::builder()
-            .push_next(&mut timeline_submit_info)
-            .wait_dst_stage_mask(wait_dst_stage_mask)
-            .wait_semaphores(wait_semaphores)
-            .signal_semaphores(signal_semaphores)
-            .command_buffers(command_buffers);
+        let command_buffer_info = CommandBufferSubmitInfo::builder()
+            .command_buffer(*command_buffer.handle())
+            .device_mask(0);
+
+        let submit_signal_semaphore_info = SemaphoreSubmitInfo::builder()
+            .semaphore(*submit_semaphore.handle())
+            .value(frame_id)
+            .stage_mask(PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
+
+        let render_signal_semaphore_info = SemaphoreSubmitInfo::builder()
+            .semaphore(*render_semaphore.handle())
+            .value(0)
+            .stage_mask(PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
+
+        let wait_semaphore_infos = &[*present_wait_semaphore_info];
+        let command_buffer_infos = &[*command_buffer_info];
+        let signal_semaphore_infos =
+            &[*submit_signal_semaphore_info, *render_signal_semaphore_info];
+        let submit_info = SubmitInfo2::builder()
+            .wait_semaphore_infos(wait_semaphore_infos)
+            .command_buffer_infos(command_buffer_infos)
+            .signal_semaphore_infos(signal_semaphore_infos);
 
         unsafe {
             self.handle
-                .queue_submit(self.graphics_queue, &[*submit_info], vk::Fence::null())
+                .queue_submit2(self.graphics_queue, &[*submit_info], vk::Fence::null())
                 .unwrap();
         }
     }
