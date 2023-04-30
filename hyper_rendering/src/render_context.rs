@@ -48,8 +48,8 @@ pub struct RenderContext {
     pipeline: Pipeline,
     swapchain: Swapchain,
     device: Arc<Device>,
-    _surface: Surface,
-    _instance: Instance,
+    surface: Surface,
+    instance: Instance,
     _entry: Entry,
 }
 
@@ -71,27 +71,39 @@ impl RenderContext {
             pipeline,
             swapchain,
             device,
-            _surface: surface,
-            _instance: instance,
+            surface,
+            instance,
             _entry: entry,
         })
     }
 
-    pub fn begin(&mut self, frame_id: u64) {
-        self.renderer
-            .begin(frame_id, &self.swapchain, &self.pipeline);
+    pub fn begin(&mut self, window: &Window, frame_id: u64) {
+        self.renderer.begin(
+            window,
+            &self.instance,
+            &self.surface,
+            frame_id,
+            &mut self.swapchain,
+            &self.pipeline,
+        );
     }
 
     pub fn end(&self) {
         self.renderer.end(&self.swapchain, &self.pipeline);
     }
 
-    pub fn submit(&self) {
-        self.renderer.submit(&self.swapchain);
+    pub fn submit(&mut self, window: &Window) {
+        self.renderer
+            .submit(window, &self.instance, &self.surface, &mut self.swapchain);
     }
 
     pub fn draw(&self) {
         self.renderer.draw();
+    }
+
+    pub fn resize(&mut self, window: &Window) {
+        self.renderer
+            .resize(window, &self.instance, &self.surface, &mut self.swapchain);
     }
 
     pub fn wait_idle(&self) {

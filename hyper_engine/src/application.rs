@@ -92,14 +92,25 @@ impl Application {
                 self.game.update();
             }
             Event::RenderFrame => {
-                self.render_context.begin(self.frame_id);
+                self.render_context.begin(&self.window, self.frame_id);
                 self.render_context.draw();
                 self.render_context.end();
-                self.render_context.submit();
+                self.render_context.submit(&self.window);
 
                 self.game.render();
 
                 self.frame_id += 1;
+            }
+            Event::WindowResized { width, height } => {
+                if self.window.framebuffer_size() == (width, height) {
+                    return;
+                }
+
+                if width == 0 || height == 0 {
+                    return;
+                }
+
+                self.render_context.resize(&self.window);
             }
             _ => {}
         });

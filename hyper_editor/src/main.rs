@@ -24,7 +24,7 @@ fn main() -> Result<()> {
         .title("HyperEditor")
         .width(1280)
         .height(720)
-        .resizable(false)
+        .resizable(true)
         .build(Box::new(Editor::new()))?
         .run();
 

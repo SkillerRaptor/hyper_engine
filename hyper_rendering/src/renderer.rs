@@ -19,6 +19,7 @@ use crate::{
 };
 
 use ash::vk::{ClearColorValue, ClearValue, CommandBufferUsageFlags, Offset2D, Rect2D, Viewport};
+use hyper_platform::window::Window;
 use std::sync::Arc;
 use thiserror::Error;
 
@@ -98,14 +99,29 @@ impl Renderer {
         })
     }
 
-    pub(crate) fn begin(&mut self, frame_id: u64, swapchain: &Swapchain, pipeline: &Pipeline) {
+    pub(crate) fn begin(
+        &mut self,
+        window: &Window,
+        instance: &Instance,
+        surface: &Surface,
+        frame_id: u64,
+        swapchain: &mut Swapchain,
+        pipeline: &Pipeline,
+    ) {
         self.current_frame_id = frame_id;
         self.submit_semaphore.wait_for(frame_id - 1);
 
         let side = self.current_frame_id % 2;
 
-        self.swapchain_image_index =
-            swapchain.acquire_next_image(&self.present_semaphores[side as usize]);
+        let Some(index) = swapchain.acquire_next_image(
+            window,
+            instance,
+            surface,
+            &self.present_semaphores[side as usize]) else {
+            return;
+        };
+
+        self.swapchain_image_index = index;
 
         self.command_buffers[side as usize].reset();
         self.command_buffers[side as usize].begin(CommandBufferUsageFlags::ONE_TIME_SUBMIT);
@@ -167,7 +183,13 @@ impl Renderer {
         self.command_buffers[side as usize].end();
     }
 
-    pub(crate) fn submit(&self, swapchain: &Swapchain) {
+    pub(crate) fn submit(
+        &self,
+        window: &Window,
+        instance: &Instance,
+        surface: &Surface,
+        swapchain: &mut Swapchain,
+    ) {
         let side = self.current_frame_id % 2;
 
         self.device.submit_queue(
@@ -179,6 +201,9 @@ impl Renderer {
         );
 
         swapchain.present_queue(
+            window,
+            instance,
+            surface,
             self.device.present_queue(),
             &self.render_semaphores[side as usize],
             self.swapchain_image_index,
@@ -193,5 +218,16 @@ impl Renderer {
                 .handle()
                 .cmd_draw(*self.command_buffers[side as usize].handle(), 3, 1, 0, 0)
         }
+    }
+
+    pub(crate) fn resize(
+        &mut self,
+        window: &Window,
+        instance: &Instance,
+        surface: &Surface,
+        swapchain: &mut Swapchain,
+    ) {
+        // TODO: Propagte error
+        swapchain.recreate(window, instance, surface).unwrap();
     }
 }
