@@ -355,7 +355,7 @@ impl Device {
             .map(|&extension| extension.as_ptr())
             .collect::<Vec<_>>();
 
-        let create_info: vk::DeviceCreateInfoBuilder = DeviceCreateInfo::builder()
+        let create_info = DeviceCreateInfo::builder()
             .push_next(&mut physical_device_features)
             .queue_create_infos(&queue_create_infos)
             .enabled_layer_names(&[])
