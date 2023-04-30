@@ -29,10 +29,13 @@ pub enum CreationError {
 }
 
 pub struct Application {
+    frame_id: u64,
+
     game: Box<dyn Game>,
-    event_loop: EventLoop,
-    window: Window,
+
     render_context: RenderContext,
+    window: Window,
+    event_loop: EventLoop,
 }
 
 impl Application {
@@ -54,10 +57,13 @@ impl Application {
         let render_context = RenderContext::new(&window)?;
 
         Ok(Self {
+            frame_id: 1,
+
             game,
-            event_loop,
-            window,
+
             render_context,
+            window,
+            event_loop,
         })
     }
 
@@ -86,12 +92,14 @@ impl Application {
                 self.game.update();
             }
             Event::RenderFrame => {
-                self.render_context.begin();
+                self.render_context.begin(self.frame_id);
                 self.render_context.draw();
                 self.render_context.end();
                 self.render_context.submit();
 
                 self.game.render();
+
+                self.frame_id += 1;
             }
             _ => {}
         });

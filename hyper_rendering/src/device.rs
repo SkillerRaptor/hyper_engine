@@ -10,18 +10,18 @@ use crate::{
         queue_family_indices::QueueFamilyIndices,
         swapchain_support_details::SwapchainSupportDetails,
     },
-    fence::Fence,
     instance::Instance,
-    semaphore::Semaphore,
     surface::Surface,
+    sync::{binary_semaphore::BinarySemaphore, timeline_semaphore::TimelineSemaphore},
 };
 
 use ash::{
     extensions::khr::Swapchain,
     vk::{
         self, DeviceCreateInfo, DeviceQueueCreateInfo, PhysicalDevice,
-        PhysicalDeviceDynamicRenderingFeatures, PhysicalDeviceFeatures2, PipelineStageFlags, Queue,
-        SubmitInfo,
+        PhysicalDeviceDynamicRenderingFeatures, PhysicalDeviceFeatures2,
+        PhysicalDeviceTimelineSemaphoreFeatures, PipelineStageFlags, Queue, SubmitInfo,
+        TimelineSemaphoreSubmitInfo,
     },
 };
 use std::{collections::HashSet, ffi::CStr};
@@ -298,8 +298,12 @@ impl Device {
         let mut physical_device_dynamic_rendering_feature =
             PhysicalDeviceDynamicRenderingFeatures::builder();
 
+        let mut physical_device_timline_semaphore_features =
+            PhysicalDeviceTimelineSemaphoreFeatures::builder();
+
         let mut physical_device_features = PhysicalDeviceFeatures2::builder()
-            .push_next(&mut physical_device_dynamic_rendering_feature);
+            .push_next(&mut physical_device_dynamic_rendering_feature)
+            .push_next(&mut physical_device_timline_semaphore_features);
 
         unsafe {
             instance
@@ -333,8 +337,11 @@ impl Device {
 
         let mut dynamic_rendering_feature = PhysicalDeviceDynamicRenderingFeatures::builder();
 
-        let mut physical_device_features =
-            PhysicalDeviceFeatures2::builder().push_next(&mut dynamic_rendering_feature);
+        let mut timline_semaphore_features = PhysicalDeviceTimelineSemaphoreFeatures::builder();
+
+        let mut physical_device_features = PhysicalDeviceFeatures2::builder()
+            .push_next(&mut dynamic_rendering_feature)
+            .push_next(&mut timline_semaphore_features);
 
         unsafe {
             instance
@@ -366,17 +373,23 @@ impl Device {
     pub(crate) fn submit_queue(
         &self,
         command_buffer: &CommandBuffer,
-        present_semaphore: &Semaphore,
-        render_semaphore: &Semaphore,
-        wait_fence: &Fence,
+        present_semaphore: &BinarySemaphore,
+        render_semaphore: &BinarySemaphore,
+        submit_semaphore: &TimelineSemaphore,
+        frame_id: u64,
     ) {
         // TODO: Propagate error
         let wait_dst_stage_mask = &[PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT];
         let wait_semaphores = &[*present_semaphore.handle()];
-        let signal_semaphores = &[*render_semaphore.handle()];
+        let signal_semaphores = &[*submit_semaphore.handle(), *render_semaphore.handle()];
         let command_buffers = &[*command_buffer.handle()];
 
+        let wait_values = [frame_id, 0];
+        let mut timeline_submit_info =
+            TimelineSemaphoreSubmitInfo::builder().signal_semaphore_values(&wait_values);
+
         let submit_info = SubmitInfo::builder()
+            .push_next(&mut timeline_submit_info)
             .wait_dst_stage_mask(wait_dst_stage_mask)
             .wait_semaphores(wait_semaphores)
             .signal_semaphores(signal_semaphores)
@@ -384,7 +397,7 @@ impl Device {
 
         unsafe {
             self.handle
-                .queue_submit(self.graphics_queue, &[*submit_info], *wait_fence.handle())
+                .queue_submit(self.graphics_queue, &[*submit_info], vk::Fence::null())
                 .unwrap();
         }
     }

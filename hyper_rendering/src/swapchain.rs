@@ -4,18 +4,15 @@
  * SPDX-License-Identifier: MIT
  */
 
-use std::sync::Arc;
-
 use crate::{
     device::{
         queue_family_indices::{self, QueueFamilyIndices},
         swapchain_support_details::{self, SwapchainSupportDetails},
         Device,
     },
-    fence::Fence,
     instance::Instance,
-    semaphore::Semaphore,
     surface::Surface,
+    sync::binary_semaphore::BinarySemaphore,
 };
 
 use hyper_platform::window::Window;
@@ -29,6 +26,7 @@ use ash::{
         SurfaceCapabilitiesKHR, SurfaceFormatKHR, SwapchainCreateInfoKHR, SwapchainKHR,
     },
 };
+use std::sync::Arc;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -202,18 +200,17 @@ impl Swapchain {
             .unwrap_or(&PresentModeKHR::FIFO)
     }
 
-    pub(crate) fn acquire_next_image(&self, semaphore: &Semaphore, fence: Option<&Fence>) -> u32 {
+    pub(crate) fn acquire_next_image(&self, semaphore: &BinarySemaphore) -> u32 {
         // TODO: Propagate error
         unsafe {
-            let fence = if fence.is_some() {
-                *fence.as_ref().unwrap().handle()
-            } else {
-                vk::Fence::null()
-            };
-
             let (index, _recreate) = self
                 .swapchain_loader
-                .acquire_next_image(self.handle, 1_000_000_000, *semaphore.handle(), fence)
+                .acquire_next_image(
+                    self.handle,
+                    1_000_000_000,
+                    *semaphore.handle(),
+                    vk::Fence::null(),
+                )
                 .unwrap();
 
             index
@@ -223,7 +220,7 @@ impl Swapchain {
     pub(crate) fn present_queue(
         &self,
         queue: &Queue,
-        render_semaphore: &Semaphore,
+        render_semaphore: &BinarySemaphore,
         swapchain_image_index: u32,
     ) {
         // TODO: Propagte error
