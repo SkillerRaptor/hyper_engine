@@ -17,13 +17,13 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("creation of vulkan {1} failed")]
+    #[error("failed to create vulkan {1}")]
     Creation(#[source] vk::Result, &'static str),
 }
 
 pub(crate) struct Surface {
     handle: SurfaceKHR,
-    surface_loader: khr::Surface,
+    loader: khr::Surface,
 }
 
 impl Surface {
@@ -32,16 +32,13 @@ impl Surface {
         entry: &Entry,
         instance: &Instance,
     ) -> Result<Self, CreationError> {
-        let surface_loader = khr::Surface::new(entry, instance.handle());
+        let loader = khr::Surface::new(entry, instance.handle());
 
-        let surface = window
+        let handle = window
             .create_surface(entry, instance.handle())
             .map_err(|error| CreationError::Creation(error, "surface"))?;
 
-        Ok(Self {
-            handle: surface,
-            surface_loader,
-        })
+        Ok(Self { handle, loader })
     }
 
     pub(crate) fn handle(&self) -> &SurfaceKHR {
@@ -49,14 +46,14 @@ impl Surface {
     }
 
     pub(crate) fn loader(&self) -> &khr::Surface {
-        &self.surface_loader
+        &self.loader
     }
 }
 
 impl Drop for Surface {
     fn drop(&mut self) {
         unsafe {
-            self.surface_loader.destroy_surface(self.handle, None);
+            self.loader.destroy_surface(self.handle, None);
         }
     }
 }

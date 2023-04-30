@@ -21,23 +21,24 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("creation of vulkan {1} failed")]
+    #[error("failed to create vulkan {1}")]
     Creation(#[source] vk::Result, &'static str),
 
-    #[error("enumeration of vulkan {1} failed")]
+    #[error("failed to enumerate vulkan {1}")]
     Enumeration(#[source] vk::Result, &'static str),
 
-    #[error("c-string construction failed")]
+    #[error("failed to construct c-string")]
     CStringCreation,
 }
 
 struct DebugExtension {
-    debug_loader: DebugUtils,
-    debug_messenger: DebugUtilsMessengerEXT,
+    handle: DebugUtilsMessengerEXT,
+    loader: DebugUtils,
 }
 
 pub(crate) struct Instance {
     validation_layers_enabled: bool,
+
     debug_extension: Option<DebugExtension>,
     handle: ash::Instance,
 }
@@ -56,14 +57,16 @@ impl Instance {
             false
         };
 
-        let instance = Self::create_instance(window, validation_layers_enabled, entry)?;
+        let handle = Self::create_instance(window, validation_layers_enabled, entry)?;
+
         let debug_extension =
-            Self::create_debug_extension(validation_layers_enabled, entry, &instance)?;
+            Self::create_debug_extension(validation_layers_enabled, entry, &handle)?;
 
         Ok(Self {
             validation_layers_enabled,
+
             debug_extension,
-            handle: instance,
+            handle,
         })
     }
 
@@ -110,7 +113,7 @@ impl Instance {
             Vec::new()
         };
 
-        let mut debug_utils_messenger_create_info = DebugUtilsMessengerCreateInfoEXT::builder()
+        let mut debug_messenger_create_info = DebugUtilsMessengerCreateInfoEXT::builder()
             .message_severity(
                 DebugUtilsMessageSeverityFlagsEXT::ERROR
                     | DebugUtilsMessageSeverityFlagsEXT::WARNING
@@ -122,36 +125,34 @@ impl Instance {
             )
             .pfn_user_callback(Some(Self::debug_callback));
 
-        let mut instance_create_info = InstanceCreateInfo::builder()
+        let mut create_info = InstanceCreateInfo::builder()
             .application_info(&application_info)
             .enabled_extension_names(&extension_names)
             .enabled_layer_names(&layer_names);
 
         if validation_layers_enabled {
-            instance_create_info =
-                instance_create_info.push_next(&mut debug_utils_messenger_create_info);
+            create_info = create_info.push_next(&mut debug_messenger_create_info);
         }
 
-        let instance = unsafe {
+        let handle = unsafe {
             entry
-                .create_instance(&instance_create_info, None)
+                .create_instance(&create_info, None)
                 .map_err(|error| CreationError::Creation(error, "instance"))
         }?;
 
-        Ok(instance)
+        Ok(handle)
     }
 
     fn check_validation_layer_support(entry: &Entry) -> Result<bool, CreationError> {
-        let instance_layer_properties = entry
+        let layer_properties = entry
             .enumerate_instance_layer_properties()
             .map_err(|error| CreationError::Enumeration(error, "instance layer properties"))?;
 
         for validation_layer in Self::VALIDATION_LAYERS {
             let mut was_layer_found = false;
 
-            for instance_layer_property in &instance_layer_properties {
-                let layer_name =
-                    unsafe { CStr::from_ptr(instance_layer_property.layer_name.as_ptr()) };
+            for layer_property in &layer_properties {
+                let layer_name = unsafe { CStr::from_ptr(layer_property.layer_name.as_ptr()) };
 
                 let layer_name_string = layer_name
                     .to_str()
@@ -179,9 +180,9 @@ impl Instance {
             return Ok(None);
         }
 
-        let debug_loader = DebugUtils::new(entry, instance);
+        let loader = DebugUtils::new(entry, instance);
 
-        let debug_utils_messenger_create_info = DebugUtilsMessengerCreateInfoEXT::builder()
+        let create_info = DebugUtilsMessengerCreateInfoEXT::builder()
             .message_severity(
                 DebugUtilsMessageSeverityFlagsEXT::ERROR
                     | DebugUtilsMessageSeverityFlagsEXT::WARNING
@@ -193,16 +194,13 @@ impl Instance {
             )
             .pfn_user_callback(Some(Self::debug_callback));
 
-        let debug_messenger = unsafe {
-            debug_loader
-                .create_debug_utils_messenger(&debug_utils_messenger_create_info, None)
+        let handle = unsafe {
+            loader
+                .create_debug_utils_messenger(&create_info, None)
                 .map_err(|error| CreationError::Creation(error, "debug utils messenger"))?
         };
 
-        let debug_extension = DebugExtension {
-            debug_loader,
-            debug_messenger,
-        };
+        let debug_extension = DebugExtension { loader, handle };
 
         Ok(Some(debug_extension))
     }
@@ -239,8 +237,8 @@ impl Drop for Instance {
                 let debug_extension = self.debug_extension.as_ref().unwrap();
 
                 debug_extension
-                    .debug_loader
-                    .destroy_debug_utils_messenger(debug_extension.debug_messenger, None);
+                    .loader
+                    .destroy_debug_utils_messenger(debug_extension.handle, None);
             }
 
             self.handle.destroy_instance(None);

@@ -19,10 +19,10 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("creation of vulkan {1} failed")]
+    #[error("failed to create vulkan {1}")]
     Creation(#[source] vk::Result, &'static str),
 
-    #[error("creation of queue family indices failed")]
+    #[error("failed to create queue family indices")]
     QueueFamilyIndicesFailure(#[from] queue_family_indices::CreationError),
 }
 
@@ -40,21 +40,18 @@ impl CommandPool {
         let queue_family_indices =
             QueueFamilyIndices::new(instance, surface, device.physical_device())?;
 
-        let command_pool_create_info = CommandPoolCreateInfo::builder()
+        let create_info = CommandPoolCreateInfo::builder()
             .queue_family_index(queue_family_indices.graphics_family().unwrap())
             .flags(CommandPoolCreateFlags::RESET_COMMAND_BUFFER);
 
-        let command_pool = unsafe {
+        let handle = unsafe {
             device
                 .handle()
-                .create_command_pool(&command_pool_create_info, None)
+                .create_command_pool(&create_info, None)
                 .map_err(|error| CreationError::Creation(error, "command pool"))
         }?;
 
-        Ok(Self {
-            handle: command_pool,
-            device,
-        })
+        Ok(Self { handle, device })
     }
 
     pub(crate) fn handle(&self) -> &vk::CommandPool {

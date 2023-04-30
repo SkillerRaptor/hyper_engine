@@ -31,26 +31,29 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("creation of vulkan {1} failed")]
+    #[error("failed to create vulkan {1}")]
     Creation(#[source] vk::Result, &'static str),
 
-    #[error("device is out of memory")]
+    #[error("failed to find memory from device")]
     OutOfMemory(#[source] vk::Result),
 
-    #[error("creation of queue family indices failed")]
+    #[error("failed to create queue family indices")]
     QueueFamilyIndicesFailure(#[from] queue_family_indices::CreationError),
 
-    #[error("creation of swapchain support details failed")]
+    #[error("failed to create swapchain support details")]
     SwapchainSupportDetailsFailure(#[from] swapchain_support_details::CreationError),
 }
 
 pub(crate) struct Swapchain {
     image_views: Vec<ImageView>,
     images: Vec<Image>,
+
     extent: Extent2D,
     format: Format,
+
     handle: SwapchainKHR,
-    swapchain_loader: khr::Swapchain,
+    loader: khr::Swapchain,
+
     device: Arc<Device>,
 }
 
@@ -89,7 +92,7 @@ impl Swapchain {
                 (SharingMode::EXCLUSIVE, &[])
             };
 
-        let swapchain_create_info = SwapchainCreateInfoKHR::builder()
+        let create_info = SwapchainCreateInfoKHR::builder()
             .surface(*surface.handle())
             .min_image_count(image_count)
             .image_format(surface_format.format)
@@ -105,22 +108,22 @@ impl Swapchain {
             .clipped(true)
             .old_swapchain(SwapchainKHR::null());
 
-        let swapchain_loader = khr::Swapchain::new(instance.handle(), device.handle());
+        let loader = khr::Swapchain::new(instance.handle(), device.handle());
 
-        let swapchain = unsafe {
-            swapchain_loader
-                .create_swapchain(&swapchain_create_info, None)
+        let handle = unsafe {
+            loader
+                .create_swapchain(&create_info, None)
                 .map_err(|error| CreationError::Creation(error, "swapchain"))
         }?;
 
-        let swapchain_images = unsafe {
-            swapchain_loader
-                .get_swapchain_images(swapchain)
+        let images = unsafe {
+            loader
+                .get_swapchain_images(handle)
                 .map_err(CreationError::OutOfMemory)
         }?;
 
-        let mut swapchain_image_views = Vec::new();
-        for image in &swapchain_images {
+        let mut image_views = Vec::new();
+        for image in &images {
             let component_mapping = ComponentMapping::builder()
                 .r(ComponentSwizzle::IDENTITY)
                 .g(ComponentSwizzle::IDENTITY)
@@ -134,31 +137,34 @@ impl Swapchain {
                 .base_array_layer(0)
                 .layer_count(1);
 
-            let image_view_create_info = ImageViewCreateInfo::builder()
+            let create_info = ImageViewCreateInfo::builder()
                 .image(*image)
                 .view_type(ImageViewType::TYPE_2D)
                 .format(surface_format.format)
                 .components(*component_mapping)
                 .subresource_range(*subresource_range);
 
-            let image_view = unsafe {
+            let handle = unsafe {
                 device
                     .handle()
-                    .create_image_view(&image_view_create_info, None)
+                    .create_image_view(&create_info, None)
                     .map_err(|error| CreationError::Creation(error, "image view"))
             }?;
 
-            swapchain_image_views.push(image_view);
+            image_views.push(handle);
         }
 
         Ok(Self {
-            image_views: swapchain_image_views,
-            images: swapchain_images,
+            image_views,
+            images,
+
             extent,
             format: surface_format.format,
-            handle: swapchain,
-            swapchain_loader,
-            device: device.clone(),
+
+            handle,
+            loader,
+
+            device,
         })
     }
 
@@ -200,15 +206,16 @@ impl Swapchain {
             .unwrap_or(&PresentModeKHR::FIFO)
     }
 
-    pub(crate) fn acquire_next_image(&self, semaphore: &BinarySemaphore) -> u32 {
+    pub(crate) fn acquire_next_image(&self, present_semaphore: &BinarySemaphore) -> u32 {
         // TODO: Propagate error
+
         unsafe {
             let (index, _recreate) = self
-                .swapchain_loader
+                .loader
                 .acquire_next_image(
                     self.handle,
                     1_000_000_000,
-                    *semaphore.handle(),
+                    *present_semaphore.handle(),
                     vk::Fence::null(),
                 )
                 .unwrap();
@@ -235,9 +242,7 @@ impl Swapchain {
             .image_indices(image_indices);
 
         unsafe {
-            self.swapchain_loader
-                .queue_present(*queue, &present_info)
-                .unwrap();
+            self.loader.queue_present(*queue, &present_info).unwrap();
         }
     }
 
@@ -265,7 +270,7 @@ impl Drop for Swapchain {
                 self.device.handle().destroy_image_view(*image_view, None);
             }
 
-            self.swapchain_loader.destroy_swapchain(self.handle, None);
+            self.loader.destroy_swapchain(self.handle, None);
         }
     }
 }

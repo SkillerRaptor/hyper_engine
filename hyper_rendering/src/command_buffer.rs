@@ -18,10 +18,10 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("Allocation of vulkan {1} failed")]
+    #[error("failed to allocate vulkan {1}")]
     Allocation(#[source] vk::Result, &'static str),
 
-    #[error("creation of queue family indices failed")]
+    #[error("failed to create queue family indices")]
     QueueFamilyIndicesFailure(#[from] queue_family_indices::CreationError),
 }
 
@@ -35,20 +35,20 @@ impl CommandBuffer {
         device: Arc<Device>,
         command_pool: &CommandPool,
     ) -> Result<Self, CreationError> {
-        let command_buffer_allocate_info = CommandBufferAllocateInfo::builder()
+        let allocate_info = CommandBufferAllocateInfo::builder()
             .command_pool(*command_pool.handle())
             .command_buffer_count(1)
             .level(CommandBufferLevel::PRIMARY);
 
-        let command_buffers = unsafe {
+        let handles = unsafe {
             device
                 .handle()
-                .allocate_command_buffers(&command_buffer_allocate_info)
+                .allocate_command_buffers(&allocate_info)
                 .map_err(|error| CreationError::Allocation(error, "command buffer"))
         }?;
 
         Ok(Self {
-            handle: command_buffers[0],
+            handle: handles[0],
             device,
         })
     }

@@ -30,51 +30,52 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("creation of vulkan {1} failed")]
+    #[error("failed to create vulkan {1}")]
     Creation(#[source] vk::Result, &'static str),
 
-    #[error("file failed to open")]
+    #[error("failed to open file")]
     OpenFailure(#[source] io::Error),
 
-    #[error("file failed to be read")]
+    #[error("failed to read file")]
     ReadFailure(#[source] io::Error),
 
-    #[error("shader is unaligned")]
+    #[error("failed to read unaligned vulkan shader")]
     Unaligned,
 }
 
 pub(crate) struct Pipeline {
-    graphics_pipeline: vk::Pipeline,
-    graphics_pipeline_layout: PipelineLayout,
+    layout: PipelineLayout,
+    handle: vk::Pipeline,
+
     device: Arc<Device>,
 }
 
 impl Pipeline {
     pub(crate) fn new(device: Arc<Device>, swapchain: &Swapchain) -> Result<Self, CreationError> {
-        let graphics_pipeline_layout = Self::create_graphics_pipeline_layout(&device)?;
-        let graphics_pipeline =
-            Self::create_graphics_pipeline(&device, swapchain, &graphics_pipeline_layout)?;
+        let layout = Self::create_graphics_pipeline_layout(&device)?;
+        let handle = Self::create_graphics_pipeline(&device, swapchain, &layout)?;
 
         Ok(Self {
-            graphics_pipeline,
-            graphics_pipeline_layout,
+            layout,
+            handle,
+
             device: device.clone(),
         })
     }
 
     fn create_graphics_pipeline_layout(device: &Device) -> Result<PipelineLayout, CreationError> {
-        let pipeline_layout_create_info = PipelineLayoutCreateInfo::builder()
+        let create_info = PipelineLayoutCreateInfo::builder()
             .set_layouts(&[])
             .push_constant_ranges(&[]);
 
-        let pipeline_layout = unsafe {
+        let handle = unsafe {
             device
                 .handle()
-                .create_pipeline_layout(&pipeline_layout_create_info, None)
+                .create_pipeline_layout(&create_info, None)
                 .map_err(|error| CreationError::Creation(error, "pipeline layout"))
         }?;
 
-        Ok(pipeline_layout)
+        Ok(handle)
     }
 
     fn create_graphics_pipeline(
@@ -91,53 +92,48 @@ impl Pipeline {
 
         let entry_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
 
-        let vertex_pipeline_shader_stage_create_info = PipelineShaderStageCreateInfo::builder()
+        let vertex_create_info = PipelineShaderStageCreateInfo::builder()
             .stage(ShaderStageFlags::VERTEX)
             .module(vertex_shader_module)
             .name(entry_name);
 
-        let fragment_pipeline_shader_stage_create_info = PipelineShaderStageCreateInfo::builder()
+        let fragment_create_info = PipelineShaderStageCreateInfo::builder()
             .stage(ShaderStageFlags::FRAGMENT)
             .module(fragment_shader_module)
             .name(entry_name);
 
-        let shader_stages = [
-            *vertex_pipeline_shader_stage_create_info,
-            *fragment_pipeline_shader_stage_create_info,
-        ];
+        let shader_stages = [*vertex_create_info, *fragment_create_info];
 
         let dynamic_states = [DynamicState::VIEWPORT, DynamicState::SCISSOR];
 
-        let pipeline_dynamic_state_create_info =
+        let dynamic_state_create_info =
             PipelineDynamicStateCreateInfo::builder().dynamic_states(&dynamic_states);
 
-        let pipeline_vertex_input_state_create_info = PipelineVertexInputStateCreateInfo::builder()
+        let vertex_input_state_create_info = PipelineVertexInputStateCreateInfo::builder()
             .vertex_binding_descriptions(&[])
             .vertex_attribute_descriptions(&[]);
 
-        let pipeline_input_assembly_state_create_info =
-            PipelineInputAssemblyStateCreateInfo::builder()
-                .topology(PrimitiveTopology::TRIANGLE_LIST)
-                .primitive_restart_enable(false);
+        let input_assembly_state_create_info = PipelineInputAssemblyStateCreateInfo::builder()
+            .topology(PrimitiveTopology::TRIANGLE_LIST)
+            .primitive_restart_enable(false);
 
-        let pipeline_viewport_state_create_info = PipelineViewportStateCreateInfo::builder()
+        let viewport_state_create_info = PipelineViewportStateCreateInfo::builder()
             .viewport_count(1)
             .scissor_count(1);
 
-        let pipeline_rasterization_state_create_info =
-            PipelineRasterizationStateCreateInfo::builder()
-                .depth_clamp_enable(false)
-                .rasterizer_discard_enable(false)
-                .polygon_mode(PolygonMode::FILL)
-                .line_width(1.0)
-                .cull_mode(CullModeFlags::BACK)
-                .front_face(FrontFace::CLOCKWISE)
-                .depth_bias_enable(false)
-                .depth_bias_constant_factor(0.0)
-                .depth_bias_clamp(0.0)
-                .depth_bias_slope_factor(0.0);
+        let rasterization_state_create_info = PipelineRasterizationStateCreateInfo::builder()
+            .depth_clamp_enable(false)
+            .rasterizer_discard_enable(false)
+            .polygon_mode(PolygonMode::FILL)
+            .line_width(1.0)
+            .cull_mode(CullModeFlags::BACK)
+            .front_face(FrontFace::CLOCKWISE)
+            .depth_bias_enable(false)
+            .depth_bias_constant_factor(0.0)
+            .depth_bias_clamp(0.0)
+            .depth_bias_slope_factor(0.0);
 
-        let pipeline_multisample_state_create_info = PipelineMultisampleStateCreateInfo::builder()
+        let multisample_state_create_info = PipelineMultisampleStateCreateInfo::builder()
             .sample_shading_enable(false)
             .rasterization_samples(SampleCountFlags::TYPE_1)
             .min_sample_shading(1.0)
@@ -145,7 +141,7 @@ impl Pipeline {
             .alpha_to_coverage_enable(false)
             .alpha_to_one_enable(false);
 
-        let pipeline_color_blend_attachment_state = PipelineColorBlendAttachmentState::builder()
+        let color_blend_attachment_state = PipelineColorBlendAttachmentState::builder()
             .color_write_mask(ColorComponentFlags::RGBA)
             .blend_enable(false)
             .src_color_blend_factor(BlendFactor::ONE)
@@ -155,43 +151,38 @@ impl Pipeline {
             .dst_alpha_blend_factor(BlendFactor::ZERO)
             .alpha_blend_op(BlendOp::ADD);
 
-        let attachments = &[*pipeline_color_blend_attachment_state];
+        let attachments = &[*color_blend_attachment_state];
 
-        let pipeline_color_blend_state_create_info = PipelineColorBlendStateCreateInfo::builder()
+        let color_blend_state_create_info = PipelineColorBlendStateCreateInfo::builder()
             .logic_op_enable(false)
             .logic_op(LogicOp::COPY)
             .attachments(attachments)
             .blend_constants([0.0; 4]);
 
         let color_attachment_formats = &[*swapchain.format()];
-        let mut pipeline_rendering_create_info = PipelineRenderingCreateInfoKHR::builder()
+        let mut rendering_create_info = PipelineRenderingCreateInfoKHR::builder()
             .color_attachment_formats(color_attachment_formats);
 
-        let graphics_pipeline_create_info = GraphicsPipelineCreateInfo::builder()
-            .push_next(&mut pipeline_rendering_create_info)
+        let create_info = GraphicsPipelineCreateInfo::builder()
+            .push_next(&mut rendering_create_info)
             .stages(&shader_stages)
-            .vertex_input_state(&pipeline_vertex_input_state_create_info)
-            .input_assembly_state(&pipeline_input_assembly_state_create_info)
-            .viewport_state(&pipeline_viewport_state_create_info)
-            .rasterization_state(&pipeline_rasterization_state_create_info)
-            .multisample_state(&pipeline_multisample_state_create_info)
-            // .depth_stencil_state(depth_stencil_state)
-            .color_blend_state(&pipeline_color_blend_state_create_info)
-            .dynamic_state(&pipeline_dynamic_state_create_info)
+            .vertex_input_state(&vertex_input_state_create_info)
+            .input_assembly_state(&input_assembly_state_create_info)
+            .viewport_state(&viewport_state_create_info)
+            .rasterization_state(&rasterization_state_create_info)
+            .multisample_state(&multisample_state_create_info)
+            .color_blend_state(&color_blend_state_create_info)
+            .dynamic_state(&dynamic_state_create_info)
             .layout(*pipeline_layout)
             .render_pass(RenderPass::null())
             .subpass(0)
             .base_pipeline_handle(vk::Pipeline::null())
             .base_pipeline_index(-1);
 
-        let graphics_pipeline = unsafe {
+        let handles = unsafe {
             device
                 .handle()
-                .create_graphics_pipelines(
-                    PipelineCache::null(),
-                    &[*graphics_pipeline_create_info],
-                    None,
-                )
+                .create_graphics_pipelines(PipelineCache::null(), &[*create_info], None)
                 .map_err(|error| CreationError::Creation(error.1, "graphics pipeline"))
         }?;
 
@@ -204,7 +195,7 @@ impl Pipeline {
                 .destroy_shader_module(fragment_shader_module, None);
         }
 
-        Ok(graphics_pipeline[0])
+        Ok(handles[0])
     }
 
     fn parse_shader(file: &str) -> Result<Vec<u8>, CreationError> {
@@ -228,16 +219,16 @@ impl Pipeline {
             return Err(CreationError::Unaligned);
         }
 
-        let shader_module_create_info = ShaderModuleCreateInfo::builder().code(code);
+        let create_info = ShaderModuleCreateInfo::builder().code(code);
 
-        let shader_module = unsafe {
+        let handle = unsafe {
             device
                 .handle()
-                .create_shader_module(&shader_module_create_info, None)
+                .create_shader_module(&create_info, None)
                 .map_err(|error| CreationError::Creation(error, "shader module"))
         }?;
 
-        Ok(shader_module)
+        Ok(handle)
     }
 
     pub(crate) fn begin_rendering(
@@ -351,7 +342,7 @@ impl Pipeline {
             self.device.handle().cmd_bind_pipeline(
                 *command_buffer.handle(),
                 PipelineBindPoint::GRAPHICS,
-                self.graphics_pipeline,
+                self.handle,
             )
         }
     }
@@ -360,13 +351,11 @@ impl Pipeline {
 impl Drop for Pipeline {
     fn drop(&mut self) {
         unsafe {
-            self.device
-                .handle()
-                .destroy_pipeline(self.graphics_pipeline, None);
+            self.device.handle().destroy_pipeline(self.handle, None);
 
             self.device
                 .handle()
-                .destroy_pipeline_layout(self.graphics_pipeline_layout, None);
+                .destroy_pipeline_layout(self.layout, None);
         }
     }
 }

@@ -21,25 +21,25 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("couldn't load vulkan entry")]
+    #[error("failde to load vulkan entry")]
     EntryLoadingFailure(#[from] LoadingError),
 
-    #[error("couldn't create instance")]
+    #[error("failed to create instance")]
     InstanceFailure(#[from] instance::CreationError),
 
-    #[error("couldn't create surface")]
+    #[error("failed to create surface")]
     SurfaceFailure(#[from] surface::CreationError),
 
-    #[error("couldn't create device")]
+    #[error("failed to create device")]
     DeviceFailure(#[from] device::CreationError),
 
-    #[error("couldn't create swapchain")]
+    #[error("failed to create swapchain")]
     SwapchainFailure(#[from] swapchain::CreationError),
 
-    #[error("couldn't create pipeline")]
+    #[error("failed to create pipeline")]
     PipelineFailure(#[from] pipeline::CreationError),
 
-    #[error("couldn't create renderer")]
+    #[error("failed to create renderer")]
     RendererFailure(#[from] renderer::CreationError),
 }
 

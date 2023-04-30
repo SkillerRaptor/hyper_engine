@@ -175,25 +175,26 @@ pub(crate) mod swapchain_support_details {
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("creation of vulkan {1} failed")]
+    #[error("failed to create vulkan {1}")]
     Creation(#[source] vk::Result, &'static str),
 
-    #[error("enumeration of vulkan {1} failed")]
+    #[error("failed to enumerate vulkan {1}")]
     Enumeration(#[source] vk::Result, &'static str),
 
-    #[error("couldn't find gpu with vulkan support")]
+    #[error("failed to find vulkan capable gpu")]
     Unsupported,
 
-    #[error("creation of queue family indices failed")]
+    #[error("failed to create queue family indices")]
     QueueFamilyIndicesFailure(#[from] queue_family_indices::CreationError),
 
-    #[error("creation of swapchain support details failed")]
+    #[error("failed to create swapchain support details")]
     SwapchainSupportDetailsFailure(#[from] swapchain_support_details::CreationError),
 }
 
 pub(crate) struct Device {
     present_queue: Queue,
     graphics_queue: Queue,
+
     handle: ash::Device,
     physical_device: PhysicalDevice,
 }
@@ -203,18 +204,18 @@ impl Device {
 
     pub(crate) fn new(instance: &Instance, surface: &Surface) -> Result<Self, CreationError> {
         let physical_device = Self::pick_physical_device(instance, surface)?;
-        let device = Self::create_device(instance, surface, &physical_device)?;
+        let handle = Self::create_device(instance, surface, &physical_device)?;
 
         let queue_family_indices = QueueFamilyIndices::new(instance, surface, &physical_device)?;
         let graphics_queue =
-            unsafe { device.get_device_queue(queue_family_indices.graphics_family().unwrap(), 0) };
+            unsafe { handle.get_device_queue(queue_family_indices.graphics_family().unwrap(), 0) };
         let present_queue =
-            unsafe { device.get_device_queue(queue_family_indices.present_family().unwrap(), 0) };
+            unsafe { handle.get_device_queue(queue_family_indices.present_family().unwrap(), 0) };
 
         Ok(Self {
             present_queue,
             graphics_queue,
-            handle: device,
+            handle,
             physical_device,
         })
     }
@@ -273,32 +274,28 @@ impl Device {
         instance: &Instance,
         physical_device: &PhysicalDevice,
     ) -> Result<bool, CreationError> {
-        let physical_device_extension_properties = unsafe {
+        let extension_properties = unsafe {
             instance
                 .handle()
                 .enumerate_device_extension_properties(*physical_device)
                 .map_err(|error| CreationError::Enumeration(error, "device extension properties"))
         }?;
 
-        let physical_device_extensions = physical_device_extension_properties
+        let extensions = extension_properties
             .iter()
-            .map(|physical_device_extension_property| unsafe {
-                CStr::from_ptr(physical_device_extension_property.extension_name.as_ptr())
-            })
+            .map(|property| unsafe { CStr::from_ptr(property.extension_name.as_ptr()) })
             .collect::<HashSet<_>>();
 
-        let available = Self::EXTENSIONS.iter().all(|&physical_device_extension| {
-            physical_device_extensions.contains(physical_device_extension)
-        });
+        let available = Self::EXTENSIONS
+            .iter()
+            .all(|&extension| extensions.contains(extension));
 
         Ok(available)
     }
 
     fn check_feature_support(instance: &Instance, physical_device: &PhysicalDevice) -> bool {
         let mut dynamic_rendering_feature = PhysicalDeviceDynamicRenderingFeatures::builder();
-
         let mut timline_semaphore_features = PhysicalDeviceTimelineSemaphoreFeatures::builder();
-
         let mut synchronization2_features = PhysicalDeviceSynchronization2Features::builder();
 
         let mut device_features = PhysicalDeviceFeatures2::builder()
@@ -328,20 +325,18 @@ impl Device {
         unique_queue_families.insert(queue_family_indices.graphics_family().unwrap());
         unique_queue_families.insert(queue_family_indices.present_family().unwrap());
 
-        let mut device_queue_create_infos = Vec::new();
+        let mut queue_create_infos = Vec::new();
         for queue_family in unique_queue_families {
-            let device_queue_create_info = DeviceQueueCreateInfo::builder()
+            let queue_create_info = DeviceQueueCreateInfo::builder()
                 .queue_family_index(queue_family)
                 .queue_priorities(&[1.0])
                 .build();
 
-            device_queue_create_infos.push(device_queue_create_info);
+            queue_create_infos.push(queue_create_info);
         }
 
         let mut dynamic_rendering_feature = PhysicalDeviceDynamicRenderingFeatures::builder();
-
         let mut timline_semaphore_features = PhysicalDeviceTimelineSemaphoreFeatures::builder();
-
         let mut synchronization2_features = PhysicalDeviceSynchronization2Features::builder();
 
         let mut physical_device_features = PhysicalDeviceFeatures2::builder()
@@ -360,20 +355,20 @@ impl Device {
             .map(|&extension| extension.as_ptr())
             .collect::<Vec<_>>();
 
-        let device_create_info: vk::DeviceCreateInfoBuilder = DeviceCreateInfo::builder()
+        let create_info: vk::DeviceCreateInfoBuilder = DeviceCreateInfo::builder()
             .push_next(&mut physical_device_features)
-            .queue_create_infos(&device_queue_create_infos)
+            .queue_create_infos(&queue_create_infos)
             .enabled_layer_names(&[])
             .enabled_extension_names(&extension_names);
 
-        let device = unsafe {
+        let handle = unsafe {
             instance
                 .handle()
-                .create_device(*physical_device, &device_create_info, None)
+                .create_device(*physical_device, &create_info, None)
                 .map_err(|error| CreationError::Creation(error, "device"))
         }?;
 
-        Ok(device)
+        Ok(handle)
     }
 
     pub(crate) fn submit_queue(
