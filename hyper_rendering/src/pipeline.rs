@@ -59,7 +59,7 @@ impl Pipeline {
             layout,
             handle,
 
-            device: device.clone(),
+            device,
         })
     }
 

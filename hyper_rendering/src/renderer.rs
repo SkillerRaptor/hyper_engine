@@ -61,7 +61,7 @@ impl Renderer {
         surface: &Surface,
         device: Arc<Device>,
     ) -> Result<Self, CreationError> {
-        let command_pool = CommandPool::new(&instance, &surface, device.clone())?;
+        let command_pool = CommandPool::new(instance, surface, device.clone())?;
 
         let mut command_buffers = Vec::new();
         for _ in 0..Self::FRAMES_IN_FLIGHT {
@@ -133,7 +133,7 @@ impl Renderer {
         };
 
         pipeline.begin_rendering(
-            &swapchain,
+            swapchain,
             &self.command_buffers[side as usize],
             &swapchain.images()[self.swapchain_image_index as usize],
             &swapchain.image_views()[self.swapchain_image_index as usize],
