@@ -19,9 +19,10 @@ use ash::{
     extensions::khr::Swapchain,
     vk::{
         self, CommandBufferSubmitInfo, DeviceCreateInfo, DeviceQueueCreateInfo, PhysicalDevice,
-        PhysicalDeviceDynamicRenderingFeatures, PhysicalDeviceFeatures2,
-        PhysicalDeviceSynchronization2Features, PhysicalDeviceTimelineSemaphoreFeatures,
-        PipelineStageFlags2, Queue, SemaphoreSubmitInfo, SubmitInfo2,
+        PhysicalDeviceDescriptorIndexingFeatures, PhysicalDeviceDynamicRenderingFeatures,
+        PhysicalDeviceFeatures2, PhysicalDeviceSynchronization2Features,
+        PhysicalDeviceTimelineSemaphoreFeatures, PipelineStageFlags2, Queue, SemaphoreSubmitInfo,
+        SubmitInfo2,
     },
 };
 use std::{collections::HashSet, ffi::CStr};
@@ -294,14 +295,16 @@ impl Device {
     }
 
     fn check_feature_support(instance: &Instance, physical_device: &PhysicalDevice) -> bool {
-        let mut dynamic_rendering_feature = PhysicalDeviceDynamicRenderingFeatures::builder();
-        let mut timline_semaphore_feature = PhysicalDeviceTimelineSemaphoreFeatures::builder();
-        let mut synchronization2_feature = PhysicalDeviceSynchronization2Features::builder();
+        let mut dynamic_rendering = PhysicalDeviceDynamicRenderingFeatures::builder();
+        let mut timline_semaphore = PhysicalDeviceTimelineSemaphoreFeatures::builder();
+        let mut synchronization2 = PhysicalDeviceSynchronization2Features::builder();
+        let mut descriptor_indexing = PhysicalDeviceDescriptorIndexingFeatures::builder();
 
         let mut device_features = PhysicalDeviceFeatures2::builder()
-            .push_next(&mut dynamic_rendering_feature)
-            .push_next(&mut timline_semaphore_feature)
-            .push_next(&mut synchronization2_feature);
+            .push_next(&mut dynamic_rendering)
+            .push_next(&mut timline_semaphore)
+            .push_next(&mut synchronization2)
+            .push_next(&mut descriptor_indexing);
 
         unsafe {
             instance
@@ -309,9 +312,30 @@ impl Device {
                 .get_physical_device_features2(*physical_device, &mut device_features);
         }
 
-        dynamic_rendering_feature.dynamic_rendering == vk::TRUE
-            && timline_semaphore_feature.timeline_semaphore == vk::TRUE
-            && synchronization2_feature.synchronization2 == vk::TRUE
+        dynamic_rendering.dynamic_rendering == vk::TRUE
+            && timline_semaphore.timeline_semaphore == vk::TRUE
+            && synchronization2.synchronization2 == vk::TRUE
+            && descriptor_indexing.shader_uniform_texel_buffer_array_dynamic_indexing == vk::TRUE
+            && descriptor_indexing.shader_storage_texel_buffer_array_dynamic_indexing == vk::TRUE
+            && descriptor_indexing.shader_uniform_buffer_array_non_uniform_indexing == vk::TRUE
+            && descriptor_indexing.shader_sampled_image_array_non_uniform_indexing == vk::TRUE
+            && descriptor_indexing.shader_storage_buffer_array_non_uniform_indexing == vk::TRUE
+            && descriptor_indexing.shader_storage_image_array_non_uniform_indexing == vk::TRUE
+            && descriptor_indexing.shader_uniform_texel_buffer_array_non_uniform_indexing
+                == vk::TRUE
+            && descriptor_indexing.shader_storage_texel_buffer_array_non_uniform_indexing
+                == vk::TRUE
+            && descriptor_indexing.descriptor_binding_sampled_image_update_after_bind == vk::TRUE
+            && descriptor_indexing.descriptor_binding_storage_image_update_after_bind == vk::TRUE
+            && descriptor_indexing.descriptor_binding_storage_buffer_update_after_bind == vk::TRUE
+            && descriptor_indexing.descriptor_binding_uniform_texel_buffer_update_after_bind
+                == vk::TRUE
+            && descriptor_indexing.descriptor_binding_storage_texel_buffer_update_after_bind
+                == vk::TRUE
+            && descriptor_indexing.descriptor_binding_update_unused_while_pending == vk::TRUE
+            && descriptor_indexing.descriptor_binding_partially_bound == vk::TRUE
+            && descriptor_indexing.descriptor_binding_variable_descriptor_count == vk::TRUE
+            && descriptor_indexing.runtime_descriptor_array == vk::TRUE
     }
 
     fn create_device(
@@ -335,17 +359,36 @@ impl Device {
             queue_create_infos.push(queue_create_info);
         }
 
-        let mut dynamic_rendering_feature =
+        let mut dynamic_rendering =
             PhysicalDeviceDynamicRenderingFeatures::builder().dynamic_rendering(true);
-        let mut timline_semaphore_feature =
+        let mut timline_semaphore =
             PhysicalDeviceTimelineSemaphoreFeatures::builder().timeline_semaphore(true);
-        let mut synchronization2_feature =
+        let mut synchronization2 =
             PhysicalDeviceSynchronization2Features::builder().synchronization2(true);
+        let mut descriptor_indexing = PhysicalDeviceDescriptorIndexingFeatures::builder()
+            .shader_uniform_texel_buffer_array_dynamic_indexing(true)
+            .shader_storage_texel_buffer_array_dynamic_indexing(true)
+            .shader_uniform_buffer_array_non_uniform_indexing(true)
+            .shader_sampled_image_array_non_uniform_indexing(true)
+            .shader_storage_buffer_array_non_uniform_indexing(true)
+            .shader_storage_image_array_non_uniform_indexing(true)
+            .shader_uniform_texel_buffer_array_non_uniform_indexing(true)
+            .shader_storage_texel_buffer_array_non_uniform_indexing(true)
+            .descriptor_binding_sampled_image_update_after_bind(true)
+            .descriptor_binding_storage_image_update_after_bind(true)
+            .descriptor_binding_storage_buffer_update_after_bind(true)
+            .descriptor_binding_uniform_texel_buffer_update_after_bind(true)
+            .descriptor_binding_storage_texel_buffer_update_after_bind(true)
+            .descriptor_binding_update_unused_while_pending(true)
+            .descriptor_binding_partially_bound(true)
+            .descriptor_binding_variable_descriptor_count(true)
+            .runtime_descriptor_array(true);
 
         let mut physical_device_features = PhysicalDeviceFeatures2::builder()
-            .push_next(&mut dynamic_rendering_feature)
-            .push_next(&mut timline_semaphore_feature)
-            .push_next(&mut synchronization2_feature);
+            .push_next(&mut dynamic_rendering)
+            .push_next(&mut timline_semaphore)
+            .push_next(&mut synchronization2)
+            .push_next(&mut descriptor_indexing);
 
         let extension_names = Self::EXTENSIONS
             .iter()
@@ -355,7 +398,6 @@ impl Device {
         let create_info = DeviceCreateInfo::builder()
             .push_next(&mut physical_device_features)
             .queue_create_infos(&queue_create_infos)
-            .enabled_layer_names(&[])
             .enabled_extension_names(&extension_names);
 
         let handle = unsafe {
