@@ -5,6 +5,7 @@
  */
 
 use crate::{
+    descriptors::descriptor_pool::{self, DescriptorPool},
     device::{self, Device},
     instance::{self, Instance},
     pipeline::{self, Pipeline},
@@ -21,7 +22,7 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("failde to load vulkan entry")]
+    #[error("failed to load vulkan entry")]
     EntryLoadingFailure(#[from] LoadingError),
 
     #[error("failed to create instance")]
@@ -36,6 +37,9 @@ pub enum CreationError {
     #[error("failed to create swapchain")]
     SwapchainFailure(#[from] swapchain::CreationError),
 
+    #[error("failed to create descriptor pool")]
+    DescriptorPoolFailure(#[from] descriptor_pool::CreationError),
+
     #[error("failed to create pipeline")]
     PipelineFailure(#[from] pipeline::CreationError),
 
@@ -46,6 +50,7 @@ pub enum CreationError {
 pub struct RenderContext {
     renderer: Renderer,
     pipeline: Pipeline,
+    _descriptor_pool: DescriptorPool,
     swapchain: Swapchain,
     device: Arc<Device>,
     surface: Surface,
@@ -62,6 +67,7 @@ impl RenderContext {
         let surface = Surface::new(window, &entry, &instance)?;
         let device = Arc::new(Device::new(&instance, &surface)?);
         let swapchain = Swapchain::new(window, &instance, &surface, device.clone())?;
+        let descriptor_pool = DescriptorPool::new(&instance, device.clone())?;
         let pipeline = Pipeline::new(device.clone(), &swapchain)?;
 
         let renderer = Renderer::new(&instance, &surface, device.clone())?;
@@ -69,6 +75,7 @@ impl RenderContext {
         Ok(Self {
             renderer,
             pipeline,
+            _descriptor_pool: descriptor_pool,
             swapchain,
             device,
             surface,
