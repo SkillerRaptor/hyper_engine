@@ -1,0 +1,14 @@
+[store]
+dir = "target/nextest"
+
+[profile.default]
+retries = 0
+test-threads = "num-cpus"
+threads-required = 1
+status-level = "pass"
+final-status-level = "flaky"
+failure-output = "immediate"
+success-output = "never"
+fail-fast = false
+slow-timeout = { period = "60s" }
+leak-timeout = "100ms"

@@ -42,6 +42,17 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           override: true
 
+      - name: Install Cargo-Audit
+        uses: baptiste0928/cargo-install@v2
+        with:
+          crate: cargo-audit
+
+      - name: Install Cargo-Nextest
+        uses: baptiste0928/cargo-install@v2
+        with:
+          crate: cargo-nextest
+          locked: true
+
       - name: Cache
         uses: Swatinem/rust-cache@v2
 
@@ -75,8 +86,14 @@ jobs:
           command: check
           args: --all-targets
 
+      - name: Cargo Audit
+        uses: actions-rs/cargo@v1
+        with:
+          command: audit
+          args: --ignore RUSTSEC-2020-0071 --ignore RUSTSEC-2021-0145
+
       - name: Cargo Test
         uses: actions-rs/cargo@v1
         with:
-          command: test
-          args: --verbose --workspace
+          command: nextest
+          args: run
