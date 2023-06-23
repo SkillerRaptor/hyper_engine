@@ -55,6 +55,10 @@ jobs:
 
       - name: Cache
         uses: Swatinem/rust-cache@v2
+        with:
+          cache-targets: true
+          cache-on-failure: true
+          cache-all-crates: true
 
       - name: Cargo Build Debug
         uses: actions-rs/cargo@v1
