@@ -68,7 +68,7 @@ impl RenderContext {
         let device = Arc::new(Device::new(&instance, &surface)?);
         let swapchain = Swapchain::new(window, &instance, &surface, device.clone())?;
         let descriptor_pool = DescriptorPool::new(&instance, device.clone())?;
-        let pipeline = Pipeline::new(device.clone(), &swapchain)?;
+        let pipeline = Pipeline::new(device.clone(), &swapchain, &descriptor_pool)?;
 
         let renderer = Renderer::new(&instance, &surface, device.clone())?;
 

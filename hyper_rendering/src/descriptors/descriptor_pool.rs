@@ -129,13 +129,11 @@ impl DescriptorPool {
                 .descriptor_count(count)
                 .stage_flags(ShaderStageFlags::ALL);
 
-            let descriptor_set_layout_bindings = vec![*descriptor_set_layout_binding];
+            let descriptor_set_layout_bindings = [*descriptor_set_layout_binding];
 
-            let descriptor_binding_flags = vec![
-                DescriptorBindingFlags::PARTIALLY_BOUND
-                    | DescriptorBindingFlags::VARIABLE_DESCRIPTOR_COUNT
-                    | DescriptorBindingFlags::UPDATE_AFTER_BIND,
-            ];
+            let descriptor_binding_flags = [DescriptorBindingFlags::PARTIALLY_BOUND
+                | DescriptorBindingFlags::VARIABLE_DESCRIPTOR_COUNT
+                | DescriptorBindingFlags::UPDATE_AFTER_BIND];
 
             let mut create_info_extended = DescriptorSetLayoutBindingFlagsCreateInfo::builder()
                 .binding_flags(&descriptor_binding_flags);
@@ -143,7 +141,7 @@ impl DescriptorPool {
             let create_info = DescriptorSetLayoutCreateInfo::builder()
                 .push_next(&mut create_info_extended)
                 .flags(DescriptorSetLayoutCreateFlags::UPDATE_AFTER_BIND_POOL)
-                .bindings(descriptor_set_layout_bindings.as_slice());
+                .bindings(&descriptor_set_layout_bindings);
 
             let layout = unsafe {
                 device

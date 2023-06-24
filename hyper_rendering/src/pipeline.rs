@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{command_buffer::CommandBuffer, device::Device, swapchain::Swapchain};
+use crate::{
+    command_buffer::CommandBuffer, descriptors::descriptor_pool::DescriptorPool, device::Device,
+    swapchain::Swapchain,
+};
 
 use ash::vk::{
     self, AccessFlags2, AttachmentLoadOp, AttachmentStoreOp, BlendFactor, BlendOp, ClearValue,
@@ -16,17 +19,26 @@ use ash::vk::{
     PipelineLayoutCreateInfo, PipelineMultisampleStateCreateInfo,
     PipelineRasterizationStateCreateInfo, PipelineRenderingCreateInfoKHR,
     PipelineShaderStageCreateInfo, PipelineStageFlags2, PipelineVertexInputStateCreateInfo,
-    PipelineViewportStateCreateInfo, PolygonMode, PrimitiveTopology, Rect2D, RenderPass,
-    RenderingAttachmentInfoKHR, RenderingInfoKHR, SampleCountFlags, ShaderModule,
+    PipelineViewportStateCreateInfo, PolygonMode, PrimitiveTopology, PushConstantRange, Rect2D,
+    RenderPass, RenderingAttachmentInfoKHR, RenderingInfoKHR, SampleCountFlags, ShaderModule,
     ShaderModuleCreateInfo, ShaderStageFlags,
 };
 use std::{
     ffi::CStr,
     fs::File,
     io::{self, BufReader, Read},
+    mem,
     sync::Arc,
 };
 use thiserror::Error;
+
+#[repr(C)]
+struct BindingsOffset {
+    bindings_offset: u32,
+    unused_0: u32,
+    unused_1: u32,
+    unused_2: u32,
+}
 
 #[derive(Debug, Error)]
 pub enum CreationError {
@@ -51,8 +63,12 @@ pub(crate) struct Pipeline {
 }
 
 impl Pipeline {
-    pub(crate) fn new(device: Arc<Device>, swapchain: &Swapchain) -> Result<Self, CreationError> {
-        let layout = Self::create_graphics_pipeline_layout(&device)?;
+    pub(crate) fn new(
+        device: Arc<Device>,
+        swapchain: &Swapchain,
+        descriptor_pool: &DescriptorPool,
+    ) -> Result<Self, CreationError> {
+        let layout = Self::create_graphics_pipeline_layout(&device, descriptor_pool)?;
         let handle = Self::create_graphics_pipeline(&device, swapchain, &layout)?;
 
         Ok(Self {
@@ -63,10 +79,22 @@ impl Pipeline {
         })
     }
 
-    fn create_graphics_pipeline_layout(device: &Device) -> Result<PipelineLayout, CreationError> {
+    fn create_graphics_pipeline_layout(
+        device: &Device,
+        descriptor_pool: &DescriptorPool,
+    ) -> Result<PipelineLayout, CreationError> {
+        let push_constant_size = mem::size_of::<BindingsOffset>() as u32;
+
+        let push_constant_range = PushConstantRange::builder()
+            .stage_flags(ShaderStageFlags::ALL)
+            .offset(0)
+            .size(push_constant_size);
+
+        let push_constant_ranges = [*push_constant_range];
+
         let create_info = PipelineLayoutCreateInfo::builder()
-            .set_layouts(&[])
-            .push_constant_ranges(&[]);
+            .set_layouts(descriptor_pool.layouts())
+            .push_constant_ranges(&push_constant_ranges);
 
         let handle = unsafe {
             device
