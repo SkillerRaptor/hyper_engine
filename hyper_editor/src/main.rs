@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
+#![cfg_attr(
+    all(target_os = "windows", not(feature = "console")),
+    windows_subsystem = "windows"
+)]
+
 mod editor;
 mod logger;
 
@@ -17,8 +22,13 @@ use logger::Verbosity;
 fn main() -> Result<()> {
     color_eyre::install()?;
 
-    // TODO: Implement CLI for '-debug' or '-trace' options
-    logger::init(Verbosity::Debug)?;
+    if cfg!(feature = "console") {
+        if cfg!(debug_assertions) {
+            logger::init(Verbosity::Debug)?;
+        } else {
+            logger::init(Verbosity::Info)?;
+        }
+    }
 
     ApplicationBuilder::new()
         .title("HyperEditor")
