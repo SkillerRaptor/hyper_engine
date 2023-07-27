@@ -52,13 +52,15 @@ pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
         out.finish(format_args!("{time} {level} {message}"))
     });
 
-    logger = match verbosity {
-        Verbosity::Error => logger.level(LevelFilter::Error),
-        Verbosity::Warning => logger.level(LevelFilter::Warn),
-        Verbosity::Info => logger.level(LevelFilter::Info),
-        Verbosity::Debug => logger.level(LevelFilter::Debug),
-        Verbosity::Trace => logger.level(LevelFilter::Trace),
+    let level_filter = match verbosity {
+        Verbosity::Error => LevelFilter::Error,
+        Verbosity::Warning => LevelFilter::Warn,
+        Verbosity::Info => LevelFilter::Info,
+        Verbosity::Debug => LevelFilter::Debug,
+        Verbosity::Trace => LevelFilter::Trace,
     };
+
+    logger = logger.level(level_filter);
 
     logger = logger.chain(io::stdout());
 

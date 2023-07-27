@@ -12,7 +12,7 @@
 mod editor;
 mod logger;
 
-use editor::Editor;
+use crate::editor::Editor;
 
 use hyper_engine::application::ApplicationBuilder;
 
@@ -20,9 +20,9 @@ use color_eyre::Result;
 use logger::Verbosity;
 
 fn main() -> Result<()> {
-    color_eyre::install()?;
-
     if cfg!(feature = "console") {
+        color_eyre::install()?;
+
         if cfg!(debug_assertions) {
             logger::init(Verbosity::Debug)?;
         } else {
