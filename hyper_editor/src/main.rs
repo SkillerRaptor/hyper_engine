@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#![cfg_attr(
-    all(target_os = "windows", not(feature = "console")),
-    windows_subsystem = "windows"
-)]
-
 mod editor;
 mod logger;
 
@@ -20,14 +15,12 @@ use color_eyre::Result;
 use logger::Verbosity;
 
 fn main() -> Result<()> {
-    if cfg!(feature = "console") {
-        color_eyre::install()?;
+    color_eyre::install()?;
 
-        if cfg!(debug_assertions) {
-            logger::init(Verbosity::Debug)?;
-        } else {
-            logger::init(Verbosity::Info)?;
-        }
+    if cfg!(debug_assertions) {
+        logger::init(Verbosity::Debug)?;
+    } else {
+        logger::init(Verbosity::Info)?;
     }
 
     ApplicationBuilder::new()
