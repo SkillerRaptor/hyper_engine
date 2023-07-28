@@ -5,6 +5,7 @@
  */
 
 use crate::{
+    binary_semaphore::{self, BinarySemaphore},
     command_buffer::{self, CommandBuffer},
     command_pool::{self, CommandPool},
     device::Device,
@@ -12,10 +13,7 @@ use crate::{
     pipeline::Pipeline,
     surface::Surface,
     swapchain::Swapchain,
-    sync::{
-        binary_semaphore::{self, BinarySemaphore},
-        timeline_semaphore::{self, TimelineSemaphore},
-    },
+    timeline_semaphore::{self, TimelineSemaphore},
 };
 
 use ash::vk::{ClearColorValue, ClearValue, CommandBufferUsageFlags, Offset2D, Rect2D, Viewport};

@@ -5,6 +5,7 @@
  */
 
 use crate::{
+    binary_semaphore::BinarySemaphore,
     device::{
         queue_family_indices::{self, QueueFamilyIndices},
         swapchain_support_details::{self, SwapchainSupportDetails},
@@ -12,7 +13,6 @@ use crate::{
     },
     instance::Instance,
     surface::Surface,
-    sync::binary_semaphore::BinarySemaphore,
 };
 
 use hyper_platform::window::Window;

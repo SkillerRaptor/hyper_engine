@@ -5,7 +5,7 @@
  */
 
 use crate::{
-    command_buffer::CommandBuffer, descriptors::descriptor_pool::DescriptorPool, device::Device,
+    command_buffer::CommandBuffer, descriptor_pool::DescriptorPool, device::Device,
     swapchain::Swapchain,
 };
 

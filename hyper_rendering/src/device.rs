@@ -5,6 +5,7 @@
  */
 
 use crate::{
+    binary_semaphore::BinarySemaphore,
     command_buffer::CommandBuffer,
     device::{
         queue_family_indices::QueueFamilyIndices,
@@ -12,7 +13,7 @@ use crate::{
     },
     instance::Instance,
     surface::Surface,
-    sync::{binary_semaphore::BinarySemaphore, timeline_semaphore::TimelineSemaphore},
+    timeline_semaphore::TimelineSemaphore,
 };
 
 use ash::{

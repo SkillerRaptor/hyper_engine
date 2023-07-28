@@ -5,7 +5,7 @@
  */
 
 use crate::{
-    descriptors::descriptor_pool::{self, DescriptorPool},
+    descriptor_pool::{self, DescriptorPool},
     device::{self, Device},
     instance::{self, Instance},
     pipeline::{self, Pipeline},
