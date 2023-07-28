@@ -4,7 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{command_pool::CommandPool, device::Device, error::CreationError};
+use crate::{
+    command_pool::CommandPool,
+    device::Device,
+    error::{CreationError, RuntimeError},
+};
 
 use ash::vk::{
     CommandBuffer as VulkanCommandBuffer, CommandBufferAllocateInfo, CommandBufferBeginInfo,
@@ -40,36 +44,39 @@ impl CommandBuffer {
         })
     }
 
-    pub(crate) fn reset(&self) {
-        // TODO: Propagate error
+    pub(crate) fn reset(&self) -> Result<(), RuntimeError> {
         unsafe {
             self.device
                 .handle()
                 .reset_command_buffer(self.handle, CommandBufferResetFlags::from_raw(0))
-                .unwrap();
-        }
+                .map_err(RuntimeError::CommandBufferReset)
+        }?;
+
+        Ok(())
     }
 
-    pub(crate) fn begin(&self, usage_flags: CommandBufferUsageFlags) {
-        // TODO: Propagate error
+    pub(crate) fn begin(&self, usage_flags: CommandBufferUsageFlags) -> Result<(), RuntimeError> {
         let command_buffer_begin_info = CommandBufferBeginInfo::builder().flags(usage_flags);
 
         unsafe {
             self.device
                 .handle()
                 .begin_command_buffer(self.handle, &command_buffer_begin_info)
-                .unwrap();
-        }
+                .map_err(RuntimeError::CommandBufferBegin)
+        }?;
+
+        Ok(())
     }
 
-    pub(crate) fn end(&self) {
-        // TODO: Propagate error
+    pub(crate) fn end(&self) -> Result<(), RuntimeError> {
         unsafe {
             self.device
                 .handle()
                 .end_command_buffer(self.handle)
-                .unwrap();
-        }
+                .map_err(RuntimeError::CommandBufferEnd)
+        }?;
+
+        Ok(())
     }
 
     pub(crate) fn handle(&self) -> &VulkanCommandBuffer {

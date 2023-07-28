@@ -16,10 +16,10 @@ use winit::{dpi::LogicalSize, error::OsError, window};
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("Failed to use uninitialized field `{0}`")]
+    #[error("Failed to use uninitialized field {0}")]
     UninitializedField(&'static str),
 
-    #[error("Failed to build `native window`")]
+    #[error("Failed to build native window")]
     WindowFailure(#[from] OsError),
 }
 

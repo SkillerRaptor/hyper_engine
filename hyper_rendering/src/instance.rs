@@ -81,7 +81,6 @@ impl Instance {
         let extension_names = if validation_layers_enabled {
             let mut extension_names = required_extensions;
             extension_names.push(DebugUtils::name().as_ptr());
-            extension_names.push("test".as_ptr() as *const i8);
             extension_names
         } else {
             required_extensions

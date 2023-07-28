@@ -5,8 +5,14 @@
  */
 
 use crate::{
-    descriptor_pool::DescriptorPool, device::Device, error::CreationError, instance::Instance,
-    pipeline::Pipeline, renderer::Renderer, surface::Surface, swapchain::Swapchain,
+    descriptor_pool::DescriptorPool,
+    device::Device,
+    error::{CreationError, RuntimeError},
+    instance::Instance,
+    pipeline::Pipeline,
+    renderer::Renderer,
+    surface::Surface,
+    swapchain::Swapchain,
 };
 
 use hyper_platform::window::Window;
@@ -51,7 +57,7 @@ impl RenderContext {
         })
     }
 
-    pub fn begin(&mut self, window: &Window, frame_id: u64) {
+    pub fn begin(&mut self, window: &Window, frame_id: u64) -> Result<(), RuntimeError> {
         self.renderer.begin(
             window,
             &self.instance,
@@ -59,28 +65,38 @@ impl RenderContext {
             frame_id,
             &mut self.swapchain,
             &self.pipeline,
-        );
+        )?;
+
+        Ok(())
     }
 
-    pub fn end(&self) {
-        self.renderer.end(&self.swapchain, &self.pipeline);
+    pub fn end(&self) -> Result<(), RuntimeError> {
+        self.renderer.end(&self.swapchain, &self.pipeline)?;
+
+        Ok(())
     }
 
-    pub fn submit(&mut self, window: &Window) {
+    pub fn submit(&mut self, window: &Window) -> Result<(), RuntimeError> {
         self.renderer
-            .submit(window, &self.instance, &self.surface, &mut self.swapchain);
+            .submit(window, &self.instance, &self.surface, &mut self.swapchain)?;
+
+        Ok(())
     }
 
     pub fn draw(&self) {
         self.renderer.draw();
     }
 
-    pub fn resize(&mut self, window: &Window) {
+    pub fn resize(&mut self, window: &Window) -> Result<(), RuntimeError> {
         self.renderer
-            .resize(window, &self.instance, &self.surface, &mut self.swapchain);
+            .resize(window, &self.instance, &self.surface, &mut self.swapchain)?;
+
+        Ok(())
     }
 
-    pub fn wait_idle(&self) {
-        self.device.wait_idle();
+    pub fn wait_idle(&self) -> Result<(), RuntimeError> {
+        self.device.wait_idle()?;
+
+        Ok(())
     }
 }

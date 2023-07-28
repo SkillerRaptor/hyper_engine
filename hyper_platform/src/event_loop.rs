@@ -9,9 +9,15 @@ use crate::{event::Event, key_code::KeyCode, mouse_code::MouseCode};
 use winit::{
     dpi::PhysicalPosition,
     event::{self, DeviceEvent, ElementState, MouseButton, MouseScrollDelta, WindowEvent},
-    event_loop::{self, ControlFlow},
+    event_loop::{self},
     platform::run_return::EventLoopExtRunReturn,
 };
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ControlFlow {
+    Run,
+    Exit,
+}
 
 #[derive(Default)]
 pub struct EventLoop {
@@ -27,34 +33,42 @@ impl EventLoop {
 
     pub fn run<F>(&mut self, mut event_handler: F)
     where
-        F: FnMut(Event),
+        F: FnMut(&mut ControlFlow, Event),
     {
+        let mut application_control_flow = ControlFlow::Run;
         self.internal.run_return(|event, _, control_flow| {
-            *control_flow = ControlFlow::Poll;
+            *control_flow = event_loop::ControlFlow::Poll;
             match event {
-                event::Event::MainEventsCleared => event_handler(Event::EventsCleared),
+                event::Event::MainEventsCleared => {
+                    event_handler(&mut application_control_flow, Event::EventsCleared)
+                }
                 event::Event::DeviceEvent {
                     event: DeviceEvent::MouseMotion { delta },
                     ..
                 } => {
-                    event_handler(Event::MouseMoved {
-                        delta_x: delta.0,
-                        delta_y: delta.1,
-                    });
+                    event_handler(
+                        &mut application_control_flow,
+                        Event::MouseMoved {
+                            delta_x: delta.0,
+                            delta_y: delta.1,
+                        },
+                    );
                 }
 
                 event::Event::WindowEvent { event, .. } => match event {
-                    WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                    WindowEvent::CloseRequested => application_control_flow = ControlFlow::Exit,
                     WindowEvent::KeyboardInput { input, .. } => {
                         if let Some(virtual_key_code) = input.virtual_keycode {
                             let key_code = KeyCode::from(virtual_key_code);
                             match input.state {
-                                ElementState::Pressed => {
-                                    event_handler(Event::KeyPressed { button: key_code })
-                                }
-                                ElementState::Released => {
-                                    event_handler(Event::KeyReleased { button: key_code })
-                                }
+                                ElementState::Pressed => event_handler(
+                                    &mut application_control_flow,
+                                    Event::KeyPressed { button: key_code },
+                                ),
+                                ElementState::Released => event_handler(
+                                    &mut application_control_flow,
+                                    Event::KeyReleased { button: key_code },
+                                ),
                             }
                         }
                     }
@@ -67,10 +81,14 @@ impl EventLoop {
                         };
 
                         match state {
-                            ElementState::Pressed => event_handler(Event::MousePressed { button }),
-                            ElementState::Released => {
-                                event_handler(Event::MouseReleased { button })
-                            }
+                            ElementState::Pressed => event_handler(
+                                &mut application_control_flow,
+                                Event::MousePressed { button },
+                            ),
+                            ElementState::Released => event_handler(
+                                &mut application_control_flow,
+                                Event::MouseReleased { button },
+                            ),
                         }
                     }
                     WindowEvent::MouseWheel { delta, .. } => {
@@ -80,26 +98,40 @@ impl EventLoop {
                                 y: scroll, ..
                             }) => -scroll,
                         };
-                        event_handler(Event::MouseScrolled { delta })
+                        event_handler(
+                            &mut application_control_flow,
+                            Event::MouseScrolled { delta },
+                        )
                     }
-                    WindowEvent::Focused(focused) => {
-                        event_handler(Event::WindowFocused { focused })
-                    }
-                    WindowEvent::Moved(position) => event_handler(Event::WindowMoved {
-                        x: position.x,
-                        y: position.y,
-                    }),
-                    WindowEvent::Resized(size) => event_handler(Event::WindowResized {
-                        width: size.width,
-                        height: size.height,
-                    }),
+                    WindowEvent::Focused(focused) => event_handler(
+                        &mut application_control_flow,
+                        Event::WindowFocused { focused },
+                    ),
+                    WindowEvent::Moved(position) => event_handler(
+                        &mut application_control_flow,
+                        Event::WindowMoved {
+                            x: position.x,
+                            y: position.y,
+                        },
+                    ),
+                    WindowEvent::Resized(size) => event_handler(
+                        &mut application_control_flow,
+                        Event::WindowResized {
+                            width: size.width,
+                            height: size.height,
+                        },
+                    ),
                     _ => {}
                 },
                 event::Event::RedrawRequested(..) => {
-                    event_handler(Event::UpdateFrame);
-                    event_handler(Event::RenderFrame);
+                    event_handler(&mut application_control_flow, Event::UpdateFrame);
+                    event_handler(&mut application_control_flow, Event::RenderFrame);
                 }
                 _ => {}
+            }
+
+            if application_control_flow == ControlFlow::Exit {
+                *control_flow = event_loop::ControlFlow::Exit;
             }
         });
     }

@@ -11,7 +11,7 @@ use crate::{
         queue_family_indices::QueueFamilyIndices,
         swapchain_support_details::SwapchainSupportDetails,
     },
-    error::CreationError,
+    error::{CreationError, RuntimeError},
     instance::Instance,
     surface::Surface,
     timeline_semaphore::TimelineSemaphore,
@@ -389,9 +389,7 @@ impl Device {
         render_semaphore: &BinarySemaphore,
         submit_semaphore: &TimelineSemaphore,
         frame_id: u64,
-    ) {
-        // TODO: Propagate error
-
+    ) -> Result<(), RuntimeError> {
         let present_wait_semaphore_info = SemaphoreSubmitInfo::builder()
             .semaphore(*present_semaphore.handle())
             .value(0)
@@ -426,15 +424,20 @@ impl Device {
         unsafe {
             self.handle
                 .queue_submit2(self.graphics_queue, &[*submit_info], VulkanFence::null())
-                .unwrap();
-        }
+                .map_err(RuntimeError::QueueSubmit)
+        }?;
+
+        Ok(())
     }
 
-    pub(crate) fn wait_idle(&self) {
-        // TODO: Propagate error
+    pub(crate) fn wait_idle(&self) -> Result<(), RuntimeError> {
         unsafe {
-            self.handle.device_wait_idle().unwrap();
-        }
+            self.handle
+                .device_wait_idle()
+                .map_err(RuntimeError::WaitIdle)
+        }?;
+
+        Ok(())
     }
 
     pub(crate) fn handle(&self) -> &ash::Device {

@@ -8,24 +8,33 @@ use crate::game::Game;
 
 use hyper_platform::{
     event::Event,
-    event_loop::EventLoop,
+    event_loop::{ControlFlow, EventLoop},
     window::{CreationError as WindowError, Window},
 };
-use hyper_rendering::{error::CreationError as RenderContextError, render_context::RenderContext};
+use hyper_rendering::{
+    error::{CreationError as RenderContextError, RuntimeError as RenderContextRuntimeError},
+    render_context::RenderContext,
+};
 
 use std::time::Instant;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("Failed to use uninitialized field `{0}`")]
+    #[error("Failed to use uninitialized field {0}")]
     UninitializedField(&'static str),
 
-    #[error("Failed to create `window`")]
-    WindowFailure(#[from] WindowError),
+    #[error("Failed to create window")]
+    WindowCreation(#[from] WindowError),
 
-    #[error("Failed to create `render context`")]
-    RenderContextFailure(#[from] RenderContextError),
+    #[error("Failed to create render context")]
+    RenderContextCreation(#[from] RenderContextError),
+}
+
+#[derive(Debug, Error)]
+pub enum RuntimeError {
+    #[error("Failed to run render context")]
+    RenderContextRuntime(#[from] RenderContextRuntimeError),
 }
 
 pub struct Application {
@@ -67,14 +76,16 @@ impl Application {
         })
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self) -> Result<(), RuntimeError> {
         // Fixed at 60 frames per second
         let mut time = 0.0;
         let delta_time = 1.0 / 60.0;
 
         let mut current_time = Instant::now();
         let mut accumulator = 0.0;
-        self.event_loop.run(|event| match event {
+
+        let mut runtime_error: Result<(), RuntimeError> = Ok(());
+        self.event_loop.run(|control_flow, event| match event {
             Event::EventsCleared => self.window.request_redraw(),
             Event::UpdateFrame => {
                 let new_time = Instant::now();
@@ -92,10 +103,25 @@ impl Application {
                 self.game.update();
             }
             Event::RenderFrame => {
-                self.render_context.begin(&self.window, self.frame_id);
+                if let Err(error) = self.render_context.begin(&self.window, self.frame_id) {
+                    runtime_error = Err(error.into());
+                    *control_flow = ControlFlow::Exit;
+                    return;
+                }
+
                 self.render_context.draw();
-                self.render_context.end();
-                self.render_context.submit(&self.window);
+
+                if let Err(error) = self.render_context.end() {
+                    runtime_error = Err(error.into());
+                    *control_flow = ControlFlow::Exit;
+                    return;
+                }
+
+                if let Err(error) = self.render_context.submit(&self.window) {
+                    runtime_error = Err(error.into());
+                    *control_flow = ControlFlow::Exit;
+                    return;
+                }
 
                 self.game.render();
 
@@ -110,12 +136,19 @@ impl Application {
                     return;
                 }
 
-                self.render_context.resize(&self.window);
+                if let Err(error) = self.render_context.resize(&self.window) {
+                    runtime_error = Err(error.into());
+                    *control_flow = ControlFlow::Exit;
+                }
             }
             _ => {}
         });
 
-        self.render_context.wait_idle();
+        runtime_error?;
+
+        self.render_context.wait_idle()?;
+
+        Ok(())
     }
 
     pub fn builder() -> ApplicationBuilder {

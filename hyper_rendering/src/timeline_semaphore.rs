@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{device::Device, error::CreationError};
+use crate::{
+    device::Device,
+    error::{CreationError, RuntimeError},
+};
 
 use ash::vk::{
     Semaphore, SemaphoreCreateInfo, SemaphoreType, SemaphoreTypeCreateInfo, SemaphoreWaitInfo,
@@ -34,9 +37,7 @@ impl TimelineSemaphore {
         Ok(Self { handle, device })
     }
 
-    pub(crate) fn wait_for(&self, value: u64) {
-        // TODO: Propagte error
-
+    pub(crate) fn wait_for(&self, value: u64) -> Result<(), RuntimeError> {
         let semaphores = [self.handle];
         let values = [value];
         let wait_info = SemaphoreWaitInfo::builder()
@@ -47,8 +48,10 @@ impl TimelineSemaphore {
             self.device
                 .handle()
                 .wait_semaphores(&wait_info, u64::MAX)
-                .unwrap();
-        }
+                .map_err(RuntimeError::WaitSemaphore)
+        }?;
+
+        Ok(())
     }
 
     pub(crate) fn handle(&self) -> &Semaphore {

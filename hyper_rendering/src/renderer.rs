@@ -5,9 +5,16 @@
  */
 
 use crate::{
-    binary_semaphore::BinarySemaphore, command_buffer::CommandBuffer, command_pool::CommandPool,
-    device::Device, error::CreationError, instance::Instance, pipeline::Pipeline, surface::Surface,
-    swapchain::Swapchain, timeline_semaphore::TimelineSemaphore,
+    binary_semaphore::BinarySemaphore,
+    command_buffer::CommandBuffer,
+    command_pool::CommandPool,
+    device::Device,
+    error::{CreationError, RuntimeError},
+    instance::Instance,
+    pipeline::Pipeline,
+    surface::Surface,
+    swapchain::Swapchain,
+    timeline_semaphore::TimelineSemaphore,
 };
 
 use ash::vk::{ClearColorValue, ClearValue, CommandBufferUsageFlags, Offset2D, Rect2D, Viewport};
@@ -83,9 +90,9 @@ impl Renderer {
         frame_id: u64,
         swapchain: &mut Swapchain,
         pipeline: &Pipeline,
-    ) {
+    ) -> Result<(), RuntimeError> {
         self.current_frame_id = frame_id;
-        self.submit_semaphore.wait_for(frame_id - 1);
+        self.submit_semaphore.wait_for(frame_id - 1)?;
 
         let side = self.current_frame_id % 2;
 
@@ -93,14 +100,14 @@ impl Renderer {
             window,
             instance,
             surface,
-            &self.present_semaphores[side as usize]) else {
-            return;
+            &self.present_semaphores[side as usize])? else {
+            return Ok(());
         };
 
         self.swapchain_image_index = index;
 
-        self.command_buffers[side as usize].reset();
-        self.command_buffers[side as usize].begin(CommandBufferUsageFlags::ONE_TIME_SUBMIT);
+        self.command_buffers[side as usize].reset()?;
+        self.command_buffers[side as usize].begin(CommandBufferUsageFlags::ONE_TIME_SUBMIT)?;
 
         let clear_value = ClearValue {
             color: ClearColorValue {
@@ -147,16 +154,25 @@ impl Renderer {
                 &[*scissor],
             );
         }
+
+        Ok(())
     }
 
-    pub(crate) fn end(&self, swapchain: &Swapchain, pipeline: &Pipeline) {
+    pub(crate) fn end(
+        &self,
+        swapchain: &Swapchain,
+        pipeline: &Pipeline,
+    ) -> Result<(), RuntimeError> {
         let side = self.current_frame_id % 2;
 
         pipeline.end_rendering(
             &self.command_buffers[side as usize],
             &swapchain.images()[self.swapchain_image_index as usize],
         );
-        self.command_buffers[side as usize].end();
+
+        self.command_buffers[side as usize].end()?;
+
+        Ok(())
     }
 
     pub(crate) fn submit(
@@ -165,7 +181,7 @@ impl Renderer {
         instance: &Instance,
         surface: &Surface,
         swapchain: &mut Swapchain,
-    ) {
+    ) -> Result<(), RuntimeError> {
         let side = self.current_frame_id % 2;
 
         self.device.submit_queue(
@@ -174,7 +190,7 @@ impl Renderer {
             &self.render_semaphores[side as usize],
             &self.submit_semaphore,
             self.current_frame_id,
-        );
+        )?;
 
         swapchain.present_queue(
             window,
@@ -183,7 +199,9 @@ impl Renderer {
             self.device.present_queue(),
             &self.render_semaphores[side as usize],
             self.swapchain_image_index,
-        );
+        )?;
+
+        Ok(())
     }
 
     pub(crate) fn draw(&self) {
@@ -202,8 +220,9 @@ impl Renderer {
         instance: &Instance,
         surface: &Surface,
         swapchain: &mut Swapchain,
-    ) {
-        // TODO: Propagte error
-        swapchain.recreate(window, instance, surface).unwrap();
+    ) -> Result<(), RuntimeError> {
+        swapchain.recreate(window, instance, surface)?;
+
+        Ok(())
     }
 }

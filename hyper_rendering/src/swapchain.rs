@@ -10,7 +10,7 @@ use crate::{
         queue_family_indices::QueueFamilyIndices,
         swapchain_support_details::SwapchainSupportDetails, Device,
     },
-    error::CreationError,
+    error::{CreationError, RuntimeError},
     instance::Instance,
     surface::Surface,
 };
@@ -197,9 +197,7 @@ impl Swapchain {
         instance: &Instance,
         surface: &Surface,
         present_semaphore: &BinarySemaphore,
-    ) -> Option<u32> {
-        // TODO: Propagate error
-
+    ) -> Result<Option<u32>, RuntimeError> {
         unsafe {
             match self.loader.acquire_next_image(
                 self.handle,
@@ -207,12 +205,12 @@ impl Swapchain {
                 *present_semaphore.handle(),
                 VulkanFence::null(),
             ) {
-                Ok((index, _)) => Some(index),
+                Ok((index, _)) => Ok(Some(index)),
                 Err(VulkanResult::ERROR_OUT_OF_DATE_KHR) => {
-                    self.recreate(window, instance, surface).unwrap();
-                    None
+                    self.recreate(window, instance, surface)?;
+                    Ok(None)
                 }
-                Err(_) => panic!("unhandled error"),
+                Err(error) => Err(RuntimeError::ImageAcquisition(error)),
             }
         }
     }
@@ -225,9 +223,7 @@ impl Swapchain {
         queue: &Queue,
         render_semaphore: &BinarySemaphore,
         swapchain_image_index: u32,
-    ) {
-        // TODO: Propagte error
-
+    ) -> Result<(), RuntimeError> {
         let swapchains = &[self.handle];
         let wait_semaphores = &[*render_semaphore.handle()];
         let image_indices = &[swapchain_image_index];
@@ -245,9 +241,11 @@ impl Swapchain {
             };
 
             if recreate {
-                self.recreate(window, instance, surface).unwrap();
+                self.recreate(window, instance, surface)?;
             }
         }
+
+        Ok(())
     }
 
     pub(crate) fn recreate(
@@ -255,17 +253,18 @@ impl Swapchain {
         window: &Window,
         instance: &Instance,
         surface: &Surface,
-    ) -> Result<(), CreationError> {
+    ) -> Result<(), RuntimeError> {
         if window.framebuffer_size() == (0, 0) {
             return Ok(());
         }
 
-        self.device.wait_idle();
+        self.device.wait_idle()?;
 
         self.destroy();
 
         let swapchain_support_details =
-            SwapchainSupportDetails::new(surface, self.device.physical_device())?;
+            SwapchainSupportDetails::new(surface, self.device.physical_device())
+                .map_err(|error| RuntimeError::CreationError(error, "swapchain support details"))?;
 
         let capabilities = swapchain_support_details.capabilities();
 
@@ -279,7 +278,9 @@ impl Swapchain {
         }
 
         let queue_family_indices =
-            QueueFamilyIndices::new(instance, surface, self.device.physical_device())?;
+            QueueFamilyIndices::new(instance, surface, self.device.physical_device())
+                .map_err(|error| RuntimeError::CreationError(error, "queue family indices"))?;
+
         let queue_families = [
             queue_family_indices.graphics_family().unwrap(),
             queue_family_indices.present_family().unwrap(),
@@ -311,13 +312,23 @@ impl Swapchain {
         self.handle = unsafe {
             self.loader
                 .create_swapchain(&create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "swapchain"))
+                .map_err(|error| {
+                    RuntimeError::CreationError(
+                        CreationError::VulkanCreation(error, "swapchain"),
+                        "swapchain",
+                    )
+                })
         }?;
 
         self.images = unsafe {
             self.loader
                 .get_swapchain_images(self.handle)
-                .map_err(|error| CreationError::VulkanAllocation(error, "swapchain images"))
+                .map_err(|error| {
+                    RuntimeError::CreationError(
+                        CreationError::VulkanAllocation(error, "swapchain images"),
+                        "swapchain images",
+                    )
+                })
         }?;
 
         self.image_views = Vec::new();
@@ -346,7 +357,12 @@ impl Swapchain {
                 self.device
                     .handle()
                     .create_image_view(&create_info, None)
-                    .map_err(|error| CreationError::VulkanCreation(error, "image view"))
+                    .map_err(|error| {
+                        RuntimeError::CreationError(
+                            CreationError::VulkanCreation(error, "image view"),
+                            "image view",
+                        )
+                    })
             }?;
 
             self.image_views.push(handle);
