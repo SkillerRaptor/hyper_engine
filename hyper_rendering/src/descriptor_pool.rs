@@ -4,26 +4,19 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{device::Device, instance::Instance};
+use crate::{device::Device, error::CreationError, instance::Instance};
 
 use ash::vk::{
-    self, DescriptorBindingFlags, DescriptorPoolCreateFlags, DescriptorPoolCreateInfo,
-    DescriptorPoolSize, DescriptorSetLayout, DescriptorSetLayoutBinding,
+    DescriptorBindingFlags, DescriptorPool as VulkanDescriptorPool, DescriptorPoolCreateFlags,
+    DescriptorPoolCreateInfo, DescriptorPoolSize, DescriptorSetLayout, DescriptorSetLayoutBinding,
     DescriptorSetLayoutBindingFlagsCreateInfo, DescriptorSetLayoutCreateFlags,
     DescriptorSetLayoutCreateInfo, DescriptorType, PhysicalDeviceLimits, ShaderStageFlags,
 };
 use std::sync::Arc;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("failed to create vulkan {1}")]
-    Creation(#[source] vk::Result, &'static str),
-}
 
 pub(crate) struct DescriptorPool {
     layouts: Vec<DescriptorSetLayout>,
-    handle: vk::DescriptorPool,
+    handle: VulkanDescriptorPool,
     device: Arc<Device>,
 }
 
@@ -49,7 +42,7 @@ impl DescriptorPool {
     fn create_descriptor_pool(
         instance: &Instance,
         device: &Device,
-    ) -> Result<vk::DescriptorPool, CreationError> {
+    ) -> Result<VulkanDescriptorPool, CreationError> {
         let pool_sizes = Self::collect_descriptor_pool_sizes(instance, device);
 
         let create_info = DescriptorPoolCreateInfo::builder()
@@ -61,7 +54,7 @@ impl DescriptorPool {
             device
                 .handle()
                 .create_descriptor_pool(&create_info, None)
-                .map_err(|error| CreationError::Creation(error, "descriptor pool"))?
+                .map_err(|error| CreationError::VulkanCreation(error, "descriptor pool"))?
         };
 
         Ok(handle)
@@ -147,17 +140,15 @@ impl DescriptorPool {
                 device
                     .handle()
                     .create_descriptor_set_layout(&create_info, None)
-                    .map_err(|error| CreationError::Creation(error, "descriptor set layout"))?
+                    .map_err(|error| {
+                        CreationError::VulkanCreation(error, "descriptor set layout")
+                    })?
             };
 
             layouts.push(layout);
         }
 
         Ok(layouts)
-    }
-
-    pub(crate) fn handle(&self) -> &vk::DescriptorPool {
-        &self.handle
     }
 
     pub(crate) fn layouts(&self) -> &[DescriptorSetLayout] {

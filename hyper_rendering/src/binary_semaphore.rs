@@ -4,17 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::device::Device;
+use crate::{device::Device, error::CreationError};
 
-use ash::vk::{self, Semaphore, SemaphoreCreateFlags, SemaphoreCreateInfo};
+use ash::vk::{Semaphore, SemaphoreCreateFlags, SemaphoreCreateInfo};
 use std::sync::Arc;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("failed to create binary semaphore")]
-    Creation(#[source] vk::Result),
-}
 
 pub(crate) struct BinarySemaphore {
     handle: Semaphore,
@@ -29,7 +22,7 @@ impl BinarySemaphore {
             device
                 .handle()
                 .create_semaphore(&create_info, None)
-                .map_err(CreationError::Creation)
+                .map_err(|error| CreationError::VulkanCreation(error, "binary semaphore"))
         }?;
 
         Ok(Self { handle, device })

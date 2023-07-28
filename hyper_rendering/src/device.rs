@@ -11,6 +11,7 @@ use crate::{
         queue_family_indices::QueueFamilyIndices,
         swapchain_support_details::SwapchainSupportDetails,
     },
+    error::CreationError,
     instance::Instance,
     surface::Surface,
     timeline_semaphore::TimelineSemaphore,
@@ -19,27 +20,20 @@ use crate::{
 use ash::{
     extensions::khr::Swapchain,
     vk::{
-        self, CommandBufferSubmitInfo, DeviceCreateInfo, DeviceQueueCreateInfo, PhysicalDevice,
-        PhysicalDeviceDescriptorIndexingFeatures, PhysicalDeviceDynamicRenderingFeatures,
-        PhysicalDeviceFeatures2, PhysicalDeviceSynchronization2Features,
-        PhysicalDeviceTimelineSemaphoreFeatures, PipelineStageFlags2, Queue, SemaphoreSubmitInfo,
-        SubmitInfo2,
+        self, CommandBufferSubmitInfo, DeviceCreateInfo, DeviceQueueCreateInfo,
+        Fence as VulkanFence, PhysicalDevice, PhysicalDeviceDescriptorIndexingFeatures,
+        PhysicalDeviceDynamicRenderingFeatures, PhysicalDeviceFeatures2,
+        PhysicalDeviceSynchronization2Features, PhysicalDeviceTimelineSemaphoreFeatures,
+        PipelineStageFlags2, Queue, SemaphoreSubmitInfo, SubmitInfo2,
     },
+    Device as VulkanDevice,
 };
 use std::{collections::HashSet, ffi::CStr};
-use thiserror::Error;
 
 pub(crate) mod queue_family_indices {
-    use crate::{instance::Instance, surface::Surface};
+    use crate::{error::CreationError, instance::Instance, surface::Surface};
 
-    use ash::vk::{self, PhysicalDevice, QueueFlags};
-    use thiserror::Error;
-
-    #[derive(Debug, Error)]
-    pub enum CreationError {
-        #[error("the vulkan surface was lost")]
-        SurfaceLost(#[source] vk::Result),
-    }
+    use ash::vk::{PhysicalDevice, QueueFlags};
 
     #[derive(Clone, Copy, Debug, Default)]
     pub(crate) struct QueueFamilyIndices {
@@ -78,7 +72,7 @@ pub(crate) mod queue_family_indices {
                             i as u32,
                             *surface.handle(),
                         )
-                        .map_err(CreationError::SurfaceLost)
+                        .map_err(CreationError::VulkanSurfaceLost)
                 }? {
                     queue_family_indices.present_family = Some(i as u32);
                 }
@@ -109,16 +103,9 @@ pub(crate) mod queue_family_indices {
 }
 
 pub(crate) mod swapchain_support_details {
-    use crate::surface::Surface;
+    use crate::{error::CreationError, surface::Surface};
 
-    use ash::vk::{self, PhysicalDevice, PresentModeKHR, SurfaceCapabilitiesKHR, SurfaceFormatKHR};
-    use thiserror::Error;
-
-    #[derive(Debug, Error)]
-    pub enum CreationError {
-        #[error("the vulkan surface was lost")]
-        SurfaceLost(#[source] vk::Result),
-    }
+    use ash::vk::{PhysicalDevice, PresentModeKHR, SurfaceCapabilitiesKHR, SurfaceFormatKHR};
 
     #[derive(Clone, Debug, Default)]
     pub(crate) struct SwapchainSupportDetails {
@@ -136,19 +123,19 @@ pub(crate) mod swapchain_support_details {
                 surface
                     .loader()
                     .get_physical_device_surface_capabilities(*physical_device, *surface.handle())
-                    .map_err(CreationError::SurfaceLost)
+                    .map_err(CreationError::VulkanSurfaceLost)
             }?;
             let formats = unsafe {
                 surface
                     .loader()
                     .get_physical_device_surface_formats(*physical_device, *surface.handle())
-                    .map_err(CreationError::SurfaceLost)
+                    .map_err(CreationError::VulkanSurfaceLost)
             }?;
             let present_modes = unsafe {
                 surface
                     .loader()
                     .get_physical_device_surface_present_modes(*physical_device, *surface.handle())
-                    .map_err(CreationError::SurfaceLost)
+                    .map_err(CreationError::VulkanSurfaceLost)
             }?;
 
             Ok(Self {
@@ -175,29 +162,11 @@ pub(crate) mod swapchain_support_details {
     }
 }
 
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("failed to create vulkan {1}")]
-    Creation(#[source] vk::Result, &'static str),
-
-    #[error("failed to enumerate vulkan {1}")]
-    Enumeration(#[source] vk::Result, &'static str),
-
-    #[error("failed to find vulkan capable gpu")]
-    Unsupported,
-
-    #[error("failed to create queue family indices")]
-    QueueFamilyIndicesFailure(#[from] queue_family_indices::CreationError),
-
-    #[error("failed to create swapchain support details")]
-    SwapchainSupportDetailsFailure(#[from] swapchain_support_details::CreationError),
-}
-
 pub(crate) struct Device {
     present_queue: Queue,
     graphics_queue: Queue,
 
-    handle: ash::Device,
+    handle: VulkanDevice,
     physical_device: PhysicalDevice,
 }
 
@@ -230,7 +199,7 @@ impl Device {
             instance
                 .handle()
                 .enumerate_physical_devices()
-                .map_err(|error| CreationError::Enumeration(error, "physical devices"))
+                .map_err(|error| CreationError::VulkanEnumeration(error, "physical devices"))
         }?;
 
         let mut chosen_physical_device = None;
@@ -280,7 +249,9 @@ impl Device {
             instance
                 .handle()
                 .enumerate_device_extension_properties(*physical_device)
-                .map_err(|error| CreationError::Enumeration(error, "device extension properties"))
+                .map_err(|error| {
+                    CreationError::VulkanEnumeration(error, "device extension properties")
+                })
         }?;
 
         let extensions = extension_properties
@@ -343,7 +314,7 @@ impl Device {
         instance: &Instance,
         surface: &Surface,
         physical_device: &PhysicalDevice,
-    ) -> Result<ash::Device, CreationError> {
+    ) -> Result<VulkanDevice, CreationError> {
         let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
 
         let mut unique_queue_families = HashSet::new();
@@ -405,7 +376,7 @@ impl Device {
             instance
                 .handle()
                 .create_device(*physical_device, &create_info, None)
-                .map_err(|error| CreationError::Creation(error, "device"))
+                .map_err(|error| CreationError::VulkanCreation(error, "device"))
         }?;
 
         Ok(handle)
@@ -454,7 +425,7 @@ impl Device {
 
         unsafe {
             self.handle
-                .queue_submit2(self.graphics_queue, &[*submit_info], vk::Fence::null())
+                .queue_submit2(self.graphics_queue, &[*submit_info], VulkanFence::null())
                 .unwrap();
         }
     }

@@ -4,19 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::device::Device;
+use crate::{device::Device, error::CreationError};
 
 use ash::vk::{
-    self, Semaphore, SemaphoreCreateInfo, SemaphoreType, SemaphoreTypeCreateInfo, SemaphoreWaitInfo,
+    Semaphore, SemaphoreCreateInfo, SemaphoreType, SemaphoreTypeCreateInfo, SemaphoreWaitInfo,
 };
 use std::sync::Arc;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("failed to create timeline semaphore")]
-    Creation(#[source] vk::Result),
-}
 
 pub(crate) struct TimelineSemaphore {
     handle: Semaphore,
@@ -35,7 +28,7 @@ impl TimelineSemaphore {
             device
                 .handle()
                 .create_semaphore(&create_info, None)
-                .map_err(CreationError::Creation)
+                .map_err(|error| CreationError::VulkanCreation(error, "timeline semaphore"))
         }?;
 
         Ok(Self { handle, device })

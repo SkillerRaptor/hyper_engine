@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+pub mod error;
 pub mod render_context;
 
 pub(crate) mod binary_semaphore;

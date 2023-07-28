@@ -9,23 +9,23 @@ use crate::game::Game;
 use hyper_platform::{
     event::Event,
     event_loop::EventLoop,
-    window::{self, Window},
+    window::{CreationError as WindowError, Window},
 };
-use hyper_rendering::render_context::{self, RenderContext};
+use hyper_rendering::{error::CreationError as RenderContextError, render_context::RenderContext};
 
 use std::time::Instant;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("uninitialized field: {0}")]
+    #[error("Failed to use uninitialized field `{0}`")]
     UninitializedField(&'static str),
 
-    #[error("couldn't create window")]
-    WindowFailure(#[from] window::CreationError),
+    #[error("Failed to create `window`")]
+    WindowFailure(#[from] WindowError),
 
-    #[error("couldn't create render context")]
-    RenderContextFailure(#[from] render_context::CreationError),
+    #[error("Failed to create `render context`")]
+    RenderContextFailure(#[from] RenderContextError),
 }
 
 pub struct Application {

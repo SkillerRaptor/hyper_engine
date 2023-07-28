@@ -7,10 +7,10 @@
 use crate::{
     binary_semaphore::BinarySemaphore,
     device::{
-        queue_family_indices::{self, QueueFamilyIndices},
-        swapchain_support_details::{self, SwapchainSupportDetails},
-        Device,
+        queue_family_indices::QueueFamilyIndices,
+        swapchain_support_details::SwapchainSupportDetails, Device,
     },
+    error::CreationError,
     instance::Instance,
     surface::Surface,
 };
@@ -20,30 +20,14 @@ use hyper_platform::window::Window;
 use ash::{
     extensions::khr,
     vk::{
-        self, ColorSpaceKHR, ComponentMapping, ComponentSwizzle, CompositeAlphaFlagsKHR, Extent2D,
-        Format, Image, ImageAspectFlags, ImageSubresourceRange, ImageUsageFlags, ImageView,
-        ImageViewCreateInfo, ImageViewType, PresentInfoKHR, PresentModeKHR, Queue, SharingMode,
-        SurfaceCapabilitiesKHR, SurfaceFormatKHR, SwapchainCreateInfoKHR, SwapchainKHR,
+        ColorSpaceKHR, ComponentMapping, ComponentSwizzle, CompositeAlphaFlagsKHR, Extent2D,
+        Fence as VulkanFence, Format, Image, ImageAspectFlags, ImageSubresourceRange,
+        ImageUsageFlags, ImageView, ImageViewCreateInfo, ImageViewType, PresentInfoKHR,
+        PresentModeKHR, Queue, Result as VulkanResult, SharingMode, SurfaceCapabilitiesKHR,
+        SurfaceFormatKHR, SwapchainCreateInfoKHR, SwapchainKHR,
     },
 };
-use core::panic;
 use std::sync::Arc;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("failed to create vulkan {1}")]
-    Creation(#[source] vk::Result, &'static str),
-
-    #[error("failed to find memory from device")]
-    OutOfMemory(#[source] vk::Result),
-
-    #[error("failed to create queue family indices")]
-    QueueFamilyIndicesFailure(#[from] queue_family_indices::CreationError),
-
-    #[error("failed to create swapchain support details")]
-    SwapchainSupportDetailsFailure(#[from] swapchain_support_details::CreationError),
-}
 
 pub(crate) struct Swapchain {
     image_views: Vec<ImageView>,
@@ -114,13 +98,13 @@ impl Swapchain {
         let handle = unsafe {
             loader
                 .create_swapchain(&create_info, None)
-                .map_err(|error| CreationError::Creation(error, "swapchain"))
+                .map_err(|error| CreationError::VulkanCreation(error, "swapchain"))
         }?;
 
         let images = unsafe {
             loader
                 .get_swapchain_images(handle)
-                .map_err(CreationError::OutOfMemory)
+                .map_err(|error| CreationError::VulkanAllocation(error, "swapchain images"))
         }?;
 
         let mut image_views = Vec::new();
@@ -149,7 +133,7 @@ impl Swapchain {
                 device
                     .handle()
                     .create_image_view(&create_info, None)
-                    .map_err(|error| CreationError::Creation(error, "image view"))
+                    .map_err(|error| CreationError::VulkanCreation(error, "image view"))
             }?;
 
             image_views.push(handle);
@@ -221,10 +205,10 @@ impl Swapchain {
                 self.handle,
                 1_000_000_000,
                 *present_semaphore.handle(),
-                vk::Fence::null(),
+                VulkanFence::null(),
             ) {
                 Ok((index, _)) => Some(index),
-                Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => {
+                Err(VulkanResult::ERROR_OUT_OF_DATE_KHR) => {
                     self.recreate(window, instance, surface).unwrap();
                     None
                 }
@@ -256,7 +240,7 @@ impl Swapchain {
         unsafe {
             let recreate = match self.loader.queue_present(*queue, &present_info) {
                 Ok(recreate) => recreate,
-                Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => true,
+                Err(VulkanResult::ERROR_OUT_OF_DATE_KHR) => true,
                 Err(_) => panic!("unhandled error"),
             };
 
@@ -327,13 +311,13 @@ impl Swapchain {
         self.handle = unsafe {
             self.loader
                 .create_swapchain(&create_info, None)
-                .map_err(|error| CreationError::Creation(error, "swapchain"))
+                .map_err(|error| CreationError::VulkanCreation(error, "swapchain"))
         }?;
 
         self.images = unsafe {
             self.loader
                 .get_swapchain_images(self.handle)
-                .map_err(CreationError::OutOfMemory)
+                .map_err(|error| CreationError::VulkanAllocation(error, "swapchain images"))
         }?;
 
         self.image_views = Vec::new();
@@ -362,7 +346,7 @@ impl Swapchain {
                 self.device
                     .handle()
                     .create_image_view(&create_info, None)
-                    .map_err(|error| CreationError::Creation(error, "image view"))
+                    .map_err(|error| CreationError::VulkanCreation(error, "image view"))
             }?;
 
             self.image_views.push(handle);

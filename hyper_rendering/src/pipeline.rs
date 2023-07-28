@@ -6,31 +6,31 @@
 
 use crate::{
     command_buffer::CommandBuffer, descriptor_pool::DescriptorPool, device::Device,
-    swapchain::Swapchain,
+    error::CreationError, swapchain::Swapchain,
 };
 
 use ash::vk::{
-    self, AccessFlags2, AttachmentLoadOp, AttachmentStoreOp, BlendFactor, BlendOp, ClearValue,
+    AccessFlags2, AttachmentLoadOp, AttachmentStoreOp, BlendFactor, BlendOp, ClearValue,
     ColorComponentFlags, CullModeFlags, DependencyFlags, DependencyInfo, DynamicState, FrontFace,
     GraphicsPipelineCreateInfo, Image, ImageAspectFlags, ImageLayout, ImageMemoryBarrier2,
-    ImageSubresourceRange, ImageView, LogicOp, Offset2D, PipelineBindPoint, PipelineCache,
-    PipelineColorBlendAttachmentState, PipelineColorBlendStateCreateInfo,
-    PipelineDynamicStateCreateInfo, PipelineInputAssemblyStateCreateInfo, PipelineLayout,
-    PipelineLayoutCreateInfo, PipelineMultisampleStateCreateInfo,
-    PipelineRasterizationStateCreateInfo, PipelineRenderingCreateInfoKHR,
-    PipelineShaderStageCreateInfo, PipelineStageFlags2, PipelineVertexInputStateCreateInfo,
-    PipelineViewportStateCreateInfo, PolygonMode, PrimitiveTopology, PushConstantRange, Rect2D,
-    RenderPass, RenderingAttachmentInfoKHR, RenderingInfoKHR, SampleCountFlags, ShaderModule,
-    ShaderModuleCreateInfo, ShaderStageFlags,
+    ImageSubresourceRange, ImageView, LogicOp, Offset2D, Pipeline as VulkanPipeline,
+    PipelineBindPoint, PipelineCache, PipelineColorBlendAttachmentState,
+    PipelineColorBlendStateCreateInfo, PipelineDynamicStateCreateInfo,
+    PipelineInputAssemblyStateCreateInfo, PipelineLayout, PipelineLayoutCreateInfo,
+    PipelineMultisampleStateCreateInfo, PipelineRasterizationStateCreateInfo,
+    PipelineRenderingCreateInfoKHR, PipelineShaderStageCreateInfo, PipelineStageFlags2,
+    PipelineVertexInputStateCreateInfo, PipelineViewportStateCreateInfo, PolygonMode,
+    PrimitiveTopology, PushConstantRange, Rect2D, RenderPass, RenderingAttachmentInfoKHR,
+    RenderingInfoKHR, SampleCountFlags, ShaderModule, ShaderModuleCreateInfo, ShaderStageFlags,
 };
 use std::{
     ffi::CStr,
+    fmt::{self, Display, Formatter},
     fs::File,
-    io::{self, BufReader, Read},
+    io::{BufReader, Read},
     mem,
     sync::Arc,
 };
-use thiserror::Error;
 
 #[repr(C)]
 struct BindingsOffset {
@@ -40,24 +40,24 @@ struct BindingsOffset {
     unused_2: u32,
 }
 
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("failed to create vulkan {1}")]
-    Creation(#[source] vk::Result, &'static str),
+#[derive(Clone, Copy, Debug)]
+pub enum ShaderType {
+    Fragment,
+    Vertex,
+}
 
-    #[error("failed to open file")]
-    OpenFailure(#[source] io::Error),
-
-    #[error("failed to read file")]
-    ReadFailure(#[source] io::Error),
-
-    #[error("failed to read unaligned vulkan shader")]
-    Unaligned,
+impl Display for ShaderType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match *self {
+            ShaderType::Fragment => write!(f, "fragment"),
+            ShaderType::Vertex => write!(f, "vertex"),
+        }
+    }
 }
 
 pub(crate) struct Pipeline {
     layout: PipelineLayout,
-    handle: vk::Pipeline,
+    handle: VulkanPipeline,
 
     device: Arc<Device>,
 }
@@ -100,7 +100,7 @@ impl Pipeline {
             device
                 .handle()
                 .create_pipeline_layout(&create_info, None)
-                .map_err(|error| CreationError::Creation(error, "pipeline layout"))
+                .map_err(|error| CreationError::VulkanCreation(error, "pipeline layout"))
         }?;
 
         Ok(handle)
@@ -110,13 +110,15 @@ impl Pipeline {
         device: &Device,
         swapchain: &Swapchain,
         pipeline_layout: &PipelineLayout,
-    ) -> Result<vk::Pipeline, CreationError> {
+    ) -> Result<VulkanPipeline, CreationError> {
         let vertex_shader_code = Self::parse_shader("./assets/shaders/compiled/triangle_vert.spv")?;
         let fragment_shader_code =
             Self::parse_shader("./assets/shaders/compiled/triangle_frag.spv")?;
 
-        let vertex_shader_module = Self::create_shader_module(device, &vertex_shader_code)?;
-        let fragment_shader_module = Self::create_shader_module(device, &fragment_shader_code)?;
+        let vertex_shader_module =
+            Self::create_shader_module(device, ShaderType::Vertex, &vertex_shader_code)?;
+        let fragment_shader_module =
+            Self::create_shader_module(device, ShaderType::Fragment, &fragment_shader_code)?;
 
         let entry_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
 
@@ -204,14 +206,14 @@ impl Pipeline {
             .layout(*pipeline_layout)
             .render_pass(RenderPass::null())
             .subpass(0)
-            .base_pipeline_handle(vk::Pipeline::null())
+            .base_pipeline_handle(VulkanPipeline::null())
             .base_pipeline_index(-1);
 
         let handles = unsafe {
             device
                 .handle()
                 .create_graphics_pipelines(PipelineCache::null(), &[*create_info], None)
-                .map_err(|error| CreationError::Creation(error.1, "graphics pipeline"))
+                .map_err(|error| CreationError::VulkanCreation(error.1, "graphics pipeline"))
         }?;
 
         unsafe {
@@ -226,25 +228,27 @@ impl Pipeline {
         Ok(handles[0])
     }
 
-    fn parse_shader(file: &str) -> Result<Vec<u8>, CreationError> {
-        let file = File::open(file).map_err(CreationError::OpenFailure)?;
+    fn parse_shader(file_path: &str) -> Result<Vec<u8>, CreationError> {
+        let file = File::open(file_path)
+            .map_err(|error| CreationError::OpenFailure(error, file_path.to_string()))?;
         let mut reader = BufReader::new(file);
 
         let mut buffer = Vec::new();
         reader
             .read_to_end(&mut buffer)
-            .map_err(CreationError::ReadFailure)?;
+            .map_err(|error| CreationError::ReadFailure(error, file_path.to_string()))?;
 
         Ok(buffer)
     }
 
     fn create_shader_module(
         device: &Device,
+        shader_type: ShaderType,
         shader_bytes: &[u8],
     ) -> Result<ShaderModule, CreationError> {
         let (prefix, code, suffix) = unsafe { shader_bytes.align_to::<u32>() };
         if !prefix.is_empty() || !suffix.is_empty() {
-            return Err(CreationError::Unaligned);
+            return Err(CreationError::Unaligned(shader_type));
         }
 
         let create_info = ShaderModuleCreateInfo::builder().code(code);
@@ -253,7 +257,14 @@ impl Pipeline {
             device
                 .handle()
                 .create_shader_module(&create_info, None)
-                .map_err(|error| CreationError::Creation(error, "shader module"))
+                .map_err(|error| {
+                    let error_message = match shader_type {
+                        ShaderType::Fragment => "fragment shader module",
+                        ShaderType::Vertex => "vertex shader module",
+                    };
+
+                    CreationError::VulkanCreation(error, error_message)
+                })
         }?;
 
         Ok(handle)

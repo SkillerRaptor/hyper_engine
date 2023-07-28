@@ -4,22 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::instance::Instance;
+use crate::{error::CreationError, instance::Instance};
 
 use hyper_platform::window::Window;
 
-use ash::{
-    extensions::khr,
-    vk::{self, SurfaceKHR},
-    Entry,
-};
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("failed to create vulkan {1}")]
-    Creation(#[source] vk::Result, &'static str),
-}
+use ash::{extensions::khr, vk::SurfaceKHR, Entry};
 
 pub(crate) struct Surface {
     handle: SurfaceKHR,
@@ -36,7 +25,7 @@ impl Surface {
 
         let handle = window
             .create_surface(entry, instance.handle())
-            .map_err(|error| CreationError::Creation(error, "surface"))?;
+            .map_err(|error| CreationError::VulkanCreation(error, "surface"))?;
 
         Ok(Self { handle, loader })
     }

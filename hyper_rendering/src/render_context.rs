@@ -5,47 +5,14 @@
  */
 
 use crate::{
-    descriptor_pool::{self, DescriptorPool},
-    device::{self, Device},
-    instance::{self, Instance},
-    pipeline::{self, Pipeline},
-    renderer::{self, Renderer},
-    surface::{self, Surface},
-    swapchain::{self, Swapchain},
+    descriptor_pool::DescriptorPool, device::Device, error::CreationError, instance::Instance,
+    pipeline::Pipeline, renderer::Renderer, surface::Surface, swapchain::Swapchain,
 };
 
 use hyper_platform::window::Window;
 
-use ash::{Entry, LoadingError};
+use ash::Entry;
 use std::sync::Arc;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("failed to load vulkan entry")]
-    EntryLoadingFailure(#[from] LoadingError),
-
-    #[error("failed to create instance")]
-    InstanceFailure(#[from] instance::CreationError),
-
-    #[error("failed to create surface")]
-    SurfaceFailure(#[from] surface::CreationError),
-
-    #[error("failed to create device")]
-    DeviceFailure(#[from] device::CreationError),
-
-    #[error("failed to create swapchain")]
-    SwapchainFailure(#[from] swapchain::CreationError),
-
-    #[error("failed to create descriptor pool")]
-    DescriptorPoolFailure(#[from] descriptor_pool::CreationError),
-
-    #[error("failed to create pipeline")]
-    PipelineFailure(#[from] pipeline::CreationError),
-
-    #[error("failed to create renderer")]
-    RendererFailure(#[from] renderer::CreationError),
-}
 
 pub struct RenderContext {
     renderer: Renderer,

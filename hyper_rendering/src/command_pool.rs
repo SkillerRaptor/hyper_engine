@@ -5,29 +5,17 @@
  */
 
 use crate::{
-    device::{
-        queue_family_indices::{self, QueueFamilyIndices},
-        Device,
-    },
+    device::{queue_family_indices::QueueFamilyIndices, Device},
+    error::CreationError,
     instance::Instance,
     surface::Surface,
 };
 
-use ash::vk::{self, CommandPoolCreateFlags, CommandPoolCreateInfo};
+use ash::vk::{CommandPool as VulkanCommandPool, CommandPoolCreateFlags, CommandPoolCreateInfo};
 use std::sync::Arc;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("failed to create vulkan {1}")]
-    Creation(#[source] vk::Result, &'static str),
-
-    #[error("failed to create queue family indices")]
-    QueueFamilyIndicesFailure(#[from] queue_family_indices::CreationError),
-}
 
 pub(crate) struct CommandPool {
-    handle: vk::CommandPool,
+    handle: VulkanCommandPool,
     device: Arc<Device>,
 }
 
@@ -48,13 +36,13 @@ impl CommandPool {
             device
                 .handle()
                 .create_command_pool(&create_info, None)
-                .map_err(|error| CreationError::Creation(error, "command pool"))
+                .map_err(|error| CreationError::VulkanCreation(error, "command pool"))
         }?;
 
         Ok(Self { handle, device })
     }
 
-    pub(crate) fn handle(&self) -> &vk::CommandPool {
+    pub(crate) fn handle(&self) -> &VulkanCommandPool {
         &self.handle
     }
 }

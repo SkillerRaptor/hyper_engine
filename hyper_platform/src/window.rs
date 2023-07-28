@@ -7,7 +7,7 @@
 use crate::event_loop::EventLoop;
 
 use ash::{
-    vk::{self, SurfaceKHR},
+    vk::{Result as VulkanResult, SurfaceKHR},
     Entry, Instance,
 };
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
@@ -16,10 +16,10 @@ use winit::{dpi::LogicalSize, error::OsError, window};
 
 #[derive(Debug, Error)]
 pub enum CreationError {
-    #[error("uninitialized field: {0}")]
+    #[error("Failed to use uninitialized field `{0}`")]
     UninitializedField(&'static str),
 
-    #[error("failed to build window")]
+    #[error("Failed to build `native window`")]
     WindowFailure(#[from] OsError),
 }
 
@@ -52,7 +52,7 @@ impl Window {
         &self,
         entry: &Entry,
         instance: &Instance,
-    ) -> Result<SurfaceKHR, vk::Result> {
+    ) -> Result<SurfaceKHR, VulkanResult> {
         unsafe {
             ash_window::create_surface(
                 entry,
@@ -64,7 +64,7 @@ impl Window {
         }
     }
 
-    pub fn required_extensions(&self) -> Result<Vec<*const i8>, vk::Result> {
+    pub fn required_extensions(&self) -> Result<Vec<*const i8>, VulkanResult> {
         let required_extensions =
             ash_window::enumerate_required_extensions(self.internal.raw_display_handle())?;
         Ok(required_extensions.to_vec())

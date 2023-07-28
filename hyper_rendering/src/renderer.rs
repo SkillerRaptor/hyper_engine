@@ -5,36 +5,14 @@
  */
 
 use crate::{
-    binary_semaphore::{self, BinarySemaphore},
-    command_buffer::{self, CommandBuffer},
-    command_pool::{self, CommandPool},
-    device::Device,
-    instance::Instance,
-    pipeline::Pipeline,
-    surface::Surface,
-    swapchain::Swapchain,
-    timeline_semaphore::{self, TimelineSemaphore},
+    binary_semaphore::BinarySemaphore, command_buffer::CommandBuffer, command_pool::CommandPool,
+    device::Device, error::CreationError, instance::Instance, pipeline::Pipeline, surface::Surface,
+    swapchain::Swapchain, timeline_semaphore::TimelineSemaphore,
 };
 
 use ash::vk::{ClearColorValue, ClearValue, CommandBufferUsageFlags, Offset2D, Rect2D, Viewport};
 use hyper_platform::window::Window;
 use std::sync::Arc;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("failed to create command pool")]
-    CommandPoolFailure(#[from] command_pool::CreationError),
-
-    #[error("failed to create command buffer")]
-    CommandBufferFailure(#[from] command_buffer::CreationError),
-
-    #[error("failed to create binary semaphore")]
-    BinarySemaphoreFailure(#[from] binary_semaphore::CreationError),
-
-    #[error("failed to create timeline semaphore")]
-    TimelineSemaphoreFailure(#[from] timeline_semaphore::CreationError),
-}
 
 pub(crate) struct Renderer {
     current_frame_id: u64,

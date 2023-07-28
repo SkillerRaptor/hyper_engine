@@ -4,29 +4,16 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    command_pool::CommandPool,
-    device::{queue_family_indices, Device},
-};
+use crate::{command_pool::CommandPool, device::Device, error::CreationError};
 
 use ash::vk::{
-    self, CommandBufferAllocateInfo, CommandBufferBeginInfo, CommandBufferLevel,
-    CommandBufferResetFlags, CommandBufferUsageFlags,
+    CommandBuffer as VulkanCommandBuffer, CommandBufferAllocateInfo, CommandBufferBeginInfo,
+    CommandBufferLevel, CommandBufferResetFlags, CommandBufferUsageFlags,
 };
 use std::sync::Arc;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("failed to allocate vulkan {1}")]
-    Allocation(#[source] vk::Result, &'static str),
-
-    #[error("failed to create queue family indices")]
-    QueueFamilyIndicesFailure(#[from] queue_family_indices::CreationError),
-}
 
 pub(crate) struct CommandBuffer {
-    handle: vk::CommandBuffer,
+    handle: VulkanCommandBuffer,
     device: Arc<Device>,
 }
 
@@ -44,7 +31,7 @@ impl CommandBuffer {
             device
                 .handle()
                 .allocate_command_buffers(&allocate_info)
-                .map_err(|error| CreationError::Allocation(error, "command buffer"))
+                .map_err(|error| CreationError::VulkanAllocation(error, "command buffer"))
         }?;
 
         Ok(Self {
@@ -85,7 +72,7 @@ impl CommandBuffer {
         }
     }
 
-    pub(crate) fn handle(&self) -> &vk::CommandBuffer {
+    pub(crate) fn handle(&self) -> &VulkanCommandBuffer {
         &self.handle
     }
 }
