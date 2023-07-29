@@ -57,7 +57,10 @@ pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
         let bright_white = format!("\x1B[{}m", Color::BrightWhite.to_fg_str());
         let message = format!("{}{}", bright_white, message);
 
-        out.finish(format_args!("{} {} {} {}", time, target, level, message))
+        out.finish(format_args!(
+            "{} {} {} {} {}",
+            time, target, level, message, reset
+        ))
     });
 
     let level_filter = match verbosity {
