@@ -7,9 +7,12 @@
 [workspace]
 resolver = "2"
 members = [
+    "hyper_audio",
     "hyper_core",
     "hyper_editor",
     "hyper_engine",
+    "hyper_math",
+    "hyper_physics",
     "hyper_platform",
     "hyper_rendering",
 ]

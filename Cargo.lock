@@ -476,6 +476,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "443144c8cdadd93ebf52ddb4056d257f5b52c04d3c804e657d19eb73fc33668b"
 
 [[package]]
+name = "hyper_audio"
+version = "0.1.0"
+dependencies = [
+ "hyper_core",
+ "log",
+ "thiserror",
+]
+
+[[package]]
 name = "hyper_core"
 version = "0.1.0"
 dependencies = [
@@ -498,9 +507,31 @@ dependencies = [
 name = "hyper_engine"
 version = "0.1.0"
 dependencies = [
+ "hyper_audio",
  "hyper_core",
+ "hyper_math",
+ "hyper_physics",
  "hyper_platform",
  "hyper_rendering",
+ "log",
+ "thiserror",
+]
+
+[[package]]
+name = "hyper_math"
+version = "0.1.0"
+dependencies = [
+ "hyper_core",
+ "log",
+ "thiserror",
+]
+
+[[package]]
+name = "hyper_physics"
+version = "0.1.0"
+dependencies = [
+ "hyper_core",
+ "hyper_math",
  "log",
  "thiserror",
 ]
@@ -525,6 +556,7 @@ dependencies = [
  "ash",
  "gpu-allocator",
  "hyper_core",
+ "hyper_math",
  "hyper_platform",
  "log",
  "thiserror",

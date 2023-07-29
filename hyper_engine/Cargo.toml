@@ -10,7 +10,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+hyper_audio = { path = "../hyper_audio" }
 hyper_core = { path = "../hyper_core" }
+hyper_math = { path = "../hyper_math" }
+hyper_physics = { path = "../hyper_physics" }
 hyper_platform = { path = "../hyper_platform" }
 hyper_rendering = { path = "../hyper_rendering" }
 
