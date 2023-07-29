@@ -17,17 +17,7 @@ use crate::{
     timeline_semaphore::TimelineSemaphore,
 };
 
-use ash::{
-    extensions::khr::Swapchain,
-    vk::{
-        self, CommandBufferSubmitInfo, DeviceCreateInfo, DeviceQueueCreateInfo,
-        Fence as VulkanFence, PhysicalDevice, PhysicalDeviceDescriptorIndexingFeatures,
-        PhysicalDeviceDynamicRenderingFeatures, PhysicalDeviceFeatures2,
-        PhysicalDeviceSynchronization2Features, PhysicalDeviceTimelineSemaphoreFeatures,
-        PipelineStageFlags2, Queue, SemaphoreSubmitInfo, SubmitInfo2,
-    },
-    Device as VulkanDevice,
-};
+use ash::{extensions::khr::Swapchain, vk, Device as VulkanDevice};
 use std::{collections::HashSet, ffi::CStr};
 
 pub(crate) mod queue_family_indices {
@@ -163,11 +153,11 @@ pub(crate) mod swapchain_support_details {
 }
 
 pub(crate) struct Device {
-    present_queue: Queue,
-    graphics_queue: Queue,
+    present_queue: vk::Queue,
+    graphics_queue: vk::Queue,
 
     handle: VulkanDevice,
-    physical_device: PhysicalDevice,
+    physical_device: vk::PhysicalDevice,
 }
 
 impl Device {
@@ -194,7 +184,7 @@ impl Device {
     fn pick_physical_device(
         instance: &Instance,
         surface: &Surface,
-    ) -> Result<PhysicalDevice, CreationError> {
+    ) -> Result<vk::PhysicalDevice, CreationError> {
         let physical_devices = unsafe {
             instance
                 .handle()
@@ -219,7 +209,7 @@ impl Device {
     fn check_physical_device_suitability(
         instance: &Instance,
         surface: &Surface,
-        physical_device: &PhysicalDevice,
+        physical_device: &vk::PhysicalDevice,
     ) -> Result<bool, CreationError> {
         let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
 
@@ -243,7 +233,7 @@ impl Device {
 
     fn check_extension_support(
         instance: &Instance,
-        physical_device: &PhysicalDevice,
+        physical_device: &vk::PhysicalDevice,
     ) -> Result<bool, CreationError> {
         let extension_properties = unsafe {
             instance
@@ -266,13 +256,13 @@ impl Device {
         Ok(available)
     }
 
-    fn check_feature_support(instance: &Instance, physical_device: &PhysicalDevice) -> bool {
-        let mut dynamic_rendering = PhysicalDeviceDynamicRenderingFeatures::builder();
-        let mut timline_semaphore = PhysicalDeviceTimelineSemaphoreFeatures::builder();
-        let mut synchronization2 = PhysicalDeviceSynchronization2Features::builder();
-        let mut descriptor_indexing = PhysicalDeviceDescriptorIndexingFeatures::builder();
+    fn check_feature_support(instance: &Instance, physical_device: &vk::PhysicalDevice) -> bool {
+        let mut dynamic_rendering = vk::PhysicalDeviceDynamicRenderingFeatures::builder();
+        let mut timline_semaphore = vk::PhysicalDeviceTimelineSemaphoreFeatures::builder();
+        let mut synchronization2 = vk::PhysicalDeviceSynchronization2Features::builder();
+        let mut descriptor_indexing = vk::PhysicalDeviceDescriptorIndexingFeatures::builder();
 
-        let mut device_features = PhysicalDeviceFeatures2::builder()
+        let mut device_features = vk::PhysicalDeviceFeatures2::builder()
             .push_next(&mut dynamic_rendering)
             .push_next(&mut timline_semaphore)
             .push_next(&mut synchronization2)
@@ -313,7 +303,7 @@ impl Device {
     fn create_device(
         instance: &Instance,
         surface: &Surface,
-        physical_device: &PhysicalDevice,
+        physical_device: &vk::PhysicalDevice,
     ) -> Result<VulkanDevice, CreationError> {
         let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
 
@@ -323,7 +313,7 @@ impl Device {
 
         let mut queue_create_infos = Vec::new();
         for queue_family in unique_queue_families {
-            let queue_create_info = DeviceQueueCreateInfo::builder()
+            let queue_create_info = vk::DeviceQueueCreateInfo::builder()
                 .queue_family_index(queue_family)
                 .queue_priorities(&[1.0])
                 .build();
@@ -332,12 +322,12 @@ impl Device {
         }
 
         let mut dynamic_rendering =
-            PhysicalDeviceDynamicRenderingFeatures::builder().dynamic_rendering(true);
+            vk::PhysicalDeviceDynamicRenderingFeatures::builder().dynamic_rendering(true);
         let mut timline_semaphore =
-            PhysicalDeviceTimelineSemaphoreFeatures::builder().timeline_semaphore(true);
+            vk::PhysicalDeviceTimelineSemaphoreFeatures::builder().timeline_semaphore(true);
         let mut synchronization2 =
-            PhysicalDeviceSynchronization2Features::builder().synchronization2(true);
-        let mut descriptor_indexing = PhysicalDeviceDescriptorIndexingFeatures::builder()
+            vk::PhysicalDeviceSynchronization2Features::builder().synchronization2(true);
+        let mut descriptor_indexing = vk::PhysicalDeviceDescriptorIndexingFeatures::builder()
             .shader_uniform_texel_buffer_array_dynamic_indexing(true)
             .shader_storage_texel_buffer_array_dynamic_indexing(true)
             .shader_uniform_buffer_array_non_uniform_indexing(true)
@@ -356,7 +346,7 @@ impl Device {
             .descriptor_binding_variable_descriptor_count(true)
             .runtime_descriptor_array(true);
 
-        let mut physical_device_features = PhysicalDeviceFeatures2::builder()
+        let mut physical_device_features = vk::PhysicalDeviceFeatures2::builder()
             .push_next(&mut dynamic_rendering)
             .push_next(&mut timline_semaphore)
             .push_next(&mut synchronization2)
@@ -367,7 +357,7 @@ impl Device {
             .map(|&extension| extension.as_ptr())
             .collect::<Vec<_>>();
 
-        let create_info = DeviceCreateInfo::builder()
+        let create_info = vk::DeviceCreateInfo::builder()
             .push_next(&mut physical_device_features)
             .queue_create_infos(&queue_create_infos)
             .enabled_extension_names(&extension_names);
@@ -390,40 +380,40 @@ impl Device {
         submit_semaphore: &TimelineSemaphore,
         frame_id: u64,
     ) -> Result<(), RuntimeError> {
-        let present_wait_semaphore_info = SemaphoreSubmitInfo::builder()
+        let present_wait_semaphore_info = vk::SemaphoreSubmitInfo::builder()
             .semaphore(*present_semaphore.handle())
             .value(0)
-            .stage_mask(PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
 
-        let command_buffer_info = CommandBufferSubmitInfo::builder()
+        let command_buffer_info = vk::CommandBufferSubmitInfo::builder()
             .command_buffer(*command_buffer.handle())
             .device_mask(0);
 
-        let submit_signal_semaphore_info = SemaphoreSubmitInfo::builder()
+        let submit_signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
             .semaphore(*submit_semaphore.handle())
             .value(frame_id)
-            .stage_mask(PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
 
-        let render_signal_semaphore_info = SemaphoreSubmitInfo::builder()
+        let render_signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
             .semaphore(*render_semaphore.handle())
             .value(0)
-            .stage_mask(PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
 
         let wait_semaphore_infos = &[*present_wait_semaphore_info];
         let command_buffer_infos = &[*command_buffer_info];
         let signal_semaphore_infos =
             &[*submit_signal_semaphore_info, *render_signal_semaphore_info];
-        let submit_info = SubmitInfo2::builder()
+        let submit_info = vk::SubmitInfo2::builder()
             .wait_semaphore_infos(wait_semaphore_infos)
             .command_buffer_infos(command_buffer_infos)
             .signal_semaphore_infos(signal_semaphore_infos);
 
         unsafe {
             self.handle
-                .queue_submit2(self.graphics_queue, &[*submit_info], VulkanFence::null())
+                .queue_submit2(self.graphics_queue, &[*submit_info], vk::Fence::null())
                 .map_err(RuntimeError::QueueSubmit)
         }?;
 
@@ -444,11 +434,11 @@ impl Device {
         &self.handle
     }
 
-    pub(crate) fn physical_device(&self) -> &PhysicalDevice {
+    pub(crate) fn physical_device(&self) -> &vk::PhysicalDevice {
         &self.physical_device
     }
 
-    pub(crate) fn present_queue(&self) -> &Queue {
+    pub(crate) fn present_queue(&self) -> &vk::Queue {
         &self.present_queue
     }
 }

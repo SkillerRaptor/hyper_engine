@@ -6,10 +6,7 @@
 
 use crate::event_loop::EventLoop;
 
-use ash::{
-    vk::{Result as VulkanResult, SurfaceKHR},
-    Entry, Instance,
-};
+use ash::{vk, Entry, Instance};
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
 use thiserror::Error;
 use winit::{dpi::LogicalSize, error::OsError, window};
@@ -52,7 +49,7 @@ impl Window {
         &self,
         entry: &Entry,
         instance: &Instance,
-    ) -> Result<SurfaceKHR, VulkanResult> {
+    ) -> Result<vk::SurfaceKHR, vk::Result> {
         unsafe {
             ash_window::create_surface(
                 entry,
@@ -64,7 +61,7 @@ impl Window {
         }
     }
 
-    pub fn required_extensions(&self) -> Result<Vec<*const i8>, VulkanResult> {
+    pub fn required_extensions(&self) -> Result<Vec<*const i8>, vk::Result> {
         let required_extensions =
             ash_window::enumerate_required_extensions(self.internal.raw_display_handle())?;
         Ok(required_extensions.to_vec())

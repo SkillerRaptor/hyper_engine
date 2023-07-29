@@ -17,7 +17,7 @@ use crate::{
     timeline_semaphore::TimelineSemaphore,
 };
 
-use ash::vk::{ClearColorValue, ClearValue, CommandBufferUsageFlags, Offset2D, Rect2D, Viewport};
+use ash::vk;
 use hyper_platform::window::Window;
 use std::sync::Arc;
 
@@ -107,10 +107,10 @@ impl Renderer {
         self.swapchain_image_index = index;
 
         self.command_buffers[side as usize].reset()?;
-        self.command_buffers[side as usize].begin(CommandBufferUsageFlags::ONE_TIME_SUBMIT)?;
+        self.command_buffers[side as usize].begin(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT)?;
 
-        let clear_value = ClearValue {
-            color: ClearColorValue {
+        let clear_value = vk::ClearValue {
+            color: vk::ClearColorValue {
                 float32: [0.12941, 0.06275, 0.13725, 1.0],
             },
         };
@@ -125,7 +125,7 @@ impl Renderer {
 
         pipeline.bind(&self.command_buffers[side as usize]);
 
-        let viewport = Viewport::builder()
+        let viewport = vk::Viewport::builder()
             .x(0.0)
             .y(0.0)
             .width(swapchain.extent().width as f32)
@@ -141,9 +141,9 @@ impl Renderer {
             );
         }
 
-        let offset = Offset2D::builder().x(0).y(0);
+        let offset = vk::Offset2D::builder().x(0).y(0);
 
-        let scissor = Rect2D::builder()
+        let scissor = vk::Rect2D::builder()
             .offset(*offset)
             .extent(*swapchain.extent());
 

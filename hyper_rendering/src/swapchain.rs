@@ -17,26 +17,17 @@ use crate::{
 
 use hyper_platform::window::Window;
 
-use ash::{
-    extensions::khr,
-    vk::{
-        ColorSpaceKHR, ComponentMapping, ComponentSwizzle, CompositeAlphaFlagsKHR, Extent2D,
-        Fence as VulkanFence, Format, Image, ImageAspectFlags, ImageSubresourceRange,
-        ImageUsageFlags, ImageView, ImageViewCreateInfo, ImageViewType, PresentInfoKHR,
-        PresentModeKHR, Queue, Result as VulkanResult, SharingMode, SurfaceCapabilitiesKHR,
-        SurfaceFormatKHR, SwapchainCreateInfoKHR, SwapchainKHR,
-    },
-};
+use ash::{extensions::khr, vk};
 use std::sync::Arc;
 
 pub(crate) struct Swapchain {
-    image_views: Vec<ImageView>,
-    images: Vec<Image>,
+    image_views: Vec<vk::ImageView>,
+    images: Vec<vk::Image>,
 
-    extent: Extent2D,
-    format: Format,
+    extent: vk::Extent2D,
+    format: vk::Format,
 
-    handle: SwapchainKHR,
+    handle: vk::SwapchainKHR,
     loader: khr::Swapchain,
 
     device: Arc<Device>,
@@ -70,28 +61,28 @@ impl Swapchain {
             queue_family_indices.present_family().unwrap(),
         ];
 
-        let (image_sharing_mode, queue_family_indices_array): (SharingMode, &[u32]) =
+        let (image_sharing_mode, queue_family_indices_array): (vk::SharingMode, &[u32]) =
             if queue_families[0] != queue_families[1] {
-                (SharingMode::CONCURRENT, &queue_families)
+                (vk::SharingMode::CONCURRENT, &queue_families)
             } else {
-                (SharingMode::EXCLUSIVE, &[])
+                (vk::SharingMode::EXCLUSIVE, &[])
             };
 
-        let create_info = SwapchainCreateInfoKHR::builder()
+        let create_info = vk::SwapchainCreateInfoKHR::builder()
             .surface(*surface.handle())
             .min_image_count(image_count)
             .image_format(surface_format.format)
             .image_color_space(surface_format.color_space)
             .image_extent(extent)
             .image_array_layers(1)
-            .image_usage(ImageUsageFlags::COLOR_ATTACHMENT)
+            .image_usage(vk::ImageUsageFlags::COLOR_ATTACHMENT)
             .image_sharing_mode(image_sharing_mode)
             .queue_family_indices(queue_family_indices_array)
             .pre_transform(capabilities.current_transform)
-            .composite_alpha(CompositeAlphaFlagsKHR::OPAQUE)
+            .composite_alpha(vk::CompositeAlphaFlagsKHR::OPAQUE)
             .present_mode(present_mode)
             .clipped(true)
-            .old_swapchain(SwapchainKHR::null());
+            .old_swapchain(vk::SwapchainKHR::null());
 
         let loader = khr::Swapchain::new(instance.handle(), device.handle());
 
@@ -109,22 +100,22 @@ impl Swapchain {
 
         let mut image_views = Vec::new();
         for image in &images {
-            let component_mapping = ComponentMapping::builder()
-                .r(ComponentSwizzle::IDENTITY)
-                .g(ComponentSwizzle::IDENTITY)
-                .b(ComponentSwizzle::IDENTITY)
-                .a(ComponentSwizzle::IDENTITY);
+            let component_mapping = vk::ComponentMapping::builder()
+                .r(vk::ComponentSwizzle::IDENTITY)
+                .g(vk::ComponentSwizzle::IDENTITY)
+                .b(vk::ComponentSwizzle::IDENTITY)
+                .a(vk::ComponentSwizzle::IDENTITY);
 
-            let subresource_range = ImageSubresourceRange::builder()
-                .aspect_mask(ImageAspectFlags::COLOR)
+            let subresource_range = vk::ImageSubresourceRange::builder()
+                .aspect_mask(vk::ImageAspectFlags::COLOR)
                 .base_mip_level(0)
                 .level_count(1)
                 .base_array_layer(0)
                 .layer_count(1);
 
-            let create_info = ImageViewCreateInfo::builder()
+            let create_info = vk::ImageViewCreateInfo::builder()
                 .image(*image)
-                .view_type(ImageViewType::TYPE_2D)
+                .view_type(vk::ImageViewType::TYPE_2D)
                 .format(surface_format.format)
                 .components(*component_mapping)
                 .subresource_range(*subresource_range);
@@ -153,7 +144,7 @@ impl Swapchain {
         })
     }
 
-    fn choose_extent(window: &Window, capabilities: &SurfaceCapabilitiesKHR) -> Extent2D {
+    fn choose_extent(window: &Window, capabilities: &vk::SurfaceCapabilitiesKHR) -> vk::Extent2D {
         if capabilities.current_extent.width != u32::MAX
             || capabilities.current_extent.height != u32::MAX
         {
@@ -162,7 +153,7 @@ impl Swapchain {
 
         let framebuffer_size = window.framebuffer_size();
 
-        Extent2D {
+        vk::Extent2D {
             width: framebuffer_size.0.clamp(
                 capabilities.min_image_extent.width,
                 capabilities.max_image_extent.width,
@@ -174,21 +165,21 @@ impl Swapchain {
         }
     }
 
-    fn choose_surface_format(formats: &[SurfaceFormatKHR]) -> SurfaceFormatKHR {
+    fn choose_surface_format(formats: &[vk::SurfaceFormatKHR]) -> vk::SurfaceFormatKHR {
         *formats
             .iter()
             .find(|&format| {
-                format.format == Format::B8G8R8A8_SRGB
-                    && format.color_space == ColorSpaceKHR::SRGB_NONLINEAR
+                format.format == vk::Format::B8G8R8A8_SRGB
+                    && format.color_space == vk::ColorSpaceKHR::SRGB_NONLINEAR
             })
             .unwrap_or_else(|| &formats[0])
     }
 
-    fn choose_present_mode(present_modes: &[PresentModeKHR]) -> PresentModeKHR {
+    fn choose_present_mode(present_modes: &[vk::PresentModeKHR]) -> vk::PresentModeKHR {
         *present_modes
             .iter()
-            .find(|&present_mode| *present_mode == PresentModeKHR::MAILBOX)
-            .unwrap_or(&PresentModeKHR::FIFO)
+            .find(|&present_mode| *present_mode == vk::PresentModeKHR::MAILBOX)
+            .unwrap_or(&vk::PresentModeKHR::FIFO)
     }
 
     pub(crate) fn acquire_next_image(
@@ -203,10 +194,10 @@ impl Swapchain {
                 self.handle,
                 1_000_000_000,
                 *present_semaphore.handle(),
-                VulkanFence::null(),
+                vk::Fence::null(),
             ) {
                 Ok((index, _)) => Ok(Some(index)),
-                Err(VulkanResult::ERROR_OUT_OF_DATE_KHR) => {
+                Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => {
                     self.recreate(window, instance, surface)?;
                     Ok(None)
                 }
@@ -220,7 +211,7 @@ impl Swapchain {
         window: &Window,
         instance: &Instance,
         surface: &Surface,
-        queue: &Queue,
+        queue: &vk::Queue,
         render_semaphore: &BinarySemaphore,
         swapchain_image_index: u32,
     ) -> Result<(), RuntimeError> {
@@ -228,7 +219,7 @@ impl Swapchain {
         let wait_semaphores = &[*render_semaphore.handle()];
         let image_indices = &[swapchain_image_index];
 
-        let present_info = PresentInfoKHR::builder()
+        let present_info = vk::PresentInfoKHR::builder()
             .swapchains(swapchains)
             .wait_semaphores(wait_semaphores)
             .image_indices(image_indices);
@@ -236,7 +227,7 @@ impl Swapchain {
         unsafe {
             let recreate = match self.loader.queue_present(*queue, &present_info) {
                 Ok(recreate) => recreate,
-                Err(VulkanResult::ERROR_OUT_OF_DATE_KHR) => true,
+                Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => true,
                 Err(_) => panic!("unhandled error"),
             };
 
@@ -286,28 +277,28 @@ impl Swapchain {
             queue_family_indices.present_family().unwrap(),
         ];
 
-        let (image_sharing_mode, queue_family_indices_array): (SharingMode, &[u32]) =
+        let (image_sharing_mode, queue_family_indices_array): (vk::SharingMode, &[u32]) =
             if queue_families[0] != queue_families[1] {
-                (SharingMode::CONCURRENT, &queue_families)
+                (vk::SharingMode::CONCURRENT, &queue_families)
             } else {
-                (SharingMode::EXCLUSIVE, &[])
+                (vk::SharingMode::EXCLUSIVE, &[])
             };
 
-        let create_info = SwapchainCreateInfoKHR::builder()
+        let create_info = vk::SwapchainCreateInfoKHR::builder()
             .surface(*surface.handle())
             .min_image_count(image_count)
             .image_format(surface_format.format)
             .image_color_space(surface_format.color_space)
             .image_extent(extent)
             .image_array_layers(1)
-            .image_usage(ImageUsageFlags::COLOR_ATTACHMENT)
+            .image_usage(vk::ImageUsageFlags::COLOR_ATTACHMENT)
             .image_sharing_mode(image_sharing_mode)
             .queue_family_indices(queue_family_indices_array)
             .pre_transform(capabilities.current_transform)
-            .composite_alpha(CompositeAlphaFlagsKHR::OPAQUE)
+            .composite_alpha(vk::CompositeAlphaFlagsKHR::OPAQUE)
             .present_mode(present_mode)
             .clipped(true)
-            .old_swapchain(SwapchainKHR::null());
+            .old_swapchain(vk::SwapchainKHR::null());
 
         self.handle = unsafe {
             self.loader
@@ -333,22 +324,22 @@ impl Swapchain {
 
         self.image_views = Vec::new();
         for image in &self.images {
-            let component_mapping = ComponentMapping::builder()
-                .r(ComponentSwizzle::IDENTITY)
-                .g(ComponentSwizzle::IDENTITY)
-                .b(ComponentSwizzle::IDENTITY)
-                .a(ComponentSwizzle::IDENTITY);
+            let component_mapping = vk::ComponentMapping::builder()
+                .r(vk::ComponentSwizzle::IDENTITY)
+                .g(vk::ComponentSwizzle::IDENTITY)
+                .b(vk::ComponentSwizzle::IDENTITY)
+                .a(vk::ComponentSwizzle::IDENTITY);
 
-            let subresource_range = ImageSubresourceRange::builder()
-                .aspect_mask(ImageAspectFlags::COLOR)
+            let subresource_range = vk::ImageSubresourceRange::builder()
+                .aspect_mask(vk::ImageAspectFlags::COLOR)
                 .base_mip_level(0)
                 .level_count(1)
                 .base_array_layer(0)
                 .layer_count(1);
 
-            let create_info = ImageViewCreateInfo::builder()
+            let create_info = vk::ImageViewCreateInfo::builder()
                 .image(*image)
-                .view_type(ImageViewType::TYPE_2D)
+                .view_type(vk::ImageViewType::TYPE_2D)
                 .format(surface_format.format)
                 .components(*component_mapping)
                 .subresource_range(*subresource_range);
@@ -384,19 +375,19 @@ impl Swapchain {
         }
     }
 
-    pub(crate) fn format(&self) -> &Format {
+    pub(crate) fn format(&self) -> &vk::Format {
         &self.format
     }
 
-    pub(crate) fn extent(&self) -> &Extent2D {
+    pub(crate) fn extent(&self) -> &vk::Extent2D {
         &self.extent
     }
 
-    pub(crate) fn images(&self) -> &[Image] {
+    pub(crate) fn images(&self) -> &[vk::Image] {
         &self.images
     }
 
-    pub(crate) fn image_views(&self) -> &[ImageView] {
+    pub(crate) fn image_views(&self) -> &[vk::ImageView] {
         &self.image_views
     }
 }

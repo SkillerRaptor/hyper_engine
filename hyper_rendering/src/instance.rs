@@ -8,20 +8,12 @@ use crate::error::CreationError;
 
 use hyper_platform::window::Window;
 
-use ash::{
-    extensions::ext::DebugUtils,
-    vk::{
-        self, ApplicationInfo, Bool32, DebugUtilsMessageSeverityFlagsEXT,
-        DebugUtilsMessageTypeFlagsEXT, DebugUtilsMessengerCallbackDataEXT,
-        DebugUtilsMessengerCreateInfoEXT, DebugUtilsMessengerEXT, InstanceCreateInfo,
-    },
-    Entry, Instance as VulkanInstance,
-};
+use ash::{extensions::ext::DebugUtils, vk, Entry, Instance as VulkanInstance};
 use log::Level;
 use std::ffi::{c_void, CStr, CString};
 
 struct DebugExtension {
-    handle: DebugUtilsMessengerEXT,
+    handle: vk::DebugUtilsMessengerEXT,
     loader: DebugUtils,
 }
 
@@ -67,7 +59,7 @@ impl Instance {
         let application_name = CString::new(window.title())?;
         let engine_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"HyperEngine\0") };
 
-        let application_info = ApplicationInfo::builder()
+        let application_info = vk::ApplicationInfo::builder()
             .application_name(&application_name)
             .application_version(vk::make_api_version(0, 1, 0, 0))
             .engine_name(engine_name)
@@ -100,19 +92,19 @@ impl Instance {
             Vec::new()
         };
 
-        let mut debug_messenger_create_info = DebugUtilsMessengerCreateInfoEXT::builder()
+        let mut debug_messenger_create_info = vk::DebugUtilsMessengerCreateInfoEXT::builder()
             .message_severity(
-                DebugUtilsMessageSeverityFlagsEXT::ERROR
-                    | DebugUtilsMessageSeverityFlagsEXT::WARNING
-                    | DebugUtilsMessageSeverityFlagsEXT::VERBOSE,
+                vk::DebugUtilsMessageSeverityFlagsEXT::ERROR
+                    | vk::DebugUtilsMessageSeverityFlagsEXT::WARNING
+                    | vk::DebugUtilsMessageSeverityFlagsEXT::VERBOSE,
             )
             .message_type(
-                DebugUtilsMessageTypeFlagsEXT::VALIDATION
-                    | DebugUtilsMessageTypeFlagsEXT::PERFORMANCE,
+                vk::DebugUtilsMessageTypeFlagsEXT::VALIDATION
+                    | vk::DebugUtilsMessageTypeFlagsEXT::PERFORMANCE,
             )
             .pfn_user_callback(Some(Self::debug_callback));
 
-        let mut create_info = InstanceCreateInfo::builder()
+        let mut create_info = vk::InstanceCreateInfo::builder()
             .application_info(&application_info)
             .enabled_extension_names(&extension_names)
             .enabled_layer_names(&layer_names);
@@ -169,15 +161,15 @@ impl Instance {
 
         let loader = DebugUtils::new(entry, instance);
 
-        let create_info = DebugUtilsMessengerCreateInfoEXT::builder()
+        let create_info = vk::DebugUtilsMessengerCreateInfoEXT::builder()
             .message_severity(
-                DebugUtilsMessageSeverityFlagsEXT::ERROR
-                    | DebugUtilsMessageSeverityFlagsEXT::WARNING
-                    | DebugUtilsMessageSeverityFlagsEXT::VERBOSE,
+                vk::DebugUtilsMessageSeverityFlagsEXT::ERROR
+                    | vk::DebugUtilsMessageSeverityFlagsEXT::WARNING
+                    | vk::DebugUtilsMessageSeverityFlagsEXT::VERBOSE,
             )
             .message_type(
-                DebugUtilsMessageTypeFlagsEXT::VALIDATION
-                    | DebugUtilsMessageTypeFlagsEXT::PERFORMANCE,
+                vk::DebugUtilsMessageTypeFlagsEXT::VALIDATION
+                    | vk::DebugUtilsMessageTypeFlagsEXT::PERFORMANCE,
             )
             .pfn_user_callback(Some(Self::debug_callback));
 
@@ -197,17 +189,17 @@ impl Instance {
     }
 
     unsafe extern "system" fn debug_callback(
-        severity: DebugUtilsMessageSeverityFlagsEXT,
-        _: DebugUtilsMessageTypeFlagsEXT,
-        callback_data: *const DebugUtilsMessengerCallbackDataEXT,
+        severity: vk::DebugUtilsMessageSeverityFlagsEXT,
+        _: vk::DebugUtilsMessageTypeFlagsEXT,
+        callback_data: *const vk::DebugUtilsMessengerCallbackDataEXT,
         _: *mut c_void,
-    ) -> Bool32 {
+    ) -> vk::Bool32 {
         let callback_data = *callback_data;
         let message = CStr::from_ptr(callback_data.p_message).to_string_lossy();
         let level = match severity {
-            DebugUtilsMessageSeverityFlagsEXT::INFO => Level::Info,
-            DebugUtilsMessageSeverityFlagsEXT::WARNING => Level::Warn,
-            DebugUtilsMessageSeverityFlagsEXT::ERROR => Level::Error,
+            vk::DebugUtilsMessageSeverityFlagsEXT::INFO => Level::Info,
+            vk::DebugUtilsMessageSeverityFlagsEXT::WARNING => Level::Warn,
+            vk::DebugUtilsMessageSeverityFlagsEXT::ERROR => Level::Error,
             _ => Level::Trace,
         };
 

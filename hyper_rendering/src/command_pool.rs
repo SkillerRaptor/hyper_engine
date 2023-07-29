@@ -11,11 +11,11 @@ use crate::{
     surface::Surface,
 };
 
-use ash::vk::{CommandPool as VulkanCommandPool, CommandPoolCreateFlags, CommandPoolCreateInfo};
+use ash::vk;
 use std::sync::Arc;
 
 pub(crate) struct CommandPool {
-    handle: VulkanCommandPool,
+    handle: vk::CommandPool,
     device: Arc<Device>,
 }
 
@@ -28,9 +28,9 @@ impl CommandPool {
         let queue_family_indices =
             QueueFamilyIndices::new(instance, surface, device.physical_device())?;
 
-        let create_info = CommandPoolCreateInfo::builder()
+        let create_info = vk::CommandPoolCreateInfo::builder()
             .queue_family_index(queue_family_indices.graphics_family().unwrap())
-            .flags(CommandPoolCreateFlags::RESET_COMMAND_BUFFER);
+            .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER);
 
         let handle = unsafe {
             device
@@ -42,7 +42,7 @@ impl CommandPool {
         Ok(Self { handle, device })
     }
 
-    pub(crate) fn handle(&self) -> &VulkanCommandPool {
+    pub(crate) fn handle(&self) -> &vk::CommandPool {
         &self.handle
     }
 }

@@ -8,10 +8,10 @@ use crate::{error::CreationError, instance::Instance};
 
 use hyper_platform::window::Window;
 
-use ash::{extensions::khr, vk::SurfaceKHR, Entry};
+use ash::{extensions::khr, vk, Entry};
 
 pub(crate) struct Surface {
-    handle: SurfaceKHR,
+    handle: vk::SurfaceKHR,
     loader: khr::Surface,
 }
 
@@ -30,7 +30,7 @@ impl Surface {
         Ok(Self { handle, loader })
     }
 
-    pub(crate) fn handle(&self) -> &SurfaceKHR {
+    pub(crate) fn handle(&self) -> &vk::SurfaceKHR {
         &self.handle
     }
 

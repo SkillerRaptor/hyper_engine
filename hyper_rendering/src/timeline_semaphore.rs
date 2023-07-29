@@ -9,23 +9,21 @@ use crate::{
     error::{CreationError, RuntimeError},
 };
 
-use ash::vk::{
-    Semaphore, SemaphoreCreateInfo, SemaphoreType, SemaphoreTypeCreateInfo, SemaphoreWaitInfo,
-};
+use ash::vk;
 use std::sync::Arc;
 
 pub(crate) struct TimelineSemaphore {
-    handle: Semaphore,
+    handle: vk::Semaphore,
     device: Arc<Device>,
 }
 
 impl TimelineSemaphore {
     pub(crate) fn new(device: Arc<Device>) -> Result<Self, CreationError> {
-        let mut type_create_info = SemaphoreTypeCreateInfo::builder()
-            .semaphore_type(SemaphoreType::TIMELINE)
+        let mut type_create_info = vk::SemaphoreTypeCreateInfo::builder()
+            .semaphore_type(vk::SemaphoreType::TIMELINE)
             .initial_value(0);
 
-        let create_info = SemaphoreCreateInfo::builder().push_next(&mut type_create_info);
+        let create_info = vk::SemaphoreCreateInfo::builder().push_next(&mut type_create_info);
 
         let handle = unsafe {
             device
@@ -40,7 +38,7 @@ impl TimelineSemaphore {
     pub(crate) fn wait_for(&self, value: u64) -> Result<(), RuntimeError> {
         let semaphores = [self.handle];
         let values = [value];
-        let wait_info = SemaphoreWaitInfo::builder()
+        let wait_info = vk::SemaphoreWaitInfo::builder()
             .semaphores(&semaphores)
             .values(&values);
 
@@ -54,7 +52,7 @@ impl TimelineSemaphore {
         Ok(())
     }
 
-    pub(crate) fn handle(&self) -> &Semaphore {
+    pub(crate) fn handle(&self) -> &vk::Semaphore {
         &self.handle
     }
 }

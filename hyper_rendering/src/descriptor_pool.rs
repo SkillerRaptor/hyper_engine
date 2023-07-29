@@ -6,26 +6,21 @@
 
 use crate::{device::Device, error::CreationError, instance::Instance};
 
-use ash::vk::{
-    DescriptorBindingFlags, DescriptorPool as VulkanDescriptorPool, DescriptorPoolCreateFlags,
-    DescriptorPoolCreateInfo, DescriptorPoolSize, DescriptorSetLayout, DescriptorSetLayoutBinding,
-    DescriptorSetLayoutBindingFlagsCreateInfo, DescriptorSetLayoutCreateFlags,
-    DescriptorSetLayoutCreateInfo, DescriptorType, PhysicalDeviceLimits, ShaderStageFlags,
-};
+use ash::vk;
 use std::sync::Arc;
 
 pub(crate) struct DescriptorPool {
-    layouts: Vec<DescriptorSetLayout>,
-    handle: VulkanDescriptorPool,
+    layouts: Vec<vk::DescriptorSetLayout>,
+    handle: vk::DescriptorPool,
     device: Arc<Device>,
 }
 
 impl DescriptorPool {
-    const DESCRIPTOR_TYPES: [DescriptorType; 4] = [
-        DescriptorType::STORAGE_BUFFER,
-        DescriptorType::STORAGE_IMAGE,
-        DescriptorType::SAMPLED_IMAGE,
-        DescriptorType::SAMPLER,
+    const DESCRIPTOR_TYPES: [vk::DescriptorType; 4] = [
+        vk::DescriptorType::STORAGE_BUFFER,
+        vk::DescriptorType::STORAGE_IMAGE,
+        vk::DescriptorType::SAMPLED_IMAGE,
+        vk::DescriptorType::SAMPLER,
     ];
 
     pub(crate) fn new(instance: &Instance, device: Arc<Device>) -> Result<Self, CreationError> {
@@ -42,11 +37,11 @@ impl DescriptorPool {
     fn create_descriptor_pool(
         instance: &Instance,
         device: &Device,
-    ) -> Result<VulkanDescriptorPool, CreationError> {
+    ) -> Result<vk::DescriptorPool, CreationError> {
         let pool_sizes = Self::collect_descriptor_pool_sizes(instance, device);
 
-        let create_info = DescriptorPoolCreateInfo::builder()
-            .flags(DescriptorPoolCreateFlags::UPDATE_AFTER_BIND)
+        let create_info = vk::DescriptorPoolCreateInfo::builder()
+            .flags(vk::DescriptorPoolCreateFlags::UPDATE_AFTER_BIND)
             .max_sets(4)
             .pool_sizes(&pool_sizes);
 
@@ -63,7 +58,7 @@ impl DescriptorPool {
     fn collect_descriptor_pool_sizes(
         instance: &Instance,
         device: &Device,
-    ) -> Vec<DescriptorPoolSize> {
+    ) -> Vec<vk::DescriptorPoolSize> {
         let properties = unsafe {
             instance
                 .handle()
@@ -74,7 +69,7 @@ impl DescriptorPool {
         for descriptor_type in Self::DESCRIPTOR_TYPES {
             let limit = Self::find_descriptor_type_limit(&descriptor_type, &properties.limits);
 
-            let descriptor_pool_size = DescriptorPoolSize::builder()
+            let descriptor_pool_size = vk::DescriptorPoolSize::builder()
                 .ty(descriptor_type)
                 .descriptor_count(limit);
 
@@ -85,16 +80,16 @@ impl DescriptorPool {
     }
 
     fn find_descriptor_type_limit(
-        descriptor_type: &DescriptorType,
-        limits: &PhysicalDeviceLimits,
+        descriptor_type: &vk::DescriptorType,
+        limits: &vk::PhysicalDeviceLimits,
     ) -> u32 {
         const MAX_DESCRIPTOR_COUNT: u32 = 1024 * 1024;
 
         let limit = match *descriptor_type {
-            DescriptorType::STORAGE_BUFFER => limits.max_descriptor_set_storage_buffers,
-            DescriptorType::STORAGE_IMAGE => limits.max_descriptor_set_storage_images,
-            DescriptorType::SAMPLED_IMAGE => limits.max_descriptor_set_sampled_images,
-            DescriptorType::SAMPLER => limits.max_descriptor_set_samplers,
+            vk::DescriptorType::STORAGE_BUFFER => limits.max_descriptor_set_storage_buffers,
+            vk::DescriptorType::STORAGE_IMAGE => limits.max_descriptor_set_storage_images,
+            vk::DescriptorType::SAMPLED_IMAGE => limits.max_descriptor_set_sampled_images,
+            vk::DescriptorType::SAMPLER => limits.max_descriptor_set_samplers,
             _ => unreachable!(),
         };
 
@@ -104,7 +99,7 @@ impl DescriptorPool {
     fn create_descriptor_set_layouts(
         instance: &Instance,
         device: &Device,
-    ) -> Result<Vec<DescriptorSetLayout>, CreationError> {
+    ) -> Result<Vec<vk::DescriptorSetLayout>, CreationError> {
         let mut layouts = Vec::new();
 
         for descriptor_type in Self::DESCRIPTOR_TYPES {
@@ -116,24 +111,24 @@ impl DescriptorPool {
 
             let count = Self::find_descriptor_type_limit(&descriptor_type, &properties.limits);
 
-            let descriptor_set_layout_binding = DescriptorSetLayoutBinding::builder()
+            let descriptor_set_layout_binding = vk::DescriptorSetLayoutBinding::builder()
                 .binding(0)
                 .descriptor_type(descriptor_type)
                 .descriptor_count(count)
-                .stage_flags(ShaderStageFlags::ALL);
+                .stage_flags(vk::ShaderStageFlags::ALL);
 
             let descriptor_set_layout_bindings = [*descriptor_set_layout_binding];
 
-            let descriptor_binding_flags = [DescriptorBindingFlags::PARTIALLY_BOUND
-                | DescriptorBindingFlags::VARIABLE_DESCRIPTOR_COUNT
-                | DescriptorBindingFlags::UPDATE_AFTER_BIND];
+            let descriptor_binding_flags = [vk::DescriptorBindingFlags::PARTIALLY_BOUND
+                | vk::DescriptorBindingFlags::VARIABLE_DESCRIPTOR_COUNT
+                | vk::DescriptorBindingFlags::UPDATE_AFTER_BIND];
 
-            let mut create_info_extended = DescriptorSetLayoutBindingFlagsCreateInfo::builder()
+            let mut create_info_extended = vk::DescriptorSetLayoutBindingFlagsCreateInfo::builder()
                 .binding_flags(&descriptor_binding_flags);
 
-            let create_info = DescriptorSetLayoutCreateInfo::builder()
+            let create_info = vk::DescriptorSetLayoutCreateInfo::builder()
                 .push_next(&mut create_info_extended)
-                .flags(DescriptorSetLayoutCreateFlags::UPDATE_AFTER_BIND_POOL)
+                .flags(vk::DescriptorSetLayoutCreateFlags::UPDATE_AFTER_BIND_POOL)
                 .bindings(&descriptor_set_layout_bindings);
 
             let layout = unsafe {
@@ -151,7 +146,7 @@ impl DescriptorPool {
         Ok(layouts)
     }
 
-    pub(crate) fn layouts(&self) -> &[DescriptorSetLayout] {
+    pub(crate) fn layouts(&self) -> &[vk::DescriptorSetLayout] {
         &self.layouts
     }
 }

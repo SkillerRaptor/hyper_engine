@@ -10,14 +10,11 @@ use crate::{
     error::{CreationError, RuntimeError},
 };
 
-use ash::vk::{
-    CommandBuffer as VulkanCommandBuffer, CommandBufferAllocateInfo, CommandBufferBeginInfo,
-    CommandBufferLevel, CommandBufferResetFlags, CommandBufferUsageFlags,
-};
+use ash::vk;
 use std::sync::Arc;
 
 pub(crate) struct CommandBuffer {
-    handle: VulkanCommandBuffer,
+    handle: vk::CommandBuffer,
     device: Arc<Device>,
 }
 
@@ -26,10 +23,10 @@ impl CommandBuffer {
         device: Arc<Device>,
         command_pool: &CommandPool,
     ) -> Result<Self, CreationError> {
-        let allocate_info = CommandBufferAllocateInfo::builder()
+        let allocate_info = vk::CommandBufferAllocateInfo::builder()
             .command_pool(*command_pool.handle())
             .command_buffer_count(1)
-            .level(CommandBufferLevel::PRIMARY);
+            .level(vk::CommandBufferLevel::PRIMARY);
 
         let handles = unsafe {
             device
@@ -48,15 +45,18 @@ impl CommandBuffer {
         unsafe {
             self.device
                 .handle()
-                .reset_command_buffer(self.handle, CommandBufferResetFlags::from_raw(0))
+                .reset_command_buffer(self.handle, vk::CommandBufferResetFlags::from_raw(0))
                 .map_err(RuntimeError::CommandBufferReset)
         }?;
 
         Ok(())
     }
 
-    pub(crate) fn begin(&self, usage_flags: CommandBufferUsageFlags) -> Result<(), RuntimeError> {
-        let command_buffer_begin_info = CommandBufferBeginInfo::builder().flags(usage_flags);
+    pub(crate) fn begin(
+        &self,
+        usage_flags: vk::CommandBufferUsageFlags,
+    ) -> Result<(), RuntimeError> {
+        let command_buffer_begin_info = vk::CommandBufferBeginInfo::builder().flags(usage_flags);
 
         unsafe {
             self.device
@@ -79,7 +79,7 @@ impl CommandBuffer {
         Ok(())
     }
 
-    pub(crate) fn handle(&self) -> &VulkanCommandBuffer {
+    pub(crate) fn handle(&self) -> &vk::CommandBuffer {
         &self.handle
     }
 }

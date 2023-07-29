@@ -6,17 +6,18 @@
 
 use crate::{device::Device, error::CreationError};
 
-use ash::vk::{Semaphore, SemaphoreCreateFlags, SemaphoreCreateInfo};
+use ash::vk;
 use std::sync::Arc;
 
 pub(crate) struct BinarySemaphore {
-    handle: Semaphore,
+    handle: vk::Semaphore,
     device: Arc<Device>,
 }
 
 impl BinarySemaphore {
     pub(crate) fn new(device: Arc<Device>) -> Result<Self, CreationError> {
-        let create_info = SemaphoreCreateInfo::builder().flags(SemaphoreCreateFlags::empty());
+        let create_info =
+            vk::SemaphoreCreateInfo::builder().flags(vk::SemaphoreCreateFlags::empty());
 
         let handle = unsafe {
             device
@@ -28,7 +29,7 @@ impl BinarySemaphore {
         Ok(Self { handle, device })
     }
 
-    pub(crate) fn handle(&self) -> &Semaphore {
+    pub(crate) fn handle(&self) -> &vk::Semaphore {
         &self.handle
     }
 }
