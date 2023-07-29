@@ -38,18 +38,26 @@ pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
 
         let time = {
             let current_time = Local::now().format("%Y-%m-%d %H:%M:%S");
-            let black = format!("\x1B[{}m", Color::BrightBlack.to_fg_str());
-            format!("{black}[{current_time}]{reset}")
+            let bright_black = format!("\x1B[{}m", Color::BrightBlack.to_fg_str());
+            format!("{}[{}]{}", bright_black, current_time, reset)
+        };
+
+        let target = {
+            let current_target = record.target().split_once(':');
+            let white = format!("\x1B[{}m", Color::White.to_fg_str());
+            format!("{}{:<15}{}", white, current_target.unwrap().0, reset)
         };
 
         let level = {
             let current_level = record.level();
             let color = format!("\x1B[{}m", levels.get_color(&record.level()).to_fg_str());
-            format!("{color}{current_level:<5}{reset}")
+            format!("{}{:<5}{}", color, current_level, reset)
         };
 
-        let message = format!("{reset}{message}");
-        out.finish(format_args!("{time} {level} {message}"))
+        let bright_white = format!("\x1B[{}m", Color::BrightWhite.to_fg_str());
+        let message = format!("{}{}", bright_white, message);
+
+        out.finish(format_args!("{} {} {} {}", time, target, level, message))
     });
 
     let level_filter = match verbosity {
