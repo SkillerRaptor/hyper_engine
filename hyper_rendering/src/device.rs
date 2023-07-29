@@ -18,7 +18,7 @@ use crate::{
 };
 
 use ash::{extensions::khr::Swapchain, vk, Device as VulkanDevice};
-use std::{collections::HashSet, ffi::CStr};
+use std::{collections::HashSet, ffi::CStr, str};
 
 pub(crate) mod queue_family_indices {
     use crate::{error::CreationError, instance::Instance, surface::Surface};
@@ -203,7 +203,34 @@ impl Device {
             return Err(CreationError::Unsupported);
         }
 
-        Ok(chosen_physical_device.unwrap())
+        let physical_device = chosen_physical_device.unwrap();
+        let properties = unsafe {
+            instance
+                .handle()
+                .get_physical_device_properties(physical_device)
+        };
+
+        let device_name_array = properties
+            .device_name
+            .iter()
+            .map(|&c| c as u8)
+            .collect::<Vec<_>>();
+        let device_name = unsafe { str::from_utf8_unchecked(&device_name_array) };
+
+        let device_type = match properties.device_type {
+            vk::PhysicalDeviceType::OTHER => "Other",
+            vk::PhysicalDeviceType::INTEGRATED_GPU => "Integrated GPU",
+            vk::PhysicalDeviceType::DISCRETE_GPU => "Discrete GPU",
+            vk::PhysicalDeviceType::VIRTUAL_GPU => "Virtual GPU",
+            vk::PhysicalDeviceType::CPU => "CPU",
+            _ => unreachable!(),
+        };
+
+        log::info!("Vulkan Device Info:");
+        log::info!("  Name: {}", device_name);
+        log::info!("  Type: {}", device_type);
+
+        Ok(physical_device)
     }
 
     fn check_physical_device_suitability(
