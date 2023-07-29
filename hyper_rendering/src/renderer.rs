@@ -47,20 +47,15 @@ impl Renderer {
         let command_pool = CommandPool::new(instance, surface, device.clone())?;
 
         let mut command_buffers = Vec::new();
-        for _ in 0..Self::FRAMES_IN_FLIGHT {
-            let command_buffer = CommandBuffer::new(device.clone(), &command_pool)?;
-            command_buffers.push(command_buffer);
-        }
-
         let mut present_semaphores = Vec::new();
-        for _ in 0..Self::FRAMES_IN_FLIGHT {
-            let present_semaphore = BinarySemaphore::new(device.clone())?;
-            present_semaphores.push(present_semaphore);
-        }
-
         let mut render_semaphores = Vec::new();
         for _ in 0..Self::FRAMES_IN_FLIGHT {
+            let command_buffer = CommandBuffer::new(device.clone(), &command_pool)?;
+            let present_semaphore = BinarySemaphore::new(device.clone())?;
             let render_semaphore = BinarySemaphore::new(device.clone())?;
+
+            command_buffers.push(command_buffer);
+            present_semaphores.push(present_semaphore);
             render_semaphores.push(render_semaphore);
         }
 
@@ -133,13 +128,7 @@ impl Renderer {
             .min_depth(0.0)
             .max_depth(1.0);
 
-        unsafe {
-            self.device.handle().cmd_set_viewport(
-                *self.command_buffers[side as usize].handle(),
-                0,
-                &[*viewport],
-            );
-        }
+        self.command_buffers[side as usize].set_viewport(0, &[*viewport]);
 
         let offset = vk::Offset2D::builder().x(0).y(0);
 
@@ -147,13 +136,7 @@ impl Renderer {
             .offset(*offset)
             .extent(*swapchain.extent());
 
-        unsafe {
-            self.device.handle().cmd_set_scissor(
-                *self.command_buffers[side as usize].handle(),
-                0,
-                &[*scissor],
-            );
-        }
+        self.command_buffers[side as usize].set_scissor(0, &[*scissor]);
 
         Ok(())
     }
@@ -207,11 +190,7 @@ impl Renderer {
     pub(crate) fn draw(&self) {
         let side = self.current_frame_id % 2;
 
-        unsafe {
-            self.device
-                .handle()
-                .cmd_draw(*self.command_buffers[side as usize].handle(), 3, 1, 0, 0)
-        }
+        self.command_buffers[side as usize].draw(3, 1, 0, 0);
     }
 
     pub(crate) fn resize(

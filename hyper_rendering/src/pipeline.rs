@@ -290,11 +290,7 @@ impl Pipeline {
             .buffer_memory_barriers(&[])
             .image_memory_barriers(&image_memory_barriers);
 
-        unsafe {
-            self.device
-                .handle()
-                .cmd_pipeline_barrier2(*command_buffer.handle(), &dependency_info);
-        }
+        command_buffer.pipeline_barrier2(*dependency_info);
 
         let render_area_extent = swapchain.extent();
         let render_area_offset = vk::Offset2D::builder().x(0).y(0);
@@ -316,19 +312,11 @@ impl Pipeline {
             .layer_count(1)
             .color_attachments(color_attachments);
 
-        unsafe {
-            self.device
-                .handle()
-                .cmd_begin_rendering(*command_buffer.handle(), &rendering_info);
-        }
+        command_buffer.begin_rendering(*rendering_info);
     }
 
     pub(crate) fn end_rendering(&self, command_buffer: &CommandBuffer, image: &vk::Image) {
-        unsafe {
-            self.device
-                .handle()
-                .cmd_end_rendering(*command_buffer.handle());
-        }
+        command_buffer.end_rendering();
 
         let subresource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -356,21 +344,15 @@ impl Pipeline {
             .buffer_memory_barriers(&[])
             .image_memory_barriers(&image_memory_barriers);
 
-        unsafe {
-            self.device
-                .handle()
-                .cmd_pipeline_barrier2(*command_buffer.handle(), &dependency_info);
-        }
+        command_buffer.pipeline_barrier2(*dependency_info);
     }
 
     pub(crate) fn bind(&self, command_buffer: &CommandBuffer) {
-        unsafe {
-            self.device.handle().cmd_bind_pipeline(
-                *command_buffer.handle(),
-                vk::PipelineBindPoint::GRAPHICS,
-                self.handle,
-            )
-        }
+        command_buffer.bind_pipeline(vk::PipelineBindPoint::GRAPHICS, self);
+    }
+
+    pub(crate) fn handle(&self) -> &vk::Pipeline {
+        &self.handle
     }
 }
 
