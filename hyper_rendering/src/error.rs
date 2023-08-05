@@ -30,6 +30,9 @@ pub enum CreationError {
     #[error("Failed to create c-string")]
     Utf8CString(#[from] Utf8Error),
 
+    #[error("Failed to create the vulkan allocator")]
+    VulkanAllocator(#[from] gpu_allocator::AllocationError),
+
     #[error("Failed to allocate vulkan {1}")]
     VulkanAllocation(#[source] vk::Result, &'static str),
 
@@ -71,4 +74,7 @@ pub enum RuntimeError {
 
     #[error("Faile to wait for semaphore")]
     WaitSemaphore(#[source] vk::Result),
+
+    #[error("Failed to allocate memory")]
+    VulkanAllocation(#[from] gpu_allocator::AllocationError),
 }

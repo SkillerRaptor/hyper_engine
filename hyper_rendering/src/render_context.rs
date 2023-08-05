@@ -5,6 +5,7 @@
  */
 
 use crate::{
+    allocator::Allocator,
     descriptor_pool::DescriptorPool,
     device::Device,
     error::{CreationError, RuntimeError},
@@ -18,13 +19,14 @@ use crate::{
 use hyper_platform::window::Window;
 
 use ash::Entry;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 pub struct RenderContext {
     renderer: Renderer,
     pipeline: Pipeline,
     _descriptor_pool: DescriptorPool,
     swapchain: Swapchain,
+    _allocator: Arc<Mutex<Allocator>>,
     device: Arc<Device>,
     surface: Surface,
     instance: Instance,
@@ -41,6 +43,12 @@ impl RenderContext {
         let surface = Surface::new(window, &entry, &instance)?;
         let device = Arc::new(Device::new(&instance, &surface)?);
 
+        let allocator = Arc::new(Mutex::new(Allocator::new(
+            validation_layers_requested,
+            &instance,
+            device.clone(),
+        )?));
+
         let descriptor_pool = DescriptorPool::new(&instance, device.clone())?;
 
         let swapchain = Swapchain::new(window, &instance, &surface, device.clone())?;
@@ -53,6 +61,7 @@ impl RenderContext {
             pipeline,
             _descriptor_pool: descriptor_pool,
             swapchain,
+            _allocator: allocator,
             device,
             surface,
             instance,

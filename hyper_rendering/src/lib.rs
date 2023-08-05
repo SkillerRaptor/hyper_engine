@@ -7,6 +7,7 @@
 pub mod error;
 pub mod render_context;
 
+pub(crate) mod allocator;
 pub(crate) mod binary_semaphore;
 pub(crate) mod command_buffer;
 pub(crate) mod command_pool;
