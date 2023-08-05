@@ -37,10 +37,13 @@ impl RenderContext {
 
         let entry = unsafe { Entry::load() }?;
         let instance = Instance::new(window, validation_layers_requested, &entry)?;
+
         let surface = Surface::new(window, &entry, &instance)?;
         let device = Arc::new(Device::new(&instance, &surface)?);
-        let swapchain = Swapchain::new(window, &instance, &surface, device.clone())?;
+
         let descriptor_pool = DescriptorPool::new(&instance, device.clone())?;
+
+        let swapchain = Swapchain::new(window, &instance, &surface, device.clone())?;
         let pipeline = Pipeline::new(device.clone(), &swapchain, &descriptor_pool)?;
 
         let renderer = Renderer::new(&instance, &surface, device.clone())?;

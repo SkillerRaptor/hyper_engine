@@ -93,7 +93,7 @@ impl DescriptorPool {
             _ => unreachable!(),
         };
 
-        MAX_DESCRIPTOR_COUNT.clamp(MAX_DESCRIPTOR_COUNT, limit)
+        limit.clamp(MAX_DESCRIPTOR_COUNT, limit)
     }
 
     fn create_descriptor_set_layouts(

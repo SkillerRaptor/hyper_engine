@@ -17,8 +17,9 @@ use crate::{
     timeline_semaphore::TimelineSemaphore,
 };
 
-use ash::vk;
 use hyper_platform::window::Window;
+
+use ash::vk;
 use std::sync::Arc;
 
 pub(crate) struct Renderer {
