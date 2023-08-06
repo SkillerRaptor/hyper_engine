@@ -5,7 +5,7 @@
  */
 
 use crate::{
-    command_buffer::CommandBuffer, descriptor_pool::DescriptorPool, device::Device,
+    command_buffer::CommandBuffer, descriptor_manager::DescriptorManager, device::Device,
     error::CreationError, swapchain::Swapchain,
 };
 
@@ -52,10 +52,10 @@ pub(crate) struct Pipeline {
 impl Pipeline {
     pub(crate) fn new(
         device: Arc<Device>,
+        descriptor_manager: &DescriptorManager,
         swapchain: &Swapchain,
-        descriptor_pool: &DescriptorPool,
     ) -> Result<Self, CreationError> {
-        let layout = Self::create_graphics_pipeline_layout(&device, descriptor_pool)?;
+        let layout = Self::create_graphics_pipeline_layout(&device, descriptor_manager)?;
         let handle = Self::create_graphics_pipeline(&device, swapchain, &layout)?;
 
         Ok(Self {
@@ -68,7 +68,7 @@ impl Pipeline {
 
     fn create_graphics_pipeline_layout(
         device: &Device,
-        descriptor_pool: &DescriptorPool,
+        descriptor_manager: &DescriptorManager,
     ) -> Result<vk::PipelineLayout, CreationError> {
         let push_constant_size = mem::size_of::<BindingsOffset>() as u32;
 
@@ -80,7 +80,7 @@ impl Pipeline {
         let push_constant_ranges = [*push_constant_range];
 
         let create_info = vk::PipelineLayoutCreateInfo::builder()
-            .set_layouts(descriptor_pool.layouts())
+            .set_layouts(descriptor_manager.descriptor_pool().layouts())
             .push_constant_ranges(&push_constant_ranges);
 
         let handle = unsafe {

@@ -6,7 +6,7 @@
 
 use crate::{
     allocator::Allocator,
-    descriptor_pool::DescriptorPool,
+    descriptor_manager::DescriptorManager,
     device::Device,
     error::{CreationError, RuntimeError},
     instance::Instance,
@@ -24,7 +24,6 @@ use std::sync::{Arc, Mutex};
 pub struct RenderContext {
     renderer: Renderer,
     pipeline: Pipeline,
-    _descriptor_pool: DescriptorPool,
     swapchain: Swapchain,
     _allocator: Arc<Mutex<Allocator>>,
     device: Arc<Device>,
@@ -49,17 +48,16 @@ impl RenderContext {
             device.clone(),
         )?));
 
-        let descriptor_pool = DescriptorPool::new(&instance, device.clone())?;
+        let descriptor_manager = DescriptorManager::new(&instance, device.clone())?;
 
         let swapchain = Swapchain::new(window, &instance, &surface, device.clone())?;
-        let pipeline = Pipeline::new(device.clone(), &swapchain, &descriptor_pool)?;
+        let pipeline = Pipeline::new(device.clone(), &descriptor_manager, &swapchain)?;
 
         let renderer = Renderer::new(&instance, &surface, device.clone())?;
 
         Ok(Self {
             renderer,
             pipeline,
-            _descriptor_pool: descriptor_pool,
             swapchain,
             _allocator: allocator,
             device,

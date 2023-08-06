@@ -104,6 +104,10 @@ impl Buffer {
 
         Ok(())
     }
+
+    pub(crate) fn handle(&self) -> &vk::Buffer {
+        &self.handle
+    }
 }
 
 impl Drop for Buffer {

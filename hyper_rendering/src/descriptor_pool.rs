@@ -7,11 +7,14 @@
 use crate::{device::Device, error::CreationError, instance::Instance};
 
 use ash::vk;
+use smallvec::SmallVec;
 use std::sync::Arc;
 
 pub(crate) struct DescriptorPool {
-    layouts: Vec<vk::DescriptorSetLayout>,
+    layouts: SmallVec<[vk::DescriptorSetLayout; 4]>,
+    limits: SmallVec<[u32; 4]>,
     handle: vk::DescriptorPool,
+
     device: Arc<Device>,
 }
 
@@ -25,11 +28,14 @@ impl DescriptorPool {
 
     pub(crate) fn new(instance: &Instance, device: Arc<Device>) -> Result<Self, CreationError> {
         let handle = Self::create_descriptor_pool(instance, &device)?;
-        let layouts = Self::create_descriptor_set_layouts(instance, &device)?;
+        let limits = Self::find_limits(instance, &device);
+        let layouts = Self::create_descriptor_set_layouts(&device, &limits)?;
 
         Ok(Self {
+            limits,
             layouts,
             handle,
+
             device,
         })
     }
@@ -100,11 +106,8 @@ impl DescriptorPool {
         }
     }
 
-    fn create_descriptor_set_layouts(
-        instance: &Instance,
-        device: &Device,
-    ) -> Result<Vec<vk::DescriptorSetLayout>, CreationError> {
-        let mut layouts = Vec::new();
+    fn find_limits(instance: &Instance, device: &Device) -> SmallVec<[u32; 4]> {
+        let mut limits = SmallVec::new();
 
         for descriptor_type in Self::DESCRIPTOR_TYPES {
             let properties = unsafe {
@@ -114,11 +117,23 @@ impl DescriptorPool {
             };
 
             let count = Self::find_descriptor_type_limit(&descriptor_type, &properties.limits);
+            limits.push(count);
+        }
 
+        limits
+    }
+
+    fn create_descriptor_set_layouts(
+        device: &Device,
+        limits: &[u32],
+    ) -> Result<SmallVec<[vk::DescriptorSetLayout; 4]>, CreationError> {
+        let mut layouts = SmallVec::new();
+
+        for (i, descriptor_type) in Self::DESCRIPTOR_TYPES.iter().enumerate() {
             let descriptor_set_layout_binding = vk::DescriptorSetLayoutBinding::builder()
                 .binding(0)
-                .descriptor_type(descriptor_type)
-                .descriptor_count(count)
+                .descriptor_type(*descriptor_type)
+                .descriptor_count(limits[i])
                 .stage_flags(vk::ShaderStageFlags::ALL);
 
             let descriptor_set_layout_bindings = [*descriptor_set_layout_binding];
@@ -152,6 +167,14 @@ impl DescriptorPool {
 
     pub(crate) fn layouts(&self) -> &[vk::DescriptorSetLayout] {
         &self.layouts
+    }
+
+    pub(crate) fn limits(&self) -> &[u32] {
+        &self.limits
+    }
+
+    pub(crate) fn handle(&self) -> &vk::DescriptorPool {
+        &self.handle
     }
 }
 
