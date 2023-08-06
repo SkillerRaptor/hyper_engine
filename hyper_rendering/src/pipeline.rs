@@ -20,11 +20,22 @@ use std::{
 };
 
 #[repr(C)]
-struct BindingsOffset {
+pub(crate) struct BindingsOffset {
     bindings_offset: u32,
     unused_0: u32,
     unused_1: u32,
     unused_2: u32,
+}
+
+impl BindingsOffset {
+    pub(crate) fn new(bindings_offset: u32) -> Self {
+        Self {
+            bindings_offset,
+            unused_0: 0,
+            unused_1: 0,
+            unused_2: 0,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -98,9 +109,8 @@ impl Pipeline {
         swapchain: &Swapchain,
         pipeline_layout: &vk::PipelineLayout,
     ) -> Result<vk::Pipeline, CreationError> {
-        let vertex_shader_code = Self::parse_shader("./assets/shaders/compiled/triangle_vert.spv")?;
-        let fragment_shader_code =
-            Self::parse_shader("./assets/shaders/compiled/triangle_frag.spv")?;
+        let vertex_shader_code = Self::parse_shader("./assets/shaders/compiled/default_vs.spv")?;
+        let fragment_shader_code = Self::parse_shader("./assets/shaders/compiled/default_ps.spv")?;
 
         let vertex_shader_module =
             Self::create_shader_module(device, ShaderType::Vertex, &vertex_shader_code)?;
@@ -353,6 +363,10 @@ impl Pipeline {
 
     pub(crate) fn handle(&self) -> &vk::Pipeline {
         &self.handle
+    }
+
+    pub(crate) fn layout(&self) -> &vk::PipelineLayout {
+        &self.layout
     }
 }
 

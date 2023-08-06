@@ -54,7 +54,7 @@ impl DescriptorManager {
         })
     }
 
-    pub(crate) fn allocate_buffer_handle(&mut self, buffer: Buffer) -> ResourceHandle {
+    pub(crate) fn allocate_buffer_handle(&mut self, buffer: &Buffer) -> ResourceHandle {
         let handle = self.fetch_handle(ResourceTag::StorageBuffer);
 
         let buffer_info = vk::DescriptorBufferInfo::builder()
@@ -100,5 +100,9 @@ impl DescriptorManager {
 
     pub(crate) fn descriptor_pool(&self) -> &DescriptorPool {
         &self.descriptor_pool
+    }
+
+    pub(crate) fn descriptor_sets(&self) -> &[DescriptorSet] {
+        &self.descriptor_sets
     }
 }

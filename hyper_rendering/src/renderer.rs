@@ -5,13 +5,16 @@
  */
 
 use crate::{
+    allocator::Allocator,
     binary_semaphore::BinarySemaphore,
+    buffer::Buffer,
     command_buffer::CommandBuffer,
     command_pool::CommandPool,
+    descriptor_manager::DescriptorManager,
     device::Device,
     error::{CreationError, RuntimeError},
     instance::Instance,
-    pipeline::Pipeline,
+    pipeline::{BindingsOffset, Pipeline},
     surface::Surface,
     swapchain::Swapchain,
     timeline_semaphore::TimelineSemaphore,
@@ -20,9 +23,31 @@ use crate::{
 use hyper_platform::window::Window;
 
 use ash::vk;
-use std::sync::Arc;
+use std::{
+    mem,
+    sync::{Arc, Mutex},
+};
+
+// NOTE: Temporary
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+struct Bindings {
+    vertices_offset: u32,
+    transforms_offset: u32,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+struct Vertex {
+    position: nalgebra_glm::Vec3,
+    color: nalgebra_glm::Vec3,
+}
 
 pub(crate) struct Renderer {
+    _transform_buffer: Buffer,
+    _vertex_buffer: Buffer,
+    _bindings_buffer: Buffer,
+
     current_frame_id: u64,
     swapchain_image_index: u32,
 
@@ -44,6 +69,8 @@ impl Renderer {
         instance: &Instance,
         surface: &Surface,
         device: Arc<Device>,
+        allocator: Arc<Mutex<Allocator>>,
+        descriptor_manager: &mut DescriptorManager,
     ) -> Result<Self, CreationError> {
         let command_pool = CommandPool::new(instance, surface, device.clone())?;
 
@@ -62,7 +89,91 @@ impl Renderer {
 
         let submit_semaphore = TimelineSemaphore::new(device.clone())?;
 
+        ////////////////////////////////////////////////////////////////////////
+
+        let bindings_buffer = Buffer::new(
+            device.clone(),
+            allocator.clone(),
+            mem::size_of::<Bindings>(),
+            vk::BufferUsageFlags::STORAGE_BUFFER,
+        )?;
+
+        let bindings = Bindings {
+            vertices_offset: 1,
+            transforms_offset: 2,
+        };
+        bindings_buffer.set_data(&[bindings]).map_err(|error| {
+            CreationError::RuntimeError(Box::new(error), "set data for bindings buffer")
+        })?;
+
+        let _ = descriptor_manager.allocate_buffer_handle(&bindings_buffer);
+
+        ////////////////////////////////////////////////////////////////////////
+
+        let vertex_buffer = Buffer::new(
+            device.clone(),
+            allocator.clone(),
+            mem::size_of::<Vertex>() * 3,
+            vk::BufferUsageFlags::STORAGE_BUFFER,
+        )?;
+
+        let triangle_vertices = vec![
+            Vertex {
+                position: nalgebra_glm::vec3(1.0, 1.0, 0.5),
+                color: nalgebra_glm::vec3(1.0, 0.0, 0.0),
+            },
+            Vertex {
+                position: nalgebra_glm::vec3(-1.0, 1.0, 0.5),
+                color: nalgebra_glm::vec3(0.0, 1.0, 0.0),
+            },
+            Vertex {
+                position: nalgebra_glm::vec3(0.0, -1.0, 0.5),
+                color: nalgebra_glm::vec3(0.0, 0.0, 1.0),
+            },
+        ];
+        vertex_buffer
+            .set_data(&triangle_vertices)
+            .map_err(|error| {
+                CreationError::RuntimeError(Box::new(error), "set data for vertex buffer")
+            })?;
+
+        let _ = descriptor_manager.allocate_buffer_handle(&vertex_buffer);
+
+        ////////////////////////////////////////////////////////////////////////
+
+        let transform_buffer = Buffer::new(
+            device.clone(),
+            allocator.clone(),
+            mem::size_of::<nalgebra_glm::Mat4>(),
+            vk::BufferUsageFlags::STORAGE_BUFFER,
+        )?;
+
+        let camera_position = nalgebra_glm::vec3(0.0, 0.0, -2.0);
+
+        let view_matrix = nalgebra_glm::translate(
+            &nalgebra_glm::mat4(
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            ),
+            &camera_position,
+        );
+
+        let projection_matrix =
+            nalgebra_glm::perspective(f32::to_radians(90.0), 1280.0 / 720.0, 0.1, 200.0);
+
+        let transform = projection_matrix * view_matrix;
+        transform_buffer.set_data(&[transform]).map_err(|error| {
+            CreationError::RuntimeError(Box::new(error), "set data for transform buffer")
+        })?;
+
+        let _ = descriptor_manager.allocate_buffer_handle(&transform_buffer);
+
+        ////////////////////////////////////////////////////////////////////////
+
         Ok(Self {
+            _transform_buffer: transform_buffer,
+            _vertex_buffer: vertex_buffer,
+            _bindings_buffer: bindings_buffer,
+
             current_frame_id: 0,
             swapchain_image_index: 0,
 
@@ -84,6 +195,7 @@ impl Renderer {
         instance: &Instance,
         surface: &Surface,
         frame_id: u64,
+        descriptor_manager: &DescriptorManager,
         swapchain: &mut Swapchain,
         pipeline: &Pipeline,
     ) -> Result<(), RuntimeError> {
@@ -120,6 +232,19 @@ impl Renderer {
         );
 
         pipeline.bind(&self.command_buffers[side as usize]);
+
+        let descriptor_sets = descriptor_manager
+            .descriptor_sets()
+            .iter()
+            .map(|descriptor_set| *descriptor_set.handle())
+            .collect::<Vec<_>>();
+        self.command_buffers[side as usize].bind_descriptor_sets(
+            vk::PipelineBindPoint::GRAPHICS,
+            pipeline,
+            0,
+            &descriptor_sets,
+            &[],
+        );
 
         let viewport = vk::Viewport::builder()
             .x(0.0)
@@ -188,8 +313,20 @@ impl Renderer {
         Ok(())
     }
 
-    pub(crate) fn draw(&self) {
+    pub(crate) fn draw(&self, pipeline: &Pipeline) {
+        // TODO: Draw scene and not a triangle
+
         let side = self.current_frame_id % 2;
+
+        // TODO: Change hardcoded binding offset
+        let bindings_offset = BindingsOffset::new(0);
+
+        self.command_buffers[side as usize].push_constants(
+            pipeline,
+            vk::ShaderStageFlags::ALL,
+            0,
+            &bindings_offset,
+        );
 
         self.command_buffers[side as usize].draw(3, 1, 0, 0);
     }

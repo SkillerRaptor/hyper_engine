@@ -25,10 +25,10 @@ impl Buffer {
     pub(crate) fn new(
         device: Arc<Device>,
         allocator: Arc<Mutex<Allocator>>,
-        allocation_size: u64,
+        allocation_size: usize,
         usage: vk::BufferUsageFlags,
     ) -> Result<Self, CreationError> {
-        let handle = Self::create_buffer(&device, allocation_size, usage)?;
+        let handle = Self::create_buffer(&device, allocation_size as u64, usage)?;
 
         let allocation = Self::allocate_memory(&device, &allocator, &handle)?;
 

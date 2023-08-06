@@ -12,7 +12,7 @@ use crate::{
 };
 
 use ash::vk;
-use std::sync::Arc;
+use std::{mem, slice, sync::Arc};
 
 pub(crate) struct CommandBuffer {
     handle: vk::CommandBuffer,
@@ -91,7 +91,11 @@ impl CommandBuffer {
         }
     }
 
-    pub fn bind_pipeline(&self, pipeline_bind_point: vk::PipelineBindPoint, pipeline: &Pipeline) {
+    pub(crate) fn bind_pipeline(
+        &self,
+        pipeline_bind_point: vk::PipelineBindPoint,
+        pipeline: &Pipeline,
+    ) {
         unsafe {
             self.device.handle().cmd_bind_pipeline(
                 self.handle,
@@ -100,7 +104,8 @@ impl CommandBuffer {
             );
         }
     }
-    pub fn pipeline_barrier2(&self, dependency_info: vk::DependencyInfo) {
+
+    pub(crate) fn pipeline_barrier2(&self, dependency_info: vk::DependencyInfo) {
         unsafe {
             self.device
                 .handle()
@@ -108,7 +113,7 @@ impl CommandBuffer {
         }
     }
 
-    pub fn set_viewport(&self, first_viewport: u32, viewports: &[vk::Viewport]) {
+    pub(crate) fn set_viewport(&self, first_viewport: u32, viewports: &[vk::Viewport]) {
         unsafe {
             self.device
                 .handle()
@@ -116,7 +121,7 @@ impl CommandBuffer {
         }
     }
 
-    pub fn set_scissor(&self, first_scissor: u32, scissors: &[vk::Rect2D]) {
+    pub(crate) fn set_scissor(&self, first_scissor: u32, scissors: &[vk::Rect2D]) {
         unsafe {
             self.device
                 .handle()
@@ -124,7 +129,45 @@ impl CommandBuffer {
         }
     }
 
-    pub fn draw(
+    pub(crate) fn bind_descriptor_sets(
+        &self,
+        pipeline_bind_point: vk::PipelineBindPoint,
+        pipeline: &Pipeline,
+        first_set: u32,
+        descriptor_sets: &[vk::DescriptorSet],
+        dynamic_offsets: &[u32],
+    ) {
+        unsafe {
+            self.device.handle().cmd_bind_descriptor_sets(
+                self.handle,
+                pipeline_bind_point,
+                *pipeline.layout(),
+                first_set,
+                descriptor_sets,
+                dynamic_offsets,
+            );
+        }
+    }
+
+    pub(crate) fn push_constants<T>(
+        &self,
+        pipeline: &Pipeline,
+        stage_flags: vk::ShaderStageFlags,
+        offset: u32,
+        constants: &T,
+    ) {
+        unsafe {
+            self.device.handle().cmd_push_constants(
+                self.handle,
+                *pipeline.layout(),
+                stage_flags,
+                offset,
+                slice::from_raw_parts(constants as *const T as *const u8, mem::size_of::<T>()),
+            );
+        }
+    }
+
+    pub(crate) fn draw(
         &self,
         vertex_count: u32,
         instance_count: u32,

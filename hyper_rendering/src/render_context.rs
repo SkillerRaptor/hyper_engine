@@ -25,6 +25,7 @@ pub struct RenderContext {
     renderer: Renderer,
     pipeline: Pipeline,
     swapchain: Swapchain,
+    descriptor_manager: DescriptorManager,
     _allocator: Arc<Mutex<Allocator>>,
     device: Arc<Device>,
     surface: Surface,
@@ -48,17 +49,24 @@ impl RenderContext {
             device.clone(),
         )?));
 
-        let descriptor_manager = DescriptorManager::new(&instance, device.clone())?;
+        let mut descriptor_manager = DescriptorManager::new(&instance, device.clone())?;
 
         let swapchain = Swapchain::new(window, &instance, &surface, device.clone())?;
         let pipeline = Pipeline::new(device.clone(), &descriptor_manager, &swapchain)?;
 
-        let renderer = Renderer::new(&instance, &surface, device.clone())?;
+        let renderer = Renderer::new(
+            &instance,
+            &surface,
+            device.clone(),
+            allocator.clone(),
+            &mut descriptor_manager,
+        )?;
 
         Ok(Self {
             renderer,
             pipeline,
             swapchain,
+            descriptor_manager,
             _allocator: allocator,
             device,
             surface,
@@ -73,6 +81,7 @@ impl RenderContext {
             &self.instance,
             &self.surface,
             frame_id,
+            &self.descriptor_manager,
             &mut self.swapchain,
             &self.pipeline,
         )?;
@@ -94,7 +103,7 @@ impl RenderContext {
     }
 
     pub fn draw(&self) {
-        self.renderer.draw();
+        self.renderer.draw(&self.pipeline);
     }
 
     pub fn resize(&mut self, window: &Window) -> Result<(), RuntimeError> {
