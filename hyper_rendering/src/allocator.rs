@@ -24,9 +24,7 @@ pub enum MemoryLocation {
 }
 
 #[derive(Debug)]
-pub(crate) struct Allocation {
-    handle: vulkan::Allocation,
-}
+pub(crate) struct Allocation(pub(crate) vulkan::Allocation);
 
 pub(crate) struct Allocator {
     handle: vulkan::Allocator,
@@ -82,11 +80,11 @@ impl Allocator {
 
         let allocation = self.handle.allocate(&allocation_info)?;
 
-        Ok(Allocation { handle: allocation })
+        Ok(Allocation(allocation))
     }
 
     pub(crate) fn free(&mut self, allocation: Allocation) -> Result<(), RuntimeError> {
-        self.handle.free(allocation.handle)?;
+        self.handle.free(allocation.0)?;
 
         Ok(())
     }

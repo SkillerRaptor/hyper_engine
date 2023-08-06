@@ -21,6 +21,9 @@ pub enum CreationError {
     #[error("Failed to read file {1}")]
     ReadFailure(#[source] io::Error, String),
 
+    #[error("Failed to {1}")]
+    RuntimeError(#[source] Box<RuntimeError>, &'static str),
+
     #[error("Failed to read unaligned vulkan {0} shader")]
     Unaligned(ShaderType),
 
@@ -35,6 +38,9 @@ pub enum CreationError {
 
     #[error("Failed to allocate vulkan {1}")]
     VulkanAllocation(#[source] vk::Result, &'static str),
+
+    #[error("Failed to bind vulkan {1}")]
+    VulkanBind(#[source] vk::Result, &'static str),
 
     #[error("Failed to create vulkan {1}")]
     VulkanCreation(#[source] vk::Result, &'static str),
@@ -51,6 +57,9 @@ pub enum CreationError {
 
 #[derive(Debug, Error)]
 pub enum RuntimeError {
+    #[error("Failed to set data for buffer")]
+    BufferFailure,
+
     #[error("Failed to recreate {1}")]
     CreationError(#[source] CreationError, &'static str),
 
