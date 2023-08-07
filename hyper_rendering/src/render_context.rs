@@ -56,7 +56,13 @@ impl RenderContext {
             device.clone(),
         )?));
 
-        let swapchain = Swapchain::new(window, &instance, &surface, device.clone())?;
+        let swapchain = Swapchain::new(
+            window,
+            &instance,
+            &surface,
+            device.clone(),
+            allocator.clone(),
+        )?;
 
         let renderer = Renderer::new(
             &instance,

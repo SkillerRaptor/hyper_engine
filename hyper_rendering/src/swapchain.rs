@@ -5,6 +5,7 @@
  */
 
 use crate::{
+    allocator::{Allocation, Allocator, MemoryLocation},
     binary_semaphore::BinarySemaphore,
     device::{
         queue_family_indices::QueueFamilyIndices,
@@ -18,9 +19,15 @@ use crate::{
 use hyper_platform::window::Window;
 
 use ash::{extensions::khr, vk};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 pub(crate) struct Swapchain {
+    // TODO: Abstract into image struct
+    depth_image_allocation: Option<Allocation>,
+    depth_format: vk::Format,
+    depth_image_view: vk::ImageView,
+    depth_image: vk::Image,
+
     image_views: Vec<vk::ImageView>,
     images: Vec<vk::Image>,
 
@@ -30,6 +37,7 @@ pub(crate) struct Swapchain {
     handle: vk::SwapchainKHR,
     loader: khr::Swapchain,
 
+    allocator: Arc<Mutex<Allocator>>,
     device: Arc<Device>,
 }
 
@@ -39,6 +47,7 @@ impl Swapchain {
         instance: &Instance,
         surface: &Surface,
         device: Arc<Device>,
+        allocator: Arc<Mutex<Allocator>>,
     ) -> CreationResult<Self> {
         let swapchain_support_details =
             SwapchainSupportDetails::new(surface, device.physical_device())?;
@@ -130,7 +139,15 @@ impl Swapchain {
             image_views.push(handle);
         }
 
+        let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
+            Self::create_depth_image(window, &device, &allocator)?;
+
         Ok(Self {
+            depth_image_allocation: Some(depth_image_allocation),
+            depth_format,
+            depth_image_view,
+            depth_image,
+
             image_views,
             images,
 
@@ -140,6 +157,7 @@ impl Swapchain {
             handle,
             loader,
 
+            allocator,
             device,
         })
     }
@@ -180,6 +198,81 @@ impl Swapchain {
             .iter()
             .find(|&present_mode| *present_mode == vk::PresentModeKHR::MAILBOX)
             .unwrap_or(&vk::PresentModeKHR::FIFO)
+    }
+
+    fn create_depth_image(
+        window: &Window,
+        device: &Device,
+        allocator: &Mutex<Allocator>,
+    ) -> CreationResult<(vk::Image, vk::ImageView, vk::Format, Allocation)> {
+        let framebuffer_size = window.framebuffer_size();
+
+        let extent = vk::Extent3D::builder()
+            .width(framebuffer_size.0 as u32)
+            .height(framebuffer_size.1 as u32)
+            .depth(1);
+
+        let format = vk::Format::D32_SFLOAT;
+
+        let image_create_info = vk::ImageCreateInfo::builder()
+            .image_type(vk::ImageType::TYPE_2D)
+            .format(format)
+            .extent(*extent)
+            .mip_levels(1)
+            .array_layers(1)
+            .samples(vk::SampleCountFlags::TYPE_1)
+            .tiling(vk::ImageTiling::OPTIMAL)
+            .usage(vk::ImageUsageFlags::DEPTH_STENCIL_ATTACHMENT)
+            .sharing_mode(vk::SharingMode::EXCLUSIVE)
+            .queue_family_indices(&[])
+            .initial_layout(vk::ImageLayout::UNDEFINED);
+
+        let image = unsafe {
+            device
+                .handle()
+                .create_image(&image_create_info, None)
+                .map_err(|error| CreationError::VulkanCreation(error, "depth image"))?
+        };
+
+        let memory_requirements = unsafe { device.handle().get_image_memory_requirements(image) };
+
+        let allocation = allocator
+            .lock()
+            .unwrap()
+            .allocate(MemoryLocation::GpuOnly, memory_requirements)
+            .map_err(|error| {
+                CreationError::RuntimeError(Box::new(error), "allocate memory for depth image")
+            })?;
+
+        unsafe {
+            device
+                .handle()
+                .bind_image_memory(image, allocation.0.memory(), allocation.0.offset())
+                .map_err(|error| CreationError::VulkanBind(error, "depth image"))?;
+        }
+
+        let subsource_range = vk::ImageSubresourceRange::builder()
+            .aspect_mask(vk::ImageAspectFlags::DEPTH)
+            .base_mip_level(0)
+            .level_count(1)
+            .base_array_layer(0)
+            .layer_count(1);
+
+        let image_view_create_info = vk::ImageViewCreateInfo::builder()
+            .image(image)
+            .view_type(vk::ImageViewType::TYPE_2D)
+            .format(format)
+            .components(vk::ComponentMapping::default())
+            .subresource_range(*subsource_range);
+
+        let image_view = unsafe {
+            device
+                .handle()
+                .create_image_view(&image_view_create_info, None)
+                .map_err(|error| CreationError::VulkanCreation(error, "depth image view"))?
+        };
+
+        Ok((image, image_view, format, allocation))
     }
 
     pub(crate) fn acquire_next_image(
@@ -239,6 +332,7 @@ impl Swapchain {
         Ok(())
     }
 
+    // TODO: Improve this by abstracting into functions and avoid repition
     pub(crate) fn recreate(
         &mut self,
         window: &Window,
@@ -362,17 +456,44 @@ impl Swapchain {
         self.extent = extent;
         self.format = surface_format.format;
 
+        let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
+            Self::create_depth_image(window, &self.device, &self.allocator)
+                .map_err(|error| RuntimeError::CreationError(error, "depth image"))?;
+
+        self.depth_image = depth_image;
+        self.depth_image_view = depth_image_view;
+        self.depth_format = depth_format;
+        self.depth_image_allocation = Some(depth_image_allocation);
+
         Ok(())
     }
 
     fn destroy(&mut self) {
         unsafe {
+            self.device
+                .handle()
+                .destroy_image_view(self.depth_image_view, None);
+            self.allocator
+                .lock()
+                .unwrap()
+                .free(self.depth_image_allocation.take().unwrap())
+                .unwrap();
+            self.device.handle().destroy_image(self.depth_image, None);
+
             for image_view in &self.image_views {
                 self.device.handle().destroy_image_view(*image_view, None);
             }
 
             self.loader.destroy_swapchain(self.handle, None);
         }
+    }
+
+    pub(crate) fn depth_image_format(&self) -> vk::Format {
+        self.depth_format
+    }
+
+    pub(crate) fn depth_image_view(&self) -> vk::ImageView {
+        self.depth_image_view
     }
 
     pub(crate) fn format(&self) -> vk::Format {

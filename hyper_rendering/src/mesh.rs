@@ -99,17 +99,11 @@ impl Mesh {
                     mesh.normals[index + 2],
                     1.0,
                 );
-                let color = Vec4f::new(
-                    mesh.normals[index],
-                    mesh.normals[index + 1],
-                    mesh.normals[index + 2],
-                    1.0,
-                );
 
                 let vertex = Vertex {
                     position,
                     normal,
-                    color,
+                    color: normal,
                 };
 
                 vertices.push(vertex);

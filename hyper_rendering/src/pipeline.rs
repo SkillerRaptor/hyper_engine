@@ -154,6 +154,17 @@ impl Pipeline {
             .alpha_to_coverage_enable(false)
             .alpha_to_one_enable(false);
 
+        let depth_stencil_state_create_info = vk::PipelineDepthStencilStateCreateInfo::builder()
+            .depth_test_enable(true)
+            .depth_write_enable(true)
+            .depth_compare_op(vk::CompareOp::LESS_OR_EQUAL)
+            .depth_bounds_test_enable(false)
+            .stencil_test_enable(false)
+            .front(vk::StencilOpState::default())
+            .back(vk::StencilOpState::default())
+            .min_depth_bounds(0.0)
+            .max_depth_bounds(1.0);
+
         let color_blend_attachment_state = vk::PipelineColorBlendAttachmentState::builder()
             .color_write_mask(vk::ColorComponentFlags::RGBA)
             .blend_enable(false)
@@ -173,8 +184,10 @@ impl Pipeline {
             .blend_constants([0.0; 4]);
 
         let color_attachment_formats = &[swapchain.format()];
+        let depth_attachment_format = swapchain.depth_image_format();
         let mut rendering_create_info = vk::PipelineRenderingCreateInfoKHR::builder()
-            .color_attachment_formats(color_attachment_formats);
+            .color_attachment_formats(color_attachment_formats)
+            .depth_attachment_format(depth_attachment_format);
 
         let create_info = vk::GraphicsPipelineCreateInfo::builder()
             .push_next(&mut rendering_create_info)
@@ -184,6 +197,7 @@ impl Pipeline {
             .viewport_state(&viewport_state_create_info)
             .rasterization_state(&rasterization_state_create_info)
             .multisample_state(&multisample_state_create_info)
+            .depth_stencil_state(&depth_stencil_state_create_info)
             .color_blend_state(&color_blend_state_create_info)
             .dynamic_state(&dynamic_state_create_info)
             .layout(pipeline_layout)
@@ -208,7 +222,8 @@ impl Pipeline {
         command_buffer: &CommandBuffer,
         image: vk::Image,
         image_view: vk::ImageView,
-        clear_value: vk::ClearValue,
+        color_clear: vk::ClearValue,
+        depth_clear: vk::ClearValue,
     ) {
         let subresource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -249,13 +264,22 @@ impl Pipeline {
             .image_layout(vk::ImageLayout::ATTACHMENT_OPTIMAL_KHR)
             .load_op(vk::AttachmentLoadOp::CLEAR)
             .store_op(vk::AttachmentStoreOp::STORE)
-            .clear_value(clear_value);
+            .clear_value(color_clear);
 
-        let color_attachments = &[*color_attachment_info];
+        let color_attachments = [*color_attachment_info];
+
+        let depth_attachment_info = vk::RenderingAttachmentInfoKHR::builder()
+            .image_view(swapchain.depth_image_view())
+            .image_layout(vk::ImageLayout::DEPTH_ATTACHMENT_OPTIMAL)
+            .load_op(vk::AttachmentLoadOp::CLEAR)
+            .store_op(vk::AttachmentStoreOp::STORE)
+            .clear_value(depth_clear);
+
         let rendering_info = vk::RenderingInfoKHR::builder()
             .render_area(*render_area)
             .layer_count(1)
-            .color_attachments(color_attachments);
+            .color_attachments(&color_attachments)
+            .depth_attachment(&depth_attachment_info);
 
         command_buffer.begin_rendering(*rendering_info);
     }

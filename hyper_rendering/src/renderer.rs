@@ -115,7 +115,7 @@ impl Renderer {
             device.clone(),
             allocator.clone(),
             descriptor_manager.clone(),
-            "./assets/models/monkey_flat.obj",
+            "./assets/models/monkey_smooth.obj",
         )?;
 
         ////////////////////////////////////////////////////////////////////////
@@ -239,9 +239,16 @@ impl Renderer {
         self.command_buffers[side as usize].reset()?;
         self.command_buffers[side as usize].begin(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT)?;
 
-        let clear_value = vk::ClearValue {
+        let color_clear = vk::ClearValue {
             color: vk::ClearColorValue {
                 float32: [0.12941, 0.06275, 0.13725, 1.0],
+            },
+        };
+
+        let depth_clear = vk::ClearValue {
+            depth_stencil: vk::ClearDepthStencilValue {
+                depth: 1.0,
+                stencil: 0,
             },
         };
 
@@ -250,7 +257,8 @@ impl Renderer {
             &self.command_buffers[side as usize],
             swapchain.images()[self.swapchain_image_index as usize],
             swapchain.image_views()[self.swapchain_image_index as usize],
-            clear_value,
+            color_clear,
+            depth_clear,
         );
 
         self.default_pipeline
