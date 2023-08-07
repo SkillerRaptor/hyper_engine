@@ -14,7 +14,7 @@ use crate::{
 };
 
 use ash::vk;
-use std::{ffi::CStr, mem, sync::Arc};
+use std::{cell::RefCell, ffi::CStr, mem, rc::Rc, sync::Arc};
 
 #[repr(C)]
 pub(crate) struct BindingsOffset {
@@ -45,12 +45,12 @@ pub(crate) struct Pipeline {
 impl Pipeline {
     pub(crate) fn new(
         device: Arc<Device>,
-        descriptor_manager: &DescriptorManager,
+        descriptor_manager: Rc<RefCell<DescriptorManager>>,
         swapchain: &Swapchain,
         vertex_shader: Shader,
         fragment_shader: Shader,
     ) -> CreationResult<Self> {
-        let layout = Self::create_graphics_pipeline_layout(&device, descriptor_manager)?;
+        let layout = Self::create_graphics_pipeline_layout(&device, &descriptor_manager)?;
         let handle = Self::create_graphics_pipeline(
             &device,
             swapchain,
@@ -69,7 +69,7 @@ impl Pipeline {
 
     fn create_graphics_pipeline_layout(
         device: &Device,
-        descriptor_manager: &DescriptorManager,
+        descriptor_manager: &RefCell<DescriptorManager>,
     ) -> CreationResult<vk::PipelineLayout> {
         let push_constant_size = mem::size_of::<BindingsOffset>() as u32;
 
@@ -80,6 +80,7 @@ impl Pipeline {
 
         let push_constant_ranges = [*push_constant_range];
 
+        let descriptor_manager = descriptor_manager.borrow();
         let create_info = vk::PipelineLayoutCreateInfo::builder()
             .set_layouts(descriptor_manager.descriptor_pool().layouts())
             .push_constant_ranges(&push_constant_ranges);

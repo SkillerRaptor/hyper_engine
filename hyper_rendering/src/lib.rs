@@ -17,6 +17,7 @@ pub(crate) mod descriptor_pool;
 pub(crate) mod descriptor_set;
 pub(crate) mod device;
 pub(crate) mod instance;
+pub(crate) mod mesh;
 pub(crate) mod pipeline;
 pub(crate) mod renderer;
 pub(crate) mod resource_handle;

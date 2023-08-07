@@ -10,9 +10,7 @@ use crate::{
     device::Device,
     error::{CreationResult, RuntimeResult},
     instance::Instance,
-    pipeline::Pipeline,
     renderer::Renderer,
-    shader::Shader,
     surface::Surface,
     swapchain::Swapchain,
 };
@@ -20,13 +18,16 @@ use crate::{
 use hyper_platform::window::Window;
 
 use ash::Entry;
-use std::sync::{Arc, Mutex};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+    sync::{Arc, Mutex},
+};
 
 pub struct RenderContext {
     renderer: Renderer,
-    pipeline: Pipeline,
     swapchain: Swapchain,
-    descriptor_manager: DescriptorManager,
+    _descriptor_manager: Rc<RefCell<DescriptorManager>>,
     _allocator: Arc<Mutex<Allocator>>,
     device: Arc<Device>,
     surface: Surface,
@@ -50,35 +51,26 @@ impl RenderContext {
             device.clone(),
         )?));
 
-        let mut descriptor_manager = DescriptorManager::new(&instance, device.clone())?;
+        let descriptor_manager = Rc::new(RefCell::new(DescriptorManager::new(
+            &instance,
+            device.clone(),
+        )?));
 
         let swapchain = Swapchain::new(window, &instance, &surface, device.clone())?;
-
-        let vertex_shader =
-            Shader::new(device.clone(), "./assets/shaders/compiled/default_vs.spv")?;
-        let fragment_shader =
-            Shader::new(device.clone(), "./assets/shaders/compiled/default_ps.spv")?;
-        let pipeline = Pipeline::new(
-            device.clone(),
-            &descriptor_manager,
-            &swapchain,
-            vertex_shader,
-            fragment_shader,
-        )?;
 
         let renderer = Renderer::new(
             &instance,
             &surface,
             device.clone(),
             allocator.clone(),
-            &mut descriptor_manager,
+            descriptor_manager.clone(),
+            &swapchain,
         )?;
 
         Ok(Self {
             renderer,
-            pipeline,
             swapchain,
-            descriptor_manager,
+            _descriptor_manager: descriptor_manager,
             _allocator: allocator,
             device,
             surface,
@@ -93,16 +85,14 @@ impl RenderContext {
             &self.instance,
             &self.surface,
             frame_id,
-            &self.descriptor_manager,
             &mut self.swapchain,
-            &self.pipeline,
         )?;
 
         Ok(())
     }
 
     pub fn end(&self) -> RuntimeResult<()> {
-        self.renderer.end(&self.swapchain, &self.pipeline)?;
+        self.renderer.end(&self.swapchain)?;
 
         Ok(())
     }
@@ -115,7 +105,7 @@ impl RenderContext {
     }
 
     pub fn draw(&self) {
-        self.renderer.draw(&self.pipeline);
+        self.renderer.draw();
     }
 
     pub fn resize(&mut self, window: &Window) -> RuntimeResult<()> {

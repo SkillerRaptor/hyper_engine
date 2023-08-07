@@ -12,8 +12,9 @@ struct Bindings {
 };
 
 struct Vertex {
-  float3 position;
-  float3 color;
+  float4 position;
+  float4 normal;
+  float4 color;
 };
 
 struct VertexOutput {
@@ -28,8 +29,7 @@ VertexOutput main(uint vertex_id : SV_VertexID) {
   float4x4 transform = bindings.transforms.load<float4x4>(0);
 
   VertexOutput output = (VertexOutput)0;
-  output.position = mul(float4(vertex.position, 1.0), transform);
-  //output.position = float4(vertex.position, 1.0);
-  output.color = float4(vertex.color, 1.0);
+  output.position = mul(transform, float4(vertex.position.xyz, 1.0));
+  output.color = float4(vertex.color.xyz, 1.0);
   return output;
 }

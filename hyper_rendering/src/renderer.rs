@@ -14,18 +14,25 @@ use crate::{
     device::Device,
     error::{CreationError, CreationResult, RuntimeResult},
     instance::Instance,
+    mesh::{Mesh, Vertex},
     pipeline::{BindingsOffset, Pipeline},
+    shader::Shader,
     surface::Surface,
     swapchain::Swapchain,
     timeline_semaphore::TimelineSemaphore,
 };
 
-use hyper_math::{matrix::Mat4x4f, vector::Vec3f};
+use hyper_math::{
+    matrix::Mat4x4f,
+    vector::{Vec3f, Vec4f},
+};
 use hyper_platform::window::Window;
 
 use ash::vk;
 use std::{
+    cell::RefCell,
     mem,
+    rc::Rc,
     sync::{Arc, Mutex},
 };
 
@@ -37,16 +44,11 @@ struct Bindings {
     transforms_offset: u32,
 }
 
-#[repr(C)]
-#[derive(Clone, Copy, Debug)]
-struct Vertex {
-    position: Vec3f,
-    color: Vec3f,
-}
-
 pub(crate) struct Renderer {
+    triangle_mesh: Mesh,
+    triangle_pipeline: Pipeline,
+
     _transform_buffer: Buffer,
-    _vertex_buffer: Buffer,
     _bindings_buffer: Buffer,
 
     current_frame_id: u64,
@@ -60,6 +62,7 @@ pub(crate) struct Renderer {
     command_buffers: Vec<CommandBuffer>,
     _command_pool: CommandPool,
 
+    descriptor_manager: Rc<RefCell<DescriptorManager>>,
     device: Arc<Device>,
 }
 
@@ -71,7 +74,8 @@ impl Renderer {
         surface: &Surface,
         device: Arc<Device>,
         allocator: Arc<Mutex<Allocator>>,
-        descriptor_manager: &mut DescriptorManager,
+        descriptor_manager: Rc<RefCell<DescriptorManager>>,
+        swapchain: &Swapchain,
     ) -> CreationResult<Self> {
         let command_pool = CommandPool::new(instance, surface, device.clone())?;
 
@@ -107,38 +111,48 @@ impl Renderer {
             CreationError::RuntimeError(Box::new(error), "set data for bindings buffer")
         })?;
 
-        let _ = descriptor_manager.allocate_buffer_handle(&bindings_buffer);
+        let _ = descriptor_manager
+            .borrow_mut()
+            .allocate_buffer_handle(&bindings_buffer);
 
         ////////////////////////////////////////////////////////////////////////
 
-        let vertex_buffer = Buffer::new(
+        let vertex_shader =
+            Shader::new(device.clone(), "./assets/shaders/compiled/default_vs.spv")?;
+        let fragment_shader =
+            Shader::new(device.clone(), "./assets/shaders/compiled/default_ps.spv")?;
+        let triangle_pipeline = Pipeline::new(
             device.clone(),
-            allocator.clone(),
-            mem::size_of::<Vertex>() * 3,
-            vk::BufferUsageFlags::STORAGE_BUFFER,
+            descriptor_manager.clone(),
+            swapchain,
+            vertex_shader,
+            fragment_shader,
         )?;
 
         let triangle_vertices = vec![
             Vertex {
-                position: Vec3f::new(1.0, 1.0, 0.5),
-                color: Vec3f::new(1.0, 0.0, 0.0),
+                position: Vec4f::new(1.0, 1.0, 0.5, 1.0),
+                normal: Vec4f::default(),
+                color: Vec4f::new(1.0, 0.0, 0.0, 1.0),
             },
             Vertex {
-                position: Vec3f::new(-1.0, 1.0, 0.5),
-                color: Vec3f::new(0.0, 1.0, 0.0),
+                position: Vec4f::new(-1.0, 1.0, 0.5, 1.0),
+                normal: Vec4f::default(),
+                color: Vec4f::new(0.0, 1.0, 0.0, 1.0),
             },
             Vertex {
-                position: Vec3f::new(0.0, -1.0, 0.5),
-                color: Vec3f::new(0.0, 0.0, 1.0),
+                position: Vec4f::new(0.0, -1.0, 0.5, 1.0),
+                normal: Vec4f::default(),
+                color: Vec4f::new(0.0, 0.0, 1.0, 1.0),
             },
         ];
-        vertex_buffer
-            .set_data(&triangle_vertices)
-            .map_err(|error| {
-                CreationError::RuntimeError(Box::new(error), "set data for vertex buffer")
-            })?;
 
-        let _ = descriptor_manager.allocate_buffer_handle(&vertex_buffer);
+        let triangle_mesh = Mesh::new(
+            device.clone(),
+            allocator.clone(),
+            descriptor_manager.clone(),
+            triangle_vertices,
+        )?;
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -161,13 +175,17 @@ impl Renderer {
             CreationError::RuntimeError(Box::new(error), "set data for transform buffer")
         })?;
 
-        let _ = descriptor_manager.allocate_buffer_handle(&transform_buffer);
+        let _ = descriptor_manager
+            .borrow_mut()
+            .allocate_buffer_handle(&transform_buffer);
 
         ////////////////////////////////////////////////////////////////////////
 
         Ok(Self {
+            triangle_pipeline,
+            triangle_mesh,
+
             _transform_buffer: transform_buffer,
-            _vertex_buffer: vertex_buffer,
             _bindings_buffer: bindings_buffer,
 
             current_frame_id: 0,
@@ -181,6 +199,7 @@ impl Renderer {
             command_buffers,
             _command_pool: command_pool,
 
+            descriptor_manager,
             device,
         })
     }
@@ -192,9 +211,7 @@ impl Renderer {
         instance: &Instance,
         surface: &Surface,
         frame_id: u64,
-        descriptor_manager: &DescriptorManager,
         swapchain: &mut Swapchain,
-        pipeline: &Pipeline,
     ) -> RuntimeResult<()> {
         self.current_frame_id = frame_id;
         self.submit_semaphore.wait_for(frame_id - 1)?;
@@ -220,7 +237,7 @@ impl Renderer {
             },
         };
 
-        pipeline.begin_rendering(
+        self.triangle_pipeline.begin_rendering(
             swapchain,
             &self.command_buffers[side as usize],
             swapchain.images()[self.swapchain_image_index as usize],
@@ -228,16 +245,19 @@ impl Renderer {
             clear_value,
         );
 
-        pipeline.bind(&self.command_buffers[side as usize]);
+        self.triangle_pipeline
+            .bind(&self.command_buffers[side as usize]);
 
-        let descriptor_sets = descriptor_manager
+        let descriptor_sets = self
+            .descriptor_manager
+            .borrow()
             .descriptor_sets()
             .iter()
             .map(|descriptor_set| descriptor_set.handle())
             .collect::<Vec<_>>();
         self.command_buffers[side as usize].bind_descriptor_sets(
             vk::PipelineBindPoint::GRAPHICS,
-            pipeline,
+            &self.triangle_pipeline,
             0,
             &descriptor_sets,
             &[],
@@ -264,10 +284,10 @@ impl Renderer {
         Ok(())
     }
 
-    pub(crate) fn end(&self, swapchain: &Swapchain, pipeline: &Pipeline) -> RuntimeResult<()> {
+    pub(crate) fn end(&self, swapchain: &Swapchain) -> RuntimeResult<()> {
         let side = self.current_frame_id % 2;
 
-        pipeline.end_rendering(
+        self.triangle_pipeline.end_rendering(
             &self.command_buffers[side as usize],
             swapchain.images()[self.swapchain_image_index as usize],
         );
@@ -306,7 +326,7 @@ impl Renderer {
         Ok(())
     }
 
-    pub(crate) fn draw(&self, pipeline: &Pipeline) {
+    pub(crate) fn draw(&self) {
         // TODO: Draw scene and not a triangle
 
         let side = self.current_frame_id % 2;
@@ -315,13 +335,18 @@ impl Renderer {
         let bindings_offset = BindingsOffset::new(0);
 
         self.command_buffers[side as usize].push_constants(
-            pipeline,
+            &self.triangle_pipeline,
             vk::ShaderStageFlags::ALL,
             0,
             &bindings_offset,
         );
 
-        self.command_buffers[side as usize].draw(3, 1, 0, 0);
+        self.command_buffers[side as usize].draw(
+            self.triangle_mesh.vertices().len() as u32,
+            1,
+            0,
+            0,
+        );
     }
 
     pub(crate) fn resize(
