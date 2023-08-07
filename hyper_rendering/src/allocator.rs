@@ -6,7 +6,7 @@
 
 use crate::{
     device::Device,
-    error::{CreationError, RuntimeError},
+    error::{CreationResult, RuntimeResult},
     instance::Instance,
 };
 
@@ -35,7 +35,7 @@ impl Allocator {
         validation_layers_requested: bool,
         instance: &Instance,
         device: Arc<Device>,
-    ) -> Result<Self, CreationError> {
+    ) -> CreationResult<Self> {
         let debug_settings = AllocatorDebugSettings {
             log_memory_information: false,
             log_leaks_on_shutdown: validation_layers_requested,
@@ -62,7 +62,7 @@ impl Allocator {
         &mut self,
         memory_location: MemoryLocation,
         memory_requirements: vk::MemoryRequirements,
-    ) -> Result<Allocation, RuntimeError> {
+    ) -> RuntimeResult<Allocation> {
         let location = match memory_location {
             MemoryLocation::Unknown => gpu_allocator::MemoryLocation::Unknown,
             MemoryLocation::GpuOnly => gpu_allocator::MemoryLocation::GpuOnly,
@@ -83,7 +83,7 @@ impl Allocator {
         Ok(Allocation(allocation))
     }
 
-    pub(crate) fn free(&mut self, allocation: Allocation) -> Result<(), RuntimeError> {
+    pub(crate) fn free(&mut self, allocation: Allocation) -> RuntimeResult<()> {
         self.handle.free(allocation.0)?;
 
         Ok(())

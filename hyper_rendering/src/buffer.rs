@@ -7,7 +7,7 @@
 use crate::{
     allocator::{Allocation, Allocator, MemoryLocation},
     device::Device,
-    error::{CreationError, RuntimeError},
+    error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
 };
 
 use ash::vk;
@@ -27,7 +27,7 @@ impl Buffer {
         allocator: Arc<Mutex<Allocator>>,
         allocation_size: usize,
         usage: vk::BufferUsageFlags,
-    ) -> Result<Self, CreationError> {
+    ) -> CreationResult<Self> {
         let handle = Self::create_buffer(&device, allocation_size as u64, usage)?;
 
         let allocation = Self::allocate_memory(&device, &allocator, handle)?;
@@ -45,7 +45,7 @@ impl Buffer {
         device: &Device,
         allocation_size: u64,
         usage: vk::BufferUsageFlags,
-    ) -> Result<vk::Buffer, CreationError> {
+    ) -> CreationResult<vk::Buffer> {
         let create_info = vk::BufferCreateInfo::builder()
             .size(allocation_size)
             .usage(usage)
@@ -66,7 +66,7 @@ impl Buffer {
         device: &Device,
         allocator: &Mutex<Allocator>,
         handle: vk::Buffer,
-    ) -> Result<Allocation, CreationError> {
+    ) -> CreationResult<Allocation> {
         let memory_requirements = unsafe { device.handle().get_buffer_memory_requirements(handle) };
 
         let allocation = allocator
@@ -87,7 +87,7 @@ impl Buffer {
         Ok(allocation)
     }
 
-    pub fn set_data<T>(&self, data: &[T]) -> Result<(), RuntimeError> {
+    pub fn set_data<T>(&self, data: &[T]) -> RuntimeResult<()> {
         let memory = self
             .allocation
             .as_ref()

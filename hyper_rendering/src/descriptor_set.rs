@@ -4,7 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{descriptor_pool::DescriptorPool, device::Device, error::CreationError};
+use crate::{
+    descriptor_pool::DescriptorPool,
+    device::Device,
+    error::{CreationError, CreationResult},
+};
 
 use ash::vk;
 use std::sync::Arc;
@@ -19,7 +23,7 @@ impl DescriptorSet {
         descriptor_pool: &DescriptorPool,
         layout: vk::DescriptorSetLayout,
         limit: u32,
-    ) -> Result<Self, CreationError> {
+    ) -> CreationResult<Self> {
         let limits = [limit];
 
         let mut count_allocate_info =

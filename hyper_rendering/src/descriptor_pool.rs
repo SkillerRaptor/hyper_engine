@@ -4,7 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{device::Device, error::CreationError, instance::Instance};
+use crate::{
+    device::Device,
+    error::{CreationError, CreationResult},
+    instance::Instance,
+};
 
 use ash::vk;
 use smallvec::SmallVec;
@@ -26,7 +30,7 @@ impl DescriptorPool {
         vk::DescriptorType::SAMPLER,
     ];
 
-    pub(crate) fn new(instance: &Instance, device: Arc<Device>) -> Result<Self, CreationError> {
+    pub(crate) fn new(instance: &Instance, device: Arc<Device>) -> CreationResult<Self> {
         let handle = Self::create_descriptor_pool(instance, &device)?;
         let limits = Self::find_limits(instance, &device);
         let layouts = Self::create_descriptor_set_layouts(&device, &limits)?;
@@ -43,7 +47,7 @@ impl DescriptorPool {
     fn create_descriptor_pool(
         instance: &Instance,
         device: &Device,
-    ) -> Result<vk::DescriptorPool, CreationError> {
+    ) -> CreationResult<vk::DescriptorPool> {
         let pool_sizes = Self::collect_descriptor_pool_sizes(instance, device);
 
         let create_info = vk::DescriptorPoolCreateInfo::builder()
@@ -126,7 +130,7 @@ impl DescriptorPool {
     fn create_descriptor_set_layouts(
         device: &Device,
         limits: &[u32],
-    ) -> Result<SmallVec<[vk::DescriptorSetLayout; 4]>, CreationError> {
+    ) -> CreationResult<SmallVec<[vk::DescriptorSetLayout; 4]>> {
         let mut layouts = SmallVec::new();
 
         for (i, descriptor_type) in Self::DESCRIPTOR_TYPES.iter().enumerate() {

@@ -10,7 +10,7 @@ use crate::{
         queue_family_indices::QueueFamilyIndices,
         swapchain_support_details::SwapchainSupportDetails, Device,
     },
-    error::{CreationError, RuntimeError},
+    error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
     instance::Instance,
     surface::Surface,
 };
@@ -39,7 +39,7 @@ impl Swapchain {
         instance: &Instance,
         surface: &Surface,
         device: Arc<Device>,
-    ) -> Result<Self, CreationError> {
+    ) -> CreationResult<Self> {
         let swapchain_support_details =
             SwapchainSupportDetails::new(surface, device.physical_device())?;
 
@@ -188,7 +188,7 @@ impl Swapchain {
         instance: &Instance,
         surface: &Surface,
         present_semaphore: &BinarySemaphore,
-    ) -> Result<Option<u32>, RuntimeError> {
+    ) -> RuntimeResult<Option<u32>> {
         unsafe {
             match self.loader.acquire_next_image(
                 self.handle,
@@ -214,7 +214,7 @@ impl Swapchain {
         queue: vk::Queue,
         render_semaphore: &BinarySemaphore,
         swapchain_image_index: u32,
-    ) -> Result<(), RuntimeError> {
+    ) -> RuntimeResult<()> {
         let swapchains = &[self.handle];
         let wait_semaphores = &[render_semaphore.handle()];
         let image_indices = &[swapchain_image_index];
@@ -244,7 +244,7 @@ impl Swapchain {
         window: &Window,
         instance: &Instance,
         surface: &Surface,
-    ) -> Result<(), RuntimeError> {
+    ) -> RuntimeResult<()> {
         if window.framebuffer_size() == (0, 0) {
             return Ok(());
         }

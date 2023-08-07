@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::error::CreationError;
+use crate::error::{CreationError, CreationResult};
 
 use hyper_platform::window::Window;
 
@@ -31,7 +31,7 @@ impl Instance {
         window: &Window,
         validation_layers_requested: bool,
         entry: &Entry,
-    ) -> Result<Self, CreationError> {
+    ) -> CreationResult<Self> {
         let validation_layers_enabled = if validation_layers_requested {
             Self::check_validation_layer_support(entry)?
         } else {
@@ -55,7 +55,7 @@ impl Instance {
         window: &Window,
         validation_layers_enabled: bool,
         entry: &Entry,
-    ) -> Result<VulkanInstance, CreationError> {
+    ) -> CreationResult<VulkanInstance> {
         let application_name = CString::new(window.title())?;
         let engine_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"HyperEngine\0") };
 
@@ -122,7 +122,7 @@ impl Instance {
         Ok(handle)
     }
 
-    fn check_validation_layer_support(entry: &Entry) -> Result<bool, CreationError> {
+    fn check_validation_layer_support(entry: &Entry) -> CreationResult<bool> {
         let layer_properties = entry
             .enumerate_instance_layer_properties()
             .map_err(|error| {
@@ -154,7 +154,7 @@ impl Instance {
         validation_layers_enabled: bool,
         entry: &Entry,
         instance: &VulkanInstance,
-    ) -> Result<Option<DebugExtension>, CreationError> {
+    ) -> CreationResult<Option<DebugExtension>> {
         if !validation_layers_enabled {
             return Ok(None);
         }

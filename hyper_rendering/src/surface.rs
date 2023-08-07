@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{error::CreationError, instance::Instance};
+use crate::{
+    error::{CreationError, CreationResult},
+    instance::Instance,
+};
 
 use hyper_platform::window::Window;
 
@@ -16,11 +19,7 @@ pub(crate) struct Surface {
 }
 
 impl Surface {
-    pub(crate) fn new(
-        window: &Window,
-        entry: &Entry,
-        instance: &Instance,
-    ) -> Result<Self, CreationError> {
+    pub(crate) fn new(window: &Window, entry: &Entry, instance: &Instance) -> CreationResult<Self> {
         let loader = khr::Surface::new(entry, instance.handle());
 
         let handle = window

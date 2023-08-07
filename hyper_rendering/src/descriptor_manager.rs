@@ -8,7 +8,7 @@ use ash::vk::{self, WriteDescriptorSet};
 
 use crate::{
     buffer::Buffer, descriptor_pool::DescriptorPool, descriptor_set::DescriptorSet, device::Device,
-    error::CreationError, instance::Instance, resource_handle::ResourceHandle,
+    error::CreationResult, instance::Instance, resource_handle::ResourceHandle,
 };
 
 use std::{collections::VecDeque, sync::Arc};
@@ -24,7 +24,7 @@ pub(crate) struct DescriptorManager {
 }
 
 impl DescriptorManager {
-    pub(crate) fn new(instance: &Instance, device: Arc<Device>) -> Result<Self, CreationError> {
+    pub(crate) fn new(instance: &Instance, device: Arc<Device>) -> CreationResult<Self> {
         let descriptor_pool = DescriptorPool::new(instance, device.clone())?;
 
         let mut descriptor_sets = Vec::new();

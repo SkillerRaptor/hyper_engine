@@ -6,7 +6,7 @@
 
 use crate::{
     device::{queue_family_indices::QueueFamilyIndices, Device},
-    error::CreationError,
+    error::{CreationError, CreationResult},
     instance::Instance,
     surface::Surface,
 };
@@ -24,7 +24,7 @@ impl CommandPool {
         instance: &Instance,
         surface: &Surface,
         device: Arc<Device>,
-    ) -> Result<Self, CreationError> {
+    ) -> CreationResult<Self> {
         let queue_family_indices =
             QueueFamilyIndices::new(instance, surface, device.physical_device())?;
 

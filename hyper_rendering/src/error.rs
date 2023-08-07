@@ -53,6 +53,8 @@ pub enum CreationError {
     VulkanSurfaceLost(#[source] vk::Result),
 }
 
+pub(crate) type CreationResult<T> = Result<T, CreationError>;
+
 #[derive(Debug, Error)]
 pub enum RuntimeError {
     #[error("Failed to set data for buffer")]
@@ -85,3 +87,5 @@ pub enum RuntimeError {
     #[error("Failed to allocate memory")]
     VulkanAllocation(#[from] gpu_allocator::AllocationError),
 }
+
+pub(crate) type RuntimeResult<T> = Result<T, RuntimeError>;

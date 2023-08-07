@@ -5,8 +5,12 @@
  */
 
 use crate::{
-    command_buffer::CommandBuffer, descriptor_manager::DescriptorManager, device::Device,
-    error::CreationError, shader::Shader, swapchain::Swapchain,
+    command_buffer::CommandBuffer,
+    descriptor_manager::DescriptorManager,
+    device::Device,
+    error::{CreationError, CreationResult},
+    shader::Shader,
+    swapchain::Swapchain,
 };
 
 use ash::vk;
@@ -45,7 +49,7 @@ impl Pipeline {
         swapchain: &Swapchain,
         vertex_shader: Shader,
         fragment_shader: Shader,
-    ) -> Result<Self, CreationError> {
+    ) -> CreationResult<Self> {
         let layout = Self::create_graphics_pipeline_layout(&device, descriptor_manager)?;
         let handle = Self::create_graphics_pipeline(
             &device,
@@ -66,7 +70,7 @@ impl Pipeline {
     fn create_graphics_pipeline_layout(
         device: &Device,
         descriptor_manager: &DescriptorManager,
-    ) -> Result<vk::PipelineLayout, CreationError> {
+    ) -> CreationResult<vk::PipelineLayout> {
         let push_constant_size = mem::size_of::<BindingsOffset>() as u32;
 
         let push_constant_range = vk::PushConstantRange::builder()
@@ -96,7 +100,7 @@ impl Pipeline {
         vertex_shader: Shader,
         fragment_shader: Shader,
         pipeline_layout: vk::PipelineLayout,
-    ) -> Result<vk::Pipeline, CreationError> {
+    ) -> CreationResult<vk::Pipeline> {
         let entry_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
 
         let vertex_create_info = vk::PipelineShaderStageCreateInfo::builder()

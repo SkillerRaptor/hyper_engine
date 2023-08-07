@@ -6,7 +6,7 @@
 
 use crate::{
     device::Device,
-    error::{CreationError, RuntimeError},
+    error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
 };
 
 use ash::vk;
@@ -18,7 +18,7 @@ pub(crate) struct TimelineSemaphore {
 }
 
 impl TimelineSemaphore {
-    pub(crate) fn new(device: Arc<Device>) -> Result<Self, CreationError> {
+    pub(crate) fn new(device: Arc<Device>) -> CreationResult<Self> {
         let mut type_create_info = vk::SemaphoreTypeCreateInfo::builder()
             .semaphore_type(vk::SemaphoreType::TIMELINE)
             .initial_value(0);
@@ -35,7 +35,7 @@ impl TimelineSemaphore {
         Ok(Self { handle, device })
     }
 
-    pub(crate) fn wait_for(&self, value: u64) -> Result<(), RuntimeError> {
+    pub(crate) fn wait_for(&self, value: u64) -> RuntimeResult<()> {
         let semaphores = [self.handle];
         let values = [value];
         let wait_info = vk::SemaphoreWaitInfo::builder()

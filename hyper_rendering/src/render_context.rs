@@ -8,7 +8,7 @@ use crate::{
     allocator::Allocator,
     descriptor_manager::DescriptorManager,
     device::Device,
-    error::{CreationError, RuntimeError},
+    error::{CreationResult, RuntimeResult},
     instance::Instance,
     pipeline::Pipeline,
     renderer::Renderer,
@@ -35,7 +35,7 @@ pub struct RenderContext {
 }
 
 impl RenderContext {
-    pub fn new(window: &Window) -> Result<Self, CreationError> {
+    pub fn new(window: &Window) -> CreationResult<Self> {
         let validation_layers_requested = cfg!(debug_assertions);
 
         let entry = unsafe { Entry::load() }?;
@@ -87,7 +87,7 @@ impl RenderContext {
         })
     }
 
-    pub fn begin(&mut self, window: &Window, frame_id: u64) -> Result<(), RuntimeError> {
+    pub fn begin(&mut self, window: &Window, frame_id: u64) -> RuntimeResult<()> {
         self.renderer.begin(
             window,
             &self.instance,
@@ -101,13 +101,13 @@ impl RenderContext {
         Ok(())
     }
 
-    pub fn end(&self) -> Result<(), RuntimeError> {
+    pub fn end(&self) -> RuntimeResult<()> {
         self.renderer.end(&self.swapchain, &self.pipeline)?;
 
         Ok(())
     }
 
-    pub fn submit(&mut self, window: &Window) -> Result<(), RuntimeError> {
+    pub fn submit(&mut self, window: &Window) -> RuntimeResult<()> {
         self.renderer
             .submit(window, &self.instance, &self.surface, &mut self.swapchain)?;
 
@@ -118,14 +118,14 @@ impl RenderContext {
         self.renderer.draw(&self.pipeline);
     }
 
-    pub fn resize(&mut self, window: &Window) -> Result<(), RuntimeError> {
+    pub fn resize(&mut self, window: &Window) -> RuntimeResult<()> {
         self.renderer
             .resize(window, &self.instance, &self.surface, &mut self.swapchain)?;
 
         Ok(())
     }
 
-    pub fn wait_idle(&self) -> Result<(), RuntimeError> {
+    pub fn wait_idle(&self) -> RuntimeResult<()> {
         self.device.wait_idle()?;
 
         Ok(())

@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{device::Device, error::CreationError};
+use crate::{
+    device::Device,
+    error::{CreationError, CreationResult},
+};
 
 use ash::vk;
 use std::sync::Arc;
@@ -15,7 +18,7 @@ pub(crate) struct BinarySemaphore {
 }
 
 impl BinarySemaphore {
-    pub(crate) fn new(device: Arc<Device>) -> Result<Self, CreationError> {
+    pub(crate) fn new(device: Arc<Device>) -> CreationResult<Self> {
         let create_info =
             vk::SemaphoreCreateInfo::builder().flags(vk::SemaphoreCreateFlags::empty());
 

@@ -12,7 +12,7 @@ use crate::{
     command_pool::CommandPool,
     descriptor_manager::DescriptorManager,
     device::Device,
-    error::{CreationError, RuntimeError},
+    error::{CreationError, CreationResult, RuntimeResult},
     instance::Instance,
     pipeline::{BindingsOffset, Pipeline},
     surface::Surface,
@@ -72,7 +72,7 @@ impl Renderer {
         device: Arc<Device>,
         allocator: Arc<Mutex<Allocator>>,
         descriptor_manager: &mut DescriptorManager,
-    ) -> Result<Self, CreationError> {
+    ) -> CreationResult<Self> {
         let command_pool = CommandPool::new(instance, surface, device.clone())?;
 
         let mut command_buffers = Vec::new();
@@ -195,7 +195,7 @@ impl Renderer {
         descriptor_manager: &DescriptorManager,
         swapchain: &mut Swapchain,
         pipeline: &Pipeline,
-    ) -> Result<(), RuntimeError> {
+    ) -> RuntimeResult<()> {
         self.current_frame_id = frame_id;
         self.submit_semaphore.wait_for(frame_id - 1)?;
 
@@ -264,11 +264,7 @@ impl Renderer {
         Ok(())
     }
 
-    pub(crate) fn end(
-        &self,
-        swapchain: &Swapchain,
-        pipeline: &Pipeline,
-    ) -> Result<(), RuntimeError> {
+    pub(crate) fn end(&self, swapchain: &Swapchain, pipeline: &Pipeline) -> RuntimeResult<()> {
         let side = self.current_frame_id % 2;
 
         pipeline.end_rendering(
@@ -287,7 +283,7 @@ impl Renderer {
         instance: &Instance,
         surface: &Surface,
         swapchain: &mut Swapchain,
-    ) -> Result<(), RuntimeError> {
+    ) -> RuntimeResult<()> {
         let side = self.current_frame_id % 2;
 
         self.device.submit_queue(
@@ -334,7 +330,7 @@ impl Renderer {
         instance: &Instance,
         surface: &Surface,
         swapchain: &mut Swapchain,
-    ) -> Result<(), RuntimeError> {
+    ) -> RuntimeResult<()> {
         swapchain.recreate(window, instance, surface)?;
 
         Ok(())

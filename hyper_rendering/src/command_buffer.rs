@@ -7,7 +7,7 @@
 use crate::{
     command_pool::CommandPool,
     device::Device,
-    error::{CreationError, RuntimeError},
+    error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
     pipeline::Pipeline,
 };
 
@@ -20,10 +20,7 @@ pub(crate) struct CommandBuffer {
 }
 
 impl CommandBuffer {
-    pub(crate) fn new(
-        device: Arc<Device>,
-        command_pool: &CommandPool,
-    ) -> Result<Self, CreationError> {
+    pub(crate) fn new(device: Arc<Device>, command_pool: &CommandPool) -> CreationResult<Self> {
         let allocate_info = vk::CommandBufferAllocateInfo::builder()
             .command_pool(command_pool.handle())
             .command_buffer_count(1)
@@ -39,10 +36,7 @@ impl CommandBuffer {
         Ok(Self { handle, device })
     }
 
-    pub(crate) fn begin(
-        &self,
-        usage_flags: vk::CommandBufferUsageFlags,
-    ) -> Result<(), RuntimeError> {
+    pub(crate) fn begin(&self, usage_flags: vk::CommandBufferUsageFlags) -> RuntimeResult<()> {
         let command_buffer_begin_info = vk::CommandBufferBeginInfo::builder().flags(usage_flags);
 
         unsafe {
@@ -55,7 +49,7 @@ impl CommandBuffer {
         Ok(())
     }
 
-    pub(crate) fn end(&self) -> Result<(), RuntimeError> {
+    pub(crate) fn end(&self) -> RuntimeResult<()> {
         unsafe {
             self.device
                 .handle()
@@ -66,7 +60,7 @@ impl CommandBuffer {
         Ok(())
     }
 
-    pub(crate) fn reset(&self) -> Result<(), RuntimeError> {
+    pub(crate) fn reset(&self) -> RuntimeResult<()> {
         unsafe {
             self.device
                 .handle()
