@@ -16,6 +16,7 @@ use crate::{
     instance::Instance,
     mesh::{Mesh, Vertex},
     pipeline::{BindingsOffset, Pipeline},
+    resource_handle::ResourceHandle,
     shader::Shader,
     surface::Surface,
     swapchain::Swapchain,
@@ -40,8 +41,9 @@ use std::{
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
 struct Bindings {
-    vertices_offset: u32,
-    transforms_offset: u32,
+    projection_view_offset: ResourceHandle,
+    vertices_offset: ResourceHandle,
+    transforms_offset: ResourceHandle,
 }
 
 pub(crate) struct Renderer {
@@ -50,6 +52,7 @@ pub(crate) struct Renderer {
 
     _transform_buffer: Buffer,
     _bindings_buffer: Buffer,
+    bindings_buffer_handle: ResourceHandle,
 
     current_frame_id: u64,
     swapchain_image_index: u32,
@@ -96,27 +99,6 @@ impl Renderer {
 
         ////////////////////////////////////////////////////////////////////////
 
-        let bindings_buffer = Buffer::new(
-            device.clone(),
-            allocator.clone(),
-            mem::size_of::<Bindings>(),
-            vk::BufferUsageFlags::STORAGE_BUFFER,
-        )?;
-
-        let bindings = Bindings {
-            vertices_offset: 1,
-            transforms_offset: 2,
-        };
-        bindings_buffer.set_data(&[bindings]).map_err(|error| {
-            CreationError::RuntimeError(Box::new(error), "set data for bindings buffer")
-        })?;
-
-        let _ = descriptor_manager
-            .borrow_mut()
-            .allocate_buffer_handle(&bindings_buffer);
-
-        ////////////////////////////////////////////////////////////////////////
-
         let vertex_shader =
             Shader::new(device.clone(), "./assets/shaders/compiled/default_vs.spv")?;
         let fragment_shader =
@@ -154,9 +136,9 @@ impl Renderer {
             triangle_vertices,
         )?;
 
-        ////////////////////////////////////////////////////////////////////////
+        // TODO: Abstract into camera struct and add dynamic update
 
-        let transform_buffer = Buffer::new(
+        let projection_view_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
             mem::size_of::<Mat4x4f>(),
@@ -170,16 +152,52 @@ impl Renderer {
         let projection_matrix =
             Mat4x4f::new_perspective(f32::to_radians(90.0), 1280.0 / 720.0, 0.1, 200.0);
 
-        let transform = projection_matrix * view_matrix;
+        let projection_view = projection_matrix * view_matrix;
+        projection_view_buffer
+            .set_data(&[projection_view])
+            .map_err(|error| {
+                CreationError::RuntimeError(Box::new(error), "set data for transform buffer")
+            })?;
+
+        let projection_view_buffer_handle = descriptor_manager
+            .borrow_mut()
+            .allocate_buffer_handle(&projection_view_buffer);
+
+        let transform_buffer = Buffer::new(
+            device.clone(),
+            allocator.clone(),
+            mem::size_of::<Mat4x4f>(),
+            vk::BufferUsageFlags::STORAGE_BUFFER,
+        )?;
+
+        let transform = Mat4x4f::identity();
         transform_buffer.set_data(&[transform]).map_err(|error| {
             CreationError::RuntimeError(Box::new(error), "set data for transform buffer")
         })?;
 
-        let _ = descriptor_manager
+        let transforms_buffer_handle = descriptor_manager
             .borrow_mut()
             .allocate_buffer_handle(&transform_buffer);
 
-        ////////////////////////////////////////////////////////////////////////
+        let bindings_buffer = Buffer::new(
+            device.clone(),
+            allocator.clone(),
+            mem::size_of::<Bindings>(),
+            vk::BufferUsageFlags::STORAGE_BUFFER,
+        )?;
+
+        let bindings = Bindings {
+            projection_view_offset: projection_view_buffer_handle,
+            vertices_offset: triangle_mesh.vertex_buffer_handle(),
+            transforms_offset: transforms_buffer_handle,
+        };
+        bindings_buffer.set_data(&[bindings]).map_err(|error| {
+            CreationError::RuntimeError(Box::new(error), "set data for bindings buffer")
+        })?;
+
+        let bindings_buffer_handle = descriptor_manager
+            .borrow_mut()
+            .allocate_buffer_handle(&bindings_buffer);
 
         Ok(Self {
             triangle_pipeline,
@@ -187,6 +205,7 @@ impl Renderer {
 
             _transform_buffer: transform_buffer,
             _bindings_buffer: bindings_buffer,
+            bindings_buffer_handle,
 
             current_frame_id: 0,
             swapchain_image_index: 0,
@@ -331,8 +350,7 @@ impl Renderer {
 
         let side = self.current_frame_id % 2;
 
-        // TODO: Change hardcoded binding offset
-        let bindings_offset = BindingsOffset::new(0);
+        let bindings_offset = BindingsOffset::new(self.bindings_buffer_handle);
 
         self.command_buffers[side as usize].push_constants(
             &self.triangle_pipeline,

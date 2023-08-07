@@ -9,6 +9,7 @@ use crate::{
     descriptor_manager::DescriptorManager,
     device::Device,
     error::{CreationError, CreationResult},
+    resource_handle::ResourceHandle,
     shader::Shader,
     swapchain::Swapchain,
 };
@@ -25,9 +26,9 @@ pub(crate) struct BindingsOffset {
 }
 
 impl BindingsOffset {
-    pub(crate) fn new(bindings_offset: u32) -> Self {
+    pub(crate) fn new(bindings_offset: ResourceHandle) -> Self {
         Self {
-            bindings_offset,
+            bindings_offset: bindings_offset.index(),
             unused_0: 0,
             unused_1: 0,
             unused_2: 0,

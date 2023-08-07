@@ -69,6 +69,10 @@ impl Mesh {
     pub(crate) fn vertices(&self) -> &[Vertex] {
         &self.vertices
     }
+
+    pub(crate) fn vertex_buffer_handle(&self) -> ResourceHandle {
+        self.vertex_buffer_handle
+    }
 }
 
 impl Drop for Mesh {
