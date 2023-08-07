@@ -543,6 +543,7 @@ version = "0.1.0"
 dependencies = [
  "hyper_core",
  "log",
+ "nalgebra-glm",
  "thiserror",
 ]
 
@@ -579,7 +580,6 @@ dependencies = [
  "hyper_math",
  "hyper_platform",
  "log",
- "nalgebra-glm",
  "smallvec",
  "thiserror",
 ]

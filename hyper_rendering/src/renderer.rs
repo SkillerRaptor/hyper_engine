@@ -20,6 +20,7 @@ use crate::{
     timeline_semaphore::TimelineSemaphore,
 };
 
+use hyper_math::{matrix::Mat4x4f, vector::Vec3f};
 use hyper_platform::window::Window;
 
 use ash::vk;
@@ -39,8 +40,8 @@ struct Bindings {
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
 struct Vertex {
-    position: nalgebra_glm::Vec3,
-    color: nalgebra_glm::Vec3,
+    position: Vec3f,
+    color: Vec3f,
 }
 
 pub(crate) struct Renderer {
@@ -119,16 +120,16 @@ impl Renderer {
 
         let triangle_vertices = vec![
             Vertex {
-                position: nalgebra_glm::vec3(1.0, 1.0, 0.5),
-                color: nalgebra_glm::vec3(1.0, 0.0, 0.0),
+                position: Vec3f::new(1.0, 1.0, 0.5),
+                color: Vec3f::new(1.0, 0.0, 0.0),
             },
             Vertex {
-                position: nalgebra_glm::vec3(-1.0, 1.0, 0.5),
-                color: nalgebra_glm::vec3(0.0, 1.0, 0.0),
+                position: Vec3f::new(-1.0, 1.0, 0.5),
+                color: Vec3f::new(0.0, 1.0, 0.0),
             },
             Vertex {
-                position: nalgebra_glm::vec3(0.0, -1.0, 0.5),
-                color: nalgebra_glm::vec3(0.0, 0.0, 1.0),
+                position: Vec3f::new(0.0, -1.0, 0.5),
+                color: Vec3f::new(0.0, 0.0, 1.0),
             },
         ];
         vertex_buffer
@@ -144,21 +145,16 @@ impl Renderer {
         let transform_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
-            mem::size_of::<nalgebra_glm::Mat4>(),
+            mem::size_of::<Mat4x4f>(),
             vk::BufferUsageFlags::STORAGE_BUFFER,
         )?;
 
-        let camera_position = nalgebra_glm::vec3(0.0, 0.0, -2.0);
+        let camera_position = Vec3f::new(0.0, 0.0, -2.0);
 
-        let view_matrix = nalgebra_glm::translate(
-            &nalgebra_glm::mat4(
-                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-            ),
-            &camera_position,
-        );
+        let view_matrix = Mat4x4f::identity().append_translation(&camera_position);
 
         let projection_matrix =
-            nalgebra_glm::perspective(f32::to_radians(90.0), 1280.0 / 720.0, 0.1, 200.0);
+            Mat4x4f::new_perspective(f32::to_radians(90.0), 1280.0 / 720.0, 0.1, 200.0);
 
         let transform = projection_matrix * view_matrix;
         transform_buffer.set_data(&[transform]).map_err(|error| {

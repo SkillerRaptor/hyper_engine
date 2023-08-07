@@ -13,4 +13,5 @@ edition = "2021"
 hyper_core = { path = "../hyper_core" }
 
 log = "0.4"
+nalgebra-glm = "0.18"
 thiserror = "1.0"
