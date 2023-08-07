@@ -17,7 +17,7 @@ impl DescriptorSet {
     pub(crate) fn new(
         device: Arc<Device>,
         descriptor_pool: &DescriptorPool,
-        layout: &vk::DescriptorSetLayout,
+        layout: vk::DescriptorSetLayout,
         limit: u32,
     ) -> Result<Self, CreationError> {
         let limits = [limit];
@@ -26,11 +26,11 @@ impl DescriptorSet {
             vk::DescriptorSetVariableDescriptorCountAllocateInfo::builder()
                 .descriptor_counts(&limits);
 
-        let layouts = [*layout];
+        let layouts = [layout];
 
         let allocate_info = vk::DescriptorSetAllocateInfo::builder()
             .push_next(&mut count_allocate_info)
-            .descriptor_pool(*descriptor_pool.handle())
+            .descriptor_pool(descriptor_pool.handle())
             .set_layouts(&layouts);
 
         let handle = unsafe {
@@ -43,7 +43,7 @@ impl DescriptorSet {
         Ok(Self { handle })
     }
 
-    pub(crate) fn handle(&self) -> &vk::DescriptorSet {
-        &self.handle
+    pub(crate) fn handle(&self) -> vk::DescriptorSet {
+        self.handle
     }
 }

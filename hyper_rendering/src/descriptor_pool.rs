@@ -68,12 +68,12 @@ impl DescriptorPool {
         let properties = unsafe {
             instance
                 .handle()
-                .get_physical_device_properties(*device.physical_device())
+                .get_physical_device_properties(device.physical_device())
         };
 
         let mut descriptor_pool_sizes = Vec::new();
         for descriptor_type in Self::DESCRIPTOR_TYPES {
-            let limit = Self::find_descriptor_type_limit(&descriptor_type, &properties.limits);
+            let limit = Self::find_descriptor_type_limit(descriptor_type, properties.limits);
 
             let descriptor_pool_size = vk::DescriptorPoolSize::builder()
                 .ty(descriptor_type)
@@ -86,12 +86,12 @@ impl DescriptorPool {
     }
 
     fn find_descriptor_type_limit(
-        descriptor_type: &vk::DescriptorType,
-        limits: &vk::PhysicalDeviceLimits,
+        descriptor_type: vk::DescriptorType,
+        limits: vk::PhysicalDeviceLimits,
     ) -> u32 {
         const MAX_DESCRIPTOR_COUNT: u32 = 1024 * 1024;
 
-        let limit = match *descriptor_type {
+        let limit = match descriptor_type {
             vk::DescriptorType::STORAGE_BUFFER => limits.max_descriptor_set_storage_buffers,
             vk::DescriptorType::STORAGE_IMAGE => limits.max_descriptor_set_storage_images,
             vk::DescriptorType::SAMPLED_IMAGE => limits.max_descriptor_set_sampled_images,
@@ -113,10 +113,10 @@ impl DescriptorPool {
             let properties = unsafe {
                 instance
                     .handle()
-                    .get_physical_device_properties(*device.physical_device())
+                    .get_physical_device_properties(device.physical_device())
             };
 
-            let count = Self::find_descriptor_type_limit(&descriptor_type, &properties.limits);
+            let count = Self::find_descriptor_type_limit(descriptor_type, properties.limits);
             limits.push(count);
         }
 
@@ -173,8 +173,8 @@ impl DescriptorPool {
         &self.limits
     }
 
-    pub(crate) fn handle(&self) -> &vk::DescriptorPool {
-        &self.handle
+    pub(crate) fn handle(&self) -> vk::DescriptorPool {
+        self.handle
     }
 }
 

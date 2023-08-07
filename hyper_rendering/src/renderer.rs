@@ -227,8 +227,8 @@ impl Renderer {
         pipeline.begin_rendering(
             swapchain,
             &self.command_buffers[side as usize],
-            &swapchain.images()[self.swapchain_image_index as usize],
-            &swapchain.image_views()[self.swapchain_image_index as usize],
+            swapchain.images()[self.swapchain_image_index as usize],
+            swapchain.image_views()[self.swapchain_image_index as usize],
             clear_value,
         );
 
@@ -237,7 +237,7 @@ impl Renderer {
         let descriptor_sets = descriptor_manager
             .descriptor_sets()
             .iter()
-            .map(|descriptor_set| *descriptor_set.handle())
+            .map(|descriptor_set| descriptor_set.handle())
             .collect::<Vec<_>>();
         self.command_buffers[side as usize].bind_descriptor_sets(
             vk::PipelineBindPoint::GRAPHICS,
@@ -261,7 +261,7 @@ impl Renderer {
 
         let scissor = vk::Rect2D::builder()
             .offset(*offset)
-            .extent(*swapchain.extent());
+            .extent(swapchain.extent());
 
         self.command_buffers[side as usize].set_scissor(0, &[*scissor]);
 
@@ -277,7 +277,7 @@ impl Renderer {
 
         pipeline.end_rendering(
             &self.command_buffers[side as usize],
-            &swapchain.images()[self.swapchain_image_index as usize],
+            swapchain.images()[self.swapchain_image_index as usize],
         );
 
         self.command_buffers[side as usize].end()?;

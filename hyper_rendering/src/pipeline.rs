@@ -52,7 +52,7 @@ impl Pipeline {
             swapchain,
             vertex_shader,
             fragment_shader,
-            &layout,
+            layout,
         )?;
 
         Ok(Self {
@@ -95,18 +95,18 @@ impl Pipeline {
         swapchain: &Swapchain,
         vertex_shader: Shader,
         fragment_shader: Shader,
-        pipeline_layout: &vk::PipelineLayout,
+        pipeline_layout: vk::PipelineLayout,
     ) -> Result<vk::Pipeline, CreationError> {
         let entry_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
 
         let vertex_create_info = vk::PipelineShaderStageCreateInfo::builder()
             .stage(vk::ShaderStageFlags::VERTEX)
-            .module(*vertex_shader.handle())
+            .module(vertex_shader.handle())
             .name(entry_name);
 
         let fragment_create_info = vk::PipelineShaderStageCreateInfo::builder()
             .stage(vk::ShaderStageFlags::FRAGMENT)
-            .module(*fragment_shader.handle())
+            .module(fragment_shader.handle())
             .name(entry_name);
 
         let shader_stages = [*vertex_create_info, *fragment_create_info];
@@ -166,7 +166,7 @@ impl Pipeline {
             .attachments(attachments)
             .blend_constants([0.0; 4]);
 
-        let color_attachment_formats = &[*swapchain.format()];
+        let color_attachment_formats = &[swapchain.format()];
         let mut rendering_create_info = vk::PipelineRenderingCreateInfoKHR::builder()
             .color_attachment_formats(color_attachment_formats);
 
@@ -180,7 +180,7 @@ impl Pipeline {
             .multisample_state(&multisample_state_create_info)
             .color_blend_state(&color_blend_state_create_info)
             .dynamic_state(&dynamic_state_create_info)
-            .layout(*pipeline_layout)
+            .layout(pipeline_layout)
             .render_pass(vk::RenderPass::null())
             .subpass(0)
             .base_pipeline_handle(vk::Pipeline::null())
@@ -200,8 +200,8 @@ impl Pipeline {
         &self,
         swapchain: &Swapchain,
         command_buffer: &CommandBuffer,
-        image: &vk::Image,
-        image_view: &vk::ImageView,
+        image: vk::Image,
+        image_view: vk::ImageView,
         clear_value: vk::ClearValue,
     ) {
         let subresource_range = vk::ImageSubresourceRange::builder()
@@ -219,7 +219,7 @@ impl Pipeline {
             .new_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
             .src_queue_family_index(0)
             .dst_queue_family_index(0)
-            .image(*image)
+            .image(image)
             .subresource_range(*subresource_range);
 
         let image_memory_barriers = [*image_memory_barrier];
@@ -235,11 +235,11 @@ impl Pipeline {
         let render_area_offset = vk::Offset2D::builder().x(0).y(0);
 
         let render_area = vk::Rect2D::builder()
-            .extent(*render_area_extent)
+            .extent(render_area_extent)
             .offset(*render_area_offset);
 
         let color_attachment_info = vk::RenderingAttachmentInfoKHR::builder()
-            .image_view(*image_view)
+            .image_view(image_view)
             .image_layout(vk::ImageLayout::ATTACHMENT_OPTIMAL_KHR)
             .load_op(vk::AttachmentLoadOp::CLEAR)
             .store_op(vk::AttachmentStoreOp::STORE)
@@ -254,7 +254,7 @@ impl Pipeline {
         command_buffer.begin_rendering(*rendering_info);
     }
 
-    pub(crate) fn end_rendering(&self, command_buffer: &CommandBuffer, image: &vk::Image) {
+    pub(crate) fn end_rendering(&self, command_buffer: &CommandBuffer, image: vk::Image) {
         command_buffer.end_rendering();
 
         let subresource_range = vk::ImageSubresourceRange::builder()
@@ -272,7 +272,7 @@ impl Pipeline {
             .new_layout(vk::ImageLayout::PRESENT_SRC_KHR)
             .src_queue_family_index(0)
             .dst_queue_family_index(0)
-            .image(*image)
+            .image(image)
             .subresource_range(*subresource_range);
 
         let image_memory_barriers = [*image_memory_barrier];
@@ -290,12 +290,12 @@ impl Pipeline {
         command_buffer.bind_pipeline(vk::PipelineBindPoint::GRAPHICS, self);
     }
 
-    pub(crate) fn handle(&self) -> &vk::Pipeline {
-        &self.handle
+    pub(crate) fn handle(&self) -> vk::Pipeline {
+        self.handle
     }
 
-    pub(crate) fn layout(&self) -> &vk::PipelineLayout {
-        &self.layout
+    pub(crate) fn layout(&self) -> vk::PipelineLayout {
+        self.layout
     }
 }
 

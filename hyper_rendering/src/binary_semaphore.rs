@@ -29,8 +29,8 @@ impl BinarySemaphore {
         Ok(Self { handle, device })
     }
 
-    pub(crate) fn handle(&self) -> &vk::Semaphore {
-        &self.handle
+    pub(crate) fn handle(&self) -> vk::Semaphore {
+        self.handle
     }
 }
 

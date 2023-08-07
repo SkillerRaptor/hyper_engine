@@ -42,8 +42,8 @@ impl CommandPool {
         Ok(Self { handle, device })
     }
 
-    pub(crate) fn handle(&self) -> &vk::CommandPool {
-        &self.handle
+    pub(crate) fn handle(&self) -> vk::CommandPool {
+        self.handle
     }
 }
 

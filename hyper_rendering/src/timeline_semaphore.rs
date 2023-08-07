@@ -52,8 +52,8 @@ impl TimelineSemaphore {
         Ok(())
     }
 
-    pub(crate) fn handle(&self) -> &vk::Semaphore {
-        &self.handle
+    pub(crate) fn handle(&self) -> vk::Semaphore {
+        self.handle
     }
 }
 

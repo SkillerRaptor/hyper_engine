@@ -30,8 +30,8 @@ impl Surface {
         Ok(Self { handle, loader })
     }
 
-    pub(crate) fn handle(&self) -> &vk::SurfaceKHR {
-        &self.handle
+    pub(crate) fn handle(&self) -> vk::SurfaceKHR {
+        self.handle
     }
 
     pub(crate) fn loader(&self) -> &khr::Surface {

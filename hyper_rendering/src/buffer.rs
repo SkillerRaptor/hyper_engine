@@ -30,7 +30,7 @@ impl Buffer {
     ) -> Result<Self, CreationError> {
         let handle = Self::create_buffer(&device, allocation_size as u64, usage)?;
 
-        let allocation = Self::allocate_memory(&device, &allocator, &handle)?;
+        let allocation = Self::allocate_memory(&device, &allocator, handle)?;
 
         Ok(Self {
             handle,
@@ -65,10 +65,9 @@ impl Buffer {
     fn allocate_memory(
         device: &Device,
         allocator: &Mutex<Allocator>,
-        handle: &vk::Buffer,
+        handle: vk::Buffer,
     ) -> Result<Allocation, CreationError> {
-        let memory_requirements =
-            unsafe { device.handle().get_buffer_memory_requirements(*handle) };
+        let memory_requirements = unsafe { device.handle().get_buffer_memory_requirements(handle) };
 
         let allocation = allocator
             .lock()
@@ -81,7 +80,7 @@ impl Buffer {
         unsafe {
             device
                 .handle()
-                .bind_buffer_memory(*handle, allocation.0.memory(), allocation.0.offset())
+                .bind_buffer_memory(handle, allocation.0.memory(), allocation.0.offset())
                 .map_err(|error| CreationError::VulkanBind(error, "buffer"))?;
         }
 
@@ -105,8 +104,8 @@ impl Buffer {
         Ok(())
     }
 
-    pub(crate) fn handle(&self) -> &vk::Buffer {
-        &self.handle
+    pub(crate) fn handle(&self) -> vk::Buffer {
+        self.handle
     }
 }
 

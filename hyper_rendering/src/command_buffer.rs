@@ -25,7 +25,7 @@ impl CommandBuffer {
         command_pool: &CommandPool,
     ) -> Result<Self, CreationError> {
         let allocate_info = vk::CommandBufferAllocateInfo::builder()
-            .command_pool(*command_pool.handle())
+            .command_pool(command_pool.handle())
             .command_buffer_count(1)
             .level(vk::CommandBufferLevel::PRIMARY);
 
@@ -100,7 +100,7 @@ impl CommandBuffer {
             self.device.handle().cmd_bind_pipeline(
                 self.handle,
                 pipeline_bind_point,
-                *pipeline.handle(),
+                pipeline.handle(),
             );
         }
     }
@@ -141,7 +141,7 @@ impl CommandBuffer {
             self.device.handle().cmd_bind_descriptor_sets(
                 self.handle,
                 pipeline_bind_point,
-                *pipeline.layout(),
+                pipeline.layout(),
                 first_set,
                 descriptor_sets,
                 dynamic_offsets,
@@ -159,7 +159,7 @@ impl CommandBuffer {
         unsafe {
             self.device.handle().cmd_push_constants(
                 self.handle,
-                *pipeline.layout(),
+                pipeline.layout(),
                 stage_flags,
                 offset,
                 slice::from_raw_parts(constants as *const T as *const u8, mem::size_of::<T>()),
@@ -185,7 +185,7 @@ impl CommandBuffer {
         }
     }
 
-    pub(crate) fn handle(&self) -> &vk::CommandBuffer {
-        &self.handle
+    pub(crate) fn handle(&self) -> vk::CommandBuffer {
+        self.handle
     }
 }

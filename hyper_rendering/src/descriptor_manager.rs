@@ -34,7 +34,7 @@ impl DescriptorManager {
             .zip(descriptor_pool.limits())
         {
             let descriptor_set =
-                DescriptorSet::new(device.clone(), &descriptor_pool, layout, *limit)?;
+                DescriptorSet::new(device.clone(), &descriptor_pool, *layout, *limit)?;
             descriptor_sets.push(descriptor_set);
         }
 
@@ -53,7 +53,7 @@ impl DescriptorManager {
         let handle = self.fetch_handle();
 
         let buffer_info = vk::DescriptorBufferInfo::builder()
-            .buffer(*buffer.handle())
+            .buffer(buffer.handle())
             .offset(0)
             .range(vk::WHOLE_SIZE);
 
@@ -61,7 +61,7 @@ impl DescriptorManager {
         let buffer_infos = [*buffer_info];
 
         let write_set = WriteDescriptorSet::builder()
-            .dst_set(*self.descriptor_sets[0].handle())
+            .dst_set(self.descriptor_sets[0].handle())
             .dst_binding(0)
             .dst_array_element(handle.index())
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)

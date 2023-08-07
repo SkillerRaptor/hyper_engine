@@ -63,8 +63,8 @@ impl Shader {
         Ok(handle)
     }
 
-    pub(crate) fn handle(&self) -> &vk::ShaderModule {
-        &self.handle
+    pub(crate) fn handle(&self) -> vk::ShaderModule {
+        self.handle
     }
 }
 

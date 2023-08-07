@@ -23,7 +23,7 @@ use std::{collections::HashSet, ffi::CStr, str};
 pub(crate) mod queue_family_indices {
     use crate::{error::CreationError, instance::Instance, surface::Surface};
 
-    use ash::vk::{PhysicalDevice, QueueFlags};
+    use ash::vk;
 
     #[derive(Clone, Copy, Debug, Default)]
     pub(crate) struct QueueFamilyIndices {
@@ -35,12 +35,12 @@ pub(crate) mod queue_family_indices {
         pub(crate) fn new(
             instance: &Instance,
             surface: &Surface,
-            physical_device: &PhysicalDevice,
+            physical_device: vk::PhysicalDevice,
         ) -> Result<Self, CreationError> {
             let physical_device_queue_family_properties = unsafe {
                 instance
                     .handle()
-                    .get_physical_device_queue_family_properties(*physical_device)
+                    .get_physical_device_queue_family_properties(physical_device)
             };
 
             let mut queue_family_indices = QueueFamilyIndices::default();
@@ -49,7 +49,7 @@ pub(crate) mod queue_family_indices {
             {
                 if physical_device_queue_family_property
                     .queue_flags
-                    .contains(QueueFlags::GRAPHICS)
+                    .contains(vk::QueueFlags::GRAPHICS)
                 {
                     queue_family_indices.graphics_family = Some(i as u32);
                 }
@@ -58,9 +58,9 @@ pub(crate) mod queue_family_indices {
                     surface
                         .loader()
                         .get_physical_device_surface_support(
-                            *physical_device,
+                            physical_device,
                             i as u32,
-                            *surface.handle(),
+                            surface.handle(),
                         )
                         .map_err(CreationError::VulkanSurfaceLost)
                 }? {
@@ -95,36 +95,36 @@ pub(crate) mod queue_family_indices {
 pub(crate) mod swapchain_support_details {
     use crate::{error::CreationError, surface::Surface};
 
-    use ash::vk::{PhysicalDevice, PresentModeKHR, SurfaceCapabilitiesKHR, SurfaceFormatKHR};
+    use ash::vk;
 
     #[derive(Clone, Debug, Default)]
     pub(crate) struct SwapchainSupportDetails {
-        capabilities: SurfaceCapabilitiesKHR,
-        formats: Vec<SurfaceFormatKHR>,
-        present_modes: Vec<PresentModeKHR>,
+        capabilities: vk::SurfaceCapabilitiesKHR,
+        formats: Vec<vk::SurfaceFormatKHR>,
+        present_modes: Vec<vk::PresentModeKHR>,
     }
 
     impl SwapchainSupportDetails {
         pub(crate) fn new(
             surface: &Surface,
-            physical_device: &PhysicalDevice,
+            physical_device: vk::PhysicalDevice,
         ) -> Result<Self, CreationError> {
             let capabilities = unsafe {
                 surface
                     .loader()
-                    .get_physical_device_surface_capabilities(*physical_device, *surface.handle())
+                    .get_physical_device_surface_capabilities(physical_device, surface.handle())
                     .map_err(CreationError::VulkanSurfaceLost)
             }?;
             let formats = unsafe {
                 surface
                     .loader()
-                    .get_physical_device_surface_formats(*physical_device, *surface.handle())
+                    .get_physical_device_surface_formats(physical_device, surface.handle())
                     .map_err(CreationError::VulkanSurfaceLost)
             }?;
             let present_modes = unsafe {
                 surface
                     .loader()
-                    .get_physical_device_surface_present_modes(*physical_device, *surface.handle())
+                    .get_physical_device_surface_present_modes(physical_device, surface.handle())
                     .map_err(CreationError::VulkanSurfaceLost)
             }?;
 
@@ -136,17 +136,17 @@ pub(crate) mod swapchain_support_details {
         }
 
         #[inline(always)]
-        pub(crate) fn capabilities(&self) -> SurfaceCapabilitiesKHR {
+        pub(crate) fn capabilities(&self) -> vk::SurfaceCapabilitiesKHR {
             self.capabilities
         }
 
         #[inline(always)]
-        pub(crate) fn formats(&self) -> &[SurfaceFormatKHR] {
+        pub(crate) fn formats(&self) -> &[vk::SurfaceFormatKHR] {
             &self.formats
         }
 
         #[inline(always)]
-        pub(crate) fn present_modes(&self) -> &[PresentModeKHR] {
+        pub(crate) fn present_modes(&self) -> &[vk::PresentModeKHR] {
             &self.present_modes
         }
     }
@@ -165,9 +165,9 @@ impl Device {
 
     pub(crate) fn new(instance: &Instance, surface: &Surface) -> Result<Self, CreationError> {
         let physical_device = Self::pick_physical_device(instance, surface)?;
-        let handle = Self::create_device(instance, surface, &physical_device)?;
+        let handle = Self::create_device(instance, surface, physical_device)?;
 
-        let queue_family_indices = QueueFamilyIndices::new(instance, surface, &physical_device)?;
+        let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
         let graphics_queue =
             unsafe { handle.get_device_queue(queue_family_indices.graphics_family().unwrap(), 0) };
         let present_queue =
@@ -194,7 +194,7 @@ impl Device {
 
         let mut chosen_physical_device = None;
         for physical_device in physical_devices {
-            if Self::check_physical_device_suitability(instance, surface, &physical_device)? {
+            if Self::check_physical_device_suitability(instance, surface, physical_device)? {
                 chosen_physical_device = Some(physical_device);
             }
         }
@@ -236,7 +236,7 @@ impl Device {
     fn check_physical_device_suitability(
         instance: &Instance,
         surface: &Surface,
-        physical_device: &vk::PhysicalDevice,
+        physical_device: vk::PhysicalDevice,
     ) -> Result<bool, CreationError> {
         let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
 
@@ -260,12 +260,12 @@ impl Device {
 
     fn check_extension_support(
         instance: &Instance,
-        physical_device: &vk::PhysicalDevice,
+        physical_device: vk::PhysicalDevice,
     ) -> Result<bool, CreationError> {
         let extension_properties = unsafe {
             instance
                 .handle()
-                .enumerate_device_extension_properties(*physical_device)
+                .enumerate_device_extension_properties(physical_device)
                 .map_err(|error| {
                     CreationError::VulkanEnumeration(error, "device extension properties")
                 })
@@ -283,7 +283,7 @@ impl Device {
         Ok(available)
     }
 
-    fn check_feature_support(instance: &Instance, physical_device: &vk::PhysicalDevice) -> bool {
+    fn check_feature_support(instance: &Instance, physical_device: vk::PhysicalDevice) -> bool {
         let mut dynamic_rendering = vk::PhysicalDeviceDynamicRenderingFeatures::builder();
         let mut timline_semaphore = vk::PhysicalDeviceTimelineSemaphoreFeatures::builder();
         let mut synchronization2 = vk::PhysicalDeviceSynchronization2Features::builder();
@@ -298,7 +298,7 @@ impl Device {
         unsafe {
             instance
                 .handle()
-                .get_physical_device_features2(*physical_device, &mut device_features);
+                .get_physical_device_features2(physical_device, &mut device_features);
         }
 
         dynamic_rendering.dynamic_rendering == vk::TRUE
@@ -330,7 +330,7 @@ impl Device {
     fn create_device(
         instance: &Instance,
         surface: &Surface,
-        physical_device: &vk::PhysicalDevice,
+        physical_device: vk::PhysicalDevice,
     ) -> Result<VulkanDevice, CreationError> {
         let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
 
@@ -392,7 +392,7 @@ impl Device {
         let handle = unsafe {
             instance
                 .handle()
-                .create_device(*physical_device, &create_info, None)
+                .create_device(physical_device, &create_info, None)
                 .map_err(|error| CreationError::VulkanCreation(error, "device"))
         }?;
 
@@ -408,23 +408,23 @@ impl Device {
         frame_id: u64,
     ) -> Result<(), RuntimeError> {
         let present_wait_semaphore_info = vk::SemaphoreSubmitInfo::builder()
-            .semaphore(*present_semaphore.handle())
+            .semaphore(present_semaphore.handle())
             .value(0)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
 
         let command_buffer_info = vk::CommandBufferSubmitInfo::builder()
-            .command_buffer(*command_buffer.handle())
+            .command_buffer(command_buffer.handle())
             .device_mask(0);
 
         let submit_signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
-            .semaphore(*submit_semaphore.handle())
+            .semaphore(submit_semaphore.handle())
             .value(frame_id)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
 
         let render_signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
-            .semaphore(*render_semaphore.handle())
+            .semaphore(render_semaphore.handle())
             .value(0)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
@@ -461,12 +461,12 @@ impl Device {
         &self.handle
     }
 
-    pub(crate) fn physical_device(&self) -> &vk::PhysicalDevice {
-        &self.physical_device
+    pub(crate) fn physical_device(&self) -> vk::PhysicalDevice {
+        self.physical_device
     }
 
-    pub(crate) fn present_queue(&self) -> &vk::Queue {
-        &self.present_queue
+    pub(crate) fn present_queue(&self) -> vk::Queue {
+        self.present_queue
     }
 }
 

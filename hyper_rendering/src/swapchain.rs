@@ -45,7 +45,7 @@ impl Swapchain {
 
         let capabilities = swapchain_support_details.capabilities();
 
-        let extent = Self::choose_extent(window, &capabilities);
+        let extent = Self::choose_extent(window, capabilities);
         let surface_format = Self::choose_surface_format(swapchain_support_details.formats());
         let present_mode = Self::choose_present_mode(swapchain_support_details.present_modes());
 
@@ -69,7 +69,7 @@ impl Swapchain {
             };
 
         let create_info = vk::SwapchainCreateInfoKHR::builder()
-            .surface(*surface.handle())
+            .surface(surface.handle())
             .min_image_count(image_count)
             .image_format(surface_format.format)
             .image_color_space(surface_format.color_space)
@@ -144,7 +144,7 @@ impl Swapchain {
         })
     }
 
-    fn choose_extent(window: &Window, capabilities: &vk::SurfaceCapabilitiesKHR) -> vk::Extent2D {
+    fn choose_extent(window: &Window, capabilities: vk::SurfaceCapabilitiesKHR) -> vk::Extent2D {
         if capabilities.current_extent.width != u32::MAX
             || capabilities.current_extent.height != u32::MAX
         {
@@ -193,7 +193,7 @@ impl Swapchain {
             match self.loader.acquire_next_image(
                 self.handle,
                 1_000_000_000,
-                *present_semaphore.handle(),
+                present_semaphore.handle(),
                 vk::Fence::null(),
             ) {
                 Ok((index, _)) => Ok(Some(index)),
@@ -211,12 +211,12 @@ impl Swapchain {
         window: &Window,
         instance: &Instance,
         surface: &Surface,
-        queue: &vk::Queue,
+        queue: vk::Queue,
         render_semaphore: &BinarySemaphore,
         swapchain_image_index: u32,
     ) -> Result<(), RuntimeError> {
         let swapchains = &[self.handle];
-        let wait_semaphores = &[*render_semaphore.handle()];
+        let wait_semaphores = &[render_semaphore.handle()];
         let image_indices = &[swapchain_image_index];
 
         let present_info = vk::PresentInfoKHR::builder()
@@ -225,7 +225,7 @@ impl Swapchain {
             .image_indices(image_indices);
 
         unsafe {
-            let recreate = match self.loader.queue_present(*queue, &present_info) {
+            let recreate = match self.loader.queue_present(queue, &present_info) {
                 Ok(recreate) => recreate,
                 Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => true,
                 Err(_) => panic!("unhandled error"),
@@ -259,7 +259,7 @@ impl Swapchain {
 
         let capabilities = swapchain_support_details.capabilities();
 
-        let extent = Self::choose_extent(window, &capabilities);
+        let extent = Self::choose_extent(window, capabilities);
         let surface_format = Self::choose_surface_format(swapchain_support_details.formats());
         let present_mode = Self::choose_present_mode(swapchain_support_details.present_modes());
 
@@ -285,7 +285,7 @@ impl Swapchain {
             };
 
         let create_info = vk::SwapchainCreateInfoKHR::builder()
-            .surface(*surface.handle())
+            .surface(surface.handle())
             .min_image_count(image_count)
             .image_format(surface_format.format)
             .image_color_space(surface_format.color_space)
@@ -375,12 +375,12 @@ impl Swapchain {
         }
     }
 
-    pub(crate) fn format(&self) -> &vk::Format {
-        &self.format
+    pub(crate) fn format(&self) -> vk::Format {
+        self.format
     }
 
-    pub(crate) fn extent(&self) -> &vk::Extent2D {
-        &self.extent
+    pub(crate) fn extent(&self) -> vk::Extent2D {
+        self.extent
     }
 
     pub(crate) fn images(&self) -> &[vk::Image] {
