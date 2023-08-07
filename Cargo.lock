@@ -518,10 +518,21 @@ version = "0.1.0"
 dependencies = [
  "hyper_audio",
  "hyper_core",
+ "hyper_game",
  "hyper_math",
  "hyper_physics",
  "hyper_platform",
  "hyper_rendering",
+ "log",
+ "thiserror",
+]
+
+[[package]]
+name = "hyper_game"
+version = "0.1.0"
+dependencies = [
+ "hyper_core",
+ "hyper_math",
  "log",
  "thiserror",
 ]
