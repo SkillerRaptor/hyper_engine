@@ -14,7 +14,7 @@ use crate::{
     device::Device,
     error::{CreationError, CreationResult, RuntimeResult},
     instance::Instance,
-    mesh::{Mesh, Vertex},
+    mesh::Mesh,
     pipeline::{BindingsOffset, Pipeline},
     resource_handle::ResourceHandle,
     shader::Shader,
@@ -23,10 +23,7 @@ use crate::{
     timeline_semaphore::TimelineSemaphore,
 };
 
-use hyper_math::{
-    matrix::Mat4x4f,
-    vector::{Vec3f, Vec4f},
-};
+use hyper_math::{matrix::Mat4x4f, vector::Vec3f};
 use hyper_platform::window::Window;
 
 use ash::vk;
@@ -47,8 +44,9 @@ struct Bindings {
 }
 
 pub(crate) struct Renderer {
-    triangle_mesh: Mesh,
-    triangle_pipeline: Pipeline,
+    monkey_mesh: Mesh,
+
+    default_pipeline: Pipeline,
 
     _transform_buffer: Buffer,
     _bindings_buffer: Buffer,
@@ -103,7 +101,7 @@ impl Renderer {
             Shader::new(device.clone(), "./assets/shaders/compiled/default_vs.spv")?;
         let fragment_shader =
             Shader::new(device.clone(), "./assets/shaders/compiled/default_ps.spv")?;
-        let triangle_pipeline = Pipeline::new(
+        let default_pipeline = Pipeline::new(
             device.clone(),
             descriptor_manager.clone(),
             swapchain,
@@ -111,30 +109,16 @@ impl Renderer {
             fragment_shader,
         )?;
 
-        let triangle_vertices = vec![
-            Vertex {
-                position: Vec4f::new(1.0, 1.0, 0.5, 1.0),
-                normal: Vec4f::default(),
-                color: Vec4f::new(1.0, 0.0, 0.0, 1.0),
-            },
-            Vertex {
-                position: Vec4f::new(-1.0, 1.0, 0.5, 1.0),
-                normal: Vec4f::default(),
-                color: Vec4f::new(0.0, 1.0, 0.0, 1.0),
-            },
-            Vertex {
-                position: Vec4f::new(0.0, -1.0, 0.5, 1.0),
-                normal: Vec4f::default(),
-                color: Vec4f::new(0.0, 0.0, 1.0, 1.0),
-            },
-        ];
+        ////////////////////////////////////////////////////////////////////////
 
-        let triangle_mesh = Mesh::new(
+        let monkey_mesh = Mesh::load(
             device.clone(),
             allocator.clone(),
             descriptor_manager.clone(),
-            triangle_vertices,
+            "./assets/models/monkey_flat.obj",
         )?;
+
+        ////////////////////////////////////////////////////////////////////////
 
         // TODO: Abstract into camera struct and add dynamic update
 
@@ -163,6 +147,8 @@ impl Renderer {
             .borrow_mut()
             .allocate_buffer_handle(&projection_view_buffer);
 
+        ////////////////////////////////////////////////////////////////////////
+
         let transform_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
@@ -179,6 +165,8 @@ impl Renderer {
             .borrow_mut()
             .allocate_buffer_handle(&transform_buffer);
 
+        ////////////////////////////////////////////////////////////////////////
+
         let bindings_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
@@ -188,7 +176,7 @@ impl Renderer {
 
         let bindings = Bindings {
             projection_view_offset: projection_view_buffer_handle,
-            vertices_offset: triangle_mesh.vertex_buffer_handle(),
+            vertices_offset: monkey_mesh.vertex_buffer_handle(),
             transforms_offset: transforms_buffer_handle,
         };
         bindings_buffer.set_data(&[bindings]).map_err(|error| {
@@ -200,8 +188,9 @@ impl Renderer {
             .allocate_buffer_handle(&bindings_buffer);
 
         Ok(Self {
-            triangle_pipeline,
-            triangle_mesh,
+            monkey_mesh,
+
+            default_pipeline,
 
             _transform_buffer: transform_buffer,
             _bindings_buffer: bindings_buffer,
@@ -256,7 +245,7 @@ impl Renderer {
             },
         };
 
-        self.triangle_pipeline.begin_rendering(
+        self.default_pipeline.begin_rendering(
             swapchain,
             &self.command_buffers[side as usize],
             swapchain.images()[self.swapchain_image_index as usize],
@@ -264,7 +253,7 @@ impl Renderer {
             clear_value,
         );
 
-        self.triangle_pipeline
+        self.default_pipeline
             .bind(&self.command_buffers[side as usize]);
 
         let descriptor_sets = self
@@ -276,7 +265,7 @@ impl Renderer {
             .collect::<Vec<_>>();
         self.command_buffers[side as usize].bind_descriptor_sets(
             vk::PipelineBindPoint::GRAPHICS,
-            &self.triangle_pipeline,
+            &self.default_pipeline,
             0,
             &descriptor_sets,
             &[],
@@ -306,7 +295,7 @@ impl Renderer {
     pub(crate) fn end(&self, swapchain: &Swapchain) -> RuntimeResult<()> {
         let side = self.current_frame_id % 2;
 
-        self.triangle_pipeline.end_rendering(
+        self.default_pipeline.end_rendering(
             &self.command_buffers[side as usize],
             swapchain.images()[self.swapchain_image_index as usize],
         );
@@ -353,18 +342,13 @@ impl Renderer {
         let bindings_offset = BindingsOffset::new(self.bindings_buffer_handle);
 
         self.command_buffers[side as usize].push_constants(
-            &self.triangle_pipeline,
+            &self.default_pipeline,
             vk::ShaderStageFlags::ALL,
             0,
             &bindings_offset,
         );
 
-        self.command_buffers[side as usize].draw(
-            self.triangle_mesh.vertices().len() as u32,
-            1,
-            0,
-            0,
-        );
+        self.command_buffers[side as usize].draw(self.monkey_mesh.vertices().len() as u32, 1, 0, 0);
     }
 
     pub(crate) fn resize(

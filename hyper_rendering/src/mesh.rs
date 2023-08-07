@@ -5,8 +5,12 @@
  */
 
 use crate::{
-    allocator::Allocator, buffer::Buffer, descriptor_manager::DescriptorManager, device::Device,
-    error::CreationError, resource_handle::ResourceHandle,
+    allocator::Allocator,
+    buffer::Buffer,
+    descriptor_manager::DescriptorManager,
+    device::Device,
+    error::{CreationError, CreationResult},
+    resource_handle::ResourceHandle,
 };
 
 use hyper_math::vector::Vec4f;
@@ -18,6 +22,7 @@ use std::{
     rc::Rc,
     sync::{Arc, Mutex},
 };
+use tobj::LoadOptions;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
@@ -41,7 +46,7 @@ impl Mesh {
         allocator: Arc<Mutex<Allocator>>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         vertices: Vec<Vertex>,
-    ) -> Result<Self, CreationError> {
+    ) -> CreationResult<Self> {
         let vertex_buffer = Buffer::new(
             device,
             allocator,
@@ -64,6 +69,55 @@ impl Mesh {
 
             descriptor_manager,
         })
+    }
+
+    // TODO: Move this into asset manager and model class
+    pub(crate) fn load(
+        device: Arc<Device>,
+        allocator: Arc<Mutex<Allocator>>,
+        descriptor_manager: Rc<RefCell<DescriptorManager>>,
+        mesh_file: &str,
+    ) -> CreationResult<Self> {
+        let (models, _) = tobj::load_obj(mesh_file, &LoadOptions::default())
+            .map_err(|error| CreationError::LoadFailure(error, mesh_file.to_string()))?;
+
+        let mut vertices = Vec::new();
+        for model in models {
+            let mesh = &model.mesh;
+
+            for i in 0..mesh.indices.len() {
+                let index = 3 * mesh.indices[i] as usize;
+                let position = Vec4f::new(
+                    mesh.positions[index],
+                    mesh.positions[index + 1],
+                    mesh.positions[index + 2],
+                    1.0,
+                );
+                let normal = Vec4f::new(
+                    mesh.normals[index],
+                    mesh.normals[index + 1],
+                    mesh.normals[index + 2],
+                    1.0,
+                );
+                let color = Vec4f::new(
+                    mesh.normals[index],
+                    mesh.normals[index + 1],
+                    mesh.normals[index + 2],
+                    1.0,
+                );
+
+                let vertex = Vertex {
+                    position,
+                    normal,
+                    color,
+                };
+
+                vertices.push(vertex);
+            }
+        }
+
+        let mesh = Self::new(device, allocator, descriptor_manager, vertices)?;
+        Ok(mesh)
     }
 
     pub(crate) fn vertices(&self) -> &[Vertex] {

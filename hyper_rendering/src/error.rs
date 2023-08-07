@@ -7,9 +7,13 @@
 use ash::{vk, LoadingError};
 use std::{ffi::NulError, io, str::Utf8Error};
 use thiserror::Error;
+use tobj::LoadError;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
+    #[error("Failed to load model {1}")]
+    LoadFailure(#[source] LoadError, String),
+
     #[error("Failed to create c-string")]
     NulCString(#[from] NulError),
 
