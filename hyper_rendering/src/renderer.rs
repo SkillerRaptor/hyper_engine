@@ -189,6 +189,7 @@ impl Renderer {
         })
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn begin(
         &mut self,
         window: &Window,

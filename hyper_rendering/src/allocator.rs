@@ -16,7 +16,7 @@ use std::sync::Arc;
 
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]
-pub enum MemoryLocation {
+pub(crate) enum MemoryLocation {
     Unknown,
     GpuOnly,
     CpuToGpu,

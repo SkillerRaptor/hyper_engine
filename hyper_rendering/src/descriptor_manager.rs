@@ -7,13 +7,8 @@
 use ash::vk::{self, WriteDescriptorSet};
 
 use crate::{
-    buffer::Buffer,
-    descriptor_pool::DescriptorPool,
-    descriptor_set::DescriptorSet,
-    device::Device,
-    error::CreationError,
-    instance::Instance,
-    resource_handle::{ResourceHandle, ResourceTag},
+    buffer::Buffer, descriptor_pool::DescriptorPool, descriptor_set::DescriptorSet, device::Device,
+    error::CreationError, instance::Instance, resource_handle::ResourceHandle,
 };
 
 use std::{collections::VecDeque, sync::Arc};
@@ -55,7 +50,7 @@ impl DescriptorManager {
     }
 
     pub(crate) fn allocate_buffer_handle(&mut self, buffer: &Buffer) -> ResourceHandle {
-        let handle = self.fetch_handle(ResourceTag::StorageBuffer);
+        let handle = self.fetch_handle();
 
         let buffer_info = vk::DescriptorBufferInfo::builder()
             .buffer(*buffer.handle())
@@ -81,19 +76,16 @@ impl DescriptorManager {
         handle
     }
 
-    pub(crate) fn fetch_handle(&mut self, resource_tag: ResourceTag) -> ResourceHandle {
-        if self.recycled_descriptors.is_empty() {
+    pub(crate) fn fetch_handle(&mut self) -> ResourceHandle {
+        self.recycled_descriptors.pop_front().unwrap_or_else(|| {
             let index = self.current_index;
             self.current_index += 1;
 
-            ResourceHandle::new(resource_tag, index)
-        } else {
-            let mut handle = self.recycled_descriptors.pop_front().unwrap();
-            handle.increment_version();
-            handle
-        }
+            ResourceHandle::new(index)
+        })
     }
 
+    #[allow(dead_code)]
     pub(crate) fn retire_handle(&mut self, handle: ResourceHandle) {
         self.recycled_descriptors.push_back(handle)
     }
