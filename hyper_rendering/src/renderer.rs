@@ -284,9 +284,9 @@ impl Renderer {
 
         let viewport = vk::Viewport::builder()
             .x(0.0)
-            .y(0.0)
+            .y(swapchain.extent().height as f32)
             .width(swapchain.extent().width as f32)
-            .height(swapchain.extent().height as f32)
+            .height(-(swapchain.extent().height as f32))
             .min_depth(0.0)
             .max_depth(1.0);
 
