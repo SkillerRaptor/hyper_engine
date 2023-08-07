@@ -6,18 +6,11 @@
 
 use crate::{
     command_buffer::CommandBuffer, descriptor_manager::DescriptorManager, device::Device,
-    error::CreationError, swapchain::Swapchain,
+    error::CreationError, shader::Shader, swapchain::Swapchain,
 };
 
 use ash::vk;
-use std::{
-    ffi::CStr,
-    fmt::{self, Display, Formatter},
-    fs::File,
-    io::{BufReader, Read},
-    mem,
-    sync::Arc,
-};
+use std::{ffi::CStr, mem, sync::Arc};
 
 #[repr(C)]
 pub(crate) struct BindingsOffset {
@@ -38,21 +31,6 @@ impl BindingsOffset {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
-pub enum ShaderType {
-    Fragment,
-    Vertex,
-}
-
-impl Display for ShaderType {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match *self {
-            ShaderType::Fragment => write!(f, "fragment"),
-            ShaderType::Vertex => write!(f, "vertex"),
-        }
-    }
-}
-
 pub(crate) struct Pipeline {
     layout: vk::PipelineLayout,
     handle: vk::Pipeline,
@@ -65,9 +43,17 @@ impl Pipeline {
         device: Arc<Device>,
         descriptor_manager: &DescriptorManager,
         swapchain: &Swapchain,
+        vertex_shader: Shader,
+        fragment_shader: Shader,
     ) -> Result<Self, CreationError> {
         let layout = Self::create_graphics_pipeline_layout(&device, descriptor_manager)?;
-        let handle = Self::create_graphics_pipeline(&device, swapchain, &layout)?;
+        let handle = Self::create_graphics_pipeline(
+            &device,
+            swapchain,
+            vertex_shader,
+            fragment_shader,
+            &layout,
+        )?;
 
         Ok(Self {
             layout,
@@ -107,26 +93,20 @@ impl Pipeline {
     fn create_graphics_pipeline(
         device: &Device,
         swapchain: &Swapchain,
+        vertex_shader: Shader,
+        fragment_shader: Shader,
         pipeline_layout: &vk::PipelineLayout,
     ) -> Result<vk::Pipeline, CreationError> {
-        let vertex_shader_code = Self::parse_shader("./assets/shaders/compiled/default_vs.spv")?;
-        let fragment_shader_code = Self::parse_shader("./assets/shaders/compiled/default_ps.spv")?;
-
-        let vertex_shader_module =
-            Self::create_shader_module(device, ShaderType::Vertex, &vertex_shader_code)?;
-        let fragment_shader_module =
-            Self::create_shader_module(device, ShaderType::Fragment, &fragment_shader_code)?;
-
         let entry_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
 
         let vertex_create_info = vk::PipelineShaderStageCreateInfo::builder()
             .stage(vk::ShaderStageFlags::VERTEX)
-            .module(vertex_shader_module)
+            .module(*vertex_shader.handle())
             .name(entry_name);
 
         let fragment_create_info = vk::PipelineShaderStageCreateInfo::builder()
             .stage(vk::ShaderStageFlags::FRAGMENT)
-            .module(fragment_shader_module)
+            .module(*fragment_shader.handle())
             .name(entry_name);
 
         let shader_stages = [*vertex_create_info, *fragment_create_info];
@@ -213,58 +193,7 @@ impl Pipeline {
                 .map_err(|error| CreationError::VulkanCreation(error.1, "graphics pipeline"))
         }?;
 
-        unsafe {
-            device
-                .handle()
-                .destroy_shader_module(vertex_shader_module, None);
-            device
-                .handle()
-                .destroy_shader_module(fragment_shader_module, None);
-        }
-
         Ok(handles[0])
-    }
-
-    fn parse_shader(file_path: &str) -> Result<Vec<u8>, CreationError> {
-        let file = File::open(file_path)
-            .map_err(|error| CreationError::OpenFailure(error, file_path.to_string()))?;
-        let mut reader = BufReader::new(file);
-
-        let mut buffer = Vec::new();
-        reader
-            .read_to_end(&mut buffer)
-            .map_err(|error| CreationError::ReadFailure(error, file_path.to_string()))?;
-
-        Ok(buffer)
-    }
-
-    fn create_shader_module(
-        device: &Device,
-        shader_type: ShaderType,
-        shader_bytes: &[u8],
-    ) -> Result<vk::ShaderModule, CreationError> {
-        let (prefix, code, suffix) = unsafe { shader_bytes.align_to::<u32>() };
-        if !prefix.is_empty() || !suffix.is_empty() {
-            return Err(CreationError::Unaligned(shader_type));
-        }
-
-        let create_info = vk::ShaderModuleCreateInfo::builder().code(code);
-
-        let handle = unsafe {
-            device
-                .handle()
-                .create_shader_module(&create_info, None)
-                .map_err(|error| {
-                    let error_message = match shader_type {
-                        ShaderType::Fragment => "fragment shader module",
-                        ShaderType::Vertex => "vertex shader module",
-                    };
-
-                    CreationError::VulkanCreation(error, error_message)
-                })
-        }?;
-
-        Ok(handle)
     }
 
     pub(crate) fn begin_rendering(

@@ -20,6 +20,7 @@ pub(crate) mod instance;
 pub(crate) mod pipeline;
 pub(crate) mod renderer;
 pub(crate) mod resource_handle;
+pub(crate) mod shader;
 pub(crate) mod surface;
 pub(crate) mod swapchain;
 pub(crate) mod timeline_semaphore;

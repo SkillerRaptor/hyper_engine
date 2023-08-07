@@ -12,6 +12,7 @@ use crate::{
     instance::Instance,
     pipeline::Pipeline,
     renderer::Renderer,
+    shader::Shader,
     surface::Surface,
     swapchain::Swapchain,
 };
@@ -52,7 +53,18 @@ impl RenderContext {
         let mut descriptor_manager = DescriptorManager::new(&instance, device.clone())?;
 
         let swapchain = Swapchain::new(window, &instance, &surface, device.clone())?;
-        let pipeline = Pipeline::new(device.clone(), &descriptor_manager, &swapchain)?;
+
+        let vertex_shader =
+            Shader::new(device.clone(), "./assets/shaders/compiled/default_vs.spv")?;
+        let fragment_shader =
+            Shader::new(device.clone(), "./assets/shaders/compiled/default_ps.spv")?;
+        let pipeline = Pipeline::new(
+            device.clone(),
+            &descriptor_manager,
+            &swapchain,
+            vertex_shader,
+            fragment_shader,
+        )?;
 
         let renderer = Renderer::new(
             &instance,

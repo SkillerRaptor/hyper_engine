@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::pipeline::ShaderType;
-
 use ash::{vk, LoadingError};
 use std::{ffi::NulError, io, str::Utf8Error};
 use thiserror::Error;
@@ -24,8 +22,8 @@ pub enum CreationError {
     #[error("Failed to {1}")]
     RuntimeError(#[source] Box<RuntimeError>, &'static str),
 
-    #[error("Failed to read unaligned vulkan {0} shader")]
-    Unaligned(ShaderType),
+    #[error("Failed to read unaligned vulkan shader")]
+    Unaligned,
 
     #[error("Failed to find vulkan capable gpu")]
     Unsupported,
