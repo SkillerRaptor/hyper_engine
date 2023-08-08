@@ -441,7 +441,7 @@ impl Renderer {
         let mut last_material = String::new();
         for renderable in &self.renderables {
             let current_material = renderable.material();
-            if current_material != &last_material {
+            if current_material != last_material {
                 let material = &self.materials[current_material];
 
                 self.command_buffers[side as usize]

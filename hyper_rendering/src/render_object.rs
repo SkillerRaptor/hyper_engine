@@ -40,6 +40,7 @@ pub(crate) struct RenderObject {
 }
 
 impl RenderObject {
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         device: Arc<Device>,
         allocator: Arc<Mutex<Allocator>>,

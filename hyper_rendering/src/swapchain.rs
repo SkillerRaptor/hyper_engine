@@ -208,8 +208,8 @@ impl Swapchain {
         let framebuffer_size = window.framebuffer_size();
 
         let extent = vk::Extent3D::builder()
-            .width(framebuffer_size.0 as u32)
-            .height(framebuffer_size.1 as u32)
+            .width(framebuffer_size.0)
+            .height(framebuffer_size.1)
             .depth(1);
 
         let format = vk::Format::D32_SFLOAT;
