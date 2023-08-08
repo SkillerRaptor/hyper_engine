@@ -7,6 +7,7 @@
 use crate::{
     allocator::{Allocator, MemoryLocation},
     binary_semaphore::BinarySemaphore,
+    bindings::TexturedBindings,
     buffer::Buffer,
     command_buffer::CommandBuffer,
     command_pool::CommandPool,
@@ -17,10 +18,10 @@ use crate::{
     mesh::{Mesh, Vertex},
     pipeline::{BindingsOffset, Pipeline},
     render_object::RenderObject,
-    resource_handle::ResourceHandle,
     shader::Shader,
     surface::Surface,
     swapchain::Swapchain,
+    texture::Texture,
     timeline_semaphore::TimelineSemaphore,
 };
 
@@ -33,17 +34,9 @@ use hyper_platform::window::Window;
 use ash::vk;
 use std::{cell::RefCell, collections::HashMap, fmt::Debug, mem, rc::Rc};
 
-// NOTE: Temporary
-#[repr(C)]
-#[derive(Clone, Copy, Debug)]
-pub(crate) struct Bindings {
-    pub(crate) projection_view_offset: ResourceHandle,
-    pub(crate) vertices_offset: ResourceHandle,
-    pub(crate) transforms_offset: ResourceHandle,
-}
-
 pub(crate) struct Renderer {
     // TODO: Make a material system
+    _textures: HashMap<String, Texture>,
     materials: HashMap<String, Pipeline>,
     meshes: HashMap<String, Mesh>,
     // NOTE: Temporary
@@ -123,6 +116,20 @@ impl Renderer {
 
         materials.insert("default".to_string(), default_pipeline);
 
+        let vertex_shader =
+            Shader::new(device.clone(), "./assets/shaders/compiled/textured_vs.spv")?;
+        let fragment_shader =
+            Shader::new(device.clone(), "./assets/shaders/compiled/textured_ps.spv")?;
+        let default_pipeline = Pipeline::new(
+            device.clone(),
+            descriptor_manager.clone(),
+            swapchain,
+            vertex_shader,
+            fragment_shader,
+        )?;
+
+        materials.insert("textured".to_string(), default_pipeline);
+
         ////////////////////////////////////////////////////////////////////////
 
         let mut meshes = HashMap::new();
@@ -132,16 +139,19 @@ impl Renderer {
                 position: Vec4f::new(1.0, 1.0, 0.5, 1.0),
                 normal: Vec4f::default(),
                 color: Vec4f::new(1.0, 0.0, 0.0, 1.0),
+                uv: Vec4f::default(),
             },
             Vertex {
                 position: Vec4f::new(0.0, -1.0, 0.5, 1.0),
                 normal: Vec4f::default(),
                 color: Vec4f::new(0.0, 0.0, 1.0, 1.0),
+                uv: Vec4f::default(),
             },
             Vertex {
                 position: Vec4f::new(-1.0, 1.0, 0.5, 1.0),
                 normal: Vec4f::default(),
                 color: Vec4f::new(0.0, 1.0, 0.0, 1.0),
+                uv: Vec4f::default(),
             },
         ];
 
@@ -154,6 +164,7 @@ impl Renderer {
             &upload_semaphore,
             &mut upload_value,
             triangle_vertices,
+            None,
         )?;
 
         meshes.insert("triangle".to_string(), triangle_mesh);
@@ -171,6 +182,35 @@ impl Renderer {
 
         meshes.insert("monkey".to_string(), monkey_mesh);
 
+        let lost_empire_mesh = Mesh::load(
+            device.clone(),
+            allocator.clone(),
+            descriptor_manager.clone(),
+            &upload_command_pool,
+            &upload_command_buffer,
+            &upload_semaphore,
+            &mut upload_value,
+            "./assets/models/lost_empire.obj",
+        )?;
+
+        meshes.insert("lost_empire".to_string(), lost_empire_mesh);
+
+        ////////////////////////////////////////////////////////////////////////
+
+        let mut textures = HashMap::new();
+
+        let lost_empire = Texture::new(
+            device.clone(),
+            allocator.clone(),
+            &upload_command_pool,
+            &upload_command_buffer,
+            &upload_semaphore,
+            &mut upload_value,
+            "./assets/textures/lost_empire-RGBA.png",
+        )?;
+
+        textures.insert("lost_empire".to_string(), lost_empire);
+
         ////////////////////////////////////////////////////////////////////////
 
         // TODO: Abstract into camera struct and add dynamic update
@@ -182,7 +222,7 @@ impl Renderer {
             MemoryLocation::GpuOnly,
         )?;
 
-        let camera_position = Vec3f::new(0.0, -1.0, -5.0);
+        let camera_position = Vec3f::new(7.0, -15.0, -6.0);
 
         let mut view_matrix = Mat4x4f::identity();
         view_matrix.append_translation_mut(&camera_position);
@@ -209,8 +249,53 @@ impl Renderer {
 
         ////////////////////////////////////////////////////////////////////////
 
+        let sampler_create_info = vk::SamplerCreateInfo::builder()
+            .mag_filter(vk::Filter::NEAREST)
+            .min_filter(vk::Filter::NEAREST)
+            .address_mode_u(vk::SamplerAddressMode::REPEAT)
+            .address_mode_v(vk::SamplerAddressMode::REPEAT)
+            .address_mode_w(vk::SamplerAddressMode::REPEAT);
+
+        let sampler = unsafe {
+            device
+                .handle()
+                .create_sampler(&sampler_create_info, None)
+                .map_err(|error| CreationError::VulkanCreation(error, "sampler"))?
+        };
+
+        let sampler_handle = descriptor_manager
+            .borrow_mut()
+            .allocate_sampler_handle(sampler);
+
+        let sampled_image_handle = descriptor_manager
+            .borrow_mut()
+            .allocate_sampled_image_handle(
+                textures["lost_empire"].view(),
+                vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+            );
+
+        ////////////////////////////////////////////////////////////////////////
+
         let mut renderables = Vec::new();
 
+        let lost_empire = RenderObject::new::<TexturedBindings>(
+            device.clone(),
+            allocator.clone(),
+            descriptor_manager.clone(),
+            &upload_command_pool,
+            &upload_command_buffer,
+            &upload_semaphore,
+            &mut upload_value,
+            "lost_empire",
+            "textured",
+            [Mat4x4f::identity()].to_vec(),
+            meshes["lost_empire"].vertex_buffer_handle(),
+            projection_view_buffer_handle,
+            &[sampler_handle, sampled_image_handle],
+        )?;
+        renderables.push(lost_empire);
+
+        /*
         let monkey = RenderObject::new(
             device.clone(),
             allocator.clone(),
@@ -252,8 +337,10 @@ impl Renderer {
             projection_view_buffer_handle,
         )?;
         renderables.push(triangle);
+        */
 
         Ok(Self {
+            _textures: textures,
             materials,
             meshes,
             renderables,
@@ -512,12 +599,25 @@ impl Renderer {
             );
 
             let mesh = &self.meshes[renderable.mesh()];
-            self.command_buffers[side as usize].draw(
-                mesh.vertices().len() as u32,
-                renderable.transforms().len() as u32,
-                0,
-                0,
-            );
+
+            if mesh.indices_count() == 0 {
+                self.command_buffers[side as usize].draw(
+                    mesh.vertices().len() as u32,
+                    renderable.transforms().len() as u32,
+                    0,
+                    0,
+                );
+            } else {
+                self.command_buffers[side as usize]
+                    .bind_index_buffer(mesh.index_buffer().as_ref().unwrap());
+                self.command_buffers[side as usize].draw_indexed(
+                    mesh.indices_count() as u32,
+                    renderable.transforms().len() as u32,
+                    0,
+                    0,
+                    0,
+                )
+            }
         }
     }
 
@@ -536,7 +636,7 @@ impl Renderer {
     // NOTE: We pass everything for now so we can use it from everywhere
 
     // TODO: Move this logic
-    fn immediate_submit<F>(
+    pub(crate) fn immediate_submit<F>(
         device: Rc<Device>,
         upload_command_pool: &CommandPool,
         upload_command_buffer: &CommandBuffer,

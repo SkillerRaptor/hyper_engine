@@ -15,23 +15,94 @@ struct BindingsOffset {
   uint unused_2;
 };
 
+#define DEFINE_BUFFER_HEAP(type) \
+  struct type##Handle { \
+    uint internal_index; \
+  }; \
+  [[vk::binding(0, 0)]] type g##_##type[]
+
+#define DEFINE_TEXTURE_HEAP(texture_type) \
+  template <typename T> \
+  struct texture_type##Handle { \
+    uint internal_index; \
+  }; \
+  [[vk::binding(0, 2)]] texture_type<float> g##_##texture_type##_##float[]; \
+  [[vk::binding(0, 2)]] texture_type<float2> g##_##texture_type##_##float2[]; \
+  [[vk::binding(0, 2)]] texture_type<float3> g##_##texture_type##_##float3[]; \
+  [[vk::binding(0, 2)]] texture_type<float4> g##_##texture_type##_##float4[]
+
+#define DEFINE_SAMPLER_HEAP(type) \
+  struct type##Handle { \
+    uint internal_index; \
+  }; \
+  [[vk::binding(0, 3)]] type g##_##type[]
+
+#define DEFINE_BUFFER_HEAP_OPERATOR(type) \
+    type operator[](type##Handle identifier) { \
+        return g_##type[NonUniformResourceIndex(identifier.internal_index)]; \
+    }
+
+#define DEFINE_TEXTURE_HEAP_OPERATOR_VALUE(resource_type, register_name, value_type, handle_name) \
+    resource_type<value_type> operator[](handle_name<value_type> identifier) { \
+        return register_name##_##value_type[NonUniformResourceIndex(identifier.internal_index)]; \
+    }
+
+#define DEFINE_SAMPLER_HEAP_OPERATOR(type) \
+    type operator[](type##Handle identifier) { \
+        return g_##type[NonUniformResourceIndex(identifier.internal_index)]; \
+    }
+
+#define DEFINE_TEXTURE_HEAP_OPERATOR(texture_type) \
+  DEFINE_TEXTURE_HEAP_OPERATOR_VALUE(texture_type, g_##texture_type, float, texture_type##Handle) \
+  DEFINE_TEXTURE_HEAP_OPERATOR_VALUE(texture_type, g_##texture_type, float2, texture_type##Handle) \
+  DEFINE_TEXTURE_HEAP_OPERATOR_VALUE(texture_type, g_##texture_type, float3, texture_type##Handle) \
+  DEFINE_TEXTURE_HEAP_OPERATOR_VALUE(texture_type, g_##texture_type, float4, texture_type##Handle)
+
 [[vk::push_constant]] ConstantBuffer<BindingsOffset> g_bindings_offset;
-[[vk::binding(0, 0)]] ByteAddressBuffer g_byte_address_buffers[];
-[[vk::binding(0, 0)]] RWByteAddressBuffer g_rw_byte_address_buffers[];
 
-#define BYTE_BUFFER(handle) \
-  g_byte_address_buffers[handle.index]
-#define BYTE_BUFFER_UNIFORM(handle) \
-  g_byte_address_buffers[NonUniformResourceIndex(handle.index)]
+DEFINE_BUFFER_HEAP(ByteAddressBuffer);
+DEFINE_BUFFER_HEAP(RWByteAddressBuffer);
 
-#define RW_BYTE_BUFFER(handle) \
-  g_rw_byte_address_buffers[handle.index]
-#define RW_BYTE_BUFFER_UNIFORM(handle) \
-  g_rw_byte_address_buffers[NonUniformResourceIndex(handle.index)]
+DEFINE_TEXTURE_HEAP(Texture1D);
+DEFINE_TEXTURE_HEAP(RWTexture1D);
+DEFINE_TEXTURE_HEAP(Texture1DArray);
+DEFINE_TEXTURE_HEAP(RWTexture1DArray);
+DEFINE_TEXTURE_HEAP(Texture2D);
+DEFINE_TEXTURE_HEAP(RWTexture2D);
+DEFINE_TEXTURE_HEAP(Texture2DArray);
+DEFINE_TEXTURE_HEAP(RWTexture2DArray);
+DEFINE_TEXTURE_HEAP(Texture3D);
+DEFINE_TEXTURE_HEAP(RWTexture3D);
+DEFINE_TEXTURE_HEAP(TextureCube);
+
+DEFINE_SAMPLER_HEAP(SamplerState);
+
+struct VulkanResourceDescriptorHeapInternal {
+  DEFINE_BUFFER_HEAP_OPERATOR(ByteAddressBuffer)
+  DEFINE_BUFFER_HEAP_OPERATOR(RWByteAddressBuffer)
+
+  DEFINE_TEXTURE_HEAP_OPERATOR(Texture1D)
+  DEFINE_TEXTURE_HEAP_OPERATOR(RWTexture1D)
+  DEFINE_TEXTURE_HEAP_OPERATOR(Texture1DArray)
+  DEFINE_TEXTURE_HEAP_OPERATOR(RWTexture1DArray)
+  DEFINE_TEXTURE_HEAP_OPERATOR(Texture2D)
+  DEFINE_TEXTURE_HEAP_OPERATOR(RWTexture2D)
+  DEFINE_TEXTURE_HEAP_OPERATOR(Texture2DArray)
+  DEFINE_TEXTURE_HEAP_OPERATOR(RWTexture2DArray)
+  DEFINE_TEXTURE_HEAP_OPERATOR(Texture3D)
+  DEFINE_TEXTURE_HEAP_OPERATOR(RWTexture3D)
+  DEFINE_TEXTURE_HEAP_OPERATOR(TextureCube)
+
+  DEFINE_SAMPLER_HEAP_OPERATOR(SamplerState)
+};
+
+static VulkanResourceDescriptorHeapInternal VkResourceDescriptorHeap;
+
+#define DESCRIPTOR_HEAP(handle_type, handle) VkResourceDescriptorHeap[(handle_type) handle.index]
 
 template <typename T>
 T load_bindings() {
-  T result = BYTE_BUFFER(g_bindings_offset.bindings_offset).Load<T>(0);
+  T result = DESCRIPTOR_HEAP(ByteAddressBufferHandle, g_bindings_offset.bindings_offset).Load<T>(0);
   return result;
 }
 
@@ -40,14 +111,7 @@ struct SimpleBuffer {
 
   template <typename T>
   T load() {
-    ByteAddressBuffer buffer = BYTE_BUFFER(this.handle);
-    T result = buffer.Load<T>(0);
-    return result;
-  }
-
-  template <typename T>
-  T load_uniform() {
-    ByteAddressBuffer buffer = BYTE_BUFFER_UNIFORM(this.handle);
+    ByteAddressBuffer buffer = DESCRIPTOR_HEAP(ByteAddressBufferHandle, this.handle);
     T result = buffer.Load<T>(0);
     return result;
   }
@@ -58,21 +122,14 @@ struct RwSimpleBuffer {
 
   template <typename T>
   T load() {
-    RWByteAddressBuffer buffer = RW_BYTE_BUFFER(this.handle);
-    T result = buffer.Load<T>(0);
-    return result;
-  }
-
-  template <typename T>
-  T load_uniform() {
-    RWByteAddressBuffer buffer = RW_BYTE_BUFFER_UNIFORM(this.handle);
+    RWByteAddressBuffer buffer = DESCRIPTOR_HEAP(RWByteAddressBufferHandle, this.handle);
     T result = buffer.Load<T>(0);
     return result;
   }
 
   template <typename T>
   void store(T value) {
-    RWByteAddressBuffer buffer = RW_BYTE_BUFFER(this.handle);
+    RWByteAddressBuffer buffer = DESCRIPTOR_HEAP(RWByteAddressBufferHandle, this.handle);
     buffer.Store<T>(0, value);
   }
 };
@@ -82,14 +139,7 @@ struct ArrayBuffer {
 
   template <typename T>
   T load(uint index) {
-    ByteAddressBuffer buffer = BYTE_BUFFER(this.handle);
-    T result = buffer.Load<T>(sizeof(T) * index);
-    return result;
-  }
-
-  template <typename T>
-  T load_uniform(uint index) {
-    ByteAddressBuffer buffer = BYTE_BUFFER_UNIFORM(this.handle);
+    ByteAddressBuffer buffer = DESCRIPTOR_HEAP(ByteAddressBufferHandle, this.handle);
     T result = buffer.Load<T>(sizeof(T) * index);
     return result;
   }
@@ -100,21 +150,193 @@ struct RwArrayBuffer {
 
   template <typename T>
   T load(uint index) {
-    RWByteAddressBuffer buffer = RW_BYTE_BUFFER(this.handle);
-    T result = buffer.Load<T>(sizeof(T) * index);
-    return result;
-  }
-
-  template <typename T>
-  T load_uniform(uint index) {
-    RWByteAddressBuffer buffer = RW_BYTE_BUFFER_UNIFORM(this.handle);
+    RWByteAddressBuffer buffer = DESCRIPTOR_HEAP(RWByteAddressBufferHandle, this.handle);
     T result = buffer.Load<T>(sizeof(T) * index);
     return result;
   }
 
   template <typename T>
   void store(uint index, T value) {
-    RWByteAddressBuffer buffer = RW_BYTE_BUFFER(this.handle);
+    RWByteAddressBuffer buffer = DESCRIPTOR_HEAP(RWByteAddressBufferHandle, this.handle);
     buffer.Store<T>(sizeof(T) * index, value);
+  }
+};
+
+struct Sampler {
+  RenderResourceHandle handle;
+
+  SamplerState load() {
+    SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+    return sampler;
+  }
+};
+
+struct Texture {
+  RenderResourceHandle handle;
+
+  template <typename T>
+  T load_1d(uint pos) {
+    Texture1D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle);
+    return texture.Load(uint2(pos, 0));
+  }
+
+  template <typename T>
+  T load_1d_array(uint2 pos) {
+    Texture1DArray<T> texture = DESCRIPTOR_HEAP(Texture1DArrayHandle<T>, this.handle);
+    return texture.Load(uint3(pos.x, 0, pos.y));
+  }
+
+  template <typename T>
+  T load_2d(uint2 pos) {
+    Texture2D<T> texture = DESCRIPTOR_HEAP(Texture2DHandle<T>, this.handle);
+    return texture.Load(uint3(pos, 0));
+  }
+
+  template <typename T>
+  T load_2d_array(uint3 pos) {
+    Texture2DArray<T> texture = DESCRIPTOR_HEAP(Texture2DArrayHandle<T>, this.handle);
+    return texture.Load(uint4(pos.xy, 0, pos.z));
+  }
+
+  template <typename T>
+  T load_3d(uint3 pos) {
+    Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle);
+    return texture.Load(uint4(pos, 0));
+  }
+
+  template<typename T>
+  T sample_1d(SamplerState s, float u) {
+      Texture1D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle);
+      return texture.Sample(s, u);
+  }
+
+  template<typename T>
+  T sample_2d(SamplerState s, float2 uv) {
+      Texture2D<T> texture = DESCRIPTOR_HEAP(Texture2DHandle<T>, this.handle);
+      return texture.Sample(s, uv);
+  }
+
+  template<typename T>
+  T sample_3d(SamplerState s, float3 uvw) {
+      Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle);
+      return texture.Sample(s, uvw);
+  }
+
+  template<typename T>
+  T sample_level_1d(SamplerState s, float u, float mip) {
+      Texture2D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle);
+      return texture.SampleLevel(s, u, mip);
+  }
+
+  template<typename T>
+  T sample_level_2d(SamplerState s, float2 uv, float mip) {
+      Texture2D<T> texture = DESCRIPTOR_HEAP(Texture2DHandle<T>, this.handle);
+      return texture.SampleLevel(s, uv, mip);
+  }
+
+  template<typename T>
+  T sample_level_3d(SamplerState s, float3 uvw, float mip) {
+      Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle);
+      return texture.SampleLevel(s, uvw, mip);
+  }
+};
+
+struct RwTexture {
+  RenderResourceHandle handle;
+
+  template <typename T>
+  T load_1d(uint pos) {
+    Texture1D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle);
+    return texture.Load(uint2(pos, 0));
+  }
+
+  template <typename T>
+  T load_1d_array(uint2 pos) {
+    Texture1DArray<T> texture = DESCRIPTOR_HEAP(Texture1DArrayHandle<T>, this.handle);
+    return texture.Load(uint3(pos.x, 0, pos.y));
+  }
+
+  template <typename T>
+  T load_2d(uint2 pos) {
+    Texture2D<T> texture = DESCRIPTOR_HEAP(Texture2DHandle<T>, this.handle);
+    return texture.Load(uint3(pos, 0));
+  }
+
+  template <typename T>
+  T load_2d_array(uint3 pos) {
+    Texture2DArray<T> texture = DESCRIPTOR_HEAP(Texture2DArrayHandle<T>, this.handle);
+    return texture.Load(uint4(pos.xy, 0, pos.z));
+  }
+
+  template <typename T>
+  T load_3d(uint3 pos) {
+    Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle);
+    return texture.Load(uint4(pos, 0));
+  }
+
+  template <typename T>
+  void store_1d(uint pos, T value) {
+    RWTexture1D<T> texture = DESCRIPTOR_HEAP(RWTexture1DHandle<T>, this.handle);
+    texture[pos] = value;
+  }
+
+  template <typename T>
+  void store_1d_array(uint2 pos, T value) {
+    RWTexture1DArray<T> texture = DESCRIPTOR_HEAP(RWTexture1DArrayHandle<T>, this.handle);
+    texture[pos] = value;
+  }
+
+  template <typename T>
+  void store_2d(uint2 pos, T value) {
+    RWTexture2D<T> texture = DESCRIPTOR_HEAP(RWTexture2DHandle<T>, this.handle);
+    texture[pos] = value;
+  }
+
+  template <typename T>
+  void store_2d_array(uint3 pos, T value) {
+    RWTexture2DArray<T> texture = DESCRIPTOR_HEAP(RWTexture2DArrayHandle<T>, this.handle);
+    texture[pos] = value;
+  }
+
+  template <typename T>
+  void store_3d(uint3 pos, T value) {
+    RWTexture3D<T> texture = DESCRIPTOR_HEAP(RWTexture3DHandle<T>, this.handle);
+    texture[pos] = value;
+  }
+
+  template<typename T>
+  T sample_1d(SamplerState s, float u) {
+      Texture1D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle);
+      return texture.Sample(s, u);
+  }
+
+  template<typename T>
+  T sample_2d(SamplerState s, float2 uv) {
+      Texture2D<T> texture = DESCRIPTOR_HEAP(Texture2DHandle<T>, this.handle);
+      return texture.Sample(s, uv);
+  }
+
+  template<typename T>
+  T sample_3d(SamplerState s, float3 uvw) {
+      Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle);
+      return texture.Sample(s, uvw);
+  }
+
+  template<typename T>
+  T sample_level_1d(SamplerState s, float u, float mip) {
+      Texture2D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle);
+      return texture.SampleLevel(s, u, mip);
+  }
+
+  template<typename T>
+  T sample_level_2d(SamplerState s, float2 uv, float mip) {
+      Texture2D<T> texture = DESCRIPTOR_HEAP(Texture2DHandle<T>, this.handle);
+      return texture.SampleLevel(s, uv, mip);
+  }
+
+  template<typename T>
+  T sample_level_3d(SamplerState s, float3 uvw, float mip) {
+      Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle);
+      return texture.SampleLevel(s, uvw, mip);
   }
 };

@@ -5,7 +5,7 @@
  */
 
 #[repr(transparent)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 pub(crate) struct ResourceHandle(u32);
 
 impl ResourceHandle {

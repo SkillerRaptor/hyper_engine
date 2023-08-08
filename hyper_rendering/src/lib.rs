@@ -9,6 +9,7 @@ pub mod render_context;
 
 pub(crate) mod allocator;
 pub(crate) mod binary_semaphore;
+pub(crate) mod bindings;
 pub(crate) mod buffer;
 pub(crate) mod command_buffer;
 pub(crate) mod command_pool;
@@ -25,4 +26,5 @@ pub(crate) mod resource_handle;
 pub(crate) mod shader;
 pub(crate) mod surface;
 pub(crate) mod swapchain;
+pub(crate) mod texture;
 pub(crate) mod timeline_semaphore;

@@ -51,25 +51,7 @@ impl DescriptorManager {
 
     pub(crate) fn allocate_buffer_handle(&mut self, buffer: &Buffer) -> ResourceHandle {
         let handle = self.fetch_handle();
-        self.update_buffer(handle, buffer);
-        handle
-    }
 
-    fn fetch_handle(&mut self) -> ResourceHandle {
-        self.recycled_descriptors.pop_front().unwrap_or_else(|| {
-            let index = self.current_index;
-            self.current_index += 1;
-
-            ResourceHandle::new(index)
-        })
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn retire_handle(&mut self, handle: ResourceHandle) {
-        self.recycled_descriptors.push_back(handle)
-    }
-
-    pub(crate) fn update_buffer(&self, handle: ResourceHandle, buffer: &Buffer) {
         let buffer_info = vk::DescriptorBufferInfo::builder()
             .buffer(buffer.handle())
             .offset(0)
@@ -90,6 +72,74 @@ impl DescriptorManager {
                 .handle()
                 .update_descriptor_sets(&[*write_set], &[]);
         }
+
+        handle
+    }
+
+    pub(crate) fn allocate_sampled_image_handle(
+        &mut self,
+        image_view: vk::ImageView,
+        image_layout: vk::ImageLayout,
+    ) -> ResourceHandle {
+        let handle = self.fetch_handle();
+
+        let image_info = vk::DescriptorImageInfo::builder()
+            .image_view(image_view)
+            .image_layout(image_layout);
+
+        let image_infos = [*image_info];
+
+        let write_set = WriteDescriptorSet::builder()
+            .dst_set(self.descriptor_sets[2].handle())
+            .dst_binding(0)
+            .dst_array_element(handle.index())
+            .descriptor_type(vk::DescriptorType::SAMPLED_IMAGE)
+            .image_info(&image_infos);
+
+        unsafe {
+            self.device
+                .handle()
+                .update_descriptor_sets(&[*write_set], &[]);
+        }
+
+        handle
+    }
+
+    pub(crate) fn allocate_sampler_handle(&mut self, sampler: vk::Sampler) -> ResourceHandle {
+        let handle = self.fetch_handle();
+
+        let image_info = vk::DescriptorImageInfo::builder().sampler(sampler);
+
+        let image_infos = [*image_info];
+
+        let write_set = WriteDescriptorSet::builder()
+            .dst_set(self.descriptor_sets[3].handle())
+            .dst_binding(0)
+            .dst_array_element(handle.index())
+            .descriptor_type(vk::DescriptorType::SAMPLER)
+            .image_info(&image_infos);
+
+        unsafe {
+            self.device
+                .handle()
+                .update_descriptor_sets(&[*write_set], &[]);
+        }
+
+        handle
+    }
+
+    fn fetch_handle(&mut self) -> ResourceHandle {
+        self.recycled_descriptors.pop_front().unwrap_or_else(|| {
+            let index = self.current_index;
+            self.current_index += 1;
+
+            ResourceHandle::new(index)
+        })
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn retire_handle(&mut self, handle: ResourceHandle) {
+        self.recycled_descriptors.push_back(handle)
     }
 
     pub(crate) fn descriptor_pool(&self) -> &DescriptorPool {

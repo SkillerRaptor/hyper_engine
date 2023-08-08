@@ -180,6 +180,37 @@ impl CommandBuffer {
         }
     }
 
+    pub(crate) fn draw_indexed(
+        &self,
+        index_count: u32,
+        instance_count: u32,
+        first_index: u32,
+        vertex_offset: i32,
+        first_instance: u32,
+    ) {
+        unsafe {
+            self.device.handle().cmd_draw_indexed(
+                self.handle,
+                index_count,
+                instance_count,
+                first_index,
+                vertex_offset,
+                first_instance,
+            );
+        }
+    }
+
+    pub(crate) fn bind_index_buffer(&self, buffer: &Buffer) {
+        unsafe {
+            self.device.handle().cmd_bind_index_buffer(
+                self.handle,
+                buffer.handle(),
+                0,
+                vk::IndexType::UINT32,
+            );
+        }
+    }
+
     pub(crate) fn copy_buffer(
         &self,
         source_buffer: &Buffer,
@@ -191,6 +222,24 @@ impl CommandBuffer {
                 self.handle(),
                 source_buffer.handle(),
                 destination_buffer.handle(),
+                regions,
+            )
+        }
+    }
+
+    pub(crate) fn copy_buffer_to_image(
+        &self,
+        source_buffer: &Buffer,
+        destination_image: vk::Image,
+        destination_image_layout: vk::ImageLayout,
+        regions: &[vk::BufferImageCopy],
+    ) {
+        unsafe {
+            self.device.handle().cmd_copy_buffer_to_image(
+                self.handle,
+                source_buffer.handle(),
+                destination_image,
+                destination_image_layout,
                 regions,
             )
         }

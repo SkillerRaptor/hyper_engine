@@ -5,12 +5,16 @@
  */
 
 use ash::{vk, LoadingError};
+use image::ImageError;
 use std::{ffi::NulError, io, str::Utf8Error};
 use thiserror::Error;
 use tobj::LoadError;
 
 #[derive(Debug, Error)]
 pub enum CreationError {
+    #[error("Failed to load image {1}")]
+    ImageFailure(#[source] ImageError, String),
+
     #[error("Failed to load model {1}")]
     LoadFailure(#[source] LoadError, String),
 

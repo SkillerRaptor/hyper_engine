@@ -6,13 +6,14 @@
 
 use crate::{
     allocator::{Allocator, MemoryLocation},
+    bindings::Bindings,
     buffer::Buffer,
     command_buffer::CommandBuffer,
     command_pool::CommandPool,
     descriptor_manager::DescriptorManager,
     device::Device,
     error::{CreationError, CreationResult},
-    renderer::{Bindings, Renderer},
+    renderer::Renderer,
     resource_handle::ResourceHandle,
     timeline_semaphore::TimelineSemaphore,
 };
@@ -41,7 +42,7 @@ pub(crate) struct RenderObject {
 
 impl RenderObject {
     #[allow(clippy::too_many_arguments)]
-    pub(crate) fn new(
+    pub(crate) fn new<T: Bindings>(
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
@@ -54,6 +55,7 @@ impl RenderObject {
         transforms: Vec<Mat4x4f>,
         vertex_buffer_handle: ResourceHandle,
         projection_view_buffer_handle: ResourceHandle,
+        extra_handles: &[ResourceHandle],
     ) -> CreationResult<Self> {
         ////////////////////////////////////////////////////////////////////////
 
@@ -86,16 +88,22 @@ impl RenderObject {
         let bindings_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
-            mem::size_of::<Bindings>(),
+            mem::size_of::<T>(),
             vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
             MemoryLocation::GpuOnly,
         )?;
 
-        let bindings = Bindings {
-            projection_view_offset: projection_view_buffer_handle,
-            vertices_offset: vertex_buffer_handle,
-            transforms_offset: transform_handle,
-        };
+        let mut resource_handles = vec![
+            projection_view_buffer_handle,
+            vertex_buffer_handle,
+            transform_handle,
+        ];
+        for extra in extra_handles {
+            resource_handles.push(*extra);
+        }
+
+        let mut bindings = T::default();
+        bindings.set_resource_handles(&resource_handles);
 
         Renderer::upload_buffer(
             device.clone(),
