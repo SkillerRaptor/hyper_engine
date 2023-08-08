@@ -5,6 +5,7 @@
  */
 
 use crate::{
+    buffer::Buffer,
     command_pool::CommandPool,
     device::Device,
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
@@ -176,6 +177,22 @@ impl CommandBuffer {
                 first_vertex,
                 first_instance,
             );
+        }
+    }
+
+    pub(crate) fn copy_buffer(
+        &self,
+        source_buffer: &Buffer,
+        destination_buffer: &Buffer,
+        regions: &[vk::BufferCopy],
+    ) {
+        unsafe {
+            self.device.handle().cmd_copy_buffer(
+                self.handle(),
+                source_buffer.handle(),
+                destination_buffer.handle(),
+                regions,
+            )
         }
     }
 

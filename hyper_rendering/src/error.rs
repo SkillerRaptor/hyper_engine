@@ -76,6 +76,9 @@ pub enum RuntimeError {
     #[error("Failed to reset command buffer recording")]
     CommandBufferReset(#[source] vk::Result),
 
+    #[error("Failed to reset command pool")]
+    CommandPoolReset(#[source] vk::Result),
+
     #[error("Failed to acquire the next swapchain image")]
     ImageAcquisition(#[source] vk::Result),
 

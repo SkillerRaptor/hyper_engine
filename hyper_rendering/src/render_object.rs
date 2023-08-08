@@ -5,13 +5,16 @@
  */
 
 use crate::{
-    allocator::Allocator,
+    allocator::{Allocator, MemoryLocation},
     buffer::Buffer,
+    command_buffer::CommandBuffer,
+    command_pool::CommandPool,
     descriptor_manager::DescriptorManager,
     device::Device,
     error::{CreationError, CreationResult},
-    renderer::Bindings,
+    renderer::{Bindings, Renderer},
     resource_handle::ResourceHandle,
+    timeline_semaphore::TimelineSemaphore,
 };
 
 use ash::vk;
@@ -47,6 +50,10 @@ impl RenderObject {
         device: Arc<Device>,
         allocator: Arc<Mutex<Allocator>>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
+        upload_command_pool: &CommandPool,
+        upload_command_buffer: &CommandBuffer,
+        upload_semaphore: &TimelineSemaphore,
+        upload_value: &mut u64,
         mesh: &str,
         material: &str,
         transforms: Vec<Mat4x4f>,
@@ -59,12 +66,21 @@ impl RenderObject {
             device.clone(),
             allocator.clone(),
             mem::size_of::<Mat4x4f>() * transforms.len(),
-            vk::BufferUsageFlags::STORAGE_BUFFER,
+            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+            MemoryLocation::GpuOnly,
         )?;
 
-        transform_buffer.set_data(&transforms).map_err(|error| {
-            CreationError::RuntimeError(Box::new(error), "set data for transform buffer")
-        })?;
+        Renderer::upload_buffer(
+            device.clone(),
+            allocator.clone(),
+            upload_command_pool,
+            upload_command_buffer,
+            upload_semaphore,
+            upload_value,
+            &transforms,
+            &transform_buffer,
+        )
+        .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
 
         let transform_handle = descriptor_manager
             .borrow_mut()
@@ -76,7 +92,8 @@ impl RenderObject {
             device.clone(),
             allocator.clone(),
             mem::size_of::<Bindings>(),
-            vk::BufferUsageFlags::STORAGE_BUFFER,
+            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+            MemoryLocation::GpuOnly,
         )?;
 
         let bindings = Bindings {
@@ -84,9 +101,18 @@ impl RenderObject {
             vertices_offset: vertex_buffer_handle,
             transforms_offset: transform_handle,
         };
-        bindings_buffer.set_data(&[bindings]).map_err(|error| {
-            CreationError::RuntimeError(Box::new(error), "set data for bindings buffer")
-        })?;
+
+        Renderer::upload_buffer(
+            device.clone(),
+            allocator.clone(),
+            upload_command_pool,
+            upload_command_buffer,
+            upload_semaphore,
+            upload_value,
+            &[bindings],
+            &bindings_buffer,
+        )
+        .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
 
         let bindings_handle = descriptor_manager
             .borrow_mut()

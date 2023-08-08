@@ -27,10 +27,11 @@ impl Buffer {
         allocator: Arc<Mutex<Allocator>>,
         allocation_size: usize,
         usage: vk::BufferUsageFlags,
+        memory_location: MemoryLocation,
     ) -> CreationResult<Self> {
         let handle = Self::create_buffer(&device, allocation_size as u64, usage)?;
 
-        let allocation = Self::allocate_memory(&device, &allocator, handle)?;
+        let allocation = Self::allocate_memory(&device, &allocator, memory_location, handle)?;
 
         Ok(Self {
             handle,
@@ -65,6 +66,7 @@ impl Buffer {
     fn allocate_memory(
         device: &Device,
         allocator: &Mutex<Allocator>,
+        memory_location: MemoryLocation,
         handle: vk::Buffer,
     ) -> CreationResult<Allocation> {
         let memory_requirements = unsafe { device.handle().get_buffer_memory_requirements(handle) };
@@ -72,7 +74,7 @@ impl Buffer {
         let allocation = allocator
             .lock()
             .unwrap()
-            .allocate(MemoryLocation::CpuToGpu, memory_requirements)
+            .allocate(memory_location, memory_requirements)
             .map_err(|error| {
                 CreationError::RuntimeError(Box::new(error), "allocate memory for buffer")
             })?;

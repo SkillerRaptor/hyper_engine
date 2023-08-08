@@ -406,7 +406,7 @@ impl Device {
         Ok(handle)
     }
 
-    pub(crate) fn submit_queue(
+    pub(crate) fn submit_render_queue(
         &self,
         command_buffer: &CommandBuffer,
         present_semaphore: &BinarySemaphore,
@@ -443,6 +443,45 @@ impl Device {
         let submit_info = vk::SubmitInfo2::builder()
             .wait_semaphore_infos(wait_semaphore_infos)
             .command_buffer_infos(command_buffer_infos)
+            .signal_semaphore_infos(signal_semaphore_infos);
+
+        unsafe {
+            self.handle
+                .queue_submit2(self.graphics_queue, &[*submit_info], vk::Fence::null())
+                .map_err(RuntimeError::QueueSubmit)
+        }?;
+
+        Ok(())
+    }
+
+    pub(crate) fn submit_upload_queue(
+        &self,
+        command_buffer: &CommandBuffer,
+        upload_semaphore: &TimelineSemaphore,
+        last_upload_value: u64,
+    ) -> RuntimeResult<()> {
+        let command_buffer_info = vk::CommandBufferSubmitInfo::builder()
+            .command_buffer(command_buffer.handle())
+            .device_mask(0);
+
+        let wait_semaphore_info = vk::SemaphoreSubmitInfo::builder()
+            .semaphore(upload_semaphore.handle())
+            .value(last_upload_value)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
+
+        let signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
+            .semaphore(upload_semaphore.handle())
+            .value(last_upload_value + 1)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
+
+        let wait_semaphore_infos = &[*wait_semaphore_info];
+        let signal_semaphore_infos = &[*signal_semaphore_info];
+        let command_buffer_infos = &[*command_buffer_info];
+        let submit_info = vk::SubmitInfo2::builder()
+            .command_buffer_infos(command_buffer_infos)
+            .wait_semaphore_infos(wait_semaphore_infos)
             .signal_semaphore_infos(signal_semaphore_infos);
 
         unsafe {

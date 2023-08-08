@@ -5,12 +5,16 @@
  */
 
 use crate::{
-    allocator::Allocator,
+    allocator::{Allocator, MemoryLocation},
     buffer::Buffer,
+    command_buffer::CommandBuffer,
+    command_pool::CommandPool,
     descriptor_manager::DescriptorManager,
     device::Device,
     error::{CreationError, CreationResult},
+    renderer::Renderer,
     resource_handle::ResourceHandle,
+    timeline_semaphore::TimelineSemaphore,
 };
 
 use hyper_math::vector::Vec4f;
@@ -41,22 +45,36 @@ pub(crate) struct Mesh {
 }
 
 impl Mesh {
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         device: Arc<Device>,
         allocator: Arc<Mutex<Allocator>>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
+        upload_command_pool: &CommandPool,
+        upload_command_buffer: &CommandBuffer,
+        upload_semaphore: &TimelineSemaphore,
+        upload_value: &mut u64,
         vertices: Vec<Vertex>,
     ) -> CreationResult<Self> {
         let vertex_buffer = Buffer::new(
-            device,
-            allocator,
+            device.clone(),
+            allocator.clone(),
             mem::size_of::<Vertex>() * vertices.len(),
-            vk::BufferUsageFlags::STORAGE_BUFFER,
+            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+            MemoryLocation::GpuOnly,
         )?;
 
-        vertex_buffer
-            .set_data(&vertices)
-            .map_err(|error| CreationError::RuntimeError(Box::new(error), "set data for mesh"))?;
+        Renderer::upload_buffer(
+            device.clone(),
+            allocator.clone(),
+            upload_command_pool,
+            upload_command_buffer,
+            upload_semaphore,
+            upload_value,
+            &vertices,
+            &vertex_buffer,
+        )
+        .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
 
         let vertex_buffer_handle = descriptor_manager
             .borrow_mut()
@@ -72,10 +90,15 @@ impl Mesh {
     }
 
     // TODO: Move this into asset manager and model class
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn load(
         device: Arc<Device>,
         allocator: Arc<Mutex<Allocator>>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
+        upload_command_pool: &CommandPool,
+        upload_command_buffer: &CommandBuffer,
+        upload_semaphore: &TimelineSemaphore,
+        upload_value: &mut u64,
         mesh_file: &str,
     ) -> CreationResult<Self> {
         let (models, _) = tobj::load_obj(mesh_file, &LoadOptions::default())
@@ -110,7 +133,16 @@ impl Mesh {
             }
         }
 
-        let mesh = Self::new(device, allocator, descriptor_manager, vertices)?;
+        let mesh = Self::new(
+            device,
+            allocator,
+            descriptor_manager,
+            upload_command_pool,
+            upload_command_buffer,
+            upload_semaphore,
+            upload_value,
+            vertices,
+        )?;
         Ok(mesh)
     }
 

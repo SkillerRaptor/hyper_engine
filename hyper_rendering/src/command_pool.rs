@@ -6,7 +6,7 @@
 
 use crate::{
     device::{queue_family_indices::QueueFamilyIndices, Device},
-    error::{CreationError, CreationResult},
+    error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
     instance::Instance,
     surface::Surface,
 };
@@ -40,6 +40,17 @@ impl CommandPool {
         }?;
 
         Ok(Self { handle, device })
+    }
+
+    pub(crate) fn reset(&self) -> RuntimeResult<()> {
+        unsafe {
+            self.device
+                .handle()
+                .reset_command_pool(self.handle, vk::CommandPoolResetFlags::empty())
+                .map_err(RuntimeError::CommandPoolReset)?;
+        }
+
+        Ok(())
     }
 
     pub(crate) fn handle(&self) -> vk::CommandPool {

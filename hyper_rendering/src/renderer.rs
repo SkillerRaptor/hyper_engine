@@ -5,14 +5,14 @@
  */
 
 use crate::{
-    allocator::Allocator,
+    allocator::{Allocator, MemoryLocation},
     binary_semaphore::BinarySemaphore,
     buffer::Buffer,
     command_buffer::CommandBuffer,
     command_pool::CommandPool,
     descriptor_manager::DescriptorManager,
     device::Device,
-    error::{CreationError, CreationResult, RuntimeResult},
+    error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
     instance::Instance,
     mesh::{Mesh, Vertex},
     pipeline::{BindingsOffset, Pipeline},
@@ -34,6 +34,7 @@ use ash::vk;
 use std::{
     cell::RefCell,
     collections::HashMap,
+    fmt::Debug,
     mem,
     rc::Rc,
     sync::{Arc, Mutex},
@@ -56,6 +57,12 @@ pub(crate) struct Renderer {
     renderables: Vec<RenderObject>,
 
     _projection_view_buffer: Buffer,
+
+    _upload_semaphore: TimelineSemaphore,
+    _upload_value: u64,
+
+    _upload_command_buffer: CommandBuffer,
+    _upload_command_pool: CommandPool,
 
     current_frame_id: u64,
     swapchain_image_index: u32,
@@ -99,6 +106,11 @@ impl Renderer {
         }
 
         let submit_semaphore = TimelineSemaphore::new(device.clone())?;
+
+        let upload_command_pool = CommandPool::new(instance, surface, device.clone())?;
+        let upload_command_buffer = CommandBuffer::new(device.clone(), &upload_command_pool)?;
+        let upload_semaphore = TimelineSemaphore::new(device.clone())?;
+        let mut upload_value = 0;
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -144,6 +156,10 @@ impl Renderer {
             device.clone(),
             allocator.clone(),
             descriptor_manager.clone(),
+            &upload_command_pool,
+            &upload_command_buffer,
+            &upload_semaphore,
+            &mut upload_value,
             triangle_vertices,
         )?;
 
@@ -153,6 +169,10 @@ impl Renderer {
             device.clone(),
             allocator.clone(),
             descriptor_manager.clone(),
+            &upload_command_pool,
+            &upload_command_buffer,
+            &upload_semaphore,
+            &mut upload_value,
             "./assets/models/monkey_smooth.obj",
         )?;
 
@@ -165,7 +185,8 @@ impl Renderer {
             device.clone(),
             allocator.clone(),
             mem::size_of::<Mat4x4f>(),
-            vk::BufferUsageFlags::STORAGE_BUFFER,
+            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+            MemoryLocation::GpuOnly,
         )?;
 
         let camera_position = Vec3f::new(0.0, -1.0, -5.0);
@@ -177,11 +198,17 @@ impl Renderer {
             Mat4x4f::new_perspective(f32::to_radians(90.0), 1280.0 / 720.0, 0.1, 200.0);
 
         let projection_view = projection_matrix * view_matrix;
-        projection_view_buffer
-            .set_data(&[projection_view])
-            .map_err(|error| {
-                CreationError::RuntimeError(Box::new(error), "set data for transform buffer")
-            })?;
+        Self::upload_buffer(
+            device.clone(),
+            allocator.clone(),
+            &upload_command_pool,
+            &upload_command_buffer,
+            &upload_semaphore,
+            &mut upload_value,
+            &[projection_view],
+            &projection_view_buffer,
+        )
+        .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
 
         let projection_view_buffer_handle = descriptor_manager
             .borrow_mut()
@@ -195,6 +222,10 @@ impl Renderer {
             device.clone(),
             allocator.clone(),
             descriptor_manager.clone(),
+            &upload_command_pool,
+            &upload_command_buffer,
+            &upload_semaphore,
+            &mut upload_value,
             "monkey",
             "default",
             [Mat4x4f::identity()].to_vec(),
@@ -217,6 +248,10 @@ impl Renderer {
             device.clone(),
             allocator.clone(),
             descriptor_manager.clone(),
+            &upload_command_pool,
+            &upload_command_buffer,
+            &upload_semaphore,
+            &mut upload_value,
             "triangle",
             "default",
             transforms,
@@ -231,6 +266,12 @@ impl Renderer {
             renderables,
 
             _projection_view_buffer: projection_view_buffer,
+
+            _upload_semaphore: upload_semaphore,
+            _upload_value: upload_value,
+
+            _upload_command_buffer: upload_command_buffer,
+            _upload_command_pool: upload_command_pool,
 
             current_frame_id: 0,
             swapchain_image_index: 0,
@@ -414,7 +455,7 @@ impl Renderer {
     ) -> RuntimeResult<()> {
         let side = self.current_frame_id % 2;
 
-        self.device.submit_queue(
+        self.device.submit_render_queue(
             &self.command_buffers[side as usize],
             &self.present_semaphores[side as usize],
             &self.render_semaphores[side as usize],
@@ -495,6 +536,81 @@ impl Renderer {
         swapchain: &mut Swapchain,
     ) -> RuntimeResult<()> {
         swapchain.recreate(window, instance, surface)?;
+
+        Ok(())
+    }
+
+    // NOTE: We pass everything for now so we can use it from everywhere
+
+    // TODO: Move this logic
+    fn immediate_submit<F>(
+        device: Arc<Device>,
+        upload_command_pool: &CommandPool,
+        upload_command_buffer: &CommandBuffer,
+        upload_semaphore: &TimelineSemaphore,
+        upload_value: &mut u64,
+        function: F,
+    ) -> RuntimeResult<()>
+    where
+        F: FnOnce(&CommandBuffer),
+    {
+        upload_command_buffer.begin(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT)?;
+
+        function(upload_command_buffer);
+
+        upload_command_buffer.end()?;
+
+        device.submit_upload_queue(upload_command_buffer, upload_semaphore, *upload_value)?;
+        *upload_value += 1;
+        upload_semaphore.wait_for(*upload_value)?;
+
+        upload_command_pool.reset()?;
+
+        Ok(())
+    }
+
+    // TODO: Move this logic
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn upload_buffer<T>(
+        device: Arc<Device>,
+        allocator: Arc<Mutex<Allocator>>,
+        upload_command_pool: &CommandPool,
+        upload_command_buffer: &CommandBuffer,
+        upload_semaphore: &TimelineSemaphore,
+        upload_value: &mut u64,
+        data: &[T],
+        buffer: &Buffer,
+    ) -> RuntimeResult<()>
+    where
+        T: Debug,
+    {
+        let buffer_size = mem::size_of_val(data);
+
+        let staging_buffer = Buffer::new(
+            device.clone(),
+            allocator,
+            buffer_size,
+            vk::BufferUsageFlags::TRANSFER_SRC,
+            MemoryLocation::CpuToGpu,
+        )
+        .map_err(|error| RuntimeError::CreationError(error, "staging buffer"))?;
+
+        staging_buffer.set_data(data)?;
+
+        Self::immediate_submit(
+            device,
+            upload_command_pool,
+            upload_command_buffer,
+            upload_semaphore,
+            upload_value,
+            |command_buffer| {
+                let buffer_copy = vk::BufferCopy::builder()
+                    .src_offset(0)
+                    .dst_offset(0)
+                    .size(buffer_size as u64);
+                command_buffer.copy_buffer(&staging_buffer, buffer, &[*buffer_copy]);
+            },
+        )?;
 
         Ok(())
     }
