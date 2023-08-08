@@ -12,7 +12,7 @@ use crate::{
 
 use ash::vk;
 use gpu_allocator::{vulkan, AllocatorDebugSettings};
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]
@@ -34,7 +34,7 @@ impl Allocator {
     pub(crate) fn new(
         validation_layers_requested: bool,
         instance: &Instance,
-        device: Arc<Device>,
+        device: Rc<Device>,
     ) -> CreationResult<Self> {
         let debug_settings = AllocatorDebugSettings {
             log_memory_information: false,

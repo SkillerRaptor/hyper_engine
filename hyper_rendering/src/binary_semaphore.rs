@@ -10,15 +10,15 @@ use crate::{
 };
 
 use ash::vk;
-use std::sync::Arc;
+use std::rc::Rc;
 
 pub(crate) struct BinarySemaphore {
     handle: vk::Semaphore,
-    device: Arc<Device>,
+    device: Rc<Device>,
 }
 
 impl BinarySemaphore {
-    pub(crate) fn new(device: Arc<Device>) -> CreationResult<Self> {
+    pub(crate) fn new(device: Rc<Device>) -> CreationResult<Self> {
         let create_info =
             vk::SemaphoreCreateInfo::builder().flags(vk::SemaphoreCreateFlags::empty());
 

@@ -12,18 +12,18 @@ use crate::{
 };
 
 use ash::vk;
-use std::sync::Arc;
+use std::rc::Rc;
 
 pub(crate) struct CommandPool {
     handle: vk::CommandPool,
-    device: Arc<Device>,
+    device: Rc<Device>,
 }
 
 impl CommandPool {
     pub(crate) fn new(
         instance: &Instance,
         surface: &Surface,
-        device: Arc<Device>,
+        device: Rc<Device>,
     ) -> CreationResult<Self> {
         let queue_family_indices =
             QueueFamilyIndices::new(instance, surface, device.physical_device())?;

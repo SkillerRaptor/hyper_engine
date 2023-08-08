@@ -12,14 +12,14 @@ use crate::{
 
 use ash::vk;
 use smallvec::SmallVec;
-use std::sync::Arc;
+use std::rc::Rc;
 
 pub(crate) struct DescriptorPool {
     layouts: SmallVec<[vk::DescriptorSetLayout; 4]>,
     limits: SmallVec<[u32; 4]>,
     handle: vk::DescriptorPool,
 
-    device: Arc<Device>,
+    device: Rc<Device>,
 }
 
 impl DescriptorPool {
@@ -30,7 +30,7 @@ impl DescriptorPool {
         vk::DescriptorType::SAMPLER,
     ];
 
-    pub(crate) fn new(instance: &Instance, device: Arc<Device>) -> CreationResult<Self> {
+    pub(crate) fn new(instance: &Instance, device: Rc<Device>) -> CreationResult<Self> {
         let handle = Self::create_descriptor_pool(instance, &device)?;
         let limits = Self::find_limits(instance, &device);
         let layouts = Self::create_descriptor_set_layouts(&device, &limits)?;

@@ -11,7 +11,7 @@ use crate::{
     error::CreationResult, instance::Instance, resource_handle::ResourceHandle,
 };
 
-use std::{collections::VecDeque, sync::Arc};
+use std::{collections::VecDeque, rc::Rc};
 
 pub(crate) struct DescriptorManager {
     recycled_descriptors: VecDeque<ResourceHandle>,
@@ -20,11 +20,11 @@ pub(crate) struct DescriptorManager {
     descriptor_sets: Vec<DescriptorSet>,
     descriptor_pool: DescriptorPool,
 
-    device: Arc<Device>,
+    device: Rc<Device>,
 }
 
 impl DescriptorManager {
-    pub(crate) fn new(instance: &Instance, device: Arc<Device>) -> CreationResult<Self> {
+    pub(crate) fn new(instance: &Instance, device: Rc<Device>) -> CreationResult<Self> {
         let descriptor_pool = DescriptorPool::new(instance, device.clone())?;
 
         let mut descriptor_sets = Vec::new();

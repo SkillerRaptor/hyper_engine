@@ -13,15 +13,15 @@ use crate::{
 };
 
 use ash::vk;
-use std::{mem, slice, sync::Arc};
+use std::{mem, rc::Rc, slice};
 
 pub(crate) struct CommandBuffer {
     handle: vk::CommandBuffer,
-    device: Arc<Device>,
+    device: Rc<Device>,
 }
 
 impl CommandBuffer {
-    pub(crate) fn new(device: Arc<Device>, command_pool: &CommandPool) -> CreationResult<Self> {
+    pub(crate) fn new(device: Rc<Device>, command_pool: &CommandPool) -> CreationResult<Self> {
         let allocate_info = vk::CommandBufferAllocateInfo::builder()
             .command_pool(command_pool.handle())
             .command_buffer_count(1)

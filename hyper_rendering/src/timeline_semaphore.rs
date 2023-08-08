@@ -10,15 +10,15 @@ use crate::{
 };
 
 use ash::vk;
-use std::sync::Arc;
+use std::rc::Rc;
 
 pub(crate) struct TimelineSemaphore {
     handle: vk::Semaphore,
-    device: Arc<Device>,
+    device: Rc<Device>,
 }
 
 impl TimelineSemaphore {
-    pub(crate) fn new(device: Arc<Device>) -> CreationResult<Self> {
+    pub(crate) fn new(device: Rc<Device>) -> CreationResult<Self> {
         let mut type_create_info = vk::SemaphoreTypeCreateInfo::builder()
             .semaphore_type(vk::SemaphoreType::TIMELINE)
             .initial_value(0);

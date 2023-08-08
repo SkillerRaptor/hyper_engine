@@ -20,12 +20,7 @@ use crate::{
 use ash::vk;
 use hyper_math::matrix::Mat4x4f;
 
-use std::{
-    cell::RefCell,
-    mem,
-    rc::Rc,
-    sync::{Arc, Mutex},
-};
+use std::{cell::RefCell, mem, rc::Rc};
 
 // NOTE: Temporary
 pub(crate) struct RenderObject {
@@ -47,8 +42,8 @@ pub(crate) struct RenderObject {
 impl RenderObject {
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
-        device: Arc<Device>,
-        allocator: Arc<Mutex<Allocator>>,
+        device: Rc<Device>,
+        allocator: Rc<RefCell<Allocator>>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         upload_command_pool: &CommandPool,
         upload_command_buffer: &CommandBuffer,

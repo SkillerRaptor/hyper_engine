@@ -31,14 +31,7 @@ use hyper_math::{
 use hyper_platform::window::Window;
 
 use ash::vk;
-use std::{
-    cell::RefCell,
-    collections::HashMap,
-    fmt::Debug,
-    mem,
-    rc::Rc,
-    sync::{Arc, Mutex},
-};
+use std::{cell::RefCell, collections::HashMap, fmt::Debug, mem, rc::Rc};
 
 // NOTE: Temporary
 #[repr(C)]
@@ -76,7 +69,7 @@ pub(crate) struct Renderer {
     _command_pool: CommandPool,
 
     descriptor_manager: Rc<RefCell<DescriptorManager>>,
-    device: Arc<Device>,
+    device: Rc<Device>,
 }
 
 impl Renderer {
@@ -85,8 +78,8 @@ impl Renderer {
     pub(crate) fn new(
         instance: &Instance,
         surface: &Surface,
-        device: Arc<Device>,
-        allocator: Arc<Mutex<Allocator>>,
+        device: Rc<Device>,
+        allocator: Rc<RefCell<Allocator>>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         swapchain: &Swapchain,
     ) -> CreationResult<Self> {
@@ -544,7 +537,7 @@ impl Renderer {
 
     // TODO: Move this logic
     fn immediate_submit<F>(
-        device: Arc<Device>,
+        device: Rc<Device>,
         upload_command_pool: &CommandPool,
         upload_command_buffer: &CommandBuffer,
         upload_semaphore: &TimelineSemaphore,
@@ -572,8 +565,8 @@ impl Renderer {
     // TODO: Move this logic
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn upload_buffer<T>(
-        device: Arc<Device>,
-        allocator: Arc<Mutex<Allocator>>,
+        device: Rc<Device>,
+        allocator: Rc<RefCell<Allocator>>,
         upload_command_pool: &CommandPool,
         upload_command_buffer: &CommandBuffer,
         upload_semaphore: &TimelineSemaphore,

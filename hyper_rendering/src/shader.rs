@@ -13,17 +13,17 @@ use ash::vk;
 use std::{
     fs::File,
     io::{BufReader, Read},
-    sync::Arc,
+    rc::Rc,
 };
 
 pub(crate) struct Shader {
     handle: vk::ShaderModule,
 
-    device: Arc<Device>,
+    device: Rc<Device>,
 }
 
 impl Shader {
-    pub(crate) fn new(device: Arc<Device>, spirv_file: &str) -> CreationResult<Self> {
+    pub(crate) fn new(device: Rc<Device>, spirv_file: &str) -> CreationResult<Self> {
         let bytes = Self::parse_spirv(spirv_file)?;
         let handle = Self::create_shader_module(&device, &bytes)?;
 

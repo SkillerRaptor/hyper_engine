@@ -11,20 +11,20 @@ use crate::{
 };
 
 use ash::vk;
-use std::sync::{Arc, Mutex};
+use std::{cell::RefCell, rc::Rc};
 
 pub(crate) struct Buffer {
     allocation: Option<Allocation>,
     handle: vk::Buffer,
 
-    allocator: Arc<Mutex<Allocator>>,
-    device: Arc<Device>,
+    allocator: Rc<RefCell<Allocator>>,
+    device: Rc<Device>,
 }
 
 impl Buffer {
     pub(crate) fn new(
-        device: Arc<Device>,
-        allocator: Arc<Mutex<Allocator>>,
+        device: Rc<Device>,
+        allocator: Rc<RefCell<Allocator>>,
         allocation_size: usize,
         usage: vk::BufferUsageFlags,
         memory_location: MemoryLocation,
@@ -65,15 +65,14 @@ impl Buffer {
 
     fn allocate_memory(
         device: &Device,
-        allocator: &Mutex<Allocator>,
+        allocator: &RefCell<Allocator>,
         memory_location: MemoryLocation,
         handle: vk::Buffer,
     ) -> CreationResult<Allocation> {
         let memory_requirements = unsafe { device.handle().get_buffer_memory_requirements(handle) };
 
         let allocation = allocator
-            .lock()
-            .unwrap()
+            .borrow_mut()
             .allocate(memory_location, memory_requirements)
             .map_err(|error| {
                 CreationError::RuntimeError(Box::new(error), "allocate memory for buffer")
@@ -114,8 +113,7 @@ impl Buffer {
 impl Drop for Buffer {
     fn drop(&mut self) {
         self.allocator
-            .lock()
-            .unwrap()
+            .borrow_mut()
             .free(self.allocation.take().unwrap())
             .unwrap();
 

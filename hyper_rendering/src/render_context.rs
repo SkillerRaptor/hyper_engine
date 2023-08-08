@@ -18,18 +18,14 @@ use crate::{
 use hyper_platform::window::Window;
 
 use ash::Entry;
-use std::{
-    cell::RefCell,
-    rc::Rc,
-    sync::{Arc, Mutex},
-};
+use std::{cell::RefCell, rc::Rc};
 
 pub struct RenderContext {
     renderer: Renderer,
     swapchain: Swapchain,
     _descriptor_manager: Rc<RefCell<DescriptorManager>>,
-    _allocator: Arc<Mutex<Allocator>>,
-    device: Arc<Device>,
+    _allocator: Rc<RefCell<Allocator>>,
+    device: Rc<Device>,
     surface: Surface,
     instance: Instance,
     _entry: Entry,
@@ -43,9 +39,9 @@ impl RenderContext {
         let instance = Instance::new(window, validation_layers_requested, &entry)?;
 
         let surface = Surface::new(window, &entry, &instance)?;
-        let device = Arc::new(Device::new(&instance, &surface)?);
+        let device = Rc::new(Device::new(&instance, &surface)?);
 
-        let allocator = Arc::new(Mutex::new(Allocator::new(
+        let allocator = Rc::new(RefCell::new(Allocator::new(
             validation_layers_requested,
             &instance,
             device.clone(),

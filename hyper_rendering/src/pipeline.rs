@@ -14,7 +14,7 @@ use crate::{
 };
 
 use ash::vk;
-use std::{cell::RefCell, ffi::CStr, mem, rc::Rc, sync::Arc};
+use std::{cell::RefCell, ffi::CStr, mem, rc::Rc};
 
 #[repr(C)]
 pub(crate) struct BindingsOffset {
@@ -39,12 +39,12 @@ pub(crate) struct Pipeline {
     layout: vk::PipelineLayout,
     handle: vk::Pipeline,
 
-    device: Arc<Device>,
+    device: Rc<Device>,
 }
 
 impl Pipeline {
     pub(crate) fn new(
-        device: Arc<Device>,
+        device: Rc<Device>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         swapchain: &Swapchain,
         vertex_shader: Shader,

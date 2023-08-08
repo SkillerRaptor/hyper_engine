@@ -20,12 +20,7 @@ use crate::{
 use hyper_math::vector::Vec4f;
 
 use ash::vk;
-use std::{
-    cell::RefCell,
-    mem,
-    rc::Rc,
-    sync::{Arc, Mutex},
-};
+use std::{cell::RefCell, mem, rc::Rc};
 use tobj::LoadOptions;
 
 #[repr(C)]
@@ -47,8 +42,8 @@ pub(crate) struct Mesh {
 impl Mesh {
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
-        device: Arc<Device>,
-        allocator: Arc<Mutex<Allocator>>,
+        device: Rc<Device>,
+        allocator: Rc<RefCell<Allocator>>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         upload_command_pool: &CommandPool,
         upload_command_buffer: &CommandBuffer,
@@ -92,8 +87,8 @@ impl Mesh {
     // TODO: Move this into asset manager and model class
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn load(
-        device: Arc<Device>,
-        allocator: Arc<Mutex<Allocator>>,
+        device: Rc<Device>,
+        allocator: Rc<RefCell<Allocator>>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         upload_command_pool: &CommandPool,
         upload_command_buffer: &CommandBuffer,

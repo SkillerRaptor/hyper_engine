@@ -19,7 +19,7 @@ use crate::{
 use hyper_platform::window::Window;
 
 use ash::{extensions::khr, vk};
-use std::sync::{Arc, Mutex};
+use std::{cell::RefCell, rc::Rc};
 
 pub(crate) struct Swapchain {
     // TODO: Abstract into image struct
@@ -37,8 +37,8 @@ pub(crate) struct Swapchain {
     handle: vk::SwapchainKHR,
     loader: khr::Swapchain,
 
-    allocator: Arc<Mutex<Allocator>>,
-    device: Arc<Device>,
+    allocator: Rc<RefCell<Allocator>>,
+    device: Rc<Device>,
 }
 
 impl Swapchain {
@@ -46,8 +46,8 @@ impl Swapchain {
         window: &Window,
         instance: &Instance,
         surface: &Surface,
-        device: Arc<Device>,
-        allocator: Arc<Mutex<Allocator>>,
+        device: Rc<Device>,
+        allocator: Rc<RefCell<Allocator>>,
     ) -> CreationResult<Self> {
         let swapchain_support_details =
             SwapchainSupportDetails::new(surface, device.physical_device())?;
@@ -203,7 +203,7 @@ impl Swapchain {
     fn create_depth_image(
         window: &Window,
         device: &Device,
-        allocator: &Mutex<Allocator>,
+        allocator: &RefCell<Allocator>,
     ) -> CreationResult<(vk::Image, vk::ImageView, vk::Format, Allocation)> {
         let framebuffer_size = window.framebuffer_size();
 
@@ -237,8 +237,7 @@ impl Swapchain {
         let memory_requirements = unsafe { device.handle().get_image_memory_requirements(image) };
 
         let allocation = allocator
-            .lock()
-            .unwrap()
+            .borrow_mut()
             .allocate(MemoryLocation::GpuOnly, memory_requirements)
             .map_err(|error| {
                 CreationError::RuntimeError(Box::new(error), "allocate memory for depth image")
@@ -474,8 +473,7 @@ impl Swapchain {
                 .handle()
                 .destroy_image_view(self.depth_image_view, None);
             self.allocator
-                .lock()
-                .unwrap()
+                .borrow_mut()
                 .free(self.depth_image_allocation.take().unwrap())
                 .unwrap();
             self.device.handle().destroy_image(self.depth_image, None);
