@@ -197,31 +197,33 @@ impl Renderer {
             descriptor_manager.clone(),
             "monkey",
             "default",
-            Mat4x4f::identity(),
+            [Mat4x4f::identity()].to_vec(),
             meshes["monkey"].vertex_buffer_handle(),
             projection_view_buffer_handle,
         )?;
         renderables.push(monkey);
 
+        let mut transforms = Vec::new();
         for x in -20..=20 {
             for y in -20..=20 {
                 let mut transform = Mat4x4f::identity();
                 transform.append_translation_mut(&Vec3f::new(x as f32, 0.0, y as f32));
                 transform.append_scaling_mut(0.18);
-
-                let triangle = RenderObject::new(
-                    device.clone(),
-                    allocator.clone(),
-                    descriptor_manager.clone(),
-                    "triangle",
-                    "default",
-                    transform,
-                    meshes["triangle"].vertex_buffer_handle(),
-                    projection_view_buffer_handle,
-                )?;
-                renderables.push(triangle);
+                transforms.push(transform);
             }
         }
+
+        let triangle = RenderObject::new(
+            device.clone(),
+            allocator.clone(),
+            descriptor_manager.clone(),
+            "triangle",
+            "default",
+            transforms,
+            meshes["triangle"].vertex_buffer_handle(),
+            projection_view_buffer_handle,
+        )?;
+        renderables.push(triangle);
 
         Ok(Self {
             materials,
@@ -476,7 +478,12 @@ impl Renderer {
             );
 
             let mesh = &self.meshes[renderable.mesh()];
-            self.command_buffers[side as usize].draw(mesh.vertices().len() as u32, 1, 0, 0);
+            self.command_buffers[side as usize].draw(
+                mesh.vertices().len() as u32,
+                renderable.transforms().len() as u32,
+                0,
+                0,
+            );
         }
     }
 

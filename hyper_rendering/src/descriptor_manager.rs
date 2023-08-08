@@ -51,7 +51,25 @@ impl DescriptorManager {
 
     pub(crate) fn allocate_buffer_handle(&mut self, buffer: &Buffer) -> ResourceHandle {
         let handle = self.fetch_handle();
+        self.update_buffer(handle, buffer);
+        handle
+    }
 
+    fn fetch_handle(&mut self) -> ResourceHandle {
+        self.recycled_descriptors.pop_front().unwrap_or_else(|| {
+            let index = self.current_index;
+            self.current_index += 1;
+
+            ResourceHandle::new(index)
+        })
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn retire_handle(&mut self, handle: ResourceHandle) {
+        self.recycled_descriptors.push_back(handle)
+    }
+
+    pub(crate) fn update_buffer(&self, handle: ResourceHandle, buffer: &Buffer) {
         let buffer_info = vk::DescriptorBufferInfo::builder()
             .buffer(buffer.handle())
             .offset(0)
@@ -72,22 +90,6 @@ impl DescriptorManager {
                 .handle()
                 .update_descriptor_sets(&[*write_set], &[]);
         }
-
-        handle
-    }
-
-    pub(crate) fn fetch_handle(&mut self) -> ResourceHandle {
-        self.recycled_descriptors.pop_front().unwrap_or_else(|| {
-            let index = self.current_index;
-            self.current_index += 1;
-
-            ResourceHandle::new(index)
-        })
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn retire_handle(&mut self, handle: ResourceHandle) {
-        self.recycled_descriptors.push_back(handle)
     }
 
     pub(crate) fn descriptor_pool(&self) -> &DescriptorPool {

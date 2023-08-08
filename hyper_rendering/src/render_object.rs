@@ -30,6 +30,8 @@ pub(crate) struct RenderObject {
     mesh: String,
     material: String,
 
+    transforms: Vec<Mat4x4f>,
+
     bindings_handle: ResourceHandle,
     _bindings_buffer: Buffer,
 
@@ -47,7 +49,7 @@ impl RenderObject {
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         mesh: &str,
         material: &str,
-        transform: Mat4x4f,
+        transforms: Vec<Mat4x4f>,
         vertex_buffer_handle: ResourceHandle,
         projection_view_buffer_handle: ResourceHandle,
     ) -> CreationResult<Self> {
@@ -56,11 +58,11 @@ impl RenderObject {
         let transform_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
-            mem::size_of::<Mat4x4f>(),
+            mem::size_of::<Mat4x4f>() * transforms.len(),
             vk::BufferUsageFlags::STORAGE_BUFFER,
         )?;
 
-        transform_buffer.set_data(&[transform]).map_err(|error| {
+        transform_buffer.set_data(&transforms).map_err(|error| {
             CreationError::RuntimeError(Box::new(error), "set data for transform buffer")
         })?;
 
@@ -94,6 +96,8 @@ impl RenderObject {
             mesh: mesh.to_string(),
             material: material.to_string(),
 
+            transforms,
+
             bindings_handle,
             _bindings_buffer: bindings_buffer,
             transform_handle,
@@ -113,6 +117,10 @@ impl RenderObject {
 
     pub(crate) fn bindings_handle(&self) -> ResourceHandle {
         self.bindings_handle
+    }
+
+    pub(crate) fn transforms(&self) -> &[Mat4x4f] {
+        &self.transforms
     }
 }
 
