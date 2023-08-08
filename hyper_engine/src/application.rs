@@ -109,7 +109,7 @@ impl Application {
                     return;
                 }
 
-                self.render_context.draw();
+                self.render_context.draw_objects();
 
                 if let Err(error) = self.render_context.end() {
                     runtime_error = Err(error.into());

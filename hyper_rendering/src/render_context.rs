@@ -110,8 +110,8 @@ impl RenderContext {
         Ok(())
     }
 
-    pub fn draw(&self) {
-        self.renderer.draw();
+    pub fn draw_objects(&self) {
+        self.renderer.draw_objects();
     }
 
     pub fn resize(&mut self, window: &Window) -> RuntimeResult<()> {

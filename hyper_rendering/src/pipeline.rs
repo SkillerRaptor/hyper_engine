@@ -5,7 +5,6 @@
  */
 
 use crate::{
-    command_buffer::CommandBuffer,
     descriptor_manager::DescriptorManager,
     device::Device,
     error::{CreationError, CreationResult},
@@ -214,110 +213,6 @@ impl Pipeline {
         }?;
 
         Ok(handles[0])
-    }
-
-    pub(crate) fn begin_rendering(
-        &self,
-        swapchain: &Swapchain,
-        command_buffer: &CommandBuffer,
-        image: vk::Image,
-        image_view: vk::ImageView,
-        color_clear: vk::ClearValue,
-        depth_clear: vk::ClearValue,
-    ) {
-        let subresource_range = vk::ImageSubresourceRange::builder()
-            .aspect_mask(vk::ImageAspectFlags::COLOR)
-            .base_mip_level(0)
-            .level_count(1)
-            .base_array_layer(0)
-            .layer_count(1);
-
-        let image_memory_barrier = vk::ImageMemoryBarrier2::builder()
-            .src_stage_mask(vk::PipelineStageFlags2::TOP_OF_PIPE)
-            .dst_stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
-            .dst_access_mask(vk::AccessFlags2::COLOR_ATTACHMENT_WRITE)
-            .old_layout(vk::ImageLayout::UNDEFINED)
-            .new_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
-            .src_queue_family_index(0)
-            .dst_queue_family_index(0)
-            .image(image)
-            .subresource_range(*subresource_range);
-
-        let image_memory_barriers = [*image_memory_barrier];
-        let dependency_info = vk::DependencyInfo::builder()
-            .dependency_flags(vk::DependencyFlags::empty())
-            .memory_barriers(&[])
-            .buffer_memory_barriers(&[])
-            .image_memory_barriers(&image_memory_barriers);
-
-        command_buffer.pipeline_barrier2(*dependency_info);
-
-        let render_area_extent = swapchain.extent();
-        let render_area_offset = vk::Offset2D::builder().x(0).y(0);
-
-        let render_area = vk::Rect2D::builder()
-            .extent(render_area_extent)
-            .offset(*render_area_offset);
-
-        let color_attachment_info = vk::RenderingAttachmentInfoKHR::builder()
-            .image_view(image_view)
-            .image_layout(vk::ImageLayout::ATTACHMENT_OPTIMAL_KHR)
-            .load_op(vk::AttachmentLoadOp::CLEAR)
-            .store_op(vk::AttachmentStoreOp::STORE)
-            .clear_value(color_clear);
-
-        let color_attachments = [*color_attachment_info];
-
-        let depth_attachment_info = vk::RenderingAttachmentInfoKHR::builder()
-            .image_view(swapchain.depth_image_view())
-            .image_layout(vk::ImageLayout::DEPTH_ATTACHMENT_OPTIMAL)
-            .load_op(vk::AttachmentLoadOp::CLEAR)
-            .store_op(vk::AttachmentStoreOp::STORE)
-            .clear_value(depth_clear);
-
-        let rendering_info = vk::RenderingInfoKHR::builder()
-            .render_area(*render_area)
-            .layer_count(1)
-            .color_attachments(&color_attachments)
-            .depth_attachment(&depth_attachment_info);
-
-        command_buffer.begin_rendering(*rendering_info);
-    }
-
-    pub(crate) fn end_rendering(&self, command_buffer: &CommandBuffer, image: vk::Image) {
-        command_buffer.end_rendering();
-
-        let subresource_range = vk::ImageSubresourceRange::builder()
-            .aspect_mask(vk::ImageAspectFlags::COLOR)
-            .base_mip_level(0)
-            .level_count(1)
-            .base_array_layer(0)
-            .layer_count(1);
-
-        let image_memory_barrier = vk::ImageMemoryBarrier2::builder()
-            .src_stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
-            .src_access_mask(vk::AccessFlags2::COLOR_ATTACHMENT_WRITE)
-            .dst_stage_mask(vk::PipelineStageFlags2::BOTTOM_OF_PIPE)
-            .old_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
-            .new_layout(vk::ImageLayout::PRESENT_SRC_KHR)
-            .src_queue_family_index(0)
-            .dst_queue_family_index(0)
-            .image(image)
-            .subresource_range(*subresource_range);
-
-        let image_memory_barriers = [*image_memory_barrier];
-
-        let dependency_info = vk::DependencyInfo::builder()
-            .dependency_flags(vk::DependencyFlags::empty())
-            .memory_barriers(&[])
-            .buffer_memory_barriers(&[])
-            .image_memory_barriers(&image_memory_barriers);
-
-        command_buffer.pipeline_barrier2(*dependency_info);
-    }
-
-    pub(crate) fn bind(&self, command_buffer: &CommandBuffer) {
-        command_buffer.bind_pipeline(vk::PipelineBindPoint::GRAPHICS, self);
     }
 
     pub(crate) fn handle(&self) -> vk::Pipeline {

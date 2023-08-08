@@ -14,8 +14,9 @@ use crate::{
     device::Device,
     error::{CreationError, CreationResult, RuntimeResult},
     instance::Instance,
-    mesh::Mesh,
+    mesh::{Mesh, Vertex},
     pipeline::{BindingsOffset, Pipeline},
+    render_object::RenderObject,
     resource_handle::ResourceHandle,
     shader::Shader,
     surface::Surface,
@@ -23,12 +24,16 @@ use crate::{
     timeline_semaphore::TimelineSemaphore,
 };
 
-use hyper_math::{matrix::Mat4x4f, vector::Vec3f};
+use hyper_math::{
+    matrix::Mat4x4f,
+    vector::{Vec3f, Vec4f},
+};
 use hyper_platform::window::Window;
 
 use ash::vk;
 use std::{
     cell::RefCell,
+    collections::HashMap,
     mem,
     rc::Rc,
     sync::{Arc, Mutex},
@@ -37,20 +42,20 @@ use std::{
 // NOTE: Temporary
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
-struct Bindings {
-    projection_view_offset: ResourceHandle,
-    vertices_offset: ResourceHandle,
-    transforms_offset: ResourceHandle,
+pub(crate) struct Bindings {
+    pub(crate) projection_view_offset: ResourceHandle,
+    pub(crate) vertices_offset: ResourceHandle,
+    pub(crate) transforms_offset: ResourceHandle,
 }
 
 pub(crate) struct Renderer {
-    monkey_mesh: Mesh,
+    // TODO: Make a material system
+    materials: HashMap<String, Pipeline>,
+    meshes: HashMap<String, Mesh>,
+    // NOTE: Temporary
+    renderables: Vec<RenderObject>,
 
-    default_pipeline: Pipeline,
-
-    _transform_buffer: Buffer,
-    _bindings_buffer: Buffer,
-    bindings_buffer_handle: ResourceHandle,
+    _projection_view_buffer: Buffer,
 
     current_frame_id: u64,
     swapchain_image_index: u32,
@@ -97,6 +102,8 @@ impl Renderer {
 
         ////////////////////////////////////////////////////////////////////////
 
+        let mut materials = HashMap::new();
+
         let vertex_shader =
             Shader::new(device.clone(), "./assets/shaders/compiled/default_vs.spv")?;
         let fragment_shader =
@@ -109,7 +116,38 @@ impl Renderer {
             fragment_shader,
         )?;
 
+        materials.insert("default".to_string(), default_pipeline);
+
         ////////////////////////////////////////////////////////////////////////
+
+        let mut meshes = HashMap::new();
+
+        let triangle_vertices = vec![
+            Vertex {
+                position: Vec4f::new(1.0, 1.0, 0.5, 1.0),
+                normal: Vec4f::default(),
+                color: Vec4f::new(1.0, 0.0, 0.0, 1.0),
+            },
+            Vertex {
+                position: Vec4f::new(0.0, -1.0, 0.5, 1.0),
+                normal: Vec4f::default(),
+                color: Vec4f::new(0.0, 0.0, 1.0, 1.0),
+            },
+            Vertex {
+                position: Vec4f::new(-1.0, 1.0, 0.5, 1.0),
+                normal: Vec4f::default(),
+                color: Vec4f::new(0.0, 1.0, 0.0, 1.0),
+            },
+        ];
+
+        let triangle_mesh = Mesh::new(
+            device.clone(),
+            allocator.clone(),
+            descriptor_manager.clone(),
+            triangle_vertices,
+        )?;
+
+        meshes.insert("triangle".to_string(), triangle_mesh);
 
         let monkey_mesh = Mesh::load(
             device.clone(),
@@ -118,10 +156,11 @@ impl Renderer {
             "./assets/models/monkey_smooth.obj",
         )?;
 
+        meshes.insert("monkey".to_string(), monkey_mesh);
+
         ////////////////////////////////////////////////////////////////////////
 
         // TODO: Abstract into camera struct and add dynamic update
-
         let projection_view_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
@@ -129,9 +168,10 @@ impl Renderer {
             vk::BufferUsageFlags::STORAGE_BUFFER,
         )?;
 
-        let camera_position = Vec3f::new(0.0, 0.0, -2.0);
+        let camera_position = Vec3f::new(0.0, -1.0, -5.0);
 
-        let view_matrix = Mat4x4f::identity().append_translation(&camera_position);
+        let mut view_matrix = Mat4x4f::identity();
+        view_matrix.append_translation_mut(&camera_position);
 
         let projection_matrix =
             Mat4x4f::new_perspective(f32::to_radians(90.0), 1280.0 / 720.0, 0.1, 200.0);
@@ -149,52 +189,46 @@ impl Renderer {
 
         ////////////////////////////////////////////////////////////////////////
 
-        let transform_buffer = Buffer::new(
+        let mut renderables = Vec::new();
+
+        let monkey = RenderObject::new(
             device.clone(),
             allocator.clone(),
-            mem::size_of::<Mat4x4f>(),
-            vk::BufferUsageFlags::STORAGE_BUFFER,
+            descriptor_manager.clone(),
+            "monkey",
+            "default",
+            Mat4x4f::identity(),
+            meshes["monkey"].vertex_buffer_handle(),
+            projection_view_buffer_handle,
         )?;
+        renderables.push(monkey);
 
-        let transform = Mat4x4f::identity();
-        transform_buffer.set_data(&[transform]).map_err(|error| {
-            CreationError::RuntimeError(Box::new(error), "set data for transform buffer")
-        })?;
+        for x in -20..=20 {
+            for y in -20..=20 {
+                let mut transform = Mat4x4f::identity();
+                transform.append_translation_mut(&Vec3f::new(x as f32, 0.0, y as f32));
+                transform.append_scaling_mut(0.18);
 
-        let transforms_buffer_handle = descriptor_manager
-            .borrow_mut()
-            .allocate_buffer_handle(&transform_buffer);
-
-        ////////////////////////////////////////////////////////////////////////
-
-        let bindings_buffer = Buffer::new(
-            device.clone(),
-            allocator.clone(),
-            mem::size_of::<Bindings>(),
-            vk::BufferUsageFlags::STORAGE_BUFFER,
-        )?;
-
-        let bindings = Bindings {
-            projection_view_offset: projection_view_buffer_handle,
-            vertices_offset: monkey_mesh.vertex_buffer_handle(),
-            transforms_offset: transforms_buffer_handle,
-        };
-        bindings_buffer.set_data(&[bindings]).map_err(|error| {
-            CreationError::RuntimeError(Box::new(error), "set data for bindings buffer")
-        })?;
-
-        let bindings_buffer_handle = descriptor_manager
-            .borrow_mut()
-            .allocate_buffer_handle(&bindings_buffer);
+                let triangle = RenderObject::new(
+                    device.clone(),
+                    allocator.clone(),
+                    descriptor_manager.clone(),
+                    "triangle",
+                    "default",
+                    transform,
+                    meshes["triangle"].vertex_buffer_handle(),
+                    projection_view_buffer_handle,
+                )?;
+                renderables.push(triangle);
+            }
+        }
 
         Ok(Self {
-            monkey_mesh,
+            materials,
+            meshes,
+            renderables,
 
-            default_pipeline,
-
-            _transform_buffer: transform_buffer,
-            _bindings_buffer: bindings_buffer,
-            bindings_buffer_handle,
+            _projection_view_buffer: projection_view_buffer,
 
             current_frame_id: 0,
             swapchain_image_index: 0,
@@ -252,32 +286,63 @@ impl Renderer {
             },
         };
 
-        self.default_pipeline.begin_rendering(
-            swapchain,
-            &self.command_buffers[side as usize],
-            swapchain.images()[self.swapchain_image_index as usize],
-            swapchain.image_views()[self.swapchain_image_index as usize],
-            color_clear,
-            depth_clear,
-        );
+        let subresource_range = vk::ImageSubresourceRange::builder()
+            .aspect_mask(vk::ImageAspectFlags::COLOR)
+            .base_mip_level(0)
+            .level_count(1)
+            .base_array_layer(0)
+            .layer_count(1);
 
-        self.default_pipeline
-            .bind(&self.command_buffers[side as usize]);
+        let image_memory_barrier = vk::ImageMemoryBarrier2::builder()
+            .src_stage_mask(vk::PipelineStageFlags2::TOP_OF_PIPE)
+            .dst_stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .dst_access_mask(vk::AccessFlags2::COLOR_ATTACHMENT_WRITE)
+            .old_layout(vk::ImageLayout::UNDEFINED)
+            .new_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+            .src_queue_family_index(0)
+            .dst_queue_family_index(0)
+            .image(swapchain.images()[self.swapchain_image_index as usize])
+            .subresource_range(*subresource_range);
 
-        let descriptor_sets = self
-            .descriptor_manager
-            .borrow()
-            .descriptor_sets()
-            .iter()
-            .map(|descriptor_set| descriptor_set.handle())
-            .collect::<Vec<_>>();
-        self.command_buffers[side as usize].bind_descriptor_sets(
-            vk::PipelineBindPoint::GRAPHICS,
-            &self.default_pipeline,
-            0,
-            &descriptor_sets,
-            &[],
-        );
+        let image_memory_barriers = [*image_memory_barrier];
+        let dependency_info = vk::DependencyInfo::builder()
+            .dependency_flags(vk::DependencyFlags::empty())
+            .memory_barriers(&[])
+            .buffer_memory_barriers(&[])
+            .image_memory_barriers(&image_memory_barriers);
+
+        self.command_buffers[side as usize].pipeline_barrier2(*dependency_info);
+
+        let render_area_extent = swapchain.extent();
+        let render_area_offset = vk::Offset2D::builder().x(0).y(0);
+
+        let render_area = vk::Rect2D::builder()
+            .extent(render_area_extent)
+            .offset(*render_area_offset);
+
+        let color_attachment_info = vk::RenderingAttachmentInfoKHR::builder()
+            .image_view(swapchain.image_views()[self.swapchain_image_index as usize])
+            .image_layout(vk::ImageLayout::ATTACHMENT_OPTIMAL_KHR)
+            .load_op(vk::AttachmentLoadOp::CLEAR)
+            .store_op(vk::AttachmentStoreOp::STORE)
+            .clear_value(color_clear);
+
+        let color_attachments = [*color_attachment_info];
+
+        let depth_attachment_info = vk::RenderingAttachmentInfoKHR::builder()
+            .image_view(swapchain.depth_image_view())
+            .image_layout(vk::ImageLayout::DEPTH_ATTACHMENT_OPTIMAL)
+            .load_op(vk::AttachmentLoadOp::CLEAR)
+            .store_op(vk::AttachmentStoreOp::STORE)
+            .clear_value(depth_clear);
+
+        let rendering_info = vk::RenderingInfoKHR::builder()
+            .render_area(*render_area)
+            .layer_count(1)
+            .color_attachments(&color_attachments)
+            .depth_attachment(&depth_attachment_info);
+
+        self.command_buffers[side as usize].begin_rendering(*rendering_info);
 
         let viewport = vk::Viewport::builder()
             .x(0.0)
@@ -303,10 +368,35 @@ impl Renderer {
     pub(crate) fn end(&self, swapchain: &Swapchain) -> RuntimeResult<()> {
         let side = self.current_frame_id % 2;
 
-        self.default_pipeline.end_rendering(
-            &self.command_buffers[side as usize],
-            swapchain.images()[self.swapchain_image_index as usize],
-        );
+        self.command_buffers[side as usize].end_rendering();
+
+        let subresource_range = vk::ImageSubresourceRange::builder()
+            .aspect_mask(vk::ImageAspectFlags::COLOR)
+            .base_mip_level(0)
+            .level_count(1)
+            .base_array_layer(0)
+            .layer_count(1);
+
+        let image_memory_barrier = vk::ImageMemoryBarrier2::builder()
+            .src_stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .src_access_mask(vk::AccessFlags2::COLOR_ATTACHMENT_WRITE)
+            .dst_stage_mask(vk::PipelineStageFlags2::BOTTOM_OF_PIPE)
+            .old_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+            .new_layout(vk::ImageLayout::PRESENT_SRC_KHR)
+            .src_queue_family_index(0)
+            .dst_queue_family_index(0)
+            .image(swapchain.images()[self.swapchain_image_index as usize])
+            .subresource_range(*subresource_range);
+
+        let image_memory_barriers = [*image_memory_barrier];
+
+        let dependency_info = vk::DependencyInfo::builder()
+            .dependency_flags(vk::DependencyFlags::empty())
+            .memory_barriers(&[])
+            .buffer_memory_barriers(&[])
+            .image_memory_barriers(&image_memory_barriers);
+
+        self.command_buffers[side as usize].pipeline_barrier2(*dependency_info);
 
         self.command_buffers[side as usize].end()?;
 
@@ -342,21 +432,52 @@ impl Renderer {
         Ok(())
     }
 
-    pub(crate) fn draw(&self) {
+    pub(crate) fn draw_objects(&self) {
         // TODO: Draw scene and not a triangle
-
         let side = self.current_frame_id % 2;
 
-        let bindings_offset = BindingsOffset::new(self.bindings_buffer_handle);
+        // TODO: Update/Set camera dynamically
 
-        self.command_buffers[side as usize].push_constants(
-            &self.default_pipeline,
-            vk::ShaderStageFlags::ALL,
-            0,
-            &bindings_offset,
-        );
+        let mut last_material = String::new();
+        for renderable in &self.renderables {
+            let current_material = renderable.material();
+            if current_material != &last_material {
+                let material = &self.materials[current_material];
 
-        self.command_buffers[side as usize].draw(self.monkey_mesh.vertices().len() as u32, 1, 0, 0);
+                self.command_buffers[side as usize]
+                    .bind_pipeline(vk::PipelineBindPoint::GRAPHICS, material);
+
+                let descriptor_sets = self
+                    .descriptor_manager
+                    .borrow()
+                    .descriptor_sets()
+                    .iter()
+                    .map(|descriptor_set| descriptor_set.handle())
+                    .collect::<Vec<_>>();
+                self.command_buffers[side as usize].bind_descriptor_sets(
+                    vk::PipelineBindPoint::GRAPHICS,
+                    material,
+                    0,
+                    &descriptor_sets,
+                    &[],
+                );
+
+                last_material = current_material.to_string();
+            }
+
+            let material = &self.materials[&last_material];
+
+            let bindings_offset = BindingsOffset::new(renderable.bindings_handle());
+            self.command_buffers[side as usize].push_constants(
+                material,
+                vk::ShaderStageFlags::ALL,
+                0,
+                &bindings_offset,
+            );
+
+            let mesh = &self.meshes[renderable.mesh()];
+            self.command_buffers[side as usize].draw(mesh.vertices().len() as u32, 1, 0, 0);
+        }
     }
 
     pub(crate) fn resize(

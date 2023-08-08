@@ -19,6 +19,7 @@ pub(crate) mod device;
 pub(crate) mod instance;
 pub(crate) mod mesh;
 pub(crate) mod pipeline;
+pub(crate) mod render_object;
 pub(crate) mod renderer;
 pub(crate) mod resource_handle;
 pub(crate) mod shader;
