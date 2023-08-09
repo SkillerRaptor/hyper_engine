@@ -6,18 +6,13 @@
 
 use crate::{event::Event, key_code::KeyCode, mouse_code::MouseCode};
 
+use std::{error::Error, ops::ControlFlow};
 use winit::{
     dpi::PhysicalPosition,
     event::{self, DeviceEvent, ElementState, MouseButton, MouseScrollDelta, WindowEvent},
     event_loop::{self},
     platform::run_return::EventLoopExtRunReturn,
 };
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum ControlFlow {
-    Run,
-    Exit,
-}
 
 #[derive(Default)]
 pub struct EventLoop {
@@ -31,45 +26,39 @@ impl EventLoop {
         }
     }
 
-    pub fn run<F>(&mut self, mut event_handler: F)
+    pub fn run<F, E>(&mut self, mut event_handler: F) -> Result<(), E>
     where
-        F: FnMut(&mut ControlFlow, Event),
+        F: FnMut(Event) -> ControlFlow<E, ()>,
+        E: Error,
     {
-        let mut application_control_flow = ControlFlow::Run;
+        let mut return_error: Result<(), E> = Ok(());
         self.internal.run_return(|event, _, control_flow| {
             *control_flow = event_loop::ControlFlow::Poll;
-            match event {
-                event::Event::MainEventsCleared => {
-                    event_handler(&mut application_control_flow, Event::EventsCleared)
-                }
+            let event_control_flow = match event {
+                event::Event::MainEventsCleared => Some(event_handler(Event::EventsCleared)),
                 event::Event::DeviceEvent {
                     event: DeviceEvent::MouseMotion { delta },
                     ..
-                } => {
-                    event_handler(
-                        &mut application_control_flow,
-                        Event::MouseMoved {
-                            delta_x: delta.0,
-                            delta_y: delta.1,
-                        },
-                    );
-                }
+                } => Some(event_handler(Event::MouseMoved {
+                    delta_x: delta.0,
+                    delta_y: delta.1,
+                })),
 
                 event::Event::WindowEvent { event, .. } => match event {
-                    WindowEvent::CloseRequested => application_control_flow = ControlFlow::Exit,
+                    WindowEvent::CloseRequested => None,
                     WindowEvent::KeyboardInput { input, .. } => {
                         if let Some(virtual_key_code) = input.virtual_keycode {
                             let key_code = KeyCode::from(virtual_key_code);
                             match input.state {
-                                ElementState::Pressed => event_handler(
-                                    &mut application_control_flow,
-                                    Event::KeyPressed { button: key_code },
-                                ),
-                                ElementState::Released => event_handler(
-                                    &mut application_control_flow,
-                                    Event::KeyReleased { button: key_code },
-                                ),
+                                ElementState::Pressed => {
+                                    Some(event_handler(Event::KeyPressed { button: key_code }))
+                                }
+                                ElementState::Released => {
+                                    Some(event_handler(Event::KeyReleased { button: key_code }))
+                                }
                             }
+                        } else {
+                            Some(ControlFlow::Continue(()))
                         }
                     }
                     WindowEvent::MouseInput { state, button, .. } => {
@@ -81,14 +70,12 @@ impl EventLoop {
                         };
 
                         match state {
-                            ElementState::Pressed => event_handler(
-                                &mut application_control_flow,
-                                Event::MousePressed { button },
-                            ),
-                            ElementState::Released => event_handler(
-                                &mut application_control_flow,
-                                Event::MouseReleased { button },
-                            ),
+                            ElementState::Pressed => {
+                                Some(event_handler(Event::MousePressed { button }))
+                            }
+                            ElementState::Released => {
+                                Some(event_handler(Event::MouseReleased { button }))
+                            }
                         }
                     }
                     WindowEvent::MouseWheel { delta, .. } => {
@@ -98,42 +85,44 @@ impl EventLoop {
                                 y: scroll, ..
                             }) => -scroll,
                         };
-                        event_handler(
-                            &mut application_control_flow,
-                            Event::MouseScrolled { delta },
-                        )
+
+                        Some(event_handler(Event::MouseScrolled { delta }))
                     }
-                    WindowEvent::Focused(focused) => event_handler(
-                        &mut application_control_flow,
-                        Event::WindowFocused { focused },
-                    ),
-                    WindowEvent::Moved(position) => event_handler(
-                        &mut application_control_flow,
-                        Event::WindowMoved {
-                            x: position.x,
-                            y: position.y,
-                        },
-                    ),
-                    WindowEvent::Resized(size) => event_handler(
-                        &mut application_control_flow,
-                        Event::WindowResized {
-                            width: size.width,
-                            height: size.height,
-                        },
-                    ),
-                    _ => {}
+                    WindowEvent::Focused(focused) => {
+                        Some(event_handler(Event::WindowFocused { focused }))
+                    }
+                    WindowEvent::Moved(position) => Some(event_handler(Event::WindowMoved {
+                        x: position.x,
+                        y: position.y,
+                    })),
+                    WindowEvent::Resized(size) => Some(event_handler(Event::WindowResized {
+                        width: size.width,
+                        height: size.height,
+                    })),
+                    _ => Some(ControlFlow::Continue(())),
                 },
                 event::Event::RedrawRequested(..) => {
-                    event_handler(&mut application_control_flow, Event::UpdateFrame);
-                    event_handler(&mut application_control_flow, Event::RenderFrame);
+                    let flow = event_handler(Event::UpdateFrame);
+                    if flow.is_continue() {
+                        Some(event_handler(Event::RenderFrame))
+                    } else {
+                        Some(flow)
+                    }
                 }
-                _ => {}
-            }
+                _ => Some(ControlFlow::Continue(())),
+            };
 
-            if application_control_flow == ControlFlow::Exit {
+            if let Some(event_control_flow) = event_control_flow {
+                if let ControlFlow::Break(error) = event_control_flow {
+                    *control_flow = event_loop::ControlFlow::Exit;
+                    return_error = Err(error);
+                }
+            } else {
                 *control_flow = event_loop::ControlFlow::Exit;
             }
         });
+
+        return_error
     }
 
     pub(crate) fn internal(&self) -> &event_loop::EventLoop<()> {

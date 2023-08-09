@@ -8,7 +8,7 @@ use crate::game::Game;
 
 use hyper_platform::{
     event::Event,
-    event_loop::{ControlFlow, EventLoop},
+    event_loop::EventLoop,
     window::{CreationError as WindowError, Window},
 };
 use hyper_rendering::{
@@ -16,7 +16,7 @@ use hyper_rendering::{
     render_context::RenderContext,
 };
 
-use std::time::Instant;
+use std::{ops::ControlFlow, time::Instant};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -84,67 +84,62 @@ impl Application {
         let mut current_time = Instant::now();
         let mut accumulator = 0.0;
 
-        let mut runtime_error: Result<(), RuntimeError> = Ok(());
-        self.event_loop.run(|control_flow, event| match event {
-            Event::EventsCleared => self.window.request_redraw(),
-            Event::UpdateFrame => {
-                let new_time = Instant::now();
-                let frame_time = (new_time - current_time).as_secs_f32();
-                current_time = new_time;
+        self.event_loop
+            .run(|control_flow, event| -> ControlFlow<E, ()> {
+                match event {
+                    Event::EventsCleared => self.window.request_redraw(),
+                    Event::UpdateFrame => {
+                        let new_time = Instant::now();
+                        let frame_time = (new_time - current_time).as_secs_f32();
+                        current_time = new_time;
 
-                accumulator += frame_time;
+                        accumulator += frame_time;
 
-                while accumulator >= delta_time {
-                    self.game.update_fixed(delta_time, time);
-                    accumulator -= delta_time;
-                    time += delta_time;
+                        while accumulator >= delta_time {
+                            self.game.update_fixed(delta_time, time);
+                            accumulator -= delta_time;
+                            time += delta_time;
+                        }
+
+                        self.game.update();
+                    }
+                    Event::RenderFrame => {
+                        if let Err(error) = self.render_context.begin(&self.window, self.frame_id) {
+                            return ControlFlow::Break(error);
+                        }
+
+                        self.render_context.draw_objects();
+
+                        if let Err(error) = self.render_context.end() {
+                            return ControlFlow::Break(error);
+                        }
+
+                        if let Err(error) = self.render_context.submit(&self.window) {
+                            return ControlFlow::Break(error);
+                        }
+
+                        self.game.render();
+
+                        self.frame_id += 1;
+                    }
+                    Event::WindowResized { width, height } => {
+                        if self.window.framebuffer_size() == (width, height) {
+                            return ControlFlow::Continue(());
+                        }
+
+                        if width == 0 || height == 0 {
+                            return ControlFlow::Continue(());
+                        }
+
+                        if let Err(error) = self.render_context.resize(&self.window) {
+                            return ControlFlow::Break(error);
+                        }
+                    }
+                    _ => {}
                 }
 
-                self.game.update();
-            }
-            Event::RenderFrame => {
-                if let Err(error) = self.render_context.begin(&self.window, self.frame_id) {
-                    runtime_error = Err(error.into());
-                    *control_flow = ControlFlow::Exit;
-                    return;
-                }
-
-                self.render_context.draw_objects();
-
-                if let Err(error) = self.render_context.end() {
-                    runtime_error = Err(error.into());
-                    *control_flow = ControlFlow::Exit;
-                    return;
-                }
-
-                if let Err(error) = self.render_context.submit(&self.window) {
-                    runtime_error = Err(error.into());
-                    *control_flow = ControlFlow::Exit;
-                    return;
-                }
-
-                self.game.render();
-
-                self.frame_id += 1;
-            }
-            Event::WindowResized { width, height } => {
-                if self.window.framebuffer_size() == (width, height) {
-                    return;
-                }
-
-                if width == 0 || height == 0 {
-                    return;
-                }
-
-                if let Err(error) = self.render_context.resize(&self.window) {
-                    runtime_error = Err(error.into());
-                    *control_flow = ControlFlow::Exit;
-                }
-            }
-            _ => {}
-        });
-
-        runtime_error?;
+                return ControlFlow::Continue(());
+            })?;
 
         self.render_context.wait_idle()?;
 
