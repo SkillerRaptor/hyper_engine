@@ -85,7 +85,7 @@ impl Application {
         let mut accumulator = 0.0;
 
         self.event_loop
-            .run(|control_flow, event| -> ControlFlow<E, ()> {
+            .run(|event| -> ControlFlow<RuntimeError, ()> {
                 match event {
                     Event::EventsCleared => self.window.request_redraw(),
                     Event::UpdateFrame => {
@@ -105,17 +105,17 @@ impl Application {
                     }
                     Event::RenderFrame => {
                         if let Err(error) = self.render_context.begin(&self.window, self.frame_id) {
-                            return ControlFlow::Break(error);
+                            return ControlFlow::Break(error.into());
                         }
 
                         self.render_context.draw_objects();
 
                         if let Err(error) = self.render_context.end() {
-                            return ControlFlow::Break(error);
+                            return ControlFlow::Break(error.into());
                         }
 
                         if let Err(error) = self.render_context.submit(&self.window) {
-                            return ControlFlow::Break(error);
+                            return ControlFlow::Break(error.into());
                         }
 
                         self.game.render();
@@ -132,7 +132,7 @@ impl Application {
                         }
 
                         if let Err(error) = self.render_context.resize(&self.window) {
-                            return ControlFlow::Break(error);
+                            return ControlFlow::Break(error.into());
                         }
                     }
                     _ => {}
