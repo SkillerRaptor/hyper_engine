@@ -138,7 +138,7 @@ impl Application {
                     _ => {}
                 }
 
-                return ControlFlow::Continue(());
+                ControlFlow::Continue(())
             })?;
 
         self.render_context.wait_idle()?;
