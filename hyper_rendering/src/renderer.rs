@@ -7,16 +7,17 @@
 use crate::{
     allocator::{Allocator, MemoryLocation},
     binary_semaphore::BinarySemaphore,
-    bindings::TexturedBindings,
+    bindings::{BindingsOffset, TexturedBindings},
     buffer::Buffer,
     command_buffer::CommandBuffer,
     command_pool::CommandPool,
     descriptor_manager::DescriptorManager,
     device::Device,
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
+    graphics_pipelines::GraphicsPipeline,
     instance::Instance,
     mesh::{Mesh, Vertex},
-    pipeline::{BindingsOffset, Pipeline},
+    pipeline_layout::PipelineLayout,
     render_object::RenderObject,
     shader::Shader,
     surface::Surface,
@@ -37,10 +38,12 @@ use std::{cell::RefCell, collections::HashMap, fmt::Debug, mem, rc::Rc};
 pub(crate) struct Renderer {
     // TODO: Make a material system
     _textures: HashMap<String, Texture>,
-    materials: HashMap<String, Pipeline>,
+    materials: HashMap<String, GraphicsPipeline>,
     meshes: HashMap<String, Mesh>,
     // NOTE: Temporary
     renderables: Vec<RenderObject>,
+
+    pipeline_layout: PipelineLayout,
 
     _projection_view_buffer: Buffer,
 
@@ -100,15 +103,19 @@ impl Renderer {
 
         ////////////////////////////////////////////////////////////////////////
 
+        let pipeline_layout = PipelineLayout::new(device.clone(), &descriptor_manager.borrow())?;
+
+        ////////////////////////////////////////////////////////////////////////
+
         let mut materials = HashMap::new();
 
         let vertex_shader =
             Shader::new(device.clone(), "./assets/shaders/compiled/default_vs.spv")?;
         let fragment_shader =
             Shader::new(device.clone(), "./assets/shaders/compiled/default_ps.spv")?;
-        let default_pipeline = Pipeline::new(
+        let default_pipeline = GraphicsPipeline::new(
             device.clone(),
-            descriptor_manager.clone(),
+            &pipeline_layout,
             swapchain,
             vertex_shader,
             fragment_shader,
@@ -120,15 +127,15 @@ impl Renderer {
             Shader::new(device.clone(), "./assets/shaders/compiled/textured_vs.spv")?;
         let fragment_shader =
             Shader::new(device.clone(), "./assets/shaders/compiled/textured_ps.spv")?;
-        let default_pipeline = Pipeline::new(
+        let textured_pipeline = GraphicsPipeline::new(
             device.clone(),
-            descriptor_manager.clone(),
+            &pipeline_layout,
             swapchain,
             vertex_shader,
             fragment_shader,
         )?;
 
-        materials.insert("textured".to_string(), default_pipeline);
+        materials.insert("textured".to_string(), textured_pipeline);
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -344,6 +351,8 @@ impl Renderer {
             materials,
             meshes,
             renderables,
+
+            pipeline_layout,
 
             _projection_view_buffer: projection_view_buffer,
 
@@ -579,7 +588,7 @@ impl Renderer {
                     .collect::<Vec<_>>();
                 self.command_buffers[side as usize].bind_descriptor_sets(
                     vk::PipelineBindPoint::GRAPHICS,
-                    material,
+                    &self.pipeline_layout,
                     0,
                     &descriptor_sets,
                     &[],
@@ -588,11 +597,9 @@ impl Renderer {
                 last_material = current_material.to_string();
             }
 
-            let material = &self.materials[&last_material];
-
             let bindings_offset = BindingsOffset::new(renderable.bindings_handle());
             self.command_buffers[side as usize].push_constants(
-                material,
+                &self.pipeline_layout,
                 vk::ShaderStageFlags::ALL,
                 0,
                 &bindings_offset,

@@ -98,12 +98,7 @@ impl RenderObject {
             vertex_buffer_handle,
             transform_handle,
         ];
-        for extra in extra_handles {
-            resource_handles.push(*extra);
-        }
-
-        let mut bindings = T::default();
-        bindings.set_resource_handles(&resource_handles);
+        resource_handles.extend_from_slice(extra_handles);
 
         Renderer::upload_buffer(
             device.clone(),
@@ -112,7 +107,7 @@ impl RenderObject {
             upload_command_buffer,
             upload_semaphore,
             upload_value,
-            &[bindings],
+            &resource_handles,
             &bindings_buffer,
         )
         .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;

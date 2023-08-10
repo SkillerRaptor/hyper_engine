@@ -10,6 +10,7 @@ use crate::{
     device::Device,
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
     pipeline::Pipeline,
+    pipeline_layout::PipelineLayout,
 };
 
 use ash::vk;
@@ -89,7 +90,7 @@ impl CommandBuffer {
     pub(crate) fn bind_pipeline(
         &self,
         pipeline_bind_point: vk::PipelineBindPoint,
-        pipeline: &Pipeline,
+        pipeline: &dyn Pipeline,
     ) {
         unsafe {
             self.device.handle().cmd_bind_pipeline(
@@ -127,7 +128,7 @@ impl CommandBuffer {
     pub(crate) fn bind_descriptor_sets(
         &self,
         pipeline_bind_point: vk::PipelineBindPoint,
-        pipeline: &Pipeline,
+        layout: &PipelineLayout,
         first_set: u32,
         descriptor_sets: &[vk::DescriptorSet],
         dynamic_offsets: &[u32],
@@ -136,7 +137,7 @@ impl CommandBuffer {
             self.device.handle().cmd_bind_descriptor_sets(
                 self.handle,
                 pipeline_bind_point,
-                pipeline.layout(),
+                layout.handle(),
                 first_set,
                 descriptor_sets,
                 dynamic_offsets,
@@ -146,7 +147,7 @@ impl CommandBuffer {
 
     pub(crate) fn push_constants<T>(
         &self,
-        pipeline: &Pipeline,
+        layout: &PipelineLayout,
         stage_flags: vk::ShaderStageFlags,
         offset: u32,
         constants: &T,
@@ -154,7 +155,7 @@ impl CommandBuffer {
         unsafe {
             self.device.handle().cmd_push_constants(
                 self.handle,
-                pipeline.layout(),
+                layout.handle(),
                 stage_flags,
                 offset,
                 slice::from_raw_parts(constants as *const T as *const u8, mem::size_of::<T>()),
