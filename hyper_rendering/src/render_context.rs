@@ -44,7 +44,7 @@ impl RenderContext {
         let allocator = Rc::new(RefCell::new(Allocator::new(
             validation_layers_requested,
             &instance,
-            device.clone(),
+            &device,
         )?));
 
         let descriptor_manager = Rc::new(RefCell::new(DescriptorManager::new(

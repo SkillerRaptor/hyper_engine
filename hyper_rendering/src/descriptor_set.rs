@@ -11,7 +11,6 @@ use crate::{
 };
 
 use ash::vk;
-use std::rc::Rc;
 
 pub(crate) struct DescriptorSet {
     handle: vk::DescriptorSet,
@@ -19,7 +18,7 @@ pub(crate) struct DescriptorSet {
 
 impl DescriptorSet {
     pub(crate) fn new(
-        device: Rc<Device>,
+        device: &Device,
         descriptor_pool: &DescriptorPool,
         layout: vk::DescriptorSetLayout,
         limit: u32,

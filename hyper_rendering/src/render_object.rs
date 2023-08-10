@@ -101,8 +101,8 @@ impl RenderObject {
         resource_handles.extend_from_slice(extra_handles);
 
         Renderer::upload_buffer(
-            device.clone(),
-            allocator.clone(),
+            device,
+            allocator,
             upload_command_pool,
             upload_command_buffer,
             upload_semaphore,

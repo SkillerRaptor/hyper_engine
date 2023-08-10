@@ -104,7 +104,7 @@ impl Texture {
         ////////////////////////////////////////////////////////////////////////
 
         Renderer::immediate_submit(
-            device.clone(),
+            &device,
             upload_command_pool,
             upload_command_buffer,
             upload_semaphore,

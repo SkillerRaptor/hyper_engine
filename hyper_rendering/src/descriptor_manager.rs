@@ -33,8 +33,7 @@ impl DescriptorManager {
             .iter()
             .zip(descriptor_pool.limits())
         {
-            let descriptor_set =
-                DescriptorSet::new(device.clone(), &descriptor_pool, *layout, *limit)?;
+            let descriptor_set = DescriptorSet::new(&device, &descriptor_pool, *layout, *limit)?;
             descriptor_sets.push(descriptor_set);
         }
 

@@ -90,8 +90,8 @@ impl Mesh {
             )?;
 
             Renderer::upload_buffer(
-                device.clone(),
-                allocator.clone(),
+                device,
+                allocator,
                 upload_command_pool,
                 upload_command_buffer,
                 upload_semaphore,

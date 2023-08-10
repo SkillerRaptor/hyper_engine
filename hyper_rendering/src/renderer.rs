@@ -287,7 +287,7 @@ impl Renderer {
 
         let lost_empire = RenderObject::new::<TexturedBindings>(
             device.clone(),
-            allocator.clone(),
+            allocator,
             descriptor_manager.clone(),
             &upload_command_pool,
             &upload_command_buffer,
@@ -644,7 +644,7 @@ impl Renderer {
 
     // TODO: Move this logic
     pub(crate) fn immediate_submit<F>(
-        device: Rc<Device>,
+        device: &Device,
         upload_command_pool: &CommandPool,
         upload_command_buffer: &CommandBuffer,
         upload_semaphore: &TimelineSemaphore,
@@ -698,7 +698,7 @@ impl Renderer {
         staging_buffer.set_data(data)?;
 
         Self::immediate_submit(
-            device,
+            &device,
             upload_command_pool,
             upload_command_buffer,
             upload_semaphore,
