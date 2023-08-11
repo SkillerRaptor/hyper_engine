@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "bindings.hlsl"
-
 struct PixelInput {
   float4 position : SV_POSITION;
   [[vk::location(0)]] float4 color : COLOR;

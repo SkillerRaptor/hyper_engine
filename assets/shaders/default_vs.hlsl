@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "bindings.hlsl"
+#include "bindings.hlsli"
 
 struct Bindings {
   SimpleBuffer projection_view;
