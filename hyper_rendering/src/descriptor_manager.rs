@@ -75,53 +75,54 @@ impl DescriptorManager {
         handle
     }
 
-    pub(crate) fn allocate_sampled_image_handle(
+    pub(crate) fn allocate_combined_image_sampler_handle(
         &mut self,
+        sampler: vk::Sampler,
         image_view: vk::ImageView,
         image_layout: vk::ImageLayout,
     ) -> ResourceHandle {
         let handle = self.fetch_handle();
 
-        let image_info = vk::DescriptorImageInfo::builder()
-            .image_view(image_view)
-            .image_layout(image_layout);
+        // Sampled Image
+        {
+            let image_info = vk::DescriptorImageInfo::builder()
+                .image_view(image_view)
+                .image_layout(image_layout);
 
-        let image_infos = [*image_info];
+            let image_infos = [*image_info];
 
-        let write_set = WriteDescriptorSet::builder()
-            .dst_set(self.descriptor_sets[2].handle())
-            .dst_binding(0)
-            .dst_array_element(handle.index())
-            .descriptor_type(vk::DescriptorType::SAMPLED_IMAGE)
-            .image_info(&image_infos);
+            let write_set = WriteDescriptorSet::builder()
+                .dst_set(self.descriptor_sets[2].handle())
+                .dst_binding(0)
+                .dst_array_element(handle.index())
+                .descriptor_type(vk::DescriptorType::SAMPLED_IMAGE)
+                .image_info(&image_infos);
 
-        unsafe {
-            self.device
-                .handle()
-                .update_descriptor_sets(&[*write_set], &[]);
+            unsafe {
+                self.device
+                    .handle()
+                    .update_descriptor_sets(&[*write_set], &[]);
+            }
         }
 
-        handle
-    }
+        // Sampler
+        {
+            let image_info = vk::DescriptorImageInfo::builder().sampler(sampler);
 
-    pub(crate) fn allocate_sampler_handle(&mut self, sampler: vk::Sampler) -> ResourceHandle {
-        let handle = self.fetch_handle();
+            let image_infos = [*image_info];
 
-        let image_info = vk::DescriptorImageInfo::builder().sampler(sampler);
+            let write_set = WriteDescriptorSet::builder()
+                .dst_set(self.descriptor_sets[3].handle())
+                .dst_binding(0)
+                .dst_array_element(handle.index())
+                .descriptor_type(vk::DescriptorType::SAMPLER)
+                .image_info(&image_infos);
 
-        let image_infos = [*image_info];
-
-        let write_set = WriteDescriptorSet::builder()
-            .dst_set(self.descriptor_sets[3].handle())
-            .dst_binding(0)
-            .dst_array_element(handle.index())
-            .descriptor_type(vk::DescriptorType::SAMPLER)
-            .image_info(&image_infos);
-
-        unsafe {
-            self.device
-                .handle()
-                .update_descriptor_sets(&[*write_set], &[]);
+            unsafe {
+                self.device
+                    .handle()
+                    .update_descriptor_sets(&[*write_set], &[]);
+            }
         }
 
         handle

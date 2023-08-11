@@ -162,15 +162,6 @@ struct RwArrayBuffer {
   }
 };
 
-struct Sampler {
-  RenderResourceHandle handle;
-
-  SamplerState load() {
-    SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
-    return sampler;
-  }
-};
-
 struct Texture {
   RenderResourceHandle handle;
 
@@ -205,39 +196,45 @@ struct Texture {
   }
 
   template<typename T>
-  T sample_1d(SamplerState s, float u) {
+  T sample_1d(float u) {
       Texture1D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle);
-      return texture.Sample(s, u);
+      SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+      return texture.Sample(sampler, u);
   }
 
   template<typename T>
-  T sample_2d(SamplerState s, float2 uv) {
+  T sample_2d(float2 uv) {
       Texture2D<T> texture = DESCRIPTOR_HEAP(Texture2DHandle<T>, this.handle);
-      return texture.Sample(s, uv);
+      SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+      return texture.Sample(sampler, uv);
   }
 
   template<typename T>
-  T sample_3d(SamplerState s, float3 uvw) {
+  T sample_3d(float3 uvw) {
       Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle);
-      return texture.Sample(s, uvw);
+      SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+      return texture.Sample(sampler, uvw);
   }
 
   template<typename T>
-  T sample_level_1d(SamplerState s, float u, float mip) {
+  T sample_level_1d(float u, float mip) {
       Texture2D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle);
-      return texture.SampleLevel(s, u, mip);
+      SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+      return texture.SampleLevel(sampler, u, mip);
   }
 
   template<typename T>
-  T sample_level_2d(SamplerState s, float2 uv, float mip) {
+  T sample_level_2d(float2 uv, float mip) {
       Texture2D<T> texture = DESCRIPTOR_HEAP(Texture2DHandle<T>, this.handle);
-      return texture.SampleLevel(s, uv, mip);
+      SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+      return texture.SampleLevel(sampler, uv, mip);
   }
 
   template<typename T>
-  T sample_level_3d(SamplerState s, float3 uvw, float mip) {
+  T sample_level_3d(float3 uvw, float mip) {
       Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle);
-      return texture.SampleLevel(s, uvw, mip);
+      SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+      return texture.SampleLevel(sampler, uvw, mip);
   }
 };
 
@@ -305,38 +302,44 @@ struct RwTexture {
   }
 
   template<typename T>
-  T sample_1d(SamplerState s, float u) {
+  T sample_1d(float u) {
       Texture1D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle);
-      return texture.Sample(s, u);
+      SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+      return texture.Sample(sampler, u);
   }
 
   template<typename T>
-  T sample_2d(SamplerState s, float2 uv) {
+  T sample_2d(float2 uv) {
       Texture2D<T> texture = DESCRIPTOR_HEAP(Texture2DHandle<T>, this.handle);
-      return texture.Sample(s, uv);
+      SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+      return texture.Sample(sampler, uv);
   }
 
   template<typename T>
-  T sample_3d(SamplerState s, float3 uvw) {
+  T sample_3d(float3 uvw) {
       Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle);
-      return texture.Sample(s, uvw);
+      SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+      return texture.Sample(sampler, uvw);
   }
 
   template<typename T>
-  T sample_level_1d(SamplerState s, float u, float mip) {
+  T sample_level_1d(float u, float mip) {
       Texture2D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle);
-      return texture.SampleLevel(s, u, mip);
+      SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+      return texture.SampleLevel(sampler, u, mip);
   }
 
   template<typename T>
-  T sample_level_2d(SamplerState s, float2 uv, float mip) {
+  T sample_level_2d(float2 uv, float mip) {
       Texture2D<T> texture = DESCRIPTOR_HEAP(Texture2DHandle<T>, this.handle);
-      return texture.SampleLevel(s, uv, mip);
+      SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+      return texture.SampleLevel(sampler, uv, mip);
   }
 
   template<typename T>
-  T sample_level_3d(SamplerState s, float3 uvw, float mip) {
+  T sample_level_3d(float3 uvw, float mip) {
       Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle);
-      return texture.SampleLevel(s, uvw, mip);
+      SamplerState sampler = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle);
+      return texture.SampleLevel(sampler, uvw, mip);
   }
 };

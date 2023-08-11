@@ -270,13 +270,10 @@ impl Renderer {
                 .map_err(|error| CreationError::VulkanCreation(error, "sampler"))?
         };
 
-        let sampler_handle = descriptor_manager
+        let combined_image_sampler_handle = descriptor_manager
             .borrow_mut()
-            .allocate_sampler_handle(sampler);
-
-        let sampled_image_handle = descriptor_manager
-            .borrow_mut()
-            .allocate_sampled_image_handle(
+            .allocate_combined_image_sampler_handle(
+                sampler,
                 textures["lost_empire"].view(),
                 vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
             );
@@ -298,7 +295,7 @@ impl Renderer {
             [Mat4x4f::identity()].to_vec(),
             meshes["lost_empire"].vertex_buffer_handle(),
             projection_view_buffer_handle,
-            &[sampler_handle, sampled_image_handle],
+            &[combined_image_sampler_handle],
         )?;
         renderables.push(lost_empire);
 

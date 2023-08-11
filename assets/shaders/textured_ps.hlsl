@@ -11,7 +11,6 @@ struct Bindings {
   ArrayBuffer vertices;
   ArrayBuffer transforms;
 
-  Sampler sampler;
   Texture texture;
 };
 
@@ -24,8 +23,6 @@ struct PixelInput {
 float4 main(PixelInput input) : SV_TARGET {
   Bindings bindings = load_bindings<Bindings>();
 
-  SamplerState sampler = bindings.sampler.load();
-  float4 value = bindings.texture.sample_2d<float4>(sampler, input.tex_coord);
+  float4 value = bindings.texture.sample_2d<float4>(input.tex_coord);
   return value;
-  //return float4(input.tex_coord, 0.5, 1.0);
 }
