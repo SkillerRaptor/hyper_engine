@@ -225,7 +225,7 @@ impl Renderer {
             device.clone(),
             allocator.clone(),
             mem::size_of::<Mat4x4f>(),
-            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+            vk::BufferUsageFlags::UNIFORM_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
             MemoryLocation::GpuOnly,
         )?;
 
@@ -250,9 +250,9 @@ impl Renderer {
         )
         .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
 
-        let projection_view_buffer_handle = descriptor_manager
+        descriptor_manager
             .borrow_mut()
-            .allocate_buffer_handle(&projection_view_buffer);
+            .update_camera(&projection_view_buffer);
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -294,7 +294,6 @@ impl Renderer {
             "textured",
             [Mat4x4f::identity()].to_vec(),
             meshes["lost_empire"].vertex_buffer_handle(),
-            projection_view_buffer_handle,
             &[combined_image_sampler_handle],
         )?;
         renderables.push(lost_empire);

@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "bindings.hlsli"
+#include "globals.hlsli"
 
 struct Bindings {
-  SimpleBuffer projection_view;
   ArrayBuffer vertices;
   ArrayBuffer transforms;
 
@@ -15,7 +14,6 @@ struct Bindings {
 };
 
 struct PixelInput {
-  float4 position : SV_POSITION;
   [[vk::location(0)]] float4 color : COLOR;
   [[vk::location(1)]] float2 tex_coord : TEXCOORD;
 };

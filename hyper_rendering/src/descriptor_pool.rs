@@ -15,18 +15,19 @@ use smallvec::SmallVec;
 use std::rc::Rc;
 
 pub(crate) struct DescriptorPool {
-    layouts: SmallVec<[vk::DescriptorSetLayout; 4]>,
-    limits: SmallVec<[u32; 4]>,
+    layouts: SmallVec<[vk::DescriptorSetLayout; 5]>,
+    limits: SmallVec<[u32; 5]>,
     handle: vk::DescriptorPool,
 
     device: Rc<Device>,
 }
 
 impl DescriptorPool {
-    const DESCRIPTOR_TYPES: [vk::DescriptorType; 4] = [
+    const DESCRIPTOR_TYPES: [vk::DescriptorType; 5] = [
+        vk::DescriptorType::UNIFORM_BUFFER,
         vk::DescriptorType::STORAGE_BUFFER,
-        vk::DescriptorType::STORAGE_IMAGE,
         vk::DescriptorType::SAMPLED_IMAGE,
+        vk::DescriptorType::STORAGE_IMAGE,
         vk::DescriptorType::SAMPLER,
     ];
 
@@ -52,7 +53,7 @@ impl DescriptorPool {
 
         let create_info = vk::DescriptorPoolCreateInfo::builder()
             .flags(vk::DescriptorPoolCreateFlags::UPDATE_AFTER_BIND)
-            .max_sets(4)
+            .max_sets(Self::DESCRIPTOR_TYPES.len() as u32)
             .pool_sizes(&pool_sizes);
 
         let handle = unsafe {
@@ -96,6 +97,7 @@ impl DescriptorPool {
         const MAX_DESCRIPTOR_COUNT: u32 = 1024 * 1024;
 
         let limit = match descriptor_type {
+            vk::DescriptorType::UNIFORM_BUFFER => 1,
             vk::DescriptorType::STORAGE_BUFFER => limits.max_descriptor_set_storage_buffers,
             vk::DescriptorType::STORAGE_IMAGE => limits.max_descriptor_set_storage_images,
             vk::DescriptorType::SAMPLED_IMAGE => limits.max_descriptor_set_sampled_images,
@@ -110,7 +112,7 @@ impl DescriptorPool {
         }
     }
 
-    fn find_limits(instance: &Instance, device: &Device) -> SmallVec<[u32; 4]> {
+    fn find_limits(instance: &Instance, device: &Device) -> SmallVec<[u32; 5]> {
         let mut limits = SmallVec::new();
 
         for descriptor_type in Self::DESCRIPTOR_TYPES {
@@ -130,7 +132,7 @@ impl DescriptorPool {
     fn create_descriptor_set_layouts(
         device: &Device,
         limits: &[u32],
-    ) -> CreationResult<SmallVec<[vk::DescriptorSetLayout; 4]>> {
+    ) -> CreationResult<SmallVec<[vk::DescriptorSetLayout; 5]>> {
         let mut layouts = SmallVec::new();
 
         for (i, descriptor_type) in Self::DESCRIPTOR_TYPES.iter().enumerate() {

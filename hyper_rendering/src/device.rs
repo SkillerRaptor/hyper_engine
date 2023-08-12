@@ -311,23 +311,14 @@ impl Device {
         dynamic_rendering.dynamic_rendering == vk::TRUE
             && timline_semaphore.timeline_semaphore == vk::TRUE
             && synchronization2.synchronization2 == vk::TRUE
-            && descriptor_indexing.shader_uniform_texel_buffer_array_dynamic_indexing == vk::TRUE
-            && descriptor_indexing.shader_storage_texel_buffer_array_dynamic_indexing == vk::TRUE
             && descriptor_indexing.shader_uniform_buffer_array_non_uniform_indexing == vk::TRUE
             && descriptor_indexing.shader_sampled_image_array_non_uniform_indexing == vk::TRUE
             && descriptor_indexing.shader_storage_buffer_array_non_uniform_indexing == vk::TRUE
             && descriptor_indexing.shader_storage_image_array_non_uniform_indexing == vk::TRUE
-            && descriptor_indexing.shader_uniform_texel_buffer_array_non_uniform_indexing
-                == vk::TRUE
-            && descriptor_indexing.shader_storage_texel_buffer_array_non_uniform_indexing
-                == vk::TRUE
+            && descriptor_indexing.descriptor_binding_uniform_buffer_update_after_bind == vk::TRUE
             && descriptor_indexing.descriptor_binding_sampled_image_update_after_bind == vk::TRUE
             && descriptor_indexing.descriptor_binding_storage_image_update_after_bind == vk::TRUE
             && descriptor_indexing.descriptor_binding_storage_buffer_update_after_bind == vk::TRUE
-            && descriptor_indexing.descriptor_binding_uniform_texel_buffer_update_after_bind
-                == vk::TRUE
-            && descriptor_indexing.descriptor_binding_storage_texel_buffer_update_after_bind
-                == vk::TRUE
             && descriptor_indexing.descriptor_binding_update_unused_while_pending == vk::TRUE
             && descriptor_indexing.descriptor_binding_partially_bound == vk::TRUE
             && descriptor_indexing.descriptor_binding_variable_descriptor_count == vk::TRUE
@@ -362,19 +353,14 @@ impl Device {
         let mut synchronization2 =
             vk::PhysicalDeviceSynchronization2Features::builder().synchronization2(true);
         let mut descriptor_indexing = vk::PhysicalDeviceDescriptorIndexingFeatures::builder()
-            .shader_uniform_texel_buffer_array_dynamic_indexing(true)
-            .shader_storage_texel_buffer_array_dynamic_indexing(true)
             .shader_uniform_buffer_array_non_uniform_indexing(true)
             .shader_sampled_image_array_non_uniform_indexing(true)
             .shader_storage_buffer_array_non_uniform_indexing(true)
             .shader_storage_image_array_non_uniform_indexing(true)
-            .shader_uniform_texel_buffer_array_non_uniform_indexing(true)
-            .shader_storage_texel_buffer_array_non_uniform_indexing(true)
+            .descriptor_binding_uniform_buffer_update_after_bind(true)
             .descriptor_binding_sampled_image_update_after_bind(true)
             .descriptor_binding_storage_image_update_after_bind(true)
             .descriptor_binding_storage_buffer_update_after_bind(true)
-            .descriptor_binding_uniform_texel_buffer_update_after_bind(true)
-            .descriptor_binding_storage_texel_buffer_update_after_bind(true)
             .descriptor_binding_update_unused_while_pending(true)
             .descriptor_binding_partially_bound(true)
             .descriptor_binding_variable_descriptor_count(true)

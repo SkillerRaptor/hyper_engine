@@ -54,7 +54,6 @@ impl RenderObject {
         material: &str,
         transforms: Vec<Mat4x4f>,
         vertex_buffer_handle: ResourceHandle,
-        projection_view_buffer_handle: ResourceHandle,
         extra_handles: &[ResourceHandle],
     ) -> CreationResult<Self> {
         ////////////////////////////////////////////////////////////////////////
@@ -93,11 +92,7 @@ impl RenderObject {
             MemoryLocation::GpuOnly,
         )?;
 
-        let mut resource_handles = vec![
-            projection_view_buffer_handle,
-            vertex_buffer_handle,
-            transform_handle,
-        ];
+        let mut resource_handles = vec![vertex_buffer_handle, transform_handle];
         resource_handles.extend_from_slice(extra_handles);
 
         Renderer::upload_buffer(

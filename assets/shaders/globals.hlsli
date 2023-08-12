@@ -4,6 +4,29 @@
  * SPDX-License-Identifier: MIT
  */
 
+////////////////////////////////////////////////////////////////////////////////
+// Constants
+////////////////////////////////////////////////////////////////////////////////
+
+#define CONSTANT_BUFFER_SLOT_CAMERA 0
+
+#define DEFINE_UNIFORM_BUFFER(type, name, slot) \
+  [[vk::binding(0, slot)]] ConstantBuffer<type> name
+
+struct Camera {
+  float4x4 view_projection;
+};
+
+DEFINE_UNIFORM_BUFFER(Camera, g_Camera, CONSTANT_BUFFER_SLOT_CAMERA);
+
+inline Camera get_camera() {
+  return g_Camera;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Bindless
+////////////////////////////////////////////////////////////////////////////////
+
 struct RenderResourceHandle {
   uint index;
 };
@@ -15,27 +38,42 @@ struct BindingsOffset {
   uint unused_2;
 };
 
+static const uint DESCRIPTOR_SET_BINDLESS_STORAGE_BUFFER = 1;
+static const uint DESCRIPTOR_SET_BINDLESS_SAMPLED_IMAGE = 2;
+static const uint DESCRIPTOR_SET_BINDLESS_STORAGE_IMAGE = 3;
+static const uint DESCRIPTOR_SET_BINDLESS_SAMPLER = 4;
+
 #define DEFINE_BUFFER_HEAP(type) \
   struct type##Handle { \
     uint internal_index; \
   }; \
-  [[vk::binding(0, 0)]] type g##_##type[]
+  [[vk::binding(0, DESCRIPTOR_SET_BINDLESS_STORAGE_BUFFER)]] type g##_##type[]
 
 #define DEFINE_TEXTURE_HEAP(texture_type) \
   template <typename T> \
   struct texture_type##Handle { \
     uint internal_index; \
   }; \
-  [[vk::binding(0, 2)]] texture_type<float> g##_##texture_type##_##float[]; \
-  [[vk::binding(0, 2)]] texture_type<float2> g##_##texture_type##_##float2[]; \
-  [[vk::binding(0, 2)]] texture_type<float3> g##_##texture_type##_##float3[]; \
-  [[vk::binding(0, 2)]] texture_type<float4> g##_##texture_type##_##float4[]
+  [[vk::binding(0, DESCRIPTOR_SET_BINDLESS_SAMPLED_IMAGE)]] texture_type<float> g##_##texture_type##_##float[]; \
+  [[vk::binding(0, DESCRIPTOR_SET_BINDLESS_SAMPLED_IMAGE)]] texture_type<float2> g##_##texture_type##_##float2[]; \
+  [[vk::binding(0, DESCRIPTOR_SET_BINDLESS_SAMPLED_IMAGE)]] texture_type<float3> g##_##texture_type##_##float3[]; \
+  [[vk::binding(0, DESCRIPTOR_SET_BINDLESS_SAMPLED_IMAGE)]] texture_type<float4> g##_##texture_type##_##float4[]
+
+#define DEFINE_RW_TEXTURE_HEAP(texture_type) \
+  template <typename T> \
+  struct texture_type##Handle { \
+    uint internal_index; \
+  }; \
+  [[vk::binding(0, DESCRIPTOR_SET_BINDLESS_STORAGE_IMAGE)]] texture_type<float> g##_##texture_type##_##float[]; \
+  [[vk::binding(0, DESCRIPTOR_SET_BINDLESS_STORAGE_IMAGE)]] texture_type<float2> g##_##texture_type##_##float2[]; \
+  [[vk::binding(0, DESCRIPTOR_SET_BINDLESS_STORAGE_IMAGE)]] texture_type<float3> g##_##texture_type##_##float3[]; \
+  [[vk::binding(0, DESCRIPTOR_SET_BINDLESS_STORAGE_IMAGE)]] texture_type<float4> g##_##texture_type##_##float4[]
 
 #define DEFINE_SAMPLER_HEAP(type) \
   struct type##Handle { \
     uint internal_index; \
   }; \
-  [[vk::binding(0, 3)]] type g##_##type[]
+  [[vk::binding(0, DESCRIPTOR_SET_BINDLESS_SAMPLER)]] type g##_##type[]
 
 #define DEFINE_BUFFER_HEAP_OPERATOR(type) \
     type operator[](type##Handle identifier) { \
@@ -64,16 +102,17 @@ DEFINE_BUFFER_HEAP(ByteAddressBuffer);
 DEFINE_BUFFER_HEAP(RWByteAddressBuffer);
 
 DEFINE_TEXTURE_HEAP(Texture1D);
-DEFINE_TEXTURE_HEAP(RWTexture1D);
 DEFINE_TEXTURE_HEAP(Texture1DArray);
-DEFINE_TEXTURE_HEAP(RWTexture1DArray);
 DEFINE_TEXTURE_HEAP(Texture2D);
-DEFINE_TEXTURE_HEAP(RWTexture2D);
 DEFINE_TEXTURE_HEAP(Texture2DArray);
-DEFINE_TEXTURE_HEAP(RWTexture2DArray);
 DEFINE_TEXTURE_HEAP(Texture3D);
-DEFINE_TEXTURE_HEAP(RWTexture3D);
 DEFINE_TEXTURE_HEAP(TextureCube);
+
+DEFINE_RW_TEXTURE_HEAP(RWTexture1D);
+DEFINE_RW_TEXTURE_HEAP(RWTexture1DArray);
+DEFINE_RW_TEXTURE_HEAP(RWTexture2D);
+DEFINE_RW_TEXTURE_HEAP(RWTexture2DArray);
+DEFINE_RW_TEXTURE_HEAP(RWTexture3D);
 
 DEFINE_SAMPLER_HEAP(SamplerState);
 
