@@ -6,6 +6,8 @@
 
 use crate::{entity::Entity, sparse_set::SparseSet};
 
+use hyper_core::handle::Handle64;
+
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
@@ -60,7 +62,7 @@ impl Registry {
             let entity = &mut self.entities[recyclable_entity_index];
 
             entity.increase_version();
-            entity.swap_entity_id(&mut self.next_entity);
+            entity.swap_handle(&mut self.next_entity);
 
             self.unrecycled_entities -= 1;
 
@@ -75,10 +77,10 @@ impl Registry {
     }
 
     pub fn destroy_entity(&mut self, entity: Entity) {
-        let entity_id = entity.entity_id();
+        let entity_id = entity.handle();
 
         let destroyable_entity = &mut self.entities[entity_id as usize];
-        destroyable_entity.swap_entity_id(&mut self.next_entity);
+        destroyable_entity.swap_handle(&mut self.next_entity);
 
         self.unrecycled_entities += 1;
     }
@@ -312,22 +314,24 @@ impl Registry {
 mod tests {
     use super::*;
 
+    use hyper_core::handle::Handle64;
+
     #[test]
     fn create_entities() {
         let mut registry = Registry::new();
         let entity_0 = registry.create_entity();
         assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.entity_id(), 0);
+        assert_eq!(entity_0.handle(), 0);
         assert_eq!(entity_0.version(), 1);
 
         let entity_1 = registry.create_entity();
         assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.entity_id(), 1);
+        assert_eq!(entity_1.handle(), 1);
         assert_eq!(entity_1.version(), 1);
 
         let entity_2 = registry.create_entity();
         assert_eq!(entity_2.0, 0x100000002);
-        assert_eq!(entity_2.entity_id(), 2);
+        assert_eq!(entity_2.handle(), 2);
         assert_eq!(entity_2.version(), 1);
     }
 
@@ -337,17 +341,17 @@ mod tests {
 
         let entity_0 = registry.create_entity();
         assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.entity_id(), 0);
+        assert_eq!(entity_0.handle(), 0);
         assert_eq!(entity_0.version(), 1);
 
         let entity_1 = registry.create_entity();
         assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.entity_id(), 1);
+        assert_eq!(entity_1.handle(), 1);
         assert_eq!(entity_1.version(), 1);
 
         let entity_2 = registry.create_entity();
         assert_eq!(entity_2.0, 0x100000002);
-        assert_eq!(entity_2.entity_id(), 2);
+        assert_eq!(entity_2.handle(), 2);
         assert_eq!(entity_2.version(), 1);
 
         registry.destroy_entity(entity_0);
@@ -355,17 +359,17 @@ mod tests {
 
         let entity_3 = registry.create_entity();
         assert_eq!(entity_3.0, 0x200000002);
-        assert_eq!(entity_3.entity_id(), 2);
+        assert_eq!(entity_3.handle(), 2);
         assert_eq!(entity_3.version(), 2);
 
         let entity_4 = registry.create_entity();
         assert_eq!(entity_4.0, 0x200000000);
-        assert_eq!(entity_4.entity_id(), 0);
+        assert_eq!(entity_4.handle(), 0);
         assert_eq!(entity_4.version(), 2);
 
         let entity_5 = registry.create_entity();
         assert_eq!(entity_5.0, 0x100000003);
-        assert_eq!(entity_5.entity_id(), 3);
+        assert_eq!(entity_5.handle(), 3);
         assert_eq!(entity_5.version(), 1);
     }
 
@@ -375,12 +379,12 @@ mod tests {
 
         let entity_0 = registry.create_entity();
         assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.entity_id(), 0);
+        assert_eq!(entity_0.handle(), 0);
         assert_eq!(entity_0.version(), 1);
 
         let entity_1 = registry.create_entity();
         assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.entity_id(), 1);
+        assert_eq!(entity_1.handle(), 1);
         assert_eq!(entity_1.version(), 1);
 
         #[derive(Debug, PartialEq)]
@@ -409,12 +413,12 @@ mod tests {
 
         let entity_0 = registry.create_entity();
         assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.entity_id(), 0);
+        assert_eq!(entity_0.handle(), 0);
         assert_eq!(entity_0.version(), 1);
 
         let entity_1 = registry.create_entity();
         assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.entity_id(), 1);
+        assert_eq!(entity_1.handle(), 1);
         assert_eq!(entity_1.version(), 1);
 
         #[derive(Debug, PartialEq)]
@@ -449,12 +453,12 @@ mod tests {
 
         let entity_0 = registry.create_entity();
         assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.entity_id(), 0);
+        assert_eq!(entity_0.handle(), 0);
         assert_eq!(entity_0.version(), 1);
 
         let entity_1 = registry.create_entity();
         assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.entity_id(), 1);
+        assert_eq!(entity_1.handle(), 1);
         assert_eq!(entity_1.version(), 1);
 
         #[derive(Debug, PartialEq)]
@@ -546,12 +550,12 @@ mod tests {
 
         let entity_0 = registry.create_entity();
         assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.entity_id(), 0);
+        assert_eq!(entity_0.handle(), 0);
         assert_eq!(entity_0.version(), 1);
 
         let entity_1 = registry.create_entity();
         assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.entity_id(), 1);
+        assert_eq!(entity_1.handle(), 1);
         assert_eq!(entity_1.version(), 1);
 
         #[derive(Debug, PartialEq)]

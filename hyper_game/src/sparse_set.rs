@@ -6,6 +6,8 @@
 
 use crate::entity::Entity;
 
+use hyper_core::handle::Handle64;
+
 use std::{
     fmt::Debug,
     slice::{Iter, IterMut},
@@ -65,7 +67,7 @@ where
         let position = self.dense.len();
         self.dense.push(Entry { key: entity, value });
 
-        let entity_id = entity.entity_id() as usize;
+        let entity_id = entity.handle() as usize;
         if entity_id >= self.sparse.len() {
             self.sparse.resize(entity_id + 1, usize::MAX);
         }
@@ -78,7 +80,7 @@ where
             return;
         }
 
-        let entity_id = entity.entity_id() as usize;
+        let entity_id = entity.handle() as usize;
         let dense_index = self.sparse[entity_id];
 
         let last_index = self.dense.len() - 1;
@@ -91,7 +93,7 @@ where
     }
 
     pub(crate) fn contains(&self, entity: Entity) -> bool {
-        let entity_id = entity.entity_id() as usize;
+        let entity_id = entity.handle() as usize;
         if entity_id >= self.sparse.len() {
             return false;
         }
@@ -109,7 +111,7 @@ where
             return None;
         }
 
-        let entity_id = entity.entity_id() as usize;
+        let entity_id = entity.handle() as usize;
         let dense_index = self.sparse[entity_id];
         let entry = &self.dense[dense_index];
         Some(entry.value())
@@ -120,7 +122,7 @@ where
             return None;
         }
 
-        let entity_id = entity.entity_id() as usize;
+        let entity_id = entity.handle() as usize;
         let dense_index = self.sparse[entity_id];
         let entry = &mut self.dense[dense_index];
         Some(entry.value_mut())
