@@ -247,31 +247,13 @@ impl Registry {
             return;
         };
 
-        let (split_index, a_index, b_index) = if a_component_id < b_component_id {
-            (
-                b_component_id - a_component_id,
-                a_component_id,
-                b_component_id - a_component_id - 1,
-            )
-        } else {
-            (
-                a_component_id - b_component_id,
-                a_component_id - b_component_id - 1,
-                b_component_id,
-            )
-        };
+        let components_ptr = self.components.as_mut_ptr();
 
-        let (a, b) = self.components.split_at_mut(split_index);
+        let set = unsafe { &mut *components_ptr.add(a_component_id) };
+        let a_specific_set = set.as_any_mut().downcast_mut::<SparseSet<A>>().unwrap();
 
-        let a_specific_set = a[a_index]
-            .as_any_mut()
-            .downcast_mut::<SparseSet<A>>()
-            .unwrap();
-
-        let b_specific_set = b[b_index]
-            .as_any_mut()
-            .downcast_mut::<SparseSet<B>>()
-            .unwrap();
+        let set = unsafe { &mut *components_ptr.add(b_component_id) };
+        let b_specific_set = set.as_any_mut().downcast_mut::<SparseSet<B>>().unwrap();
 
         if a_specific_set.len() < b_specific_set.len() {
             for entry in a_specific_set.iter_mut() {
