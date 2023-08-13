@@ -11,7 +11,7 @@ use hyper_platform::{
     event_loop::EventLoop,
     window::{CreationError as WindowError, Window},
 };
-use hyper_rendering::{
+use hyper_rendering::backend::{
     error::{CreationError as RenderContextError, RuntimeError as RenderContextRuntimeError},
     render_context::RenderContext,
 };

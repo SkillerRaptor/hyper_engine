@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
+use crate::backend::{
     binary_semaphore::BinarySemaphore,
     command_buffer::CommandBuffer,
     device::{
@@ -21,7 +21,7 @@ use ash::{extensions::khr::Swapchain, vk, Device as VulkanDevice};
 use std::{collections::HashSet, ffi::CStr, str};
 
 pub(crate) mod queue_family_indices {
-    use crate::{
+    use crate::backend::{
         error::{CreationError, CreationResult},
         instance::Instance,
         surface::Surface,
@@ -97,7 +97,7 @@ pub(crate) mod queue_family_indices {
 }
 
 pub(crate) mod swapchain_support_details {
-    use crate::{
+    use crate::backend::{
         error::{CreationError, CreationResult},
         surface::Surface,
     };

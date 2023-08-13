@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
+use crate::backend::{
     device::{queue_family_indices::QueueFamilyIndices, Device},
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
     instance::Instance,

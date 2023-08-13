@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
+use crate::backend::{
     bindings::BindingsOffset,
     descriptor_manager::DescriptorManager,
     device::Device,

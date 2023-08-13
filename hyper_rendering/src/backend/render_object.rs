@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
+use crate::backend::{
     allocator::{Allocator, MemoryLocation},
     bindings::Bindings,
     buffer::Buffer,

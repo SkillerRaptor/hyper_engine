@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
+use crate::backend::{
     buffer::Buffer,
     command_pool::CommandPool,
     device::Device,

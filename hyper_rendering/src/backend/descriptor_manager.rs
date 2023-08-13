@@ -6,7 +6,7 @@
 
 use ash::vk::{self, WriteDescriptorSet};
 
-use crate::{
+use crate::backend::{
     buffer::Buffer, descriptor_pool::DescriptorPool, descriptor_set::DescriptorSet, device::Device,
     error::CreationResult, instance::Instance, resource_handle::ResourceHandle,
 };
