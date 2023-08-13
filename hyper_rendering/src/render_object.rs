@@ -41,7 +41,6 @@ pub(crate) struct RenderObject {
 }
 
 impl RenderObject {
-    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new<T: Bindings>(
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,

@@ -13,7 +13,6 @@ use crate::{
 use ash::vk;
 use gpu_allocator::{vulkan, AllocatorDebugSettings};
 
-#[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum MemoryLocation {
     Unknown,

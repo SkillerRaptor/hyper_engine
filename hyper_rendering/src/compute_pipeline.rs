@@ -22,7 +22,6 @@ pub(crate) struct ComputePipeline {
 }
 
 impl ComputePipeline {
-    #[allow(dead_code)]
     pub(crate) fn new(
         device: Rc<Device>,
         layout: &PipelineLayout,

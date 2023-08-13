@@ -44,7 +44,6 @@ pub(crate) struct Mesh {
 }
 
 impl Mesh {
-    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
@@ -119,7 +118,6 @@ impl Mesh {
     }
 
     // TODO: Move this into asset manager and model class
-    #[allow(clippy::too_many_arguments)]
     pub(crate) fn load(
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,

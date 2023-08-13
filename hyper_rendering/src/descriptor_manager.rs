@@ -161,7 +161,6 @@ impl DescriptorManager {
         })
     }
 
-    #[allow(dead_code)]
     pub(crate) fn retire_handle(&mut self, handle: ResourceHandle) {
         self.recycled_descriptors.push_back(handle)
     }

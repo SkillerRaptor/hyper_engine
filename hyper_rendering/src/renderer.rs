@@ -374,7 +374,6 @@ impl Renderer {
         })
     }
 
-    #[allow(clippy::too_many_arguments)]
     pub(crate) fn begin(
         &mut self,
         window: &Window,
@@ -666,7 +665,6 @@ impl Renderer {
     }
 
     // TODO: Move this logic
-    #[allow(clippy::too_many_arguments)]
     pub(crate) fn upload_buffer<T>(
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
