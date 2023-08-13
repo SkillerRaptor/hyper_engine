@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-// 16-bit version | 16-bit entity
+// 32-bit version | 32-bit entity
 #[repr(transparent)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Entity(pub(crate) u64);
