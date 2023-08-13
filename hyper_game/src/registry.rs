@@ -200,6 +200,10 @@ impl Registry {
             return;
         };
 
+        if a_component_id == b_component_id {
+            panic!("can't create component view for same component type");
+        }
+
         let a_component_set = &self.components[a_component_id];
         let a_specific_set = a_component_set
             .as_any()
@@ -246,6 +250,10 @@ impl Registry {
         let Some(b_component_id) = self.get_component_id::<B>() else {
             return;
         };
+
+        if a_component_id == b_component_id {
+            panic!("can't create component view for same component type");
+        }
 
         let components_ptr = self.components.as_mut_ptr();
 
@@ -529,5 +537,43 @@ mod tests {
                 assert_eq!(*velocity, Velocity { dx: 1.0, dy: 1.0 });
             },
         );
+    }
+
+    #[test]
+    #[should_panic]
+    fn view_panic() {
+        let mut registry = Registry::new();
+
+        let entity_0 = registry.create_entity();
+        assert_eq!(entity_0.0, 0x100000000);
+        assert_eq!(entity_0.entity_id(), 0);
+        assert_eq!(entity_0.version(), 1);
+
+        let entity_1 = registry.create_entity();
+        assert_eq!(entity_1.0, 0x100000001);
+        assert_eq!(entity_1.entity_id(), 1);
+        assert_eq!(entity_1.version(), 1);
+
+        #[derive(Debug, PartialEq)]
+        struct Position {
+            x: f32,
+            y: f32,
+        }
+
+        registry.add_component(entity_0, Position { x: 0.0, y: 0.0 });
+        registry.add_component(entity_1, Position { x: 1.0, y: 1.0 });
+
+        assert_eq!(
+            registry.get_component(entity_0),
+            Some(&Position { x: 0.0, y: 0.0 })
+        );
+
+        assert_eq!(
+            registry.get_component(entity_1),
+            Some(&Position { x: 1.0, y: 1.0 })
+        );
+
+        // Should panic
+        registry.view_two(|_: Entity, _: &Position, _: &Position| {});
     }
 }
