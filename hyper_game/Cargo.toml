@@ -14,4 +14,5 @@ hyper_core = { path = "../hyper_core" }
 hyper_math = { path = "../hyper_math" }
 
 log = "0.4"
+paste = "1.0"
 thiserror = "1.0"

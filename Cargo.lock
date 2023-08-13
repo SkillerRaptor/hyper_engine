@@ -692,6 +692,7 @@ dependencies = [
  "hyper_core",
  "hyper_math",
  "log",
+ "paste",
  "thiserror",
 ]
 
