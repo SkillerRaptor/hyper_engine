@@ -35,7 +35,7 @@ where
 
 #[derive(Default)]
 pub struct Registry {
-    handle_manager: HandleManager<Entity, u64, u32>,
+    pub handle_manager: HandleManager<Entity, u64, u32>,
 
     components: Vec<Box<dyn ComponentList>>,
     component_indices: HashMap<TypeId, usize>,
@@ -60,6 +60,8 @@ impl Registry {
     }
 
     pub fn add_component<T: 'static + Debug>(&mut self, entity: Entity, component: T) {
+        assert!(self.handle_manager.is_handle_valid(entity));
+
         let component_id = self.get_component_id_or_construct::<T>();
         let component_set = &mut self.components[component_id];
 
@@ -75,6 +77,8 @@ impl Registry {
     }
 
     pub fn remove_component<T: 'static + Debug>(&mut self, entity: Entity) {
+        assert!(self.handle_manager.is_handle_valid(entity));
+
         let component_id = self.get_component_id_or_construct::<T>();
         let component_set = &mut self.components[component_id];
 
@@ -90,6 +94,8 @@ impl Registry {
     }
 
     pub fn get_component<T: 'static + Debug>(&self, entity: Entity) -> Option<&T> {
+        assert!(self.handle_manager.is_handle_valid(entity));
+
         let Some(component_id) = self.get_component_id::<T>() else {
             return None;
         };
@@ -108,6 +114,8 @@ impl Registry {
     }
 
     pub fn get_component_mut<T: 'static + Debug>(&mut self, entity: Entity) -> Option<&mut T> {
+        assert!(self.handle_manager.is_handle_valid(entity));
+
         let component_id = self.get_component_id_or_construct::<T>();
         let component_set = &mut self.components[component_id];
 
@@ -560,5 +568,40 @@ mod tests {
 
         // Should panic
         registry.view_two(|_: Entity, _: &Position, _: &Position| {});
+    }
+
+    #[test]
+    #[should_panic]
+    fn version_panic() {
+        let mut registry = Registry::new();
+
+        let entity_0 = registry.create_entity();
+        assert_eq!(entity_0.0, 0x100000000);
+        assert_eq!(entity_0.handle(), 0);
+        assert_eq!(entity_0.version(), 1);
+
+        let entity_1 = registry.create_entity();
+        assert_eq!(entity_1.0, 0x100000001);
+        assert_eq!(entity_1.handle(), 1);
+        assert_eq!(entity_1.version(), 1);
+
+        let entity_2 = registry.create_entity();
+        assert_eq!(entity_2.0, 0x100000002);
+        assert_eq!(entity_2.handle(), 2);
+        assert_eq!(entity_2.version(), 1);
+
+        registry.destroy_entity(entity_1);
+
+        #[derive(Debug)]
+        struct Position {
+            x: f32,
+            y: f32,
+        }
+
+        registry.add_component(entity_0, Position { x: 0.0, y: 0.0 });
+        registry.add_component(entity_2, Position { x: 0.0, y: 0.0 });
+
+        // Should panic
+        registry.add_component(entity_1, Position { x: 0.0, y: 0.0 });
     }
 }

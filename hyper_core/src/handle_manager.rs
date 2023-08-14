@@ -9,7 +9,7 @@ use crate::handle::Handle;
 use num_traits::PrimInt;
 use std::marker::PhantomData;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct HandleManager<T, A, B>
 where
     T: Handle<A, B>,
@@ -31,7 +31,7 @@ where
     pub fn new() -> Self {
         Self {
             handles: Vec::new(),
-            next_handle: B::zero(),
+            next_handle: B::max_value(),
             unrecycled_handles: 0,
             _marker: PhantomData,
         }
@@ -74,6 +74,12 @@ where
 
         self.next_handle = new_index;
         self.unrecycled_handles += 1;
+    }
+
+    pub fn is_handle_valid(&self, handle: T) -> bool {
+        let handle_id = handle.handle().to_usize().unwrap();
+
+        self.handles[handle_id] == handle
     }
 
     pub fn handles(&self) -> &[T] {
