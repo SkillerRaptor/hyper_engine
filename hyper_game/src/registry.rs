@@ -6,7 +6,7 @@
 
 use crate::{entity::Entity, sparse_set::SparseSet};
 
-use hyper_core::handle::HandleManager64;
+use hyper_core::handle_manager::HandleManager;
 
 use std::{
     any::{Any, TypeId},
@@ -35,9 +35,7 @@ where
 
 #[derive(Default)]
 pub struct Registry {
-    entities: Vec<Entity>,
-    next_entity: u32,
-    unrecycled_entities: usize,
+    handle_manager: HandleManager<Entity, u64, u32>,
 
     components: Vec<Box<dyn ComponentList>>,
     component_indices: HashMap<TypeId, usize>,
@@ -46,9 +44,7 @@ pub struct Registry {
 impl Registry {
     pub fn new() -> Self {
         Self {
-            entities: Vec::new(),
-            next_entity: u32::MAX,
-            unrecycled_entities: 0,
+            handle_manager: HandleManager::new(),
 
             components: Vec::new(),
             component_indices: HashMap::new(),
@@ -56,11 +52,11 @@ impl Registry {
     }
 
     pub fn create_entity(&mut self) -> Entity {
-        self.create_handle()
+        self.handle_manager.create_handle()
     }
 
     pub fn destroy_entity(&mut self, entity: Entity) {
-        self.destroy_handle(entity)
+        self.handle_manager.destroy_handle(entity)
     }
 
     pub fn add_component<T: 'static + Debug>(&mut self, entity: Entity, component: T) {
@@ -288,25 +284,11 @@ impl Registry {
     }
 }
 
-impl HandleManager64<Entity> for Registry {
-    fn handles(&mut self) -> &mut Vec<Entity> {
-        &mut self.entities
-    }
-
-    fn next_handle(&mut self) -> &mut u32 {
-        &mut self.next_entity
-    }
-
-    fn unrecycled_handles(&mut self) -> &mut usize {
-        &mut self.unrecycled_entities
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    use hyper_core::handle::Handle64;
+    use hyper_core::handle::Handle;
 
     #[test]
     fn create_entities() {

@@ -656,6 +656,7 @@ name = "hyper_core"
 version = "0.1.0"
 dependencies = [
  "log",
+ "num-traits",
  "thiserror",
 ]
 

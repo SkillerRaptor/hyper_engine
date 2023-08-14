@@ -4,166 +4,56 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub trait Handle32: Copy {
-    const BIT_COUNT: u32 = u32::BITS;
-    const SHIFT_COUNT: u32 = u32::BITS / 2;
+use num_traits::PrimInt;
+use std::fmt::Debug;
 
-    const HANDLE_MASK: u32 = (1 << Self::SHIFT_COUNT) - 1;
-    const VERSION_MASK: u32 = Self::HANDLE_MASK << Self::SHIFT_COUNT;
-
-    fn new(handle: u16) -> Self;
+pub trait Handle<T, H>: Copy + Debug + Default
+where
+    T: PrimInt,
+    H: PrimInt,
+{
+    fn create(handle: H) -> Self;
 
     fn increase_version(&mut self) {
-        let current_version = self.version() as u32;
-        *self.value_mut() =
-            ((current_version + 1) << Self::SHIFT_COUNT) | (self.value() & Self::HANDLE_MASK);
+        let current_version = T::from(self.version()).unwrap();
+        let upper_version = (current_version + T::one()) << Self::half_shift();
+        let lower_handle = self.value() & Self::handle_mask();
+        *self.value_mut() = upper_version | lower_handle;
     }
 
-    fn swap_handle(&mut self, handle: u16) -> u16 {
+    fn swap_handle(&mut self, handle: H) -> H {
         let current_handle_id = self.handle();
-        *self.value_mut() = (self.value() & Self::VERSION_MASK) | (handle as u32);
+        let upper_version = self.value() & Self::version_mask();
+        let lower_handle = T::from(handle).unwrap();
+        *self.value_mut() = upper_version | lower_handle;
         current_handle_id
     }
 
-    fn handle(&self) -> u16 {
-        (self.value() & Self::HANDLE_MASK) as u16
+    fn handle(&self) -> H {
+        H::from(self.value() & Self::handle_mask()).unwrap()
     }
 
-    fn version(&self) -> u16 {
-        ((self.value() & Self::VERSION_MASK) >> Self::SHIFT_COUNT) as u16
+    fn version(&self) -> H {
+        H::from((self.value() & Self::version_mask()) >> Self::half_shift()).unwrap()
     }
 
-    fn value(&self) -> u32;
-
-    fn value_mut(&mut self) -> &mut u32;
-}
-
-pub trait Handle64: Copy {
-    const BIT_COUNT: u32 = u64::BITS;
-    const SHIFT_COUNT: u32 = u64::BITS / 2;
-
-    const HANDLE_MASK: u64 = (1 << Self::SHIFT_COUNT) - 1;
-    const VERSION_MASK: u64 = Self::HANDLE_MASK << Self::SHIFT_COUNT;
-
-    fn new(handle: u32) -> Self;
-
-    fn increase_version(&mut self) {
-        let current_version = self.version() as u64;
-        *self.value_mut() =
-            ((current_version + 1) << Self::SHIFT_COUNT) | (self.value() & Self::HANDLE_MASK);
+    fn handle_mask() -> T {
+        (T::one() << Self::half_shift()) - T::one()
     }
 
-    fn swap_handle(&mut self, handle: u32) -> u32 {
-        let current_handle_id = self.handle();
-        *self.value_mut() = (self.value() & Self::VERSION_MASK) | (handle as u64);
-        current_handle_id
+    fn version_mask() -> T {
+        Self::handle_mask() << Self::half_shift()
     }
 
-    fn handle(&self) -> u32 {
-        (self.value() & Self::HANDLE_MASK) as u32
+    fn width() -> u32 {
+        T::zero().leading_zeros()
     }
 
-    fn version(&self) -> u32 {
-        ((self.value() & Self::VERSION_MASK) >> Self::SHIFT_COUNT) as u32
+    fn half_shift() -> usize {
+        (Self::width() / 2) as usize
     }
 
-    fn value(&self) -> u64;
+    fn value(&self) -> T;
 
-    fn value_mut(&mut self) -> &mut u64;
-}
-
-pub trait HandleManager32<T: Handle32> {
-    fn create_handle(&mut self) -> T {
-        if *self.unrecycled_handles() > 0 {
-            let recyclable_handle_index = *self.next_handle() as usize;
-
-            let new_index = {
-                let next_handle = *self.next_handle();
-                let handle = &mut self.handles()[recyclable_handle_index];
-
-                handle.increase_version();
-                handle.swap_handle(next_handle)
-            };
-
-            *self.next_handle() = new_index;
-
-            *self.unrecycled_handles() -= 1;
-
-            return self.handles()[recyclable_handle_index];
-        }
-
-        let new_handle_id = self.handles().len() as u16;
-        let handle = T::new(new_handle_id);
-        self.handles().push(handle);
-
-        handle
-    }
-
-    fn destroy_handle(&mut self, handle: T) {
-        let handle_id = handle.handle();
-
-        let new_index = {
-            let next_handle = *self.next_handle();
-            let destroyable_handle = &mut self.handles()[handle_id as usize];
-
-            destroyable_handle.swap_handle(next_handle)
-        };
-
-        *self.next_handle() = new_index;
-        *self.unrecycled_handles() += 1;
-    }
-
-    fn handles(&mut self) -> &mut Vec<T>;
-
-    fn next_handle(&mut self) -> &mut u16;
-
-    fn unrecycled_handles(&mut self) -> &mut usize;
-}
-
-pub trait HandleManager64<T: Handle64> {
-    fn create_handle(&mut self) -> T {
-        if *self.unrecycled_handles() > 0 {
-            let recyclable_handle_index = *self.next_handle() as usize;
-
-            let new_index = {
-                let next_handle = *self.next_handle();
-                let handle = &mut self.handles()[recyclable_handle_index];
-
-                handle.increase_version();
-                handle.swap_handle(next_handle)
-            };
-
-            *self.next_handle() = new_index;
-
-            *self.unrecycled_handles() -= 1;
-
-            return self.handles()[recyclable_handle_index];
-        }
-
-        let new_handle_id = self.handles().len() as u32;
-        let handle = T::new(new_handle_id);
-        self.handles().push(handle);
-
-        handle
-    }
-
-    fn destroy_handle(&mut self, handle: T) {
-        let handle_id = handle.handle();
-
-        let new_index = {
-            let next_handle = *self.next_handle();
-            let destroyable_handle = &mut self.handles()[handle_id as usize];
-
-            destroyable_handle.swap_handle(next_handle)
-        };
-
-        *self.next_handle() = new_index;
-        *self.unrecycled_handles() += 1;
-    }
-
-    fn handles(&mut self) -> &mut Vec<T>;
-
-    fn next_handle(&mut self) -> &mut u32;
-
-    fn unrecycled_handles(&mut self) -> &mut usize;
+    fn value_mut(&mut self) -> &mut T;
 }

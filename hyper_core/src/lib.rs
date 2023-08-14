@@ -8,3 +8,4 @@
 #![allow(clippy::too_many_arguments)]
 
 pub mod handle;
+pub mod handle_manager;

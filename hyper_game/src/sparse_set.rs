@@ -6,7 +6,7 @@
 
 use crate::entity::Entity;
 
-use hyper_core::handle::Handle64;
+use hyper_core::handle::Handle;
 
 use std::{
     fmt::Debug,
