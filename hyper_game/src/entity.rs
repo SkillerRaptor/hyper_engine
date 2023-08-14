@@ -11,13 +11,13 @@ use hyper_core::handle::Handle64;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Entity(pub(crate) u64);
 
-impl Entity {
-    pub(crate) fn new(entity_id: u32) -> Self {
-        Self((1 << Self::SHIFT_COUNT) | entity_id as u64)
-    }
-}
+impl Entity {}
 
 impl Handle64 for Entity {
+    fn new(entity_id: u32) -> Self {
+        Self((1 << Self::SHIFT_COUNT) | entity_id as u64)
+    }
+
     fn value(&self) -> u64 {
         self.0
     }

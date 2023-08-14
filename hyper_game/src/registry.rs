@@ -6,7 +6,7 @@
 
 use crate::{entity::Entity, sparse_set::SparseSet};
 
-use hyper_core::handle::Handle64;
+use hyper_core::handle::HandleManager64;
 
 use std::{
     any::{Any, TypeId},
@@ -56,33 +56,11 @@ impl Registry {
     }
 
     pub fn create_entity(&mut self) -> Entity {
-        if self.unrecycled_entities > 0 {
-            let recyclable_entity_index = self.next_entity as usize;
-
-            let entity = &mut self.entities[recyclable_entity_index];
-
-            entity.increase_version();
-            entity.swap_handle(&mut self.next_entity);
-
-            self.unrecycled_entities -= 1;
-
-            return *entity;
-        }
-
-        let new_entitiy_id = self.entities.len() as u32;
-        let entity = Entity::new(new_entitiy_id);
-        self.entities.push(entity);
-
-        entity
+        self.create_handle()
     }
 
     pub fn destroy_entity(&mut self, entity: Entity) {
-        let entity_id = entity.handle();
-
-        let destroyable_entity = &mut self.entities[entity_id as usize];
-        destroyable_entity.swap_handle(&mut self.next_entity);
-
-        self.unrecycled_entities += 1;
+        self.destroy_handle(entity)
     }
 
     pub fn add_component<T: 'static + Debug>(&mut self, entity: Entity, component: T) {
@@ -307,6 +285,20 @@ impl Registry {
         self.component_indices.insert(type_id, new_index);
         self.components.push(Box::new(SparseSet::<T>::new()));
         new_index
+    }
+}
+
+impl HandleManager64<Entity> for Registry {
+    fn handles(&mut self) -> &mut Vec<Entity> {
+        &mut self.entities
+    }
+
+    fn next_handle(&mut self) -> &mut u32 {
+        &mut self.next_entity
+    }
+
+    fn unrecycled_handles(&mut self) -> &mut usize {
+        &mut self.unrecycled_entities
     }
 }
 
