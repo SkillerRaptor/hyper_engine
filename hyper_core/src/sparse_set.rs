@@ -29,7 +29,6 @@ where
 impl<K, T, A, B> Entry<K, T, A, B>
 where
     K: Handle<A, B>,
-    T: Debug,
     A: PrimInt,
     B: PrimInt,
 {
@@ -61,7 +60,6 @@ where
 impl<K, T, A, B> SparseSet<K, T, A, B>
 where
     K: Handle<A, B>,
-    T: Debug,
     A: PrimInt,
     B: PrimInt,
 {
@@ -174,7 +172,6 @@ where
 impl<K, T, A, B> IntoIterator for SparseSet<K, T, A, B>
 where
     K: Handle<A, B>,
-    T: Debug,
     A: PrimInt,
     B: PrimInt,
 {
@@ -189,7 +186,6 @@ where
 impl<'a, K, T, A, B> IntoIterator for &'a SparseSet<K, T, A, B>
 where
     K: Handle<A, B>,
-    T: Debug,
     A: PrimInt,
     B: PrimInt,
 {
@@ -204,7 +200,6 @@ where
 impl<'a, K, T, A, B> IntoIterator for &'a mut SparseSet<K, T, A, B>
 where
     K: Handle<A, B>,
-    T: Debug,
     A: PrimInt,
     B: PrimInt,
 {
