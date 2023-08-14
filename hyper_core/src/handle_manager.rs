@@ -52,8 +52,6 @@ where
             self.next_handle = new_index;
             self.unrecycled_handles -= 1;
 
-            println!("Recycled {:?}", self.handles[recyclable_handle_index]);
-
             return self.handles[recyclable_handle_index];
         }
 
@@ -61,14 +59,10 @@ where
         let handle = T::create(new_handle_id);
         self.handles.push(handle);
 
-        println!("Created {:?}", handle);
-
         handle
     }
 
     pub fn destroy_handle(&mut self, handle: T) {
-        println!("Destroy {:?}", handle);
-
         let handle_id = handle.handle().to_usize().unwrap();
 
         let new_index = {

@@ -18,7 +18,6 @@ use std::{
 pub struct Entry<K, T, A, B>
 where
     K: Handle<A, B>,
-    T: Debug,
     A: PrimInt,
     B: PrimInt,
 {
@@ -51,7 +50,6 @@ where
 pub struct SparseSet<K, T, A, B>
 where
     K: Handle<A, B>,
-    T: Debug,
     A: PrimInt,
     B: PrimInt,
 {
