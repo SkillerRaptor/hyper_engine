@@ -55,6 +55,8 @@ impl Application {
         height: u32,
         resizable: bool,
     ) -> Result<Self, CreationError> {
+        let start_time = Instant::now();
+
         let event_loop = EventLoop::default();
         let window = Window::builder()
             .title(&title)
@@ -64,6 +66,11 @@ impl Application {
             .build(&event_loop)?;
 
         let render_context = RenderContext::new(&window)?;
+
+        log::info!(
+            "Application started in {:.4} seconds",
+            start_time.elapsed().as_secs_f32()
+        );
 
         Ok(Self {
             frame_id: 1,
