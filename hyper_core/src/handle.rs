@@ -7,7 +7,7 @@
 use num_traits::PrimInt;
 use std::fmt::Debug;
 
-pub trait Handle<T, H>: Copy + Debug + Default
+pub trait Handle<T, H>: Copy + Debug + Default + PartialEq + Eq
 where
     T: PrimInt,
     H: PrimInt,

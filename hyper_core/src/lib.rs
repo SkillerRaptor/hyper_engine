@@ -9,3 +9,4 @@
 
 pub mod handle;
 pub mod handle_manager;
+pub mod sparse_set;

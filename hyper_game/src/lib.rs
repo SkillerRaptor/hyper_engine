@@ -9,5 +9,3 @@
 
 pub mod entity;
 pub mod registry;
-
-pub(crate) mod sparse_set;
