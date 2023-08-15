@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::entity::Entity;
+use crate::{entity::Entity, sparse_set::SparseSet};
 
-use hyper_core::{handle_manager::HandleManager, sparse_set::SparseSet};
+use hyper_core::handle_manager::HandleManager;
 
 use std::{
     any::{Any, TypeId},
@@ -20,7 +20,7 @@ pub(crate) trait ComponentList {
     fn as_any_mut(&mut self) -> &mut dyn Any;
 }
 
-impl<T> ComponentList for SparseSet<Entity, T, u64, u32>
+impl<T> ComponentList for SparseSet<T>
 where
     T: 'static + Debug,
 {
@@ -67,7 +67,7 @@ impl Registry {
 
         let specific_set = component_set
             .as_any_mut()
-            .downcast_mut::<SparseSet<Entity, T, u64, u32>>()
+            .downcast_mut::<SparseSet<T>>()
             .unwrap();
         if specific_set.contains(entity) {
             return;
@@ -84,7 +84,7 @@ impl Registry {
 
         let specific_set = component_set
             .as_any_mut()
-            .downcast_mut::<SparseSet<Entity, T, u64, u32>>()
+            .downcast_mut::<SparseSet<T>>()
             .unwrap();
         if !specific_set.contains(entity) {
             return;
@@ -104,7 +104,7 @@ impl Registry {
 
         let specific_set = component_set
             .as_any()
-            .downcast_ref::<SparseSet<Entity, T, u64, u32>>()
+            .downcast_ref::<SparseSet<T>>()
             .unwrap();
         if !specific_set.contains(entity) {
             return None;
@@ -121,7 +121,7 @@ impl Registry {
 
         let specific_set = component_set
             .as_any_mut()
-            .downcast_mut::<SparseSet<Entity, T, u64, u32>>()
+            .downcast_mut::<SparseSet<T>>()
             .unwrap();
         if !specific_set.contains(entity) {
             return None;
@@ -142,7 +142,7 @@ impl Registry {
         let component_set = &self.components[component_id];
         let specific_set = component_set
             .as_any()
-            .downcast_ref::<SparseSet<Entity, A, u64, u32>>()
+            .downcast_ref::<SparseSet<A>>()
             .unwrap();
 
         for entry in specific_set.iter() {
@@ -162,7 +162,7 @@ impl Registry {
         let component_set = &mut self.components[component_id];
         let specific_set = component_set
             .as_any_mut()
-            .downcast_mut::<SparseSet<Entity, A, u64, u32>>()
+            .downcast_mut::<SparseSet<A>>()
             .unwrap();
 
         for entry in specific_set.iter_mut() {
@@ -191,13 +191,13 @@ impl Registry {
         let a_component_set = &self.components[a_component_id];
         let a_specific_set = a_component_set
             .as_any()
-            .downcast_ref::<SparseSet<Entity, A, u64, u32>>()
+            .downcast_ref::<SparseSet<A>>()
             .unwrap();
 
         let b_component_set = &self.components[b_component_id];
         let b_specific_set = b_component_set
             .as_any()
-            .downcast_ref::<SparseSet<Entity, B, u64, u32>>()
+            .downcast_ref::<SparseSet<B>>()
             .unwrap();
 
         if a_specific_set.len() < b_specific_set.len() {
@@ -242,16 +242,10 @@ impl Registry {
         let components_ptr = self.components.as_mut_ptr();
 
         let set = unsafe { &mut *components_ptr.add(a_component_id) };
-        let a_specific_set = set
-            .as_any_mut()
-            .downcast_mut::<SparseSet<Entity, A, u64, u32>>()
-            .unwrap();
+        let a_specific_set = set.as_any_mut().downcast_mut::<SparseSet<A>>().unwrap();
 
         let set = unsafe { &mut *components_ptr.add(b_component_id) };
-        let b_specific_set = set
-            .as_any_mut()
-            .downcast_mut::<SparseSet<Entity, B, u64, u32>>()
-            .unwrap();
+        let b_specific_set = set.as_any_mut().downcast_mut::<SparseSet<B>>().unwrap();
 
         if a_specific_set.len() < b_specific_set.len() {
             for entry in a_specific_set.iter_mut() {
@@ -293,8 +287,7 @@ impl Registry {
 
         let new_index = self.components.len();
         self.component_indices.insert(type_id, new_index);
-        self.components
-            .push(Box::new(SparseSet::<Entity, T, u64, u32>::new()));
+        self.components.push(Box::new(SparseSet::<T>::new()));
         new_index
     }
 }
