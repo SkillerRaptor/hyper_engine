@@ -35,7 +35,7 @@ where
 
 #[derive(Default)]
 pub struct Registry {
-    pub handle_manager: HandleManager<Entity, u64, u32>,
+    pub handle_manager: HandleManager<Entity>,
 
     components: Vec<Box<dyn ComponentList>>,
     component_indices: HashMap<TypeId, usize>,

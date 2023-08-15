@@ -23,16 +23,19 @@ impl Default for Entity {
     }
 }
 
-impl Handle<u64, u32> for Entity {
-    fn create(handle: u32) -> Self {
+impl Handle for Entity {
+    type FullType = u64;
+    type HalfType = u32;
+
+    fn create(handle: Self::HalfType) -> Self {
         Self::new(handle)
     }
 
-    fn value(&self) -> u64 {
+    fn value(&self) -> Self::FullType {
         self.0
     }
 
-    fn value_mut(&mut self) -> &mut u64 {
+    fn value_mut(&mut self) -> &mut Self::FullType {
         &mut self.0
     }
 }

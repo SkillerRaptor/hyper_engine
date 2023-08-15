@@ -6,34 +6,27 @@
 
 use crate::handle::Handle;
 
-use num_traits::PrimInt;
-use std::marker::PhantomData;
+use num_traits::{Bounded, NumCast, ToPrimitive};
 
 #[derive(Default, Debug)]
-pub struct HandleManager<T, A, B>
+pub struct HandleManager<T>
 where
-    T: Handle<A, B>,
-    A: PrimInt,
-    B: PrimInt,
+    T: Handle,
 {
     handles: Vec<T>,
-    next_handle: B,
+    next_handle: T::HalfType,
     unrecycled_handles: usize,
-    _marker: PhantomData<(T, A, B)>,
 }
 
-impl<T, A, B> HandleManager<T, A, B>
+impl<T> HandleManager<T>
 where
-    T: Handle<A, B>,
-    A: PrimInt,
-    B: PrimInt,
+    T: Handle,
 {
     pub fn new() -> Self {
         Self {
             handles: Vec::new(),
-            next_handle: B::max_value(),
+            next_handle: T::HalfType::max_value(),
             unrecycled_handles: 0,
-            _marker: PhantomData,
         }
     }
 
@@ -55,7 +48,7 @@ where
             return self.handles[recyclable_handle_index];
         }
 
-        let new_handle_id = B::from(self.handles.len()).unwrap();
+        let new_handle_id = <T::HalfType as NumCast>::from(self.handles.len()).unwrap();
         let handle = T::create(new_handle_id);
         self.handles.push(handle);
 
