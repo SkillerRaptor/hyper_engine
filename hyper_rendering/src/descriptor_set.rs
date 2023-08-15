@@ -5,7 +5,8 @@
  */
 
 use crate::{
-    backend::{descriptor_pool::DescriptorPool, device::Device},
+    descriptor_pool::DescriptorPool,
+    device::Device,
     error::{CreationError, CreationResult},
 };
 

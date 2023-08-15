@@ -5,18 +5,16 @@
  */
 
 use crate::{
-    backend::{
-        binary_semaphore::BinarySemaphore,
-        command_buffer::CommandBuffer,
-        device::{
-            queue_family_indices::QueueFamilyIndices,
-            swapchain_support_details::SwapchainSupportDetails,
-        },
-        instance::Instance,
-        surface::Surface,
-        timeline_semaphore::TimelineSemaphore,
+    binary_semaphore::BinarySemaphore,
+    command_buffer::CommandBuffer,
+    device::{
+        queue_family_indices::QueueFamilyIndices,
+        swapchain_support_details::SwapchainSupportDetails,
     },
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
+    instance::Instance,
+    surface::Surface,
+    timeline_semaphore::TimelineSemaphore,
 };
 
 use ash::{extensions::khr::Swapchain, vk, Device as VulkanDevice};
@@ -24,8 +22,8 @@ use std::{collections::HashSet, ffi::CStr, str};
 
 pub(crate) mod queue_family_indices {
     use crate::{
-        backend::{instance::Instance, surface::Surface},
         error::{CreationError, CreationResult},
+        {instance::Instance, surface::Surface},
     };
 
     use ash::vk;
@@ -99,8 +97,8 @@ pub(crate) mod queue_family_indices {
 
 pub(crate) mod swapchain_support_details {
     use crate::{
-        backend::surface::Surface,
         error::{CreationError, CreationResult},
+        surface::Surface,
     };
 
     use ash::vk;

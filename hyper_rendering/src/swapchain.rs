@@ -5,17 +5,15 @@
  */
 
 use crate::{
-    backend::{
-        allocator::{Allocation, Allocator, MemoryLocation},
-        binary_semaphore::BinarySemaphore,
-        device::{
-            queue_family_indices::QueueFamilyIndices,
-            swapchain_support_details::SwapchainSupportDetails, Device,
-        },
-        instance::Instance,
-        surface::Surface,
+    allocator::{Allocation, Allocator, MemoryLocation},
+    binary_semaphore::BinarySemaphore,
+    device::{
+        queue_family_indices::QueueFamilyIndices,
+        swapchain_support_details::SwapchainSupportDetails, Device,
     },
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
+    instance::Instance,
+    surface::Surface,
 };
 
 use hyper_platform::window::Window;

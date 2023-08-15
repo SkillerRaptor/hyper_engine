@@ -5,12 +5,10 @@
  */
 
 use crate::{
-    backend::{
-        device::{queue_family_indices::QueueFamilyIndices, Device},
-        instance::Instance,
-        surface::Surface,
-    },
+    device::{queue_family_indices::QueueFamilyIndices, Device},
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
+    instance::Instance,
+    surface::Surface,
 };
 
 use ash::vk;

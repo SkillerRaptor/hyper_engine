@@ -7,11 +7,8 @@
 use ash::vk::{self, WriteDescriptorSet};
 
 use crate::{
-    backend::{
-        buffer::Buffer, descriptor_pool::DescriptorPool, descriptor_set::DescriptorSet,
-        device::Device, instance::Instance, resource_handle::ResourceHandle,
-    },
-    error::CreationResult,
+    buffer::Buffer, descriptor_pool::DescriptorPool, descriptor_set::DescriptorSet, device::Device,
+    error::CreationResult, instance::Instance, resource_handle::ResourceHandle,
 };
 
 use std::{collections::VecDeque, rc::Rc};

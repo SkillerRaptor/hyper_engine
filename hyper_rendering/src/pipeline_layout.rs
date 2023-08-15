@@ -5,7 +5,9 @@
  */
 
 use crate::{
-    backend::{bindings::BindingsOffset, descriptor_manager::DescriptorManager, device::Device},
+    bindings::BindingsOffset,
+    descriptor_manager::DescriptorManager,
+    device::Device,
     error::{CreationError, CreationResult},
 };
 

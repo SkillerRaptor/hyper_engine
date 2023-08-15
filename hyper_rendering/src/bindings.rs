@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::backend::resource_handle::ResourceHandle;
+use crate::resource_handle::ResourceHandle;
 
 use std::fmt::Debug;
 

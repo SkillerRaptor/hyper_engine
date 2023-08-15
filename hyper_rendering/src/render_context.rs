@@ -5,12 +5,15 @@
  */
 
 use crate::{
-    backend::{
-        allocator::Allocator, descriptor_manager::DescriptorManager, device::Device,
-        instance::Instance, surface::Surface, swapchain::Swapchain, upload_manager::UploadManager,
-    },
+    allocator::Allocator,
+    descriptor_manager::DescriptorManager,
+    device::Device,
     error::{CreationResult, RuntimeResult},
+    instance::Instance,
     renderer::Renderer,
+    surface::Surface,
+    swapchain::Swapchain,
+    upload_manager::UploadManager,
 };
 
 use hyper_platform::window::Window;

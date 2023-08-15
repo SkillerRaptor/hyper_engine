@@ -5,17 +5,15 @@
  */
 
 use crate::{
-    backend::{
-        allocator::{Allocator, MemoryLocation},
-        buffer::Buffer,
-        command_buffer::CommandBuffer,
-        command_pool::CommandPool,
-        device::Device,
-        instance::Instance,
-        surface::Surface,
-        timeline_semaphore::TimelineSemaphore,
-    },
+    allocator::{Allocator, MemoryLocation},
+    buffer::Buffer,
+    command_buffer::CommandBuffer,
+    command_pool::CommandPool,
+    device::Device,
     error::{CreationResult, RuntimeError, RuntimeResult},
+    instance::Instance,
+    surface::Surface,
+    timeline_semaphore::TimelineSemaphore,
 };
 
 use ash::vk;

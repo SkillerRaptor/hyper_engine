@@ -5,10 +5,11 @@
  */
 
 use crate::{
-    backend::{
-        device::Device, pipeline::Pipeline, pipeline_layout::PipelineLayout, shader::Shader,
-    },
+    device::Device,
     error::{CreationError, CreationResult},
+    pipeline::Pipeline,
+    pipeline_layout::PipelineLayout,
+    shader::Shader,
 };
 
 use ash::vk;

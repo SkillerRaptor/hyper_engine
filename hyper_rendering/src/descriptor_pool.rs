@@ -5,8 +5,9 @@
  */
 
 use crate::{
-    backend::{device::Device, instance::Instance},
+    device::Device,
     error::{CreationError, CreationResult},
+    instance::Instance,
 };
 
 use ash::vk;

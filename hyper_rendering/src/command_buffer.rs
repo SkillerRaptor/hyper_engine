@@ -5,11 +5,12 @@
  */
 
 use crate::{
-    backend::{
-        buffer::Buffer, command_pool::CommandPool, device::Device, pipeline::Pipeline,
-        pipeline_layout::PipelineLayout,
-    },
+    buffer::Buffer,
+    command_pool::CommandPool,
+    device::Device,
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
+    pipeline::Pipeline,
+    pipeline_layout::PipelineLayout,
 };
 
 use ash::vk;

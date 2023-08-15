@@ -5,13 +5,11 @@
  */
 
 use crate::{
-    backend::{
-        allocator::{Allocation, Allocator, MemoryLocation},
-        buffer::Buffer,
-        device::Device,
-        upload_manager::UploadManager,
-    },
+    allocator::{Allocation, Allocator, MemoryLocation},
+    buffer::Buffer,
+    device::Device,
     error::{CreationError, CreationResult},
+    upload_manager::UploadManager,
 };
 
 use ash::vk;

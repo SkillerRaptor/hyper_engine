@@ -5,15 +5,13 @@
  */
 
 use crate::{
-    backend::{
-        allocator::{Allocator, MemoryLocation},
-        buffer::Buffer,
-        descriptor_manager::DescriptorManager,
-        device::Device,
-        resource_handle::ResourceHandle,
-        upload_manager::UploadManager,
-    },
+    allocator::{Allocator, MemoryLocation},
+    buffer::Buffer,
+    descriptor_manager::DescriptorManager,
+    device::Device,
     error::{CreationError, CreationResult},
+    resource_handle::ResourceHandle,
+    upload_manager::UploadManager,
 };
 
 use hyper_math::vector::Vec4f;

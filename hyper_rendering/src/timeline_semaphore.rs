@@ -5,7 +5,7 @@
  */
 
 use crate::{
-    backend::device::Device,
+    device::Device,
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
 };
 
