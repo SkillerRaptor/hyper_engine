@@ -4,26 +4,29 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::backend::{
-    allocator::{Allocator, MemoryLocation},
-    binary_semaphore::BinarySemaphore,
-    bindings::{BindingsOffset, TexturedBindings},
-    buffer::Buffer,
-    command_buffer::CommandBuffer,
-    command_pool::CommandPool,
-    descriptor_manager::DescriptorManager,
-    device::Device,
-    error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
-    graphics_pipelines::GraphicsPipeline,
-    instance::Instance,
-    mesh::{Mesh, Vertex},
-    pipeline_layout::PipelineLayout,
-    render_object::RenderObject,
-    shader::Shader,
-    surface::Surface,
-    swapchain::Swapchain,
-    texture::Texture,
-    timeline_semaphore::TimelineSemaphore,
+use crate::{
+    backend::{
+        allocator::{Allocator, MemoryLocation},
+        binary_semaphore::BinarySemaphore,
+        bindings::{BindingsOffset, TexturedBindings},
+        buffer::Buffer,
+        command_buffer::CommandBuffer,
+        command_pool::CommandPool,
+        descriptor_manager::DescriptorManager,
+        device::Device,
+        graphics_pipelines::GraphicsPipeline,
+        instance::Instance,
+        mesh::{Mesh, Vertex},
+        pipeline_layout::PipelineLayout,
+        render_object::RenderObject,
+        shader::Shader,
+        surface::Surface,
+        swapchain::Swapchain,
+        texture::Texture,
+        timeline_semaphore::TimelineSemaphore,
+        upload_manager::UploadManager,
+    },
+    error::{CreationError, CreationResult, RuntimeResult},
 };
 
 use hyper_math::{
@@ -33,7 +36,7 @@ use hyper_math::{
 use hyper_platform::window::Window;
 
 use ash::vk;
-use std::{cell::RefCell, collections::HashMap, fmt::Debug, mem, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
 pub(crate) struct Renderer {
     // TODO: Make a material system
@@ -46,12 +49,6 @@ pub(crate) struct Renderer {
     pipeline_layout: PipelineLayout,
 
     _projection_view_buffer: Buffer,
-
-    _upload_semaphore: TimelineSemaphore,
-    _upload_value: u64,
-
-    _upload_command_buffer: CommandBuffer,
-    _upload_command_pool: CommandPool,
 
     current_frame_id: u64,
     swapchain_image_index: u32,
@@ -76,8 +73,9 @@ impl Renderer {
         surface: &Surface,
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
-        descriptor_manager: Rc<RefCell<DescriptorManager>>,
         swapchain: &Swapchain,
+        descriptor_manager: Rc<RefCell<DescriptorManager>>,
+        upload_manager: Rc<RefCell<UploadManager>>,
     ) -> CreationResult<Self> {
         let command_pool = CommandPool::new(instance, surface, device.clone())?;
 
@@ -95,11 +93,6 @@ impl Renderer {
         }
 
         let submit_semaphore = TimelineSemaphore::new(device.clone())?;
-
-        let upload_command_pool = CommandPool::new(instance, surface, device.clone())?;
-        let upload_command_buffer = CommandBuffer::new(device.clone(), &upload_command_pool)?;
-        let upload_semaphore = TimelineSemaphore::new(device.clone())?;
-        let mut upload_value = 0;
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -166,10 +159,7 @@ impl Renderer {
             device.clone(),
             allocator.clone(),
             descriptor_manager.clone(),
-            &upload_command_pool,
-            &upload_command_buffer,
-            &upload_semaphore,
-            &mut upload_value,
+            upload_manager.clone(),
             triangle_vertices,
             None,
         )?;
@@ -180,10 +170,7 @@ impl Renderer {
             device.clone(),
             allocator.clone(),
             descriptor_manager.clone(),
-            &upload_command_pool,
-            &upload_command_buffer,
-            &upload_semaphore,
-            &mut upload_value,
+            upload_manager.clone(),
             "./assets/models/monkey_smooth.obj",
         )?;
 
@@ -193,10 +180,7 @@ impl Renderer {
             device.clone(),
             allocator.clone(),
             descriptor_manager.clone(),
-            &upload_command_pool,
-            &upload_command_buffer,
-            &upload_semaphore,
-            &mut upload_value,
+            upload_manager.clone(),
             "./assets/models/lost_empire.obj",
         )?;
 
@@ -209,10 +193,7 @@ impl Renderer {
         let lost_empire = Texture::new(
             device.clone(),
             allocator.clone(),
-            &upload_command_pool,
-            &upload_command_buffer,
-            &upload_semaphore,
-            &mut upload_value,
+            upload_manager.clone(),
             "./assets/textures/lost_empire-RGBA.png",
         )?;
 
@@ -238,17 +219,10 @@ impl Renderer {
             Mat4x4f::new_perspective(f32::to_radians(90.0), 1280.0 / 720.0, 0.1, 200.0);
 
         let projection_view = projection_matrix * view_matrix;
-        Self::upload_buffer(
-            device.clone(),
-            allocator.clone(),
-            &upload_command_pool,
-            &upload_command_buffer,
-            &upload_semaphore,
-            &mut upload_value,
-            &[projection_view],
-            &projection_view_buffer,
-        )
-        .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
+        upload_manager
+            .borrow_mut()
+            .upload_buffer(&[projection_view], &projection_view_buffer)
+            .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
 
         descriptor_manager
             .borrow_mut()
@@ -286,10 +260,7 @@ impl Renderer {
             device.clone(),
             allocator,
             descriptor_manager.clone(),
-            &upload_command_pool,
-            &upload_command_buffer,
-            &upload_semaphore,
-            &mut upload_value,
+            upload_manager.clone(),
             "lost_empire",
             "textured",
             [Mat4x4f::identity()].to_vec(),
@@ -297,50 +268,6 @@ impl Renderer {
             &[combined_image_sampler_handle],
         )?;
         renderables.push(lost_empire);
-
-        /*
-        let monkey = RenderObject::new(
-            device.clone(),
-            allocator.clone(),
-            descriptor_manager.clone(),
-            &upload_command_pool,
-            &upload_command_buffer,
-            &upload_semaphore,
-            &mut upload_value,
-            "monkey",
-            "default",
-            [Mat4x4f::identity()].to_vec(),
-            meshes["monkey"].vertex_buffer_handle(),
-            projection_view_buffer_handle,
-        )?;
-        renderables.push(monkey);
-
-        let mut transforms = Vec::new();
-        for x in -20..=20 {
-            for y in -20..=20 {
-                let mut transform = Mat4x4f::identity();
-                transform.append_translation_mut(&Vec3f::new(x as f32, 0.0, y as f32));
-                transform.append_scaling_mut(0.18);
-                transforms.push(transform);
-            }
-        }
-
-        let triangle = RenderObject::new(
-            device.clone(),
-            allocator.clone(),
-            descriptor_manager.clone(),
-            &upload_command_pool,
-            &upload_command_buffer,
-            &upload_semaphore,
-            &mut upload_value,
-            "triangle",
-            "default",
-            transforms,
-            meshes["triangle"].vertex_buffer_handle(),
-            projection_view_buffer_handle,
-        )?;
-        renderables.push(triangle);
-        */
 
         Ok(Self {
             _textures: textures,
@@ -351,12 +278,6 @@ impl Renderer {
             pipeline_layout,
 
             _projection_view_buffer: projection_view_buffer,
-
-            _upload_semaphore: upload_semaphore,
-            _upload_value: upload_value,
-
-            _upload_command_buffer: upload_command_buffer,
-            _upload_command_pool: upload_command_pool,
 
             current_frame_id: 0,
             swapchain_image_index: 0,
@@ -631,80 +552,6 @@ impl Renderer {
         swapchain: &mut Swapchain,
     ) -> RuntimeResult<()> {
         swapchain.recreate(window, instance, surface)?;
-
-        Ok(())
-    }
-
-    // NOTE: We pass everything for now so we can use it from everywhere
-
-    // TODO: Move this logic
-    pub(crate) fn immediate_submit<F>(
-        device: &Device,
-        upload_command_pool: &CommandPool,
-        upload_command_buffer: &CommandBuffer,
-        upload_semaphore: &TimelineSemaphore,
-        upload_value: &mut u64,
-        function: F,
-    ) -> RuntimeResult<()>
-    where
-        F: FnOnce(&CommandBuffer),
-    {
-        upload_command_buffer.begin(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT)?;
-
-        function(upload_command_buffer);
-
-        upload_command_buffer.end()?;
-
-        device.submit_upload_queue(upload_command_buffer, upload_semaphore, *upload_value)?;
-        *upload_value += 1;
-        upload_semaphore.wait_for(*upload_value)?;
-
-        upload_command_pool.reset()?;
-
-        Ok(())
-    }
-
-    // TODO: Move this logic
-    pub(crate) fn upload_buffer<T>(
-        device: Rc<Device>,
-        allocator: Rc<RefCell<Allocator>>,
-        upload_command_pool: &CommandPool,
-        upload_command_buffer: &CommandBuffer,
-        upload_semaphore: &TimelineSemaphore,
-        upload_value: &mut u64,
-        data: &[T],
-        buffer: &Buffer,
-    ) -> RuntimeResult<()>
-    where
-        T: Debug,
-    {
-        let buffer_size = mem::size_of_val(data);
-
-        let staging_buffer = Buffer::new(
-            device.clone(),
-            allocator,
-            buffer_size,
-            vk::BufferUsageFlags::TRANSFER_SRC,
-            MemoryLocation::CpuToGpu,
-        )
-        .map_err(|error| RuntimeError::CreationError(error, "staging buffer"))?;
-
-        staging_buffer.set_data(data)?;
-
-        Self::immediate_submit(
-            &device,
-            upload_command_pool,
-            upload_command_buffer,
-            upload_semaphore,
-            upload_value,
-            |command_buffer| {
-                let buffer_copy = vk::BufferCopy::builder()
-                    .src_offset(0)
-                    .dst_offset(0)
-                    .size(buffer_size as u64);
-                command_buffer.copy_buffer(&staging_buffer, buffer, &[*buffer_copy]);
-            },
-        )?;
 
         Ok(())
     }

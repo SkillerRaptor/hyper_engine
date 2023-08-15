@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::backend::{
-    device::Device,
+use crate::{
+    backend::{
+        device::Device, pipeline::Pipeline, pipeline_layout::PipelineLayout, shader::Shader,
+        swapchain::Swapchain,
+    },
     error::{CreationError, CreationResult},
-    pipeline::Pipeline,
-    pipeline_layout::PipelineLayout,
-    shader::Shader,
-    swapchain::Swapchain,
 };
 
 use ash::vk;

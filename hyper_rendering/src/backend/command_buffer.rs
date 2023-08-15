@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::backend::{
-    buffer::Buffer,
-    command_pool::CommandPool,
-    device::Device,
+use crate::{
+    backend::{
+        buffer::Buffer, command_pool::CommandPool, device::Device, pipeline::Pipeline,
+        pipeline_layout::PipelineLayout,
+    },
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
-    pipeline::Pipeline,
-    pipeline_layout::PipelineLayout,
 };
 
 use ash::vk;

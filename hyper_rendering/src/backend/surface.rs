@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::backend::{
+use crate::{
+    backend::instance::Instance,
     error::{CreationError, CreationResult},
-    instance::Instance,
 };
 
 use hyper_platform::window::Window;

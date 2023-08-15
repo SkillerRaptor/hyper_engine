@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::backend::{
-    allocator::{Allocation, Allocator, MemoryLocation},
-    device::Device,
+use crate::{
+    backend::{
+        allocator::{Allocation, Allocator, MemoryLocation},
+        device::Device,
+    },
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
 };
 

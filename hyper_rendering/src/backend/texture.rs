@@ -4,15 +4,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::backend::{
-    allocator::{Allocation, Allocator, MemoryLocation},
-    buffer::Buffer,
-    command_buffer::CommandBuffer,
-    command_pool::CommandPool,
-    device::Device,
+use crate::{
+    backend::{
+        allocator::{Allocation, Allocator, MemoryLocation},
+        buffer::Buffer,
+        device::Device,
+        upload_manager::UploadManager,
+    },
     error::{CreationError, CreationResult},
-    renderer::Renderer,
-    timeline_semaphore::TimelineSemaphore,
 };
 
 use ash::vk;
@@ -32,10 +31,7 @@ impl Texture {
     pub(crate) fn new(
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
-        upload_command_pool: &CommandPool,
-        upload_command_buffer: &CommandBuffer,
-        upload_semaphore: &TimelineSemaphore,
-        upload_value: &mut u64,
+        upload_manager: Rc<RefCell<UploadManager>>,
         file: &str,
     ) -> CreationResult<Self> {
         let image = ImageReader::open(file)
@@ -101,87 +97,10 @@ impl Texture {
                 .map_err(|error| CreationError::VulkanBind(error, "image"))?;
         }
 
-        ////////////////////////////////////////////////////////////////////////
-
-        Renderer::immediate_submit(
-            &device,
-            upload_command_pool,
-            upload_command_buffer,
-            upload_semaphore,
-            upload_value,
-            |command_buffer| {
-                let subsource_range = vk::ImageSubresourceRange::builder()
-                    .aspect_mask(vk::ImageAspectFlags::COLOR)
-                    .base_mip_level(0)
-                    .level_count(1)
-                    .base_array_layer(0)
-                    .layer_count(1);
-
-                let image_memory_barrier = vk::ImageMemoryBarrier2::builder()
-                    .src_stage_mask(vk::PipelineStageFlags2::TOP_OF_PIPE)
-                    .src_access_mask(vk::AccessFlags2::empty())
-                    .dst_stage_mask(vk::PipelineStageFlags2::TRANSFER)
-                    .dst_access_mask(vk::AccessFlags2::TRANSFER_WRITE)
-                    .old_layout(vk::ImageLayout::UNDEFINED)
-                    .new_layout(vk::ImageLayout::TRANSFER_DST_OPTIMAL)
-                    .image(handle)
-                    .subresource_range(*subsource_range);
-
-                let image_memory_barries = [*image_memory_barrier];
-
-                let dependency_info =
-                    vk::DependencyInfo::builder().image_memory_barriers(&image_memory_barries);
-
-                command_buffer.pipeline_barrier2(*dependency_info);
-
-                let image_subresource = vk::ImageSubresourceLayers::builder()
-                    .aspect_mask(vk::ImageAspectFlags::COLOR)
-                    .mip_level(0)
-                    .base_array_layer(0)
-                    .layer_count(1);
-
-                let buffer_image_copy = vk::BufferImageCopy::builder()
-                    .buffer_offset(0)
-                    .buffer_row_length(0)
-                    .buffer_image_height(0)
-                    .image_subresource(*image_subresource)
-                    .image_extent(*extent);
-
-                command_buffer.copy_buffer_to_image(
-                    &staging_buffer,
-                    handle,
-                    vk::ImageLayout::TRANSFER_DST_OPTIMAL,
-                    &[*buffer_image_copy],
-                );
-
-                let subsource_range = vk::ImageSubresourceRange::builder()
-                    .aspect_mask(vk::ImageAspectFlags::COLOR)
-                    .base_mip_level(0)
-                    .level_count(1)
-                    .base_array_layer(0)
-                    .layer_count(1);
-
-                let image_memory_barrier = vk::ImageMemoryBarrier2::builder()
-                    .src_stage_mask(vk::PipelineStageFlags2::TRANSFER)
-                    .src_access_mask(vk::AccessFlags2::TRANSFER_WRITE)
-                    .dst_stage_mask(vk::PipelineStageFlags2::FRAGMENT_SHADER)
-                    .dst_access_mask(vk::AccessFlags2::SHADER_READ)
-                    .old_layout(vk::ImageLayout::TRANSFER_DST_OPTIMAL)
-                    .new_layout(vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL)
-                    .image(handle)
-                    .subresource_range(*subsource_range);
-
-                let image_memory_barries = [*image_memory_barrier];
-
-                let dependency_info =
-                    vk::DependencyInfo::builder().image_memory_barriers(&image_memory_barries);
-
-                command_buffer.pipeline_barrier2(*dependency_info);
-            },
-        )
-        .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload image"))?;
-
-        ////////////////////////////////////////////////////////////////////////
+        upload_manager
+            .borrow_mut()
+            .upload_texture(&staging_buffer, handle, *extent)
+            .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload image"))?;
 
         let subsource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)

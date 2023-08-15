@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub mod error;
-pub mod render_context;
-
 pub(crate) mod allocator;
 pub(crate) mod binary_semaphore;
 pub(crate) mod bindings;
@@ -24,10 +21,10 @@ pub(crate) mod mesh;
 pub(crate) mod pipeline;
 pub(crate) mod pipeline_layout;
 pub(crate) mod render_object;
-pub(crate) mod renderer;
 pub(crate) mod resource_handle;
 pub(crate) mod shader;
 pub(crate) mod surface;
 pub(crate) mod swapchain;
 pub(crate) mod texture;
 pub(crate) mod timeline_semaphore;
+pub(crate) mod upload_manager;

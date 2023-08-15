@@ -4,15 +4,13 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::backend::{
-    allocator::Allocator,
-    descriptor_manager::DescriptorManager,
-    device::Device,
+use crate::{
+    backend::{
+        allocator::Allocator, descriptor_manager::DescriptorManager, device::Device,
+        instance::Instance, surface::Surface, swapchain::Swapchain, upload_manager::UploadManager,
+    },
     error::{CreationResult, RuntimeResult},
-    instance::Instance,
     renderer::Renderer,
-    surface::Surface,
-    swapchain::Swapchain,
 };
 
 use hyper_platform::window::Window;
@@ -22,8 +20,11 @@ use std::{cell::RefCell, rc::Rc};
 
 pub struct RenderContext {
     renderer: Renderer,
-    swapchain: Swapchain,
+
+    _upload_manager: Rc<RefCell<UploadManager>>,
     _descriptor_manager: Rc<RefCell<DescriptorManager>>,
+
+    swapchain: Swapchain,
     _allocator: Rc<RefCell<Allocator>>,
     device: Rc<Device>,
     surface: Surface,
@@ -47,11 +48,6 @@ impl RenderContext {
             &device,
         )?));
 
-        let descriptor_manager = Rc::new(RefCell::new(DescriptorManager::new(
-            &instance,
-            device.clone(),
-        )?));
-
         let swapchain = Swapchain::new(
             window,
             &instance,
@@ -60,19 +56,35 @@ impl RenderContext {
             allocator.clone(),
         )?;
 
+        let descriptor_manager = Rc::new(RefCell::new(DescriptorManager::new(
+            &instance,
+            device.clone(),
+        )?));
+
+        let upload_manager = Rc::new(RefCell::new(UploadManager::new(
+            &instance,
+            &surface,
+            device.clone(),
+            allocator.clone(),
+        )?));
+
         let renderer = Renderer::new(
             &instance,
             &surface,
             device.clone(),
             allocator.clone(),
-            descriptor_manager.clone(),
             &swapchain,
+            descriptor_manager.clone(),
+            upload_manager.clone(),
         )?;
 
         Ok(Self {
             renderer,
-            swapchain,
+
+            _upload_manager: upload_manager,
             _descriptor_manager: descriptor_manager,
+
+            swapchain,
             _allocator: allocator,
             device,
             surface,

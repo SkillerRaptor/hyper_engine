@@ -4,16 +4,18 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::backend::{
-    allocator::{Allocation, Allocator, MemoryLocation},
-    binary_semaphore::BinarySemaphore,
-    device::{
-        queue_family_indices::QueueFamilyIndices,
-        swapchain_support_details::SwapchainSupportDetails, Device,
+use crate::{
+    backend::{
+        allocator::{Allocation, Allocator, MemoryLocation},
+        binary_semaphore::BinarySemaphore,
+        device::{
+            queue_family_indices::QueueFamilyIndices,
+            swapchain_support_details::SwapchainSupportDetails, Device,
+        },
+        instance::Instance,
+        surface::Surface,
     },
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
-    instance::Instance,
-    surface::Surface,
 };
 
 use hyper_platform::window::Window;

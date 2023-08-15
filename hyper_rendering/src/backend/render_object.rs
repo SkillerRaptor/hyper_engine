@@ -4,23 +4,22 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::backend::{
-    allocator::{Allocator, MemoryLocation},
-    bindings::Bindings,
-    buffer::Buffer,
-    command_buffer::CommandBuffer,
-    command_pool::CommandPool,
-    descriptor_manager::DescriptorManager,
-    device::Device,
+use crate::{
+    backend::{
+        allocator::{Allocator, MemoryLocation},
+        bindings::Bindings,
+        buffer::Buffer,
+        descriptor_manager::DescriptorManager,
+        device::Device,
+        resource_handle::ResourceHandle,
+        upload_manager::UploadManager,
+    },
     error::{CreationError, CreationResult},
-    renderer::Renderer,
-    resource_handle::ResourceHandle,
-    timeline_semaphore::TimelineSemaphore,
 };
 
-use ash::vk;
 use hyper_math::matrix::Mat4x4f;
 
+use ash::vk;
 use std::{cell::RefCell, mem, rc::Rc};
 
 // NOTE: Temporary
@@ -45,10 +44,7 @@ impl RenderObject {
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
-        upload_command_pool: &CommandPool,
-        upload_command_buffer: &CommandBuffer,
-        upload_semaphore: &TimelineSemaphore,
-        upload_value: &mut u64,
+        upload_manager: Rc<RefCell<UploadManager>>,
         mesh: &str,
         material: &str,
         transforms: Vec<Mat4x4f>,
@@ -65,17 +61,10 @@ impl RenderObject {
             MemoryLocation::GpuOnly,
         )?;
 
-        Renderer::upload_buffer(
-            device.clone(),
-            allocator.clone(),
-            upload_command_pool,
-            upload_command_buffer,
-            upload_semaphore,
-            upload_value,
-            &transforms,
-            &transform_buffer,
-        )
-        .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
+        upload_manager
+            .borrow_mut()
+            .upload_buffer(&transforms, &transform_buffer)
+            .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
 
         let transform_handle = descriptor_manager
             .borrow_mut()
@@ -94,17 +83,10 @@ impl RenderObject {
         let mut resource_handles = vec![vertex_buffer_handle, transform_handle];
         resource_handles.extend_from_slice(extra_handles);
 
-        Renderer::upload_buffer(
-            device,
-            allocator,
-            upload_command_pool,
-            upload_command_buffer,
-            upload_semaphore,
-            upload_value,
-            &resource_handles,
-            &bindings_buffer,
-        )
-        .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
+        upload_manager
+            .borrow_mut()
+            .upload_buffer(&resource_handles, &bindings_buffer)
+            .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
 
         let bindings_handle = descriptor_manager
             .borrow_mut()

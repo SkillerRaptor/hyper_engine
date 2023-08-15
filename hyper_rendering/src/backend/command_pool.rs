@@ -4,11 +4,13 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::backend::{
-    device::{queue_family_indices::QueueFamilyIndices, Device},
+use crate::{
+    backend::{
+        device::{queue_family_indices::QueueFamilyIndices, Device},
+        instance::Instance,
+        surface::Surface,
+    },
     error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
-    instance::Instance,
-    surface::Surface,
 };
 
 use ash::vk;

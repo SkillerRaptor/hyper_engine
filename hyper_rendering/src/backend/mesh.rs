@@ -4,17 +4,16 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::backend::{
-    allocator::{Allocator, MemoryLocation},
-    buffer::Buffer,
-    command_buffer::CommandBuffer,
-    command_pool::CommandPool,
-    descriptor_manager::DescriptorManager,
-    device::Device,
+use crate::{
+    backend::{
+        allocator::{Allocator, MemoryLocation},
+        buffer::Buffer,
+        descriptor_manager::DescriptorManager,
+        device::Device,
+        resource_handle::ResourceHandle,
+        upload_manager::UploadManager,
+    },
     error::{CreationError, CreationResult},
-    renderer::Renderer,
-    resource_handle::ResourceHandle,
-    timeline_semaphore::TimelineSemaphore,
 };
 
 use hyper_math::vector::Vec4f;
@@ -48,10 +47,7 @@ impl Mesh {
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
-        upload_command_pool: &CommandPool,
-        upload_command_buffer: &CommandBuffer,
-        upload_semaphore: &TimelineSemaphore,
-        upload_value: &mut u64,
+        upload_manager: Rc<RefCell<UploadManager>>,
         vertices: Vec<Vertex>,
         indices: Option<Vec<u32>>,
     ) -> CreationResult<Self> {
@@ -63,17 +59,12 @@ impl Mesh {
             MemoryLocation::GpuOnly,
         )?;
 
-        Renderer::upload_buffer(
-            device.clone(),
-            allocator.clone(),
-            upload_command_pool,
-            upload_command_buffer,
-            upload_semaphore,
-            upload_value,
-            &vertices,
-            &vertex_buffer,
-        )
-        .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
+        upload_manager
+            .borrow_mut()
+            .upload_buffer(&vertices, &vertex_buffer)
+            .map_err(|error| {
+                CreationError::RuntimeError(Box::new(error), "upload vertex buffer")
+            })?;
 
         let vertex_buffer_handle = descriptor_manager
             .borrow_mut()
@@ -88,17 +79,12 @@ impl Mesh {
                 MemoryLocation::GpuOnly,
             )?;
 
-            Renderer::upload_buffer(
-                device,
-                allocator,
-                upload_command_pool,
-                upload_command_buffer,
-                upload_semaphore,
-                upload_value,
-                &indices,
-                &index_buffer,
-            )
-            .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
+            upload_manager
+                .borrow_mut()
+                .upload_buffer(&indices, &index_buffer)
+                .map_err(|error| {
+                    CreationError::RuntimeError(Box::new(error), "upload index buffer")
+                })?;
 
             (Some(index_buffer), indices.len())
         } else {
@@ -122,10 +108,7 @@ impl Mesh {
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
-        upload_command_pool: &CommandPool,
-        upload_command_buffer: &CommandBuffer,
-        upload_semaphore: &TimelineSemaphore,
-        upload_value: &mut u64,
+        upload_manager: Rc<RefCell<UploadManager>>,
         mesh_file: &str,
     ) -> CreationResult<Self> {
         let (models, _) = tobj::load_obj(mesh_file, &tobj::GPU_LOAD_OPTIONS)
@@ -175,10 +158,7 @@ impl Mesh {
             device,
             allocator,
             descriptor_manager,
-            upload_command_pool,
-            upload_command_buffer,
-            upload_semaphore,
-            upload_value,
+            upload_manager,
             vertices,
             Some(indices),
         )?;

@@ -11,7 +11,7 @@ use hyper_platform::{
     event_loop::EventLoop,
     window::{CreationError as WindowError, Window},
 };
-use hyper_rendering::backend::{
+use hyper_rendering::{
     error::{CreationError as RenderContextError, RuntimeError as RenderContextRuntimeError},
     render_context::RenderContext,
 };
@@ -43,6 +43,7 @@ pub struct Application {
     game: Box<dyn Game>,
 
     render_context: RenderContext,
+
     window: Window,
     event_loop: EventLoop,
 }
