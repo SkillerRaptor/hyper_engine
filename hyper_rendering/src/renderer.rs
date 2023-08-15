@@ -103,7 +103,7 @@ impl Renderer {
         let vertex_shader =
             Shader::new(device.clone(), "./assets/shaders/compiled/default_vs.spv")?;
         let fragment_shader =
-            Shader::new(device.clone(), "./assets/shaders/compiled/default_ps.spv")?;
+            Shader::new(device.clone(), "./assets/shaders/compiled/default_fs.spv")?;
         let default_pipeline = GraphicsPipeline::new(
             device.clone(),
             &pipeline_layout,
@@ -117,7 +117,7 @@ impl Renderer {
         let vertex_shader =
             Shader::new(device.clone(), "./assets/shaders/compiled/textured_vs.spv")?;
         let fragment_shader =
-            Shader::new(device.clone(), "./assets/shaders/compiled/textured_ps.spv")?;
+            Shader::new(device.clone(), "./assets/shaders/compiled/textured_fs.spv")?;
         let textured_pipeline = GraphicsPipeline::new(
             device.clone(),
             &pipeline_layout,
