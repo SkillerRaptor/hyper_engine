@@ -18,5 +18,6 @@ hyper_physics = { path = "../hyper_physics" }
 hyper_platform = { path = "../hyper_platform" }
 hyper_rendering = { path = "../hyper_rendering" }
 
+egui = "0.22"
 log = "0.4"
 thiserror = "1.0"

@@ -15,10 +15,13 @@ hyper_math = { path = "../hyper_math" }
 hyper_platform = { path = "../hyper_platform" }
 
 ash = "0.37"
+egui = "0.22"
+egui-winit = "0.22"
 gpu-allocator = "0.22"
 log = "0.4"
 smallvec = "1.11"
 thiserror = "1.0"
+winit = "0.28"
 
 # NOTE: Temporary
 image = "0.24"

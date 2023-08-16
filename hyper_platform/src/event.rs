@@ -6,8 +6,10 @@
 
 use crate::{key_code::KeyCode, mouse_code::MouseCode};
 
+use winit::event::WindowEvent;
+
 #[derive(Clone, Copy, Debug)]
-pub enum Event {
+pub enum Event<'a> {
     EventsCleared,
     UpdateFrame,
     RenderFrame,
@@ -24,4 +26,6 @@ pub enum Event {
     WindowFocused { focused: bool },
     WindowMoved { x: i32, y: i32 },
     WindowResized { width: u32, height: u32 },
+
+    WinitWindowEvent { event: &'a WindowEvent<'a> },
 }

@@ -72,6 +72,10 @@ pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
 
     logger = logger.level(level_filter);
 
+    logger = logger.level_for("egui", LevelFilter::Off);
+
+    logger = logger.level_for("egui_winit", LevelFilter::Off);
+
     logger = logger.chain(io::stdout());
 
     logger.apply()?;

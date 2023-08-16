@@ -11,8 +11,10 @@ edition = "2021"
 
 [dependencies]
 hyper_engine = { path = "../hyper_engine" }
+hyper_math = { path = "../hyper_math" }
 
 chrono = "0.4"
 color-eyre = "0.6"
+egui = "0.22"
 fern = { version = "0.6", features = ["colored"] }
 log = "0.4"

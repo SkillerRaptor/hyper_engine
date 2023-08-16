@@ -76,6 +76,10 @@ impl Window {
         (inner_size.width, inner_size.height)
     }
 
+    pub fn internal(&self) -> &window::Window {
+        &self.internal
+    }
+
     pub fn builder() -> WindowBuilder {
         WindowBuilder::default()
     }

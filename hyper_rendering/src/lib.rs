@@ -23,6 +23,7 @@ pub(crate) mod descriptor_set;
 pub(crate) mod device;
 pub(crate) mod graphics_pipelines;
 pub(crate) mod instance;
+pub(crate) mod integration;
 pub(crate) mod mesh;
 pub(crate) mod pipeline;
 pub(crate) mod pipeline_layout;

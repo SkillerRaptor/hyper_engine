@@ -39,7 +39,7 @@ impl DescriptorManager {
 
         Ok(Self {
             recycled_descriptors: VecDeque::new(),
-            current_index: 0,
+            current_index: 2, // Set to 2. 0 = Frame, 1 = Camera
 
             descriptor_sets,
             descriptor_pool,
@@ -48,8 +48,7 @@ impl DescriptorManager {
         })
     }
 
-    // TODO: Refactor to make uniforms based on the binding and make this cleaner
-    pub(crate) fn update_camera(&mut self, buffer: &Buffer) {
+    pub(crate) fn update_frame(&mut self, buffer: &Buffer) {
         let buffer_info = vk::DescriptorBufferInfo::builder()
             .buffer(buffer.handle())
             .offset(0)
@@ -62,7 +61,30 @@ impl DescriptorManager {
             .dst_set(self.descriptor_sets[0].handle())
             .dst_binding(0)
             .dst_array_element(0)
-            .descriptor_type(vk::DescriptorType::UNIFORM_BUFFER)
+            .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
+            .buffer_info(&buffer_infos);
+
+        unsafe {
+            self.device
+                .handle()
+                .update_descriptor_sets(&[*write_set], &[]);
+        }
+    }
+
+    pub(crate) fn update_camera(&mut self, buffer: &Buffer) {
+        let buffer_info = vk::DescriptorBufferInfo::builder()
+            .buffer(buffer.handle())
+            .offset(0)
+            .range(vk::WHOLE_SIZE);
+
+        // TODO: Replace descriptor set indexing with an enum that corresponds to the same array order in the descriptor pool
+        let buffer_infos = [*buffer_info];
+
+        let write_set = WriteDescriptorSet::builder()
+            .dst_set(self.descriptor_sets[0].handle())
+            .dst_binding(0)
+            .dst_array_element(1)
+            .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
             .buffer_info(&buffer_infos);
 
         unsafe {
@@ -84,7 +106,7 @@ impl DescriptorManager {
         let buffer_infos = [*buffer_info];
 
         let write_set = WriteDescriptorSet::builder()
-            .dst_set(self.descriptor_sets[1].handle())
+            .dst_set(self.descriptor_sets[0].handle())
             .dst_binding(0)
             .dst_array_element(handle.index())
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
@@ -97,6 +119,29 @@ impl DescriptorManager {
         }
 
         handle
+    }
+
+    pub(crate) fn update_buffer_handle(&mut self, handle: ResourceHandle, buffer: &Buffer) {
+        let buffer_info = vk::DescriptorBufferInfo::builder()
+            .buffer(buffer.handle())
+            .offset(0)
+            .range(vk::WHOLE_SIZE);
+
+        // TODO: Replace descriptor set indexing with an enum that corresponds to the same array order in the descriptor pool
+        let buffer_infos = [*buffer_info];
+
+        let write_set = WriteDescriptorSet::builder()
+            .dst_set(self.descriptor_sets[0].handle())
+            .dst_binding(0)
+            .dst_array_element(handle.index())
+            .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
+            .buffer_info(&buffer_infos);
+
+        unsafe {
+            self.device
+                .handle()
+                .update_descriptor_sets(&[*write_set], &[]);
+        }
     }
 
     pub(crate) fn allocate_combined_image_sampler_handle(
@@ -116,7 +161,7 @@ impl DescriptorManager {
             let image_infos = [*image_info];
 
             let write_set = WriteDescriptorSet::builder()
-                .dst_set(self.descriptor_sets[2].handle())
+                .dst_set(self.descriptor_sets[1].handle())
                 .dst_binding(0)
                 .dst_array_element(handle.index())
                 .descriptor_type(vk::DescriptorType::SAMPLED_IMAGE)
@@ -136,7 +181,7 @@ impl DescriptorManager {
             let image_infos = [*image_info];
 
             let write_set = WriteDescriptorSet::builder()
-                .dst_set(self.descriptor_sets[4].handle())
+                .dst_set(self.descriptor_sets[3].handle())
                 .dst_binding(0)
                 .dst_array_element(handle.index())
                 .descriptor_type(vk::DescriptorType::SAMPLER)

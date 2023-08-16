@@ -34,6 +34,7 @@ impl EventLoop {
         let mut return_error: Result<(), E> = Ok(());
         self.internal.run_return(|event, _, control_flow| {
             *control_flow = event_loop::ControlFlow::Poll;
+
             let event_control_flow = match event {
                 event::Event::MainEventsCleared => Some(event_handler(Event::EventsCleared)),
                 event::Event::DeviceEvent {
@@ -44,63 +45,68 @@ impl EventLoop {
                     delta_y: delta.1,
                 })),
 
-                event::Event::WindowEvent { event, .. } => match event {
-                    WindowEvent::CloseRequested => None,
-                    WindowEvent::KeyboardInput { input, .. } => {
-                        if let Some(virtual_key_code) = input.virtual_keycode {
-                            let key_code = KeyCode::from(virtual_key_code);
-                            match input.state {
+                event::Event::WindowEvent { event, .. } => {
+                    event_handler(Event::WinitWindowEvent { event: &event });
+
+                    match event {
+                        WindowEvent::CloseRequested => None,
+                        WindowEvent::KeyboardInput { input, .. } => {
+                            if let Some(virtual_key_code) = input.virtual_keycode {
+                                let key_code = KeyCode::from(virtual_key_code);
+                                match input.state {
+                                    ElementState::Pressed => {
+                                        Some(event_handler(Event::KeyPressed { button: key_code }))
+                                    }
+                                    ElementState::Released => {
+                                        Some(event_handler(Event::KeyReleased { button: key_code }))
+                                    }
+                                }
+                            } else {
+                                Some(ControlFlow::Continue(()))
+                            }
+                        }
+                        WindowEvent::MouseInput { state, button, .. } => {
+                            let button = match button {
+                                MouseButton::Left => MouseCode::Left,
+                                MouseButton::Right => MouseCode::Right,
+                                MouseButton::Middle => MouseCode::Middle,
+                                MouseButton::Other(other) => MouseCode::Other(other),
+                            };
+
+                            match state {
                                 ElementState::Pressed => {
-                                    Some(event_handler(Event::KeyPressed { button: key_code }))
+                                    Some(event_handler(Event::MousePressed { button }))
                                 }
                                 ElementState::Released => {
-                                    Some(event_handler(Event::KeyReleased { button: key_code }))
+                                    Some(event_handler(Event::MouseReleased { button }))
                                 }
                             }
-                        } else {
-                            Some(ControlFlow::Continue(()))
                         }
-                    }
-                    WindowEvent::MouseInput { state, button, .. } => {
-                        let button = match button {
-                            MouseButton::Left => MouseCode::Left,
-                            MouseButton::Right => MouseCode::Right,
-                            MouseButton::Middle => MouseCode::Middle,
-                            MouseButton::Other(other) => MouseCode::Other(other),
-                        };
+                        WindowEvent::MouseWheel { delta, .. } => {
+                            let delta = match delta {
+                                MouseScrollDelta::LineDelta(_, scroll) => (-scroll * 0.5) as f64,
+                                MouseScrollDelta::PixelDelta(PhysicalPosition {
+                                    y: scroll,
+                                    ..
+                                }) => -scroll,
+                            };
 
-                        match state {
-                            ElementState::Pressed => {
-                                Some(event_handler(Event::MousePressed { button }))
-                            }
-                            ElementState::Released => {
-                                Some(event_handler(Event::MouseReleased { button }))
-                            }
+                            Some(event_handler(Event::MouseScrolled { delta }))
                         }
+                        WindowEvent::Focused(focused) => {
+                            Some(event_handler(Event::WindowFocused { focused }))
+                        }
+                        WindowEvent::Moved(position) => Some(event_handler(Event::WindowMoved {
+                            x: position.x,
+                            y: position.y,
+                        })),
+                        WindowEvent::Resized(size) => Some(event_handler(Event::WindowResized {
+                            width: size.width,
+                            height: size.height,
+                        })),
+                        _ => Some(ControlFlow::Continue(())),
                     }
-                    WindowEvent::MouseWheel { delta, .. } => {
-                        let delta = match delta {
-                            MouseScrollDelta::LineDelta(_, scroll) => (-scroll * 0.5) as f64,
-                            MouseScrollDelta::PixelDelta(PhysicalPosition {
-                                y: scroll, ..
-                            }) => -scroll,
-                        };
-
-                        Some(event_handler(Event::MouseScrolled { delta }))
-                    }
-                    WindowEvent::Focused(focused) => {
-                        Some(event_handler(Event::WindowFocused { focused }))
-                    }
-                    WindowEvent::Moved(position) => Some(event_handler(Event::WindowMoved {
-                        x: position.x,
-                        y: position.y,
-                    })),
-                    WindowEvent::Resized(size) => Some(event_handler(Event::WindowResized {
-                        width: size.width,
-                        height: size.height,
-                    })),
-                    _ => Some(ControlFlow::Continue(())),
-                },
+                }
                 event::Event::RedrawRequested(..) => {
                     let flow = event_handler(Event::UpdateFrame);
                     if flow.is_continue() {
@@ -125,7 +131,7 @@ impl EventLoop {
         return_error
     }
 
-    pub(crate) fn internal(&self) -> &event_loop::EventLoop<()> {
+    pub fn internal(&self) -> &event_loop::EventLoop<()> {
         &self.internal
     }
 }

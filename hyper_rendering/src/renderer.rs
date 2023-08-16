@@ -18,7 +18,9 @@ use crate::{
     instance::Instance,
     mesh::{Mesh, Vertex},
     pipeline_layout::PipelineLayout,
+    render_context::Frame,
     render_object::RenderObject,
+    resource_handle::ResourceHandle,
     shader::Shader,
     surface::Surface,
     swapchain::Swapchain,
@@ -37,14 +39,15 @@ use ash::vk;
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
 pub(crate) struct Renderer {
+    frame_buffer: Buffer,
+    upload_manager: Rc<RefCell<UploadManager>>,
+
     // TODO: Make a material system
     _textures: HashMap<String, Texture>,
     materials: HashMap<String, GraphicsPipeline>,
     meshes: HashMap<String, Mesh>,
     // NOTE: Temporary
     renderables: Vec<RenderObject>,
-
-    pipeline_layout: PipelineLayout,
 
     _projection_view_buffer: Buffer,
 
@@ -74,6 +77,7 @@ impl Renderer {
         swapchain: &Swapchain,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         upload_manager: Rc<RefCell<UploadManager>>,
+        pipeline_layout: &PipelineLayout,
     ) -> CreationResult<Self> {
         let command_pool = CommandPool::new(instance, surface, device.clone())?;
 
@@ -94,10 +98,6 @@ impl Renderer {
 
         ////////////////////////////////////////////////////////////////////////
 
-        let pipeline_layout = PipelineLayout::new(device.clone(), &descriptor_manager.borrow())?;
-
-        ////////////////////////////////////////////////////////////////////////
-
         let mut materials = HashMap::new();
 
         let vertex_shader =
@@ -110,6 +110,9 @@ impl Renderer {
             swapchain,
             vertex_shader,
             fragment_shader,
+            vk::CullModeFlags::BACK,
+            true,
+            false,
         )?;
 
         materials.insert("default".to_string(), default_pipeline);
@@ -124,6 +127,9 @@ impl Renderer {
             swapchain,
             vertex_shader,
             fragment_shader,
+            vk::CullModeFlags::BACK,
+            true,
+            false,
         )?;
 
         materials.insert("textured".to_string(), textured_pipeline);
@@ -204,7 +210,7 @@ impl Renderer {
             device.clone(),
             allocator.clone(),
             mem::size_of::<Mat4x4f>(),
-            vk::BufferUsageFlags::UNIFORM_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
             MemoryLocation::GpuOnly,
         )?;
 
@@ -256,7 +262,7 @@ impl Renderer {
 
         let lost_empire = RenderObject::new::<TexturedBindings>(
             device.clone(),
-            allocator,
+            allocator.clone(),
             descriptor_manager.clone(),
             upload_manager.clone(),
             "lost_empire",
@@ -267,13 +273,22 @@ impl Renderer {
         )?;
         renderables.push(lost_empire);
 
+        let frame_buffer = Buffer::new(
+            device.clone(),
+            allocator.clone(),
+            mem::size_of::<Frame>(),
+            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+            MemoryLocation::GpuOnly,
+        )?;
+
         Ok(Self {
+            frame_buffer,
+            upload_manager: upload_manager.clone(),
+
             _textures: textures,
             materials,
             meshes,
             renderables,
-
-            pipeline_layout,
 
             _projection_view_buffer: projection_view_buffer,
 
@@ -319,19 +334,6 @@ impl Renderer {
         self.command_buffers[side as usize].reset()?;
         self.command_buffers[side as usize].begin(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT)?;
 
-        let color_clear = vk::ClearValue {
-            color: vk::ClearColorValue {
-                float32: [0.12941, 0.06275, 0.13725, 1.0],
-            },
-        };
-
-        let depth_clear = vk::ClearValue {
-            depth_stencil: vk::ClearDepthStencilValue {
-                depth: 1.0,
-                stencil: 0,
-            },
-        };
-
         let subresource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
             .base_mip_level(0)
@@ -359,62 +361,11 @@ impl Renderer {
 
         self.command_buffers[side as usize].pipeline_barrier2(*dependency_info);
 
-        let render_area_extent = swapchain.extent();
-        let render_area_offset = vk::Offset2D::builder().x(0).y(0);
-
-        let render_area = vk::Rect2D::builder()
-            .extent(render_area_extent)
-            .offset(*render_area_offset);
-
-        let color_attachment_info = vk::RenderingAttachmentInfoKHR::builder()
-            .image_view(swapchain.image_views()[self.swapchain_image_index as usize])
-            .image_layout(vk::ImageLayout::ATTACHMENT_OPTIMAL_KHR)
-            .load_op(vk::AttachmentLoadOp::CLEAR)
-            .store_op(vk::AttachmentStoreOp::STORE)
-            .clear_value(color_clear);
-
-        let color_attachments = [*color_attachment_info];
-
-        let depth_attachment_info = vk::RenderingAttachmentInfoKHR::builder()
-            .image_view(swapchain.depth_image_view())
-            .image_layout(vk::ImageLayout::DEPTH_ATTACHMENT_OPTIMAL)
-            .load_op(vk::AttachmentLoadOp::CLEAR)
-            .store_op(vk::AttachmentStoreOp::STORE)
-            .clear_value(depth_clear);
-
-        let rendering_info = vk::RenderingInfoKHR::builder()
-            .render_area(*render_area)
-            .layer_count(1)
-            .color_attachments(&color_attachments)
-            .depth_attachment(&depth_attachment_info);
-
-        self.command_buffers[side as usize].begin_rendering(*rendering_info);
-
-        let viewport = vk::Viewport::builder()
-            .x(0.0)
-            .y(swapchain.extent().height as f32)
-            .width(swapchain.extent().width as f32)
-            .height(-(swapchain.extent().height as f32))
-            .min_depth(0.0)
-            .max_depth(1.0);
-
-        self.command_buffers[side as usize].set_viewport(0, &[*viewport]);
-
-        let offset = vk::Offset2D::builder().x(0).y(0);
-
-        let scissor = vk::Rect2D::builder()
-            .offset(*offset)
-            .extent(swapchain.extent());
-
-        self.command_buffers[side as usize].set_scissor(0, &[*scissor]);
-
         Ok(())
     }
 
     pub(crate) fn end(&self, swapchain: &Swapchain) -> RuntimeResult<()> {
         let side = self.current_frame_id % 2;
-
-        self.command_buffers[side as usize].end_rendering();
 
         let subresource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -449,6 +400,122 @@ impl Renderer {
         Ok(())
     }
 
+    pub(crate) fn begin_rendering(&mut self, swapchain: &mut Swapchain) {
+        let side = self.current_frame_id % 2;
+
+        let render_area_extent = swapchain.extent();
+        let render_area_offset = vk::Offset2D::builder().x(0).y(0);
+
+        let render_area = vk::Rect2D::builder()
+            .extent(render_area_extent)
+            .offset(*render_area_offset);
+
+        let color_clear = vk::ClearValue {
+            color: vk::ClearColorValue {
+                float32: [0.12941, 0.06275, 0.13725, 1.0],
+            },
+        };
+
+        let depth_clear = vk::ClearValue {
+            depth_stencil: vk::ClearDepthStencilValue {
+                depth: 1.0,
+                stencil: 0,
+            },
+        };
+
+        let color_attachment_info = vk::RenderingAttachmentInfo::builder()
+            .image_view(swapchain.image_views()[self.swapchain_image_index as usize])
+            .image_layout(vk::ImageLayout::ATTACHMENT_OPTIMAL)
+            .load_op(vk::AttachmentLoadOp::CLEAR)
+            .store_op(vk::AttachmentStoreOp::STORE)
+            .clear_value(color_clear);
+
+        let color_attachments = [*color_attachment_info];
+
+        let depth_attachment_info = vk::RenderingAttachmentInfo::builder()
+            .image_view(swapchain.depth_image_view())
+            .image_layout(vk::ImageLayout::DEPTH_ATTACHMENT_OPTIMAL)
+            .load_op(vk::AttachmentLoadOp::CLEAR)
+            .store_op(vk::AttachmentStoreOp::STORE)
+            .clear_value(depth_clear);
+
+        let rendering_info = vk::RenderingInfo::builder()
+            .render_area(*render_area)
+            .layer_count(1)
+            .color_attachments(&color_attachments)
+            .depth_attachment(&depth_attachment_info);
+
+        self.command_buffers[side as usize].begin_rendering(*rendering_info);
+
+        let viewport = vk::Viewport::builder()
+            .x(0.0)
+            .y(swapchain.extent().height as f32)
+            .width(swapchain.extent().width as f32)
+            .height(-(swapchain.extent().height as f32))
+            .min_depth(0.0)
+            .max_depth(1.0);
+
+        self.command_buffers[side as usize].set_viewport(0, &[*viewport]);
+
+        let offset = vk::Offset2D::builder().x(0).y(0);
+
+        let scissor = vk::Rect2D::builder()
+            .offset(*offset)
+            .extent(swapchain.extent());
+
+        self.command_buffers[side as usize].set_scissor(0, &[*scissor]);
+    }
+
+    pub(crate) fn begin_rendering_gui(&mut self, swapchain: &mut Swapchain) {
+        let side = self.current_frame_id % 2;
+
+        let render_area_extent = swapchain.extent();
+        let render_area_offset = vk::Offset2D::builder().x(0).y(0);
+
+        let render_area = vk::Rect2D::builder()
+            .extent(render_area_extent)
+            .offset(*render_area_offset);
+
+        let color_attachment_info = vk::RenderingAttachmentInfo::builder()
+            .image_view(swapchain.image_views()[self.swapchain_image_index as usize])
+            .image_layout(vk::ImageLayout::ATTACHMENT_OPTIMAL)
+            .load_op(vk::AttachmentLoadOp::LOAD)
+            .store_op(vk::AttachmentStoreOp::STORE);
+
+        let color_attachments = [*color_attachment_info];
+
+        let rendering_info = vk::RenderingInfo::builder()
+            .render_area(*render_area)
+            .layer_count(1)
+            .color_attachments(&color_attachments);
+
+        self.command_buffers[side as usize].begin_rendering(*rendering_info);
+
+        let viewport = vk::Viewport::builder()
+            .x(0.0)
+            .y(swapchain.extent().height as f32)
+            .width(swapchain.extent().width as f32)
+            .height(-(swapchain.extent().height as f32))
+            .min_depth(0.0)
+            .max_depth(1.0);
+
+        self.command_buffers[side as usize].set_viewport(0, &[*viewport]);
+
+        let offset = vk::Offset2D::builder().x(0).y(0);
+
+        let scissor = vk::Rect2D::builder()
+            .offset(*offset)
+            .extent(swapchain.extent());
+
+        self.command_buffers[side as usize].set_scissor(0, &[*scissor]);
+    }
+
+    pub(crate) fn end_rendering(&self) {
+        let side = self.current_frame_id % 2;
+
+        self.command_buffers[side as usize].end_rendering();
+    }
+
     pub(crate) fn submit(
         &self,
         window: &Window,
@@ -478,7 +545,7 @@ impl Renderer {
         Ok(())
     }
 
-    pub(crate) fn draw_objects(&self) {
+    pub(crate) fn draw_objects(&self, pipeline_layout: &PipelineLayout) {
         // TODO: Draw scene and not a triangle
         let side = self.current_frame_id % 2;
 
@@ -502,7 +569,7 @@ impl Renderer {
                     .collect::<Vec<_>>();
                 self.command_buffers[side as usize].bind_descriptor_sets(
                     vk::PipelineBindPoint::GRAPHICS,
-                    &self.pipeline_layout,
+                    &pipeline_layout,
                     0,
                     &descriptor_sets,
                     &[],
@@ -513,7 +580,7 @@ impl Renderer {
 
             let bindings_offset = BindingsOffset::new(renderable.bindings_handle());
             self.command_buffers[side as usize].push_constants(
-                &self.pipeline_layout,
+                &pipeline_layout,
                 vk::ShaderStageFlags::ALL,
                 0,
                 &bindings_offset,
@@ -550,6 +617,93 @@ impl Renderer {
         swapchain: &mut Swapchain,
     ) -> RuntimeResult<()> {
         swapchain.recreate(window, instance, surface)?;
+
+        Ok(())
+    }
+
+    pub(crate) fn bind_pipeline(
+        &self,
+        pipeline: &GraphicsPipeline,
+        pipeline_layout: &PipelineLayout,
+    ) {
+        let side = self.current_frame_id % 2;
+
+        self.command_buffers[side as usize]
+            .bind_pipeline(vk::PipelineBindPoint::GRAPHICS, pipeline);
+
+        let descriptor_sets = self
+            .descriptor_manager
+            .borrow()
+            .descriptor_sets()
+            .iter()
+            .map(|descriptor_set| descriptor_set.handle())
+            .collect::<Vec<_>>();
+        self.command_buffers[side as usize].bind_descriptor_sets(
+            vk::PipelineBindPoint::GRAPHICS,
+            &pipeline_layout,
+            0,
+            &descriptor_sets,
+            &[],
+        );
+    }
+
+    pub(crate) fn set_scissor(&self, offset: vk::Offset2D, extent: vk::Extent2D) {
+        let side = self.current_frame_id % 2;
+
+        let scissor = vk::Rect2D::builder().offset(offset).extent(extent);
+
+        self.command_buffers[side as usize].set_scissor(0, &[*scissor]);
+    }
+
+    pub(crate) fn draw_indexed(
+        &self,
+        index_count: u32,
+        instance_count: u32,
+        first_index: u32,
+        vertex_offset: i32,
+        first_instance: u32,
+    ) {
+        let side = self.current_frame_id % 2;
+
+        self.command_buffers[side as usize].draw_indexed(
+            index_count,
+            instance_count,
+            first_index,
+            vertex_offset,
+            first_instance,
+        );
+    }
+
+    pub(crate) fn push_constants(
+        &self,
+        pipeline_layout: &PipelineLayout,
+        bindings_handle: ResourceHandle,
+    ) {
+        let side = self.current_frame_id % 2;
+
+        let bindings_offset = BindingsOffset::new(bindings_handle);
+        self.command_buffers[side as usize].push_constants(
+            &pipeline_layout,
+            vk::ShaderStageFlags::ALL,
+            0,
+            &bindings_offset,
+        );
+    }
+
+    pub(crate) fn bind_index_buffer(&self, index_buffer: &Buffer) {
+        let side = self.current_frame_id % 2;
+
+        self.command_buffers[side as usize].bind_index_buffer(index_buffer);
+    }
+
+    pub(crate) fn update_frame(&self, frame: Frame) -> RuntimeResult<()> {
+        self.upload_manager
+            .borrow_mut()
+            .upload_buffer(&[frame], &self.frame_buffer)?;
+
+        self.descriptor_manager
+            .borrow_mut()
+            .update_frame(&self.frame_buffer);
 
         Ok(())
     }

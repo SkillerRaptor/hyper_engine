@@ -27,9 +27,7 @@ impl BindingsOffset {
     }
 }
 
-pub(crate) trait Bindings: Debug + Default {
-    fn set_resource_handles(&mut self, handles: &[ResourceHandle]);
-}
+pub(crate) trait Bindings: Debug + Default {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
@@ -38,14 +36,7 @@ pub(crate) struct DefaultBindings {
     pub(crate) transforms_offset: ResourceHandle,
 }
 
-impl Bindings for DefaultBindings {
-    fn set_resource_handles(&mut self, handles: &[ResourceHandle]) {
-        assert!(handles.len() == 2);
-
-        self.vertices_offset = handles[0];
-        self.transforms_offset = handles[1];
-    }
-}
+impl Bindings for DefaultBindings {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
@@ -55,12 +46,13 @@ pub(crate) struct TexturedBindings {
     pub(crate) texture: ResourceHandle,
 }
 
-impl Bindings for TexturedBindings {
-    fn set_resource_handles(&mut self, handles: &[ResourceHandle]) {
-        assert!(handles.len() == 3);
+impl Bindings for TexturedBindings {}
 
-        self.vertices_offset = handles[0];
-        self.transforms_offset = handles[1];
-        self.texture = handles[2];
-    }
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) struct GuiBindings {
+    pub(crate) vertices_offset: ResourceHandle,
+    pub(crate) texture: ResourceHandle,
 }
+
+impl Bindings for GuiBindings {}

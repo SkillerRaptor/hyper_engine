@@ -6,6 +6,7 @@
 
 use crate::game::Game;
 
+use hyper_math::vector::Vec2f;
 use hyper_platform::{
     event::Event,
     event_loop::EventLoop,
@@ -13,7 +14,7 @@ use hyper_platform::{
 };
 use hyper_rendering::{
     error::{CreationError as RenderContextError, RuntimeError as RenderContextRuntimeError},
-    render_context::RenderContext,
+    render_context::{Frame, RenderContext},
 };
 
 use std::{ops::ControlFlow, time::Instant};
@@ -38,7 +39,7 @@ pub enum RuntimeError {
 }
 
 pub struct Application {
-    frame_id: u64,
+    frame_id: u32,
 
     game: Box<dyn Game>,
 
@@ -66,7 +67,7 @@ impl Application {
             .resizable(resizable)
             .build(&event_loop)?;
 
-        let render_context = RenderContext::new(&window)?;
+        let render_context = RenderContext::new(&event_loop, &window)?;
 
         log::info!(
             "Application started in {:.4} seconds",
@@ -112,11 +113,59 @@ impl Application {
                         self.game.update();
                     }
                     Event::RenderFrame => {
-                        if let Err(error) = self.render_context.begin(&self.window, self.frame_id) {
+                        // Render Game
+                        if let Err(error) = self
+                            .render_context
+                            .begin(&self.window, self.frame_id as u64)
+                        {
                             return ControlFlow::Break(error.into());
                         }
 
-                        self.render_context.draw_objects();
+                        let frame = Frame {
+                            time,
+                            delta_time,
+
+                            unused_0: 0.0,
+                            unused_1: 0.0,
+
+                            frame_count: self.frame_id,
+                            unused_2: 0,
+                            unused_3: 0,
+                            unused_4: 0,
+
+                            screen_size: Vec2f::new(
+                                self.window.framebuffer_size().0 as f32,
+                                self.window.framebuffer_size().1 as f32,
+                            ),
+                            unused_5: Vec2f::default(),
+                        };
+
+                        if let Err(error) = self.render_context.update_frame(frame) {
+                            return ControlFlow::Break(error.into());
+                        }
+
+                        {
+                            self.render_context.begin_rendering();
+
+                            self.render_context.draw_objects();
+                            self.game.render();
+
+                            self.render_context.end_rendering();
+                        }
+
+                        // Render GUI
+                        {
+                            self.render_context.begin_gui(&self.window);
+
+                            self.game.render_gui(self.render_context.egui_context());
+
+                            let output = self.render_context.end_gui(&self.window);
+
+                            if let Err(error) = self.render_context.submit_gui(&self.window, output)
+                            {
+                                return ControlFlow::Break(error.into());
+                            }
+                        }
 
                         if let Err(error) = self.render_context.end() {
                             return ControlFlow::Break(error.into());
@@ -126,9 +175,10 @@ impl Application {
                             return ControlFlow::Break(error.into());
                         }
 
-                        self.game.render();
-
                         self.frame_id += 1;
+                    }
+                    Event::WinitWindowEvent { event } => {
+                        self.render_context.handle_gui_event(event);
                     }
                     Event::WindowResized { width, height } => {
                         if self.window.framebuffer_size() == (width, height) {
