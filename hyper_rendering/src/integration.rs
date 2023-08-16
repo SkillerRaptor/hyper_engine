@@ -84,7 +84,7 @@ impl EguiIntegration {
         let fragment_shader = Shader::new(device.clone(), "./assets/shaders/compiled/gui_fs.spv")?;
         let pipeline = GraphicsPipeline::new(
             device.clone(),
-            &pipeline_layout,
+            pipeline_layout,
             swapchain,
             vertex_shader,
             fragment_shader,
@@ -175,7 +175,7 @@ impl EguiIntegration {
     }
 
     pub(crate) fn begin_gui(&mut self, window: &Window) {
-        let raw_input = self.egui_winit.take_egui_input(&window.internal());
+        let raw_input = self.egui_winit.take_egui_input(window.internal());
         self.egui_context.begin_frame(raw_input);
     }
 
@@ -229,7 +229,7 @@ impl EguiIntegration {
             let staging_buffer = Buffer::new(
                 self.device.clone(),
                 self.allocator.clone(),
-                data.len() as usize,
+                data.len(),
                 vk::BufferUsageFlags::TRANSFER_SRC,
                 MemoryLocation::CpuToGpu,
             )

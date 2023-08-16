@@ -106,7 +106,7 @@ impl Renderer {
             Shader::new(device.clone(), "./assets/shaders/compiled/default_fs.spv")?;
         let default_pipeline = GraphicsPipeline::new(
             device.clone(),
-            &pipeline_layout,
+            pipeline_layout,
             swapchain,
             vertex_shader,
             fragment_shader,
@@ -123,7 +123,7 @@ impl Renderer {
             Shader::new(device.clone(), "./assets/shaders/compiled/textured_fs.spv")?;
         let textured_pipeline = GraphicsPipeline::new(
             device.clone(),
-            &pipeline_layout,
+            pipeline_layout,
             swapchain,
             vertex_shader,
             fragment_shader,
@@ -569,7 +569,7 @@ impl Renderer {
                     .collect::<Vec<_>>();
                 self.command_buffers[side as usize].bind_descriptor_sets(
                     vk::PipelineBindPoint::GRAPHICS,
-                    &pipeline_layout,
+                    pipeline_layout,
                     0,
                     &descriptor_sets,
                     &[],
@@ -580,7 +580,7 @@ impl Renderer {
 
             let bindings_offset = BindingsOffset::new(renderable.bindings_handle());
             self.command_buffers[side as usize].push_constants(
-                &pipeline_layout,
+                pipeline_layout,
                 vk::ShaderStageFlags::ALL,
                 0,
                 &bindings_offset,
@@ -640,7 +640,7 @@ impl Renderer {
             .collect::<Vec<_>>();
         self.command_buffers[side as usize].bind_descriptor_sets(
             vk::PipelineBindPoint::GRAPHICS,
-            &pipeline_layout,
+            pipeline_layout,
             0,
             &descriptor_sets,
             &[],
@@ -683,7 +683,7 @@ impl Renderer {
 
         let bindings_offset = BindingsOffset::new(bindings_handle);
         self.command_buffers[side as usize].push_constants(
-            &pipeline_layout,
+            pipeline_layout,
             vk::ShaderStageFlags::ALL,
             0,
             &bindings_offset,
