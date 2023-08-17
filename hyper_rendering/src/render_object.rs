@@ -5,14 +5,15 @@
  */
 
 use crate::{
-    allocator::{Allocator, MemoryLocation},
     bindings::Bindings,
-    buffer::Buffer,
-    descriptor_manager::DescriptorManager,
-    device::Device,
     error::Result,
     resource_handle::ResourceHandle,
-    upload_manager::UploadManager,
+    vulkan::{
+        core::device::Device,
+        descriptors::descriptor_manager::DescriptorManager,
+        memory::allocator::{Allocator, MemoryLocation},
+        resource::{buffer::Buffer, upload_manager::UploadManager},
+    },
 };
 
 use hyper_math::matrix::Mat4x4f;

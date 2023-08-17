@@ -5,8 +5,13 @@
  */
 
 use crate::{
-    buffer::Buffer, descriptor_pool::DescriptorPool, descriptor_set::DescriptorSet, device::Device,
-    error::Result, instance::Instance, resource_handle::ResourceHandle,
+    error::Result,
+    resource_handle::ResourceHandle,
+    vulkan::{
+        core::{device::Device, instance::Instance},
+        descriptors::{descriptor_pool::DescriptorPool, descriptor_set::DescriptorSet},
+        resource::buffer::Buffer,
+    },
 };
 
 use ash::vk::{self, WriteDescriptorSet};

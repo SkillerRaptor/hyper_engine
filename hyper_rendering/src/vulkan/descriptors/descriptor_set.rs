@@ -5,9 +5,8 @@
  */
 
 use crate::{
-    descriptor_pool::DescriptorPool,
-    device::Device,
     error::{Error, Result},
+    vulkan::{core::device::Device, descriptors::descriptor_pool::DescriptorPool},
 };
 
 use ash::vk;

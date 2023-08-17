@@ -5,23 +5,26 @@
  */
 
 use crate::{
-    allocator::{Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation},
     bindings::GuiBindings,
-    buffer::Buffer,
-    descriptor_manager::DescriptorManager,
-    device::Device,
     error::Result,
-    graphics_pipelines::{
-        ColorBlendAttachmentStateCreateInfo, ColorBlendStateCreateInfo,
-        DepthStencilStateCreateInfo, GraphicsPipeline, GraphicsPipelineCreateInfo,
-        InputAssemblyCreateInfo, RasterizationStateCreateInfo,
-    },
-    pipeline_layout::PipelineLayout,
     renderer::Renderer,
     resource_handle::ResourceHandle,
-    shader::Shader,
-    swapchain::Swapchain,
-    upload_manager::UploadManager,
+    vulkan::{
+        core::{device::Device, swapchain::Swapchain},
+        descriptors::descriptor_manager::DescriptorManager,
+        memory::allocator::{
+            Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation,
+        },
+        pipeline::{
+            graphics_pipelines::{
+                ColorBlendAttachmentStateCreateInfo, ColorBlendStateCreateInfo,
+                DepthStencilStateCreateInfo, GraphicsPipeline, GraphicsPipelineCreateInfo,
+                InputAssemblyCreateInfo, RasterizationStateCreateInfo,
+            },
+            pipeline_layout::PipelineLayout,
+        },
+        resource::{buffer::Buffer, shader::Shader, upload_manager::UploadManager},
+    },
 };
 
 use hyper_math::vector::Vec4f;

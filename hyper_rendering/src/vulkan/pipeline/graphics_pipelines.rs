@@ -5,11 +5,12 @@
  */
 
 use crate::{
-    device::Device,
     error::{Error, Result},
-    pipeline::Pipeline,
-    pipeline_layout::PipelineLayout,
-    shader::Shader,
+    vulkan::{
+        core::device::Device,
+        pipeline::{pipeline_layout::PipelineLayout, Pipeline},
+        resource::shader::Shader,
+    },
 };
 
 use ash::vk;

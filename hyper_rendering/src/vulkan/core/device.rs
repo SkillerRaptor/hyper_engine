@@ -5,16 +5,19 @@
  */
 
 use crate::{
-    binary_semaphore::BinarySemaphore,
-    command_buffer::CommandBuffer,
-    device::{
-        queue_family_indices::QueueFamilyIndices,
-        swapchain_support_details::SwapchainSupportDetails,
-    },
     error::{Error, Result},
-    instance::Instance,
-    surface::Surface,
-    timeline_semaphore::TimelineSemaphore,
+    vulkan::{
+        command::command_buffer::CommandBuffer,
+        core::{
+            device::{
+                queue_family_indices::QueueFamilyIndices,
+                swapchain_support_details::SwapchainSupportDetails,
+            },
+            instance::Instance,
+            surface::Surface,
+        },
+        sync::{binary_semaphore::BinarySemaphore, timeline_semaphore::TimelineSemaphore},
+    },
 };
 
 use ash::{extensions::khr::Swapchain, vk, Device as VulkanDevice};
@@ -23,7 +26,7 @@ use std::{collections::HashSet, ffi::CStr, str};
 pub(crate) mod queue_family_indices {
     use crate::{
         error::{Error, Result},
-        {instance::Instance, surface::Surface},
+        vulkan::core::{instance::Instance, surface::Surface},
     };
 
     use ash::vk;
@@ -98,7 +101,7 @@ pub(crate) mod queue_family_indices {
 pub(crate) mod swapchain_support_details {
     use crate::{
         error::{Error, Result},
-        surface::Surface,
+        vulkan::core::surface::Surface,
     };
 
     use ash::vk;

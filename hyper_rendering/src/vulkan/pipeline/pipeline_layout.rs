@@ -6,9 +6,8 @@
 
 use crate::{
     bindings::BindingsOffset,
-    descriptor_manager::DescriptorManager,
-    device::Device,
     error::{Error, Result},
+    vulkan::{core::device::Device, descriptors::descriptor_manager::DescriptorManager},
 };
 
 use ash::vk;

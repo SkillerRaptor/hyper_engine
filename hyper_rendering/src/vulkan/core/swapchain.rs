@@ -5,15 +5,21 @@
  */
 
 use crate::{
-    allocator::{Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation},
-    binary_semaphore::BinarySemaphore,
-    device::{
-        queue_family_indices::QueueFamilyIndices,
-        swapchain_support_details::SwapchainSupportDetails, Device,
-    },
     error::{Error, Result},
-    instance::Instance,
-    surface::Surface,
+    vulkan::{
+        core::{
+            device::{
+                queue_family_indices::QueueFamilyIndices,
+                swapchain_support_details::SwapchainSupportDetails, Device,
+            },
+            instance::Instance,
+            surface::Surface,
+        },
+        memory::allocator::{
+            Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation,
+        },
+        sync::binary_semaphore::BinarySemaphore,
+    },
 };
 
 use hyper_platform::window::Window;

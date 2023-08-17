@@ -5,9 +5,8 @@
  */
 
 use crate::{
-    device::Device,
     error::{Error, Result},
-    instance::Instance,
+    vulkan::core::{device::Device, instance::Instance},
 };
 
 use ash::vk;

@@ -5,17 +5,16 @@
  */
 
 use crate::{
-    allocator::{Allocator, AllocatorCreateInfo},
-    descriptor_manager::DescriptorManager,
-    device::Device,
+    egui_integration::EguiIntegration,
     error::Result,
-    instance::Instance,
-    integration::EguiIntegration,
-    pipeline_layout::PipelineLayout,
     renderer::Renderer,
-    surface::Surface,
-    swapchain::Swapchain,
-    upload_manager::UploadManager,
+    vulkan::{
+        core::{device::Device, instance::Instance, surface::Surface, swapchain::Swapchain},
+        descriptors::descriptor_manager::DescriptorManager,
+        memory::allocator::{Allocator, AllocatorCreateInfo},
+        pipeline::pipeline_layout::PipelineLayout,
+        resource::upload_manager::UploadManager,
+    },
 };
 
 use hyper_math::vector::Vec2f;

@@ -5,12 +5,13 @@
  */
 
 use crate::{
-    buffer::Buffer,
-    command_pool::CommandPool,
-    device::Device,
     error::{Error, Result},
-    pipeline::Pipeline,
-    pipeline_layout::PipelineLayout,
+    vulkan::{
+        command::command_pool::CommandPool,
+        core::device::Device,
+        pipeline::{pipeline_layout::PipelineLayout, Pipeline},
+        resource::buffer::Buffer,
+    },
 };
 
 use ash::vk;

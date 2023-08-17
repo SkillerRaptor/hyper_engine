@@ -5,32 +5,30 @@
  */
 
 use crate::{
-    allocator::{Allocator, MemoryLocation},
-    binary_semaphore::BinarySemaphore,
     bindings::{BindingsOffset, TexturedBindings},
-    buffer::Buffer,
-    command_buffer::CommandBuffer,
-    command_pool::CommandPool,
-    descriptor_manager::DescriptorManager,
-    device::Device,
     error::{Error, Result},
-    graphics_pipelines::{
-        ColorBlendAttachmentStateCreateInfo, ColorBlendStateCreateInfo,
-        DepthStencilStateCreateInfo, GraphicsPipeline, GraphicsPipelineCreateInfo,
-        InputAssemblyCreateInfo, RasterizationStateCreateInfo,
-    },
-    instance::Instance,
     mesh::{Mesh, Vertex},
-    pipeline_layout::PipelineLayout,
     render_context::Frame,
     render_object::RenderObject,
     resource_handle::ResourceHandle,
-    shader::Shader,
-    surface::Surface,
-    swapchain::Swapchain,
-    texture::Texture,
-    timeline_semaphore::TimelineSemaphore,
-    upload_manager::UploadManager,
+    vulkan::{
+        command::{command_buffer::CommandBuffer, command_pool::CommandPool},
+        core::{device::Device, instance::Instance, surface::Surface, swapchain::Swapchain},
+        descriptors::descriptor_manager::DescriptorManager,
+        memory::allocator::{Allocator, MemoryLocation},
+        pipeline::{
+            graphics_pipelines::{
+                ColorBlendAttachmentStateCreateInfo, ColorBlendStateCreateInfo,
+                DepthStencilStateCreateInfo, GraphicsPipeline, GraphicsPipelineCreateInfo,
+                InputAssemblyCreateInfo, RasterizationStateCreateInfo,
+            },
+            pipeline_layout::PipelineLayout,
+        },
+        resource::{
+            buffer::Buffer, shader::Shader, texture::Texture, upload_manager::UploadManager,
+        },
+        sync::{binary_semaphore::BinarySemaphore, timeline_semaphore::TimelineSemaphore},
+    },
 };
 
 use hyper_math::{

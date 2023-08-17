@@ -5,10 +5,12 @@
  */
 
 use crate::{
-    device::{queue_family_indices::QueueFamilyIndices, Device},
     error::{Error, Result},
-    instance::Instance,
-    surface::Surface,
+    vulkan::core::{
+        device::{queue_family_indices::QueueFamilyIndices, Device},
+        instance::Instance,
+        surface::Surface,
+    },
 };
 
 use ash::vk;

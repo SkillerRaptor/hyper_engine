@@ -5,15 +5,14 @@
  */
 
 use crate::{
-    allocator::{Allocator, MemoryLocation},
-    buffer::Buffer,
-    command_buffer::CommandBuffer,
-    command_pool::CommandPool,
-    device::Device,
     error::Result,
-    instance::Instance,
-    surface::Surface,
-    timeline_semaphore::TimelineSemaphore,
+    vulkan::{
+        command::{command_buffer::CommandBuffer, command_pool::CommandPool},
+        core::{device::Device, instance::Instance, surface::Surface},
+        memory::allocator::{Allocator, MemoryLocation},
+        resource::buffer::Buffer,
+        sync::timeline_semaphore::TimelineSemaphore,
+    },
 };
 
 use ash::vk;

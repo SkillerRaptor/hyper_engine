@@ -5,9 +5,13 @@
  */
 
 use crate::{
-    allocator::{Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation},
-    device::Device,
     error::{Error, Result},
+    vulkan::{
+        core::device::Device,
+        memory::allocator::{
+            Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation,
+        },
+    },
 };
 
 use ash::vk;

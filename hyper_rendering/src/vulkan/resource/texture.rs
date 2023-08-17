@@ -5,11 +5,14 @@
  */
 
 use crate::{
-    allocator::{Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation},
-    buffer::Buffer,
-    device::Device,
     error::{Error, Result},
-    upload_manager::UploadManager,
+    vulkan::{
+        core::device::Device,
+        memory::allocator::{
+            Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation,
+        },
+        resource::{buffer::Buffer, upload_manager::UploadManager},
+    },
 };
 
 use ash::vk;

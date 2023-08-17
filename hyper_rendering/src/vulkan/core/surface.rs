@@ -6,7 +6,7 @@
 
 use crate::{
     error::{Error, Result},
-    instance::Instance,
+    vulkan::core::instance::Instance,
 };
 
 use hyper_platform::window::Window;
