@@ -6,7 +6,7 @@
 
 use crate::{
     device::Device,
-    error::{CreationError, CreationResult},
+    error::{Error, Result},
 };
 
 use ash::vk;
@@ -18,7 +18,7 @@ pub(crate) struct BinarySemaphore {
 }
 
 impl BinarySemaphore {
-    pub(crate) fn new(device: Rc<Device>) -> CreationResult<Self> {
+    pub(crate) fn new(device: Rc<Device>) -> Result<Self> {
         let create_info =
             vk::SemaphoreCreateInfo::builder().flags(vk::SemaphoreCreateFlags::empty());
 
@@ -26,7 +26,7 @@ impl BinarySemaphore {
             device
                 .handle()
                 .create_semaphore(&create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "binary semaphore"))
+                .map_err(|error| Error::VulkanCreation(error, "binary semaphore"))
         }?;
 
         Ok(Self { handle, device })

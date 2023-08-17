@@ -5,17 +5,9 @@
  */
 
 use crate::{
-    allocator::Allocator,
-    descriptor_manager::DescriptorManager,
-    device::Device,
-    error::{CreationResult, RuntimeResult},
-    instance::Instance,
-    integration::EguiIntegration,
-    pipeline_layout::PipelineLayout,
-    renderer::Renderer,
-    surface::Surface,
-    swapchain::Swapchain,
-    upload_manager::UploadManager,
+    allocator::Allocator, descriptor_manager::DescriptorManager, device::Device, error::Result,
+    instance::Instance, integration::EguiIntegration, pipeline_layout::PipelineLayout,
+    renderer::Renderer, surface::Surface, swapchain::Swapchain, upload_manager::UploadManager,
 };
 
 use hyper_math::vector::Vec2f;
@@ -62,7 +54,7 @@ pub struct RenderContext {
 }
 
 impl RenderContext {
-    pub fn new(event_loop: &EventLoop, window: &Window) -> CreationResult<Self> {
+    pub fn new(event_loop: &EventLoop, window: &Window) -> Result<Self> {
         let validation_layers_requested = cfg!(debug_assertions);
 
         let entry = unsafe { Entry::load() }?;
@@ -139,7 +131,7 @@ impl RenderContext {
         })
     }
 
-    pub fn begin(&mut self, window: &Window, frame_id: u64) -> RuntimeResult<()> {
+    pub fn begin(&mut self, window: &Window, frame_id: u64) -> Result<()> {
         self.renderer.begin(
             window,
             &self.instance,
@@ -155,7 +147,7 @@ impl RenderContext {
         self.renderer.begin_rendering(&mut self.swapchain);
     }
 
-    pub fn end(&self) -> RuntimeResult<()> {
+    pub fn end(&self) -> Result<()> {
         self.renderer.end(&self.swapchain)?;
 
         Ok(())
@@ -165,7 +157,7 @@ impl RenderContext {
         self.renderer.end_rendering();
     }
 
-    pub fn submit(&mut self, window: &Window) -> RuntimeResult<()> {
+    pub fn submit(&mut self, window: &Window) -> Result<()> {
         self.renderer
             .submit(window, &self.instance, &self.surface, &mut self.swapchain)?;
 
@@ -176,14 +168,14 @@ impl RenderContext {
         self.renderer.draw_objects(&self.pipeline_layout);
     }
 
-    pub fn resize(&mut self, window: &Window) -> RuntimeResult<()> {
+    pub fn resize(&mut self, window: &Window) -> Result<()> {
         self.renderer
             .resize(window, &self.instance, &self.surface, &mut self.swapchain)?;
 
         Ok(())
     }
 
-    pub fn wait_idle(&self) -> RuntimeResult<()> {
+    pub fn wait_idle(&self) -> Result<()> {
         self.device.wait_idle()?;
 
         Ok(())
@@ -201,7 +193,7 @@ impl RenderContext {
         self.egui_integration.end_gui(window)
     }
 
-    pub fn submit_gui(&mut self, window: &Window, output: FullOutput) -> RuntimeResult<()> {
+    pub fn submit_gui(&mut self, window: &Window, output: FullOutput) -> Result<()> {
         self.egui_integration.submit_gui(
             window,
             &mut self.swapchain,
@@ -211,7 +203,7 @@ impl RenderContext {
         )
     }
 
-    pub fn update_frame(&self, frame: Frame) -> RuntimeResult<()> {
+    pub fn update_frame(&self, frame: Frame) -> Result<()> {
         self.renderer.update_frame(frame)
     }
 

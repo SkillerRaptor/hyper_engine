@@ -6,7 +6,7 @@
 
 use crate::{
     device::Device,
-    error::{CreationError, CreationResult},
+    error::{Error, Result},
     instance::Instance,
 };
 
@@ -30,7 +30,7 @@ impl DescriptorPool {
         vk::DescriptorType::SAMPLER,
     ];
 
-    pub(crate) fn new(instance: &Instance, device: Rc<Device>) -> CreationResult<Self> {
+    pub(crate) fn new(instance: &Instance, device: Rc<Device>) -> Result<Self> {
         let handle = Self::create_descriptor_pool(instance, &device)?;
         let limits = Self::find_limits(instance, &device);
         let layouts = Self::create_descriptor_set_layouts(&device, &limits)?;
@@ -44,10 +44,7 @@ impl DescriptorPool {
         })
     }
 
-    fn create_descriptor_pool(
-        instance: &Instance,
-        device: &Device,
-    ) -> CreationResult<vk::DescriptorPool> {
+    fn create_descriptor_pool(instance: &Instance, device: &Device) -> Result<vk::DescriptorPool> {
         let pool_sizes = Self::collect_descriptor_pool_sizes(instance, device);
 
         let create_info = vk::DescriptorPoolCreateInfo::builder()
@@ -59,7 +56,7 @@ impl DescriptorPool {
             device
                 .handle()
                 .create_descriptor_pool(&create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "descriptor pool"))?
+                .map_err(|error| Error::VulkanCreation(error, "descriptor pool"))?
         };
 
         Ok(handle)
@@ -130,7 +127,7 @@ impl DescriptorPool {
     fn create_descriptor_set_layouts(
         device: &Device,
         limits: &[u32],
-    ) -> CreationResult<SmallVec<[vk::DescriptorSetLayout; 4]>> {
+    ) -> Result<SmallVec<[vk::DescriptorSetLayout; 4]>> {
         let mut layouts = SmallVec::new();
 
         for (i, descriptor_type) in Self::DESCRIPTOR_TYPES.iter().enumerate() {
@@ -158,9 +155,7 @@ impl DescriptorPool {
                 device
                     .handle()
                     .create_descriptor_set_layout(&create_info, None)
-                    .map_err(|error| {
-                        CreationError::VulkanCreation(error, "descriptor set layout")
-                    })?
+                    .map_err(|error| Error::VulkanCreation(error, "descriptor set layout"))?
             };
 
             layouts.push(layout);

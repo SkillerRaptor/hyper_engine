@@ -7,7 +7,7 @@
 use crate::{
     descriptor_pool::DescriptorPool,
     device::Device,
-    error::{CreationError, CreationResult},
+    error::{Error, Result},
 };
 
 use ash::vk;
@@ -22,7 +22,7 @@ impl DescriptorSet {
         descriptor_pool: &DescriptorPool,
         layout: vk::DescriptorSetLayout,
         limit: u32,
-    ) -> CreationResult<Self> {
+    ) -> Result<Self> {
         let limits = [limit];
 
         let mut count_allocate_info =
@@ -40,7 +40,7 @@ impl DescriptorSet {
             device
                 .handle()
                 .allocate_descriptor_sets(&allocate_info)
-                .map_err(|error| CreationError::VulkanAllocation(error, "descriptor set"))
+                .map_err(|error| Error::VulkanAllocation(error, "descriptor set"))
         }?[0];
 
         Ok(Self { handle })

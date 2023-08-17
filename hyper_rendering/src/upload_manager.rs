@@ -10,7 +10,7 @@ use crate::{
     command_buffer::CommandBuffer,
     command_pool::CommandPool,
     device::Device,
-    error::{CreationResult, RuntimeError, RuntimeResult},
+    error::Result,
     instance::Instance,
     surface::Surface,
     timeline_semaphore::TimelineSemaphore,
@@ -36,7 +36,7 @@ impl UploadManager {
         surface: &Surface,
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
-    ) -> CreationResult<Self> {
+    ) -> Result<Self> {
         let upload_command_pool = CommandPool::new(instance, surface, device.clone())?;
         let upload_command_buffer = CommandBuffer::new(device.clone(), &upload_command_pool)?;
         let upload_semaphore = TimelineSemaphore::new(device.clone())?;
@@ -54,7 +54,7 @@ impl UploadManager {
         })
     }
 
-    pub(crate) fn immediate_submit<F>(&mut self, function: F) -> RuntimeResult<()>
+    pub(crate) fn immediate_submit<F>(&mut self, function: F) -> Result<()>
     where
         F: FnOnce(&CommandBuffer),
     {
@@ -79,11 +79,7 @@ impl UploadManager {
         Ok(())
     }
 
-    pub(crate) fn upload_buffer<T>(
-        &mut self,
-        source: &[T],
-        destination: &Buffer,
-    ) -> RuntimeResult<()> {
+    pub(crate) fn upload_buffer<T>(&mut self, source: &[T], destination: &Buffer) -> Result<()> {
         let buffer_size = mem::size_of_val(source);
 
         let staging_buffer = Buffer::new(
@@ -92,8 +88,7 @@ impl UploadManager {
             buffer_size,
             vk::BufferUsageFlags::TRANSFER_SRC,
             MemoryLocation::CpuToGpu,
-        )
-        .map_err(|error| RuntimeError::CreationError(error, "staging buffer"))?;
+        )?;
 
         staging_buffer.set_data(source)?;
 
@@ -115,7 +110,7 @@ impl UploadManager {
         source: &Buffer,
         destination: vk::Image,
         extent: vk::Extent3D,
-    ) -> RuntimeResult<()> {
+    ) -> Result<()> {
         self.immediate_submit(|command_buffer| {
             let subsource_range = vk::ImageSubresourceRange::builder()
                 .aspect_mask(vk::ImageAspectFlags::COLOR)

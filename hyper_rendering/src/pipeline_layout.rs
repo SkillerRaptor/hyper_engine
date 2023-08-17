@@ -8,7 +8,7 @@ use crate::{
     bindings::BindingsOffset,
     descriptor_manager::DescriptorManager,
     device::Device,
-    error::{CreationError, CreationResult},
+    error::{Error, Result},
 };
 
 use ash::vk;
@@ -21,10 +21,7 @@ pub(crate) struct PipelineLayout {
 }
 
 impl PipelineLayout {
-    pub(crate) fn new(
-        device: Rc<Device>,
-        descriptor_manager: &DescriptorManager,
-    ) -> CreationResult<Self> {
+    pub(crate) fn new(device: Rc<Device>, descriptor_manager: &DescriptorManager) -> Result<Self> {
         let bindings_offset_size = mem::size_of::<BindingsOffset>() as u32;
 
         let bindings_range = vk::PushConstantRange::builder()
@@ -41,7 +38,7 @@ impl PipelineLayout {
             device
                 .handle()
                 .create_pipeline_layout(&create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "pipeline layout"))
+                .map_err(|error| Error::VulkanCreation(error, "pipeline layout"))
         }?;
 
         Ok(Self { handle, device })

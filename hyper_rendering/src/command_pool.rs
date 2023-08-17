@@ -6,7 +6,7 @@
 
 use crate::{
     device::{queue_family_indices::QueueFamilyIndices, Device},
-    error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
+    error::{Error, Result},
     instance::Instance,
     surface::Surface,
 };
@@ -20,11 +20,7 @@ pub(crate) struct CommandPool {
 }
 
 impl CommandPool {
-    pub(crate) fn new(
-        instance: &Instance,
-        surface: &Surface,
-        device: Rc<Device>,
-    ) -> CreationResult<Self> {
+    pub(crate) fn new(instance: &Instance, surface: &Surface, device: Rc<Device>) -> Result<Self> {
         let queue_family_indices =
             QueueFamilyIndices::new(instance, surface, device.physical_device())?;
 
@@ -36,18 +32,18 @@ impl CommandPool {
             device
                 .handle()
                 .create_command_pool(&create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "command pool"))
+                .map_err(|error| Error::VulkanCreation(error, "command pool"))
         }?;
 
         Ok(Self { handle, device })
     }
 
-    pub(crate) fn reset(&self) -> RuntimeResult<()> {
+    pub(crate) fn reset(&self) -> Result<()> {
         unsafe {
             self.device
                 .handle()
                 .reset_command_pool(self.handle, vk::CommandPoolResetFlags::empty())
-                .map_err(RuntimeError::CommandPoolReset)?;
+                .map_err(Error::CommandPoolReset)?;
         }
 
         Ok(())

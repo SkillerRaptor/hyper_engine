@@ -11,7 +11,7 @@ use crate::{
         queue_family_indices::QueueFamilyIndices,
         swapchain_support_details::SwapchainSupportDetails,
     },
-    error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
+    error::{Error, Result},
     instance::Instance,
     surface::Surface,
     timeline_semaphore::TimelineSemaphore,
@@ -22,7 +22,7 @@ use std::{collections::HashSet, ffi::CStr, str};
 
 pub(crate) mod queue_family_indices {
     use crate::{
-        error::{CreationError, CreationResult},
+        error::{Error, Result},
         {instance::Instance, surface::Surface},
     };
 
@@ -39,7 +39,7 @@ pub(crate) mod queue_family_indices {
             instance: &Instance,
             surface: &Surface,
             physical_device: vk::PhysicalDevice,
-        ) -> CreationResult<Self> {
+        ) -> Result<Self> {
             let physical_device_queue_family_properties = unsafe {
                 instance
                     .handle()
@@ -65,7 +65,7 @@ pub(crate) mod queue_family_indices {
                             i as u32,
                             surface.handle(),
                         )
-                        .map_err(CreationError::VulkanSurfaceLost)
+                        .map_err(Error::VulkanSurfaceLost)
                 }? {
                     queue_family_indices.present_family = Some(i as u32);
                 }
@@ -97,7 +97,7 @@ pub(crate) mod queue_family_indices {
 
 pub(crate) mod swapchain_support_details {
     use crate::{
-        error::{CreationError, CreationResult},
+        error::{Error, Result},
         surface::Surface,
     };
 
@@ -111,27 +111,24 @@ pub(crate) mod swapchain_support_details {
     }
 
     impl SwapchainSupportDetails {
-        pub(crate) fn new(
-            surface: &Surface,
-            physical_device: vk::PhysicalDevice,
-        ) -> CreationResult<Self> {
+        pub(crate) fn new(surface: &Surface, physical_device: vk::PhysicalDevice) -> Result<Self> {
             let capabilities = unsafe {
                 surface
                     .loader()
                     .get_physical_device_surface_capabilities(physical_device, surface.handle())
-                    .map_err(CreationError::VulkanSurfaceLost)
+                    .map_err(Error::VulkanSurfaceLost)
             }?;
             let formats = unsafe {
                 surface
                     .loader()
                     .get_physical_device_surface_formats(physical_device, surface.handle())
-                    .map_err(CreationError::VulkanSurfaceLost)
+                    .map_err(Error::VulkanSurfaceLost)
             }?;
             let present_modes = unsafe {
                 surface
                     .loader()
                     .get_physical_device_surface_present_modes(physical_device, surface.handle())
-                    .map_err(CreationError::VulkanSurfaceLost)
+                    .map_err(Error::VulkanSurfaceLost)
             }?;
 
             Ok(Self {
@@ -169,7 +166,7 @@ pub(crate) struct Device {
 impl Device {
     const EXTENSIONS: [&'static CStr; 1] = [Swapchain::name()];
 
-    pub(crate) fn new(instance: &Instance, surface: &Surface) -> CreationResult<Self> {
+    pub(crate) fn new(instance: &Instance, surface: &Surface) -> Result<Self> {
         let physical_device = Self::pick_physical_device(instance, surface)?;
         let handle = Self::create_device(instance, surface, physical_device)?;
 
@@ -187,15 +184,12 @@ impl Device {
         })
     }
 
-    fn pick_physical_device(
-        instance: &Instance,
-        surface: &Surface,
-    ) -> CreationResult<vk::PhysicalDevice> {
+    fn pick_physical_device(instance: &Instance, surface: &Surface) -> Result<vk::PhysicalDevice> {
         let physical_devices = unsafe {
             instance
                 .handle()
                 .enumerate_physical_devices()
-                .map_err(|error| CreationError::VulkanEnumeration(error, "physical devices"))
+                .map_err(|error| Error::VulkanEnumeration(error, "physical devices"))
         }?;
 
         let mut chosen_physical_device = None;
@@ -206,7 +200,7 @@ impl Device {
         }
 
         if chosen_physical_device.is_none() {
-            return Err(CreationError::Unsupported);
+            return Err(Error::Unsupported);
         }
 
         let physical_device = chosen_physical_device.unwrap();
@@ -243,7 +237,7 @@ impl Device {
         instance: &Instance,
         surface: &Surface,
         physical_device: vk::PhysicalDevice,
-    ) -> CreationResult<bool> {
+    ) -> Result<bool> {
         let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
 
         let extensions_supported = Self::check_extension_support(instance, physical_device)?;
@@ -267,14 +261,12 @@ impl Device {
     fn check_extension_support(
         instance: &Instance,
         physical_device: vk::PhysicalDevice,
-    ) -> CreationResult<bool> {
+    ) -> Result<bool> {
         let extension_properties = unsafe {
             instance
                 .handle()
                 .enumerate_device_extension_properties(physical_device)
-                .map_err(|error| {
-                    CreationError::VulkanEnumeration(error, "device extension properties")
-                })
+                .map_err(|error| Error::VulkanEnumeration(error, "device extension properties"))
         }?;
 
         let extensions = extension_properties
@@ -328,7 +320,7 @@ impl Device {
         instance: &Instance,
         surface: &Surface,
         physical_device: vk::PhysicalDevice,
-    ) -> CreationResult<VulkanDevice> {
+    ) -> Result<VulkanDevice> {
         let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
 
         let mut unique_queue_families = HashSet::new();
@@ -385,7 +377,7 @@ impl Device {
             instance
                 .handle()
                 .create_device(physical_device, &create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "device"))
+                .map_err(|error| Error::VulkanCreation(error, "device"))
         }?;
 
         Ok(handle)
@@ -398,7 +390,7 @@ impl Device {
         render_semaphore: &BinarySemaphore,
         submit_semaphore: &TimelineSemaphore,
         frame_id: u64,
-    ) -> RuntimeResult<()> {
+    ) -> Result<()> {
         let present_wait_semaphore_info = vk::SemaphoreSubmitInfo::builder()
             .semaphore(present_semaphore.handle())
             .value(0)
@@ -433,7 +425,7 @@ impl Device {
         unsafe {
             self.handle
                 .queue_submit2(self.graphics_queue, &[*submit_info], vk::Fence::null())
-                .map_err(RuntimeError::QueueSubmit)
+                .map_err(Error::QueueSubmit)
         }?;
 
         Ok(())
@@ -444,7 +436,7 @@ impl Device {
         command_buffer: &CommandBuffer,
         upload_semaphore: &TimelineSemaphore,
         last_upload_value: u64,
-    ) -> RuntimeResult<()> {
+    ) -> Result<()> {
         let command_buffer_info = vk::CommandBufferSubmitInfo::builder()
             .command_buffer(command_buffer.handle())
             .device_mask(0);
@@ -472,18 +464,14 @@ impl Device {
         unsafe {
             self.handle
                 .queue_submit2(self.graphics_queue, &[*submit_info], vk::Fence::null())
-                .map_err(RuntimeError::QueueSubmit)
+                .map_err(Error::QueueSubmit)
         }?;
 
         Ok(())
     }
 
-    pub(crate) fn wait_idle(&self) -> RuntimeResult<()> {
-        unsafe {
-            self.handle
-                .device_wait_idle()
-                .map_err(RuntimeError::WaitIdle)
-        }?;
+    pub(crate) fn wait_idle(&self) -> Result<()> {
+        unsafe { self.handle.device_wait_idle().map_err(Error::WaitIdle) }?;
 
         Ok(())
     }

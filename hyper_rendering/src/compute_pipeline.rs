@@ -6,7 +6,7 @@
 
 use crate::{
     device::Device,
-    error::{CreationError, CreationResult},
+    error::{Error, Result},
     pipeline::Pipeline,
     pipeline_layout::PipelineLayout,
     shader::Shader,
@@ -22,10 +22,7 @@ pub(crate) struct ComputePipeline {
 }
 
 impl ComputePipeline {
-    pub(crate) fn new(
-        device: Rc<Device>,
-        create_info: ComputePipelineCreateInfo,
-    ) -> CreationResult<Self> {
+    pub(crate) fn new(device: Rc<Device>, create_info: ComputePipelineCreateInfo) -> Result<Self> {
         let ComputePipelineCreateInfo { layout, shader } = create_info;
 
         let entry_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
@@ -45,7 +42,7 @@ impl ComputePipeline {
             device
                 .handle()
                 .create_compute_pipelines(vk::PipelineCache::null(), &[*create_info], None)
-                .map_err(|error| CreationError::VulkanCreation(error.1, "compute pipeline"))
+                .map_err(|error| Error::VulkanCreation(error.1, "compute pipeline"))
         }?[0];
 
         Ok(Self { handle, device })

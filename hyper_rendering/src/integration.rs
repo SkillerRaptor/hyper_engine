@@ -10,7 +10,7 @@ use crate::{
     buffer::Buffer,
     descriptor_manager::DescriptorManager,
     device::Device,
-    error::{CreationError, CreationResult, RuntimeResult},
+    error::Result,
     graphics_pipelines::{
         ColorBlendAttachmentStateCreateInfo, ColorBlendStateCreateInfo,
         DepthStencilStateCreateInfo, GraphicsPipeline, GraphicsPipelineCreateInfo,
@@ -83,7 +83,7 @@ impl EguiIntegration {
         swapchain: &Swapchain,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         upload_manager: Rc<RefCell<UploadManager>>,
-    ) -> CreationResult<Self> {
+    ) -> Result<Self> {
         let vertex_shader = Shader::new(device.clone(), "./assets/shaders/compiled/gui_vs.spv")?;
         let fragment_shader = Shader::new(device.clone(), "./assets/shaders/compiled/gui_fs.spv")?;
 
@@ -171,8 +171,7 @@ impl EguiIntegration {
 
         upload_manager
             .borrow_mut()
-            .upload_buffer(&resource_handles, &bindings_buffer)
-            .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
+            .upload_buffer(&resource_handles, &bindings_buffer)?;
 
         let bindings_handle = descriptor_manager
             .borrow_mut()
@@ -238,7 +237,7 @@ impl EguiIntegration {
         pipeline_layout: &PipelineLayout,
         renderer: &mut Renderer,
         output: FullOutput,
-    ) -> RuntimeResult<()> {
+    ) -> Result<()> {
         let clipped_meshes = self.egui_context.tessellate(output.shapes);
 
         for (id, image_delta) in output.textures_delta.set {

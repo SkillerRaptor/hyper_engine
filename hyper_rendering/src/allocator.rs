@@ -6,7 +6,7 @@
 
 use crate::{
     device::Device,
-    error::{CreationResult, RuntimeResult},
+    error::{Error, Result},
     instance::Instance,
 };
 
@@ -33,7 +33,7 @@ impl Allocator {
         validation_layers_requested: bool,
         instance: &Instance,
         device: &Device,
-    ) -> CreationResult<Self> {
+    ) -> Result<Self> {
         let debug_settings = AllocatorDebugSettings {
             log_memory_information: false,
             log_leaks_on_shutdown: validation_layers_requested,
@@ -51,7 +51,8 @@ impl Allocator {
             buffer_device_address: false,
         };
 
-        let handle = vulkan::Allocator::new(&create_info)?;
+        let handle =
+            vulkan::Allocator::new(&create_info).map_err(Error::AllocatorCreationFailure)?;
 
         Ok(Self { handle })
     }
@@ -60,7 +61,7 @@ impl Allocator {
         &mut self,
         memory_location: MemoryLocation,
         memory_requirements: vk::MemoryRequirements,
-    ) -> RuntimeResult<Allocation> {
+    ) -> Result<Allocation> {
         let location = match memory_location {
             MemoryLocation::Unknown => gpu_allocator::MemoryLocation::Unknown,
             MemoryLocation::GpuOnly => gpu_allocator::MemoryLocation::GpuOnly,
@@ -76,13 +77,18 @@ impl Allocator {
             linear: true,
         };
 
-        let allocation = self.handle.allocate(&allocation_info)?;
+        let allocation = self
+            .handle
+            .allocate(&allocation_info)
+            .map_err(Error::AllocatorAllocateFailure)?;
 
         Ok(Allocation(allocation))
     }
 
-    pub(crate) fn free(&mut self, allocation: Allocation) -> RuntimeResult<()> {
-        self.handle.free(allocation.0)?;
+    pub(crate) fn free(&mut self, allocation: Allocation) -> Result<()> {
+        self.handle
+            .free(allocation.0)
+            .map_err(Error::AllocatorFreeFailure)?;
 
         Ok(())
     }

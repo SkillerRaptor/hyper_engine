@@ -9,7 +9,7 @@ use crate::{
     buffer::Buffer,
     descriptor_manager::DescriptorManager,
     device::Device,
-    error::{CreationError, CreationResult},
+    error::{Error, Result},
     resource_handle::ResourceHandle,
     upload_manager::UploadManager,
 };
@@ -48,7 +48,7 @@ impl Mesh {
         upload_manager: Rc<RefCell<UploadManager>>,
         vertices: Vec<Vertex>,
         indices: Option<Vec<u32>>,
-    ) -> CreationResult<Self> {
+    ) -> Result<Self> {
         let vertex_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
@@ -59,10 +59,7 @@ impl Mesh {
 
         upload_manager
             .borrow_mut()
-            .upload_buffer(&vertices, &vertex_buffer)
-            .map_err(|error| {
-                CreationError::RuntimeError(Box::new(error), "upload vertex buffer")
-            })?;
+            .upload_buffer(&vertices, &vertex_buffer)?;
 
         let vertex_buffer_handle = descriptor_manager
             .borrow_mut()
@@ -79,10 +76,7 @@ impl Mesh {
 
             upload_manager
                 .borrow_mut()
-                .upload_buffer(&indices, &index_buffer)
-                .map_err(|error| {
-                    CreationError::RuntimeError(Box::new(error), "upload index buffer")
-                })?;
+                .upload_buffer(&indices, &index_buffer)?;
 
             (Some(index_buffer), indices.len())
         } else {
@@ -108,9 +102,9 @@ impl Mesh {
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         upload_manager: Rc<RefCell<UploadManager>>,
         mesh_file: &str,
-    ) -> CreationResult<Self> {
+    ) -> Result<Self> {
         let (models, _) = tobj::load_obj(mesh_file, &tobj::GPU_LOAD_OPTIONS)
-            .map_err(|error| CreationError::LoadFailure(error, mesh_file.to_string()))?;
+            .map_err(|error| Error::ModelLoadFailure(error, mesh_file.to_string()))?;
 
         let mut vertices = Vec::new();
         let mut indices = Vec::new();

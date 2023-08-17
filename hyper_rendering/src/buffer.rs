@@ -7,7 +7,7 @@
 use crate::{
     allocator::{Allocation, Allocator, MemoryLocation},
     device::Device,
-    error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
+    error::{Error, Result},
 };
 
 use ash::vk;
@@ -28,7 +28,7 @@ impl Buffer {
         allocation_size: usize,
         usage: vk::BufferUsageFlags,
         memory_location: MemoryLocation,
-    ) -> CreationResult<Self> {
+    ) -> Result<Self> {
         let handle = Self::create_buffer(&device, allocation_size as u64, usage)?;
 
         let allocation = Self::allocate_memory(&device, &allocator, memory_location, handle)?;
@@ -46,7 +46,7 @@ impl Buffer {
         device: &Device,
         allocation_size: u64,
         usage: vk::BufferUsageFlags,
-    ) -> CreationResult<vk::Buffer> {
+    ) -> Result<vk::Buffer> {
         let create_info = vk::BufferCreateInfo::builder()
             .size(allocation_size)
             .usage(usage)
@@ -57,7 +57,7 @@ impl Buffer {
             device
                 .handle()
                 .create_buffer(&create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "buffer"))?
+                .map_err(|error| Error::VulkanCreation(error, "buffer"))?
         };
 
         Ok(buffer)
@@ -68,34 +68,31 @@ impl Buffer {
         allocator: &RefCell<Allocator>,
         memory_location: MemoryLocation,
         handle: vk::Buffer,
-    ) -> CreationResult<Allocation> {
+    ) -> Result<Allocation> {
         let memory_requirements = unsafe { device.handle().get_buffer_memory_requirements(handle) };
 
         let allocation = allocator
             .borrow_mut()
-            .allocate(memory_location, memory_requirements)
-            .map_err(|error| {
-                CreationError::RuntimeError(Box::new(error), "allocate memory for buffer")
-            })?;
+            .allocate(memory_location, memory_requirements)?;
 
         unsafe {
             device
                 .handle()
                 .bind_buffer_memory(handle, allocation.0.memory(), allocation.0.offset())
-                .map_err(|error| CreationError::VulkanBind(error, "buffer"))?;
+                .map_err(|error| Error::VulkanBind(error, "buffer"))?;
         }
 
         Ok(allocation)
     }
 
-    pub fn set_data<T>(&self, data: &[T]) -> RuntimeResult<()> {
+    pub fn set_data<T>(&self, data: &[T]) -> Result<()> {
         let memory = self
             .allocation
             .as_ref()
-            .ok_or(RuntimeError::BufferFailure)?
+            .ok_or(Error::BufferDataFailure)?
             .0
             .mapped_ptr()
-            .ok_or(RuntimeError::BufferFailure)?
+            .ok_or(Error::BufferDataFailure)?
             .as_ptr() as *mut T;
 
         unsafe {

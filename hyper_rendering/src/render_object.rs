@@ -10,7 +10,7 @@ use crate::{
     buffer::Buffer,
     descriptor_manager::DescriptorManager,
     device::Device,
-    error::{CreationError, CreationResult},
+    error::Result,
     resource_handle::ResourceHandle,
     upload_manager::UploadManager,
 };
@@ -48,7 +48,7 @@ impl RenderObject {
         transforms: Vec<Mat4x4f>,
         vertex_buffer_handle: ResourceHandle,
         extra_handles: &[ResourceHandle],
-    ) -> CreationResult<Self> {
+    ) -> Result<Self> {
         ////////////////////////////////////////////////////////////////////////
 
         let transform_buffer = Buffer::new(
@@ -61,8 +61,7 @@ impl RenderObject {
 
         upload_manager
             .borrow_mut()
-            .upload_buffer(&transforms, &transform_buffer)
-            .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
+            .upload_buffer(&transforms, &transform_buffer)?;
 
         let transform_handle = descriptor_manager
             .borrow_mut()
@@ -83,8 +82,7 @@ impl RenderObject {
 
         upload_manager
             .borrow_mut()
-            .upload_buffer(&resource_handles, &bindings_buffer)
-            .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
+            .upload_buffer(&resource_handles, &bindings_buffer)?;
 
         let bindings_handle = descriptor_manager
             .borrow_mut()

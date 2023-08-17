@@ -11,7 +11,7 @@ use crate::{
         queue_family_indices::QueueFamilyIndices,
         swapchain_support_details::SwapchainSupportDetails, Device,
     },
-    error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
+    error::{Error, Result},
     instance::Instance,
     surface::Surface,
 };
@@ -48,7 +48,7 @@ impl Swapchain {
         surface: &Surface,
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
-    ) -> CreationResult<Self> {
+    ) -> Result<Self> {
         let swapchain_support_details =
             SwapchainSupportDetails::new(surface, device.physical_device())?;
 
@@ -98,13 +98,13 @@ impl Swapchain {
         let handle = unsafe {
             loader
                 .create_swapchain(&create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "swapchain"))
+                .map_err(|error| Error::VulkanCreation(error, "swapchain"))
         }?;
 
         let images = unsafe {
             loader
                 .get_swapchain_images(handle)
-                .map_err(|error| CreationError::VulkanAllocation(error, "swapchain images"))
+                .map_err(|error| Error::VulkanAllocation(error, "swapchain images"))
         }?;
 
         let mut image_views = Vec::new();
@@ -133,7 +133,7 @@ impl Swapchain {
                 device
                     .handle()
                     .create_image_view(&create_info, None)
-                    .map_err(|error| CreationError::VulkanCreation(error, "image view"))
+                    .map_err(|error| Error::VulkanCreation(error, "image view"))
             }?;
 
             image_views.push(handle);
@@ -204,7 +204,7 @@ impl Swapchain {
         window: &Window,
         device: &Device,
         allocator: &RefCell<Allocator>,
-    ) -> CreationResult<(vk::Image, vk::ImageView, vk::Format, Allocation)> {
+    ) -> Result<(vk::Image, vk::ImageView, vk::Format, Allocation)> {
         let framebuffer_size = window.framebuffer_size();
 
         let extent = vk::Extent3D::builder()
@@ -231,23 +231,20 @@ impl Swapchain {
             device
                 .handle()
                 .create_image(&image_create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "depth image"))?
+                .map_err(|error| Error::VulkanCreation(error, "depth image"))?
         };
 
         let memory_requirements = unsafe { device.handle().get_image_memory_requirements(image) };
 
         let allocation = allocator
             .borrow_mut()
-            .allocate(MemoryLocation::GpuOnly, memory_requirements)
-            .map_err(|error| {
-                CreationError::RuntimeError(Box::new(error), "allocate memory for depth image")
-            })?;
+            .allocate(MemoryLocation::GpuOnly, memory_requirements)?;
 
         unsafe {
             device
                 .handle()
                 .bind_image_memory(image, allocation.0.memory(), allocation.0.offset())
-                .map_err(|error| CreationError::VulkanBind(error, "depth image"))?;
+                .map_err(|error| Error::VulkanBind(error, "depth image"))?;
         }
 
         let subsource_range = vk::ImageSubresourceRange::builder()
@@ -268,7 +265,7 @@ impl Swapchain {
             device
                 .handle()
                 .create_image_view(&image_view_create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "depth image view"))?
+                .map_err(|error| Error::VulkanCreation(error, "depth image view"))?
         };
 
         Ok((image, image_view, format, allocation))
@@ -280,7 +277,7 @@ impl Swapchain {
         instance: &Instance,
         surface: &Surface,
         present_semaphore: &BinarySemaphore,
-    ) -> RuntimeResult<Option<u32>> {
+    ) -> Result<Option<u32>> {
         unsafe {
             match self.loader.acquire_next_image(
                 self.handle,
@@ -293,7 +290,7 @@ impl Swapchain {
                     self.recreate(window, instance, surface)?;
                     Ok(None)
                 }
-                Err(error) => Err(RuntimeError::ImageAcquisition(error)),
+                Err(error) => Err(Error::ImageAcquisition(error)),
             }
         }
     }
@@ -306,7 +303,7 @@ impl Swapchain {
         queue: vk::Queue,
         render_semaphore: &BinarySemaphore,
         swapchain_image_index: u32,
-    ) -> RuntimeResult<()> {
+    ) -> Result<()> {
         let swapchains = &[self.handle];
         let wait_semaphores = &[render_semaphore.handle()];
         let image_indices = &[swapchain_image_index];
@@ -337,7 +334,7 @@ impl Swapchain {
         window: &Window,
         instance: &Instance,
         surface: &Surface,
-    ) -> RuntimeResult<()> {
+    ) -> Result<()> {
         if window.framebuffer_size() == (0, 0) {
             return Ok(());
         }
@@ -347,8 +344,7 @@ impl Swapchain {
         self.destroy();
 
         let swapchain_support_details =
-            SwapchainSupportDetails::new(surface, self.device.physical_device())
-                .map_err(|error| RuntimeError::CreationError(error, "swapchain support details"))?;
+            SwapchainSupportDetails::new(surface, self.device.physical_device())?;
 
         let capabilities = swapchain_support_details.capabilities();
 
@@ -362,8 +358,7 @@ impl Swapchain {
         }
 
         let queue_family_indices =
-            QueueFamilyIndices::new(instance, surface, self.device.physical_device())
-                .map_err(|error| RuntimeError::CreationError(error, "queue family indices"))?;
+            QueueFamilyIndices::new(instance, surface, self.device.physical_device())?;
 
         let queue_families = [
             queue_family_indices.graphics_family().unwrap(),
@@ -396,23 +391,13 @@ impl Swapchain {
         self.handle = unsafe {
             self.loader
                 .create_swapchain(&create_info, None)
-                .map_err(|error| {
-                    RuntimeError::CreationError(
-                        CreationError::VulkanCreation(error, "swapchain"),
-                        "swapchain",
-                    )
-                })
+                .map_err(|error| Error::VulkanCreation(error, "swapchain"))
         }?;
 
         self.images = unsafe {
             self.loader
                 .get_swapchain_images(self.handle)
-                .map_err(|error| {
-                    RuntimeError::CreationError(
-                        CreationError::VulkanAllocation(error, "swapchain images"),
-                        "swapchain images",
-                    )
-                })
+                .map_err(|error| Error::VulkanAllocation(error, "swapchain images"))
         }?;
 
         self.image_views = Vec::new();
@@ -441,12 +426,7 @@ impl Swapchain {
                 self.device
                     .handle()
                     .create_image_view(&create_info, None)
-                    .map_err(|error| {
-                        RuntimeError::CreationError(
-                            CreationError::VulkanCreation(error, "image view"),
-                            "image view",
-                        )
-                    })
+                    .map_err(|error| Error::VulkanCreation(error, "image view"))
             }?;
 
             self.image_views.push(handle);
@@ -456,8 +436,7 @@ impl Swapchain {
         self.format = surface_format.format;
 
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
-            Self::create_depth_image(window, &self.device, &self.allocator)
-                .map_err(|error| RuntimeError::CreationError(error, "depth image"))?;
+            Self::create_depth_image(window, &self.device, &self.allocator)?;
 
         self.depth_image = depth_image;
         self.depth_image_view = depth_image_view;

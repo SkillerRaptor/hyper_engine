@@ -6,7 +6,7 @@
 
 use crate::{
     device::Device,
-    error::{CreationError, CreationResult},
+    error::{Error, Result},
     pipeline::Pipeline,
     pipeline_layout::PipelineLayout,
     shader::Shader,
@@ -23,10 +23,7 @@ pub(crate) struct GraphicsPipeline {
 }
 
 impl GraphicsPipeline {
-    pub(crate) fn new(
-        device: Rc<Device>,
-        create_info: GraphicsPipelineCreateInfo,
-    ) -> CreationResult<Self> {
+    pub(crate) fn new(device: Rc<Device>, create_info: GraphicsPipelineCreateInfo) -> Result<Self> {
         let GraphicsPipelineCreateInfo {
             layout,
             vertex_shader,
@@ -176,7 +173,7 @@ impl GraphicsPipeline {
             device
                 .handle()
                 .create_graphics_pipelines(vk::PipelineCache::null(), &[*create_info], None)
-                .map_err(|error| CreationError::VulkanCreation(error.1, "graphics pipeline"))
+                .map_err(|error| Error::VulkanCreation(error.1, "graphics pipeline"))
         }?[0];
 
         Ok(Self { handle, device })

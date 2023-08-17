@@ -4,21 +4,15 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::event_loop::EventLoop;
+use crate::{
+    error::{Error, Result},
+    event_loop::EventLoop,
+};
 
 use ash::{vk, Entry, Instance};
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
-use thiserror::Error;
-use winit::{dpi::LogicalSize, error::OsError, window};
-
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("Failed to use uninitialized field {0}")]
-    UninitializedField(&'static str),
-
-    #[error("Failed to build native window")]
-    WindowFailure(#[from] OsError),
-}
+use std::result;
+use winit::{dpi::LogicalSize, window};
 
 pub struct Window {
     internal: window::Window,
@@ -31,7 +25,7 @@ impl Window {
         width: u32,
         height: u32,
         resizable: bool,
-    ) -> Result<Self, CreationError> {
+    ) -> Result<Self> {
         let window = window::WindowBuilder::new()
             .with_title(title)
             .with_inner_size(LogicalSize::new(width, height))
@@ -49,7 +43,7 @@ impl Window {
         &self,
         entry: &Entry,
         instance: &Instance,
-    ) -> Result<vk::SurfaceKHR, vk::Result> {
+    ) -> result::Result<vk::SurfaceKHR, vk::Result> {
         unsafe {
             ash_window::create_surface(
                 entry,
@@ -61,7 +55,7 @@ impl Window {
         }
     }
 
-    pub fn required_extensions(&self) -> Result<Vec<*const i8>, vk::Result> {
+    pub fn required_extensions(&self) -> result::Result<Vec<*const i8>, vk::Result> {
         let required_extensions =
             ash_window::enumerate_required_extensions(self.internal.raw_display_handle())?;
         Ok(required_extensions.to_vec())
@@ -123,21 +117,21 @@ impl WindowBuilder {
         self
     }
 
-    pub fn build(self, event_loop: &EventLoop) -> Result<Window, CreationError> {
+    pub fn build(self, event_loop: &EventLoop) -> Result<Window> {
         let Some(title) = self.title else {
-            return Err(CreationError::UninitializedField("title"));
+            return Err(Error::UninitializedField("title"));
         };
 
         let Some(width) = self.width else {
-            return Err(CreationError::UninitializedField("width"));
+            return Err(Error::UninitializedField("width"));
         };
 
         let Some(height) = self.height else {
-            return Err(CreationError::UninitializedField("height"));
+            return Err(Error::UninitializedField("height"));
         };
 
         let Some(resizable) = self.resizable else {
-            return Err(CreationError::UninitializedField("resizable"));
+            return Err(Error::UninitializedField("resizable"));
         };
 
         Window::new(event_loop, title, width, height, resizable)

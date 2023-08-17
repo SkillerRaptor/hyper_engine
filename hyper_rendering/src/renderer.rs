@@ -13,7 +13,7 @@ use crate::{
     command_pool::CommandPool,
     descriptor_manager::DescriptorManager,
     device::Device,
-    error::{CreationError, CreationResult, RuntimeResult},
+    error::{Error, Result},
     graphics_pipelines::{
         ColorBlendAttachmentStateCreateInfo, ColorBlendStateCreateInfo,
         DepthStencilStateCreateInfo, GraphicsPipeline, GraphicsPipelineCreateInfo,
@@ -82,7 +82,7 @@ impl Renderer {
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         upload_manager: Rc<RefCell<UploadManager>>,
         pipeline_layout: &PipelineLayout,
-    ) -> CreationResult<Self> {
+    ) -> Result<Self> {
         let command_pool = CommandPool::new(instance, surface, device.clone())?;
 
         let mut command_buffers = Vec::new();
@@ -292,8 +292,7 @@ impl Renderer {
         let projection_view = projection_matrix * view_matrix;
         upload_manager
             .borrow_mut()
-            .upload_buffer(&[projection_view], &projection_view_buffer)
-            .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload buffer"))?;
+            .upload_buffer(&[projection_view], &projection_view_buffer)?;
 
         descriptor_manager
             .borrow_mut()
@@ -312,7 +311,7 @@ impl Renderer {
             device
                 .handle()
                 .create_sampler(&sampler_create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "sampler"))?
+                .map_err(|error| Error::VulkanCreation(error, "sampler"))?
         };
 
         let combined_image_sampler_handle = descriptor_manager
@@ -382,7 +381,7 @@ impl Renderer {
         surface: &Surface,
         frame_id: u64,
         swapchain: &mut Swapchain,
-    ) -> RuntimeResult<()> {
+    ) -> Result<()> {
         self.current_frame_id = frame_id;
         self.submit_semaphore.wait_for(frame_id - 1)?;
 
@@ -431,7 +430,7 @@ impl Renderer {
         Ok(())
     }
 
-    pub(crate) fn end(&self, swapchain: &Swapchain) -> RuntimeResult<()> {
+    pub(crate) fn end(&self, swapchain: &Swapchain) -> Result<()> {
         let side = self.current_frame_id % 2;
 
         let subresource_range = vk::ImageSubresourceRange::builder()
@@ -589,7 +588,7 @@ impl Renderer {
         instance: &Instance,
         surface: &Surface,
         swapchain: &mut Swapchain,
-    ) -> RuntimeResult<()> {
+    ) -> Result<()> {
         let side = self.current_frame_id % 2;
 
         self.device.submit_render_queue(
@@ -682,7 +681,7 @@ impl Renderer {
         instance: &Instance,
         surface: &Surface,
         swapchain: &mut Swapchain,
-    ) -> RuntimeResult<()> {
+    ) -> Result<()> {
         swapchain.recreate(window, instance, surface)?;
 
         Ok(())
@@ -763,7 +762,7 @@ impl Renderer {
         self.command_buffers[side as usize].bind_index_buffer(index_buffer);
     }
 
-    pub(crate) fn update_frame(&self, frame: Frame) -> RuntimeResult<()> {
+    pub(crate) fn update_frame(&self, frame: Frame) -> Result<()> {
         self.upload_manager
             .borrow_mut()
             .upload_buffer(&[frame], &self.frame_buffer)?;

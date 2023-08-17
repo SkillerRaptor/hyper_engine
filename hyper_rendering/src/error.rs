@@ -6,17 +6,42 @@
 
 use ash::{vk, LoadingError};
 use image::ImageError;
-use std::{ffi::NulError, io, str::Utf8Error};
+use std::{ffi::NulError, io, result, str::Utf8Error};
 use thiserror::Error;
 use tobj::LoadError;
 
-#[derive(Debug, Error)]
-pub enum CreationError {
-    #[error("Failed to load image {1}")]
-    ImageFailure(#[source] ImageError, String),
+pub(crate) type Result<T> = result::Result<T, Error>;
 
-    #[error("Failed to load model {1}")]
-    LoadFailure(#[source] LoadError, String),
+#[derive(Debug, Error)]
+pub enum Error {
+    // Allocator
+    #[error("Failed to create allocator")]
+    AllocatorCreationFailure(#[source] gpu_allocator::AllocationError),
+
+    #[error("Failed to allocate vulkan memory")]
+    AllocatorAllocateFailure(#[source] gpu_allocator::AllocationError),
+
+    #[error("Failed to free vulkan memory")]
+    AllocatorFreeFailure(#[source] gpu_allocator::AllocationError),
+
+    // Buffer
+    #[error("Failed to set data for buffer")]
+    BufferDataFailure,
+
+    #[error("Failed to begin command buffer recording")]
+    CommandBufferBegin(#[source] vk::Result),
+
+    #[error("Failed to end command buffer recording")]
+    CommandBufferEnd(#[source] vk::Result),
+
+    #[error("Failed to reset command buffer recording")]
+    CommandBufferReset(#[source] vk::Result),
+
+    #[error("Failed to reset command pool")]
+    CommandPoolReset(#[source] vk::Result),
+
+    #[error("Failed to acquire the next swapchain image")]
+    ImageAcquisition(#[source] vk::Result),
 
     #[error("Failed to create c-string")]
     NulCString(#[from] NulError),
@@ -27,9 +52,6 @@ pub enum CreationError {
     #[error("Failed to read file {1}")]
     ReadFailure(#[source] io::Error, String),
 
-    #[error("Failed to {1}")]
-    RuntimeError(#[source] Box<RuntimeError>, &'static str),
-
     #[error("Failed to read unaligned vulkan shader")]
     Unaligned,
 
@@ -39,9 +61,10 @@ pub enum CreationError {
     #[error("Failed to create c-string")]
     Utf8CString(#[from] Utf8Error),
 
-    #[error("Failed to create the vulkan allocator")]
-    VulkanAllocator(#[from] gpu_allocator::AllocationError),
+    #[error("Failed to submit queue to device")]
+    QueueSubmit(#[source] vk::Result),
 
+    // Vulkan
     #[error("Failed to allocate vulkan {1}")]
     VulkanAllocation(#[source] vk::Result, &'static str),
 
@@ -59,35 +82,6 @@ pub enum CreationError {
 
     #[error("Failed to continue with lost vulkan surface")]
     VulkanSurfaceLost(#[source] vk::Result),
-}
-
-pub(crate) type CreationResult<T> = Result<T, CreationError>;
-
-#[derive(Debug, Error)]
-pub enum RuntimeError {
-    #[error("Failed to set data for buffer")]
-    BufferFailure,
-
-    #[error("Failed to recreate {1}")]
-    CreationError(#[source] CreationError, &'static str),
-
-    #[error("Failed to begin command buffer recording")]
-    CommandBufferBegin(#[source] vk::Result),
-
-    #[error("Failed to end command buffer recording")]
-    CommandBufferEnd(#[source] vk::Result),
-
-    #[error("Failed to reset command buffer recording")]
-    CommandBufferReset(#[source] vk::Result),
-
-    #[error("Failed to reset command pool")]
-    CommandPoolReset(#[source] vk::Result),
-
-    #[error("Failed to acquire the next swapchain image")]
-    ImageAcquisition(#[source] vk::Result),
-
-    #[error("Failed to submit queue to device")]
-    QueueSubmit(#[source] vk::Result),
 
     #[error("Failed to wait idle for device")]
     WaitIdle(#[source] vk::Result),
@@ -95,8 +89,10 @@ pub enum RuntimeError {
     #[error("Faile to wait for semaphore")]
     WaitSemaphore(#[source] vk::Result),
 
-    #[error("Failed to allocate memory")]
-    VulkanAllocation(#[from] gpu_allocator::AllocationError),
-}
+    // TODO: Temporary
+    #[error("Failed to load image {1}")]
+    ImageLoadFailure(#[source] ImageError, String),
 
-pub(crate) type RuntimeResult<T> = Result<T, RuntimeError>;
+    #[error("Failed to load model {1}")]
+    ModelLoadFailure(#[source] LoadError, String),
+}

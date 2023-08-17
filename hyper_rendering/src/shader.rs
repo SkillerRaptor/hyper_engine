@@ -6,7 +6,7 @@
 
 use crate::{
     device::Device,
-    error::{CreationError, CreationResult},
+    error::{Error, Result},
 };
 
 use ash::vk;
@@ -23,35 +23,32 @@ pub(crate) struct Shader {
 }
 
 impl Shader {
-    pub(crate) fn new(device: Rc<Device>, spirv_file: &str) -> CreationResult<Self> {
+    pub(crate) fn new(device: Rc<Device>, spirv_file: &str) -> Result<Self> {
         let bytes = Self::parse_spirv(spirv_file)?;
         let handle = Self::create_shader_module(&device, &bytes)?;
 
         Ok(Self { handle, device })
     }
 
-    pub(crate) fn parse_spirv(spirv_file: &str) -> CreationResult<Vec<u8>> {
+    pub(crate) fn parse_spirv(spirv_file: &str) -> Result<Vec<u8>> {
         let spirv_file = spirv_file.to_string();
 
         let file = File::open(&spirv_file)
-            .map_err(|error| CreationError::OpenFailure(error, spirv_file.clone()))?;
+            .map_err(|error| Error::OpenFailure(error, spirv_file.clone()))?;
         let mut reader = BufReader::new(file);
 
         let mut bytes = Vec::new();
         reader
             .read_to_end(&mut bytes)
-            .map_err(|error| CreationError::ReadFailure(error, spirv_file))?;
+            .map_err(|error| Error::ReadFailure(error, spirv_file))?;
 
         Ok(bytes)
     }
 
-    fn create_shader_module(
-        device: &Device,
-        shader_bytes: &[u8],
-    ) -> CreationResult<vk::ShaderModule> {
+    fn create_shader_module(device: &Device, shader_bytes: &[u8]) -> Result<vk::ShaderModule> {
         let (prefix, code, suffix) = unsafe { shader_bytes.align_to::<u32>() };
         if !prefix.is_empty() || !suffix.is_empty() {
-            return Err(CreationError::Unaligned);
+            return Err(Error::Unaligned);
         }
 
         let create_info = vk::ShaderModuleCreateInfo::builder().code(code);
@@ -60,7 +57,7 @@ impl Shader {
             device
                 .handle()
                 .create_shader_module(&create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "shader module"))
+                .map_err(|error| Error::VulkanCreation(error, "shader module"))
         }?;
 
         Ok(handle)

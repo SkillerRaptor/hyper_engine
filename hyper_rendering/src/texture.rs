@@ -8,7 +8,7 @@ use crate::{
     allocator::{Allocation, Allocator, MemoryLocation},
     buffer::Buffer,
     device::Device,
-    error::{CreationError, CreationResult},
+    error::{Error, Result},
     upload_manager::UploadManager,
 };
 
@@ -31,11 +31,11 @@ impl Texture {
         allocator: Rc<RefCell<Allocator>>,
         upload_manager: Rc<RefCell<UploadManager>>,
         file: &str,
-    ) -> CreationResult<Self> {
+    ) -> Result<Self> {
         let image = ImageReader::open(file)
-            .map_err(|error| CreationError::OpenFailure(error, file.to_string()))?
+            .map_err(|error| Error::OpenFailure(error, file.to_string()))?
             .decode()
-            .map_err(|error| CreationError::ImageFailure(error, file.to_string()))?;
+            .map_err(|error| Error::ImageLoadFailure(error, file.to_string()))?;
 
         // TODO: Don't hardcode channels
         let image_size = image.width() * image.height() * 4;
@@ -48,9 +48,7 @@ impl Texture {
             MemoryLocation::CpuToGpu,
         )?;
 
-        staging_buffer
-            .set_data(image.as_bytes())
-            .map_err(|error| CreationError::RuntimeError(Box::new(error), "image"))?;
+        staging_buffer.set_data(image.as_bytes())?;
 
         let extent = vk::Extent3D::builder()
             .width(image.width())
@@ -76,29 +74,25 @@ impl Texture {
             device
                 .handle()
                 .create_image(&create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "image"))?
+                .map_err(|error| Error::VulkanCreation(error, "image"))?
         };
 
         let memory_requirements = unsafe { device.handle().get_image_memory_requirements(handle) };
 
         let allocation = allocator
             .borrow_mut()
-            .allocate(MemoryLocation::GpuOnly, memory_requirements)
-            .map_err(|error| {
-                CreationError::RuntimeError(Box::new(error), "allocate memory for image")
-            })?;
+            .allocate(MemoryLocation::GpuOnly, memory_requirements)?;
 
         unsafe {
             device
                 .handle()
                 .bind_image_memory(handle, allocation.0.memory(), allocation.0.offset())
-                .map_err(|error| CreationError::VulkanBind(error, "image"))?;
+                .map_err(|error| Error::VulkanBind(error, "image"))?;
         }
 
         upload_manager
             .borrow_mut()
-            .upload_texture(&staging_buffer, handle, *extent)
-            .map_err(|error| CreationError::RuntimeError(Box::new(error), "upload image"))?;
+            .upload_texture(&staging_buffer, handle, *extent)?;
 
         let subsource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -118,7 +112,7 @@ impl Texture {
             device
                 .handle()
                 .create_image_view(&view_create_info, None)
-                .map_err(|error| CreationError::VulkanCreation(error, "depth image view"))?
+                .map_err(|error| Error::VulkanCreation(error, "depth image view"))?
         };
 
         Ok(Self {

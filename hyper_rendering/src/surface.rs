@@ -5,7 +5,7 @@
  */
 
 use crate::{
-    error::{CreationError, CreationResult},
+    error::{Error, Result},
     instance::Instance,
 };
 
@@ -19,12 +19,12 @@ pub(crate) struct Surface {
 }
 
 impl Surface {
-    pub(crate) fn new(window: &Window, entry: &Entry, instance: &Instance) -> CreationResult<Self> {
+    pub(crate) fn new(window: &Window, entry: &Entry, instance: &Instance) -> Result<Self> {
         let loader = khr::Surface::new(entry, instance.handle());
 
         let handle = window
             .create_surface(entry, instance.handle())
-            .map_err(|error| CreationError::VulkanCreation(error, "surface"))?;
+            .map_err(|error| Error::VulkanCreation(error, "surface"))?;
 
         Ok(Self { handle, loader })
     }

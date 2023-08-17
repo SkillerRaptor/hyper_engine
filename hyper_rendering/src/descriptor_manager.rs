@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-use ash::vk::{self, WriteDescriptorSet};
-
 use crate::{
     buffer::Buffer, descriptor_pool::DescriptorPool, descriptor_set::DescriptorSet, device::Device,
-    error::CreationResult, instance::Instance, resource_handle::ResourceHandle,
+    error::Result, instance::Instance, resource_handle::ResourceHandle,
 };
 
+use ash::vk::{self, WriteDescriptorSet};
 use std::{collections::VecDeque, rc::Rc};
 
 pub(crate) struct DescriptorManager {
@@ -24,7 +23,7 @@ pub(crate) struct DescriptorManager {
 }
 
 impl DescriptorManager {
-    pub(crate) fn new(instance: &Instance, device: Rc<Device>) -> CreationResult<Self> {
+    pub(crate) fn new(instance: &Instance, device: Rc<Device>) -> Result<Self> {
         let descriptor_pool = DescriptorPool::new(instance, device.clone())?;
 
         let mut descriptor_sets = Vec::new();

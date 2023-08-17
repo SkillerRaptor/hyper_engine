@@ -8,7 +8,7 @@ use crate::{
     buffer::Buffer,
     command_pool::CommandPool,
     device::Device,
-    error::{CreationError, CreationResult, RuntimeError, RuntimeResult},
+    error::{Error, Result},
     pipeline::Pipeline,
     pipeline_layout::PipelineLayout,
 };
@@ -22,7 +22,7 @@ pub(crate) struct CommandBuffer {
 }
 
 impl CommandBuffer {
-    pub(crate) fn new(device: Rc<Device>, command_pool: &CommandPool) -> CreationResult<Self> {
+    pub(crate) fn new(device: Rc<Device>, command_pool: &CommandPool) -> Result<Self> {
         let allocate_info = vk::CommandBufferAllocateInfo::builder()
             .command_pool(command_pool.handle())
             .command_buffer_count(1)
@@ -32,42 +32,42 @@ impl CommandBuffer {
             device
                 .handle()
                 .allocate_command_buffers(&allocate_info)
-                .map_err(|error| CreationError::VulkanAllocation(error, "command buffer"))
+                .map_err(|error| Error::VulkanAllocation(error, "command buffer"))
         }?[0];
 
         Ok(Self { handle, device })
     }
 
-    pub(crate) fn begin(&self, usage_flags: vk::CommandBufferUsageFlags) -> RuntimeResult<()> {
+    pub(crate) fn begin(&self, usage_flags: vk::CommandBufferUsageFlags) -> Result<()> {
         let command_buffer_begin_info = vk::CommandBufferBeginInfo::builder().flags(usage_flags);
 
         unsafe {
             self.device
                 .handle()
                 .begin_command_buffer(self.handle, &command_buffer_begin_info)
-                .map_err(RuntimeError::CommandBufferBegin)
+                .map_err(Error::CommandBufferBegin)
         }?;
 
         Ok(())
     }
 
-    pub(crate) fn end(&self) -> RuntimeResult<()> {
+    pub(crate) fn end(&self) -> Result<()> {
         unsafe {
             self.device
                 .handle()
                 .end_command_buffer(self.handle)
-                .map_err(RuntimeError::CommandBufferEnd)
+                .map_err(Error::CommandBufferEnd)
         }?;
 
         Ok(())
     }
 
-    pub(crate) fn reset(&self) -> RuntimeResult<()> {
+    pub(crate) fn reset(&self) -> Result<()> {
         unsafe {
             self.device
                 .handle()
                 .reset_command_buffer(self.handle, vk::CommandBufferResetFlags::from_raw(0))
-                .map_err(RuntimeError::CommandBufferReset)
+                .map_err(Error::CommandBufferReset)
         }?;
 
         Ok(())
