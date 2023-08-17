@@ -25,10 +25,10 @@ pub(crate) struct GraphicsPipeline {
 impl GraphicsPipeline {
     pub(crate) fn new(
         device: Rc<Device>,
-        layout: &PipelineLayout,
         create_info: GraphicsPipelineCreateInfo,
     ) -> CreationResult<Self> {
         let GraphicsPipelineCreateInfo {
+            layout,
             vertex_shader,
             fragment_shader,
             color_image_format,
@@ -197,7 +197,9 @@ impl Pipeline for GraphicsPipeline {
     }
 }
 
-pub(crate) struct GraphicsPipelineCreateInfo {
+pub(crate) struct GraphicsPipelineCreateInfo<'a> {
+    pub(crate) layout: &'a PipelineLayout,
+
     pub(crate) vertex_shader: Option<Shader>,
     pub(crate) fragment_shader: Option<Shader>,
 
@@ -210,24 +212,6 @@ pub(crate) struct GraphicsPipelineCreateInfo {
     pub(crate) depth_stencil_state: DepthStencilStateCreateInfo,
     pub(crate) color_blend_attachment_state: ColorBlendAttachmentStateCreateInfo,
     pub(crate) color_blend_state: ColorBlendStateCreateInfo,
-}
-
-impl Default for GraphicsPipelineCreateInfo {
-    fn default() -> Self {
-        Self {
-            vertex_shader: None,
-            fragment_shader: None,
-
-            color_image_format: vk::Format::UNDEFINED,
-            depth_image_format: None,
-
-            input_assembly: InputAssemblyCreateInfo::default(),
-            rasterization_state: RasterizationStateCreateInfo::default(),
-            depth_stencil_state: DepthStencilStateCreateInfo::default(),
-            color_blend_attachment_state: ColorBlendAttachmentStateCreateInfo::default(),
-            color_blend_state: ColorBlendStateCreateInfo::default(),
-        }
-    }
 }
 
 pub(crate) struct InputAssemblyCreateInfo {

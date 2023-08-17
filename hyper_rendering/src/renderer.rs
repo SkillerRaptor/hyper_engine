@@ -110,8 +110,9 @@ impl Renderer {
             Shader::new(device.clone(), "./assets/shaders/compiled/default_fs.spv")?;
         let default_pipeline = GraphicsPipeline::new(
             device.clone(),
-            pipeline_layout,
             GraphicsPipelineCreateInfo {
+                layout: pipeline_layout,
+
                 vertex_shader: Some(vertex_shader),
                 fragment_shader: Some(fragment_shader),
 
@@ -157,8 +158,9 @@ impl Renderer {
             Shader::new(device.clone(), "./assets/shaders/compiled/textured_fs.spv")?;
         let textured_pipeline = GraphicsPipeline::new(
             device.clone(),
-            pipeline_layout,
             GraphicsPipelineCreateInfo {
+                layout: pipeline_layout,
+
                 vertex_shader: Some(vertex_shader),
                 fragment_shader: Some(fragment_shader),
 
