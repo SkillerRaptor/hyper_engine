@@ -211,6 +211,7 @@ pub(crate) struct GraphicsPipelineCreateInfo<'a> {
     pub(crate) color_blend_state: ColorBlendStateCreateInfo,
 }
 
+#[derive(Clone, Copy, Debug)]
 pub(crate) struct InputAssemblyCreateInfo {
     pub(crate) toplogy: vk::PrimitiveTopology,
     pub(crate) restart: bool,
@@ -225,6 +226,7 @@ impl Default for InputAssemblyCreateInfo {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
 pub(crate) struct RasterizationStateCreateInfo {
     pub(crate) polygon_mode: vk::PolygonMode,
 
@@ -253,6 +255,7 @@ impl Default for RasterizationStateCreateInfo {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
 pub(crate) struct DepthStencilStateCreateInfo {
     pub(crate) depth_test_enable: bool,
     pub(crate) depth_write_enable: bool,
@@ -278,6 +281,7 @@ impl Default for DepthStencilStateCreateInfo {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
 pub(crate) struct ColorBlendAttachmentStateCreateInfo {
     pub(crate) blend_enable: bool,
 
@@ -310,6 +314,7 @@ impl Default for ColorBlendAttachmentStateCreateInfo {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
 pub(crate) struct ColorBlendStateCreateInfo {
     pub(crate) logic_op_enable: bool,
     pub(crate) logic_op: vk::LogicOp,
