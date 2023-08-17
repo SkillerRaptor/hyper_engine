@@ -24,9 +24,10 @@ pub(crate) struct ComputePipeline {
 impl ComputePipeline {
     pub(crate) fn new(
         device: Rc<Device>,
-        layout: &PipelineLayout,
-        shader: Shader,
+        create_info: ComputePipelineCreateInfo,
     ) -> CreationResult<Self> {
+        let ComputePipelineCreateInfo { layout, shader } = create_info;
+
         let entry_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
 
         let stage_create_info = vk::PipelineShaderStageCreateInfo::builder()
@@ -63,4 +64,10 @@ impl Pipeline for ComputePipeline {
     fn handle(&self) -> vk::Pipeline {
         self.handle
     }
+}
+
+pub(crate) struct ComputePipelineCreateInfo<'a> {
+    layout: &'a PipelineLayout,
+
+    shader: Shader,
 }
