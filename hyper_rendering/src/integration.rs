@@ -5,7 +5,7 @@
  */
 
 use crate::{
-    allocator::{Allocation, Allocator, MemoryLocation},
+    allocator::{Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation},
     bindings::GuiBindings,
     buffer::Buffer,
     descriptor_manager::DescriptorManager,
@@ -306,10 +306,11 @@ impl EguiIntegration {
             let memory_requirements =
                 unsafe { self.device.handle().get_image_memory_requirements(handle) };
 
-            let allocation = self
-                .allocator
-                .borrow_mut()
-                .allocate(MemoryLocation::GpuOnly, memory_requirements)?;
+            let allocation = self.allocator.borrow_mut().allocate(AllocationCreateInfo {
+                requirements: memory_requirements,
+                location: MemoryLocation::GpuOnly,
+                scheme: AllocationScheme::DedicatedImage(handle),
+            })?;
 
             unsafe {
                 self.device

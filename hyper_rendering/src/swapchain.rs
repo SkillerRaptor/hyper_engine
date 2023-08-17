@@ -5,7 +5,7 @@
  */
 
 use crate::{
-    allocator::{Allocation, Allocator, MemoryLocation},
+    allocator::{Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation},
     binary_semaphore::BinarySemaphore,
     device::{
         queue_family_indices::QueueFamilyIndices,
@@ -236,9 +236,11 @@ impl Swapchain {
 
         let memory_requirements = unsafe { device.handle().get_image_memory_requirements(image) };
 
-        let allocation = allocator
-            .borrow_mut()
-            .allocate(MemoryLocation::GpuOnly, memory_requirements)?;
+        let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
+            requirements: memory_requirements,
+            location: MemoryLocation::GpuOnly,
+            scheme: AllocationScheme::DedicatedImage(image),
+        })?;
 
         unsafe {
             device

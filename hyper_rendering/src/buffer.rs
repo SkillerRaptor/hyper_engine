@@ -5,7 +5,7 @@
  */
 
 use crate::{
-    allocator::{Allocation, Allocator, MemoryLocation},
+    allocator::{Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation},
     device::Device,
     error::{Error, Result},
 };
@@ -71,9 +71,11 @@ impl Buffer {
     ) -> Result<Allocation> {
         let memory_requirements = unsafe { device.handle().get_buffer_memory_requirements(handle) };
 
-        let allocation = allocator
-            .borrow_mut()
-            .allocate(memory_location, memory_requirements)?;
+        let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
+            requirements: memory_requirements,
+            location: memory_location,
+            scheme: AllocationScheme::DedicatedBuffer(handle),
+        })?;
 
         unsafe {
             device

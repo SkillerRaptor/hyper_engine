@@ -5,7 +5,7 @@
  */
 
 use crate::{
-    allocator::{Allocation, Allocator, MemoryLocation},
+    allocator::{Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation},
     buffer::Buffer,
     device::Device,
     error::{Error, Result},
@@ -79,9 +79,11 @@ impl Texture {
 
         let memory_requirements = unsafe { device.handle().get_image_memory_requirements(handle) };
 
-        let allocation = allocator
-            .borrow_mut()
-            .allocate(MemoryLocation::GpuOnly, memory_requirements)?;
+        let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
+            requirements: memory_requirements,
+            location: MemoryLocation::GpuOnly,
+            scheme: AllocationScheme::DedicatedImage(handle),
+        })?;
 
         unsafe {
             device

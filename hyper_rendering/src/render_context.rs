@@ -5,9 +5,17 @@
  */
 
 use crate::{
-    allocator::Allocator, descriptor_manager::DescriptorManager, device::Device, error::Result,
-    instance::Instance, integration::EguiIntegration, pipeline_layout::PipelineLayout,
-    renderer::Renderer, surface::Surface, swapchain::Swapchain, upload_manager::UploadManager,
+    allocator::{Allocator, AllocatorCreateInfo},
+    descriptor_manager::DescriptorManager,
+    device::Device,
+    error::Result,
+    instance::Instance,
+    integration::EguiIntegration,
+    pipeline_layout::PipelineLayout,
+    renderer::Renderer,
+    surface::Surface,
+    swapchain::Swapchain,
+    upload_manager::UploadManager,
 };
 
 use hyper_math::vector::Vec2f;
@@ -64,9 +72,15 @@ impl RenderContext {
         let device = Rc::new(Device::new(&instance, &surface)?);
 
         let allocator = Rc::new(RefCell::new(Allocator::new(
-            validation_layers_requested,
             &instance,
             &device,
+            AllocatorCreateInfo {
+                log_memory_information: false,
+                log_leaks_on_shutdown: validation_layers_requested,
+                log_allocations: false,
+                log_frees: false,
+                log_stack_traces: false,
+            },
         )?));
 
         let swapchain = Swapchain::new(
