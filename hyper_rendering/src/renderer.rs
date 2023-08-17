@@ -14,7 +14,11 @@ use crate::{
     descriptor_manager::DescriptorManager,
     device::Device,
     error::{CreationError, CreationResult, RuntimeResult},
-    graphics_pipelines::GraphicsPipeline,
+    graphics_pipelines::{
+        ColorBlendAttachmentStateCreateInfo, ColorBlendStateCreateInfo,
+        DepthStencilStateCreateInfo, GraphicsPipeline, GraphicsPipelineCreateInfo,
+        InputAssemblyCreateInfo, RasterizationStateCreateInfo,
+    },
     instance::Instance,
     mesh::{Mesh, Vertex},
     pipeline_layout::PipelineLayout,
@@ -107,12 +111,41 @@ impl Renderer {
         let default_pipeline = GraphicsPipeline::new(
             device.clone(),
             pipeline_layout,
-            swapchain,
-            vertex_shader,
-            fragment_shader,
-            vk::CullModeFlags::BACK,
-            true,
-            false,
+            GraphicsPipelineCreateInfo {
+                vertex_shader: Some(vertex_shader),
+                fragment_shader: Some(fragment_shader),
+
+                color_image_format: swapchain.format(),
+                depth_image_format: Some(swapchain.depth_image_format()),
+
+                input_assembly: InputAssemblyCreateInfo {
+                    toplogy: vk::PrimitiveTopology::TRIANGLE_LIST,
+                    ..Default::default()
+                },
+                rasterization_state: RasterizationStateCreateInfo {
+                    polygon_mode: vk::PolygonMode::FILL,
+                    cull_mode: vk::CullModeFlags::BACK,
+                    front_face: vk::FrontFace::COUNTER_CLOCKWISE,
+
+                    depth_bias_enable: false,
+                    ..Default::default()
+                },
+                depth_stencil_state: DepthStencilStateCreateInfo {
+                    depth_test_enable: true,
+                    depth_write_enable: true,
+                    depth_compare_op: vk::CompareOp::LESS_OR_EQUAL,
+                    depth_bounds_test_enable: false,
+                    ..Default::default()
+                },
+                color_blend_attachment_state: ColorBlendAttachmentStateCreateInfo {
+                    blend_enable: false,
+                    ..Default::default()
+                },
+                color_blend_state: ColorBlendStateCreateInfo {
+                    logic_op_enable: false,
+                    ..Default::default()
+                },
+            },
         )?;
 
         materials.insert("default".to_string(), default_pipeline);
@@ -124,12 +157,42 @@ impl Renderer {
         let textured_pipeline = GraphicsPipeline::new(
             device.clone(),
             pipeline_layout,
-            swapchain,
-            vertex_shader,
-            fragment_shader,
-            vk::CullModeFlags::BACK,
-            true,
-            false,
+            GraphicsPipelineCreateInfo {
+                vertex_shader: Some(vertex_shader),
+                fragment_shader: Some(fragment_shader),
+
+                color_image_format: swapchain.format(),
+                depth_image_format: Some(swapchain.depth_image_format()),
+
+                input_assembly: InputAssemblyCreateInfo {
+                    toplogy: vk::PrimitiveTopology::TRIANGLE_LIST,
+                    ..Default::default()
+                },
+                rasterization_state: RasterizationStateCreateInfo {
+                    polygon_mode: vk::PolygonMode::FILL,
+                    cull_mode: vk::CullModeFlags::BACK,
+                    front_face: vk::FrontFace::COUNTER_CLOCKWISE,
+
+                    depth_bias_enable: false,
+                    ..Default::default()
+                },
+                depth_stencil_state: DepthStencilStateCreateInfo {
+                    depth_test_enable: true,
+                    depth_write_enable: true,
+                    depth_compare_op: vk::CompareOp::LESS_OR_EQUAL,
+                    depth_bounds_test_enable: false,
+                    ..Default::default()
+                },
+                color_blend_attachment_state: ColorBlendAttachmentStateCreateInfo {
+                    blend_enable: false,
+                    color_write_mask: vk::ColorComponentFlags::RGBA,
+                    ..Default::default()
+                },
+                color_blend_state: ColorBlendStateCreateInfo {
+                    logic_op_enable: false,
+                    ..Default::default()
+                },
+            },
         )?;
 
         materials.insert("textured".to_string(), textured_pipeline);

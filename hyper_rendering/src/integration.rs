@@ -11,7 +11,11 @@ use crate::{
     descriptor_manager::DescriptorManager,
     device::Device,
     error::{CreationError, CreationResult, RuntimeResult},
-    graphics_pipelines::GraphicsPipeline,
+    graphics_pipelines::{
+        ColorBlendAttachmentStateCreateInfo, ColorBlendStateCreateInfo,
+        DepthStencilStateCreateInfo, GraphicsPipeline, GraphicsPipelineCreateInfo,
+        InputAssemblyCreateInfo, RasterizationStateCreateInfo,
+    },
     pipeline_layout::PipelineLayout,
     renderer::Renderer,
     resource_handle::ResourceHandle,
@@ -82,15 +86,47 @@ impl EguiIntegration {
     ) -> CreationResult<Self> {
         let vertex_shader = Shader::new(device.clone(), "./assets/shaders/compiled/gui_vs.spv")?;
         let fragment_shader = Shader::new(device.clone(), "./assets/shaders/compiled/gui_fs.spv")?;
+
         let pipeline = GraphicsPipeline::new(
             device.clone(),
             pipeline_layout,
-            swapchain,
-            vertex_shader,
-            fragment_shader,
-            vk::CullModeFlags::NONE,
-            false,
-            true,
+            GraphicsPipelineCreateInfo {
+                vertex_shader: Some(vertex_shader),
+                fragment_shader: Some(fragment_shader),
+
+                color_image_format: swapchain.format(),
+                depth_image_format: Some(swapchain.depth_image_format()),
+
+                input_assembly: InputAssemblyCreateInfo {
+                    toplogy: vk::PrimitiveTopology::TRIANGLE_LIST,
+                    ..Default::default()
+                },
+                rasterization_state: RasterizationStateCreateInfo {
+                    polygon_mode: vk::PolygonMode::FILL,
+                    cull_mode: vk::CullModeFlags::NONE,
+
+                    depth_bias_enable: false,
+                    ..Default::default()
+                },
+                depth_stencil_state: DepthStencilStateCreateInfo {
+                    depth_test_enable: false,
+                    depth_write_enable: false,
+                    depth_bounds_test_enable: false,
+                    ..Default::default()
+                },
+                color_blend_attachment_state: ColorBlendAttachmentStateCreateInfo {
+                    blend_enable: true,
+                    src_color_blend_factor: vk::BlendFactor::ONE,
+                    dst_color_blend_factor: vk::BlendFactor::ONE_MINUS_SRC_ALPHA,
+                    color_blend_op: vk::BlendOp::ADD,
+                    color_write_mask: vk::ColorComponentFlags::RGBA,
+                    ..Default::default()
+                },
+                color_blend_state: ColorBlendStateCreateInfo {
+                    logic_op_enable: false,
+                    ..Default::default()
+                },
+            },
         )?;
 
         ////////////////////////////////////////////////////////////////////////

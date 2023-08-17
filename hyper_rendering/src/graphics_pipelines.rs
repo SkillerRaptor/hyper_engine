@@ -10,10 +10,10 @@ use crate::{
     pipeline::Pipeline,
     pipeline_layout::PipelineLayout,
     shader::Shader,
-    swapchain::Swapchain,
 };
 
 use ash::vk;
+use smallvec::SmallVec;
 use std::{ffi::CStr, rc::Rc};
 
 pub(crate) struct GraphicsPipeline {
@@ -26,26 +26,51 @@ impl GraphicsPipeline {
     pub(crate) fn new(
         device: Rc<Device>,
         layout: &PipelineLayout,
-        swapchain: &Swapchain,
-        vertex_shader: Shader,
-        fragment_shader: Shader,
-        cull_mode: vk::CullModeFlags,
-        depth_enable: bool,
-        blend: bool,
+        create_info: GraphicsPipelineCreateInfo,
     ) -> CreationResult<Self> {
+        let GraphicsPipelineCreateInfo {
+            vertex_shader,
+            fragment_shader,
+            color_image_format,
+            depth_image_format,
+            input_assembly,
+            rasterization_state,
+            depth_stencil_state,
+            color_blend_attachment_state,
+            color_blend_state,
+        } = create_info;
+
+        // TODO: Add check for no depth image format, but still enabling depth testing
+        // TODO: Add check if no shader at all was set
+
         let entry_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
 
-        let vertex_create_info = vk::PipelineShaderStageCreateInfo::builder()
-            .stage(vk::ShaderStageFlags::VERTEX)
-            .module(vertex_shader.handle())
-            .name(entry_name);
+        let vertex_shader_stage_create_info = if let Some(ref vertex_shader) = vertex_shader {
+            vk::PipelineShaderStageCreateInfo::builder()
+                .stage(vk::ShaderStageFlags::VERTEX)
+                .module(vertex_shader.handle())
+                .name(entry_name)
+        } else {
+            vk::PipelineShaderStageCreateInfo::builder()
+        };
 
-        let fragment_create_info = vk::PipelineShaderStageCreateInfo::builder()
-            .stage(vk::ShaderStageFlags::FRAGMENT)
-            .module(fragment_shader.handle())
-            .name(entry_name);
+        let fragment_shader_stage_create_info = if let Some(ref fragment_shader) = fragment_shader {
+            vk::PipelineShaderStageCreateInfo::builder()
+                .stage(vk::ShaderStageFlags::FRAGMENT)
+                .module(fragment_shader.handle())
+                .name(entry_name)
+        } else {
+            vk::PipelineShaderStageCreateInfo::builder()
+        };
 
-        let shader_stages = [*vertex_create_info, *fragment_create_info];
+        let mut shader_stages = SmallVec::<[vk::PipelineShaderStageCreateInfo; 2]>::new();
+        if vertex_shader.is_some() {
+            shader_stages.push(*vertex_shader_stage_create_info);
+        }
+
+        if fragment_shader.is_some() {
+            shader_stages.push(*fragment_shader_stage_create_info);
+        }
 
         let dynamic_states = [vk::DynamicState::VIEWPORT, vk::DynamicState::SCISSOR];
 
@@ -57,8 +82,11 @@ impl GraphicsPipeline {
             .vertex_attribute_descriptions(&[]);
 
         let input_assembly_state_create_info = vk::PipelineInputAssemblyStateCreateInfo::builder()
-            .topology(vk::PrimitiveTopology::TRIANGLE_LIST)
-            .primitive_restart_enable(false);
+            .topology(input_assembly.toplogy)
+            .primitive_restart_enable(input_assembly.restart);
+
+        let tessellation_state_create_info =
+            vk::PipelineTessellationStateCreateInfo::builder().patch_control_points(0);
 
         let viewport_state_create_info = vk::PipelineViewportStateCreateInfo::builder()
             .viewport_count(1)
@@ -67,15 +95,16 @@ impl GraphicsPipeline {
         let rasterization_state_create_info = vk::PipelineRasterizationStateCreateInfo::builder()
             .depth_clamp_enable(false)
             .rasterizer_discard_enable(false)
-            .polygon_mode(vk::PolygonMode::FILL)
+            .polygon_mode(rasterization_state.polygon_mode)
             .line_width(1.0)
-            .cull_mode(cull_mode)
-            .front_face(vk::FrontFace::COUNTER_CLOCKWISE)
-            .depth_bias_enable(false)
-            .depth_bias_constant_factor(0.0)
-            .depth_bias_clamp(0.0)
-            .depth_bias_slope_factor(0.0);
+            .cull_mode(rasterization_state.cull_mode)
+            .front_face(rasterization_state.front_face)
+            .depth_bias_enable(rasterization_state.depth_bias_enable)
+            .depth_bias_constant_factor(rasterization_state.depth_bias_constant_factor)
+            .depth_bias_clamp(rasterization_state.depth_bias_clamp)
+            .depth_bias_slope_factor(rasterization_state.depth_bias_slope_factor);
 
+        // TODO: Add multisampling
         let multisample_state_create_info = vk::PipelineMultisampleStateCreateInfo::builder()
             .sample_shading_enable(false)
             .rasterization_samples(vk::SampleCountFlags::TYPE_1)
@@ -84,58 +113,53 @@ impl GraphicsPipeline {
             .alpha_to_coverage_enable(false)
             .alpha_to_one_enable(false);
 
+        // TODO: Add stencil
         let depth_stencil_state_create_info = vk::PipelineDepthStencilStateCreateInfo::builder()
-            .depth_test_enable(depth_enable)
-            .depth_write_enable(depth_enable)
-            .depth_compare_op(vk::CompareOp::LESS_OR_EQUAL)
-            .depth_bounds_test_enable(false)
+            .depth_test_enable(depth_stencil_state.depth_test_enable)
+            .depth_write_enable(depth_stencil_state.depth_write_enable)
+            .depth_compare_op(depth_stencil_state.depth_compare_op)
+            .depth_bounds_test_enable(depth_stencil_state.depth_bounds_test_enable)
             .stencil_test_enable(false)
             .front(vk::StencilOpState::default())
             .back(vk::StencilOpState::default())
-            .min_depth_bounds(0.0)
-            .max_depth_bounds(1.0);
+            .min_depth_bounds(depth_stencil_state.min_depth_bounds)
+            .max_depth_bounds(depth_stencil_state.max_depth_bounds);
 
-        let color_blend_attachment_state = if blend {
+        let color_blend_attachment_state_create_info =
             vk::PipelineColorBlendAttachmentState::builder()
-                .color_write_mask(vk::ColorComponentFlags::RGBA)
-                .blend_enable(true)
-                .src_color_blend_factor(vk::BlendFactor::ONE)
-                .dst_color_blend_factor(vk::BlendFactor::ONE_MINUS_SRC_ALPHA)
-                .color_blend_op(vk::BlendOp::ADD)
-                .src_alpha_blend_factor(vk::BlendFactor::ZERO)
-                .dst_alpha_blend_factor(vk::BlendFactor::ZERO)
-                .alpha_blend_op(vk::BlendOp::ADD)
-        } else {
-            vk::PipelineColorBlendAttachmentState::builder()
-                .color_write_mask(vk::ColorComponentFlags::RGBA)
-                .blend_enable(false)
-                .src_color_blend_factor(vk::BlendFactor::ONE)
-                .dst_color_blend_factor(vk::BlendFactor::ZERO)
-                .color_blend_op(vk::BlendOp::ADD)
-                .src_alpha_blend_factor(vk::BlendFactor::ONE)
-                .dst_alpha_blend_factor(vk::BlendFactor::ZERO)
-                .alpha_blend_op(vk::BlendOp::ADD)
-        };
+                .blend_enable(color_blend_attachment_state.blend_enable)
+                .src_color_blend_factor(color_blend_attachment_state.src_color_blend_factor)
+                .dst_color_blend_factor(color_blend_attachment_state.dst_color_blend_factor)
+                .color_blend_op(color_blend_attachment_state.color_blend_op)
+                .src_alpha_blend_factor(color_blend_attachment_state.src_alpha_blend_factor)
+                .dst_alpha_blend_factor(color_blend_attachment_state.dst_alpha_blend_factor)
+                .alpha_blend_op(color_blend_attachment_state.alpha_blend_op)
+                .color_write_mask(color_blend_attachment_state.color_write_mask);
 
-        let attachments = &[*color_blend_attachment_state];
+        let attachments = &[*color_blend_attachment_state_create_info];
 
         let color_blend_state_create_info = vk::PipelineColorBlendStateCreateInfo::builder()
-            .logic_op_enable(false)
-            .logic_op(vk::LogicOp::COPY)
+            .logic_op_enable(color_blend_state.logic_op_enable)
+            .logic_op(color_blend_state.logic_op)
             .attachments(attachments)
-            .blend_constants([0.0; 4]);
+            .blend_constants(color_blend_state.blend_constants);
 
-        let color_attachment_formats = &[swapchain.format()];
-        let depth_attachment_format = swapchain.depth_image_format();
+        let color_attachment_formats = &[color_image_format];
         let mut rendering_create_info = vk::PipelineRenderingCreateInfoKHR::builder()
-            .color_attachment_formats(color_attachment_formats)
-            .depth_attachment_format(depth_attachment_format);
+            .color_attachment_formats(color_attachment_formats);
+
+        if depth_stencil_state.depth_test_enable || depth_stencil_state.depth_write_enable {
+            let depth_attachment_format = depth_image_format.unwrap_or_default();
+            rendering_create_info =
+                rendering_create_info.depth_attachment_format(depth_attachment_format);
+        }
 
         let create_info = vk::GraphicsPipelineCreateInfo::builder()
             .push_next(&mut rendering_create_info)
             .stages(&shader_stages)
             .vertex_input_state(&vertex_input_state_create_info)
             .input_assembly_state(&input_assembly_state_create_info)
+            .tessellation_state(&tessellation_state_create_info)
             .viewport_state(&viewport_state_create_info)
             .rasterization_state(&rasterization_state_create_info)
             .multisample_state(&multisample_state_create_info)
@@ -171,4 +195,70 @@ impl Pipeline for GraphicsPipeline {
     fn handle(&self) -> vk::Pipeline {
         self.handle
     }
+}
+
+#[derive(Default)]
+pub(crate) struct GraphicsPipelineCreateInfo {
+    pub(crate) vertex_shader: Option<Shader>,
+    pub(crate) fragment_shader: Option<Shader>,
+
+    pub(crate) color_image_format: vk::Format,
+    pub(crate) depth_image_format: Option<vk::Format>,
+
+    pub(crate) input_assembly: InputAssemblyCreateInfo,
+    pub(crate) rasterization_state: RasterizationStateCreateInfo,
+    // TODO: Add multisampling
+    pub(crate) depth_stencil_state: DepthStencilStateCreateInfo,
+    pub(crate) color_blend_attachment_state: ColorBlendAttachmentStateCreateInfo,
+    pub(crate) color_blend_state: ColorBlendStateCreateInfo,
+}
+
+#[derive(Default)]
+pub(crate) struct InputAssemblyCreateInfo {
+    pub(crate) toplogy: vk::PrimitiveTopology,
+    pub(crate) restart: bool,
+}
+
+#[derive(Default)]
+pub(crate) struct RasterizationStateCreateInfo {
+    pub(crate) polygon_mode: vk::PolygonMode,
+
+    pub(crate) cull_mode: vk::CullModeFlags,
+    pub(crate) front_face: vk::FrontFace,
+
+    pub(crate) depth_bias_enable: bool,
+    pub(crate) depth_bias_constant_factor: f32,
+    pub(crate) depth_bias_clamp: f32,
+    pub(crate) depth_bias_slope_factor: f32,
+}
+
+#[derive(Default)]
+pub(crate) struct DepthStencilStateCreateInfo {
+    pub(crate) depth_test_enable: bool,
+    pub(crate) depth_write_enable: bool,
+    pub(crate) depth_compare_op: vk::CompareOp,
+
+    pub(crate) depth_bounds_test_enable: bool,
+    pub(crate) min_depth_bounds: f32,
+    pub(crate) max_depth_bounds: f32,
+    // TODO: Add stencil
+}
+
+#[derive(Default)]
+pub(crate) struct ColorBlendAttachmentStateCreateInfo {
+    pub(crate) blend_enable: bool,
+    pub(crate) src_color_blend_factor: vk::BlendFactor,
+    pub(crate) dst_color_blend_factor: vk::BlendFactor,
+    pub(crate) color_blend_op: vk::BlendOp,
+    pub(crate) src_alpha_blend_factor: vk::BlendFactor,
+    pub(crate) dst_alpha_blend_factor: vk::BlendFactor,
+    pub(crate) alpha_blend_op: vk::BlendOp,
+    pub(crate) color_write_mask: vk::ColorComponentFlags,
+}
+
+#[derive(Default)]
+pub(crate) struct ColorBlendStateCreateInfo {
+    pub(crate) logic_op_enable: bool,
+    pub(crate) logic_op: vk::LogicOp,
+    pub(crate) blend_constants: [f32; 4],
 }
