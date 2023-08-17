@@ -197,7 +197,6 @@ impl Pipeline for GraphicsPipeline {
     }
 }
 
-#[derive(Default)]
 pub(crate) struct GraphicsPipelineCreateInfo {
     pub(crate) vertex_shader: Option<Shader>,
     pub(crate) fragment_shader: Option<Shader>,
@@ -213,13 +212,38 @@ pub(crate) struct GraphicsPipelineCreateInfo {
     pub(crate) color_blend_state: ColorBlendStateCreateInfo,
 }
 
-#[derive(Default)]
+impl Default for GraphicsPipelineCreateInfo {
+    fn default() -> Self {
+        Self {
+            vertex_shader: None,
+            fragment_shader: None,
+
+            color_image_format: vk::Format::UNDEFINED,
+            depth_image_format: None,
+
+            input_assembly: InputAssemblyCreateInfo::default(),
+            rasterization_state: RasterizationStateCreateInfo::default(),
+            depth_stencil_state: DepthStencilStateCreateInfo::default(),
+            color_blend_attachment_state: ColorBlendAttachmentStateCreateInfo::default(),
+            color_blend_state: ColorBlendStateCreateInfo::default(),
+        }
+    }
+}
+
 pub(crate) struct InputAssemblyCreateInfo {
     pub(crate) toplogy: vk::PrimitiveTopology,
     pub(crate) restart: bool,
 }
 
-#[derive(Default)]
+impl Default for InputAssemblyCreateInfo {
+    fn default() -> Self {
+        Self {
+            toplogy: vk::PrimitiveTopology::TRIANGLE_LIST,
+            restart: false,
+        }
+    }
+}
+
 pub(crate) struct RasterizationStateCreateInfo {
     pub(crate) polygon_mode: vk::PolygonMode,
 
@@ -232,7 +256,22 @@ pub(crate) struct RasterizationStateCreateInfo {
     pub(crate) depth_bias_slope_factor: f32,
 }
 
-#[derive(Default)]
+impl Default for RasterizationStateCreateInfo {
+    fn default() -> Self {
+        Self {
+            polygon_mode: vk::PolygonMode::FILL,
+
+            cull_mode: vk::CullModeFlags::NONE,
+            front_face: vk::FrontFace::COUNTER_CLOCKWISE,
+
+            depth_bias_enable: false,
+            depth_bias_constant_factor: 0.0,
+            depth_bias_clamp: 0.0,
+            depth_bias_slope_factor: 0.0,
+        }
+    }
+}
+
 pub(crate) struct DepthStencilStateCreateInfo {
     pub(crate) depth_test_enable: bool,
     pub(crate) depth_write_enable: bool,
@@ -244,21 +283,66 @@ pub(crate) struct DepthStencilStateCreateInfo {
     // TODO: Add stencil
 }
 
-#[derive(Default)]
+impl Default for DepthStencilStateCreateInfo {
+    fn default() -> Self {
+        Self {
+            depth_test_enable: false,
+            depth_write_enable: false,
+            depth_compare_op: vk::CompareOp::NEVER,
+
+            depth_bounds_test_enable: false,
+            min_depth_bounds: 0.0,
+            max_depth_bounds: 0.0,
+        }
+    }
+}
+
 pub(crate) struct ColorBlendAttachmentStateCreateInfo {
     pub(crate) blend_enable: bool,
+
     pub(crate) src_color_blend_factor: vk::BlendFactor,
     pub(crate) dst_color_blend_factor: vk::BlendFactor,
     pub(crate) color_blend_op: vk::BlendOp,
+
     pub(crate) src_alpha_blend_factor: vk::BlendFactor,
     pub(crate) dst_alpha_blend_factor: vk::BlendFactor,
     pub(crate) alpha_blend_op: vk::BlendOp,
+
     pub(crate) color_write_mask: vk::ColorComponentFlags,
 }
 
-#[derive(Default)]
+impl Default for ColorBlendAttachmentStateCreateInfo {
+    fn default() -> Self {
+        Self {
+            blend_enable: false,
+
+            src_color_blend_factor: vk::BlendFactor::ZERO,
+            dst_color_blend_factor: vk::BlendFactor::ZERO,
+            color_blend_op: vk::BlendOp::ADD,
+
+            src_alpha_blend_factor: vk::BlendFactor::ZERO,
+            dst_alpha_blend_factor: vk::BlendFactor::ZERO,
+            alpha_blend_op: vk::BlendOp::ADD,
+
+            color_write_mask: vk::ColorComponentFlags::RGBA,
+        }
+    }
+}
+
 pub(crate) struct ColorBlendStateCreateInfo {
     pub(crate) logic_op_enable: bool,
     pub(crate) logic_op: vk::LogicOp,
+
     pub(crate) blend_constants: [f32; 4],
+}
+
+impl Default for ColorBlendStateCreateInfo {
+    fn default() -> Self {
+        Self {
+            logic_op_enable: false,
+            logic_op: vk::LogicOp::NO_OP,
+
+            blend_constants: [0.0; 4],
+        }
+    }
 }

@@ -134,6 +134,7 @@ impl Renderer {
                     depth_test_enable: true,
                     depth_write_enable: true,
                     depth_compare_op: vk::CompareOp::LESS_OR_EQUAL,
+
                     depth_bounds_test_enable: false,
                     ..Default::default()
                 },
@@ -180,6 +181,7 @@ impl Renderer {
                     depth_test_enable: true,
                     depth_write_enable: true,
                     depth_compare_op: vk::CompareOp::LESS_OR_EQUAL,
+
                     depth_bounds_test_enable: false,
                     ..Default::default()
                 },

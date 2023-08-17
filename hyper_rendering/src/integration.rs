@@ -111,14 +111,17 @@ impl EguiIntegration {
                 depth_stencil_state: DepthStencilStateCreateInfo {
                     depth_test_enable: false,
                     depth_write_enable: false,
+
                     depth_bounds_test_enable: false,
                     ..Default::default()
                 },
                 color_blend_attachment_state: ColorBlendAttachmentStateCreateInfo {
                     blend_enable: true,
+
                     src_color_blend_factor: vk::BlendFactor::ONE,
                     dst_color_blend_factor: vk::BlendFactor::ONE_MINUS_SRC_ALPHA,
                     color_blend_op: vk::BlendOp::ADD,
+
                     color_write_mask: vk::ColorComponentFlags::RGBA,
                     ..Default::default()
                 },
