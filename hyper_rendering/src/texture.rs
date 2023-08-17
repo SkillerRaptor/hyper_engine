@@ -79,7 +79,9 @@ impl Texture {
 
         let memory_requirements = unsafe { device.handle().get_image_memory_requirements(handle) };
 
+        // TODO: Add label
         let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
+            label: None,
             requirements: memory_requirements,
             location: MemoryLocation::GpuOnly,
             scheme: AllocationScheme::DedicatedImage(handle),

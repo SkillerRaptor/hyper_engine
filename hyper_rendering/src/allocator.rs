@@ -56,6 +56,7 @@ impl Allocator {
 
     pub(crate) fn allocate(&mut self, create_info: AllocationCreateInfo) -> Result<Allocation> {
         let AllocationCreateInfo {
+            label,
             requirements,
             location,
             scheme,
@@ -79,7 +80,7 @@ impl Allocator {
         };
 
         let allocation_info = vulkan::AllocationCreateDesc {
-            name: "",
+            name: label.unwrap_or_default(),
             requirements,
             location,
             allocation_scheme,
@@ -114,7 +115,8 @@ pub(crate) struct AllocatorCreateInfo {
     pub(crate) log_stack_traces: bool,
 }
 
-pub(crate) struct AllocationCreateInfo {
+pub(crate) struct AllocationCreateInfo<'a> {
+    pub(crate) label: Option<&'a str>,
     pub(crate) requirements: vk::MemoryRequirements,
     pub(crate) location: MemoryLocation,
     pub(crate) scheme: AllocationScheme,

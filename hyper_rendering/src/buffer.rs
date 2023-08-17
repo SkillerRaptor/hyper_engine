@@ -71,7 +71,9 @@ impl Buffer {
     ) -> Result<Allocation> {
         let memory_requirements = unsafe { device.handle().get_buffer_memory_requirements(handle) };
 
+        // TODO: Add label
         let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
+            label: None,
             requirements: memory_requirements,
             location: memory_location,
             scheme: AllocationScheme::DedicatedBuffer(handle),

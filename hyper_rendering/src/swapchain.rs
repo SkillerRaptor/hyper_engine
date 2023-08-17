@@ -237,6 +237,7 @@ impl Swapchain {
         let memory_requirements = unsafe { device.handle().get_image_memory_requirements(image) };
 
         let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
+            label: Some("depth image"),
             requirements: memory_requirements,
             location: MemoryLocation::GpuOnly,
             scheme: AllocationScheme::DedicatedImage(image),

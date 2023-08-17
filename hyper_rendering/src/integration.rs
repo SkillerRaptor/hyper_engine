@@ -307,6 +307,7 @@ impl EguiIntegration {
                 unsafe { self.device.handle().get_image_memory_requirements(handle) };
 
             let allocation = self.allocator.borrow_mut().allocate(AllocationCreateInfo {
+                label: Some("Font Texture"),
                 requirements: memory_requirements,
                 location: MemoryLocation::GpuOnly,
                 scheme: AllocationScheme::DedicatedImage(handle),
