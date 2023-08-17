@@ -81,7 +81,7 @@ impl Texture {
 
         // TODO: Add label
         let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
-            label: None,
+            label: Some("<name> texture"),
             requirements: memory_requirements,
             location: MemoryLocation::GpuOnly,
             scheme: AllocationScheme::DedicatedImage(handle),
@@ -90,7 +90,11 @@ impl Texture {
         unsafe {
             device
                 .handle()
-                .bind_image_memory(handle, allocation.0.memory(), allocation.0.offset())
+                .bind_image_memory(
+                    handle,
+                    allocation.handle().memory(),
+                    allocation.handle().offset(),
+                )
                 .map_err(|error| Error::VulkanBind(error, "image"))?;
         }
 

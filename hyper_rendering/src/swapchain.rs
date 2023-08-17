@@ -246,7 +246,11 @@ impl Swapchain {
         unsafe {
             device
                 .handle()
-                .bind_image_memory(image, allocation.0.memory(), allocation.0.offset())
+                .bind_image_memory(
+                    image,
+                    allocation.handle().memory(),
+                    allocation.handle().offset(),
+                )
                 .map_err(|error| Error::VulkanBind(error, "depth image"))?;
         }
 

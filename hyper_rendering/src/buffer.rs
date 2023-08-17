@@ -73,7 +73,7 @@ impl Buffer {
 
         // TODO: Add label
         let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
-            label: None,
+            label: Some("<name> buffer"),
             requirements: memory_requirements,
             location: memory_location,
             scheme: AllocationScheme::DedicatedBuffer(handle),
@@ -82,7 +82,11 @@ impl Buffer {
         unsafe {
             device
                 .handle()
-                .bind_buffer_memory(handle, allocation.0.memory(), allocation.0.offset())
+                .bind_buffer_memory(
+                    handle,
+                    allocation.handle().memory(),
+                    allocation.handle().offset(),
+                )
                 .map_err(|error| Error::VulkanBind(error, "buffer"))?;
         }
 
@@ -94,7 +98,7 @@ impl Buffer {
             .allocation
             .as_ref()
             .ok_or(Error::BufferDataFailure)?
-            .0
+            .handle()
             .mapped_ptr()
             .ok_or(Error::BufferDataFailure)?
             .as_ptr() as *mut T;

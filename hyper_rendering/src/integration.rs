@@ -316,7 +316,11 @@ impl EguiIntegration {
             unsafe {
                 self.device
                     .handle()
-                    .bind_image_memory(handle, allocation.0.memory(), allocation.0.offset())
+                    .bind_image_memory(
+                        handle,
+                        allocation.handle().memory(),
+                        allocation.handle().offset(),
+                    )
                     .unwrap();
             }
 

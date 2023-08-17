@@ -75,11 +75,7 @@ impl RenderContext {
             &instance,
             &device,
             AllocatorCreateInfo {
-                log_memory_information: false,
                 log_leaks_on_shutdown: validation_layers_requested,
-                log_allocations: false,
-                log_frees: false,
-                log_stack_traces: false,
             },
         )?));
 

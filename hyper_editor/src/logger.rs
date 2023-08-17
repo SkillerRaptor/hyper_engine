@@ -10,7 +10,7 @@ use fern::{
     colors::{Color, ColoredLevelConfig},
     Dispatch,
 };
-use log::LevelFilter;
+use log::{Level, LevelFilter};
 use std::io;
 
 #[derive(Clone, Copy, Debug)]
@@ -53,8 +53,12 @@ pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
             format!("{}{:<5}{}", color, current_level, reset)
         };
 
-        let bright_white = format!("\x1B[{}m", Color::BrightWhite.to_fg_str());
-        let message = format!("{}{}", bright_white, message);
+        let color = if record.level() == Level::Trace {
+            format!("\x1B[{}m", Color::White.to_fg_str())
+        } else {
+            format!("\x1B[{}m", Color::BrightWhite.to_fg_str())
+        };
+        let message = format!("{}{}", color, message);
 
         out.finish(format_args!(
             "{} {} {} {} {}",

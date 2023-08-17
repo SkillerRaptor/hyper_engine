@@ -24,20 +24,16 @@ impl Allocator {
         create_info: AllocatorCreateInfo,
     ) -> Result<Self> {
         let AllocatorCreateInfo {
-            log_memory_information,
             log_leaks_on_shutdown,
-            log_allocations,
-            log_frees,
-            log_stack_traces,
         } = create_info;
 
         let debug_settings = AllocatorDebugSettings {
-            log_memory_information,
+            log_memory_information: false,
             log_leaks_on_shutdown,
             store_stack_traces: false,
-            log_allocations,
-            log_frees,
-            log_stack_traces,
+            log_allocations: false,
+            log_frees: false,
+            log_stack_traces: false,
         };
 
         let create_info = vulkan::AllocatorCreateDesc {
@@ -92,12 +88,12 @@ impl Allocator {
             .allocate(&allocation_info)
             .map_err(Error::AllocatorAllocateFailure)?;
 
-        Ok(Allocation(allocation))
+        Ok(Allocation { handle: allocation })
     }
 
     pub(crate) fn free(&mut self, allocation: Allocation) -> Result<()> {
         self.handle
-            .free(allocation.0)
+            .free(allocation.handle)
             .map_err(Error::AllocatorFreeFailure)?;
 
         Ok(())
@@ -105,14 +101,18 @@ impl Allocator {
 }
 
 #[derive(Debug)]
-pub(crate) struct Allocation(pub(crate) vulkan::Allocation);
+pub(crate) struct Allocation {
+    handle: vulkan::Allocation,
+}
+
+impl Allocation {
+    pub(crate) fn handle(&self) -> &vulkan::Allocation {
+        &self.handle
+    }
+}
 
 pub(crate) struct AllocatorCreateInfo {
-    pub(crate) log_memory_information: bool,
     pub(crate) log_leaks_on_shutdown: bool,
-    pub(crate) log_allocations: bool,
-    pub(crate) log_frees: bool,
-    pub(crate) log_stack_traces: bool,
 }
 
 pub(crate) struct AllocationCreateInfo<'a> {
