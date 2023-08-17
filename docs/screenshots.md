@@ -2,6 +2,12 @@
 
 All new noticeable changes to this project will be documented via screenshots in this file.
 
+## August 16, 2023
+
+### Basic GUI
+
+![Basic GUI](./screenshots/16_08_2023_0.png)
+
 ## August 8, 2023
 
 ### Texture support
