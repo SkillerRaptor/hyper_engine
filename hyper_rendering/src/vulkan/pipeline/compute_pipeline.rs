@@ -4,13 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    error::{Error, Result},
-    vulkan::{
-        core::device::Device,
-        pipeline::{pipeline_layout::PipelineLayout, Pipeline},
-        resource::shader::Shader,
-    },
+use crate::vulkan::{
+    core::device::Device,
+    pipeline::{pipeline_layout::PipelineLayout, Pipeline},
+    resource::shader::Shader,
 };
 
 use ash::vk;
@@ -23,7 +20,7 @@ pub(crate) struct ComputePipeline {
 }
 
 impl ComputePipeline {
-    pub(crate) fn new(device: Rc<Device>, create_info: ComputePipelineCreateInfo) -> Result<Self> {
+    pub(crate) fn new(device: Rc<Device>, create_info: ComputePipelineCreateInfo) -> Self {
         let ComputePipelineCreateInfo { layout, shader } = create_info;
 
         let entry_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
@@ -43,10 +40,10 @@ impl ComputePipeline {
             device
                 .handle()
                 .create_compute_pipelines(vk::PipelineCache::null(), &[*create_info], None)
-                .map_err(|error| Error::VulkanCreation(error.1, "compute pipeline"))
-        }?[0];
+                .expect("failed to create compute pipeline")
+        }[0];
 
-        Ok(Self { handle, device })
+        Self { handle, device }
     }
 }
 

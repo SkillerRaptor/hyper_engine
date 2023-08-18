@@ -4,13 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    error::{Error, Result},
-    vulkan::core::{
-        device::{queue_family_indices::QueueFamilyIndices, Device},
-        instance::Instance,
-        surface::Surface,
-    },
+use crate::vulkan::core::{
+    device::{queue_family_indices::QueueFamilyIndices, Device},
+    instance::Instance,
+    surface::Surface,
 };
 
 use ash::vk;
@@ -22,9 +19,9 @@ pub(crate) struct CommandPool {
 }
 
 impl CommandPool {
-    pub(crate) fn new(instance: &Instance, surface: &Surface, device: Rc<Device>) -> Result<Self> {
+    pub(crate) fn new(instance: &Instance, surface: &Surface, device: Rc<Device>) -> Self {
         let queue_family_indices =
-            QueueFamilyIndices::new(instance, surface, device.physical_device())?;
+            QueueFamilyIndices::new(instance, surface, device.physical_device());
 
         let create_info = vk::CommandPoolCreateInfo::builder()
             .queue_family_index(queue_family_indices.graphics_family().unwrap())
@@ -34,21 +31,19 @@ impl CommandPool {
             device
                 .handle()
                 .create_command_pool(&create_info, None)
-                .map_err(|error| Error::VulkanCreation(error, "command pool"))
-        }?;
+                .expect("failed to create command pool")
+        };
 
-        Ok(Self { handle, device })
+        Self { handle, device }
     }
 
-    pub(crate) fn reset(&self) -> Result<()> {
+    pub(crate) fn reset(&self) {
         unsafe {
             self.device
                 .handle()
                 .reset_command_pool(self.handle, vk::CommandPoolResetFlags::empty())
-                .map_err(Error::CommandPoolReset)?;
+                .expect("failed to reset command pool");
         }
-
-        Ok(())
     }
 
     pub(crate) fn handle(&self) -> vk::CommandPool {

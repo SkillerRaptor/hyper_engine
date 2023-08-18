@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    error::{Error, Result},
-    vulkan::core::device::Device,
-};
+use crate::vulkan::core::device::Device;
 
 use ash::vk;
 use std::rc::Rc;
@@ -18,7 +15,7 @@ pub(crate) struct TimelineSemaphore {
 }
 
 impl TimelineSemaphore {
-    pub(crate) fn new(device: Rc<Device>) -> Result<Self> {
+    pub(crate) fn new(device: Rc<Device>) -> Self {
         let mut type_create_info = vk::SemaphoreTypeCreateInfo::builder()
             .semaphore_type(vk::SemaphoreType::TIMELINE)
             .initial_value(0);
@@ -29,13 +26,13 @@ impl TimelineSemaphore {
             device
                 .handle()
                 .create_semaphore(&create_info, None)
-                .map_err(|error| Error::VulkanCreation(error, "timeline semaphore"))
-        }?;
+                .expect("failed to create timeline semaphore")
+        };
 
-        Ok(Self { handle, device })
+        Self { handle, device }
     }
 
-    pub(crate) fn wait_for(&self, value: u64) -> Result<()> {
+    pub(crate) fn wait_for(&self, value: u64) {
         let semaphores = [self.handle];
         let values = [value];
         let wait_info = vk::SemaphoreWaitInfo::builder()
@@ -46,10 +43,8 @@ impl TimelineSemaphore {
             self.device
                 .handle()
                 .wait_semaphores(&wait_info, u64::MAX)
-                .map_err(Error::WaitSemaphore)
-        }?;
-
-        Ok(())
+                .expect("failed to wait for timeline semaphore");
+        }
     }
 
     pub(crate) fn handle(&self) -> vk::Semaphore {

@@ -4,13 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    error::{Error, Result},
-    vulkan::{
-        core::device::Device,
-        pipeline::{pipeline_layout::PipelineLayout, Pipeline},
-        resource::shader::Shader,
-    },
+use crate::vulkan::{
+    core::device::Device,
+    pipeline::{pipeline_layout::PipelineLayout, Pipeline},
+    resource::shader::Shader,
 };
 
 use ash::vk;
@@ -24,7 +21,7 @@ pub(crate) struct GraphicsPipeline {
 }
 
 impl GraphicsPipeline {
-    pub(crate) fn new(device: Rc<Device>, create_info: GraphicsPipelineCreateInfo) -> Result<Self> {
+    pub(crate) fn new(device: Rc<Device>, create_info: GraphicsPipelineCreateInfo) -> Self {
         let GraphicsPipelineCreateInfo {
             layout,
             vertex_shader,
@@ -174,10 +171,10 @@ impl GraphicsPipeline {
             device
                 .handle()
                 .create_graphics_pipelines(vk::PipelineCache::null(), &[*create_info], None)
-                .map_err(|error| Error::VulkanCreation(error.1, "graphics pipeline"))
-        }?[0];
+                .expect("failed to create graphics pipeline")
+        }[0];
 
-        Ok(Self { handle, device })
+        Self { handle, device }
     }
 }
 

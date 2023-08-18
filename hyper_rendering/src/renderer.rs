@@ -6,7 +6,6 @@
 
 use crate::{
     bindings::{BindingsOffset, TexturedBindings},
-    error::{Error, Result},
     mesh::{Mesh, Vertex},
     render_context::Frame,
     render_object::RenderObject,
@@ -80,32 +79,31 @@ impl Renderer {
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         upload_manager: Rc<RefCell<UploadManager>>,
         pipeline_layout: &PipelineLayout,
-    ) -> Result<Self> {
-        let command_pool = CommandPool::new(instance, surface, device.clone())?;
+    ) -> Self {
+        let command_pool = CommandPool::new(instance, surface, device.clone());
 
         let mut command_buffers = Vec::new();
         let mut present_semaphores = Vec::new();
         let mut render_semaphores = Vec::new();
         for _ in 0..Self::FRAMES_IN_FLIGHT {
-            let command_buffer = CommandBuffer::new(device.clone(), &command_pool)?;
-            let present_semaphore = BinarySemaphore::new(device.clone())?;
-            let render_semaphore = BinarySemaphore::new(device.clone())?;
+            let command_buffer = CommandBuffer::new(device.clone(), &command_pool);
+            let present_semaphore = BinarySemaphore::new(device.clone());
+            let render_semaphore = BinarySemaphore::new(device.clone());
 
             command_buffers.push(command_buffer);
             present_semaphores.push(present_semaphore);
             render_semaphores.push(render_semaphore);
         }
 
-        let submit_semaphore = TimelineSemaphore::new(device.clone())?;
+        let submit_semaphore = TimelineSemaphore::new(device.clone());
 
         ////////////////////////////////////////////////////////////////////////
 
         let mut materials = HashMap::new();
 
-        let vertex_shader =
-            Shader::new(device.clone(), "./assets/shaders/compiled/default_vs.spv")?;
+        let vertex_shader = Shader::new(device.clone(), "./assets/shaders/compiled/default_vs.spv");
         let fragment_shader =
-            Shader::new(device.clone(), "./assets/shaders/compiled/default_fs.spv")?;
+            Shader::new(device.clone(), "./assets/shaders/compiled/default_fs.spv");
         let default_pipeline = GraphicsPipeline::new(
             device.clone(),
             GraphicsPipelineCreateInfo {
@@ -146,14 +144,14 @@ impl Renderer {
                     ..Default::default()
                 },
             },
-        )?;
+        );
 
         materials.insert("default".to_string(), default_pipeline);
 
         let vertex_shader =
-            Shader::new(device.clone(), "./assets/shaders/compiled/textured_vs.spv")?;
+            Shader::new(device.clone(), "./assets/shaders/compiled/textured_vs.spv");
         let fragment_shader =
-            Shader::new(device.clone(), "./assets/shaders/compiled/textured_fs.spv")?;
+            Shader::new(device.clone(), "./assets/shaders/compiled/textured_fs.spv");
         let textured_pipeline = GraphicsPipeline::new(
             device.clone(),
             GraphicsPipelineCreateInfo {
@@ -195,7 +193,7 @@ impl Renderer {
                     ..Default::default()
                 },
             },
-        )?;
+        );
 
         materials.insert("textured".to_string(), textured_pipeline);
 
@@ -231,7 +229,7 @@ impl Renderer {
             upload_manager.clone(),
             triangle_vertices,
             None,
-        )?;
+        );
 
         meshes.insert("triangle".to_string(), triangle_mesh);
 
@@ -241,7 +239,7 @@ impl Renderer {
             descriptor_manager.clone(),
             upload_manager.clone(),
             "./assets/models/monkey_smooth.obj",
-        )?;
+        );
 
         meshes.insert("monkey".to_string(), monkey_mesh);
 
@@ -251,7 +249,7 @@ impl Renderer {
             descriptor_manager.clone(),
             upload_manager.clone(),
             "./assets/models/lost_empire.obj",
-        )?;
+        );
 
         meshes.insert("lost_empire".to_string(), lost_empire_mesh);
 
@@ -264,7 +262,7 @@ impl Renderer {
             allocator.clone(),
             upload_manager.clone(),
             "./assets/textures/lost_empire-RGBA.png",
-        )?;
+        );
 
         textures.insert("lost_empire".to_string(), lost_empire);
 
@@ -277,7 +275,7 @@ impl Renderer {
             mem::size_of::<Mat4x4f>(),
             vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
             MemoryLocation::GpuOnly,
-        )?;
+        );
 
         let camera_position = Vec3f::new(7.0, -15.0, -6.0);
 
@@ -290,7 +288,7 @@ impl Renderer {
         let projection_view = projection_matrix * view_matrix;
         upload_manager
             .borrow_mut()
-            .upload_buffer(&[projection_view], &projection_view_buffer)?;
+            .upload_buffer(&[projection_view], &projection_view_buffer);
 
         descriptor_manager
             .borrow_mut()
@@ -309,7 +307,7 @@ impl Renderer {
             device
                 .handle()
                 .create_sampler(&sampler_create_info, None)
-                .map_err(|error| Error::VulkanCreation(error, "sampler"))?
+                .expect("failed to create sampler")
         };
 
         let combined_image_sampler_handle = descriptor_manager
@@ -334,7 +332,7 @@ impl Renderer {
             [Mat4x4f::identity()].to_vec(),
             meshes["lost_empire"].vertex_buffer_handle(),
             &[combined_image_sampler_handle],
-        )?;
+        );
         renderables.push(lost_empire);
 
         let frame_buffer = Buffer::new(
@@ -343,9 +341,9 @@ impl Renderer {
             mem::size_of::<Frame>(),
             vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
             MemoryLocation::GpuOnly,
-        )?;
+        );
 
-        Ok(Self {
+        Self {
             frame_buffer,
             upload_manager: upload_manager.clone(),
 
@@ -369,7 +367,7 @@ impl Renderer {
 
             descriptor_manager,
             device,
-        })
+        }
     }
 
     pub(crate) fn begin(
@@ -379,9 +377,9 @@ impl Renderer {
         surface: &Surface,
         frame_id: u64,
         swapchain: &mut Swapchain,
-    ) -> Result<()> {
+    ) {
         self.current_frame_id = frame_id;
-        self.submit_semaphore.wait_for(frame_id - 1)?;
+        self.submit_semaphore.wait_for(frame_id - 1);
 
         let side = self.current_frame_id % 2;
 
@@ -389,14 +387,14 @@ impl Renderer {
             window,
             instance,
             surface,
-            &self.present_semaphores[side as usize])? else {
-            return Ok(());
+            &self.present_semaphores[side as usize]) else {
+            return;
         };
 
         self.swapchain_image_index = index;
 
-        self.command_buffers[side as usize].reset()?;
-        self.command_buffers[side as usize].begin(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT)?;
+        self.command_buffers[side as usize].reset();
+        self.command_buffers[side as usize].begin(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
 
         let subresource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -424,11 +422,9 @@ impl Renderer {
             .image_memory_barriers(&image_memory_barriers);
 
         self.command_buffers[side as usize].pipeline_barrier2(*dependency_info);
-
-        Ok(())
     }
 
-    pub(crate) fn end(&self, swapchain: &Swapchain) -> Result<()> {
+    pub(crate) fn end(&self, swapchain: &Swapchain) {
         let side = self.current_frame_id % 2;
 
         let subresource_range = vk::ImageSubresourceRange::builder()
@@ -459,9 +455,7 @@ impl Renderer {
 
         self.command_buffers[side as usize].pipeline_barrier2(*dependency_info);
 
-        self.command_buffers[side as usize].end()?;
-
-        Ok(())
+        self.command_buffers[side as usize].end();
     }
 
     pub(crate) fn begin_rendering(&mut self, swapchain: &mut Swapchain) {
@@ -586,7 +580,7 @@ impl Renderer {
         instance: &Instance,
         surface: &Surface,
         swapchain: &mut Swapchain,
-    ) -> Result<()> {
+    ) {
         let side = self.current_frame_id % 2;
 
         self.device.submit_render_queue(
@@ -595,7 +589,7 @@ impl Renderer {
             &self.render_semaphores[side as usize],
             &self.submit_semaphore,
             self.current_frame_id,
-        )?;
+        );
 
         swapchain.present_queue(
             window,
@@ -604,9 +598,7 @@ impl Renderer {
             self.device.present_queue(),
             &self.render_semaphores[side as usize],
             self.swapchain_image_index,
-        )?;
-
-        Ok(())
+        );
     }
 
     pub(crate) fn draw_objects(&self, pipeline_layout: &PipelineLayout) {
@@ -679,10 +671,8 @@ impl Renderer {
         instance: &Instance,
         surface: &Surface,
         swapchain: &mut Swapchain,
-    ) -> Result<()> {
-        swapchain.recreate(window, instance, surface)?;
-
-        Ok(())
+    ) {
+        swapchain.recreate(window, instance, surface);
     }
 
     pub(crate) fn bind_pipeline(
@@ -760,15 +750,13 @@ impl Renderer {
         self.command_buffers[side as usize].bind_index_buffer(index_buffer);
     }
 
-    pub(crate) fn update_frame(&self, frame: Frame) -> Result<()> {
+    pub(crate) fn update_frame(&self, frame: Frame) {
         self.upload_manager
             .borrow_mut()
-            .upload_buffer(&[frame], &self.frame_buffer)?;
+            .upload_buffer(&[frame], &self.frame_buffer);
 
         self.descriptor_manager
             .borrow_mut()
             .update_frame(&self.frame_buffer);
-
-        Ok(())
     }
 }

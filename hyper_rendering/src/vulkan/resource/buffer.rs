@@ -4,13 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    error::{Error, Result},
-    vulkan::{
-        core::device::Device,
-        memory::allocator::{
-            Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation,
-        },
+use crate::vulkan::{
+    core::device::Device,
+    memory::allocator::{
+        Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation,
     },
 };
 
@@ -32,25 +29,25 @@ impl Buffer {
         allocation_size: usize,
         usage: vk::BufferUsageFlags,
         memory_location: MemoryLocation,
-    ) -> Result<Self> {
-        let handle = Self::create_buffer(&device, allocation_size as u64, usage)?;
+    ) -> Self {
+        let handle = Self::create_buffer(&device, allocation_size as u64, usage);
 
-        let allocation = Self::allocate_memory(&device, &allocator, memory_location, handle)?;
+        let allocation = Self::allocate_memory(&device, &allocator, memory_location, handle);
 
-        Ok(Self {
+        Self {
             handle,
             allocation: Some(allocation),
 
             allocator,
             device,
-        })
+        }
     }
 
     fn create_buffer(
         device: &Device,
         allocation_size: u64,
         usage: vk::BufferUsageFlags,
-    ) -> Result<vk::Buffer> {
+    ) -> vk::Buffer {
         let create_info = vk::BufferCreateInfo::builder()
             .size(allocation_size)
             .usage(usage)
@@ -61,10 +58,10 @@ impl Buffer {
             device
                 .handle()
                 .create_buffer(&create_info, None)
-                .map_err(|error| Error::VulkanCreation(error, "buffer"))?
+                .expect("failed to create buffer")
         };
 
-        Ok(buffer)
+        buffer
     }
 
     fn allocate_memory(
@@ -72,7 +69,7 @@ impl Buffer {
         allocator: &RefCell<Allocator>,
         memory_location: MemoryLocation,
         handle: vk::Buffer,
-    ) -> Result<Allocation> {
+    ) -> Allocation {
         let memory_requirements = unsafe { device.handle().get_buffer_memory_requirements(handle) };
 
         // TODO: Add label
@@ -81,7 +78,7 @@ impl Buffer {
             requirements: memory_requirements,
             location: memory_location,
             scheme: AllocationScheme::DedicatedBuffer(handle),
-        })?;
+        });
 
         unsafe {
             device
@@ -91,27 +88,25 @@ impl Buffer {
                     allocation.handle().memory(),
                     allocation.handle().offset(),
                 )
-                .map_err(|error| Error::VulkanBind(error, "buffer"))?;
+                .expect("failed to bind buffer memory");
         }
 
-        Ok(allocation)
+        allocation
     }
 
-    pub fn set_data<T>(&self, data: &[T]) -> Result<()> {
+    pub fn set_data<T>(&self, data: &[T]) {
         let memory = self
             .allocation
             .as_ref()
-            .ok_or(Error::BufferDataFailure)?
+            .expect("failed to get reference to allocation")
             .handle()
             .mapped_ptr()
-            .ok_or(Error::BufferDataFailure)?
+            .expect("failed to get mapped pointer to allocation")
             .as_ptr() as *mut T;
 
         unsafe {
             memory.copy_from_nonoverlapping(data.as_ptr(), data.len());
         }
-
-        Ok(())
     }
 
     pub(crate) fn handle(&self) -> vk::Buffer {
@@ -123,8 +118,7 @@ impl Drop for Buffer {
     fn drop(&mut self) {
         self.allocator
             .borrow_mut()
-            .free(self.allocation.take().unwrap())
-            .unwrap();
+            .free(self.allocation.take().unwrap());
 
         unsafe {
             self.device.handle().destroy_buffer(self.handle, None);

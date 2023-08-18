@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    error::{Error, Result},
-    vulkan::{core::device::Device, descriptors::descriptor_pool::DescriptorPool},
-};
+use crate::vulkan::{core::device::Device, descriptors::descriptor_pool::DescriptorPool};
 
 use ash::vk;
 
@@ -21,7 +18,7 @@ impl DescriptorSet {
         descriptor_pool: &DescriptorPool,
         layout: vk::DescriptorSetLayout,
         limit: u32,
-    ) -> Result<Self> {
+    ) -> Self {
         let limits = [limit];
 
         let mut count_allocate_info =
@@ -39,10 +36,10 @@ impl DescriptorSet {
             device
                 .handle()
                 .allocate_descriptor_sets(&allocate_info)
-                .map_err(|error| Error::VulkanAllocation(error, "descriptor set"))
-        }?[0];
+                .expect("failed to allocate descriptor set")
+        }[0];
 
-        Ok(Self { handle })
+        Self { handle }
     }
 
     pub(crate) fn handle(&self) -> vk::DescriptorSet {

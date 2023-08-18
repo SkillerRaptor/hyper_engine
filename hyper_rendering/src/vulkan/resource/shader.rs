@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    error::{Error, Result},
-    vulkan::core::device::Device,
-};
+use crate::vulkan::core::device::Device;
 
 use ash::vk;
 use std::{
@@ -23,32 +20,34 @@ pub(crate) struct Shader {
 }
 
 impl Shader {
-    pub(crate) fn new(device: Rc<Device>, spirv_file: &str) -> Result<Self> {
-        let bytes = Self::parse_spirv(spirv_file)?;
-        let handle = Self::create_shader_module(&device, &bytes)?;
+    pub(crate) fn new(device: Rc<Device>, spirv_file: &str) -> Self {
+        let bytes = Self::parse_spirv(spirv_file);
+        let handle = Self::create_shader_module(&device, spirv_file, &bytes);
 
-        Ok(Self { handle, device })
+        Self { handle, device }
     }
 
-    pub(crate) fn parse_spirv(spirv_file: &str) -> Result<Vec<u8>> {
-        let spirv_file = spirv_file.to_string();
-
-        let file = File::open(&spirv_file)
-            .map_err(|error| Error::OpenFailure(error, spirv_file.clone()))?;
+    pub(crate) fn parse_spirv(spirv_file: &str) -> Vec<u8> {
+        let file = File::open(spirv_file)
+            .unwrap_or_else(|_| panic!("failed to open shader file `{}`", spirv_file));
         let mut reader = BufReader::new(file);
 
         let mut bytes = Vec::new();
         reader
             .read_to_end(&mut bytes)
-            .map_err(|error| Error::ReadFailure(error, spirv_file))?;
+            .unwrap_or_else(|_| panic!("failed to read shader file `{}`", spirv_file));
 
-        Ok(bytes)
+        bytes
     }
 
-    fn create_shader_module(device: &Device, shader_bytes: &[u8]) -> Result<vk::ShaderModule> {
+    fn create_shader_module(
+        device: &Device,
+        spirv_file: &str,
+        shader_bytes: &[u8],
+    ) -> vk::ShaderModule {
         let (prefix, code, suffix) = unsafe { shader_bytes.align_to::<u32>() };
         if !prefix.is_empty() || !suffix.is_empty() {
-            return Err(Error::Unaligned);
+            panic!("failed to parse unaligned shader file `{}`", spirv_file);
         }
 
         let create_info = vk::ShaderModuleCreateInfo::builder().code(code);
@@ -57,10 +56,10 @@ impl Shader {
             device
                 .handle()
                 .create_shader_module(&create_info, None)
-                .map_err(|error| Error::VulkanCreation(error, "shader module"))
-        }?;
+                .expect("failed to create shader module")
+        };
 
-        Ok(handle)
+        handle
     }
 
     pub(crate) fn handle(&self) -> vk::ShaderModule {

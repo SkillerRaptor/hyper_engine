@@ -5,7 +5,6 @@
  */
 
 use crate::{
-    error::Result,
     resource_handle::ResourceHandle,
     vulkan::{
         core::{device::Device, instance::Instance},
@@ -28,8 +27,8 @@ pub(crate) struct DescriptorManager {
 }
 
 impl DescriptorManager {
-    pub(crate) fn new(instance: &Instance, device: Rc<Device>) -> Result<Self> {
-        let descriptor_pool = DescriptorPool::new(instance, device.clone())?;
+    pub(crate) fn new(instance: &Instance, device: Rc<Device>) -> Self {
+        let descriptor_pool = DescriptorPool::new(instance, device.clone());
 
         let mut descriptor_sets = Vec::new();
         for (layout, limit) in descriptor_pool
@@ -37,11 +36,11 @@ impl DescriptorManager {
             .iter()
             .zip(descriptor_pool.limits())
         {
-            let descriptor_set = DescriptorSet::new(&device, &descriptor_pool, *layout, *limit)?;
+            let descriptor_set = DescriptorSet::new(&device, &descriptor_pool, *layout, *limit);
             descriptor_sets.push(descriptor_set);
         }
 
-        Ok(Self {
+        Self {
             recycled_descriptors: VecDeque::new(),
             current_index: 2, // Set to 2. 0 = Frame, 1 = Camera
 
@@ -49,7 +48,7 @@ impl DescriptorManager {
             descriptor_pool,
 
             device,
-        })
+        }
     }
 
     pub(crate) fn update_frame(&mut self, buffer: &Buffer) {

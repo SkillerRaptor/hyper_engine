@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    error::{Error, Result},
-    vulkan::core::device::Device,
-};
+use crate::vulkan::core::device::Device;
 
 use ash::vk;
 use std::rc::Rc;
@@ -18,7 +15,7 @@ pub(crate) struct BinarySemaphore {
 }
 
 impl BinarySemaphore {
-    pub(crate) fn new(device: Rc<Device>) -> Result<Self> {
+    pub(crate) fn new(device: Rc<Device>) -> Self {
         let create_info =
             vk::SemaphoreCreateInfo::builder().flags(vk::SemaphoreCreateFlags::empty());
 
@@ -26,10 +23,10 @@ impl BinarySemaphore {
             device
                 .handle()
                 .create_semaphore(&create_info, None)
-                .map_err(|error| Error::VulkanCreation(error, "binary semaphore"))
-        }?;
+                .expect("failed to create binary semaphore")
+        };
 
-        Ok(Self { handle, device })
+        Self { handle, device }
     }
 
     pub(crate) fn handle(&self) -> vk::Semaphore {

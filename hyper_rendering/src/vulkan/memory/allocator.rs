@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    error::{Error, Result},
-    vulkan::core::{device::Device, instance::Instance},
-};
+use crate::vulkan::core::{device::Device, instance::Instance};
 
 use ash::vk;
 use gpu_allocator::{vulkan, AllocatorDebugSettings};
@@ -21,7 +18,7 @@ impl Allocator {
         instance: &Instance,
         device: &Device,
         create_info: AllocatorCreateInfo,
-    ) -> Result<Self> {
+    ) -> Self {
         let AllocatorCreateInfo {
             log_leaks_on_shutdown,
         } = create_info;
@@ -44,12 +41,12 @@ impl Allocator {
         };
 
         let handle =
-            vulkan::Allocator::new(&create_info).map_err(Error::AllocatorCreationFailure)?;
+            vulkan::Allocator::new(&create_info).expect("failed to create vulkan allocator");
 
-        Ok(Self { handle })
+        Self { handle }
     }
 
-    pub(crate) fn allocate(&mut self, create_info: AllocationCreateInfo) -> Result<Allocation> {
+    pub(crate) fn allocate(&mut self, create_info: AllocationCreateInfo) -> Allocation {
         let AllocationCreateInfo {
             label,
             requirements,
@@ -85,17 +82,15 @@ impl Allocator {
         let allocation = self
             .handle
             .allocate(&allocation_info)
-            .map_err(Error::AllocatorAllocateFailure)?;
+            .expect("failed to allocate vulkan memory");
 
-        Ok(Allocation { handle: allocation })
+        Allocation { handle: allocation }
     }
 
-    pub(crate) fn free(&mut self, allocation: Allocation) -> Result<()> {
+    pub(crate) fn free(&mut self, allocation: Allocation) {
         self.handle
             .free(allocation.handle)
-            .map_err(Error::AllocatorFreeFailure)?;
-
-        Ok(())
+            .expect("failed to free vulkan memory");
     }
 }
 

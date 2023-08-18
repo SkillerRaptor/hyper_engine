@@ -4,16 +4,13 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    error::{Error, Result},
-    game::Game,
-};
+use crate::game::Game;
 
 use hyper_math::vector::Vec2f;
 use hyper_platform::{event::Event, event_loop::EventLoop, window::Window};
 use hyper_rendering::render_context::{Frame, RenderContext};
 
-use std::{ops::ControlFlow, time::Instant};
+use std::time::Instant;
 
 pub struct Application {
     frame_id: u32,
@@ -27,13 +24,7 @@ pub struct Application {
 }
 
 impl Application {
-    fn new(
-        game: Box<dyn Game>,
-        title: String,
-        width: u32,
-        height: u32,
-        resizable: bool,
-    ) -> Result<Self> {
+    fn new(game: Box<dyn Game>, title: String, width: u32, height: u32, resizable: bool) -> Self {
         let start_time = Instant::now();
 
         let event_loop = EventLoop::default();
@@ -42,16 +33,16 @@ impl Application {
             .width(width)
             .height(height)
             .resizable(resizable)
-            .build(&event_loop)?;
+            .build(&event_loop);
 
-        let render_context = RenderContext::new(&event_loop, &window)?;
+        let render_context = RenderContext::new(&event_loop, &window);
 
         log::info!(
             "Application started in {:.4} seconds",
             start_time.elapsed().as_secs_f32()
         );
 
-        Ok(Self {
+        Self {
             frame_id: 1,
 
             game,
@@ -59,10 +50,10 @@ impl Application {
             render_context,
             window,
             event_loop,
-        })
+        }
     }
 
-    pub fn run(&mut self) -> Result<()> {
+    pub fn run(&mut self) {
         // Fixed at 60 frames per second
         let mut time = 0.0;
         let delta_time = 1.0 / 60.0;
@@ -70,33 +61,29 @@ impl Application {
         let mut current_time = Instant::now();
         let mut accumulator = 0.0;
 
-        self.event_loop.run(|event| -> ControlFlow<Error, ()> {
-            match event {
-                Event::EventsCleared => self.window.request_redraw(),
-                Event::UpdateFrame => {
-                    let new_time = Instant::now();
-                    let frame_time = (new_time - current_time).as_secs_f32();
-                    current_time = new_time;
+        self.event_loop.run(|event| match event {
+            Event::EventsCleared => self.window.request_redraw(),
+            Event::UpdateFrame => {
+                let new_time = Instant::now();
+                let frame_time = (new_time - current_time).as_secs_f32();
+                current_time = new_time;
 
-                    accumulator += frame_time;
+                accumulator += frame_time;
 
-                    while accumulator >= delta_time {
-                        self.game.update_fixed(delta_time, time);
-                        accumulator -= delta_time;
-                        time += delta_time;
-                    }
-
-                    self.game.update();
+                while accumulator >= delta_time {
+                    self.game.update_fixed(delta_time, time);
+                    accumulator -= delta_time;
+                    time += delta_time;
                 }
-                Event::RenderFrame => {
-                    // Render Game
-                    if let Err(error) = self
-                        .render_context
-                        .begin(&self.window, self.frame_id as u64)
-                    {
-                        return ControlFlow::Break(error.into());
-                    }
 
+                self.game.update();
+            }
+            Event::RenderFrame => {
+                // Render Game
+                self.render_context
+                    .begin(&self.window, self.frame_id as u64);
+
+                {
                     let frame = Frame {
                         time,
                         delta_time,
@@ -116,67 +103,52 @@ impl Application {
                         unused_5: Vec2f::default(),
                     };
 
-                    if let Err(error) = self.render_context.update_frame(frame) {
-                        return ControlFlow::Break(error.into());
-                    }
-
-                    {
-                        self.render_context.begin_rendering();
-
-                        self.render_context.draw_objects();
-                        self.game.render();
-
-                        self.render_context.end_rendering();
-                    }
-
-                    // Render GUI
-                    {
-                        self.render_context.begin_gui(&self.window);
-
-                        self.game.render_gui(self.render_context.egui_context());
-
-                        let output = self.render_context.end_gui(&self.window);
-
-                        if let Err(error) = self.render_context.submit_gui(&self.window, output) {
-                            return ControlFlow::Break(error.into());
-                        }
-                    }
-
-                    if let Err(error) = self.render_context.end() {
-                        return ControlFlow::Break(error.into());
-                    }
-
-                    if let Err(error) = self.render_context.submit(&self.window) {
-                        return ControlFlow::Break(error.into());
-                    }
-
-                    self.frame_id += 1;
+                    self.render_context.update_frame(frame);
                 }
-                Event::WinitWindowEvent { event } => {
-                    self.render_context.handle_gui_event(event);
-                }
-                Event::WindowResized { width, height } => {
-                    if self.window.framebuffer_size() == (width, height) {
-                        return ControlFlow::Continue(());
-                    }
 
-                    if width == 0 || height == 0 {
-                        return ControlFlow::Continue(());
-                    }
+                {
+                    self.render_context.begin_rendering();
 
-                    if let Err(error) = self.render_context.resize(&self.window) {
-                        return ControlFlow::Break(error.into());
-                    }
+                    self.render_context.draw_objects();
+                    self.game.render();
+
+                    self.render_context.end_rendering();
                 }
-                _ => {}
+
+                // Render GUI
+                {
+                    self.render_context.begin_gui(&self.window);
+
+                    self.game.render_gui(self.render_context.egui_context());
+
+                    let output = self.render_context.end_gui(&self.window);
+                    self.render_context.submit_gui(&self.window, output);
+                }
+
+                self.render_context.end();
+
+                self.render_context.submit(&self.window);
+
+                self.frame_id += 1;
             }
+            Event::WinitWindowEvent { event } => {
+                self.render_context.handle_gui_event(event);
+            }
+            Event::WindowResized { width, height } => {
+                if self.window.framebuffer_size() == (width, height) {
+                    return;
+                }
 
-            ControlFlow::Continue(())
-        })?;
+                if width == 0 || height == 0 {
+                    return;
+                }
 
-        self.render_context.wait_idle()?;
+                self.render_context.resize(&self.window);
+            }
+            _ => {}
+        });
 
-        Ok(())
+        self.render_context.wait_idle();
     }
 
     pub fn builder() -> ApplicationBuilder {
@@ -222,9 +194,9 @@ impl ApplicationBuilder {
         self
     }
 
-    pub fn build(self, game: Box<dyn Game>) -> Result<Application> {
+    pub fn build(self, game: Box<dyn Game>) -> Application {
         let Some(title) = self.title else {
-            return Err(Error::UninitializedField("title"));
+            panic!("field `title` is uninitialized");
         };
 
         Application::new(game, title, self.width, self.height, self.resizable)

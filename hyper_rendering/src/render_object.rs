@@ -6,7 +6,6 @@
 
 use crate::{
     bindings::Bindings,
-    error::Result,
     resource_handle::ResourceHandle,
     vulkan::{
         core::device::Device,
@@ -49,7 +48,7 @@ impl RenderObject {
         transforms: Vec<Mat4x4f>,
         vertex_buffer_handle: ResourceHandle,
         extra_handles: &[ResourceHandle],
-    ) -> Result<Self> {
+    ) -> Self {
         ////////////////////////////////////////////////////////////////////////
 
         let transform_buffer = Buffer::new(
@@ -58,11 +57,11 @@ impl RenderObject {
             mem::size_of::<Mat4x4f>() * transforms.len(),
             vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
             MemoryLocation::GpuOnly,
-        )?;
+        );
 
         upload_manager
             .borrow_mut()
-            .upload_buffer(&transforms, &transform_buffer)?;
+            .upload_buffer(&transforms, &transform_buffer);
 
         let transform_handle = descriptor_manager
             .borrow_mut()
@@ -76,20 +75,20 @@ impl RenderObject {
             mem::size_of::<T>(),
             vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
             MemoryLocation::GpuOnly,
-        )?;
+        );
 
         let mut resource_handles = vec![vertex_buffer_handle, transform_handle];
         resource_handles.extend_from_slice(extra_handles);
 
         upload_manager
             .borrow_mut()
-            .upload_buffer(&resource_handles, &bindings_buffer)?;
+            .upload_buffer(&resource_handles, &bindings_buffer);
 
         let bindings_handle = descriptor_manager
             .borrow_mut()
             .allocate_buffer_handle(&bindings_buffer);
 
-        Ok(Self {
+        Self {
             mesh: mesh.to_string(),
             material: material.to_string(),
 
@@ -101,7 +100,7 @@ impl RenderObject {
             _transform_buffer: transform_buffer,
 
             descriptor_manager,
-        })
+        }
     }
 
     pub(crate) fn mesh(&self) -> &str {

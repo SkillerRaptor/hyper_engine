@@ -7,7 +7,6 @@
 #![allow(dead_code)]
 #![allow(clippy::too_many_arguments)]
 
-pub mod error;
 pub mod render_context;
 
 pub(crate) mod bindings;

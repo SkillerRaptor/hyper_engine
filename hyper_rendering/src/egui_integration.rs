@@ -6,7 +6,6 @@
 
 use crate::{
     bindings::GuiBindings,
-    error::Result,
     renderer::Renderer,
     resource_handle::ResourceHandle,
     vulkan::{
@@ -86,9 +85,9 @@ impl EguiIntegration {
         swapchain: &Swapchain,
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         upload_manager: Rc<RefCell<UploadManager>>,
-    ) -> Result<Self> {
-        let vertex_shader = Shader::new(device.clone(), "./assets/shaders/compiled/gui_vs.spv")?;
-        let fragment_shader = Shader::new(device.clone(), "./assets/shaders/compiled/gui_fs.spv")?;
+    ) -> Self {
+        let vertex_shader = Shader::new(device.clone(), "./assets/shaders/compiled/gui_vs.spv");
+        let fragment_shader = Shader::new(device.clone(), "./assets/shaders/compiled/gui_fs.spv");
 
         let pipeline = GraphicsPipeline::new(
             device.clone(),
@@ -134,7 +133,7 @@ impl EguiIntegration {
                     ..Default::default()
                 },
             },
-        )?;
+        );
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -144,7 +143,7 @@ impl EguiIntegration {
             mem::size_of::<Vertex>() * 1024 * 1024,
             vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
             MemoryLocation::GpuOnly,
-        )?;
+        );
 
         let vertex_buffer_handle = descriptor_manager
             .borrow_mut()
@@ -158,7 +157,7 @@ impl EguiIntegration {
             mem::size_of::<u32>() * 1024 * 1024,
             vk::BufferUsageFlags::INDEX_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
             MemoryLocation::GpuOnly,
-        )?;
+        );
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -168,13 +167,13 @@ impl EguiIntegration {
             mem::size_of::<GuiBindings>(),
             vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
             MemoryLocation::GpuOnly,
-        )?;
+        );
 
         let resource_handles = vec![vertex_buffer_handle, ResourceHandle::new(0)];
 
         upload_manager
             .borrow_mut()
-            .upload_buffer(&resource_handles, &bindings_buffer)?;
+            .upload_buffer(&resource_handles, &bindings_buffer);
 
         let bindings_handle = descriptor_manager
             .borrow_mut()
@@ -188,7 +187,7 @@ impl EguiIntegration {
 
         let egui_winit = State::new(&event_loop.internal());
 
-        Ok(Self {
+        Self {
             textures: HashMap::new(),
 
             upload_manager,
@@ -209,7 +208,7 @@ impl EguiIntegration {
 
             egui_winit,
             egui_context,
-        })
+        }
     }
 
     pub(crate) fn handle_event(&mut self, winit_event: &WindowEvent<'_>) {
@@ -240,7 +239,7 @@ impl EguiIntegration {
         pipeline_layout: &PipelineLayout,
         renderer: &mut Renderer,
         output: FullOutput,
-    ) -> Result<()> {
+    ) {
         let clipped_meshes = self.egui_context.tessellate(output.shapes);
 
         for (id, image_delta) in output.textures_delta.set {
@@ -274,10 +273,9 @@ impl EguiIntegration {
                 data.len(),
                 vk::BufferUsageFlags::TRANSFER_SRC,
                 MemoryLocation::CpuToGpu,
-            )
-            .unwrap();
+            );
 
-            staging_buffer.set_data(&data)?;
+            staging_buffer.set_data(&data);
 
             let extent = vk::Extent3D::builder()
                 .width(image_delta.image.width() as u32)
@@ -314,7 +312,7 @@ impl EguiIntegration {
                 requirements: memory_requirements,
                 location: MemoryLocation::GpuOnly,
                 scheme: AllocationScheme::DedicatedImage(handle),
-            })?;
+            });
 
             unsafe {
                 self.device
@@ -329,7 +327,7 @@ impl EguiIntegration {
 
             self.upload_manager
                 .borrow_mut()
-                .upload_texture(&staging_buffer, handle, *extent)?;
+                .upload_texture(&staging_buffer, handle, *extent);
 
             let subsource_range = vk::ImageSubresourceRange::builder()
                 .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -383,7 +381,7 @@ impl EguiIntegration {
 
             self.upload_manager
                 .borrow_mut()
-                .upload_buffer(&resource_handles, &self.bindings_buffer)?;
+                .upload_buffer(&resource_handles, &self.bindings_buffer);
 
             self.descriptor_manager
                 .borrow_mut()
@@ -438,7 +436,7 @@ impl EguiIntegration {
 
             self.upload_manager
                 .borrow_mut()
-                .upload_buffer::<Vertex>(&vertices, &self.vertex_buffer)?;
+                .upload_buffer::<Vertex>(&vertices, &self.vertex_buffer);
 
             self.descriptor_manager
                 .borrow_mut()
@@ -448,7 +446,7 @@ impl EguiIntegration {
         if !indices.is_empty() {
             self.upload_manager
                 .borrow_mut()
-                .upload_buffer::<u32>(&indices, &self.index_buffer)?;
+                .upload_buffer::<u32>(&indices, &self.index_buffer);
         }
 
         renderer.begin_rendering_gui(swapchain);
@@ -505,8 +503,6 @@ impl EguiIntegration {
         }
 
         renderer.end_rendering();
-
-        Ok(())
     }
 
     pub(crate) fn context(&self) -> &Context {

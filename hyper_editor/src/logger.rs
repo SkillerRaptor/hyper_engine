@@ -5,7 +5,6 @@
  */
 
 use chrono::Local;
-use color_eyre::Result;
 use fern::{
     colors::{Color, ColoredLevelConfig},
     Dispatch,
@@ -22,7 +21,7 @@ pub(crate) enum Verbosity {
     Trace,
 }
 
-pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
+pub(crate) fn init(verbosity: Verbosity) {
     let levels = ColoredLevelConfig::new()
         .error(Color::Red)
         .warn(Color::BrightYellow)
@@ -82,7 +81,5 @@ pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
 
     logger = logger.chain(io::stdout());
 
-    logger.apply()?;
-
-    Ok(())
+    logger.apply().unwrap();
 }

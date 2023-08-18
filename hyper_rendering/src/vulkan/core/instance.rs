@@ -4,16 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::error::{Error, Result};
-
 use hyper_platform::window::Window;
 
 use ash::{extensions::ext::DebugUtils, vk, Entry, Instance as VulkanInstance};
 use log::Level;
-use std::{
-    ffi::{c_void, CStr, CString},
-    result,
-};
+use std::ffi::{c_void, CStr, CString};
 
 struct DebugExtension {
     handle: vk::DebugUtilsMessengerEXT,
@@ -30,36 +25,33 @@ pub(crate) struct Instance {
 impl Instance {
     const VALIDATION_LAYERS: [&'static str; 1] = ["VK_LAYER_KHRONOS_validation"];
 
-    pub(crate) fn new(
-        window: &Window,
-        validation_layers_requested: bool,
-        entry: &Entry,
-    ) -> Result<Self> {
+    pub(crate) fn new(window: &Window, validation_layers_requested: bool, entry: &Entry) -> Self {
         let validation_layers_enabled = if validation_layers_requested {
-            Self::check_validation_layer_support(entry)?
+            Self::check_validation_layer_support(entry)
         } else {
             false
         };
 
-        let handle = Self::create_instance(window, validation_layers_enabled, entry)?;
+        let handle = Self::create_instance(window, validation_layers_enabled, entry);
 
         let debug_extension =
-            Self::create_debug_extension(validation_layers_enabled, entry, &handle)?;
+            Self::create_debug_extension(validation_layers_enabled, entry, &handle);
 
-        Ok(Self {
+        Self {
             validation_layers_enabled,
 
             debug_extension,
             handle,
-        })
+        }
     }
 
     fn create_instance(
         window: &Window,
         validation_layers_enabled: bool,
         entry: &Entry,
-    ) -> Result<VulkanInstance> {
-        let application_name = CString::new(window.title())?;
+    ) -> VulkanInstance {
+        let application_name =
+            CString::new(window.title()).expect("failed to construct c-string from window title");
         let engine_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"HyperEngine\0") };
 
         let application_info = vk::ApplicationInfo::builder()
@@ -69,9 +61,7 @@ impl Instance {
             .engine_version(vk::make_api_version(0, 1, 0, 0))
             .api_version(vk::API_VERSION_1_3);
 
-        let required_extensions = window
-            .required_extensions()
-            .map_err(|error| Error::VulkanEnumeration(error, "window extensions"))?;
+        let required_extensions = window.required_extensions();
 
         let extension_names = if validation_layers_enabled {
             let mut extension_names = required_extensions;
@@ -83,8 +73,10 @@ impl Instance {
 
         let c_validation_layers = Self::VALIDATION_LAYERS
             .iter()
-            .map(|string| CString::new(*string))
-            .collect::<result::Result<Vec<_>, _>>()?;
+            .map(|string| {
+                CString::new(*string).expect("failed to construct c-string from validation layer")
+            })
+            .collect::<Vec<_>>();
 
         let layer_names = if validation_layers_enabled {
             c_validation_layers
@@ -116,19 +108,17 @@ impl Instance {
             create_info = create_info.push_next(&mut debug_messenger_create_info);
         }
 
-        let handle = unsafe {
+        unsafe {
             entry
                 .create_instance(&create_info, None)
-                .map_err(|error| Error::VulkanCreation(error, "instance"))
-        }?;
-
-        Ok(handle)
+                .expect("failed to create instance")
+        }
     }
 
-    fn check_validation_layer_support(entry: &Entry) -> Result<bool> {
+    fn check_validation_layer_support(entry: &Entry) -> bool {
         let layer_properties = entry
             .enumerate_instance_layer_properties()
-            .map_err(|error| Error::VulkanEnumeration(error, "instance layer properties"))?;
+            .expect("failed to enumerate instance layer properties");
 
         for validation_layer in Self::VALIDATION_LAYERS {
             let mut was_layer_found = false;
@@ -136,7 +126,9 @@ impl Instance {
             for layer_property in &layer_properties {
                 let layer_name = unsafe { CStr::from_ptr(layer_property.layer_name.as_ptr()) };
 
-                let layer_name_string = layer_name.to_str()?;
+                let layer_name_string = layer_name
+                    .to_str()
+                    .expect("failed to construct string from layer name");
 
                 if layer_name_string == validation_layer {
                     was_layer_found = true;
@@ -144,20 +136,20 @@ impl Instance {
             }
 
             if !was_layer_found {
-                return Ok(false);
+                return false;
             }
         }
 
-        Ok(true)
+        true
     }
 
     fn create_debug_extension(
         validation_layers_enabled: bool,
         entry: &Entry,
         instance: &VulkanInstance,
-    ) -> Result<Option<DebugExtension>> {
+    ) -> Option<DebugExtension> {
         if !validation_layers_enabled {
-            return Ok(None);
+            return None;
         }
 
         let loader = DebugUtils::new(entry, instance);
@@ -177,12 +169,12 @@ impl Instance {
         let handle = unsafe {
             loader
                 .create_debug_utils_messenger(&create_info, None)
-                .map_err(|error| Error::VulkanCreation(error, "debug utils messenger"))?
+                .expect("failed to create debug utils messenger")
         };
 
         let debug_extension = DebugExtension { loader, handle };
 
-        Ok(Some(debug_extension))
+        Some(debug_extension)
     }
 
     pub(crate) fn handle(&self) -> &VulkanInstance {

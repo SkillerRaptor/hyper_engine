@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    error::{Error, Result},
-    vulkan::core::instance::Instance,
-};
+use crate::vulkan::core::instance::Instance;
 
 use hyper_platform::window::Window;
 
@@ -19,14 +16,12 @@ pub(crate) struct Surface {
 }
 
 impl Surface {
-    pub(crate) fn new(window: &Window, entry: &Entry, instance: &Instance) -> Result<Self> {
+    pub(crate) fn new(window: &Window, entry: &Entry, instance: &Instance) -> Self {
         let loader = khr::Surface::new(entry, instance.handle());
 
-        let handle = window
-            .create_surface(entry, instance.handle())
-            .map_err(|error| Error::VulkanCreation(error, "surface"))?;
+        let handle = window.create_surface(entry, instance.handle());
 
-        Ok(Self { handle, loader })
+        Self { handle, loader }
     }
 
     pub(crate) fn handle(&self) -> vk::SurfaceKHR {

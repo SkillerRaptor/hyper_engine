@@ -4,14 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    error::{Error, Result},
-    event_loop::EventLoop,
-};
+use crate::event_loop::EventLoop;
 
 use ash::{vk, Entry, Instance};
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
-use std::result;
 use winit::{dpi::LogicalSize, window};
 
 pub struct Window {
@@ -25,25 +21,22 @@ impl Window {
         width: u32,
         height: u32,
         resizable: bool,
-    ) -> Result<Self> {
+    ) -> Self {
         let window = window::WindowBuilder::new()
-            .with_title(title)
+            .with_title(&title)
             .with_inner_size(LogicalSize::new(width, height))
             .with_resizable(resizable)
-            .build(event_loop.internal())?;
+            .build(event_loop.internal())
+            .unwrap_or_else(|_| panic!("failed to create window `{}`", title));
 
-        Ok(Self { internal: window })
+        Self { internal: window }
     }
 
     pub fn request_redraw(&self) {
         self.internal.request_redraw();
     }
 
-    pub fn create_surface(
-        &self,
-        entry: &Entry,
-        instance: &Instance,
-    ) -> result::Result<vk::SurfaceKHR, vk::Result> {
+    pub fn create_surface(&self, entry: &Entry, instance: &Instance) -> vk::SurfaceKHR {
         unsafe {
             ash_window::create_surface(
                 entry,
@@ -52,13 +45,14 @@ impl Window {
                 self.internal.raw_window_handle(),
                 None,
             )
+            .expect("failed to create window surface")
         }
     }
 
-    pub fn required_extensions(&self) -> result::Result<Vec<*const i8>, vk::Result> {
-        let required_extensions =
-            ash_window::enumerate_required_extensions(self.internal.raw_display_handle())?;
-        Ok(required_extensions.to_vec())
+    pub fn required_extensions(&self) -> Vec<*const i8> {
+        ash_window::enumerate_required_extensions(self.internal.raw_display_handle())
+            .expect("failed to query required window extensions")
+            .to_vec()
     }
 
     pub fn title(&self) -> String {
@@ -117,21 +111,21 @@ impl WindowBuilder {
         self
     }
 
-    pub fn build(self, event_loop: &EventLoop) -> Result<Window> {
+    pub fn build(self, event_loop: &EventLoop) -> Window {
         let Some(title) = self.title else {
-            return Err(Error::UninitializedField("title"));
+            panic!("field `title` is uninitialized");
         };
 
         let Some(width) = self.width else {
-            return Err(Error::UninitializedField("width"));
+            panic!("field `width` is uninitialized");
         };
 
         let Some(height) = self.height else {
-            return Err(Error::UninitializedField("height"));
+            panic!("field `height` is uninitialized");
         };
 
         let Some(resizable) = self.resizable else {
-            return Err(Error::UninitializedField("resizable"));
+            panic!("field `resizable` is uninitialized");
         };
 
         Window::new(event_loop, title, width, height, resizable)
