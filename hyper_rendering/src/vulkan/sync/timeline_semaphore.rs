@@ -7,32 +7,29 @@
 use crate::vulkan::core::device::Device;
 
 use ash::vk;
+use color_eyre::Result;
 use std::rc::Rc;
 
 pub(crate) struct TimelineSemaphore {
     handle: vk::Semaphore,
+
     device: Rc<Device>,
 }
 
 impl TimelineSemaphore {
-    pub(crate) fn new(device: Rc<Device>) -> Self {
+    pub(crate) fn new(device: Rc<Device>) -> Result<Self> {
         let mut type_create_info = vk::SemaphoreTypeCreateInfo::builder()
             .semaphore_type(vk::SemaphoreType::TIMELINE)
             .initial_value(0);
 
         let create_info = vk::SemaphoreCreateInfo::builder().push_next(&mut type_create_info);
 
-        let handle = unsafe {
-            device
-                .handle()
-                .create_semaphore(&create_info, None)
-                .expect("failed to create timeline semaphore")
-        };
+        let handle = unsafe { device.handle().create_semaphore(&create_info, None) }?;
 
-        Self { handle, device }
+        Ok(Self { handle, device })
     }
 
-    pub(crate) fn wait_for(&self, value: u64) {
+    pub(crate) fn wait_for(&self, value: u64) -> Result<()> {
         let semaphores = [self.handle];
         let values = [value];
         let wait_info = vk::SemaphoreWaitInfo::builder()
@@ -40,11 +37,10 @@ impl TimelineSemaphore {
             .values(&values);
 
         unsafe {
-            self.device
-                .handle()
-                .wait_semaphores(&wait_info, u64::MAX)
-                .expect("failed to wait for timeline semaphore");
+            self.device.handle().wait_semaphores(&wait_info, u64::MAX)?;
         }
+
+        Ok(())
     }
 
     pub(crate) fn handle(&self) -> vk::Semaphore {

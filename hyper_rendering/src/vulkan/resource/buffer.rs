@@ -12,6 +12,7 @@ use crate::vulkan::{
 };
 
 use ash::vk;
+use color_eyre::{eyre::eyre, Result};
 use std::{cell::RefCell, rc::Rc};
 
 pub(crate) struct Buffer {
@@ -29,39 +30,34 @@ impl Buffer {
         allocation_size: usize,
         usage: vk::BufferUsageFlags,
         memory_location: MemoryLocation,
-    ) -> Self {
-        let handle = Self::create_buffer(&device, allocation_size as u64, usage);
+    ) -> Result<Self> {
+        let handle = Self::create_buffer(&device, allocation_size as u64, usage)?;
 
-        let allocation = Self::allocate_memory(&device, &allocator, memory_location, handle);
+        let allocation = Self::allocate_memory(&device, &allocator, memory_location, handle)?;
 
-        Self {
+        Ok(Self {
             handle,
             allocation: Some(allocation),
 
             allocator,
             device,
-        }
+        })
     }
 
     fn create_buffer(
         device: &Device,
         allocation_size: u64,
         usage: vk::BufferUsageFlags,
-    ) -> vk::Buffer {
+    ) -> Result<vk::Buffer> {
         let create_info = vk::BufferCreateInfo::builder()
             .size(allocation_size)
             .usage(usage)
             .sharing_mode(vk::SharingMode::EXCLUSIVE)
             .queue_family_indices(&[]);
 
-        let buffer = unsafe {
-            device
-                .handle()
-                .create_buffer(&create_info, None)
-                .expect("failed to create buffer")
-        };
+        let buffer = unsafe { device.handle().create_buffer(&create_info, None) }?;
 
-        buffer
+        Ok(buffer)
     }
 
     fn allocate_memory(
@@ -69,7 +65,7 @@ impl Buffer {
         allocator: &RefCell<Allocator>,
         memory_location: MemoryLocation,
         handle: vk::Buffer,
-    ) -> Allocation {
+    ) -> Result<Allocation> {
         let memory_requirements = unsafe { device.handle().get_buffer_memory_requirements(handle) };
 
         // TODO: Add label
@@ -78,35 +74,34 @@ impl Buffer {
             requirements: memory_requirements,
             location: memory_location,
             scheme: AllocationScheme::DedicatedBuffer(handle),
-        });
+        })?;
 
         unsafe {
-            device
-                .handle()
-                .bind_buffer_memory(
-                    handle,
-                    allocation.handle().memory(),
-                    allocation.handle().offset(),
-                )
-                .expect("failed to bind buffer memory");
+            device.handle().bind_buffer_memory(
+                handle,
+                allocation.handle().memory(),
+                allocation.handle().offset(),
+            )?
         }
 
-        allocation
+        Ok(allocation)
     }
 
-    pub fn set_data<T>(&self, data: &[T]) {
+    pub fn set_data<T>(&self, data: &[T]) -> Result<()> {
         let memory = self
             .allocation
             .as_ref()
-            .expect("failed to get reference to allocation")
+            .ok_or(eyre!("failed to take allocation as reference"))?
             .handle()
             .mapped_ptr()
-            .expect("failed to get mapped pointer to allocation")
+            .ok_or(eyre!("failed to get mapped pointer of allocation"))?
             .as_ptr() as *mut T;
 
         unsafe {
             memory.copy_from_nonoverlapping(data.as_ptr(), data.len());
         }
+
+        Ok(())
     }
 
     pub(crate) fn handle(&self) -> vk::Buffer {
@@ -118,7 +113,8 @@ impl Drop for Buffer {
     fn drop(&mut self) {
         self.allocator
             .borrow_mut()
-            .free(self.allocation.take().unwrap());
+            .free(self.allocation.take().unwrap())
+            .unwrap();
 
         unsafe {
             self.device.handle().destroy_buffer(self.handle, None);

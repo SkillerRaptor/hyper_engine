@@ -9,7 +9,7 @@ use crate::{event::Event, key_code::KeyCode, mouse_code::MouseCode};
 use winit::{
     dpi::PhysicalPosition,
     event::{self, DeviceEvent, ElementState, MouseButton, MouseScrollDelta, WindowEvent},
-    event_loop::{self, ControlFlow},
+    event_loop,
     platform::run_return::EventLoopExtRunReturn,
 };
 
@@ -30,7 +30,7 @@ impl EventLoop {
         F: FnMut(Event),
     {
         self.internal.run_return(|event, _, control_flow| {
-            *control_flow = ControlFlow::Poll;
+            *control_flow = event_loop::ControlFlow::Poll;
 
             match event {
                 event::Event::MainEventsCleared => event_handler(Event::EventsCleared),
@@ -47,7 +47,7 @@ impl EventLoop {
 
                     match event {
                         WindowEvent::CloseRequested => {
-                            *control_flow = ControlFlow::Exit;
+                            *control_flow = event_loop::ControlFlow::Exit;
                         }
                         WindowEvent::KeyboardInput { input, .. } => {
                             if let Some(virtual_key_code) = input.virtual_keycode {

@@ -9,19 +9,21 @@ use crate::vulkan::core::instance::Instance;
 use hyper_platform::window::Window;
 
 use ash::{extensions::khr, vk, Entry};
+use color_eyre::Result;
 
 pub(crate) struct Surface {
     handle: vk::SurfaceKHR,
+
     loader: khr::Surface,
 }
 
 impl Surface {
-    pub(crate) fn new(window: &Window, entry: &Entry, instance: &Instance) -> Self {
+    pub(crate) fn new(window: &Window, entry: &Entry, instance: &Instance) -> Result<Self> {
         let loader = khr::Surface::new(entry, instance.handle());
 
-        let handle = window.create_surface(entry, instance.handle());
+        let handle = window.create_surface(entry, instance.handle())?;
 
-        Self { handle, loader }
+        Ok(Self { handle, loader })
     }
 
     pub(crate) fn handle(&self) -> vk::SurfaceKHR {

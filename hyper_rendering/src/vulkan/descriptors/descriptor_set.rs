@@ -7,6 +7,7 @@
 use crate::vulkan::{core::device::Device, descriptors::descriptor_pool::DescriptorPool};
 
 use ash::vk;
+use color_eyre::Result;
 
 pub(crate) struct DescriptorSet {
     handle: vk::DescriptorSet,
@@ -18,7 +19,7 @@ impl DescriptorSet {
         descriptor_pool: &DescriptorPool,
         layout: vk::DescriptorSetLayout,
         limit: u32,
-    ) -> Self {
+    ) -> Result<Self> {
         let limits = [limit];
 
         let mut count_allocate_info =
@@ -32,14 +33,9 @@ impl DescriptorSet {
             .descriptor_pool(descriptor_pool.handle())
             .set_layouts(&layouts);
 
-        let handle = unsafe {
-            device
-                .handle()
-                .allocate_descriptor_sets(&allocate_info)
-                .expect("failed to allocate descriptor set")
-        }[0];
+        let handle = unsafe { device.handle().allocate_descriptor_sets(&allocate_info) }?[0];
 
-        Self { handle }
+        Ok(Self { handle })
     }
 
     pub(crate) fn handle(&self) -> vk::DescriptorSet {

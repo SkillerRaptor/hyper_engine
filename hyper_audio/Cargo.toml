@@ -12,5 +12,5 @@ edition = "2021"
 [dependencies]
 hyper_core = { path = "../hyper_core" }
 
+color-eyre = "0.6"
 log = "0.4"
-thiserror = "1.0"

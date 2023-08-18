@@ -11,6 +11,7 @@ use crate::vulkan::{
 };
 
 use ash::vk;
+use color_eyre::Result;
 use smallvec::SmallVec;
 use std::{ffi::CStr, rc::Rc};
 
@@ -21,7 +22,7 @@ pub(crate) struct GraphicsPipeline {
 }
 
 impl GraphicsPipeline {
-    pub(crate) fn new(device: Rc<Device>, create_info: GraphicsPipelineCreateInfo) -> Self {
+    pub(crate) fn new(device: Rc<Device>, create_info: GraphicsPipelineCreateInfo) -> Result<Self> {
         let GraphicsPipelineCreateInfo {
             layout,
             vertex_shader,
@@ -168,13 +169,15 @@ impl GraphicsPipeline {
             .base_pipeline_index(-1);
 
         let handle = unsafe {
-            device
-                .handle()
-                .create_graphics_pipelines(vk::PipelineCache::null(), &[*create_info], None)
-                .expect("failed to create graphics pipeline")
-        }[0];
+            device.handle().create_graphics_pipelines(
+                vk::PipelineCache::null(),
+                &[*create_info],
+                None,
+            )
+        }
+        .map_err(|error| error.1)?[0];
 
-        Self { handle, device }
+        Ok(Self { handle, device })
     }
 }
 

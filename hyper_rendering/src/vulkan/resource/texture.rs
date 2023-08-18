@@ -13,6 +13,7 @@ use crate::vulkan::{
 };
 
 use ash::vk;
+use color_eyre::Result;
 use image::io::Reader as ImageReader;
 use std::{cell::RefCell, rc::Rc};
 
@@ -31,11 +32,8 @@ impl Texture {
         allocator: Rc<RefCell<Allocator>>,
         upload_manager: Rc<RefCell<UploadManager>>,
         file: &str,
-    ) -> Self {
-        let image = ImageReader::open(file)
-            .unwrap_or_else(|_| panic!("failed to open texture file `{}`", file))
-            .decode()
-            .unwrap_or_else(|_| panic!("failed to load texture file `{}`", file));
+    ) -> Result<Self> {
+        let image = ImageReader::open(file)?.decode()?;
 
         // TODO: Don't hardcode channels
         let image_size = image.width() * image.height() * 4;
@@ -46,9 +44,9 @@ impl Texture {
             image_size as usize,
             vk::BufferUsageFlags::TRANSFER_SRC,
             MemoryLocation::CpuToGpu,
-        );
+        )?;
 
-        staging_buffer.set_data(image.as_bytes());
+        staging_buffer.set_data(image.as_bytes())?;
 
         let extent = vk::Extent3D::builder()
             .width(image.width())
@@ -70,12 +68,7 @@ impl Texture {
             .queue_family_indices(&[])
             .initial_layout(vk::ImageLayout::UNDEFINED);
 
-        let handle = unsafe {
-            device
-                .handle()
-                .create_image(&create_info, None)
-                .expect("failed to create image")
-        };
+        let handle = unsafe { device.handle().create_image(&create_info, None) }?;
 
         let memory_requirements = unsafe { device.handle().get_image_memory_requirements(handle) };
 
@@ -85,22 +78,19 @@ impl Texture {
             requirements: memory_requirements,
             location: MemoryLocation::GpuOnly,
             scheme: AllocationScheme::DedicatedImage(handle),
-        });
+        })?;
 
         unsafe {
-            device
-                .handle()
-                .bind_image_memory(
-                    handle,
-                    allocation.handle().memory(),
-                    allocation.handle().offset(),
-                )
-                .expect("failed to bind image")
+            device.handle().bind_image_memory(
+                handle,
+                allocation.handle().memory(),
+                allocation.handle().offset(),
+            )?
         }
 
         upload_manager
             .borrow_mut()
-            .upload_texture(&staging_buffer, handle, *extent);
+            .upload_texture(&staging_buffer, handle, *extent)?;
 
         let subsource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -116,21 +106,16 @@ impl Texture {
             .components(vk::ComponentMapping::default())
             .subresource_range(*subsource_range);
 
-        let view = unsafe {
-            device
-                .handle()
-                .create_image_view(&view_create_info, None)
-                .expect("failed to create image view")
-        };
+        let view = unsafe { device.handle().create_image_view(&view_create_info, None) }?;
 
-        Self {
+        Ok(Self {
             allocation: Some(allocation),
             view,
             handle,
 
             allocator,
             device,
-        }
+        })
     }
 
     pub(crate) fn view(&self) -> vk::ImageView {
@@ -144,7 +129,8 @@ impl Drop for Texture {
             self.device.handle().destroy_image_view(self.view, None);
             self.allocator
                 .borrow_mut()
-                .free(self.allocation.take().unwrap());
+                .free(self.allocation.take().unwrap())
+                .unwrap();
 
             self.device.handle().destroy_image(self.handle, None);
         }

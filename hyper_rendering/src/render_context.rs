@@ -20,6 +20,7 @@ use hyper_math::vector::Vec2f;
 use hyper_platform::{event_loop::EventLoop, window::Window};
 
 use ash::Entry;
+use color_eyre::Result;
 use egui::{Context, FullOutput};
 use std::{cell::RefCell, rc::Rc};
 use winit::event::WindowEvent;
@@ -60,14 +61,14 @@ pub struct RenderContext {
 }
 
 impl RenderContext {
-    pub fn new(event_loop: &EventLoop, window: &Window) -> Self {
+    pub fn new(event_loop: &EventLoop, window: &Window) -> Result<Self> {
         let validation_layers_requested = cfg!(debug_assertions);
 
-        let entry = unsafe { Entry::load().expect("failed to load vulkan library") };
-        let instance = Instance::new(window, validation_layers_requested, &entry);
+        let entry = unsafe { Entry::load()? };
+        let instance = Instance::new(window, validation_layers_requested, &entry)?;
 
-        let surface = Surface::new(window, &entry, &instance);
-        let device = Rc::new(Device::new(&instance, &surface));
+        let surface = Surface::new(window, &entry, &instance)?;
+        let device = Rc::new(Device::new(&instance, &surface)?);
 
         let allocator = Rc::new(RefCell::new(Allocator::new(
             &instance,
@@ -75,7 +76,7 @@ impl RenderContext {
             AllocatorCreateInfo {
                 log_leaks_on_shutdown: validation_layers_requested,
             },
-        )));
+        )?));
 
         let swapchain = Swapchain::new(
             window,
@@ -83,21 +84,21 @@ impl RenderContext {
             &surface,
             device.clone(),
             allocator.clone(),
-        );
+        )?;
 
         let descriptor_manager = Rc::new(RefCell::new(DescriptorManager::new(
             &instance,
             device.clone(),
-        )));
+        )?));
 
         let upload_manager = Rc::new(RefCell::new(UploadManager::new(
             &instance,
             &surface,
             device.clone(),
             allocator.clone(),
-        )));
+        )?));
 
-        let pipeline_layout = PipelineLayout::new(device.clone(), &descriptor_manager.borrow());
+        let pipeline_layout = PipelineLayout::new(device.clone(), &descriptor_manager.borrow())?;
 
         let renderer = Renderer::new(
             &instance,
@@ -108,7 +109,7 @@ impl RenderContext {
             descriptor_manager.clone(),
             upload_manager.clone(),
             &pipeline_layout,
-        );
+        )?;
 
         let egui_integration = EguiIntegration::new(
             event_loop,
@@ -118,9 +119,9 @@ impl RenderContext {
             &swapchain,
             descriptor_manager.clone(),
             upload_manager.clone(),
-        );
+        )?;
 
-        Self {
+        Ok(Self {
             egui_integration,
 
             renderer,
@@ -136,47 +137,57 @@ impl RenderContext {
             surface,
             instance,
             _entry: entry,
-        }
+        })
     }
 
-    pub fn begin(&mut self, window: &Window, frame_id: u64) {
+    pub fn begin(&mut self, window: &Window, frame_id: u64) -> Result<()> {
         self.renderer.begin(
             window,
             &self.instance,
             &self.surface,
             frame_id,
             &mut self.swapchain,
-        );
+        )?;
+
+        Ok(())
     }
 
     pub fn begin_rendering(&mut self) {
         self.renderer.begin_rendering(&mut self.swapchain);
     }
 
-    pub fn end(&self) {
-        self.renderer.end(&self.swapchain);
+    pub fn end(&self) -> Result<()> {
+        self.renderer.end(&self.swapchain)?;
+
+        Ok(())
     }
 
     pub fn end_rendering(&self) {
         self.renderer.end_rendering();
     }
 
-    pub fn submit(&mut self, window: &Window) {
+    pub fn submit(&mut self, window: &Window) -> Result<()> {
         self.renderer
-            .submit(window, &self.instance, &self.surface, &mut self.swapchain);
+            .submit(window, &self.instance, &self.surface, &mut self.swapchain)?;
+
+        Ok(())
     }
 
     pub fn draw_objects(&self) {
         self.renderer.draw_objects(&self.pipeline_layout);
     }
 
-    pub fn resize(&mut self, window: &Window) {
+    pub fn resize(&mut self, window: &Window) -> Result<()> {
         self.renderer
-            .resize(window, &self.instance, &self.surface, &mut self.swapchain);
+            .resize(window, &self.instance, &self.surface, &mut self.swapchain)?;
+
+        Ok(())
     }
 
-    pub fn wait_idle(&self) {
-        self.device.wait_idle();
+    pub fn wait_idle(&self) -> Result<()> {
+        self.device.wait_idle()?;
+
+        Ok(())
     }
 
     pub fn handle_gui_event(&mut self, winit_event: &WindowEvent<'_>) {
@@ -191,18 +202,22 @@ impl RenderContext {
         self.egui_integration.end_gui(window)
     }
 
-    pub fn submit_gui(&mut self, window: &Window, output: FullOutput) {
+    pub fn submit_gui(&mut self, window: &Window, output: FullOutput) -> Result<()> {
         self.egui_integration.submit_gui(
             window,
             &mut self.swapchain,
             &self.pipeline_layout,
             &mut self.renderer,
             output,
-        )
+        )?;
+
+        Ok(())
     }
 
-    pub fn update_frame(&self, frame: Frame) {
-        self.renderer.update_frame(frame)
+    pub fn update_frame(&self, frame: Frame) -> Result<()> {
+        self.renderer.update_frame(frame)?;
+
+        Ok(())
     }
 
     pub fn egui_context(&self) -> &Context {

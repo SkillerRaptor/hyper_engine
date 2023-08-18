@@ -10,6 +10,7 @@ use crate::{
 };
 
 use ash::vk;
+use color_eyre::Result;
 use std::{mem, rc::Rc};
 
 pub(crate) struct PipelineLayout {
@@ -19,7 +20,7 @@ pub(crate) struct PipelineLayout {
 }
 
 impl PipelineLayout {
-    pub(crate) fn new(device: Rc<Device>, descriptor_manager: &DescriptorManager) -> Self {
+    pub(crate) fn new(device: Rc<Device>, descriptor_manager: &DescriptorManager) -> Result<Self> {
         let bindings_offset_size = mem::size_of::<BindingsOffset>() as u32;
 
         let bindings_range = vk::PushConstantRange::builder()
@@ -32,14 +33,9 @@ impl PipelineLayout {
             .set_layouts(descriptor_manager.descriptor_pool().layouts())
             .push_constant_ranges(&push_ranges);
 
-        let handle = unsafe {
-            device
-                .handle()
-                .create_pipeline_layout(&create_info, None)
-                .expect("failed to create pipeline layout")
-        };
+        let handle = unsafe { device.handle().create_pipeline_layout(&create_info, None)? };
 
-        Self { handle, device }
+        Ok(Self { handle, device })
     }
 
     pub(crate) fn handle(&self) -> vk::PipelineLayout {

@@ -13,6 +13,7 @@ use crate::vulkan::{
 };
 
 use ash::vk;
+use color_eyre::Result;
 use std::{cell::RefCell, mem, rc::Rc};
 
 pub(crate) struct UploadManager {
@@ -32,13 +33,13 @@ impl UploadManager {
         surface: &Surface,
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
-    ) -> Self {
-        let upload_command_pool = CommandPool::new(instance, surface, device.clone());
-        let upload_command_buffer = CommandBuffer::new(device.clone(), &upload_command_pool);
-        let upload_semaphore = TimelineSemaphore::new(device.clone());
+    ) -> Result<Self> {
+        let upload_command_pool = CommandPool::new(instance, surface, device.clone())?;
+        let upload_command_buffer = CommandBuffer::new(device.clone(), &upload_command_pool)?;
+        let upload_semaphore = TimelineSemaphore::new(device.clone())?;
         let upload_value = 0;
 
-        Self {
+        Ok(Self {
             upload_semaphore,
             upload_value,
 
@@ -47,33 +48,35 @@ impl UploadManager {
 
             allocator,
             device,
-        }
+        })
     }
 
-    pub(crate) fn immediate_submit<F>(&mut self, function: F)
+    pub(crate) fn immediate_submit<F>(&mut self, function: F) -> Result<()>
     where
         F: FnOnce(&CommandBuffer),
     {
         self.upload_command_buffer
-            .begin(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
+            .begin(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT)?;
 
         function(&self.upload_command_buffer);
 
-        self.upload_command_buffer.end();
+        self.upload_command_buffer.end()?;
 
         self.device.submit_upload_queue(
             &self.upload_command_buffer,
             &self.upload_semaphore,
             self.upload_value,
-        );
+        )?;
 
         self.upload_value += 1;
-        self.upload_semaphore.wait_for(self.upload_value);
+        self.upload_semaphore.wait_for(self.upload_value)?;
 
-        self.upload_command_pool.reset();
+        self.upload_command_pool.reset()?;
+
+        Ok(())
     }
 
-    pub(crate) fn upload_buffer<T>(&mut self, source: &[T], destination: &Buffer) {
+    pub(crate) fn upload_buffer<T>(&mut self, source: &[T], destination: &Buffer) -> Result<()> {
         let buffer_size = mem::size_of_val(source);
 
         let staging_buffer = Buffer::new(
@@ -82,9 +85,9 @@ impl UploadManager {
             buffer_size,
             vk::BufferUsageFlags::TRANSFER_SRC,
             MemoryLocation::CpuToGpu,
-        );
+        )?;
 
-        staging_buffer.set_data(source);
+        staging_buffer.set_data(source)?;
 
         self.immediate_submit(|command_buffer| {
             let buffer_copy = vk::BufferCopy::builder()
@@ -93,7 +96,9 @@ impl UploadManager {
                 .size(buffer_size as u64);
 
             command_buffer.copy_buffer(&staging_buffer, destination, &[*buffer_copy]);
-        });
+        })?;
+
+        Ok(())
     }
 
     // TODO: Make this more flexible
@@ -102,7 +107,7 @@ impl UploadManager {
         source: &Buffer,
         destination: vk::Image,
         extent: vk::Extent3D,
-    ) {
+    ) -> Result<()> {
         self.immediate_submit(|command_buffer| {
             let subsource_range = vk::ImageSubresourceRange::builder()
                 .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -171,6 +176,8 @@ impl UploadManager {
                 vk::DependencyInfo::builder().image_memory_barriers(&image_memory_barries);
 
             command_buffer.pipeline_barrier2(*dependency_info);
-        });
+        })?;
+
+        Ok(())
     }
 }

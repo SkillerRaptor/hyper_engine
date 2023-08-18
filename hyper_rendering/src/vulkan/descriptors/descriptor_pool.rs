@@ -7,6 +7,7 @@
 use crate::vulkan::core::{device::Device, instance::Instance};
 
 use ash::vk;
+use color_eyre::Result;
 use smallvec::SmallVec;
 use std::rc::Rc;
 
@@ -26,21 +27,21 @@ impl DescriptorPool {
         vk::DescriptorType::SAMPLER,
     ];
 
-    pub(crate) fn new(instance: &Instance, device: Rc<Device>) -> Self {
-        let handle = Self::create_descriptor_pool(instance, &device);
+    pub(crate) fn new(instance: &Instance, device: Rc<Device>) -> Result<Self> {
+        let handle = Self::create_descriptor_pool(instance, &device)?;
         let limits = Self::find_limits(instance, &device);
-        let layouts = Self::create_descriptor_set_layouts(&device, &limits);
+        let layouts = Self::create_descriptor_set_layouts(&device, &limits)?;
 
-        Self {
+        Ok(Self {
             limits,
             layouts,
             handle,
 
             device,
-        }
+        })
     }
 
-    fn create_descriptor_pool(instance: &Instance, device: &Device) -> vk::DescriptorPool {
+    fn create_descriptor_pool(instance: &Instance, device: &Device) -> Result<vk::DescriptorPool> {
         let pool_sizes = Self::collect_descriptor_pool_sizes(instance, device);
 
         let create_info = vk::DescriptorPoolCreateInfo::builder()
@@ -48,14 +49,9 @@ impl DescriptorPool {
             .max_sets(Self::DESCRIPTOR_TYPES.len() as u32)
             .pool_sizes(&pool_sizes);
 
-        let handle = unsafe {
-            device
-                .handle()
-                .create_descriptor_pool(&create_info, None)
-                .expect("failed to create descriptor pool")
-        };
+        let handle = unsafe { device.handle().create_descriptor_pool(&create_info, None) }?;
 
-        handle
+        Ok(handle)
     }
 
     fn collect_descriptor_pool_sizes(
@@ -123,7 +119,7 @@ impl DescriptorPool {
     fn create_descriptor_set_layouts(
         device: &Device,
         limits: &[u32],
-    ) -> SmallVec<[vk::DescriptorSetLayout; 4]> {
+    ) -> Result<SmallVec<[vk::DescriptorSetLayout; 4]>> {
         let mut layouts = SmallVec::new();
 
         for (i, descriptor_type) in Self::DESCRIPTOR_TYPES.iter().enumerate() {
@@ -151,13 +147,12 @@ impl DescriptorPool {
                 device
                     .handle()
                     .create_descriptor_set_layout(&create_info, None)
-                    .expect("failed to create descriptor set layout")
-            };
+            }?;
 
             layouts.push(layout);
         }
 
-        layouts
+        Ok(layouts)
     }
 
     pub(crate) fn layouts(&self) -> &[vk::DescriptorSetLayout] {

@@ -22,6 +22,7 @@ use crate::vulkan::{
 use hyper_platform::window::Window;
 
 use ash::{extensions::khr, vk};
+use color_eyre::Result;
 use std::{cell::RefCell, rc::Rc};
 
 pub(crate) struct Swapchain {
@@ -51,9 +52,9 @@ impl Swapchain {
         surface: &Surface,
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
-    ) -> Self {
+    ) -> Result<Self> {
         let swapchain_support_details =
-            SwapchainSupportDetails::new(surface, device.physical_device());
+            SwapchainSupportDetails::new(surface, device.physical_device())?;
 
         let capabilities = swapchain_support_details.capabilities();
 
@@ -67,7 +68,7 @@ impl Swapchain {
         }
 
         let queue_family_indices =
-            QueueFamilyIndices::new(instance, surface, device.physical_device());
+            QueueFamilyIndices::new(instance, surface, device.physical_device())?;
         let queue_families = [
             queue_family_indices.graphics_family().unwrap(),
             queue_family_indices.present_family().unwrap(),
@@ -98,17 +99,9 @@ impl Swapchain {
 
         let loader = khr::Swapchain::new(instance.handle(), device.handle());
 
-        let handle = unsafe {
-            loader
-                .create_swapchain(&create_info, None)
-                .expect("failed to create swapchain")
-        };
+        let handle = unsafe { loader.create_swapchain(&create_info, None) }?;
 
-        let images = unsafe {
-            loader
-                .get_swapchain_images(handle)
-                .expect("failed to allocate swapchain images")
-        };
+        let images = unsafe { loader.get_swapchain_images(handle) }?;
 
         let mut image_views = Vec::new();
         for image in &images {
@@ -132,20 +125,15 @@ impl Swapchain {
                 .components(*component_mapping)
                 .subresource_range(*subresource_range);
 
-            let handle = unsafe {
-                device
-                    .handle()
-                    .create_image_view(&create_info, None)
-                    .expect("failed to create swapchain image view")
-            };
+            let handle = unsafe { device.handle().create_image_view(&create_info, None) }?;
 
             image_views.push(handle);
         }
 
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
-            Self::create_depth_image(window, &device, &allocator);
+            Self::create_depth_image(window, &device, &allocator)?;
 
-        Self {
+        Ok(Self {
             depth_image_allocation: Some(depth_image_allocation),
             depth_format,
             depth_image_view,
@@ -162,7 +150,7 @@ impl Swapchain {
 
             allocator,
             device,
-        }
+        })
     }
 
     fn choose_extent(window: &Window, capabilities: vk::SurfaceCapabilitiesKHR) -> vk::Extent2D {
@@ -207,7 +195,7 @@ impl Swapchain {
         window: &Window,
         device: &Device,
         allocator: &RefCell<Allocator>,
-    ) -> (vk::Image, vk::ImageView, vk::Format, Allocation) {
+    ) -> Result<(vk::Image, vk::ImageView, vk::Format, Allocation)> {
         let framebuffer_size = window.framebuffer_size();
 
         let extent = vk::Extent3D::builder()
@@ -230,12 +218,7 @@ impl Swapchain {
             .queue_family_indices(&[])
             .initial_layout(vk::ImageLayout::UNDEFINED);
 
-        let image = unsafe {
-            device
-                .handle()
-                .create_image(&image_create_info, None)
-                .expect("failed to create depth image")
-        };
+        let image = unsafe { device.handle().create_image(&image_create_info, None) }?;
 
         let memory_requirements = unsafe { device.handle().get_image_memory_requirements(image) };
 
@@ -244,17 +227,14 @@ impl Swapchain {
             requirements: memory_requirements,
             location: MemoryLocation::GpuOnly,
             scheme: AllocationScheme::DedicatedImage(image),
-        });
+        })?;
 
         unsafe {
-            device
-                .handle()
-                .bind_image_memory(
-                    image,
-                    allocation.handle().memory(),
-                    allocation.handle().offset(),
-                )
-                .expect("failed to bind depth image")
+            device.handle().bind_image_memory(
+                image,
+                allocation.handle().memory(),
+                allocation.handle().offset(),
+            )?;
         }
 
         let subsource_range = vk::ImageSubresourceRange::builder()
@@ -275,10 +255,9 @@ impl Swapchain {
             device
                 .handle()
                 .create_image_view(&image_view_create_info, None)
-                .expect("failed to create depth image view")
-        };
+        }?;
 
-        (image, image_view, format, allocation)
+        Ok((image, image_view, format, allocation))
     }
 
     pub(crate) fn acquire_next_image(
@@ -287,7 +266,7 @@ impl Swapchain {
         instance: &Instance,
         surface: &Surface,
         present_semaphore: &BinarySemaphore,
-    ) -> Option<u32> {
+    ) -> Result<Option<u32>> {
         unsafe {
             match self.loader.acquire_next_image(
                 self.handle,
@@ -295,14 +274,12 @@ impl Swapchain {
                 present_semaphore.handle(),
                 vk::Fence::null(),
             ) {
-                Ok((index, _)) => Some(index),
+                Ok((index, _)) => Ok(Some(index)),
                 Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => {
-                    self.recreate(window, instance, surface);
-                    None
+                    self.recreate(window, instance, surface)?;
+                    Ok(None)
                 }
-                Err(_) => {
-                    panic!("failed to acquire next swapchain image");
-                }
+                Err(error) => Err(error.into()),
             }
         }
     }
@@ -315,7 +292,7 @@ impl Swapchain {
         queue: vk::Queue,
         render_semaphore: &BinarySemaphore,
         swapchain_image_index: u32,
-    ) {
+    ) -> Result<()> {
         let swapchains = &[self.handle];
         let wait_semaphores = &[render_semaphore.handle()];
         let image_indices = &[swapchain_image_index];
@@ -329,27 +306,34 @@ impl Swapchain {
             let recreate = match self.loader.queue_present(queue, &present_info) {
                 Ok(recreate) => recreate,
                 Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => true,
-                Err(_) => panic!("unhandled error"),
+                Err(error) => return Err(error.into()),
             };
 
             if recreate {
-                self.recreate(window, instance, surface);
+                self.recreate(window, instance, surface)?;
             }
         }
+
+        Ok(())
     }
 
     // TODO: Improve this by abstracting into functions and avoid repition
-    pub(crate) fn recreate(&mut self, window: &Window, instance: &Instance, surface: &Surface) {
+    pub(crate) fn recreate(
+        &mut self,
+        window: &Window,
+        instance: &Instance,
+        surface: &Surface,
+    ) -> Result<()> {
         if window.framebuffer_size() == (0, 0) {
-            return;
+            return Ok(());
         }
 
-        self.device.wait_idle();
+        self.device.wait_idle()?;
 
         self.destroy();
 
         let swapchain_support_details =
-            SwapchainSupportDetails::new(surface, self.device.physical_device());
+            SwapchainSupportDetails::new(surface, self.device.physical_device())?;
 
         let capabilities = swapchain_support_details.capabilities();
 
@@ -363,7 +347,7 @@ impl Swapchain {
         }
 
         let queue_family_indices =
-            QueueFamilyIndices::new(instance, surface, self.device.physical_device());
+            QueueFamilyIndices::new(instance, surface, self.device.physical_device())?;
 
         let queue_families = [
             queue_family_indices.graphics_family().unwrap(),
@@ -393,17 +377,9 @@ impl Swapchain {
             .clipped(true)
             .old_swapchain(vk::SwapchainKHR::null());
 
-        self.handle = unsafe {
-            self.loader
-                .create_swapchain(&create_info, None)
-                .expect("failed to create swapchain")
-        };
+        self.handle = unsafe { self.loader.create_swapchain(&create_info, None) }?;
 
-        self.images = unsafe {
-            self.loader
-                .get_swapchain_images(self.handle)
-                .expect("failed to allocate swapchain images")
-        };
+        self.images = unsafe { self.loader.get_swapchain_images(self.handle) }?;
 
         self.image_views = Vec::new();
         for image in &self.images {
@@ -427,12 +403,7 @@ impl Swapchain {
                 .components(*component_mapping)
                 .subresource_range(*subresource_range);
 
-            let handle = unsafe {
-                self.device
-                    .handle()
-                    .create_image_view(&create_info, None)
-                    .expect("failed to create swapchain image views")
-            };
+            let handle = unsafe { self.device.handle().create_image_view(&create_info, None) }?;
 
             self.image_views.push(handle);
         }
@@ -441,12 +412,14 @@ impl Swapchain {
         self.format = surface_format.format;
 
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
-            Self::create_depth_image(window, &self.device, &self.allocator);
+            Self::create_depth_image(window, &self.device, &self.allocator)?;
 
         self.depth_image = depth_image;
         self.depth_image_view = depth_image_view;
         self.depth_format = depth_format;
         self.depth_image_allocation = Some(depth_image_allocation);
+
+        Ok(())
     }
 
     fn destroy(&mut self) {
@@ -456,7 +429,8 @@ impl Swapchain {
                 .destroy_image_view(self.depth_image_view, None);
             self.allocator
                 .borrow_mut()
-                .free(self.depth_image_allocation.take().unwrap());
+                .free(self.depth_image_allocation.take().unwrap())
+                .unwrap();
 
             self.device.handle().destroy_image(self.depth_image, None);
 

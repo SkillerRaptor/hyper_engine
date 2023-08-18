@@ -10,6 +10,7 @@ use hyper_math::vector::Vec2f;
 use hyper_platform::{event::Event, event_loop::EventLoop, window::Window};
 use hyper_rendering::render_context::{Frame, RenderContext};
 
+use color_eyre::{eyre::eyre, Result};
 use std::time::Instant;
 
 pub struct Application {
@@ -24,7 +25,13 @@ pub struct Application {
 }
 
 impl Application {
-    fn new(game: Box<dyn Game>, title: String, width: u32, height: u32, resizable: bool) -> Self {
+    fn new(
+        game: Box<dyn Game>,
+        title: String,
+        width: u32,
+        height: u32,
+        resizable: bool,
+    ) -> Result<Self> {
         let start_time = Instant::now();
 
         let event_loop = EventLoop::default();
@@ -33,16 +40,16 @@ impl Application {
             .width(width)
             .height(height)
             .resizable(resizable)
-            .build(&event_loop);
+            .build(&event_loop)?;
 
-        let render_context = RenderContext::new(&event_loop, &window);
+        let render_context = RenderContext::new(&event_loop, &window)?;
 
         log::info!(
             "Application started in {:.4} seconds",
             start_time.elapsed().as_secs_f32()
         );
 
-        Self {
+        Ok(Self {
             frame_id: 1,
 
             game,
@@ -50,10 +57,10 @@ impl Application {
             render_context,
             window,
             event_loop,
-        }
+        })
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self) -> Result<()> {
         // Fixed at 60 frames per second
         let mut time = 0.0;
         let delta_time = 1.0 / 60.0;
@@ -81,7 +88,8 @@ impl Application {
             Event::RenderFrame => {
                 // Render Game
                 self.render_context
-                    .begin(&self.window, self.frame_id as u64);
+                    .begin(&self.window, self.frame_id as u64)
+                    .unwrap();
 
                 {
                     let frame = Frame {
@@ -103,7 +111,7 @@ impl Application {
                         unused_5: Vec2f::default(),
                     };
 
-                    self.render_context.update_frame(frame);
+                    self.render_context.update_frame(frame).unwrap();
                 }
 
                 {
@@ -122,12 +130,15 @@ impl Application {
                     self.game.render_gui(self.render_context.egui_context());
 
                     let output = self.render_context.end_gui(&self.window);
-                    self.render_context.submit_gui(&self.window, output);
+
+                    self.render_context
+                        .submit_gui(&self.window, output)
+                        .unwrap();
                 }
 
-                self.render_context.end();
+                self.render_context.end().unwrap();
 
-                self.render_context.submit(&self.window);
+                self.render_context.submit(&self.window).unwrap();
 
                 self.frame_id += 1;
             }
@@ -143,12 +154,14 @@ impl Application {
                     return;
                 }
 
-                self.render_context.resize(&self.window);
+                self.render_context.resize(&self.window).unwrap();
             }
             _ => {}
         });
 
-        self.render_context.wait_idle();
+        self.render_context.wait_idle()?;
+
+        Ok(())
     }
 
     pub fn builder() -> ApplicationBuilder {
@@ -194,11 +207,13 @@ impl ApplicationBuilder {
         self
     }
 
-    pub fn build(self, game: Box<dyn Game>) -> Application {
+    pub fn build(self, game: Box<dyn Game>) -> Result<Application> {
         let Some(title) = self.title else {
-            panic!("field `title` is uninitialized");
+            return Err(eyre!("field `title` is uninitialized"));
         };
 
-        Application::new(game, title, self.width, self.height, self.resizable)
+        let application = Application::new(game, title, self.width, self.height, self.resizable)?;
+
+        Ok(application)
     }
 }

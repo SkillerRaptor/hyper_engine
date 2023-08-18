@@ -12,57 +12,55 @@ use crate::vulkan::{
 };
 
 use ash::vk;
+use color_eyre::Result;
 use std::{mem, rc::Rc, slice};
 
 pub(crate) struct CommandBuffer {
     handle: vk::CommandBuffer,
+
     device: Rc<Device>,
 }
 
 impl CommandBuffer {
-    pub(crate) fn new(device: Rc<Device>, command_pool: &CommandPool) -> Self {
+    pub(crate) fn new(device: Rc<Device>, command_pool: &CommandPool) -> Result<Self> {
         let allocate_info = vk::CommandBufferAllocateInfo::builder()
             .command_pool(command_pool.handle())
             .command_buffer_count(1)
             .level(vk::CommandBufferLevel::PRIMARY);
 
-        let handle = unsafe {
-            device
-                .handle()
-                .allocate_command_buffers(&allocate_info)
-                .expect("failed to allocate command buffer")
-        }[0];
+        let handle = unsafe { device.handle().allocate_command_buffers(&allocate_info) }?[0];
 
-        Self { handle, device }
+        Ok(Self { handle, device })
     }
 
-    pub(crate) fn begin(&self, usage_flags: vk::CommandBufferUsageFlags) {
+    pub(crate) fn begin(&self, usage_flags: vk::CommandBufferUsageFlags) -> Result<()> {
         let command_buffer_begin_info = vk::CommandBufferBeginInfo::builder().flags(usage_flags);
 
         unsafe {
             self.device
                 .handle()
-                .begin_command_buffer(self.handle, &command_buffer_begin_info)
-                .expect("failed to begin command buffer");
+                .begin_command_buffer(self.handle, &command_buffer_begin_info)?;
         }
+
+        Ok(())
     }
 
-    pub(crate) fn end(&self) {
+    pub(crate) fn end(&self) -> Result<()> {
+        unsafe {
+            self.device.handle().end_command_buffer(self.handle)?;
+        }
+
+        Ok(())
+    }
+
+    pub(crate) fn reset(&self) -> Result<()> {
         unsafe {
             self.device
                 .handle()
-                .end_command_buffer(self.handle)
-                .expect("failed to end command buffer");
+                .reset_command_buffer(self.handle, vk::CommandBufferResetFlags::from_raw(0))?;
         }
-    }
 
-    pub(crate) fn reset(&self) {
-        unsafe {
-            self.device
-                .handle()
-                .reset_command_buffer(self.handle, vk::CommandBufferResetFlags::from_raw(0))
-                .expect("failed to reset command buffer")
-        }
+        Ok(())
     }
 
     pub(crate) fn begin_rendering(&self, rendering_info: vk::RenderingInfo) {

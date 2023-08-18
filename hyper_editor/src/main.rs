@@ -14,15 +14,16 @@ use crate::editor::Editor;
 
 use hyper_engine::application::ApplicationBuilder;
 
+use color_eyre::Result;
 use logger::Verbosity;
 
-fn main() {
-    color_eyre::install().unwrap();
+fn main() -> Result<()> {
+    color_eyre::install()?;
 
     if cfg!(debug_assertions) {
-        logger::init(Verbosity::Debug);
+        logger::init(Verbosity::Debug)?;
     } else {
-        logger::init(Verbosity::Info);
+        logger::init(Verbosity::Info)?;
     }
 
     ApplicationBuilder::new()
@@ -30,6 +31,8 @@ fn main() {
         .width(1280)
         .height(720)
         .resizable(true)
-        .build(Box::new(Editor::new()))
-        .run();
+        .build(Box::new(Editor::new()))?
+        .run()?;
+
+    Ok(())
 }

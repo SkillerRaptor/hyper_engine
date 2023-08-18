@@ -11,6 +11,7 @@ use crate::vulkan::{
 };
 
 use ash::vk;
+use color_eyre::Result;
 use std::{ffi::CStr, rc::Rc};
 
 pub(crate) struct ComputePipeline {
@@ -20,7 +21,7 @@ pub(crate) struct ComputePipeline {
 }
 
 impl ComputePipeline {
-    pub(crate) fn new(device: Rc<Device>, create_info: ComputePipelineCreateInfo) -> Self {
+    pub(crate) fn new(device: Rc<Device>, create_info: ComputePipelineCreateInfo) -> Result<Self> {
         let ComputePipelineCreateInfo { layout, shader } = create_info;
 
         let entry_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
@@ -37,13 +38,15 @@ impl ComputePipeline {
             .base_pipeline_index(0);
 
         let handle = unsafe {
-            device
-                .handle()
-                .create_compute_pipelines(vk::PipelineCache::null(), &[*create_info], None)
-                .expect("failed to create compute pipeline")
-        }[0];
+            device.handle().create_compute_pipelines(
+                vk::PipelineCache::null(),
+                &[*create_info],
+                None,
+            )
+        }
+        .map_err(|error| error.1)?[0];
 
-        Self { handle, device }
+        Ok(Self { handle, device })
     }
 }
 

@@ -17,6 +17,7 @@ use crate::{
 use hyper_math::vector::Vec4f;
 
 use ash::vk;
+use color_eyre::Result;
 use std::{cell::RefCell, mem, rc::Rc};
 
 // NOTE: Using Vec4f to avoid alignment issues
@@ -48,18 +49,18 @@ impl Mesh {
         upload_manager: Rc<RefCell<UploadManager>>,
         vertices: Vec<Vertex>,
         indices: Option<Vec<u32>>,
-    ) -> Self {
+    ) -> Result<Self> {
         let vertex_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
             mem::size_of::<Vertex>() * vertices.len(),
             vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
             MemoryLocation::GpuOnly,
-        );
+        )?;
 
         upload_manager
             .borrow_mut()
-            .upload_buffer(&vertices, &vertex_buffer);
+            .upload_buffer(&vertices, &vertex_buffer)?;
 
         let vertex_buffer_handle = descriptor_manager
             .borrow_mut()
@@ -72,18 +73,18 @@ impl Mesh {
                 mem::size_of::<u32>() * indices.len(),
                 vk::BufferUsageFlags::INDEX_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
                 MemoryLocation::GpuOnly,
-            );
+            )?;
 
             upload_manager
                 .borrow_mut()
-                .upload_buffer(&indices, &index_buffer);
+                .upload_buffer(&indices, &index_buffer)?;
 
             (Some(index_buffer), indices.len())
         } else {
             (None, 0)
         };
 
-        Self {
+        Ok(Self {
             index_buffer,
             indices_count,
 
@@ -92,7 +93,7 @@ impl Mesh {
             vertices,
 
             descriptor_manager,
-        }
+        })
     }
 
     // TODO: Move this into asset manager and model class
@@ -102,9 +103,8 @@ impl Mesh {
         descriptor_manager: Rc<RefCell<DescriptorManager>>,
         upload_manager: Rc<RefCell<UploadManager>>,
         mesh_file: &str,
-    ) -> Self {
-        let (models, _) = tobj::load_obj(mesh_file, &tobj::GPU_LOAD_OPTIONS)
-            .unwrap_or_else(|_| panic!("failed to load model file `{}`", mesh_file));
+    ) -> Result<Self> {
+        let (models, _) = tobj::load_obj(mesh_file, &tobj::GPU_LOAD_OPTIONS)?;
 
         let mut vertices = Vec::new();
         let mut indices = Vec::new();

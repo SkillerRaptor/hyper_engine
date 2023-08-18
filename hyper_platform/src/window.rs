@@ -7,6 +7,7 @@
 use crate::event_loop::EventLoop;
 
 use ash::{vk, Entry, Instance};
+use color_eyre::{eyre::eyre, Result};
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
 use winit::{dpi::LogicalSize, window};
 
@@ -21,23 +22,22 @@ impl Window {
         width: u32,
         height: u32,
         resizable: bool,
-    ) -> Self {
+    ) -> Result<Self> {
         let window = window::WindowBuilder::new()
-            .with_title(&title)
+            .with_title(title)
             .with_inner_size(LogicalSize::new(width, height))
             .with_resizable(resizable)
-            .build(event_loop.internal())
-            .unwrap_or_else(|_| panic!("failed to create window `{}`", title));
+            .build(event_loop.internal())?;
 
-        Self { internal: window }
+        Ok(Self { internal: window })
     }
 
     pub fn request_redraw(&self) {
         self.internal.request_redraw();
     }
 
-    pub fn create_surface(&self, entry: &Entry, instance: &Instance) -> vk::SurfaceKHR {
-        unsafe {
+    pub fn create_surface(&self, entry: &Entry, instance: &Instance) -> Result<vk::SurfaceKHR> {
+        let surface = unsafe {
             ash_window::create_surface(
                 entry,
                 instance,
@@ -45,14 +45,15 @@ impl Window {
                 self.internal.raw_window_handle(),
                 None,
             )
-            .expect("failed to create window surface")
-        }
+        }?;
+
+        Ok(surface)
     }
 
-    pub fn required_extensions(&self) -> Vec<*const i8> {
-        ash_window::enumerate_required_extensions(self.internal.raw_display_handle())
-            .expect("failed to query required window extensions")
-            .to_vec()
+    pub fn required_extensions(&self) -> Result<Vec<*const i8>> {
+        let extensions =
+            ash_window::enumerate_required_extensions(self.internal.raw_display_handle())?;
+        Ok(extensions.to_vec())
     }
 
     pub fn title(&self) -> String {
@@ -111,21 +112,21 @@ impl WindowBuilder {
         self
     }
 
-    pub fn build(self, event_loop: &EventLoop) -> Window {
+    pub fn build(self, event_loop: &EventLoop) -> Result<Window> {
         let Some(title) = self.title else {
-            panic!("field `title` is uninitialized");
+            return Err(eyre!("field `title` is uninitialized"));
         };
 
         let Some(width) = self.width else {
-            panic!("field `width` is uninitialized");
+            return Err(eyre!("field `width` is uninitialized"));
         };
 
         let Some(height) = self.height else {
-            panic!("field `height` is uninitialized");
+            return Err(eyre!("field `height` is uninitialized"));
         };
 
         let Some(resizable) = self.resizable else {
-            panic!("field `resizable` is uninitialized");
+            return Err(eyre!("field `resizable` is uninitialized"));
         };
 
         Window::new(event_loop, title, width, height, resizable)

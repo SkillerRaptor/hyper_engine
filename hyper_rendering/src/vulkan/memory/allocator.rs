@@ -7,6 +7,7 @@
 use crate::vulkan::core::{device::Device, instance::Instance};
 
 use ash::vk;
+use color_eyre::Result;
 use gpu_allocator::{vulkan, AllocatorDebugSettings};
 
 pub(crate) struct Allocator {
@@ -18,7 +19,7 @@ impl Allocator {
         instance: &Instance,
         device: &Device,
         create_info: AllocatorCreateInfo,
-    ) -> Self {
+    ) -> Result<Self> {
         let AllocatorCreateInfo {
             log_leaks_on_shutdown,
         } = create_info;
@@ -40,13 +41,12 @@ impl Allocator {
             buffer_device_address: false,
         };
 
-        let handle =
-            vulkan::Allocator::new(&create_info).expect("failed to create vulkan allocator");
+        let handle = vulkan::Allocator::new(&create_info)?;
 
-        Self { handle }
+        Ok(Self { handle })
     }
 
-    pub(crate) fn allocate(&mut self, create_info: AllocationCreateInfo) -> Allocation {
+    pub(crate) fn allocate(&mut self, create_info: AllocationCreateInfo) -> Result<Allocation> {
         let AllocationCreateInfo {
             label,
             requirements,
@@ -79,18 +79,15 @@ impl Allocator {
             linear: true,
         };
 
-        let allocation = self
-            .handle
-            .allocate(&allocation_info)
-            .expect("failed to allocate vulkan memory");
+        let allocation = self.handle.allocate(&allocation_info)?;
 
-        Allocation { handle: allocation }
+        Ok(Allocation { handle: allocation })
     }
 
-    pub(crate) fn free(&mut self, allocation: Allocation) {
-        self.handle
-            .free(allocation.handle)
-            .expect("failed to free vulkan memory");
+    pub(crate) fn free(&mut self, allocation: Allocation) -> Result<()> {
+        self.handle.free(allocation.handle)?;
+
+        Ok(())
     }
 }
 

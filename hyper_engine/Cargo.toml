@@ -18,6 +18,6 @@ hyper_physics = { path = "../hyper_physics" }
 hyper_platform = { path = "../hyper_platform" }
 hyper_rendering = { path = "../hyper_rendering" }
 
+color-eyre = "0.6"
 egui = "0.22"
 log = "0.4"
-thiserror = "1.0"

@@ -7,26 +7,23 @@
 use crate::vulkan::core::device::Device;
 
 use ash::vk;
+use color_eyre::Result;
 use std::rc::Rc;
 
 pub(crate) struct BinarySemaphore {
     handle: vk::Semaphore,
+
     device: Rc<Device>,
 }
 
 impl BinarySemaphore {
-    pub(crate) fn new(device: Rc<Device>) -> Self {
+    pub(crate) fn new(device: Rc<Device>) -> Result<Self> {
         let create_info =
             vk::SemaphoreCreateInfo::builder().flags(vk::SemaphoreCreateFlags::empty());
 
-        let handle = unsafe {
-            device
-                .handle()
-                .create_semaphore(&create_info, None)
-                .expect("failed to create binary semaphore")
-        };
+        let handle = unsafe { device.handle().create_semaphore(&create_info, None) }?;
 
-        Self { handle, device }
+        Ok(Self { handle, device })
     }
 
     pub(crate) fn handle(&self) -> vk::Semaphore {

@@ -18,12 +18,14 @@ use crate::vulkan::{
 };
 
 use ash::{extensions::khr::Swapchain, vk, Device as VulkanDevice};
+use color_eyre::{eyre::eyre, Result};
 use std::{collections::HashSet, ffi::CStr, str};
 
 pub(crate) mod queue_family_indices {
     use crate::vulkan::core::{instance::Instance, surface::Surface};
 
     use ash::vk;
+    use color_eyre::Result;
 
     #[derive(Clone, Copy, Debug, Default)]
     pub(crate) struct QueueFamilyIndices {
@@ -36,7 +38,7 @@ pub(crate) mod queue_family_indices {
             instance: &Instance,
             surface: &Surface,
             physical_device: vk::PhysicalDevice,
-        ) -> Self {
+        ) -> Result<Self> {
             let physical_device_queue_family_properties = unsafe {
                 instance
                     .handle()
@@ -55,14 +57,11 @@ pub(crate) mod queue_family_indices {
                 }
 
                 if unsafe {
-                    surface
-                        .loader()
-                        .get_physical_device_surface_support(
-                            physical_device,
-                            i as u32,
-                            surface.handle(),
-                        )
-                        .expect("failed to query physical device surface support")
+                    surface.loader().get_physical_device_surface_support(
+                        physical_device,
+                        i as u32,
+                        surface.handle(),
+                    )?
                 } {
                     queue_family_indices.present_family = Some(i as u32);
                 }
@@ -72,7 +71,7 @@ pub(crate) mod queue_family_indices {
                 }
             }
 
-            queue_family_indices
+            Ok(queue_family_indices)
         }
 
         #[inline(always)]
@@ -96,6 +95,7 @@ pub(crate) mod swapchain_support_details {
     use crate::vulkan::core::surface::Surface;
 
     use ash::vk;
+    use color_eyre::Result;
 
     #[derive(Clone, Debug, Default)]
     pub(crate) struct SwapchainSupportDetails {
@@ -105,33 +105,30 @@ pub(crate) mod swapchain_support_details {
     }
 
     impl SwapchainSupportDetails {
-        pub(crate) fn new(surface: &Surface, physical_device: vk::PhysicalDevice) -> Self {
+        pub(crate) fn new(surface: &Surface, physical_device: vk::PhysicalDevice) -> Result<Self> {
             let capabilities = unsafe {
                 surface
                     .loader()
                     .get_physical_device_surface_capabilities(physical_device, surface.handle())
-                    .expect("failed to query physical device surface capabilities")
-            };
+            }?;
 
             let formats = unsafe {
                 surface
                     .loader()
                     .get_physical_device_surface_formats(physical_device, surface.handle())
-                    .expect("failed to query physical device surface formats")
-            };
+            }?;
 
             let present_modes = unsafe {
                 surface
                     .loader()
                     .get_physical_device_surface_present_modes(physical_device, surface.handle())
-                    .expect("failed to query physical device surface present modes")
-            };
+            }?;
 
-            Self {
+            Ok(Self {
                 capabilities,
                 formats,
                 present_modes,
-            }
+            })
         }
 
         #[inline(always)]
@@ -162,41 +159,36 @@ pub(crate) struct Device {
 impl Device {
     const EXTENSIONS: [&'static CStr; 1] = [Swapchain::name()];
 
-    pub(crate) fn new(instance: &Instance, surface: &Surface) -> Self {
-        let physical_device = Self::pick_physical_device(instance, surface);
-        let handle = Self::create_device(instance, surface, physical_device);
+    pub(crate) fn new(instance: &Instance, surface: &Surface) -> Result<Self> {
+        let physical_device = Self::pick_physical_device(instance, surface)?;
+        let handle = Self::create_device(instance, surface, physical_device)?;
 
-        let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device);
+        let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
         let graphics_queue =
             unsafe { handle.get_device_queue(queue_family_indices.graphics_family().unwrap(), 0) };
         let present_queue =
             unsafe { handle.get_device_queue(queue_family_indices.present_family().unwrap(), 0) };
 
-        Self {
+        Ok(Self {
             present_queue,
             graphics_queue,
             handle,
             physical_device,
-        }
+        })
     }
 
-    fn pick_physical_device(instance: &Instance, surface: &Surface) -> vk::PhysicalDevice {
-        let physical_devices = unsafe {
-            instance
-                .handle()
-                .enumerate_physical_devices()
-                .expect("failed to enumerate phyiscal devices")
-        };
+    fn pick_physical_device(instance: &Instance, surface: &Surface) -> Result<vk::PhysicalDevice> {
+        let physical_devices = unsafe { instance.handle().enumerate_physical_devices() }?;
 
         let mut chosen_physical_device = None;
         for physical_device in physical_devices {
-            if Self::check_physical_device_suitability(instance, surface, physical_device) {
+            if Self::check_physical_device_suitability(instance, surface, physical_device)? {
                 chosen_physical_device = Some(physical_device);
             }
         }
 
         if chosen_physical_device.is_none() {
-            panic!("failed to find vulkan capable physical device");
+            return Err(eyre!("failed to find vulkan capable physical device"));
         }
 
         let physical_device = chosen_physical_device.unwrap();
@@ -226,41 +218,43 @@ impl Device {
         log::info!("  Name: {}", device_name);
         log::info!("  Type: {}", device_type);
 
-        physical_device
+        Ok(physical_device)
     }
 
     fn check_physical_device_suitability(
         instance: &Instance,
         surface: &Surface,
         physical_device: vk::PhysicalDevice,
-    ) -> bool {
-        let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device);
+    ) -> Result<bool> {
+        let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
 
-        let extensions_supported = Self::check_extension_support(instance, physical_device);
+        let extensions_supported = Self::check_extension_support(instance, physical_device)?;
 
         let features_supported = Self::check_feature_support(instance, physical_device);
 
         let swapchain_adequate = if extensions_supported {
-            let swapchain_support_details = SwapchainSupportDetails::new(surface, physical_device);
+            let swapchain_support_details = SwapchainSupportDetails::new(surface, physical_device)?;
             !swapchain_support_details.formats().is_empty()
                 && !swapchain_support_details.present_modes().is_empty()
         } else {
             false
         };
 
-        queue_family_indices.is_complete()
+        Ok(queue_family_indices.is_complete()
             && extensions_supported
             && features_supported
-            && swapchain_adequate
+            && swapchain_adequate)
     }
 
-    fn check_extension_support(instance: &Instance, physical_device: vk::PhysicalDevice) -> bool {
+    fn check_extension_support(
+        instance: &Instance,
+        physical_device: vk::PhysicalDevice,
+    ) -> Result<bool> {
         let extension_properties = unsafe {
             instance
                 .handle()
                 .enumerate_device_extension_properties(physical_device)
-                .expect("failed to enumerate logical device extension properties")
-        };
+        }?;
 
         let extensions = extension_properties
             .iter()
@@ -271,7 +265,7 @@ impl Device {
             .iter()
             .all(|&extension| extensions.contains(extension));
 
-        available
+        Ok(available)
     }
 
     fn check_feature_support(instance: &Instance, physical_device: vk::PhysicalDevice) -> bool {
@@ -313,8 +307,8 @@ impl Device {
         instance: &Instance,
         surface: &Surface,
         physical_device: vk::PhysicalDevice,
-    ) -> VulkanDevice {
-        let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device);
+    ) -> Result<VulkanDevice> {
+        let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
 
         let mut unique_queue_families = HashSet::new();
         unique_queue_families.insert(queue_family_indices.graphics_family().unwrap());
@@ -370,10 +364,9 @@ impl Device {
             instance
                 .handle()
                 .create_device(physical_device, &create_info, None)
-                .expect("failed to create logical device")
-        };
+        }?;
 
-        handle
+        Ok(handle)
     }
 
     pub(crate) fn submit_render_queue(
@@ -383,7 +376,7 @@ impl Device {
         render_semaphore: &BinarySemaphore,
         submit_semaphore: &TimelineSemaphore,
         frame_id: u64,
-    ) {
+    ) -> Result<()> {
         let present_wait_semaphore_info = vk::SemaphoreSubmitInfo::builder()
             .semaphore(present_semaphore.handle())
             .value(0)
@@ -417,9 +410,10 @@ impl Device {
 
         unsafe {
             self.handle
-                .queue_submit2(self.graphics_queue, &[*submit_info], vk::Fence::null())
-                .expect("failed to submit to graphics queue");
+                .queue_submit2(self.graphics_queue, &[*submit_info], vk::Fence::null())?;
         }
+
+        Ok(())
     }
 
     pub(crate) fn submit_upload_queue(
@@ -427,7 +421,7 @@ impl Device {
         command_buffer: &CommandBuffer,
         upload_semaphore: &TimelineSemaphore,
         last_upload_value: u64,
-    ) {
+    ) -> Result<()> {
         let command_buffer_info = vk::CommandBufferSubmitInfo::builder()
             .command_buffer(command_buffer.handle())
             .device_mask(0);
@@ -454,17 +448,18 @@ impl Device {
 
         unsafe {
             self.handle
-                .queue_submit2(self.graphics_queue, &[*submit_info], vk::Fence::null())
-                .expect("failed to submit to graphics queue");
+                .queue_submit2(self.graphics_queue, &[*submit_info], vk::Fence::null())?;
         }
+
+        Ok(())
     }
 
-    pub(crate) fn wait_idle(&self) {
+    pub(crate) fn wait_idle(&self) -> Result<()> {
         unsafe {
-            self.handle
-                .device_wait_idle()
-                .expect("failed to wait for device idle");
+            self.handle.device_wait_idle()?;
         }
+
+        Ok(())
     }
 
     pub(crate) fn handle(&self) -> &ash::Device {
