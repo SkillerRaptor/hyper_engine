@@ -27,7 +27,7 @@ use crate::{
             buffer::Buffer, shader::Shader, texture::Texture, upload_manager::UploadManager,
         },
         sync::{
-            binary_semaphore::BinarySemaphore,
+            binary_semaphore::{BinarySemaphore, BinarySemaphoreCreateInfo},
             timeline_semaphore::{TimelineSemaphore, TimelineSemaphoreCreateInfo},
         },
     },
@@ -89,10 +89,22 @@ impl Renderer {
         let mut command_buffers = Vec::new();
         let mut present_semaphores = Vec::new();
         let mut render_semaphores = Vec::new();
-        for _ in 0..Self::FRAMES_IN_FLIGHT {
+        for i in 0..Self::FRAMES_IN_FLIGHT {
             let command_buffer = CommandBuffer::new(device.clone(), &command_pool)?;
-            let present_semaphore = BinarySemaphore::new(device.clone())?;
-            let render_semaphore = BinarySemaphore::new(device.clone())?;
+
+            let present_semaphore = BinarySemaphore::new(
+                device.clone(),
+                BinarySemaphoreCreateInfo {
+                    label: &format!("Present Binary Semaphore #{}", i),
+                },
+            )?;
+
+            let render_semaphore = BinarySemaphore::new(
+                device.clone(),
+                BinarySemaphoreCreateInfo {
+                    label: &format!("Render Binary Semaphore #{}", i),
+                },
+            )?;
 
             command_buffers.push(command_buffer);
             present_semaphores.push(present_semaphore);

@@ -17,11 +17,15 @@ pub(crate) struct BinarySemaphore {
 }
 
 impl BinarySemaphore {
-    pub(crate) fn new(device: Rc<Device>) -> Result<Self> {
+    pub(crate) fn new(device: Rc<Device>, create_info: BinarySemaphoreCreateInfo) -> Result<Self> {
+        let BinarySemaphoreCreateInfo { label } = create_info;
+
         let create_info =
             vk::SemaphoreCreateInfo::builder().flags(vk::SemaphoreCreateFlags::empty());
 
         let handle = unsafe { device.handle().create_semaphore(&create_info, None) }?;
+
+        device.set_object_name(vk::ObjectType::SEMAPHORE, handle, label)?;
 
         Ok(Self { handle, device })
     }
@@ -37,4 +41,8 @@ impl Drop for BinarySemaphore {
             self.device.handle().destroy_semaphore(self.handle, None);
         }
     }
+}
+
+pub(crate) struct BinarySemaphoreCreateInfo<'a> {
+    pub(crate) label: &'a str,
 }
