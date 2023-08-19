@@ -24,6 +24,7 @@ impl ComputePipeline {
     pub(crate) fn new(device: Rc<Device>, create_info: ComputePipelineCreateInfo) -> Result<Self> {
         let ComputePipelineCreateInfo {
             label,
+
             layout,
             shader,
         } = create_info;

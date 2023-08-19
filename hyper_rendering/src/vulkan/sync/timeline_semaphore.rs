@@ -23,6 +23,7 @@ impl TimelineSemaphore {
     ) -> Result<Self> {
         let TimelineSemaphoreCreateInfo {
             label,
+
             initial_value,
         } = create_info;
 

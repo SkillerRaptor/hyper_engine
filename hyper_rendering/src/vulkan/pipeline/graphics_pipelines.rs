@@ -25,11 +25,14 @@ impl GraphicsPipeline {
     pub(crate) fn new(device: Rc<Device>, create_info: GraphicsPipelineCreateInfo) -> Result<Self> {
         let GraphicsPipelineCreateInfo {
             label,
+
             layout,
             vertex_shader,
             fragment_shader,
+
             color_image_format,
             depth_image_format,
+
             input_assembly,
             rasterization_state,
             depth_stencil_state,
