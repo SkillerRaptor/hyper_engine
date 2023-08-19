@@ -22,7 +22,11 @@ pub(crate) struct ComputePipeline {
 
 impl ComputePipeline {
     pub(crate) fn new(device: Rc<Device>, create_info: ComputePipelineCreateInfo) -> Result<Self> {
-        let ComputePipelineCreateInfo { layout, shader } = create_info;
+        let ComputePipelineCreateInfo {
+            label,
+            layout,
+            shader,
+        } = create_info;
 
         let entry_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
 
@@ -46,6 +50,8 @@ impl ComputePipeline {
         }
         .map_err(|error| error.1)?[0];
 
+        device.set_object_name(vk::ObjectType::PIPELINE, handle, label)?;
+
         Ok(Self { handle, device })
     }
 }
@@ -65,7 +71,8 @@ impl Pipeline for ComputePipeline {
 }
 
 pub(crate) struct ComputePipelineCreateInfo<'a> {
-    layout: &'a PipelineLayout,
+    label: &'a str,
 
+    layout: &'a PipelineLayout,
     shader: Shader,
 }
