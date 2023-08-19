@@ -26,7 +26,10 @@ use crate::{
         resource::{
             buffer::Buffer, shader::Shader, texture::Texture, upload_manager::UploadManager,
         },
-        sync::{binary_semaphore::BinarySemaphore, timeline_semaphore::TimelineSemaphore},
+        sync::{
+            binary_semaphore::BinarySemaphore,
+            timeline_semaphore::{TimelineSemaphore, TimelineSemaphoreCreateInfo},
+        },
     },
 };
 
@@ -96,7 +99,13 @@ impl Renderer {
             render_semaphores.push(render_semaphore);
         }
 
-        let submit_semaphore = TimelineSemaphore::new(device.clone())?;
+        let submit_semaphore = TimelineSemaphore::new(
+            device.clone(),
+            TimelineSemaphoreCreateInfo {
+                label: "Submit Timeline Semaphore",
+                initial_value: 0,
+            },
+        )?;
 
         ////////////////////////////////////////////////////////////////////////
 

@@ -9,7 +9,7 @@ use crate::vulkan::{
     core::{device::Device, instance::Instance, surface::Surface},
     memory::allocator::{Allocator, MemoryLocation},
     resource::buffer::Buffer,
-    sync::timeline_semaphore::TimelineSemaphore,
+    sync::timeline_semaphore::{TimelineSemaphore, TimelineSemaphoreCreateInfo},
 };
 
 use ash::vk;
@@ -36,8 +36,15 @@ impl UploadManager {
     ) -> Result<Self> {
         let upload_command_pool = CommandPool::new(instance, surface, device.clone())?;
         let upload_command_buffer = CommandBuffer::new(device.clone(), &upload_command_pool)?;
-        let upload_semaphore = TimelineSemaphore::new(device.clone())?;
+
         let upload_value = 0;
+        let upload_semaphore = TimelineSemaphore::new(
+            device.clone(),
+            TimelineSemaphoreCreateInfo {
+                label: "Upload Timeline Semaphore",
+                initial_value: upload_value,
+            },
+        )?;
 
         Ok(Self {
             upload_semaphore,

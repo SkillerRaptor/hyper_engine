@@ -17,14 +17,24 @@ pub(crate) struct TimelineSemaphore {
 }
 
 impl TimelineSemaphore {
-    pub(crate) fn new(device: Rc<Device>) -> Result<Self> {
+    pub(crate) fn new(
+        device: Rc<Device>,
+        create_info: TimelineSemaphoreCreateInfo,
+    ) -> Result<Self> {
+        let TimelineSemaphoreCreateInfo {
+            label,
+            initial_value,
+        } = create_info;
+
         let mut type_create_info = vk::SemaphoreTypeCreateInfo::builder()
             .semaphore_type(vk::SemaphoreType::TIMELINE)
-            .initial_value(0);
+            .initial_value(initial_value);
 
         let create_info = vk::SemaphoreCreateInfo::builder().push_next(&mut type_create_info);
 
         let handle = unsafe { device.handle().create_semaphore(&create_info, None) }?;
+
+        device.set_object_name(vk::ObjectType::SEMAPHORE, handle, label)?;
 
         Ok(Self { handle, device })
     }
@@ -54,4 +64,10 @@ impl Drop for TimelineSemaphore {
             self.device.handle().destroy_semaphore(self.handle, None);
         }
     }
+}
+
+pub(crate) struct TimelineSemaphoreCreateInfo<'a> {
+    pub(crate) label: &'a str,
+
+    pub(crate) initial_value: u64,
 }
