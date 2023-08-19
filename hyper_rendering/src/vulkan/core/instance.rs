@@ -11,9 +11,9 @@ use color_eyre::Result;
 use log::Level;
 use std::ffi::{c_void, CStr, CString};
 
-struct DebugExtension {
-    handle: vk::DebugUtilsMessengerEXT,
-    loader: DebugUtils,
+pub(crate) struct DebugExtension {
+    pub(crate) handle: vk::DebugUtilsMessengerEXT,
+    pub(crate) loader: DebugUtils,
 }
 
 pub(crate) struct Instance {
@@ -167,6 +167,10 @@ impl Instance {
         let debug_extension = DebugExtension { loader, handle };
 
         Ok(Some(debug_extension))
+    }
+
+    pub(crate) fn debug_extension(&self) -> &Option<DebugExtension> {
+        &self.debug_extension
     }
 
     pub(crate) fn handle(&self) -> &VulkanInstance {

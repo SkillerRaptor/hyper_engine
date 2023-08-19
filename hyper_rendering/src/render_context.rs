@@ -56,7 +56,7 @@ pub struct RenderContext {
     _allocator: Rc<RefCell<Allocator>>,
     device: Rc<Device>,
     surface: Surface,
-    instance: Instance,
+    instance: Rc<Instance>,
     _entry: Entry,
 }
 
@@ -65,10 +65,10 @@ impl RenderContext {
         let validation_layers_requested = cfg!(debug_assertions);
 
         let entry = unsafe { Entry::load()? };
-        let instance = Instance::new(window, validation_layers_requested, &entry)?;
+        let instance = Rc::new(Instance::new(window, validation_layers_requested, &entry)?);
 
         let surface = Surface::new(window, &entry, &instance)?;
-        let device = Rc::new(Device::new(&instance, &surface)?);
+        let device = Rc::new(Device::new(instance.clone(), &surface)?);
 
         let allocator = Rc::new(RefCell::new(Allocator::new(
             &instance,

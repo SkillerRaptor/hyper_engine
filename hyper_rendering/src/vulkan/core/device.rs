@@ -19,7 +19,12 @@ use crate::vulkan::{
 
 use ash::{extensions::khr::Swapchain, vk, Device as VulkanDevice};
 use color_eyre::{eyre::eyre, Result};
-use std::{collections::HashSet, ffi::CStr, str};
+use std::{
+    collections::HashSet,
+    ffi::{CStr, CString},
+    rc::Rc,
+    str,
+};
 
 pub(crate) mod queue_family_indices {
     use crate::vulkan::core::{instance::Instance, surface::Surface};
@@ -154,16 +159,18 @@ pub(crate) struct Device {
 
     handle: VulkanDevice,
     physical_device: vk::PhysicalDevice,
+
+    instance: Rc<Instance>,
 }
 
 impl Device {
     const EXTENSIONS: [&'static CStr; 1] = [Swapchain::name()];
 
-    pub(crate) fn new(instance: &Instance, surface: &Surface) -> Result<Self> {
-        let physical_device = Self::pick_physical_device(instance, surface)?;
-        let handle = Self::create_device(instance, surface, physical_device)?;
+    pub(crate) fn new(instance: Rc<Instance>, surface: &Surface) -> Result<Self> {
+        let physical_device = Self::pick_physical_device(&instance, surface)?;
+        let handle = Self::create_device(&instance, surface, physical_device)?;
 
-        let queue_family_indices = QueueFamilyIndices::new(instance, surface, physical_device)?;
+        let queue_family_indices = QueueFamilyIndices::new(&instance, surface, physical_device)?;
         let graphics_queue =
             unsafe { handle.get_device_queue(queue_family_indices.graphics_family().unwrap(), 0) };
         let present_queue =
@@ -172,8 +179,11 @@ impl Device {
         Ok(Self {
             present_queue,
             graphics_queue,
+
             handle,
             physical_device,
+
+            instance,
         })
     }
 
@@ -457,6 +467,32 @@ impl Device {
     pub(crate) fn wait_idle(&self) -> Result<()> {
         unsafe {
             self.handle.device_wait_idle()?;
+        }
+
+        Ok(())
+    }
+
+    pub(crate) fn set_object_name(
+        &self,
+        object_type: vk::ObjectType,
+        object: impl vk::Handle,
+        name: &str,
+    ) -> Result<()> {
+        if let Some(debug_extension) = self.instance.debug_extension().as_ref() {
+            let object_name_c_string = CString::new(name)?;
+
+            let object_name = &object_name_c_string;
+
+            let name_info = vk::DebugUtilsObjectNameInfoEXT::builder()
+                .object_type(object_type)
+                .object_handle(object.as_raw())
+                .object_name(object_name);
+
+            unsafe {
+                debug_extension
+                    .loader
+                    .set_debug_utils_object_name(self.handle.handle(), &name_info)?;
+            }
         }
 
         Ok(())
