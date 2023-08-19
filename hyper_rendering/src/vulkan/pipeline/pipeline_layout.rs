@@ -20,7 +20,13 @@ pub(crate) struct PipelineLayout {
 }
 
 impl PipelineLayout {
-    pub(crate) fn new(device: Rc<Device>, descriptor_manager: &DescriptorManager) -> Result<Self> {
+    pub(crate) fn new(device: Rc<Device>, create_info: PipelineLayoutCreateInfo) -> Result<Self> {
+        let PipelineLayoutCreateInfo {
+            label,
+
+            descriptor_manager,
+        } = create_info;
+
         let bindings_offset_size = mem::size_of::<BindingsOffset>() as u32;
 
         let bindings_range = vk::PushConstantRange::builder()
@@ -34,6 +40,8 @@ impl PipelineLayout {
             .push_constant_ranges(&push_ranges);
 
         let handle = unsafe { device.handle().create_pipeline_layout(&create_info, None)? };
+
+        device.set_object_name(vk::ObjectType::PIPELINE_LAYOUT, handle, label)?;
 
         Ok(Self { handle, device })
     }
@@ -51,4 +59,10 @@ impl Drop for PipelineLayout {
                 .destroy_pipeline_layout(self.handle, None);
         }
     }
+}
+
+pub(crate) struct PipelineLayoutCreateInfo<'a> {
+    pub(crate) label: &'a str,
+
+    pub(crate) descriptor_manager: &'a DescriptorManager,
 }

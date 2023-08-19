@@ -11,7 +11,7 @@ use crate::{
         core::{device::Device, instance::Instance, surface::Surface, swapchain::Swapchain},
         descriptors::descriptor_manager::DescriptorManager,
         memory::allocator::{Allocator, AllocatorCreateInfo},
-        pipeline::pipeline_layout::PipelineLayout,
+        pipeline::pipeline_layout::{PipelineLayout, PipelineLayoutCreateInfo},
         resource::upload_manager::UploadManager,
     },
 };
@@ -98,7 +98,13 @@ impl RenderContext {
             allocator.clone(),
         )?));
 
-        let pipeline_layout = PipelineLayout::new(device.clone(), &descriptor_manager.borrow())?;
+        let pipeline_layout = PipelineLayout::new(
+            device.clone(),
+            PipelineLayoutCreateInfo {
+                label: "Engine Pipeline Layout",
+                descriptor_manager: &descriptor_manager.borrow(),
+            },
+        )?;
 
         let renderer = Renderer::new(
             &instance,
