@@ -24,6 +24,7 @@ pub(crate) struct GraphicsPipeline {
 impl GraphicsPipeline {
     pub(crate) fn new(device: Rc<Device>, create_info: GraphicsPipelineCreateInfo) -> Result<Self> {
         let GraphicsPipelineCreateInfo {
+            label,
             layout,
             vertex_shader,
             fragment_shader,
@@ -177,6 +178,8 @@ impl GraphicsPipeline {
         }
         .map_err(|error| error.1)?[0];
 
+        device.set_object_name(vk::ObjectType::PIPELINE, handle, label)?;
+
         Ok(Self { handle, device })
     }
 }
@@ -196,8 +199,9 @@ impl Pipeline for GraphicsPipeline {
 }
 
 pub(crate) struct GraphicsPipelineCreateInfo<'a> {
-    pub(crate) layout: &'a PipelineLayout,
+    pub(crate) label: &'a str,
 
+    pub(crate) layout: &'a PipelineLayout,
     pub(crate) vertex_shader: Option<Shader>,
     pub(crate) fragment_shader: Option<Shader>,
 

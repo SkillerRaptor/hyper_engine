@@ -93,8 +93,9 @@ impl EguiIntegration {
         let pipeline = GraphicsPipeline::new(
             device.clone(),
             GraphicsPipelineCreateInfo {
-                layout: pipeline_layout,
+                label: "Egui Graphics Pipeline",
 
+                layout: pipeline_layout,
                 vertex_shader: Some(vertex_shader),
                 fragment_shader: Some(fragment_shader),
 

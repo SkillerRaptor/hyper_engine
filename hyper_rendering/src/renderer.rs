@@ -130,6 +130,8 @@ impl Renderer {
         let default_pipeline = GraphicsPipeline::new(
             device.clone(),
             GraphicsPipelineCreateInfo {
+                label: "Default Graphics Pipeline",
+
                 layout: pipeline_layout,
 
                 vertex_shader: Some(vertex_shader),
@@ -178,8 +180,9 @@ impl Renderer {
         let textured_pipeline = GraphicsPipeline::new(
             device.clone(),
             GraphicsPipelineCreateInfo {
-                layout: pipeline_layout,
+                label: "Textured Graphics Pipeline",
 
+                layout: pipeline_layout,
                 vertex_shader: Some(vertex_shader),
                 fragment_shader: Some(fragment_shader),
 
