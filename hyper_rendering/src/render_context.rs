@@ -101,7 +101,8 @@ impl RenderContext {
         let pipeline_layout = PipelineLayout::new(
             device.clone(),
             PipelineLayoutCreateInfo {
-                label: "Engine Pipeline Layout",
+                label: "Pipeline Layout General",
+
                 descriptor_manager: &descriptor_manager.borrow(),
             },
         )?;

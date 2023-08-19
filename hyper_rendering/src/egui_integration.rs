@@ -93,7 +93,7 @@ impl EguiIntegration {
         let pipeline = GraphicsPipeline::new(
             device.clone(),
             GraphicsPipelineCreateInfo {
-                label: "Egui Graphics Pipeline",
+                label: "Pipeline Graphics Egui",
 
                 layout: pipeline_layout,
                 vertex_shader: Some(vertex_shader),

@@ -95,14 +95,14 @@ impl Renderer {
             let present_semaphore = BinarySemaphore::new(
                 device.clone(),
                 BinarySemaphoreCreateInfo {
-                    label: &format!("Present Binary Semaphore #{}", i),
+                    label: &format!("Semaphore Binary Present #{}", i),
                 },
             )?;
 
             let render_semaphore = BinarySemaphore::new(
                 device.clone(),
                 BinarySemaphoreCreateInfo {
-                    label: &format!("Render Binary Semaphore #{}", i),
+                    label: &format!("Semaphore Binary Render #{}", i),
                 },
             )?;
 
@@ -114,7 +114,8 @@ impl Renderer {
         let submit_semaphore = TimelineSemaphore::new(
             device.clone(),
             TimelineSemaphoreCreateInfo {
-                label: "Submit Timeline Semaphore",
+                label: "Semaphore Timeline Submit",
+
                 initial_value: 0,
             },
         )?;
@@ -130,10 +131,9 @@ impl Renderer {
         let default_pipeline = GraphicsPipeline::new(
             device.clone(),
             GraphicsPipelineCreateInfo {
-                label: "Default Graphics Pipeline",
+                label: "Pipeline Graphics Default",
 
                 layout: pipeline_layout,
-
                 vertex_shader: Some(vertex_shader),
                 fragment_shader: Some(fragment_shader),
 
@@ -180,7 +180,7 @@ impl Renderer {
         let textured_pipeline = GraphicsPipeline::new(
             device.clone(),
             GraphicsPipelineCreateInfo {
-                label: "Textured Graphics Pipeline",
+                label: "Pipeline Graphics Textured",
 
                 layout: pipeline_layout,
                 vertex_shader: Some(vertex_shader),

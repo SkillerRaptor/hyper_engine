@@ -41,7 +41,8 @@ impl UploadManager {
         let upload_semaphore = TimelineSemaphore::new(
             device.clone(),
             TimelineSemaphoreCreateInfo {
-                label: "Upload Timeline Semaphore",
+                label: "Semaphore Timeline Upload",
+
                 initial_value: upload_value,
             },
         )?;
