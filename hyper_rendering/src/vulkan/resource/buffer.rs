@@ -27,13 +27,18 @@ impl Buffer {
     pub(crate) fn new(
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
-        allocation_size: usize,
-        usage: vk::BufferUsageFlags,
-        memory_location: MemoryLocation,
+        create_info: BufferCreateInfo,
     ) -> Result<Self> {
-        let handle = Self::create_buffer(&device, allocation_size as u64, usage)?;
+        let BufferCreateInfo {
+            label,
 
-        let allocation = Self::allocate_memory(&device, &allocator, memory_location, handle)?;
+            usage,
+            size,
+            location,
+        } = create_info;
+
+        let handle = Self::create_buffer(&device, label, size, usage)?;
+        let allocation = Self::allocate_memory(&device, &allocator, label, location, handle)?;
 
         Ok(Self {
             handle,
@@ -46,33 +51,37 @@ impl Buffer {
 
     fn create_buffer(
         device: &Device,
-        allocation_size: u64,
+        label: &str,
+        size: u64,
         usage: vk::BufferUsageFlags,
     ) -> Result<vk::Buffer> {
         let create_info = vk::BufferCreateInfo::builder()
-            .size(allocation_size)
+            .size(size)
             .usage(usage)
             .sharing_mode(vk::SharingMode::EXCLUSIVE)
             .queue_family_indices(&[]);
 
-        let buffer = unsafe { device.handle().create_buffer(&create_info, None) }?;
+        let handle = unsafe { device.handle().create_buffer(&create_info, None) }?;
 
-        Ok(buffer)
+        device.set_object_name(vk::ObjectType::BUFFER, handle, label)?;
+
+        Ok(handle)
     }
 
     fn allocate_memory(
         device: &Device,
         allocator: &RefCell<Allocator>,
-        memory_location: MemoryLocation,
+        label: &str,
+        location: MemoryLocation,
         handle: vk::Buffer,
     ) -> Result<Allocation> {
-        let memory_requirements = unsafe { device.handle().get_buffer_memory_requirements(handle) };
+        let requirements = unsafe { device.handle().get_buffer_memory_requirements(handle) };
 
         // TODO: Add label
         let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
-            label: Some("<name> buffer"),
-            requirements: memory_requirements,
-            location: memory_location,
+            label: Some(label),
+            requirements,
+            location,
             scheme: AllocationScheme::DedicatedBuffer(handle),
         })?;
 
@@ -120,4 +129,12 @@ impl Drop for Buffer {
             self.device.handle().destroy_buffer(self.handle, None);
         }
     }
+}
+
+pub(crate) struct BufferCreateInfo<'a> {
+    pub(crate) label: &'a str,
+
+    pub(crate) usage: vk::BufferUsageFlags,
+    pub(crate) size: u64,
+    pub(crate) location: MemoryLocation,
 }

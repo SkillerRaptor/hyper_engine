@@ -8,7 +8,7 @@ use crate::vulkan::{
     command::{command_buffer::CommandBuffer, command_pool::CommandPool},
     core::{device::Device, instance::Instance, surface::Surface},
     memory::allocator::{Allocator, MemoryLocation},
-    resource::buffer::Buffer,
+    resource::buffer::{Buffer, BufferCreateInfo},
     sync::timeline_semaphore::{TimelineSemaphore, TimelineSemaphoreCreateInfo},
 };
 
@@ -90,9 +90,13 @@ impl UploadManager {
         let staging_buffer = Buffer::new(
             self.device.clone(),
             self.allocator.clone(),
-            buffer_size,
-            vk::BufferUsageFlags::TRANSFER_SRC,
-            MemoryLocation::CpuToGpu,
+            BufferCreateInfo {
+                label: "Buffer Staging General",
+
+                usage: vk::BufferUsageFlags::TRANSFER_SRC,
+                size: buffer_size as u64,
+                location: MemoryLocation::CpuToGpu,
+            },
         )?;
 
         staging_buffer.set_data(source)?;

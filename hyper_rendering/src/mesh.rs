@@ -10,7 +10,10 @@ use crate::{
         core::device::Device,
         descriptors::descriptor_manager::DescriptorManager,
         memory::allocator::{Allocator, MemoryLocation},
-        resource::{buffer::Buffer, upload_manager::UploadManager},
+        resource::{
+            buffer::{Buffer, BufferCreateInfo},
+            upload_manager::UploadManager,
+        },
     },
 };
 
@@ -53,9 +56,13 @@ impl Mesh {
         let vertex_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
-            mem::size_of::<Vertex>() * vertices.len(),
-            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
-            MemoryLocation::GpuOnly,
+            BufferCreateInfo {
+                label: "Buffer Vertex Mesh",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: (mem::size_of::<Vertex>() * vertices.len()) as u64,
+                location: MemoryLocation::GpuOnly,
+            },
         )?;
 
         upload_manager
@@ -70,9 +77,13 @@ impl Mesh {
             let index_buffer = Buffer::new(
                 device.clone(),
                 allocator.clone(),
-                mem::size_of::<u32>() * indices.len(),
-                vk::BufferUsageFlags::INDEX_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
-                MemoryLocation::GpuOnly,
+                BufferCreateInfo {
+                    label: "Buffer Index Mesh",
+
+                    usage: vk::BufferUsageFlags::INDEX_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                    size: (mem::size_of::<u32>() * indices.len()) as u64,
+                    location: MemoryLocation::GpuOnly,
+                },
             )?;
 
             upload_manager

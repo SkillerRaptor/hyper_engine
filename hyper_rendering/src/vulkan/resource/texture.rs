@@ -9,7 +9,10 @@ use crate::vulkan::{
     memory::allocator::{
         Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation,
     },
-    resource::{buffer::Buffer, upload_manager::UploadManager},
+    resource::{
+        buffer::{Buffer, BufferCreateInfo},
+        upload_manager::UploadManager,
+    },
 };
 
 use ash::vk;
@@ -41,9 +44,13 @@ impl Texture {
         let staging_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
-            image_size as usize,
-            vk::BufferUsageFlags::TRANSFER_SRC,
-            MemoryLocation::CpuToGpu,
+            BufferCreateInfo {
+                label: "Buffer Staging Texture",
+
+                usage: vk::BufferUsageFlags::TRANSFER_SRC,
+                size: image_size as u64,
+                location: MemoryLocation::CpuToGpu,
+            },
         )?;
 
         staging_buffer.set_data(image.as_bytes())?;

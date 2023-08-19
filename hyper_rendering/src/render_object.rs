@@ -11,7 +11,10 @@ use crate::{
         core::device::Device,
         descriptors::descriptor_manager::DescriptorManager,
         memory::allocator::{Allocator, MemoryLocation},
-        resource::{buffer::Buffer, upload_manager::UploadManager},
+        resource::{
+            buffer::{Buffer, BufferCreateInfo},
+            upload_manager::UploadManager,
+        },
     },
 };
 
@@ -55,9 +58,13 @@ impl RenderObject {
         let transform_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
-            mem::size_of::<Mat4x4f>() * transforms.len(),
-            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
-            MemoryLocation::GpuOnly,
+            BufferCreateInfo {
+                label: "Buffer Transform Render Object",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: (mem::size_of::<Mat4x4f>() * transforms.len()) as u64,
+                location: MemoryLocation::GpuOnly,
+            },
         )?;
 
         upload_manager
@@ -73,9 +80,13 @@ impl RenderObject {
         let bindings_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
-            mem::size_of::<T>(),
-            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
-            MemoryLocation::GpuOnly,
+            BufferCreateInfo {
+                label: "Buffer Bindings Render Object",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: mem::size_of::<T>() as u64,
+                location: MemoryLocation::GpuOnly,
+            },
         )?;
 
         let mut resource_handles = vec![vertex_buffer_handle, transform_handle];

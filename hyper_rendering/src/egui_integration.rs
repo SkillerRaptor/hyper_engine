@@ -22,7 +22,11 @@ use crate::{
             },
             pipeline_layout::PipelineLayout,
         },
-        resource::{buffer::Buffer, shader::Shader, upload_manager::UploadManager},
+        resource::{
+            buffer::{Buffer, BufferCreateInfo},
+            shader::Shader,
+            upload_manager::UploadManager,
+        },
     },
 };
 
@@ -142,9 +146,13 @@ impl EguiIntegration {
         let vertex_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
-            mem::size_of::<Vertex>() * 1024 * 1024,
-            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
-            MemoryLocation::GpuOnly,
+            BufferCreateInfo {
+                label: "Buffer Staging Texture",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: (mem::size_of::<Vertex>() * 1024 * 1024) as u64,
+                location: MemoryLocation::GpuOnly,
+            },
         )?;
 
         let vertex_buffer_handle = descriptor_manager
@@ -156,9 +164,13 @@ impl EguiIntegration {
         let index_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
-            mem::size_of::<u32>() * 1024 * 1024,
-            vk::BufferUsageFlags::INDEX_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
-            MemoryLocation::GpuOnly,
+            BufferCreateInfo {
+                label: "Buffer Staging Texture",
+
+                usage: vk::BufferUsageFlags::INDEX_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: (mem::size_of::<u32>() * 1024 * 1024) as u64,
+                location: MemoryLocation::GpuOnly,
+            },
         )?;
 
         ////////////////////////////////////////////////////////////////////////
@@ -166,9 +178,13 @@ impl EguiIntegration {
         let bindings_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
-            mem::size_of::<GuiBindings>(),
-            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
-            MemoryLocation::GpuOnly,
+            BufferCreateInfo {
+                label: "Buffer Staging Texture",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: mem::size_of::<GuiBindings>() as u64,
+                location: MemoryLocation::GpuOnly,
+            },
         )?;
 
         let resource_handles = vec![vertex_buffer_handle, ResourceHandle::new(0)];
@@ -272,9 +288,13 @@ impl EguiIntegration {
             let staging_buffer = Buffer::new(
                 self.device.clone(),
                 self.allocator.clone(),
-                data.len(),
-                vk::BufferUsageFlags::TRANSFER_SRC,
-                MemoryLocation::CpuToGpu,
+                BufferCreateInfo {
+                    label: "Buffer Staging Texture",
+
+                    usage: vk::BufferUsageFlags::TRANSFER_SRC,
+                    size: data.len() as u64,
+                    location: MemoryLocation::CpuToGpu,
+                },
             )?;
 
             staging_buffer.set_data(&data)?;

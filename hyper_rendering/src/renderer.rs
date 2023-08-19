@@ -24,7 +24,10 @@ use crate::{
             pipeline_layout::PipelineLayout,
         },
         resource::{
-            buffer::Buffer, shader::Shader, texture::Texture, upload_manager::UploadManager,
+            buffer::{Buffer, BufferCreateInfo},
+            shader::Shader,
+            texture::Texture,
+            upload_manager::UploadManager,
         },
         sync::{
             binary_semaphore::{BinarySemaphore, BinarySemaphoreCreateInfo},
@@ -298,9 +301,13 @@ impl Renderer {
         let projection_view_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
-            mem::size_of::<Mat4x4f>(),
-            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
-            MemoryLocation::GpuOnly,
+            BufferCreateInfo {
+                label: "Buffer Projection View",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: mem::size_of::<Mat4x4f>() as u64,
+                location: MemoryLocation::GpuOnly,
+            },
         )?;
 
         let camera_position = Vec3f::new(7.0, -15.0, -6.0);
@@ -360,9 +367,13 @@ impl Renderer {
         let frame_buffer = Buffer::new(
             device.clone(),
             allocator.clone(),
-            mem::size_of::<Frame>(),
-            vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
-            MemoryLocation::GpuOnly,
+            BufferCreateInfo {
+                label: "Buffer Frame",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: mem::size_of::<Frame>() as u64,
+                location: MemoryLocation::GpuOnly,
+            },
         )?;
 
         Ok(Self {
