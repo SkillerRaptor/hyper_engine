@@ -7,7 +7,11 @@
 use crate::game::Game;
 
 use hyper_math::vector::Vec2f;
-use hyper_platform::{event::Event, event_loop::EventLoop, window::Window};
+use hyper_platform::{
+    event::Event,
+    event_loop::EventLoop,
+    window::{Window, WindowCreateInfo},
+};
 use hyper_rendering::render_context::{Frame, RenderContext};
 
 use color_eyre::{eyre::eyre, Result};
@@ -35,12 +39,13 @@ impl Application {
         let start_time = Instant::now();
 
         let event_loop = EventLoop::default();
-        let window = Window::builder()
-            .title(&title)
-            .width(width)
-            .height(height)
-            .resizable(resizable)
-            .build(&event_loop)?;
+        let window = Window::new(WindowCreateInfo {
+            event_loop: &event_loop,
+            title: &title,
+            width,
+            height,
+            resizable,
+        })?;
 
         let render_context = RenderContext::new(&event_loop, &window)?;
 

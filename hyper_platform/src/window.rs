@@ -7,7 +7,7 @@
 use crate::event_loop::EventLoop;
 
 use ash::{vk, Entry, Instance};
-use color_eyre::{eyre::eyre, Result};
+use color_eyre::Result;
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
 use winit::{dpi::LogicalSize, window};
 
@@ -16,13 +16,15 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new(
-        event_loop: &EventLoop,
-        title: String,
-        width: u32,
-        height: u32,
-        resizable: bool,
-    ) -> Result<Self> {
+    pub fn new(create_info: WindowCreateInfo) -> Result<Self> {
+        let WindowCreateInfo {
+            event_loop,
+            title,
+            width,
+            height,
+            resizable,
+        } = create_info;
+
         let window = window::WindowBuilder::new()
             .with_title(title)
             .with_inner_size(LogicalSize::new(width, height))
@@ -68,67 +70,12 @@ impl Window {
     pub fn internal(&self) -> &window::Window {
         &self.internal
     }
-
-    pub fn builder() -> WindowBuilder {
-        WindowBuilder::default()
-    }
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct WindowBuilder {
-    title: Option<String>,
-    width: Option<u32>,
-    height: Option<u32>,
-    resizable: Option<bool>,
-}
-
-impl WindowBuilder {
-    pub fn new() -> Self {
-        Self {
-            title: None,
-            width: None,
-            height: None,
-            resizable: None,
-        }
-    }
-
-    pub fn title(mut self, title: &str) -> Self {
-        self.title = Some(title.to_owned());
-        self
-    }
-
-    pub fn width(mut self, width: u32) -> Self {
-        self.width = Some(width);
-        self
-    }
-
-    pub fn height(mut self, height: u32) -> Self {
-        self.height = Some(height);
-        self
-    }
-
-    pub fn resizable(mut self, resizable: bool) -> Self {
-        self.resizable = Some(resizable);
-        self
-    }
-
-    pub fn build(self, event_loop: &EventLoop) -> Result<Window> {
-        let Some(title) = self.title else {
-            return Err(eyre!("field `title` is uninitialized"));
-        };
-
-        let Some(width) = self.width else {
-            return Err(eyre!("field `width` is uninitialized"));
-        };
-
-        let Some(height) = self.height else {
-            return Err(eyre!("field `height` is uninitialized"));
-        };
-
-        let Some(resizable) = self.resizable else {
-            return Err(eyre!("field `resizable` is uninitialized"));
-        };
-
-        Window::new(event_loop, title, width, height, resizable)
-    }
+pub struct WindowCreateInfo<'a> {
+    pub event_loop: &'a EventLoop,
+    pub title: &'a str,
+    pub width: u32,
+    pub height: u32,
+    pub resizable: bool,
 }
