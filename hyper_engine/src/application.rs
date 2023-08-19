@@ -12,7 +12,7 @@ use hyper_platform::{
     event_loop::EventLoop,
     window::{Window, WindowCreateInfo},
 };
-use hyper_rendering::render_context::{Frame, RenderContext};
+use hyper_render::render_context::{Frame, RenderContext};
 
 use color_eyre::{eyre::eyre, Result};
 use std::time::Instant;

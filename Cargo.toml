@@ -14,7 +14,7 @@ members = [
     "hyper_math",
     "hyper_physics",
     "hyper_platform",
-    "hyper_rendering",
+    "hyper_render",
 ]
 
 [profile.dev]

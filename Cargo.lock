@@ -836,7 +836,7 @@ dependencies = [
  "hyper_math",
  "hyper_physics",
  "hyper_platform",
- "hyper_rendering",
+ "hyper_render",
  "log",
 ]
 
@@ -884,7 +884,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "hyper_rendering"
+name = "hyper_render"
 version = "0.1.0"
 dependencies = [
  "ash",

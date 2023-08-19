@@ -16,7 +16,7 @@ hyper_game = { path = "../hyper_game" }
 hyper_math = { path = "../hyper_math" }
 hyper_physics = { path = "../hyper_physics" }
 hyper_platform = { path = "../hyper_platform" }
-hyper_rendering = { path = "../hyper_rendering" }
+hyper_render = { path = "../hyper_render" }
 
 color-eyre = "0.6"
 egui = "0.22"
