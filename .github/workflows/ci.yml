@@ -46,11 +46,18 @@ jobs:
         uses: baptiste0928/cargo-install@v2
         with:
           crate: cargo-audit
+          locked: true
 
       - name: Install Cargo-Nextest
         uses: baptiste0928/cargo-install@v2
         with:
           crate: cargo-nextest
+          locked: true
+
+      - name: Install Cargo-Nextest
+        uses: baptiste0928/cargo-install@v2
+        with:
+          crate: cargo-deny
           locked: true
 
       - name: Cache
@@ -90,11 +97,11 @@ jobs:
           command: check
           args: --all-targets
 
-      - name: Cargo Audit
+      - name: Cargo Deny
         uses: actions-rs/cargo@v1
         with:
-          command: audit
-          args: --ignore RUSTSEC-2020-0071 --ignore RUSTSEC-2021-0145
+          command: deny
+          args: check
 
       - name: Cargo Test
         uses: actions-rs/cargo@v1

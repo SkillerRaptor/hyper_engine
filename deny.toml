@@ -1,0 +1,81 @@
+targets = [
+    { triple = "x86_64-unknown-linux-gnu" },
+    { triple = "x86_64-unknown-linux-musl" },
+    { triple = "x86_64-apple-darwin" },
+    { triple = "x86_64-pc-windows-msvc" },
+]
+
+all-features = false
+no-default-features = false
+feature-depth = 1
+
+[advisories]
+db-path = "~/.cargo/advisory-db"
+db-urls = ["https://github.com/rustsec/advisory-db"]
+notice = "deny"
+unmaintained = "deny"
+unsound = "deny"
+vulnerability = "deny"
+yanked = "deny"
+ignore = ["RUSTSEC-2020-0071"]
+
+[licenses]
+unlicensed = "deny"
+copyleft = "deny"
+allow-osi-fsf-free = "neither"
+default = "deny"
+confidence-threshold = 0.93
+allow = ["Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "MIT", "MPL-2.0", "ISC"]
+exceptions = [
+    { allow = [
+        "BSL-1.0",
+    ], name = "clipboard-win" },
+    { allow = [
+        "LicenseRef-UFL-1.0",
+        "OFL-1.1",
+    ], name = "epaint" },
+    { allow = [
+        "BSL-1.0",
+    ], name = "error-code" },
+    { allow = [
+        "Zlib",
+    ], name = "nanorand" },
+    { allow = [
+        "Zlib",
+    ], name = "slotmap" },
+    { allow = [
+        "BSL-1.0",
+    ], name = "str-buf" },
+    { allow = [
+        "Unicode-DFS-2016",
+    ], name = "unicode-ident" },
+]
+
+
+[licenses.private]
+ignore = false
+registries = []
+
+[bans]
+multiple-versions = "warn"
+wildcards = "allow"
+highlight = "all"
+workspace-default-features = "allow"
+external-default-features = "allow"
+allow = []
+deny = [{ name = "serde_derive", version = ">1.0.171" }]
+skip = [
+    { name = "bitflags", version = "2.4" },
+    { name = "libloading", version = "0.8" },
+    { name = "memoffset", version = "0.9" },
+    { name = "nix", version = "0.25" },
+    { name = "windows", version = "0.48" },
+    { name = "windows-sys", version = "0.48" },
+    { name = "windows-targets", version = "0.48" },
+    { name = "windows_x86_64_msvc", version = "0.48" },
+]
+
+[sources]
+unknown-registry = "warn"
+unknown-git = "warn"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
