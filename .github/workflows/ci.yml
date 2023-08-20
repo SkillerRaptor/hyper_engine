@@ -54,7 +54,7 @@ jobs:
           crate: cargo-nextest
           locked: true
 
-      - name: Install Cargo-Nextest
+      - name: Install Cargo-Deny
         uses: baptiste0928/cargo-install@v2
         with:
           crate: cargo-deny
@@ -84,6 +84,12 @@ jobs:
         with:
           command: build
           args: --verbose --workspace --profile production
+
+      - name: Cargo Build Profiling
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --verbose --workspace --profile profiling
 
       - name: Cargo Formatter
         uses: actions-rs/cargo@v1
