@@ -17,16 +17,13 @@ graph TD;
     Render-->Render-Hal;
     Render-Hal-->Render-Core;
 
-    Audio-->Math;
     Game-->Math;
     Physics-->Math;
     Render-Core-->Math;
 
-    Audio-->Platform;
-    Game-->Platform;
-    Physics-->Platform;
     Render-Core-->Platform;
 
+    Audio-->Core;
     Math-->Core;
     Platform-->Core;
 ```
