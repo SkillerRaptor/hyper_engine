@@ -21,7 +21,7 @@ impl Surface {
     pub(crate) fn new(window: &Window, entry: &Entry, instance: &Instance) -> Result<Self> {
         let loader = khr::Surface::new(entry, instance.handle());
 
-        let handle = window.create_surface(entry, instance.handle())?;
+        let handle = instance.create_surface(&window, entry)?;
 
         Ok(Self { handle, loader })
     }

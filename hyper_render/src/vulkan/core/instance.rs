@@ -9,6 +9,7 @@ use hyper_platform::window::Window;
 use ash::{extensions::ext::DebugUtils, vk, Entry, Instance as VulkanInstance};
 use color_eyre::Result;
 use log::Level;
+use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
 use std::ffi::{c_void, CStr, CString};
 
 pub(crate) struct DebugExtension {
@@ -65,7 +66,7 @@ impl Instance {
             .engine_version(vk::make_api_version(0, 1, 0, 0))
             .api_version(vk::API_VERSION_1_3);
 
-        let required_extensions = window.required_extensions()?;
+        let required_extensions = Self::required_extensions(window)?;
 
         let extension_names = if validation_layers_enabled {
             let mut extension_names = required_extensions;
@@ -167,6 +168,26 @@ impl Instance {
         let debug_extension = DebugExtension { loader, handle };
 
         Ok(Some(debug_extension))
+    }
+
+    pub fn create_surface(&self, window: &Window, entry: &Entry) -> Result<vk::SurfaceKHR> {
+        let surface = unsafe {
+            ash_window::create_surface(
+                entry,
+                &self.handle,
+                window.internal().raw_display_handle(),
+                window.internal().raw_window_handle(),
+                None,
+            )
+        }?;
+
+        Ok(surface)
+    }
+
+    pub fn required_extensions(window: &Window) -> Result<Vec<*const i8>> {
+        let extensions =
+            ash_window::enumerate_required_extensions(window.internal().raw_display_handle())?;
+        Ok(extensions.to_vec())
     }
 
     pub(crate) fn debug_extension(&self) -> &Option<DebugExtension> {

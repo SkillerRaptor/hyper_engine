@@ -13,9 +13,6 @@ license = "MIT"
 [dependencies]
 hyper_core = { path = "../hyper_core" }
 
-ash = "0.37"
-ash-window = "0.12"
 color-eyre = "0.6"
 log = "0.4"
-raw-window-handle = "0.5"
 winit = "0.28"

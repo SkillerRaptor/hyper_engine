@@ -875,12 +875,9 @@ dependencies = [
 name = "hyper_platform"
 version = "0.1.0"
 dependencies = [
- "ash",
- "ash-window",
  "color-eyre",
  "hyper_core",
  "log",
- "raw-window-handle",
  "winit",
 ]
 
@@ -889,6 +886,7 @@ name = "hyper_render"
 version = "0.1.0"
 dependencies = [
  "ash",
+ "ash-window",
  "color-eyre",
  "egui",
  "egui-winit",
@@ -898,6 +896,7 @@ dependencies = [
  "hyper_platform",
  "image",
  "log",
+ "raw-window-handle",
  "smallvec",
  "tobj",
  "winit",

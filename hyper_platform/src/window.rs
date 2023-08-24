@@ -6,9 +6,7 @@
 
 use crate::event_loop::EventLoop;
 
-use ash::{vk, Entry, Instance};
 use color_eyre::Result;
-use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
 use winit::{dpi::LogicalSize, window};
 
 pub struct Window {
@@ -36,26 +34,6 @@ impl Window {
 
     pub fn request_redraw(&self) {
         self.internal.request_redraw();
-    }
-
-    pub fn create_surface(&self, entry: &Entry, instance: &Instance) -> Result<vk::SurfaceKHR> {
-        let surface = unsafe {
-            ash_window::create_surface(
-                entry,
-                instance,
-                self.internal.raw_display_handle(),
-                self.internal.raw_window_handle(),
-                None,
-            )
-        }?;
-
-        Ok(surface)
-    }
-
-    pub fn required_extensions(&self) -> Result<Vec<*const i8>> {
-        let extensions =
-            ash_window::enumerate_required_extensions(self.internal.raw_display_handle())?;
-        Ok(extensions.to_vec())
     }
 
     pub fn title(&self) -> String {
