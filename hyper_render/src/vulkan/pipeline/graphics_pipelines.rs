@@ -5,7 +5,7 @@
  */
 
 use crate::vulkan::{
-    core::device::Device,
+    core::{debug_utils::DebugName, device::Device},
     pipeline::{pipeline_layout::PipelineLayout, Pipeline},
     resource::shader::Shader,
 };
@@ -181,7 +181,11 @@ impl GraphicsPipeline {
         }
         .map_err(|error| error.1)?[0];
 
-        device.set_object_name(vk::ObjectType::PIPELINE, handle, label)?;
+        device.set_object_name(DebugName {
+            ty: vk::ObjectType::PIPELINE,
+            object: handle,
+            name: label,
+        })?;
 
         Ok(Self { handle, device })
     }

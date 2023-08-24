@@ -82,7 +82,7 @@ impl Swapchain {
             };
 
         let create_info = vk::SwapchainCreateInfoKHR::builder()
-            .surface(surface.handle())
+            .surface(surface.raw())
             .min_image_count(image_count)
             .image_format(surface_format.format)
             .image_color_space(surface_format.color_space)
@@ -97,7 +97,7 @@ impl Swapchain {
             .clipped(true)
             .old_swapchain(vk::SwapchainKHR::null());
 
-        let loader = khr::Swapchain::new(instance.handle(), device.handle());
+        let loader = khr::Swapchain::new(instance.raw(), device.handle());
 
         let handle = unsafe { loader.create_swapchain(&create_info, None) }?;
 
@@ -362,7 +362,7 @@ impl Swapchain {
             };
 
         let create_info = vk::SwapchainCreateInfoKHR::builder()
-            .surface(surface.handle())
+            .surface(surface.raw())
             .min_image_count(image_count)
             .image_format(surface_format.format)
             .image_color_space(surface_format.color_space)

@@ -6,7 +6,10 @@
 
 use crate::{
     bindings::BindingsOffset,
-    vulkan::{core::device::Device, descriptors::descriptor_manager::DescriptorManager},
+    vulkan::{
+        core::{debug_utils::DebugName, device::Device},
+        descriptors::descriptor_manager::DescriptorManager,
+    },
 };
 
 use ash::vk;
@@ -41,7 +44,11 @@ impl PipelineLayout {
 
         let handle = unsafe { device.handle().create_pipeline_layout(&create_info, None)? };
 
-        device.set_object_name(vk::ObjectType::PIPELINE_LAYOUT, handle, label)?;
+        device.set_object_name(DebugName {
+            ty: vk::ObjectType::PIPELINE_LAYOUT,
+            object: handle,
+            name: label,
+        })?;
 
         Ok(Self { handle, device })
     }

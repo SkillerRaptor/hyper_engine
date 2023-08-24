@@ -87,7 +87,6 @@ pub(crate) struct Renderer {
     textures_buffer: Buffer,
     geometry_handle: ResourceHandle,
     geometry_buffer: Buffer,
-
     frame_buffer: Buffer,
     upload_manager: Rc<RefCell<UploadManager>>,
 
@@ -560,7 +559,7 @@ impl Renderer {
 
         let scene_buffer = Buffer::new(
             device.clone(),
-            allocator.clone(),
+            allocator,
             BufferCreateInfo {
                 label: "Buffer Scene",
 
@@ -599,7 +598,7 @@ impl Renderer {
             geometry_buffer,
 
             frame_buffer,
-            upload_manager: upload_manager.clone(),
+            upload_manager,
 
             _textures: textures,
             materials,
@@ -641,7 +640,9 @@ impl Renderer {
             window,
             instance,
             surface,
-            &self.present_semaphores[side as usize])? else {
+            &self.present_semaphores[side as usize],
+        )?
+        else {
             return Ok(());
         };
 

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::vulkan::core::device::Device;
+use crate::vulkan::core::{debug_utils::DebugName, device::Device};
 
 use ash::vk;
 use color_eyre::Result;
@@ -25,7 +25,11 @@ impl BinarySemaphore {
 
         let handle = unsafe { device.handle().create_semaphore(&create_info, None) }?;
 
-        device.set_object_name(vk::ObjectType::SEMAPHORE, handle, label)?;
+        device.set_object_name(DebugName {
+            ty: vk::ObjectType::SEMAPHORE,
+            object: handle,
+            name: label,
+        })?;
 
         Ok(Self { handle, device })
     }

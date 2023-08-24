@@ -76,8 +76,8 @@ impl RenderObject {
         ////////////////////////////////////////////////////////////////////////
 
         let bindings_buffer = Buffer::new(
-            device.clone(),
-            allocator.clone(),
+            device,
+            allocator,
             BufferCreateInfo {
                 label: "Buffer Bindings Render Object",
 

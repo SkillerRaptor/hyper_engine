@@ -75,8 +75,8 @@ impl Mesh {
 
         let (index_buffer, indices_count) = if let Some(indices) = indices {
             let index_buffer = Buffer::new(
-                device.clone(),
-                allocator.clone(),
+                device,
+                allocator,
                 BufferCreateInfo {
                     label: "Buffer Index Mesh",
 

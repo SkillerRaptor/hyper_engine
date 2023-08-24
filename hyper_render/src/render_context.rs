@@ -8,7 +8,12 @@ use crate::{
     egui_integration::EguiIntegration,
     renderer::Renderer,
     vulkan::{
-        core::{device::Device, instance::Instance, surface::Surface, swapchain::Swapchain},
+        core::{
+            device::Device,
+            instance::{Instance, InstanceCreateInfo},
+            surface::Surface,
+            swapchain::Swapchain,
+        },
         descriptors::descriptor_manager::DescriptorManager,
         memory::allocator::{Allocator, AllocatorCreateInfo},
         pipeline::pipeline_layout::{PipelineLayout, PipelineLayoutCreateInfo},
@@ -19,7 +24,6 @@ use crate::{
 use hyper_math::vector::Vec2f;
 use hyper_platform::{event_loop::EventLoop, window::Window};
 
-use ash::Entry;
 use color_eyre::Result;
 use egui::{Context, FullOutput};
 use std::{cell::RefCell, rc::Rc};
@@ -57,24 +61,21 @@ pub struct RenderContext {
     device: Rc<Device>,
     surface: Surface,
     instance: Rc<Instance>,
-    _entry: Entry,
 }
 
 impl RenderContext {
     pub fn new(event_loop: &EventLoop, window: &Window) -> Result<Self> {
-        let validation_layers_requested = cfg!(debug_assertions);
+        let debug = cfg!(debug_assertions);
 
-        let entry = unsafe { Entry::load()? };
-        let instance = Rc::new(Instance::new(window, validation_layers_requested, &entry)?);
-
-        let surface = Surface::new(window, &entry, &instance)?;
-        let device = Rc::new(Device::new(instance.clone(), &surface)?);
+        let instance = Instance::new(InstanceCreateInfo { window, debug })?;
+        let surface = instance.create_surface(window)?;
+        let device = instance.create_device(&surface)?;
 
         let allocator = Rc::new(RefCell::new(Allocator::new(
             &instance,
             &device,
             AllocatorCreateInfo {
-                log_leaks_on_shutdown: validation_layers_requested,
+                log_leaks_on_shutdown: debug,
             },
         )?));
 
@@ -143,7 +144,6 @@ impl RenderContext {
             device,
             surface,
             instance,
-            _entry: entry,
         })
     }
 

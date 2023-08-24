@@ -58,11 +58,7 @@ impl DescriptorPool {
         instance: &Instance,
         device: &Device,
     ) -> Vec<vk::DescriptorPoolSize> {
-        let properties = unsafe {
-            instance
-                .handle()
-                .get_physical_device_properties(device.physical_device())
-        };
+        let properties = instance.get_physical_device_properties(device.physical_device());
 
         let mut descriptor_pool_sizes = Vec::new();
         for descriptor_type in Self::DESCRIPTOR_TYPES {
@@ -103,11 +99,7 @@ impl DescriptorPool {
         let mut limits = SmallVec::new();
 
         for descriptor_type in Self::DESCRIPTOR_TYPES {
-            let properties = unsafe {
-                instance
-                    .handle()
-                    .get_physical_device_properties(device.physical_device())
-            };
+            let properties = instance.get_physical_device_properties(device.physical_device());
 
             let count = Self::find_descriptor_type_limit(descriptor_type, properties.limits);
             limits.push(count);

@@ -7,6 +7,7 @@
 use crate::vulkan::{
     command::command_buffer::CommandBuffer,
     core::{
+        debug_utils::DebugName,
         device::{
             queue_family_indices::QueueFamilyIndices,
             swapchain_support_details::SwapchainSupportDetails,
@@ -19,12 +20,7 @@ use crate::vulkan::{
 
 use ash::{extensions::khr::Swapchain, vk, Device as VulkanDevice};
 use color_eyre::{eyre::eyre, Result};
-use std::{
-    collections::HashSet,
-    ffi::{CStr, CString},
-    rc::Rc,
-    str,
-};
+use std::{collections::HashSet, ffi::CStr, rc::Rc, str};
 
 pub(crate) mod queue_family_indices {
     use crate::vulkan::core::{instance::Instance, surface::Surface};
@@ -44,11 +40,8 @@ pub(crate) mod queue_family_indices {
             surface: &Surface,
             physical_device: vk::PhysicalDevice,
         ) -> Result<Self> {
-            let physical_device_queue_family_properties = unsafe {
-                instance
-                    .handle()
-                    .get_physical_device_queue_family_properties(physical_device)
-            };
+            let physical_device_queue_family_properties =
+                instance.get_physical_device_queue_family_properties(physical_device);
 
             let mut queue_family_indices = QueueFamilyIndices::default();
             for (i, physical_device_queue_family_property) in
@@ -61,13 +54,7 @@ pub(crate) mod queue_family_indices {
                     queue_family_indices.graphics_family = Some(i as u32);
                 }
 
-                if unsafe {
-                    surface.loader().get_physical_device_surface_support(
-                        physical_device,
-                        i as u32,
-                        surface.handle(),
-                    )?
-                } {
+                if surface.get_physical_device_surface_support(physical_device, i as u32)? {
                     queue_family_indices.present_family = Some(i as u32);
                 }
 
@@ -111,23 +98,10 @@ pub(crate) mod swapchain_support_details {
 
     impl SwapchainSupportDetails {
         pub(crate) fn new(surface: &Surface, physical_device: vk::PhysicalDevice) -> Result<Self> {
-            let capabilities = unsafe {
-                surface
-                    .loader()
-                    .get_physical_device_surface_capabilities(physical_device, surface.handle())
-            }?;
-
-            let formats = unsafe {
-                surface
-                    .loader()
-                    .get_physical_device_surface_formats(physical_device, surface.handle())
-            }?;
-
-            let present_modes = unsafe {
-                surface
-                    .loader()
-                    .get_physical_device_surface_present_modes(physical_device, surface.handle())
-            }?;
+            let capabilities = surface.get_physical_device_surface_capabilities(physical_device)?;
+            let formats = surface.get_physical_device_surface_formats(physical_device)?;
+            let present_modes =
+                surface.get_physical_device_surface_present_modes(physical_device)?;
 
             Ok(Self {
                 capabilities,
@@ -166,7 +140,7 @@ pub(crate) struct Device {
 impl Device {
     const EXTENSIONS: [&'static CStr; 1] = [Swapchain::name()];
 
-    pub(crate) fn new(instance: Rc<Instance>, surface: &Surface) -> Result<Self> {
+    pub(crate) fn new(instance: Rc<Instance>, surface: &Surface) -> Result<Rc<Self>> {
         let physical_device = Self::pick_physical_device(&instance, surface)?;
         let handle = Self::create_device(&instance, surface, physical_device)?;
 
@@ -176,7 +150,7 @@ impl Device {
         let present_queue =
             unsafe { handle.get_device_queue(queue_family_indices.present_family().unwrap(), 0) };
 
-        Ok(Self {
+        Ok(Rc::new(Self {
             present_queue,
             graphics_queue,
 
@@ -184,11 +158,11 @@ impl Device {
             physical_device,
 
             instance,
-        })
+        }))
     }
 
     fn pick_physical_device(instance: &Instance, surface: &Surface) -> Result<vk::PhysicalDevice> {
-        let physical_devices = unsafe { instance.handle().enumerate_physical_devices() }?;
+        let physical_devices = instance.enumerate_physical_devices()?;
 
         let mut chosen_physical_device = None;
         for physical_device in physical_devices {
@@ -202,11 +176,7 @@ impl Device {
         }
 
         let physical_device = chosen_physical_device.unwrap();
-        let properties = unsafe {
-            instance
-                .handle()
-                .get_physical_device_properties(physical_device)
-        };
+        let properties = instance.get_physical_device_properties(physical_device);
 
         let device_name_array = properties
             .device_name
@@ -260,11 +230,8 @@ impl Device {
         instance: &Instance,
         physical_device: vk::PhysicalDevice,
     ) -> Result<bool> {
-        let extension_properties = unsafe {
-            instance
-                .handle()
-                .enumerate_device_extension_properties(physical_device)
-        }?;
+        let extension_properties =
+            instance.enumerate_device_extension_properties(physical_device)?;
 
         let extensions = extension_properties
             .iter()
@@ -290,11 +257,7 @@ impl Device {
             .push_next(&mut synchronization2)
             .push_next(&mut descriptor_indexing);
 
-        unsafe {
-            instance
-                .handle()
-                .get_physical_device_features2(physical_device, &mut device_features);
-        }
+        instance.get_physical_device_features2(physical_device, &mut device_features);
 
         dynamic_rendering.dynamic_rendering == vk::TRUE
             && timline_semaphore.timeline_semaphore == vk::TRUE
@@ -370,11 +333,7 @@ impl Device {
             .queue_create_infos(&queue_create_infos)
             .enabled_extension_names(&extension_names);
 
-        let handle = unsafe {
-            instance
-                .handle()
-                .create_device(physical_device, &create_info, None)
-        }?;
+        let handle = instance.create_logical_device(physical_device, &create_info)?;
 
         Ok(handle)
     }
@@ -472,27 +431,12 @@ impl Device {
         Ok(())
     }
 
-    pub(crate) fn set_object_name(
-        &self,
-        object_type: vk::ObjectType,
-        object: impl vk::Handle,
-        name: &str,
-    ) -> Result<()> {
-        if let Some(debug_extension) = self.instance.debug_extension().as_ref() {
-            let object_name_c_string = CString::new(name)?;
-
-            let object_name = &object_name_c_string;
-
-            let name_info = vk::DebugUtilsObjectNameInfoEXT::builder()
-                .object_type(object_type)
-                .object_handle(object.as_raw())
-                .object_name(object_name);
-
-            unsafe {
-                debug_extension
-                    .loader
-                    .set_debug_utils_object_name(self.handle.handle(), &name_info)?;
-            }
+    pub(crate) fn set_object_name<T>(&self, debug_name: DebugName<T>) -> Result<()>
+    where
+        T: vk::Handle,
+    {
+        if let Some(debug_utils) = self.instance.debug_utils().as_ref() {
+            debug_utils.set_object_name(self, debug_name)?;
         }
 
         Ok(())

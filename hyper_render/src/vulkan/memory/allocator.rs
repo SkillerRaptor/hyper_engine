@@ -34,7 +34,7 @@ impl Allocator {
         };
 
         let create_info = vulkan::AllocatorCreateDesc {
-            instance: instance.handle().clone(),
+            instance: instance.raw().clone(),
             device: device.handle().clone(),
             physical_device: device.physical_device(),
             debug_settings,

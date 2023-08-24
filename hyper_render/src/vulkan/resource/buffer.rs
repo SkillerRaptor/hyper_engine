@@ -5,7 +5,7 @@
  */
 
 use crate::vulkan::{
-    core::device::Device,
+    core::{debug_utils::DebugName, device::Device},
     memory::allocator::{
         Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation,
     },
@@ -63,7 +63,11 @@ impl Buffer {
 
         let handle = unsafe { device.handle().create_buffer(&create_info, None) }?;
 
-        device.set_object_name(vk::ObjectType::BUFFER, handle, label)?;
+        device.set_object_name(DebugName {
+            ty: vk::ObjectType::BUFFER,
+            object: handle,
+            name: label,
+        })?;
 
         Ok(handle)
     }
