@@ -175,8 +175,8 @@ impl Instance {
             ash_window::create_surface(
                 entry,
                 &self.handle,
-                window.internal().raw_display_handle(),
-                window.internal().raw_window_handle(),
+                window.raw().raw_display_handle(),
+                window.raw().raw_window_handle(),
                 None,
             )
         }?;
@@ -186,7 +186,7 @@ impl Instance {
 
     pub fn required_extensions(window: &Window) -> Result<Vec<*const i8>> {
         let extensions =
-            ash_window::enumerate_required_extensions(window.internal().raw_display_handle())?;
+            ash_window::enumerate_required_extensions(window.raw().raw_display_handle())?;
         Ok(extensions.to_vec())
     }
 

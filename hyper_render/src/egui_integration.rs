@@ -209,7 +209,7 @@ impl EguiIntegration {
         egui_context.set_fonts(FontDefinitions::default());
         egui_context.set_style(Style::default());
 
-        let egui_winit = State::new(&event_loop.internal());
+        let egui_winit = State::new(&event_loop.raw());
 
         Ok(Self {
             textures: HashMap::new(),
@@ -240,7 +240,7 @@ impl EguiIntegration {
     }
 
     pub(crate) fn begin_gui(&mut self, window: &Window) {
-        let raw_input = self.egui_winit.take_egui_input(window.internal());
+        let raw_input = self.egui_winit.take_egui_input(window.raw());
         self.egui_context.begin_frame(raw_input);
     }
 
@@ -248,7 +248,7 @@ impl EguiIntegration {
         let output = self.egui_context.end_frame();
 
         self.egui_winit.handle_platform_output(
-            window.internal(),
+            window.raw(),
             &self.egui_context,
             output.platform_output.clone(),
         );

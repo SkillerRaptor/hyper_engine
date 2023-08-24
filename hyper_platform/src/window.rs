@@ -7,10 +7,13 @@
 use crate::event_loop::EventLoop;
 
 use color_eyre::Result;
-use winit::{dpi::LogicalSize, window};
+use winit::{
+    dpi::LogicalSize,
+    window::{Window as RawWindow, WindowBuilder},
+};
 
 pub struct Window {
-    internal: window::Window,
+    raw: RawWindow,
 }
 
 impl Window {
@@ -23,30 +26,30 @@ impl Window {
             resizable,
         } = create_info;
 
-        let window = window::WindowBuilder::new()
+        let window = WindowBuilder::new()
             .with_title(title)
             .with_inner_size(LogicalSize::new(width, height))
             .with_resizable(resizable)
-            .build(event_loop.internal())?;
+            .build(event_loop.raw())?;
 
-        Ok(Self { internal: window })
+        Ok(Self { raw: window })
     }
 
     pub fn request_redraw(&self) {
-        self.internal.request_redraw();
+        self.raw.request_redraw();
     }
 
     pub fn title(&self) -> String {
-        self.internal.title()
+        self.raw.title()
     }
 
     pub fn framebuffer_size(&self) -> (u32, u32) {
-        let inner_size = self.internal.inner_size();
+        let inner_size = self.raw.inner_size();
         (inner_size.width, inner_size.height)
     }
 
-    pub fn internal(&self) -> &window::Window {
-        &self.internal
+    pub fn raw(&self) -> &RawWindow {
+        &self.raw
     }
 }
 

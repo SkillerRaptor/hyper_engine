@@ -8,20 +8,22 @@ use crate::{event::Event, key_code::KeyCode, mouse_code::MouseCode};
 
 use winit::{
     dpi::PhysicalPosition,
-    event::{self, DeviceEvent, ElementState, MouseButton, MouseScrollDelta, WindowEvent},
-    event_loop,
+    event::{
+        DeviceEvent, ElementState, Event as WinitEvent, MouseButton, MouseScrollDelta, WindowEvent,
+    },
+    event_loop::{ControlFlow, EventLoop as RawEventLoop},
     platform::run_return::EventLoopExtRunReturn,
 };
 
 #[derive(Default)]
 pub struct EventLoop {
-    internal: event_loop::EventLoop<()>,
+    raw: RawEventLoop<()>,
 }
 
 impl EventLoop {
     pub fn new() -> Self {
         Self {
-            internal: event_loop::EventLoop::new(),
+            raw: RawEventLoop::new(),
         }
     }
 
@@ -29,25 +31,24 @@ impl EventLoop {
     where
         F: FnMut(Event),
     {
-        self.internal.run_return(|event, _, control_flow| {
-            *control_flow = event_loop::ControlFlow::Poll;
+        self.raw.run_return(|event, _, control_flow| {
+            *control_flow = ControlFlow::Poll;
 
             match event {
-                event::Event::MainEventsCleared => event_handler(Event::EventsCleared),
-                event::Event::DeviceEvent {
+                WinitEvent::MainEventsCleared => event_handler(Event::EventsCleared),
+                WinitEvent::DeviceEvent {
                     event: DeviceEvent::MouseMotion { delta },
                     ..
                 } => event_handler(Event::MouseMoved {
                     delta_x: delta.0,
                     delta_y: delta.1,
                 }),
-
-                event::Event::WindowEvent { event, .. } => {
+                WinitEvent::WindowEvent { event, .. } => {
                     event_handler(Event::WinitWindowEvent { event: &event });
 
                     match event {
                         WindowEvent::CloseRequested => {
-                            *control_flow = event_loop::ControlFlow::Exit;
+                            *control_flow = ControlFlow::Exit;
                         }
                         WindowEvent::KeyboardInput { input, .. } => {
                             if let Some(virtual_key_code) = input.virtual_keycode {
@@ -103,7 +104,7 @@ impl EventLoop {
                         _ => {}
                     }
                 }
-                event::Event::RedrawRequested(..) => {
+                WinitEvent::RedrawRequested(..) => {
                     event_handler(Event::UpdateFrame);
                     event_handler(Event::RenderFrame);
                 }
@@ -112,7 +113,7 @@ impl EventLoop {
         });
     }
 
-    pub fn internal(&self) -> &event_loop::EventLoop<()> {
-        &self.internal
+    pub fn raw(&self) -> &RawEventLoop<()> {
+        &self.raw
     }
 }
