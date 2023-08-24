@@ -6,20 +6,16 @@
 
 #include "globals.hlsli"
 
-struct Bindings {
-  ArrayBuffer vertices;
-
-  Texture font_texture;
-};
-
-struct PixelInput {
+struct FragmentInput {
   [[vk::location(0)]] float4 color : COLOR;
   [[vk::location(1)]] float2 uv : TEXCOORD;
 };
 
-float4 main(PixelInput input) : SV_TARGET {
-  Bindings bindings = load_bindings<Bindings>();
+float4 main(FragmentInput input) : SV_TARGET {
+  GuiBindings gui = get_bindings<GuiBindings>();
 
-  float4 value = input.color * bindings.font_texture.sample_2d<float4>(input.uv);
+  Texture font_texture = gui.font_texture;
+
+  float4 value = input.color * font_texture.sample_2d<float4>(input.uv);
   return value;
 }

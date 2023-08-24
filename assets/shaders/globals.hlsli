@@ -4,19 +4,15 @@
  * SPDX-License-Identifier: MIT
  */
 
+#ifndef HYPER_ENGINE_GLOBALS_HLSLI
+#define HYPER_ENGINE_GLOBALS_HLSLI
+
 ////////////////////////////////////////////////////////////////////////////////
 // Bindless
 ////////////////////////////////////////////////////////////////////////////////
 
 struct RenderResourceHandle {
   uint index;
-};
-
-struct BindingsOffset {
-  RenderResourceHandle bindings_offset;
-  uint unused_0;
-  uint unused_1;
-  uint unused_2;
 };
 
 static const uint DESCRIPTOR_SET_BINDLESS_STORAGE_BUFFER = 0;
@@ -77,8 +73,6 @@ static const uint DESCRIPTOR_SET_BINDLESS_SAMPLER = 3;
   DEFINE_TEXTURE_HEAP_OPERATOR_VALUE(texture_type, g_##texture_type, float3, texture_type##Handle) \
   DEFINE_TEXTURE_HEAP_OPERATOR_VALUE(texture_type, g_##texture_type, float4, texture_type##Handle)
 
-[[vk::push_constant]] ConstantBuffer<BindingsOffset> g_bindings_offset;
-
 DEFINE_BUFFER_HEAP(ByteAddressBuffer);
 DEFINE_BUFFER_HEAP(RWByteAddressBuffer);
 
@@ -119,12 +113,6 @@ struct VulkanResourceDescriptorHeapInternal {
 static VulkanResourceDescriptorHeapInternal VkResourceDescriptorHeap;
 
 #define DESCRIPTOR_HEAP(handle_type, handle) VkResourceDescriptorHeap[(handle_type) handle]
-
-template <typename T>
-T load_bindings() {
-  T result = DESCRIPTOR_HEAP(ByteAddressBufferHandle, g_bindings_offset.bindings_offset.index).Load<T>(0);
-  return result;
-}
 
 struct SimpleBuffer {
   RenderResourceHandle handle;
@@ -188,31 +176,31 @@ struct Texture {
   template <typename T>
   T load_1d(uint pos) {
     Texture1D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle.index);
-    return texture.Load(uint2(pos, 0));
+    return texture.load(uint2(pos, 0));
   }
 
   template <typename T>
   T load_1d_array(uint2 pos) {
     Texture1DArray<T> texture = DESCRIPTOR_HEAP(Texture1DArrayHandle<T>, this.handle.index);
-    return texture.Load(uint3(pos.x, 0, pos.y));
+    return texture.load(uint3(pos.x, 0, pos.y));
   }
 
   template <typename T>
   T load_2d(uint2 pos) {
     Texture2D<T> texture = DESCRIPTOR_HEAP(Texture2DHandle<T>, this.handle.index);
-    return texture.Load(uint3(pos, 0));
+    return texture.load(uint3(pos, 0));
   }
 
   template <typename T>
   T load_2d_array(uint3 pos) {
     Texture2DArray<T> texture = DESCRIPTOR_HEAP(Texture2DArrayHandle<T>, this.handle.index);
-    return texture.Load(uint4(pos.xy, 0, pos.z));
+    return texture.load(uint4(pos.xy, 0, pos.z));
   }
 
   template <typename T>
   T load_3d(uint3 pos) {
     Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle.index);
-    return texture.Load(uint4(pos, 0));
+    return texture.load(uint4(pos, 0));
   }
 
   template<typename T>
@@ -264,31 +252,31 @@ struct RwTexture {
   template <typename T>
   T load_1d(uint pos) {
     Texture1D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle.index);
-    return texture.Load(uint2(pos, 0));
+    return texture.load(uint2(pos, 0));
   }
 
   template <typename T>
   T load_1d_array(uint2 pos) {
     Texture1DArray<T> texture = DESCRIPTOR_HEAP(Texture1DArrayHandle<T>, this.handle.index);
-    return texture.Load(uint3(pos.x, 0, pos.y));
+    return texture.load(uint3(pos.x, 0, pos.y));
   }
 
   template <typename T>
   T load_2d(uint2 pos) {
     Texture2D<T> texture = DESCRIPTOR_HEAP(Texture2DHandle<T>, this.handle.index);
-    return texture.Load(uint3(pos, 0));
+    return texture.load(uint3(pos, 0));
   }
 
   template <typename T>
   T load_2d_array(uint3 pos) {
     Texture2DArray<T> texture = DESCRIPTOR_HEAP(Texture2DArrayHandle<T>, this.handle.index);
-    return texture.Load(uint4(pos.xy, 0, pos.z));
+    return texture.load(uint4(pos.xy, 0, pos.z));
   }
 
   template <typename T>
   T load_3d(uint3 pos) {
     Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle.index);
-    return texture.Load(uint4(pos, 0));
+    return texture.load(uint4(pos, 0));
   }
 
   template <typename T>
@@ -364,12 +352,33 @@ struct RwTexture {
   }
 };
 
+
+////////////////////////////////////////////////////////////////////////////////
+// Push Constants
+////////////////////////////////////////////////////////////////////////////////
+
+struct BindingsOffset {
+  RenderResourceHandle bindings_offset;
+  uint unused_0;
+  uint unused_1;
+  uint unused_2;
+};
+
+[[vk::push_constant]] ConstantBuffer<BindingsOffset> g_bindings_offset;
+
+template <typename T>
+inline T get_bindings() {
+  T result = DESCRIPTOR_HEAP(ByteAddressBufferHandle, g_bindings_offset.bindings_offset.index).Load<T>(0);
+  return result;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
 ////////////////////////////////////////////////////////////////////////////////
 
 static const uint DESCRIPTOR_SET_SLOT_FRAME = 0;
-static const uint DESCRIPTOR_SET_SLOT_CAMERA = 1;
+static const uint DESCRIPTOR_SET_SLOT_SCENE = 1;
+static const uint DESCRIPTOR_SET_SLOT_CAMERA = 2;
 
 struct Frame {
   float time;
@@ -390,15 +399,111 @@ struct Camera {
   float4x4 view_projection;
 };
 
+
+struct ObjectGeometry {
+  ArrayBuffer vertices;
+  uint unused_0;
+  uint unused_1;
+  uint unused_2;
+
+  template<typename T>
+  inline T get_vertex(uint vertex_id) {
+    return vertices.load<T>(vertex_id);
+  }
+};
+
+static const uint OBJECT_TEXTURE_SLOT_ALBEDO_MAP = 0;
+static const uint OBJECT_TEXTURE_SLOT_NORMAL_MAP = 1;
+
+struct ObjectMaterial {
+  float4 base_color;
+  float4 unused_0;
+  float4 unused_1;
+  float4 unused_2;
+
+  ArrayBuffer textures;
+  uint unused_3;
+  uint unused_4;
+  uint unused_5;
+
+  inline Texture get_texture(uint texture_id) {
+    Texture texture = textures.load<Texture>(texture_id);
+    return texture;
+  }
+};
+
+struct Scene {
+  ArrayBuffer geometries;
+  ArrayBuffer materials;
+  ArrayBuffer instances;
+  uint camera_index;
+
+  inline ObjectGeometry get_geometry(uint index) {
+    return geometries.load<ObjectGeometry>(index);
+  }
+
+  inline ObjectMaterial get_material(uint index) {
+    return materials.load<ObjectMaterial>(index);
+  }
+
+  inline float4x4 get_instance(uint index, uint instance_id) {
+    ArrayBuffer instance_buffer = instances.load<ArrayBuffer>(index);
+    return instance_buffer.load<float4x4>(instance_id);
+  }
+
+  inline Camera get_camera() {
+    ByteAddressBuffer buffer = DESCRIPTOR_HEAP(ByteAddressBufferHandle, DESCRIPTOR_SET_SLOT_CAMERA);
+    return buffer.Load<Camera>(camera_index);
+  }
+};
+
 inline Frame get_frame() {
   ByteAddressBuffer buffer = DESCRIPTOR_HEAP(ByteAddressBufferHandle, DESCRIPTOR_SET_SLOT_FRAME);
   return buffer.Load<Frame>(0);
 }
 
-inline Camera get_camera() {
-  ByteAddressBuffer buffer = DESCRIPTOR_HEAP(ByteAddressBufferHandle, DESCRIPTOR_SET_SLOT_CAMERA);
-  return buffer.Load<Camera>(0);
+inline Scene get_scene() {
+  ByteAddressBuffer buffer = DESCRIPTOR_HEAP(ByteAddressBufferHandle, DESCRIPTOR_SET_SLOT_SCENE);
+  return buffer.Load<Scene>(0);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Bindings
+////////////////////////////////////////////////////////////////////////////////
+
+struct ObjectBindings {
+  uint geometry_index;
+  uint material_index;
+  uint instance_index;
+  uint unused_0;
+
+  inline ObjectGeometry get_geometry() {
+    Scene scene = get_scene();
+    return scene.get_geometry(geometry_index);
+  }
+
+  inline ObjectMaterial get_material() {
+    Scene scene = get_scene();
+    return scene.get_material(geometry_index);
+  }
+
+  inline float4x4 get_instance(uint instance_id) {
+    Scene scene = get_scene();
+    return scene.get_instance(instance_index, instance_id);
+  }
+};
+
+struct GuiBindings {
+  ArrayBuffer geometry;
+  Texture font_texture;
+  uint unused_0;
+  uint unused_1;
+
+  template<typename T>
+  inline T get_vertex(uint vertex_id) {
+    return geometry.load<T>(vertex_id);
+  }
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Globals
@@ -421,3 +526,5 @@ float3 srgb_to_linear(float3 x)
     return pow((x + 0.055) / 1.055, 2.4);
   }
 }
+
+#endif

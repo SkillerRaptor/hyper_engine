@@ -48,6 +48,7 @@ pub(crate) struct Vertex {
     pub(crate) position: Vec4f,
     pub(crate) color: Vec4f,
     pub(crate) uv: Vec4f,
+    pub(crate) unused_0: Vec4f,
 }
 
 struct Texture {
@@ -187,11 +188,16 @@ impl EguiIntegration {
             },
         )?;
 
-        let resource_handles = vec![vertex_buffer_handle, ResourceHandle::new(0)];
+        let gui_bindings = GuiBindings {
+            geometry: vertex_buffer_handle,
+            font_texture: ResourceHandle::new(0),
+            unused_0: 0,
+            unused_1: 0,
+        };
 
         upload_manager
             .borrow_mut()
-            .upload_buffer(&resource_handles, &bindings_buffer)?;
+            .upload_buffer(&[gui_bindings], &bindings_buffer)?;
 
         let bindings_handle = descriptor_manager
             .borrow_mut()
@@ -399,11 +405,16 @@ impl EguiIntegration {
                     vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL,
                 );
 
-            let resource_handles = vec![self.vertex_buffer_handle, combined_image_sampler_handle];
+            let gui_bindings = GuiBindings {
+                geometry: self.vertex_buffer_handle,
+                font_texture: combined_image_sampler_handle,
+                unused_0: 0,
+                unused_1: 0,
+            };
 
             self.upload_manager
                 .borrow_mut()
-                .upload_buffer(&resource_handles, &self.bindings_buffer)?;
+                .upload_buffer(&[gui_bindings], &self.bindings_buffer)?;
 
             self.descriptor_manager
                 .borrow_mut()
@@ -453,6 +464,7 @@ impl EguiIntegration {
                         vertex.color.a() as f32 / 255.0,
                     ),
                     uv: Vec4f::new(vertex.uv.x, vertex.uv.y, 0.0, 0.0),
+                    unused_0: Vec4f::default(),
                 })
                 .collect::<Vec<_>>();
 

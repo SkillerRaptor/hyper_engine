@@ -5,7 +5,7 @@
  */
 
 use crate::{
-    bindings::{BindingsOffset, TexturedBindings},
+    bindings::BindingsOffset,
     mesh::{Mesh, Vertex},
     render_context::Frame,
     render_object::RenderObject,
@@ -46,7 +46,48 @@ use ash::vk;
 use color_eyre::Result;
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
+#[repr(C)]
+pub(crate) struct Scene {
+    geometries: ResourceHandle,
+    materials: ResourceHandle,
+    instances: ResourceHandle,
+    camera_index: u32,
+}
+
+#[repr(C)]
+pub(crate) struct ObjectGeometry {
+    vertices: ResourceHandle,
+    unused_0: u32,
+    unused_1: u32,
+    unused_2: u32,
+}
+
+#[repr(C)]
+pub(crate) struct ObjectMaterial {
+    base_color: Vec4f,
+    unused_0: Vec4f,
+    unused_1: Vec4f,
+    unused_2: Vec4f,
+
+    textures: ResourceHandle,
+    unused_3: u32,
+    unused_4: u32,
+    unused_5: u32,
+}
+
 pub(crate) struct Renderer {
+    scene_buffer: Buffer,
+    instance_scene_redirection_handle: ResourceHandle,
+    instance_scene_redirection_buffer: Buffer,
+    instance_handle: ResourceHandle,
+    instance_buffer: Buffer,
+    material_handle: ResourceHandle,
+    material_buffer: Buffer,
+    textures_handle: ResourceHandle,
+    textures_buffer: Buffer,
+    geometry_handle: ResourceHandle,
+    geometry_buffer: Buffer,
+
     frame_buffer: Buffer,
     upload_manager: Rc<RefCell<UploadManager>>,
 
@@ -350,7 +391,7 @@ impl Renderer {
 
         let mut renderables = Vec::new();
 
-        let lost_empire = RenderObject::new::<TexturedBindings>(
+        let lost_empire = RenderObject::new(
             device.clone(),
             allocator.clone(),
             descriptor_manager.clone(),
@@ -358,11 +399,11 @@ impl Renderer {
             "lost_empire",
             "textured",
             [Mat4x4f::identity()].to_vec(),
-            meshes["lost_empire"].vertex_buffer_handle(),
-            &[combined_image_sampler_handle],
         )?;
 
         renderables.push(lost_empire);
+
+        ////////////////////////////////////////////////////////////////////////
 
         let frame_buffer = Buffer::new(
             device.clone(),
@@ -376,7 +417,187 @@ impl Renderer {
             },
         )?;
 
+        ////////////////////////////////////////////////////////////////////////
+        // Geometries
+
+        let geometry_buffer = Buffer::new(
+            device.clone(),
+            allocator.clone(),
+            BufferCreateInfo {
+                label: "Buffer Geometries",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: mem::size_of::<[ObjectGeometry; 1]>() as u64,
+                location: MemoryLocation::GpuOnly,
+            },
+        )?;
+
+        let geometry = ObjectGeometry {
+            vertices: meshes["lost_empire"].vertex_buffer_handle(),
+            unused_0: 0,
+            unused_1: 0,
+            unused_2: 0,
+        };
+
+        upload_manager
+            .borrow_mut()
+            .upload_buffer(&[geometry], &geometry_buffer)?;
+
+        let geometry_handle = descriptor_manager
+            .borrow_mut()
+            .allocate_buffer_handle(&geometry_buffer);
+
+        ////////////////////////////////////////////////////////////////////////
+        // Textures
+
+        let textures_buffer = Buffer::new(
+            device.clone(),
+            allocator.clone(),
+            BufferCreateInfo {
+                label: "Buffer Textures",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: mem::size_of::<[ResourceHandle; 1]>() as u64, // Note: Albedo Map
+                location: MemoryLocation::GpuOnly,
+            },
+        )?;
+
+        upload_manager
+            .borrow_mut()
+            .upload_buffer(&[combined_image_sampler_handle], &textures_buffer)?;
+
+        let textures_handle = descriptor_manager
+            .borrow_mut()
+            .allocate_buffer_handle(&textures_buffer);
+
+        ////////////////////////////////////////////////////////////////////////
+        // Materials
+
+        let material_buffer = Buffer::new(
+            device.clone(),
+            allocator.clone(),
+            BufferCreateInfo {
+                label: "Buffer Materials",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: mem::size_of::<[ObjectMaterial; 1]>() as u64,
+                location: MemoryLocation::GpuOnly,
+            },
+        )?;
+
+        let material = ObjectMaterial {
+            base_color: Vec4f::new(1.0, 1.0, 1.0, 1.0),
+            unused_0: Vec4f::default(),
+            unused_1: Vec4f::default(),
+            unused_2: Vec4f::default(),
+
+            textures: textures_handle,
+            unused_3: 0,
+            unused_4: 0,
+            unused_5: 0,
+        };
+
+        upload_manager
+            .borrow_mut()
+            .upload_buffer(&[material], &material_buffer)?;
+
+        let material_handle = descriptor_manager
+            .borrow_mut()
+            .allocate_buffer_handle(&material_buffer);
+
+        ////////////////////////////////////////////////////////////////////////
+        // Instances
+
+        let instance_buffer = Buffer::new(
+            device.clone(),
+            allocator.clone(),
+            BufferCreateInfo {
+                label: "Buffer Instances",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: mem::size_of::<[Mat4x4f; 1]>() as u64,
+                location: MemoryLocation::GpuOnly,
+            },
+        )?;
+
+        let instances = [Mat4x4f::identity()];
+
+        upload_manager
+            .borrow_mut()
+            .upload_buffer(&instances, &instance_buffer)?;
+
+        let instance_handle = descriptor_manager
+            .borrow_mut()
+            .allocate_buffer_handle(&instance_buffer);
+
+        ////////////////////////////////////////////////////////////////////////
+        // Instance Scene Redirection
+
+        let instance_scene_redirection_buffer = Buffer::new(
+            device.clone(),
+            allocator.clone(),
+            BufferCreateInfo {
+                label: "Buffer Instance Redirection",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: mem::size_of::<[ResourceHandle; 1]>() as u64,
+                location: MemoryLocation::GpuOnly,
+            },
+        )?;
+
+        let instance_redirections = [instance_handle];
+
+        upload_manager
+            .borrow_mut()
+            .upload_buffer(&instance_redirections, &instance_scene_redirection_buffer)?;
+
+        let instance_scene_redirection_handle = descriptor_manager
+            .borrow_mut()
+            .allocate_buffer_handle(&instance_scene_redirection_buffer);
+
+        ////////////////////////////////////////////////////////////////////////
+        // Scene
+
+        let scene_buffer = Buffer::new(
+            device.clone(),
+            allocator.clone(),
+            BufferCreateInfo {
+                label: "Buffer Scene",
+
+                usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+                size: mem::size_of::<Scene>() as u64,
+                location: MemoryLocation::GpuOnly,
+            },
+        )?;
+
+        let scene = Scene {
+            geometries: geometry_handle,
+            materials: material_handle,
+            instances: instance_scene_redirection_handle,
+            camera_index: 0, // TODO: Don't hardcode
+        };
+
+        upload_manager
+            .borrow_mut()
+            .upload_buffer(&[scene], &scene_buffer)?;
+
+        descriptor_manager.borrow_mut().update_scene(&scene_buffer);
+
+        ////////////////////////////////////////////////////////////////////////
+
         Ok(Self {
+            scene_buffer,
+            instance_scene_redirection_handle,
+            instance_scene_redirection_buffer,
+            instance_handle,
+            instance_buffer,
+            material_handle,
+            material_buffer,
+            textures_handle,
+            textures_buffer,
+            geometry_handle,
+            geometry_buffer,
+
             frame_buffer,
             upload_manager: upload_manager.clone(),
 

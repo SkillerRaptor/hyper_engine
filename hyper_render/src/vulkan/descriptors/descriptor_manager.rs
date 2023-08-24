@@ -75,7 +75,7 @@ impl DescriptorManager {
         }
     }
 
-    pub(crate) fn update_camera(&mut self, buffer: &Buffer) {
+    pub(crate) fn update_scene(&mut self, buffer: &Buffer) {
         let buffer_info = vk::DescriptorBufferInfo::builder()
             .buffer(buffer.handle())
             .offset(0)
@@ -88,6 +88,29 @@ impl DescriptorManager {
             .dst_set(self.descriptor_sets[0].handle())
             .dst_binding(0)
             .dst_array_element(1)
+            .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
+            .buffer_info(&buffer_infos);
+
+        unsafe {
+            self.device
+                .handle()
+                .update_descriptor_sets(&[*write_set], &[]);
+        }
+    }
+
+    pub(crate) fn update_camera(&mut self, buffer: &Buffer) {
+        let buffer_info = vk::DescriptorBufferInfo::builder()
+            .buffer(buffer.handle())
+            .offset(0)
+            .range(vk::WHOLE_SIZE);
+
+        // TODO: Replace descriptor set indexing with an enum that corresponds to the same array order in the descriptor pool
+        let buffer_infos = [*buffer_info];
+
+        let write_set = WriteDescriptorSet::builder()
+            .dst_set(self.descriptor_sets[0].handle())
+            .dst_binding(0)
+            .dst_array_element(2)
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
             .buffer_info(&buffer_infos);
 

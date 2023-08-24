@@ -6,16 +6,11 @@
 
 #include "globals.hlsli"
 
-struct Bindings {
-  ArrayBuffer vertices;
-
-  Texture font_texture;
-};
-
 struct Vertex {
   float4 position;
   float4 color;
   float4 uv;
+  float4 unused_0;
 };
 
 struct VertexOutput {
@@ -27,12 +22,11 @@ struct VertexOutput {
 VertexOutput main(
   uint vertex_id : SV_VertexID
 ) {
-  Bindings bindings = load_bindings<Bindings>();
-
   Frame frame = get_frame();
-  Camera camera = get_camera();
 
-  Vertex vertex = bindings.vertices.load<Vertex>(vertex_id);
+  GuiBindings gui = get_bindings<GuiBindings>();
+
+  Vertex vertex = gui.get_vertex<Vertex>(vertex_id);
 
   VertexOutput output = (VertexOutput) 0;
   output.position = float4(

@@ -6,13 +6,6 @@
 
 #include "globals.hlsli"
 
-struct Bindings {
-  ArrayBuffer vertices;
-  ArrayBuffer transforms;
-
-  Texture texture;
-};
-
 struct Vertex {
   float4 position;
   float4 normal;
@@ -30,12 +23,13 @@ VertexOutput main(
   uint vertex_id : SV_VertexID,
   uint instance_id : SV_InstanceID
 ) {
-  Bindings bindings = load_bindings<Bindings>();
+  Scene scene = get_scene();
+  Camera camera = scene.get_camera();
 
-  Camera camera = get_camera();
+  ObjectBindings object = get_bindings<ObjectBindings>();
 
-  Vertex vertex = bindings.vertices.load<Vertex>(vertex_id);
-  float4x4 transform = bindings.transforms.load<float4x4>(instance_id);
+  Vertex vertex = object.get_geometry().get_vertex<Vertex>(vertex_id);
+  float4x4 transform = object.get_instance(instance_id);
 
   VertexOutput output = (VertexOutput) 0;
   output.position = mul(mul(camera.view_projection, transform), float4(vertex.position.xyz, 1.0));

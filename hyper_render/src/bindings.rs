@@ -31,28 +31,22 @@ pub(crate) trait Bindings: Debug + Default {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
-pub(crate) struct DefaultBindings {
-    pub(crate) vertices_offset: ResourceHandle,
-    pub(crate) transforms_offset: ResourceHandle,
+pub(crate) struct ObjectBindings {
+    pub(crate) geometry_index: u32,
+    pub(crate) material_index: u32,
+    pub(crate) instance_index: u32,
+    pub(crate) unused_0: u32,
 }
 
-impl Bindings for DefaultBindings {}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug, Default)]
-pub(crate) struct TexturedBindings {
-    pub(crate) vertices_offset: ResourceHandle,
-    pub(crate) transforms_offset: ResourceHandle,
-    pub(crate) texture: ResourceHandle,
-}
-
-impl Bindings for TexturedBindings {}
+impl Bindings for ObjectBindings {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
 pub(crate) struct GuiBindings {
-    pub(crate) vertices_offset: ResourceHandle,
-    pub(crate) texture: ResourceHandle,
+    pub(crate) geometry: ResourceHandle,
+    pub(crate) font_texture: ResourceHandle,
+    pub(crate) unused_0: u32,
+    pub(crate) unused_1: u32,
 }
 
 impl Bindings for GuiBindings {}
