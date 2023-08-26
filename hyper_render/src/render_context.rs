@@ -20,6 +20,7 @@ use crate::{
     },
 };
 
+use hyper_game::camera::Camera;
 use hyper_math::vector::Vec2f;
 use hyper_platform::{event_loop::EventLoop, window::Window};
 
@@ -133,9 +134,9 @@ impl RenderContext {
         })
     }
 
-    pub fn begin(&mut self, window: &Window, frame_id: u64) -> Result<()> {
+    pub fn begin(&mut self, window: &Window, camera: &dyn Camera, frame_id: u64) -> Result<()> {
         self.renderer
-            .begin(window, &self.surface, frame_id, &mut self.swapchain)?;
+            .begin(window, &self.surface, &mut self.swapchain, camera, frame_id)?;
 
         Ok(())
     }

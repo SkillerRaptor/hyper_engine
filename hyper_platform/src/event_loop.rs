@@ -50,6 +50,12 @@ impl EventLoop {
                         WindowEvent::CloseRequested => {
                             *control_flow = ControlFlow::Exit;
                         }
+                        WindowEvent::CursorMoved { position, .. } => {
+                            event_handler(Event::MouseMove {
+                                position_x: position.x,
+                                position_y: position.y,
+                            });
+                        }
                         WindowEvent::KeyboardInput { input, .. } => {
                             if let Some(virtual_key_code) = input.virtual_keycode {
                                 let key_code = KeyCode::from(virtual_key_code);

@@ -12,6 +12,7 @@ license = "MIT"
 
 [dependencies]
 hyper_core = { path = "../hyper_core" }
+hyper_game = { path = "../hyper_game" }
 hyper_math = { path = "../hyper_math" }
 hyper_platform = { path = "../hyper_platform" }
 

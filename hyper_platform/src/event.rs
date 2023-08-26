@@ -19,6 +19,7 @@ pub enum Event<'a> {
 
     MousePressed { button: MouseCode },
     MouseReleased { button: MouseCode },
+    MouseMove { position_x: f64, position_y: f64 },
     MouseMoved { delta_x: f64, delta_y: f64 },
     MouseScrolled { delta: f64 },
 

@@ -7,8 +7,9 @@
 use crate::event_loop::EventLoop;
 
 use color_eyre::Result;
+use hyper_math::vector::Vec2f;
 use winit::{
-    dpi::LogicalSize,
+    dpi::{LogicalPosition, LogicalSize},
     window::{Window as RawWindow, WindowBuilder},
 };
 
@@ -46,6 +47,17 @@ impl Window {
     pub fn framebuffer_size(&self) -> (u32, u32) {
         let inner_size = self.raw.inner_size();
         (inner_size.width, inner_size.height)
+    }
+
+    // TOOD: Make this cleaner
+    pub fn set_cursor_position(&self, position: Vec2f) -> Result<()> {
+        self.raw
+            .set_cursor_position(LogicalPosition::new(position.x, position.y))?;
+        Ok(())
+    }
+
+    pub fn set_cursor_visiblity(&self, visibility: bool) {
+        self.raw.set_cursor_visible(visibility);
     }
 
     pub fn raw(&self) -> &RawWindow {

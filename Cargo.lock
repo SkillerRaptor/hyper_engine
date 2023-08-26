@@ -847,7 +847,9 @@ version = "0.1.0"
 dependencies = [
  "hyper_core",
  "hyper_math",
+ "hyper_platform",
  "log",
+ "nalgebra-glm",
  "paste",
 ]
 
@@ -877,6 +879,7 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
+ "hyper_math",
  "log",
  "winit",
 ]
@@ -892,6 +895,7 @@ dependencies = [
  "egui-winit",
  "gpu-allocator",
  "hyper_core",
+ "hyper_game",
  "hyper_math",
  "hyper_platform",
  "image",

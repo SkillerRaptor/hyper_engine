@@ -6,7 +6,7 @@
 
 use winit::event::VirtualKeyCode;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum KeyCode {
     Key1,
     Key2,

@@ -7,6 +7,7 @@
 #![allow(dead_code)]
 #![allow(clippy::too_many_arguments)]
 
+pub mod camera;
 pub mod entity;
 pub mod registry;
 

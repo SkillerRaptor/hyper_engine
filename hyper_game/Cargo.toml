@@ -13,6 +13,8 @@ license = "MIT"
 [dependencies]
 hyper_core = { path = "../hyper_core" }
 hyper_math = { path = "../hyper_math" }
+hyper_platform = { path = "../hyper_platform" }
 
 log = "0.4"
+nalgebra-glm = "0.18"
 paste = "1.0"

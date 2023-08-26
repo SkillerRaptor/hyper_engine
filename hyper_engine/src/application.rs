@@ -6,10 +6,12 @@
 
 use crate::game::Game;
 
+use hyper_game::camera::free_camera::FpsCamera;
 use hyper_math::vector::Vec2f;
 use hyper_platform::{
     event::Event,
     event_loop::EventLoop,
+    input::Input,
     window::{Window, WindowCreateInfo},
 };
 use hyper_render::render_context::{Frame, RenderContext};
@@ -24,6 +26,7 @@ pub struct Application {
 
     render_context: RenderContext,
 
+    input: Input,
     window: Window,
     event_loop: EventLoop,
 }
@@ -60,6 +63,8 @@ impl Application {
             game,
 
             render_context,
+
+            input: Input::new(),
             window,
             event_loop,
         })
@@ -73,95 +78,130 @@ impl Application {
         let mut current_time = Instant::now();
         let mut accumulator = 0.0;
 
-        self.event_loop.run(|event| match event {
-            Event::EventsCleared => self.window.request_redraw(),
-            Event::UpdateFrame => {
-                let new_time = Instant::now();
-                let frame_time = (new_time - current_time).as_secs_f32();
-                current_time = new_time;
+        // TODO: Move this to application and/or ECS
+        let mut camera = FpsCamera::new(
+            self.window.framebuffer_size().0 as f32 / self.window.framebuffer_size().1 as f32,
+        );
 
-                accumulator += frame_time;
-
-                while accumulator >= delta_time {
-                    self.game.update_fixed(delta_time, time);
-                    accumulator -= delta_time;
-                    time += delta_time;
+        // TODO: move this somewhere else
+        let mut window_focused = true;
+        self.event_loop.run(|event| {
+            match event {
+                Event::EventsCleared => self.window.request_redraw(),
+                Event::KeyPressed { button } => {
+                    self.input.set_key(button, true);
                 }
-
-                self.game.update();
-            }
-            Event::RenderFrame => {
-                // Render Game
-                self.render_context
-                    .begin(&self.window, self.frame_id as u64)
-                    .unwrap();
-
-                {
-                    let frame = Frame {
-                        time,
-                        delta_time,
-
-                        unused_0: 0.0,
-                        unused_1: 0.0,
-
-                        frame_count: self.frame_id,
-                        unused_2: 0,
-                        unused_3: 0,
-                        unused_4: 0,
-
-                        screen_size: Vec2f::new(
-                            self.window.framebuffer_size().0 as f32,
-                            self.window.framebuffer_size().1 as f32,
-                        ),
-                        unused_5: Vec2f::default(),
-                    };
-
-                    self.render_context.update_frame(frame).unwrap();
+                Event::KeyReleased { button } => {
+                    self.input.set_key(button, false);
                 }
-
-                {
-                    self.render_context.begin_rendering();
-
-                    self.render_context.draw_objects();
-                    self.game.render();
-
-                    self.render_context.end_rendering();
+                Event::MouseMove {
+                    position_x,
+                    position_y,
+                } => {
+                    self.input
+                        .set_mouse_position(Vec2f::new(position_x as f32, position_y as f32));
                 }
+                Event::MousePressed { button } => {
+                    self.input.set_mouse(button, true);
+                }
+                Event::MouseReleased { button } => {
+                    self.input.set_mouse(button, false);
+                }
+                Event::UpdateFrame => {
+                    let new_time = Instant::now();
+                    let frame_time = (new_time - current_time).as_secs_f32();
+                    current_time = new_time;
 
-                // Render GUI
-                {
-                    self.render_context.begin_gui(&self.window);
+                    accumulator += frame_time;
 
-                    self.game.render_gui(self.render_context.egui_context());
+                    while accumulator >= delta_time {
+                        self.game.update_fixed(delta_time, time);
+                        accumulator -= delta_time;
+                        time += delta_time;
+                    }
 
-                    let output = self.render_context.end_gui(&self.window);
+                    camera.update(frame_time, &self.input, window_focused, &mut self.window);
 
+                    self.game.update();
+                }
+                Event::RenderFrame => {
+                    // Render Game
                     self.render_context
-                        .submit_gui(&self.window, output)
+                        .begin(&self.window, &camera, self.frame_id as u64)
                         .unwrap();
+
+                    {
+                        let frame = Frame {
+                            time,
+                            delta_time,
+
+                            unused_0: 0.0,
+                            unused_1: 0.0,
+
+                            frame_count: self.frame_id,
+                            unused_2: 0,
+                            unused_3: 0,
+                            unused_4: 0,
+
+                            screen_size: Vec2f::new(
+                                self.window.framebuffer_size().0 as f32,
+                                self.window.framebuffer_size().1 as f32,
+                            ),
+                            unused_5: Vec2f::default(),
+                        };
+
+                        self.render_context.update_frame(frame).unwrap();
+                    }
+
+                    {
+                        self.render_context.begin_rendering();
+
+                        self.render_context.draw_objects();
+                        self.game.render();
+
+                        self.render_context.end_rendering();
+                    }
+
+                    // Render GUI
+                    {
+                        self.render_context.begin_gui(&self.window);
+
+                        self.game.render_gui(self.render_context.egui_context());
+
+                        let output = self.render_context.end_gui(&self.window);
+
+                        self.render_context
+                            .submit_gui(&self.window, output)
+                            .unwrap();
+                    }
+
+                    self.render_context.end().unwrap();
+
+                    self.render_context.submit(&self.window).unwrap();
+
+                    self.frame_id += 1;
                 }
-
-                self.render_context.end().unwrap();
-
-                self.render_context.submit(&self.window).unwrap();
-
-                self.frame_id += 1;
-            }
-            Event::WinitWindowEvent { event } => {
-                self.render_context.handle_gui_event(event);
-            }
-            Event::WindowResized { width, height } => {
-                if self.window.framebuffer_size() == (width, height) {
-                    return;
+                Event::WinitWindowEvent { event } => {
+                    self.render_context.handle_gui_event(event);
                 }
-
-                if width == 0 || height == 0 {
-                    return;
+                Event::WindowFocused { focused } => {
+                    window_focused = focused;
                 }
+                Event::WindowResized { width, height } => {
+                    if self.window.framebuffer_size() == (width, height) {
+                        return;
+                    }
 
-                self.render_context.resize(&self.window).unwrap();
+                    if width == 0 || height == 0 {
+                        return;
+                    }
+
+                    self.render_context.resize(&self.window).unwrap();
+
+                    camera.on_window_resize(width, height);
+                }
+                _ => {}
             }
-            _ => {}
         });
 
         self.render_context.wait_idle()?;

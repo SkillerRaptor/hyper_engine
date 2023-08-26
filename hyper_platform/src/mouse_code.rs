@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum MouseCode {
     Left,
     Right,

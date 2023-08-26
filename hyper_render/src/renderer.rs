@@ -35,6 +35,7 @@ use crate::{
     },
 };
 
+use hyper_game::camera::Camera;
 use hyper_math::{
     matrix::Mat4x4f,
     vector::{Vec3f, Vec4f},
@@ -96,7 +97,7 @@ pub(crate) struct Renderer {
     // NOTE: Temporary
     renderables: Vec<RenderObject>,
 
-    _projection_view_buffer: Buffer,
+    projection_view_buffer: Buffer,
 
     current_frame_id: u64,
     swapchain_image_index: u32,
@@ -602,7 +603,7 @@ impl Renderer {
             meshes,
             renderables,
 
-            _projection_view_buffer: projection_view_buffer,
+            projection_view_buffer,
 
             current_frame_id: 0,
             swapchain_image_index: 0,
@@ -624,8 +625,9 @@ impl Renderer {
         &mut self,
         window: &Window,
         surface: &Surface,
-        frame_id: u64,
         swapchain: &mut Swapchain,
+        camera: &dyn Camera,
+        frame_id: u64,
     ) -> Result<()> {
         self.current_frame_id = frame_id;
         self.submit_semaphore.wait_for(frame_id - 1)?;
@@ -672,6 +674,15 @@ impl Renderer {
             .image_memory_barriers(&image_memory_barriers);
 
         self.command_buffers[side as usize].pipeline_barrier2(*dependency_info);
+
+        let projection_view = camera.projection_matrix() * camera.view_matrix();
+        self.upload_manager
+            .borrow_mut()
+            .upload_buffer(&[projection_view], &self.projection_view_buffer)?;
+
+        self.descriptor_manager
+            .borrow_mut()
+            .update_camera(&self.projection_view_buffer);
 
         Ok(())
     }
