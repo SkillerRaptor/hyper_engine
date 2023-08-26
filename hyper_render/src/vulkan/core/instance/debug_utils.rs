@@ -6,7 +6,7 @@
 
 use crate::vulkan::core::device::logical_device::LogicalDevice;
 
-use ash::{extensions::ext, vk, Entry, Instance as VulkanInstance};
+use ash::{extensions::ext, vk, Entry};
 use color_eyre::Result;
 use log::Level;
 use std::{
@@ -241,7 +241,7 @@ impl Drop for DebugUtils {
 
 pub(crate) struct DebugUtilsCreateInfo<'a> {
     pub(crate) entry: &'a Entry,
-    pub(crate) instance: &'a VulkanInstance,
+    pub(crate) instance: &'a ash::Instance,
 }
 
 pub(crate) struct DebugName<'a, T>
