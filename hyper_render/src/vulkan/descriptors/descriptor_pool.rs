@@ -156,9 +156,9 @@ impl DescriptorPool {
 
 impl Drop for DescriptorPool {
     fn drop(&mut self) {
-        for layout in &self.layouts {
+        self.layouts.iter().for_each(|layout| {
             self.device.destroy_descriptor_set_layout(*layout);
-        }
+        });
 
         self.device.destroy_descriptor_pool(self.raw);
     }

@@ -187,31 +187,33 @@ impl Swapchain {
     ) -> Result<(Vec<vk::Image>, Vec<vk::ImageView>)> {
         let images = unsafe { functor.get_swapchain_images(raw) }?;
 
-        let mut image_views = Vec::new();
-        for image in &images {
-            let component_mapping = vk::ComponentMapping::builder()
-                .r(vk::ComponentSwizzle::IDENTITY)
-                .g(vk::ComponentSwizzle::IDENTITY)
-                .b(vk::ComponentSwizzle::IDENTITY)
-                .a(vk::ComponentSwizzle::IDENTITY);
+        let image_views = images
+            .iter()
+            .map(|image| {
+                let component_mapping = vk::ComponentMapping::builder()
+                    .r(vk::ComponentSwizzle::IDENTITY)
+                    .g(vk::ComponentSwizzle::IDENTITY)
+                    .b(vk::ComponentSwizzle::IDENTITY)
+                    .a(vk::ComponentSwizzle::IDENTITY);
 
-            let subresource_range = vk::ImageSubresourceRange::builder()
-                .aspect_mask(vk::ImageAspectFlags::COLOR)
-                .base_mip_level(0)
-                .level_count(1)
-                .base_array_layer(0)
-                .layer_count(1);
+                let subresource_range = vk::ImageSubresourceRange::builder()
+                    .aspect_mask(vk::ImageAspectFlags::COLOR)
+                    .base_mip_level(0)
+                    .level_count(1)
+                    .base_array_layer(0)
+                    .layer_count(1);
 
-            let create_info = vk::ImageViewCreateInfo::builder()
-                .image(*image)
-                .view_type(vk::ImageViewType::TYPE_2D)
-                .format(settings.surface_format.format)
-                .components(*component_mapping)
-                .subresource_range(*subresource_range);
+                let create_info = vk::ImageViewCreateInfo::builder()
+                    .image(*image)
+                    .view_type(vk::ImageViewType::TYPE_2D)
+                    .format(settings.surface_format.format)
+                    .components(*component_mapping)
+                    .subresource_range(*subresource_range);
 
-            let raw = device.create_vk_image_view(*create_info)?;
-            image_views.push(raw);
-        }
+                let raw = device.create_vk_image_view(*create_info)?;
+                Ok(raw)
+            })
+            .collect::<Result<Vec<_>>>()?;
 
         Ok((images, image_views))
     }

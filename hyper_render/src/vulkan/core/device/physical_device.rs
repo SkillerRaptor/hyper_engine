@@ -34,6 +34,7 @@ impl PhysicalDevice {
             let suitable = physical_device.check_physical_device_suitability(instance, surface)?;
             if suitable {
                 chosen_physical_device = Some(physical_device);
+                break;
             }
         }
 

@@ -116,10 +116,10 @@ impl Mesh {
 
         let mut vertices = Vec::new();
         let mut indices = Vec::new();
-        for model in &models {
+        models.iter().for_each(|model| {
             let mesh = &model.mesh;
 
-            for i in &mesh.indices {
+            mesh.indices.iter().for_each(|i| {
                 let index = *i as usize;
                 let position = Vec4f::new(
                     mesh.positions[3 * index],
@@ -151,8 +151,8 @@ impl Mesh {
 
                 vertices.push(vertex);
                 indices.push(indices.len() as u32);
-            }
-        }
+            });
+        });
 
         Self::new(
             device,

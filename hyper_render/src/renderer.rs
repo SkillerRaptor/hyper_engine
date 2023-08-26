@@ -862,7 +862,7 @@ impl Renderer {
         // TODO: Update/Set camera dynamically
 
         let mut last_material = String::new();
-        for renderable in &self.renderables {
+        self.renderables.iter().for_each(|renderable| {
             let current_material = renderable.material();
             if current_material != last_material {
                 let material = &self.materials[current_material];
@@ -916,7 +916,7 @@ impl Renderer {
                     0,
                 )
             }
-        }
+        });
     }
 
     pub(crate) fn resize(
