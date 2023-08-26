@@ -51,7 +51,7 @@ impl Swapchain {
         let settings = Self::choose_settings(window, &device);
 
         let functor = khr::Swapchain::new(instance.raw(), device.logical_device().raw());
-        let raw = Self::create_swapchain(window, surface, &device, &settings, &functor)?;
+        let raw = Self::create_swapchain(surface, &device, &settings, &functor)?;
 
         let (images, image_views) =
             Self::create_images_and_views(&device, &functor, raw, &settings)?;
@@ -133,7 +133,6 @@ impl Swapchain {
     }
 
     fn create_swapchain(
-        window: &Window,
         surface: &Surface,
         device: &Device,
         settings: &SwapchainSettings,
@@ -342,7 +341,7 @@ impl Swapchain {
 
         let settings = Self::choose_settings(window, &self.device);
 
-        let raw = Self::create_swapchain(window, surface, &self.device, &settings, &self.functor)?;
+        let raw = Self::create_swapchain(surface, &self.device, &settings, &self.functor)?;
 
         let (images, image_views) =
             Self::create_images_and_views(&self.device, &self.functor, raw, &settings)?;
