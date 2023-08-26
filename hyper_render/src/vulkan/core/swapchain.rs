@@ -31,7 +31,7 @@ pub(crate) struct Swapchain {
     extent: vk::Extent2D,
     format: vk::Format,
 
-    handle: vk::SwapchainKHR,
+    raw: vk::SwapchainKHR,
     loader: khr::Swapchain,
 
     allocator: Rc<RefCell<Allocator>>,
@@ -92,9 +92,9 @@ impl Swapchain {
 
         let loader = khr::Swapchain::new(instance.raw(), device.logical_device().raw());
 
-        let handle = unsafe { loader.create_swapchain(&create_info, None) }?;
+        let raw = unsafe { loader.create_swapchain(&create_info, None) }?;
 
-        let images = unsafe { loader.get_swapchain_images(handle) }?;
+        let images = unsafe { loader.get_swapchain_images(raw) }?;
 
         let mut image_views = Vec::new();
         for image in &images {
@@ -118,9 +118,8 @@ impl Swapchain {
                 .components(*component_mapping)
                 .subresource_range(*subresource_range);
 
-            let handle = device.create_vk_image_view(*create_info)?;
-
-            image_views.push(handle);
+            let raw = device.create_vk_image_view(*create_info)?;
+            image_views.push(raw);
         }
 
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
@@ -138,7 +137,7 @@ impl Swapchain {
             extent,
             format: surface_format.format,
 
-            handle,
+            raw,
             loader,
 
             allocator,
@@ -251,9 +250,9 @@ impl Swapchain {
     ) -> Result<Option<u32>> {
         unsafe {
             match self.loader.acquire_next_image(
-                self.handle,
+                self.raw,
                 1_000_000_000,
-                present_semaphore.handle(),
+                present_semaphore.raw(),
                 vk::Fence::null(),
             ) {
                 Ok((index, _)) => Ok(Some(index)),
@@ -274,8 +273,8 @@ impl Swapchain {
         render_semaphore: &BinarySemaphore,
         swapchain_image_index: u32,
     ) -> Result<()> {
-        let swapchains = &[self.handle];
-        let wait_semaphores = &[render_semaphore.handle()];
+        let swapchains = &[self.raw];
+        let wait_semaphores = &[render_semaphore.raw()];
         let image_indices = &[swapchain_image_index];
 
         let present_info = vk::PresentInfoKHR::builder()
@@ -350,9 +349,9 @@ impl Swapchain {
             .clipped(true)
             .old_swapchain(vk::SwapchainKHR::null());
 
-        self.handle = unsafe { self.loader.create_swapchain(&create_info, None) }?;
+        self.raw = unsafe { self.loader.create_swapchain(&create_info, None) }?;
 
-        self.images = unsafe { self.loader.get_swapchain_images(self.handle) }?;
+        self.images = unsafe { self.loader.get_swapchain_images(self.raw) }?;
 
         self.image_views = Vec::new();
         for image in &self.images {
@@ -408,7 +407,7 @@ impl Swapchain {
         }
 
         unsafe {
-            self.loader.destroy_swapchain(self.handle, None);
+            self.loader.destroy_swapchain(self.raw, None);
         }
     }
 

@@ -15,7 +15,7 @@ use color_eyre::Result;
 use std::{ffi::CStr, rc::Rc};
 
 pub(crate) struct ComputePipeline {
-    handle: vk::Pipeline,
+    raw: vk::Pipeline,
 
     device: Rc<Device>,
 }
@@ -33,36 +33,36 @@ impl ComputePipeline {
 
         let stage_create_info = vk::PipelineShaderStageCreateInfo::builder()
             .stage(vk::ShaderStageFlags::COMPUTE)
-            .module(shader.handle())
+            .module(shader.raw())
             .name(entry_name);
 
         let create_info = vk::ComputePipelineCreateInfo::builder()
             .stage(*stage_create_info)
-            .layout(layout.handle())
+            .layout(layout.raw())
             .base_pipeline_handle(vk::Pipeline::null())
             .base_pipeline_index(0);
 
-        let handle = device.create_vk_compute_pipelines(&[*create_info])?[0];
+        let raw = device.create_vk_compute_pipelines(&[*create_info])?[0];
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::PIPELINE,
-            object: handle,
+            object: raw,
             name: label,
         })?;
 
-        Ok(Self { handle, device })
+        Ok(Self { raw, device })
     }
 }
 
 impl Drop for ComputePipeline {
     fn drop(&mut self) {
-        self.device.destroy_pipeline(self.handle);
+        self.device.destroy_pipeline(self.raw);
     }
 }
 
 impl Pipeline for ComputePipeline {
-    fn handle(&self) -> vk::Pipeline {
-        self.handle
+    fn raw(&self) -> vk::Pipeline {
+        self.raw
     }
 }
 

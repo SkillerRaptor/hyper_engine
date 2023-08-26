@@ -10,7 +10,7 @@ use ash::vk;
 use color_eyre::Result;
 
 pub(crate) struct DescriptorSet {
-    handle: vk::DescriptorSet,
+    raw: vk::DescriptorSet,
 }
 
 impl DescriptorSet {
@@ -30,15 +30,14 @@ impl DescriptorSet {
 
         let allocate_info = vk::DescriptorSetAllocateInfo::builder()
             .push_next(&mut count_allocate_info)
-            .descriptor_pool(descriptor_pool.handle())
+            .descriptor_pool(descriptor_pool.raw())
             .set_layouts(&layouts);
 
-        let handle = device.allocate_vk_descriptor_sets(*allocate_info)?[0];
-
-        Ok(Self { handle })
+        let raw = device.allocate_vk_descriptor_sets(*allocate_info)?[0];
+        Ok(Self { raw })
     }
 
-    pub(crate) fn handle(&self) -> vk::DescriptorSet {
-        self.handle
+    pub(crate) fn raw(&self) -> vk::DescriptorSet {
+        self.raw
     }
 }

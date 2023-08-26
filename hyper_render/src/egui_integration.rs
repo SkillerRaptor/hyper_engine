@@ -55,7 +55,7 @@ struct Texture {
     image_view: vk::ImageView,
     sampler: vk::Sampler,
     allocation: Allocation,
-    handle: ResourceHandle,
+    raw: ResourceHandle,
 }
 
 pub(crate) struct EguiIntegration {
@@ -400,7 +400,7 @@ impl EguiIntegration {
                 image_view: view,
                 sampler,
                 allocation,
-                handle: combined_image_sampler_handle,
+                raw: combined_image_sampler_handle,
             };
 
             self.textures.insert(id, texture);

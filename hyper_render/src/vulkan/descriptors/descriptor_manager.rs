@@ -62,7 +62,7 @@ impl DescriptorManager {
         let buffer_infos = [*buffer_info];
 
         let write_set = WriteDescriptorSet::builder()
-            .dst_set(self.descriptor_sets[0].handle())
+            .dst_set(self.descriptor_sets[0].raw())
             .dst_binding(0)
             .dst_array_element(0)
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
@@ -81,7 +81,7 @@ impl DescriptorManager {
         let buffer_infos = [*buffer_info];
 
         let write_set = WriteDescriptorSet::builder()
-            .dst_set(self.descriptor_sets[0].handle())
+            .dst_set(self.descriptor_sets[0].raw())
             .dst_binding(0)
             .dst_array_element(1)
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
@@ -100,7 +100,7 @@ impl DescriptorManager {
         let buffer_infos = [*buffer_info];
 
         let write_set = WriteDescriptorSet::builder()
-            .dst_set(self.descriptor_sets[0].handle())
+            .dst_set(self.descriptor_sets[0].raw())
             .dst_binding(0)
             .dst_array_element(2)
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
@@ -121,7 +121,7 @@ impl DescriptorManager {
         let buffer_infos = [*buffer_info];
 
         let write_set = WriteDescriptorSet::builder()
-            .dst_set(self.descriptor_sets[0].handle())
+            .dst_set(self.descriptor_sets[0].raw())
             .dst_binding(0)
             .dst_array_element(handle.index())
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
@@ -132,7 +132,7 @@ impl DescriptorManager {
         handle
     }
 
-    pub(crate) fn update_buffer_handle(&mut self, handle: ResourceHandle, buffer: &Buffer) {
+    pub(crate) fn update_buffer_handle(&mut self, raw: ResourceHandle, buffer: &Buffer) {
         let buffer_info = vk::DescriptorBufferInfo::builder()
             .buffer(buffer.raw())
             .offset(0)
@@ -142,9 +142,9 @@ impl DescriptorManager {
         let buffer_infos = [*buffer_info];
 
         let write_set = WriteDescriptorSet::builder()
-            .dst_set(self.descriptor_sets[0].handle())
+            .dst_set(self.descriptor_sets[0].raw())
             .dst_binding(0)
-            .dst_array_element(handle.index())
+            .dst_array_element(raw.index())
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
             .buffer_info(&buffer_infos);
 
@@ -168,7 +168,7 @@ impl DescriptorManager {
             let image_infos = [*image_info];
 
             let write_set = WriteDescriptorSet::builder()
-                .dst_set(self.descriptor_sets[1].handle())
+                .dst_set(self.descriptor_sets[1].raw())
                 .dst_binding(0)
                 .dst_array_element(handle.index())
                 .descriptor_type(vk::DescriptorType::SAMPLED_IMAGE)
@@ -184,7 +184,7 @@ impl DescriptorManager {
             let image_infos = [*image_info];
 
             let write_set = WriteDescriptorSet::builder()
-                .dst_set(self.descriptor_sets[3].handle())
+                .dst_set(self.descriptor_sets[3].raw())
                 .dst_binding(0)
                 .dst_array_element(handle.index())
                 .descriptor_type(vk::DescriptorType::SAMPLER)

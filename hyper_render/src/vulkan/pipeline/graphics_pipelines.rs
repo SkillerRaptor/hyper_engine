@@ -16,7 +16,7 @@ use smallvec::SmallVec;
 use std::{ffi::CStr, rc::Rc};
 
 pub(crate) struct GraphicsPipeline {
-    handle: vk::Pipeline,
+    raw: vk::Pipeline,
 
     device: Rc<Device>,
 }
@@ -48,7 +48,7 @@ impl GraphicsPipeline {
         let vertex_shader_stage_create_info = if let Some(ref vertex_shader) = vertex_shader {
             vk::PipelineShaderStageCreateInfo::builder()
                 .stage(vk::ShaderStageFlags::VERTEX)
-                .module(vertex_shader.handle())
+                .module(vertex_shader.raw())
                 .name(entry_name)
         } else {
             vk::PipelineShaderStageCreateInfo::builder()
@@ -57,7 +57,7 @@ impl GraphicsPipeline {
         let fragment_shader_stage_create_info = if let Some(ref fragment_shader) = fragment_shader {
             vk::PipelineShaderStageCreateInfo::builder()
                 .stage(vk::ShaderStageFlags::FRAGMENT)
-                .module(fragment_shader.handle())
+                .module(fragment_shader.raw())
                 .name(entry_name)
         } else {
             vk::PipelineShaderStageCreateInfo::builder()
@@ -166,33 +166,33 @@ impl GraphicsPipeline {
             .depth_stencil_state(&depth_stencil_state_create_info)
             .color_blend_state(&color_blend_state_create_info)
             .dynamic_state(&dynamic_state_create_info)
-            .layout(layout.handle())
+            .layout(layout.raw())
             .render_pass(vk::RenderPass::null())
             .subpass(0)
             .base_pipeline_handle(vk::Pipeline::null())
             .base_pipeline_index(-1);
 
-        let handle = device.create_vk_graphics_pipelines(&[*create_info])?[0];
+        let raw = device.create_vk_graphics_pipelines(&[*create_info])?[0];
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::PIPELINE,
-            object: handle,
+            object: raw,
             name: label,
         })?;
 
-        Ok(Self { handle, device })
+        Ok(Self { raw, device })
     }
 }
 
 impl Drop for GraphicsPipeline {
     fn drop(&mut self) {
-        self.device.destroy_pipeline(self.handle);
+        self.device.destroy_pipeline(self.raw);
     }
 }
 
 impl Pipeline for GraphicsPipeline {
-    fn handle(&self) -> vk::Pipeline {
-        self.handle
+    fn raw(&self) -> vk::Pipeline {
+        self.raw
     }
 }
 

@@ -17,7 +17,7 @@ use color_eyre::Result;
 use std::{mem, rc::Rc};
 
 pub(crate) struct PipelineLayout {
-    handle: vk::PipelineLayout,
+    raw: vk::PipelineLayout,
 
     device: Rc<Device>,
 }
@@ -42,25 +42,25 @@ impl PipelineLayout {
             .set_layouts(descriptor_manager.descriptor_pool().layouts())
             .push_constant_ranges(&push_ranges);
 
-        let handle = device.create_vk_pipeline_layout(*create_info)?;
+        let raw = device.create_vk_pipeline_layout(*create_info)?;
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::PIPELINE_LAYOUT,
-            object: handle,
+            object: raw,
             name: label,
         })?;
 
-        Ok(Self { handle, device })
+        Ok(Self { raw, device })
     }
 
-    pub(crate) fn handle(&self) -> vk::PipelineLayout {
-        self.handle
+    pub(crate) fn raw(&self) -> vk::PipelineLayout {
+        self.raw
     }
 }
 
 impl Drop for PipelineLayout {
     fn drop(&mut self) {
-        self.device.destroy_pipeline_layout(self.handle);
+        self.device.destroy_pipeline_layout(self.raw);
     }
 }
 

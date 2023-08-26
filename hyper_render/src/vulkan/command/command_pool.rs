@@ -11,7 +11,7 @@ use color_eyre::Result;
 use std::rc::Rc;
 
 pub(crate) struct CommandPool {
-    handle: vk::CommandPool,
+    raw: vk::CommandPool,
 
     device: Rc<Device>,
 }
@@ -24,8 +24,8 @@ impl CommandPool {
             .queue_family_index(queue_families.graphics_family())
             .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER);
 
-        let handle = device.create_vk_command_pool(*create_info)?;
-        Ok(Self { handle, device })
+        let raw = device.create_vk_command_pool(*create_info)?;
+        Ok(Self { raw, device })
     }
 
     pub(crate) fn reset(&self) -> Result<()> {
@@ -34,13 +34,13 @@ impl CommandPool {
         Ok(())
     }
 
-    pub(crate) fn handle(&self) -> vk::CommandPool {
-        self.handle
+    pub(crate) fn raw(&self) -> vk::CommandPool {
+        self.raw
     }
 }
 
 impl Drop for CommandPool {
     fn drop(&mut self) {
-        self.device.destroy_command_pool(self.handle);
+        self.device.destroy_command_pool(self.raw);
     }
 }

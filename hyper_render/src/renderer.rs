@@ -875,7 +875,7 @@ impl Renderer {
                     .borrow()
                     .descriptor_sets()
                     .iter()
-                    .map(|descriptor_set| descriptor_set.handle())
+                    .map(|descriptor_set| descriptor_set.raw())
                     .collect::<Vec<_>>();
                 self.command_buffers[side as usize].bind_descriptor_sets(
                     vk::PipelineBindPoint::GRAPHICS,
@@ -945,7 +945,7 @@ impl Renderer {
             .borrow()
             .descriptor_sets()
             .iter()
-            .map(|descriptor_set| descriptor_set.handle())
+            .map(|descriptor_set| descriptor_set.raw())
             .collect::<Vec<_>>();
         self.command_buffers[side as usize].bind_descriptor_sets(
             vk::PipelineBindPoint::GRAPHICS,

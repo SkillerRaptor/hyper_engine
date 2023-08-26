@@ -112,7 +112,7 @@ impl LogicalDevice {
     ) -> Result<()> {
         unsafe {
             self.raw
-                .begin_command_buffer(command_buffer.handle(), &begin_info)?;
+                .begin_command_buffer(command_buffer.raw(), &begin_info)?;
         }
 
         Ok(())
@@ -150,13 +150,13 @@ impl LogicalDevice {
     ) {
         unsafe {
             self.raw
-                .cmd_begin_rendering(command_buffer.handle(), &rendering_info);
+                .cmd_begin_rendering(command_buffer.raw(), &rendering_info);
         }
     }
 
     pub(crate) fn cmd_end_rendering(&self, command_buffer: &CommandBuffer) {
         unsafe {
-            self.raw.cmd_end_rendering(command_buffer.handle());
+            self.raw.cmd_end_rendering(command_buffer.raw());
         }
     }
 
@@ -167,11 +167,8 @@ impl LogicalDevice {
         pipeline: &dyn Pipeline,
     ) {
         unsafe {
-            self.raw.cmd_bind_pipeline(
-                command_buffer.handle(),
-                pipeline_bind_point,
-                pipeline.handle(),
-            );
+            self.raw
+                .cmd_bind_pipeline(command_buffer.raw(), pipeline_bind_point, pipeline.raw());
         }
     }
 
@@ -182,7 +179,7 @@ impl LogicalDevice {
     ) {
         unsafe {
             self.raw
-                .cmd_pipeline_barrier2(command_buffer.handle(), &dependency_info);
+                .cmd_pipeline_barrier2(command_buffer.raw(), &dependency_info);
         }
     }
 
@@ -194,7 +191,7 @@ impl LogicalDevice {
     ) {
         unsafe {
             self.raw
-                .cmd_set_viewport(command_buffer.handle(), first_viewport, viewports);
+                .cmd_set_viewport(command_buffer.raw(), first_viewport, viewports);
         }
     }
 
@@ -206,7 +203,7 @@ impl LogicalDevice {
     ) {
         unsafe {
             self.raw
-                .cmd_set_scissor(command_buffer.handle(), first_scissor, scissors);
+                .cmd_set_scissor(command_buffer.raw(), first_scissor, scissors);
         }
     }
 
@@ -221,9 +218,9 @@ impl LogicalDevice {
     ) {
         unsafe {
             self.raw.cmd_bind_descriptor_sets(
-                command_buffer.handle(),
+                command_buffer.raw(),
                 pipeline_bind_point,
-                layout.handle(),
+                layout.raw(),
                 first_set,
                 descriptor_sets,
                 dynamic_offsets,
@@ -241,7 +238,7 @@ impl LogicalDevice {
     ) {
         unsafe {
             self.raw.cmd_push_constants(
-                command_buffer.handle(),
+                command_buffer.raw(),
                 layout,
                 stage_flags,
                 offset,
@@ -260,7 +257,7 @@ impl LogicalDevice {
     ) {
         unsafe {
             self.raw.cmd_draw(
-                command_buffer.handle(),
+                command_buffer.raw(),
                 vertex_count,
                 instance_count,
                 first_vertex,
@@ -280,7 +277,7 @@ impl LogicalDevice {
     ) {
         unsafe {
             self.raw.cmd_draw_indexed(
-                command_buffer.handle(),
+                command_buffer.raw(),
                 index_count,
                 instance_count,
                 first_index,
@@ -298,12 +295,8 @@ impl LogicalDevice {
         index_type: vk::IndexType,
     ) {
         unsafe {
-            self.raw.cmd_bind_index_buffer(
-                command_buffer.handle(),
-                buffer.raw(),
-                offset,
-                index_type,
-            );
+            self.raw
+                .cmd_bind_index_buffer(command_buffer.raw(), buffer.raw(), offset, index_type);
         }
     }
 
@@ -316,7 +309,7 @@ impl LogicalDevice {
     ) {
         unsafe {
             self.raw.cmd_copy_buffer(
-                command_buffer.handle(),
+                command_buffer.raw(),
                 source_buffer.raw(),
                 destination_buffer.raw(),
                 regions,
@@ -334,7 +327,7 @@ impl LogicalDevice {
     ) {
         unsafe {
             self.raw.cmd_copy_buffer_to_image(
-                command_buffer.handle(),
+                command_buffer.raw(),
                 source_buffer.raw(),
                 destination_image,
                 destination_image_layout,
@@ -505,7 +498,7 @@ impl LogicalDevice {
 
     pub(crate) fn end_command_buffer(&self, command_buffer: &CommandBuffer) -> Result<()> {
         unsafe {
-            self.raw.end_command_buffer(command_buffer.handle())?;
+            self.raw.end_command_buffer(command_buffer.raw())?;
         }
 
         Ok(())
@@ -525,8 +518,7 @@ impl LogicalDevice {
         flags: vk::CommandBufferResetFlags,
     ) -> Result<()> {
         unsafe {
-            self.raw
-                .reset_command_buffer(command_buffer.handle(), flags)?;
+            self.raw.reset_command_buffer(command_buffer.raw(), flags)?;
         }
 
         Ok(())
@@ -538,7 +530,7 @@ impl LogicalDevice {
         flags: vk::CommandPoolResetFlags,
     ) -> Result<()> {
         unsafe {
-            self.raw.reset_command_pool(command_pool.handle(), flags)?;
+            self.raw.reset_command_pool(command_pool.raw(), flags)?;
         }
 
         Ok(())
@@ -565,23 +557,23 @@ impl LogicalDevice {
         frame_id: u64,
     ) -> Result<()> {
         let present_wait_semaphore_info = vk::SemaphoreSubmitInfo::builder()
-            .semaphore(present_semaphore.handle())
+            .semaphore(present_semaphore.raw())
             .value(0)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
 
         let command_buffer_info = vk::CommandBufferSubmitInfo::builder()
-            .command_buffer(command_buffer.handle())
+            .command_buffer(command_buffer.raw())
             .device_mask(0);
 
         let submit_signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
-            .semaphore(submit_semaphore.handle())
+            .semaphore(submit_semaphore.raw())
             .value(frame_id)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
 
         let render_signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
-            .semaphore(render_semaphore.handle())
+            .semaphore(render_semaphore.raw())
             .value(0)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
@@ -611,17 +603,17 @@ impl LogicalDevice {
         last_upload_value: u64,
     ) -> Result<()> {
         let command_buffer_info = vk::CommandBufferSubmitInfo::builder()
-            .command_buffer(command_buffer.handle())
+            .command_buffer(command_buffer.raw())
             .device_mask(0);
 
         let wait_semaphore_info = vk::SemaphoreSubmitInfo::builder()
-            .semaphore(upload_semaphore.handle())
+            .semaphore(upload_semaphore.raw())
             .value(last_upload_value)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
 
         let signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
-            .semaphore(upload_semaphore.handle())
+            .semaphore(upload_semaphore.raw())
             .value(last_upload_value + 1)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);

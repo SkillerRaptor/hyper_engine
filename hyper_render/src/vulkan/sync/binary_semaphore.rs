@@ -11,7 +11,7 @@ use color_eyre::Result;
 use std::rc::Rc;
 
 pub(crate) struct BinarySemaphore {
-    handle: vk::Semaphore,
+    raw: vk::Semaphore,
 
     device: Rc<Device>,
 }
@@ -23,25 +23,25 @@ impl BinarySemaphore {
         let create_info =
             vk::SemaphoreCreateInfo::builder().flags(vk::SemaphoreCreateFlags::empty());
 
-        let handle = device.create_vk_semaphore(*create_info)?;
+        let raw = device.create_vk_semaphore(*create_info)?;
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::SEMAPHORE,
-            object: handle,
+            object: raw,
             name: label,
         })?;
 
-        Ok(Self { handle, device })
+        Ok(Self { raw, device })
     }
 
-    pub(crate) fn handle(&self) -> vk::Semaphore {
-        self.handle
+    pub(crate) fn raw(&self) -> vk::Semaphore {
+        self.raw
     }
 }
 
 impl Drop for BinarySemaphore {
     fn drop(&mut self) {
-        self.device.destroy_semaphore(self.handle);
+        self.device.destroy_semaphore(self.raw);
     }
 }
 

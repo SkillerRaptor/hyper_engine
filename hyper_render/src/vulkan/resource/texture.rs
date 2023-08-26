@@ -21,7 +21,7 @@ use std::{cell::RefCell, rc::Rc};
 pub(crate) struct Texture {
     allocation: Option<Allocation>,
     view: vk::ImageView,
-    handle: vk::Image,
+    raw: vk::Image,
 
     allocator: Rc<RefCell<Allocator>>,
     device: Rc<Device>,
@@ -73,23 +73,23 @@ impl Texture {
             .queue_family_indices(&[])
             .initial_layout(vk::ImageLayout::UNDEFINED);
 
-        let handle = device.create_vk_image(*create_info)?;
+        let raw = device.create_vk_image(*create_info)?;
 
-        let memory_requirements = device.get_image_memory_requirements(handle);
+        let memory_requirements = device.get_image_memory_requirements(raw);
 
         // TODO: Add label
         let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
             label: Some("<name> texture"),
             requirements: memory_requirements,
             location: MemoryLocation::GpuOnly,
-            scheme: AllocationScheme::DedicatedImage(handle),
+            scheme: AllocationScheme::DedicatedImage(raw),
         })?;
 
-        device.bind_image_memory(handle, allocation.memory(), allocation.offset())?;
+        device.bind_image_memory(raw, allocation.memory(), allocation.offset())?;
 
         upload_manager
             .borrow_mut()
-            .upload_texture(&staging_buffer, handle, *extent)?;
+            .upload_texture(&staging_buffer, raw, *extent)?;
 
         let subsource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
@@ -99,7 +99,7 @@ impl Texture {
             .layer_count(1);
 
         let view_create_info = vk::ImageViewCreateInfo::builder()
-            .image(handle)
+            .image(raw)
             .view_type(vk::ImageViewType::TYPE_2D)
             .format(format)
             .components(vk::ComponentMapping::default())
@@ -110,7 +110,7 @@ impl Texture {
         Ok(Self {
             allocation: Some(allocation),
             view,
-            handle,
+            raw,
 
             allocator,
             device,
@@ -130,6 +130,6 @@ impl Drop for Texture {
             .free(self.allocation.take().unwrap())
             .unwrap();
 
-        self.device.destroy_image(self.handle);
+        self.device.destroy_image(self.raw);
     }
 }

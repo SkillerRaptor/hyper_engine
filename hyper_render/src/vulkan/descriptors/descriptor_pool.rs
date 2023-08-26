@@ -14,7 +14,7 @@ use std::rc::Rc;
 pub(crate) struct DescriptorPool {
     layouts: SmallVec<[vk::DescriptorSetLayout; 4]>,
     limits: SmallVec<[u32; 4]>,
-    handle: vk::DescriptorPool,
+    raw: vk::DescriptorPool,
 
     device: Rc<Device>,
 }
@@ -28,14 +28,14 @@ impl DescriptorPool {
     ];
 
     pub(crate) fn new(instance: &Instance, device: Rc<Device>) -> Result<Self> {
-        let handle = Self::create_descriptor_pool(instance, &device)?;
+        let raw = Self::create_descriptor_pool(instance, &device)?;
         let limits = Self::find_limits(instance, &device);
         let layouts = Self::create_descriptor_set_layouts(&device, &limits)?;
 
         Ok(Self {
             limits,
             layouts,
-            handle,
+            raw,
 
             device,
         })
@@ -149,8 +149,8 @@ impl DescriptorPool {
         &self.limits
     }
 
-    pub(crate) fn handle(&self) -> vk::DescriptorPool {
-        self.handle
+    pub(crate) fn raw(&self) -> vk::DescriptorPool {
+        self.raw
     }
 }
 
@@ -160,6 +160,6 @@ impl Drop for DescriptorPool {
             self.device.destroy_descriptor_set_layout(*layout);
         }
 
-        self.device.destroy_descriptor_pool(self.handle);
+        self.device.destroy_descriptor_pool(self.raw);
     }
 }

@@ -15,7 +15,7 @@ use std::{
 };
 
 pub(crate) struct Shader {
-    handle: vk::ShaderModule,
+    raw: vk::ShaderModule,
 
     device: Rc<Device>,
 }
@@ -23,9 +23,9 @@ pub(crate) struct Shader {
 impl Shader {
     pub(crate) fn new(device: Rc<Device>, spirv_file: &str) -> Result<Self> {
         let bytes = Self::parse_spirv(spirv_file)?;
-        let handle = Self::create_shader_module(&device, spirv_file, &bytes)?;
+        let raw = Self::create_shader_module(&device, spirv_file, &bytes)?;
 
-        Ok(Self { handle, device })
+        Ok(Self { raw, device })
     }
 
     pub(crate) fn parse_spirv(spirv_file: &str) -> Result<Vec<u8>> {
@@ -53,18 +53,17 @@ impl Shader {
 
         let create_info = vk::ShaderModuleCreateInfo::builder().code(code);
 
-        let handle = device.create_vk_shader_module(*create_info)?;
-
-        Ok(handle)
+        let raw = device.create_vk_shader_module(*create_info)?;
+        Ok(raw)
     }
 
-    pub(crate) fn handle(&self) -> vk::ShaderModule {
-        self.handle
+    pub(crate) fn raw(&self) -> vk::ShaderModule {
+        self.raw
     }
 }
 
 impl Drop for Shader {
     fn drop(&mut self) {
-        self.device.destroy_shader_module(self.handle);
+        self.device.destroy_shader_module(self.raw);
     }
 }

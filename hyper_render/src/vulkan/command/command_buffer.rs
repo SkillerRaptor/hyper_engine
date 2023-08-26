@@ -16,7 +16,7 @@ use color_eyre::Result;
 use std::{mem, rc::Rc, slice};
 
 pub(crate) struct CommandBuffer {
-    handle: vk::CommandBuffer,
+    raw: vk::CommandBuffer,
 
     device: Rc<Device>,
 }
@@ -24,13 +24,12 @@ pub(crate) struct CommandBuffer {
 impl CommandBuffer {
     pub(crate) fn new(device: Rc<Device>, command_pool: &CommandPool) -> Result<Self> {
         let allocate_info = vk::CommandBufferAllocateInfo::builder()
-            .command_pool(command_pool.handle())
+            .command_pool(command_pool.raw())
             .command_buffer_count(1)
             .level(vk::CommandBufferLevel::PRIMARY);
 
-        let handle = device.allocate_vk_command_buffers(*allocate_info)?[0];
-
-        Ok(Self { handle, device })
+        let raw = device.allocate_vk_command_buffers(*allocate_info)?[0];
+        Ok(Self { raw, device })
     }
 
     pub(crate) fn begin(&self, usage_flags: vk::CommandBufferUsageFlags) -> Result<()> {
@@ -108,7 +107,7 @@ impl CommandBuffer {
         constants: &T,
     ) {
         self.device
-            .cmd_push_constants(self, layout.handle(), stage_flags, offset, unsafe {
+            .cmd_push_constants(self, layout.raw(), stage_flags, offset, unsafe {
                 slice::from_raw_parts(constants as *const T as *const u8, mem::size_of::<T>())
             });
     }
@@ -178,7 +177,7 @@ impl CommandBuffer {
         )
     }
 
-    pub(crate) fn handle(&self) -> vk::CommandBuffer {
-        self.handle
+    pub(crate) fn raw(&self) -> vk::CommandBuffer {
+        self.raw
     }
 }

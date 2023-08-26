@@ -11,5 +11,5 @@ pub(crate) mod pipeline_layout;
 use ash::vk;
 
 pub(crate) trait Pipeline {
-    fn handle(&self) -> vk::Pipeline;
+    fn raw(&self) -> vk::Pipeline;
 }

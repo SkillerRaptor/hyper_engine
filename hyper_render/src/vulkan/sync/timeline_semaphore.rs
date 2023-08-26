@@ -11,7 +11,7 @@ use color_eyre::Result;
 use std::rc::Rc;
 
 pub(crate) struct TimelineSemaphore {
-    handle: vk::Semaphore,
+    raw: vk::Semaphore,
 
     device: Rc<Device>,
 }
@@ -33,19 +33,19 @@ impl TimelineSemaphore {
 
         let create_info = vk::SemaphoreCreateInfo::builder().push_next(&mut type_create_info);
 
-        let handle = device.create_vk_semaphore(*create_info)?;
+        let raw = device.create_vk_semaphore(*create_info)?;
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::SEMAPHORE,
-            object: handle,
+            object: raw,
             name: label,
         })?;
 
-        Ok(Self { handle, device })
+        Ok(Self { raw, device })
     }
 
     pub(crate) fn wait_for(&self, value: u64) -> Result<()> {
-        let semaphores = [self.handle];
+        let semaphores = [self.raw];
         let values = [value];
         let wait_info = vk::SemaphoreWaitInfo::builder()
             .semaphores(&semaphores)
@@ -55,14 +55,14 @@ impl TimelineSemaphore {
         Ok(())
     }
 
-    pub(crate) fn handle(&self) -> vk::Semaphore {
-        self.handle
+    pub(crate) fn raw(&self) -> vk::Semaphore {
+        self.raw
     }
 }
 
 impl Drop for TimelineSemaphore {
     fn drop(&mut self) {
-        self.device.destroy_semaphore(self.handle);
+        self.device.destroy_semaphore(self.raw);
     }
 }
 
