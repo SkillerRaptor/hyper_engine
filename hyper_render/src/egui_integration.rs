@@ -10,7 +10,7 @@ use crate::{
     resource_handle::ResourceHandle,
     vulkan::{
         core::{device::Device, swapchain::Swapchain},
-        descriptors::descriptor_manager::DescriptorManager,
+        descriptors::{descriptor_manager::DescriptorManager, upload_manager::UploadManager},
         memory::allocator::{
             Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation,
         },
@@ -25,7 +25,6 @@ use crate::{
         resource::{
             buffer::{Buffer, BufferCreateInfo},
             shader::Shader,
-            upload_manager::UploadManager,
         },
     },
 };

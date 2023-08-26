@@ -8,12 +8,9 @@ use crate::{
     resource_handle::ResourceHandle,
     vulkan::{
         core::device::Device,
-        descriptors::descriptor_manager::DescriptorManager,
+        descriptors::{descriptor_manager::DescriptorManager, upload_manager::UploadManager},
         memory::allocator::{Allocator, MemoryLocation},
-        resource::{
-            buffer::{Buffer, BufferCreateInfo},
-            upload_manager::UploadManager,
-        },
+        resource::buffer::{Buffer, BufferCreateInfo},
     },
 };
 

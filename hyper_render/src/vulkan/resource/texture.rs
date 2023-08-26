@@ -6,13 +6,11 @@
 
 use crate::vulkan::{
     core::device::Device,
+    descriptors::upload_manager::UploadManager,
     memory::allocator::{
         Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation,
     },
-    resource::{
-        buffer::{Buffer, BufferCreateInfo},
-        upload_manager::UploadManager,
-    },
+    resource::buffer::{Buffer, BufferCreateInfo},
 };
 
 use ash::vk;

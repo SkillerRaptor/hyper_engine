@@ -7,4 +7,3 @@
 pub(crate) mod buffer;
 pub(crate) mod shader;
 pub(crate) mod texture;
-pub(crate) mod upload_manager;

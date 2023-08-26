@@ -14,10 +14,9 @@ use crate::{
             surface::Surface,
             swapchain::Swapchain,
         },
-        descriptors::descriptor_manager::DescriptorManager,
+        descriptors::{descriptor_manager::DescriptorManager, upload_manager::UploadManager},
         memory::allocator::Allocator,
         pipeline::pipeline_layout::{PipelineLayout, PipelineLayoutCreateInfo},
-        resource::upload_manager::UploadManager,
     },
 };
 

@@ -13,7 +13,7 @@ use crate::{
     vulkan::{
         command::{command_buffer::CommandBuffer, command_pool::CommandPool},
         core::{device::Device, surface::Surface, swapchain::Swapchain},
-        descriptors::descriptor_manager::DescriptorManager,
+        descriptors::{descriptor_manager::DescriptorManager, upload_manager::UploadManager},
         memory::allocator::{Allocator, MemoryLocation},
         pipeline::{
             graphics_pipelines::{
@@ -27,7 +27,6 @@ use crate::{
             buffer::{Buffer, BufferCreateInfo},
             shader::Shader,
             texture::Texture,
-            upload_manager::UploadManager,
         },
         sync::{
             binary_semaphore::{BinarySemaphore, BinarySemaphoreCreateInfo},
