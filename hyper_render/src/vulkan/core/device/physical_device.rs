@@ -23,25 +23,21 @@ impl PhysicalDevice {
 
         let physical_devices = instance.enumerate_physical_devices()?;
 
-        let mut physical_device = PhysicalDevice {
-            surface_details: SurfaceDetails::default(),
-            queue_families: QueueFamilies::default(),
-            raw: vk::PhysicalDevice::null(),
-        };
-
+        let mut chosen_physical_device = None;
         for raw in physical_devices {
-            physical_device.raw = raw;
+            let mut physical_device = PhysicalDevice {
+                surface_details: SurfaceDetails::default(),
+                queue_families: QueueFamilies::default(),
+                raw,
+            };
 
-            let suitable =
-                Self::check_physical_device_suitability(instance, surface, &mut physical_device)?;
+            let suitable = physical_device.check_physical_device_suitability(instance, surface)?;
             if suitable {
-                break;
+                chosen_physical_device = Some(physical_device);
             }
-
-            physical_device.raw = vk::PhysicalDevice::null();
         }
 
-        if physical_device.raw == vk::PhysicalDevice::null() {
+        let Some(physical_device) = chosen_physical_device else {
             return Err(eyre!("failed to find vulkan capable physical device"));
         };
 
@@ -71,35 +67,33 @@ impl PhysicalDevice {
     }
 
     fn check_physical_device_suitability(
+        &mut self,
         instance: &Instance,
         surface: &Surface,
-        physical_device: &mut PhysicalDevice,
     ) -> Result<bool> {
         let queue_families = QueueFamilies::new(QueueFamiliesCreateInfo {
             instance,
             surface,
-
-            physical_device,
+            physical_device: self,
         })?;
 
         let Some(queue_families) = queue_families else {
             return Ok(false);
         };
 
-        let extensions_supported = Self::check_extension_support(instance, physical_device)?;
+        let extensions_supported = self.check_extension_support(instance)?;
         if !extensions_supported {
             return Ok(false);
         }
 
-        let features_supported = Self::check_feature_support(instance, physical_device);
+        let features_supported = self.check_feature_support(instance);
         if !features_supported {
             return Ok(false);
         }
 
         let surface_details = SurfaceDetails::new(SurfaceDetailsCreateInfo {
             surface,
-
-            physical_device,
+            physical_device: self,
         })?;
 
         let surface_usable =
@@ -108,18 +102,14 @@ impl PhysicalDevice {
             return Ok(false);
         }
 
-        physical_device.queue_families = queue_families;
-        physical_device.surface_details = surface_details;
+        self.queue_families = queue_families;
+        self.surface_details = surface_details;
 
         Ok(true)
     }
 
-    fn check_extension_support(
-        instance: &Instance,
-        physical_device: &PhysicalDevice,
-    ) -> Result<bool> {
-        let extension_properties =
-            instance.enumerate_device_extension_properties(physical_device)?;
+    fn check_extension_support(&self, instance: &Instance) -> Result<bool> {
+        let extension_properties = instance.enumerate_device_extension_properties(self)?;
 
         let extensions = extension_properties
             .iter()
@@ -133,7 +123,7 @@ impl PhysicalDevice {
         Ok(available)
     }
 
-    fn check_feature_support(instance: &Instance, physical_device: &PhysicalDevice) -> bool {
+    fn check_feature_support(&self, instance: &Instance) -> bool {
         let mut dynamic_rendering = vk::PhysicalDeviceDynamicRenderingFeatures::builder();
         let mut timline_semaphore = vk::PhysicalDeviceTimelineSemaphoreFeatures::builder();
         let mut synchronization2 = vk::PhysicalDeviceSynchronization2Features::builder();
@@ -145,7 +135,7 @@ impl PhysicalDevice {
             .push_next(&mut synchronization2)
             .push_next(&mut descriptor_indexing);
 
-        instance.get_physical_device_features2(physical_device, &mut device_features);
+        instance.get_physical_device_features2(self, &mut device_features);
 
         let dynamic_rendering_supported = dynamic_rendering.dynamic_rendering;
         let timeline_semaphore_supported = timline_semaphore.timeline_semaphore;
