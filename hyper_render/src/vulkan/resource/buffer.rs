@@ -5,7 +5,7 @@
  */
 
 use crate::vulkan::{
-    core::{debug_utils::DebugName, device::Device},
+    core::{device::Device, instance::debug_utils::DebugName},
     memory::allocator::{
         Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation,
     },
@@ -61,7 +61,7 @@ impl Buffer {
             .sharing_mode(vk::SharingMode::EXCLUSIVE)
             .queue_family_indices(&[]);
 
-        let handle = unsafe { device.handle().create_buffer(&create_info, None) }?;
+        let handle = device.create_buffer(*create_info)?;
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::BUFFER,
@@ -79,7 +79,7 @@ impl Buffer {
         location: MemoryLocation,
         handle: vk::Buffer,
     ) -> Result<Allocation> {
-        let requirements = unsafe { device.handle().get_buffer_memory_requirements(handle) };
+        let requirements = device.get_buffer_memory_requirements(handle);
 
         // TODO: Add label
         let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
@@ -89,13 +89,7 @@ impl Buffer {
             scheme: AllocationScheme::DedicatedBuffer(handle),
         })?;
 
-        unsafe {
-            device.handle().bind_buffer_memory(
-                handle,
-                allocation.handle().memory(),
-                allocation.handle().offset(),
-            )?
-        }
+        device.bind_buffer_memory(handle, allocation.memory(), allocation.offset())?;
 
         Ok(allocation)
     }
@@ -105,7 +99,7 @@ impl Buffer {
             .allocation
             .as_ref()
             .ok_or(eyre!("failed to take allocation as reference"))?
-            .handle()
+            .raw()
             .mapped_ptr()
             .ok_or(eyre!("failed to get mapped pointer of allocation"))?
             .as_ptr() as *mut T;
@@ -129,9 +123,7 @@ impl Drop for Buffer {
             .free(self.allocation.take().unwrap())
             .unwrap();
 
-        unsafe {
-            self.device.handle().destroy_buffer(self.handle, None);
-        }
+        self.device.destroy_buffer(self.handle);
     }
 }
 

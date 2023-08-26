@@ -68,11 +68,7 @@ impl DescriptorManager {
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
             .buffer_info(&buffer_infos);
 
-        unsafe {
-            self.device
-                .handle()
-                .update_descriptor_sets(&[*write_set], &[]);
-        }
+        self.device.update_descriptor_sets(&[*write_set], &[]);
     }
 
     pub(crate) fn update_scene(&mut self, buffer: &Buffer) {
@@ -91,11 +87,7 @@ impl DescriptorManager {
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
             .buffer_info(&buffer_infos);
 
-        unsafe {
-            self.device
-                .handle()
-                .update_descriptor_sets(&[*write_set], &[]);
-        }
+        self.device.update_descriptor_sets(&[*write_set], &[]);
     }
 
     pub(crate) fn update_camera(&mut self, buffer: &Buffer) {
@@ -114,11 +106,7 @@ impl DescriptorManager {
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
             .buffer_info(&buffer_infos);
 
-        unsafe {
-            self.device
-                .handle()
-                .update_descriptor_sets(&[*write_set], &[]);
-        }
+        self.device.update_descriptor_sets(&[*write_set], &[]);
     }
 
     pub(crate) fn allocate_buffer_handle(&mut self, buffer: &Buffer) -> ResourceHandle {
@@ -139,11 +127,7 @@ impl DescriptorManager {
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
             .buffer_info(&buffer_infos);
 
-        unsafe {
-            self.device
-                .handle()
-                .update_descriptor_sets(&[*write_set], &[]);
-        }
+        self.device.update_descriptor_sets(&[*write_set], &[]);
 
         handle
     }
@@ -164,11 +148,7 @@ impl DescriptorManager {
             .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
             .buffer_info(&buffer_infos);
 
-        unsafe {
-            self.device
-                .handle()
-                .update_descriptor_sets(&[*write_set], &[]);
-        }
+        self.device.update_descriptor_sets(&[*write_set], &[]);
     }
 
     pub(crate) fn allocate_combined_image_sampler_handle(
@@ -194,11 +174,7 @@ impl DescriptorManager {
                 .descriptor_type(vk::DescriptorType::SAMPLED_IMAGE)
                 .image_info(&image_infos);
 
-            unsafe {
-                self.device
-                    .handle()
-                    .update_descriptor_sets(&[*write_set], &[]);
-            }
+            self.device.update_descriptor_sets(&[*write_set], &[]);
         }
 
         // Sampler
@@ -214,11 +190,7 @@ impl DescriptorManager {
                 .descriptor_type(vk::DescriptorType::SAMPLER)
                 .image_info(&image_infos);
 
-            unsafe {
-                self.device
-                    .handle()
-                    .update_descriptor_sets(&[*write_set], &[]);
-            }
+            self.device.update_descriptor_sets(&[*write_set], &[]);
         }
 
         handle

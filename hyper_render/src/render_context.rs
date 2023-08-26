@@ -15,7 +15,7 @@ use crate::{
             swapchain::Swapchain,
         },
         descriptors::descriptor_manager::DescriptorManager,
-        memory::allocator::{Allocator, AllocatorCreateInfo},
+        memory::allocator::Allocator,
         pipeline::pipeline_layout::{PipelineLayout, PipelineLayoutCreateInfo},
         resource::upload_manager::UploadManager,
     },
@@ -71,13 +71,7 @@ impl RenderContext {
         let surface = instance.create_surface(window)?;
         let device = instance.create_device(&surface)?;
 
-        let allocator = Rc::new(RefCell::new(Allocator::new(
-            &instance,
-            &device,
-            AllocatorCreateInfo {
-                log_leaks_on_shutdown: debug,
-            },
-        )?));
+        let allocator = device.create_allocator(debug)?;
 
         let swapchain = Swapchain::new(
             window,
@@ -93,8 +87,6 @@ impl RenderContext {
         )?));
 
         let upload_manager = Rc::new(RefCell::new(UploadManager::new(
-            &instance,
-            &surface,
             device.clone(),
             allocator.clone(),
         )?));
@@ -109,8 +101,6 @@ impl RenderContext {
         )?;
 
         let renderer = Renderer::new(
-            &instance,
-            &surface,
             device.clone(),
             allocator.clone(),
             &swapchain,
@@ -148,13 +138,8 @@ impl RenderContext {
     }
 
     pub fn begin(&mut self, window: &Window, frame_id: u64) -> Result<()> {
-        self.renderer.begin(
-            window,
-            &self.instance,
-            &self.surface,
-            frame_id,
-            &mut self.swapchain,
-        )?;
+        self.renderer
+            .begin(window, &self.surface, frame_id, &mut self.swapchain)?;
 
         Ok(())
     }
@@ -175,7 +160,7 @@ impl RenderContext {
 
     pub fn submit(&mut self, window: &Window) -> Result<()> {
         self.renderer
-            .submit(window, &self.instance, &self.surface, &mut self.swapchain)?;
+            .submit(window, &self.surface, &mut self.swapchain)?;
 
         Ok(())
     }
@@ -186,7 +171,7 @@ impl RenderContext {
 
     pub fn resize(&mut self, window: &Window) -> Result<()> {
         self.renderer
-            .resize(window, &self.instance, &self.surface, &mut self.swapchain)?;
+            .resize(window, &self.surface, &mut self.swapchain)?;
 
         Ok(())
     }

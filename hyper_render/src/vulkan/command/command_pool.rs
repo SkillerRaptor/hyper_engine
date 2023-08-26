@@ -4,11 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::vulkan::core::{
-    device::{queue_family_indices::QueueFamilyIndices, Device},
-    instance::Instance,
-    surface::Surface,
-};
+use crate::vulkan::core::device::Device;
 
 use ash::vk;
 use color_eyre::Result;
@@ -21,26 +17,20 @@ pub(crate) struct CommandPool {
 }
 
 impl CommandPool {
-    pub(crate) fn new(instance: &Instance, surface: &Surface, device: Rc<Device>) -> Result<Self> {
-        let queue_family_indices =
-            QueueFamilyIndices::new(instance, surface, device.physical_device())?;
+    pub(crate) fn new(device: Rc<Device>) -> Result<Self> {
+        let queue_families = device.queue_families();
 
         let create_info = vk::CommandPoolCreateInfo::builder()
-            .queue_family_index(queue_family_indices.graphics_family().unwrap())
+            .queue_family_index(queue_families.graphics_family())
             .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER);
 
-        let handle = unsafe { device.handle().create_command_pool(&create_info, None) }?;
-
+        let handle = device.create_command_pool(*create_info)?;
         Ok(Self { handle, device })
     }
 
     pub(crate) fn reset(&self) -> Result<()> {
-        unsafe {
-            self.device
-                .handle()
-                .reset_command_pool(self.handle, vk::CommandPoolResetFlags::empty())?;
-        }
-
+        self.device
+            .reset_command_pool(self.handle, vk::CommandPoolResetFlags::empty())?;
         Ok(())
     }
 
@@ -51,8 +41,6 @@ impl CommandPool {
 
 impl Drop for CommandPool {
     fn drop(&mut self) {
-        unsafe {
-            self.device.handle().destroy_command_pool(self.handle, None);
-        }
+        self.device.destroy_command_pool(self.handle);
     }
 }

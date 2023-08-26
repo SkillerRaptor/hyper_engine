@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
+pub(crate) mod debug_utils;
+
 use crate::vulkan::core::{
-    debug_utils::{DebugUtils, DebugUtilsCreateInfo},
-    device::Device,
+    device::{physical_device::PhysicalDevice, Device, DeviceCreateInfo},
+    instance::debug_utils::{DebugUtils, DebugUtilsCreateInfo},
     surface::{Surface, SurfaceCreateInfo},
 };
 
@@ -158,63 +160,72 @@ impl Instance {
     }
 
     pub(crate) fn create_device(self: &Rc<Self>, surface: &Surface) -> Result<Rc<Device>> {
-        let device = Device::new(self.clone(), surface)?;
+        let device = Device::new(DeviceCreateInfo {
+            instance: self.clone(),
+            surface,
+        })?;
+
         Ok(device)
     }
 
     pub(crate) fn create_logical_device(
         &self,
-        physical_device: vk::PhysicalDevice,
+        physical_device: &PhysicalDevice,
         create_info: &vk::DeviceCreateInfo,
     ) -> Result<ash::Device> {
-        let result = unsafe { self.raw.create_device(physical_device, create_info, None) }?;
+        let logical_device = unsafe {
+            self.raw
+                .create_device(physical_device.raw(), create_info, None)
+        }?;
 
-        Ok(result)
+        Ok(logical_device)
     }
 
     pub(crate) fn enumerate_device_extension_properties(
         &self,
-        physical_device: vk::PhysicalDevice,
+        physical_device: &PhysicalDevice,
     ) -> Result<Vec<vk::ExtensionProperties>> {
-        let result = unsafe {
+        let extension_properties = unsafe {
             self.raw
-                .enumerate_device_extension_properties(physical_device)
+                .enumerate_device_extension_properties(physical_device.raw())
         }?;
 
-        Ok(result)
+        Ok(extension_properties)
     }
 
     pub(crate) fn enumerate_physical_devices(&self) -> Result<Vec<vk::PhysicalDevice>> {
-        let result = unsafe { self.raw.enumerate_physical_devices() }?;
-
-        Ok(result)
+        let physical_devices = unsafe { self.raw.enumerate_physical_devices() }?;
+        Ok(physical_devices)
     }
 
     pub(crate) fn get_physical_device_features2(
         &self,
-        physical_device: vk::PhysicalDevice,
+        physical_device: &PhysicalDevice,
         physical_device_features: &mut vk::PhysicalDeviceFeatures2,
     ) {
         unsafe {
             self.raw
-                .get_physical_device_features2(physical_device, physical_device_features);
+                .get_physical_device_features2(physical_device.raw(), physical_device_features);
         }
     }
 
     pub(crate) fn get_physical_device_properties(
         &self,
-        physical_device: vk::PhysicalDevice,
+        physical_device: &PhysicalDevice,
     ) -> vk::PhysicalDeviceProperties {
-        unsafe { self.raw.get_physical_device_properties(physical_device) }
+        unsafe {
+            self.raw
+                .get_physical_device_properties(physical_device.raw())
+        }
     }
 
     pub(crate) fn get_physical_device_queue_family_properties(
         &self,
-        physical_device: vk::PhysicalDevice,
+        physical_device: &PhysicalDevice,
     ) -> Vec<vk::QueueFamilyProperties> {
         unsafe {
             self.raw
-                .get_physical_device_queue_family_properties(physical_device)
+                .get_physical_device_queue_family_properties(physical_device.raw())
         }
     }
 

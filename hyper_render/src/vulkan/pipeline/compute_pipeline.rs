@@ -5,7 +5,7 @@
  */
 
 use crate::vulkan::{
-    core::{debug_utils::DebugName, device::Device},
+    core::{device::Device, instance::debug_utils::DebugName},
     pipeline::{pipeline_layout::PipelineLayout, Pipeline},
     resource::shader::Shader,
 };
@@ -42,14 +42,7 @@ impl ComputePipeline {
             .base_pipeline_handle(vk::Pipeline::null())
             .base_pipeline_index(0);
 
-        let handle = unsafe {
-            device.handle().create_compute_pipelines(
-                vk::PipelineCache::null(),
-                &[*create_info],
-                None,
-            )
-        }
-        .map_err(|error| error.1)?[0];
+        let handle = device.create_compute_pipelines(&[*create_info])?[0];
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::PIPELINE,
@@ -63,9 +56,7 @@ impl ComputePipeline {
 
 impl Drop for ComputePipeline {
     fn drop(&mut self) {
-        unsafe {
-            self.device.handle().destroy_pipeline(self.handle, None);
-        }
+        self.device.destroy_pipeline(self.handle);
     }
 }
 

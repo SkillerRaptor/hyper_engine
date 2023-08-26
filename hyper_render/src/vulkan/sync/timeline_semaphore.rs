@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::vulkan::core::{debug_utils::DebugName, device::Device};
+use crate::vulkan::core::{device::Device, instance::debug_utils::DebugName};
 
 use ash::vk;
 use color_eyre::Result;
@@ -33,7 +33,7 @@ impl TimelineSemaphore {
 
         let create_info = vk::SemaphoreCreateInfo::builder().push_next(&mut type_create_info);
 
-        let handle = unsafe { device.handle().create_semaphore(&create_info, None) }?;
+        let handle = device.create_semaphore(*create_info)?;
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::SEMAPHORE,
@@ -51,10 +51,7 @@ impl TimelineSemaphore {
             .semaphores(&semaphores)
             .values(&values);
 
-        unsafe {
-            self.device.handle().wait_semaphores(&wait_info, u64::MAX)?;
-        }
-
+        self.device.wait_semaphores(*wait_info)?;
         Ok(())
     }
 
@@ -65,9 +62,7 @@ impl TimelineSemaphore {
 
 impl Drop for TimelineSemaphore {
     fn drop(&mut self) {
-        unsafe {
-            self.device.handle().destroy_semaphore(self.handle, None);
-        }
+        self.device.destroy_semaphore(self.handle);
     }
 }
 

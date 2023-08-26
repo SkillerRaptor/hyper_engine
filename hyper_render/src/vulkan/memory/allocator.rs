@@ -11,16 +11,15 @@ use color_eyre::Result;
 use gpu_allocator::{vulkan, AllocatorDebugSettings};
 
 pub(crate) struct Allocator {
-    handle: vulkan::Allocator,
+    raw: vulkan::Allocator,
 }
 
 impl Allocator {
-    pub(crate) fn new(
-        instance: &Instance,
-        device: &Device,
-        create_info: AllocatorCreateInfo,
-    ) -> Result<Self> {
+    pub(crate) fn new(create_info: AllocatorCreateInfo) -> Result<Self> {
         let AllocatorCreateInfo {
+            instance,
+            device,
+
             log_leaks_on_shutdown,
         } = create_info;
 
@@ -35,15 +34,14 @@ impl Allocator {
 
         let create_info = vulkan::AllocatorCreateDesc {
             instance: instance.raw().clone(),
-            device: device.handle().clone(),
-            physical_device: device.physical_device(),
+            device: device.logical_device().raw().clone(),
+            physical_device: device.physical_device().raw(),
             debug_settings,
             buffer_device_address: false,
         };
 
-        let handle = vulkan::Allocator::new(&create_info)?;
-
-        Ok(Self { handle })
+        let raw = vulkan::Allocator::new(&create_info)?;
+        Ok(Self { raw })
     }
 
     pub(crate) fn allocate(&mut self, create_info: AllocationCreateInfo) -> Result<Allocation> {
@@ -79,31 +77,40 @@ impl Allocator {
             linear: true,
         };
 
-        let allocation = self.handle.allocate(&allocation_info)?;
-
-        Ok(Allocation { handle: allocation })
+        let raw = self.raw.allocate(&allocation_info)?;
+        Ok(Allocation { raw })
     }
 
     pub(crate) fn free(&mut self, allocation: Allocation) -> Result<()> {
-        self.handle.free(allocation.handle)?;
-
+        self.raw.free(allocation.raw)?;
         Ok(())
     }
 }
 
+pub(crate) struct AllocatorCreateInfo<'a> {
+    pub(crate) instance: &'a Instance,
+    pub(crate) device: &'a Device,
+
+    pub(crate) log_leaks_on_shutdown: bool,
+}
+
 #[derive(Debug)]
 pub(crate) struct Allocation {
-    handle: vulkan::Allocation,
+    raw: vulkan::Allocation,
 }
 
 impl Allocation {
-    pub(crate) fn handle(&self) -> &vulkan::Allocation {
-        &self.handle
+    pub(crate) fn memory(&self) -> vk::DeviceMemory {
+        unsafe { self.raw.memory() }
     }
-}
 
-pub(crate) struct AllocatorCreateInfo {
-    pub(crate) log_leaks_on_shutdown: bool,
+    pub(crate) fn offset(&self) -> u64 {
+        self.raw.offset()
+    }
+
+    pub(crate) fn raw(&self) -> &vulkan::Allocation {
+        &self.raw
+    }
 }
 
 pub(crate) struct AllocationCreateInfo<'a> {

@@ -6,7 +6,7 @@
 
 use crate::vulkan::{
     command::{command_buffer::CommandBuffer, command_pool::CommandPool},
-    core::{device::Device, instance::Instance, surface::Surface},
+    core::device::Device,
     memory::allocator::{Allocator, MemoryLocation},
     resource::buffer::{Buffer, BufferCreateInfo},
     sync::timeline_semaphore::{TimelineSemaphore, TimelineSemaphoreCreateInfo},
@@ -28,13 +28,8 @@ pub(crate) struct UploadManager {
 }
 
 impl UploadManager {
-    pub(crate) fn new(
-        instance: &Instance,
-        surface: &Surface,
-        device: Rc<Device>,
-        allocator: Rc<RefCell<Allocator>>,
-    ) -> Result<Self> {
-        let upload_command_pool = CommandPool::new(instance, surface, device.clone())?;
+    pub(crate) fn new(device: Rc<Device>, allocator: Rc<RefCell<Allocator>>) -> Result<Self> {
+        let upload_command_pool = CommandPool::new(device.clone())?;
         let upload_command_buffer = CommandBuffer::new(device.clone(), &upload_command_pool)?;
 
         let upload_value = 0;

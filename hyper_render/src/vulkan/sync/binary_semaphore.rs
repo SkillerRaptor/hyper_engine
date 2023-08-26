@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::vulkan::core::{debug_utils::DebugName, device::Device};
+use crate::vulkan::core::{device::Device, instance::debug_utils::DebugName};
 
 use ash::vk;
 use color_eyre::Result;
@@ -23,7 +23,7 @@ impl BinarySemaphore {
         let create_info =
             vk::SemaphoreCreateInfo::builder().flags(vk::SemaphoreCreateFlags::empty());
 
-        let handle = unsafe { device.handle().create_semaphore(&create_info, None) }?;
+        let handle = device.create_semaphore(*create_info)?;
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::SEMAPHORE,
@@ -41,9 +41,7 @@ impl BinarySemaphore {
 
 impl Drop for BinarySemaphore {
     fn drop(&mut self) {
-        unsafe {
-            self.device.handle().destroy_semaphore(self.handle, None);
-        }
+        self.device.destroy_semaphore(self.handle);
     }
 }
 

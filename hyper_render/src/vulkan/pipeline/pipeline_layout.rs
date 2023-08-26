@@ -7,7 +7,7 @@
 use crate::{
     bindings::BindingsOffset,
     vulkan::{
-        core::{debug_utils::DebugName, device::Device},
+        core::{device::Device, instance::debug_utils::DebugName},
         descriptors::descriptor_manager::DescriptorManager,
     },
 };
@@ -42,7 +42,7 @@ impl PipelineLayout {
             .set_layouts(descriptor_manager.descriptor_pool().layouts())
             .push_constant_ranges(&push_ranges);
 
-        let handle = unsafe { device.handle().create_pipeline_layout(&create_info, None)? };
+        let handle = device.create_pipeline_layout(*create_info)?;
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::PIPELINE_LAYOUT,
@@ -60,11 +60,7 @@ impl PipelineLayout {
 
 impl Drop for PipelineLayout {
     fn drop(&mut self) {
-        unsafe {
-            self.device
-                .handle()
-                .destroy_pipeline_layout(self.handle, None);
-        }
+        self.device.destroy_pipeline_layout(self.handle);
     }
 }
 

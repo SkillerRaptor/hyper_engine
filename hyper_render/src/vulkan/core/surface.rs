@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::vulkan::core::instance::Instance;
+use crate::vulkan::core::{device::physical_device::PhysicalDevice, instance::Instance};
 
 use hyper_platform::window::Window;
 
@@ -38,12 +38,12 @@ impl Surface {
 
     pub(crate) fn get_physical_device_surface_support(
         &self,
-        physical_device: vk::PhysicalDevice,
+        physical_device: &PhysicalDevice,
         queue_family_index: u32,
     ) -> Result<bool> {
         let result = unsafe {
             self.functor.get_physical_device_surface_support(
-                physical_device,
+                physical_device.raw(),
                 queue_family_index,
                 self.raw,
             )
@@ -54,11 +54,11 @@ impl Surface {
 
     pub(crate) fn get_physical_device_surface_capabilities(
         &self,
-        physical_device: vk::PhysicalDevice,
+        physical_device: &PhysicalDevice,
     ) -> Result<vk::SurfaceCapabilitiesKHR> {
         let result = unsafe {
             self.functor
-                .get_physical_device_surface_capabilities(physical_device, self.raw)
+                .get_physical_device_surface_capabilities(physical_device.raw(), self.raw)
         }?;
 
         Ok(result)
@@ -66,11 +66,11 @@ impl Surface {
 
     pub(crate) fn get_physical_device_surface_formats(
         &self,
-        physical_device: vk::PhysicalDevice,
+        physical_device: &PhysicalDevice,
     ) -> Result<Vec<vk::SurfaceFormatKHR>> {
         let result = unsafe {
             self.functor
-                .get_physical_device_surface_formats(physical_device, self.raw)
+                .get_physical_device_surface_formats(physical_device.raw(), self.raw)
         }?;
 
         Ok(result)
@@ -78,11 +78,11 @@ impl Surface {
 
     pub(crate) fn get_physical_device_surface_present_modes(
         &self,
-        physical_device: vk::PhysicalDevice,
+        physical_device: &PhysicalDevice,
     ) -> Result<Vec<vk::PresentModeKHR>> {
         let result = unsafe {
             self.functor
-                .get_physical_device_surface_present_modes(physical_device, self.raw)
+                .get_physical_device_surface_present_modes(physical_device.raw(), self.raw)
         }?;
 
         Ok(result)

@@ -49,8 +49,7 @@ impl DescriptorPool {
             .max_sets(Self::DESCRIPTOR_TYPES.len() as u32)
             .pool_sizes(&pool_sizes);
 
-        let handle = unsafe { device.handle().create_descriptor_pool(&create_info, None) }?;
-
+        let handle = device.create_descriptor_pool(*create_info)?;
         Ok(handle)
     }
 
@@ -135,12 +134,7 @@ impl DescriptorPool {
                 .flags(vk::DescriptorSetLayoutCreateFlags::UPDATE_AFTER_BIND_POOL)
                 .bindings(&descriptor_set_layout_bindings);
 
-            let layout = unsafe {
-                device
-                    .handle()
-                    .create_descriptor_set_layout(&create_info, None)
-            }?;
-
+            let layout = device.create_descriptor_set_layout(*create_info)?;
             layouts.push(layout);
         }
 
@@ -162,16 +156,10 @@ impl DescriptorPool {
 
 impl Drop for DescriptorPool {
     fn drop(&mut self) {
-        unsafe {
-            for layout in &self.layouts {
-                self.device
-                    .handle()
-                    .destroy_descriptor_set_layout(*layout, None);
-            }
-
-            self.device
-                .handle()
-                .destroy_descriptor_pool(self.handle, None);
+        for layout in &self.layouts {
+            self.device.destroy_descriptor_set_layout(*layout);
         }
+
+        self.device.destroy_descriptor_pool(self.handle);
     }
 }

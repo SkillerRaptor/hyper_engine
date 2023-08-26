@@ -53,7 +53,7 @@ impl Shader {
 
         let create_info = vk::ShaderModuleCreateInfo::builder().code(code);
 
-        let handle = unsafe { device.handle().create_shader_module(&create_info, None) }?;
+        let handle = device.create_shader_module(*create_info)?;
 
         Ok(handle)
     }
@@ -65,10 +65,6 @@ impl Shader {
 
 impl Drop for Shader {
     fn drop(&mut self) {
-        unsafe {
-            self.device
-                .handle()
-                .destroy_shader_module(self.handle, None);
-        }
+        self.device.destroy_shader_module(self.handle);
     }
 }

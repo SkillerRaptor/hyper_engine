@@ -75,9 +75,9 @@ impl Texture {
             .queue_family_indices(&[])
             .initial_layout(vk::ImageLayout::UNDEFINED);
 
-        let handle = unsafe { device.handle().create_image(&create_info, None) }?;
+        let handle = device.create_image(*create_info)?;
 
-        let memory_requirements = unsafe { device.handle().get_image_memory_requirements(handle) };
+        let memory_requirements = device.get_image_memory_requirements(handle);
 
         // TODO: Add label
         let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
@@ -87,13 +87,7 @@ impl Texture {
             scheme: AllocationScheme::DedicatedImage(handle),
         })?;
 
-        unsafe {
-            device.handle().bind_image_memory(
-                handle,
-                allocation.handle().memory(),
-                allocation.handle().offset(),
-            )?
-        }
+        device.bind_image_memory(handle, allocation.memory(), allocation.offset())?;
 
         upload_manager
             .borrow_mut()
@@ -113,7 +107,7 @@ impl Texture {
             .components(vk::ComponentMapping::default())
             .subresource_range(*subsource_range);
 
-        let view = unsafe { device.handle().create_image_view(&view_create_info, None) }?;
+        let view = device.create_image_view(*view_create_info)?;
 
         Ok(Self {
             allocation: Some(allocation),
@@ -132,14 +126,12 @@ impl Texture {
 
 impl Drop for Texture {
     fn drop(&mut self) {
-        unsafe {
-            self.device.handle().destroy_image_view(self.view, None);
-            self.allocator
-                .borrow_mut()
-                .free(self.allocation.take().unwrap())
-                .unwrap();
+        self.device.destroy_image_view(self.view);
+        self.allocator
+            .borrow_mut()
+            .free(self.allocation.take().unwrap())
+            .unwrap();
 
-            self.device.handle().destroy_image(self.handle, None);
-        }
+        self.device.destroy_image(self.handle);
     }
 }

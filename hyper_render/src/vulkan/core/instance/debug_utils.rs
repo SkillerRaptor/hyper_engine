@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::vulkan::core::device::Device;
+use crate::vulkan::core::device::logical_device::LogicalDevice;
 
 use ash::{extensions::ext, vk, Entry, Instance as VulkanInstance};
 use color_eyre::Result;
@@ -43,7 +43,11 @@ impl DebugUtils {
         Ok(Self { raw, functor })
     }
 
-    pub(crate) fn set_object_name<T>(&self, device: &Device, debug_name: DebugName<T>) -> Result<()>
+    pub(crate) fn set_object_name<T>(
+        &self,
+        logical_device: &LogicalDevice,
+        debug_name: DebugName<T>,
+    ) -> Result<()>
     where
         T: vk::Handle,
     {
@@ -58,7 +62,7 @@ impl DebugUtils {
 
         unsafe {
             self.functor
-                .set_debug_utils_object_name(device.handle().handle(), &name_info)?;
+                .set_debug_utils_object_name(logical_device.raw().handle(), &name_info)?;
         }
 
         Ok(())

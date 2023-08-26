@@ -12,7 +12,7 @@ use crate::{
     resource_handle::ResourceHandle,
     vulkan::{
         command::{command_buffer::CommandBuffer, command_pool::CommandPool},
-        core::{device::Device, instance::Instance, surface::Surface, swapchain::Swapchain},
+        core::{device::Device, surface::Surface, swapchain::Swapchain},
         descriptors::descriptor_manager::DescriptorManager,
         memory::allocator::{Allocator, MemoryLocation},
         pipeline::{
@@ -118,8 +118,6 @@ impl Renderer {
     const FRAMES_IN_FLIGHT: u32 = 2;
 
     pub(crate) fn new(
-        instance: &Instance,
-        surface: &Surface,
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
         swapchain: &Swapchain,
@@ -127,7 +125,7 @@ impl Renderer {
         upload_manager: Rc<RefCell<UploadManager>>,
         pipeline_layout: &PipelineLayout,
     ) -> Result<Self> {
-        let command_pool = CommandPool::new(instance, surface, device.clone())?;
+        let command_pool = CommandPool::new(device.clone())?;
 
         let mut command_buffers = Vec::new();
         let mut present_semaphores = Vec::new();
@@ -376,7 +374,7 @@ impl Renderer {
             .address_mode_v(vk::SamplerAddressMode::REPEAT)
             .address_mode_w(vk::SamplerAddressMode::REPEAT);
 
-        let sampler = unsafe { device.handle().create_sampler(&sampler_create_info, None) }?;
+        let sampler = device.create_sampler(*sampler_create_info)?;
 
         let combined_image_sampler_handle = descriptor_manager
             .borrow_mut()
@@ -626,7 +624,6 @@ impl Renderer {
     pub(crate) fn begin(
         &mut self,
         window: &Window,
-        instance: &Instance,
         surface: &Surface,
         frame_id: u64,
         swapchain: &mut Swapchain,
@@ -638,7 +635,6 @@ impl Renderer {
 
         let Some(index) = swapchain.acquire_next_image(
             window,
-            instance,
             surface,
             &self.present_semaphores[side as usize],
         )?
@@ -836,7 +832,6 @@ impl Renderer {
     pub(crate) fn submit(
         &self,
         window: &Window,
-        instance: &Instance,
         surface: &Surface,
         swapchain: &mut Swapchain,
     ) -> Result<()> {
@@ -852,7 +847,6 @@ impl Renderer {
 
         swapchain.present_queue(
             window,
-            instance,
             surface,
             self.device.present_queue(),
             &self.render_semaphores[side as usize],
@@ -929,11 +923,10 @@ impl Renderer {
     pub(crate) fn resize(
         &mut self,
         window: &Window,
-        instance: &Instance,
         surface: &Surface,
         swapchain: &mut Swapchain,
     ) -> Result<()> {
-        swapchain.recreate(window, instance, surface)?;
+        swapchain.recreate(window, surface)?;
 
         Ok(())
     }

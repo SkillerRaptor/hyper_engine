@@ -325,15 +325,9 @@ impl EguiIntegration {
                 .queue_family_indices(&[])
                 .initial_layout(vk::ImageLayout::UNDEFINED);
 
-            let handle = unsafe {
-                self.device
-                    .handle()
-                    .create_image(&create_info, None)
-                    .unwrap()
-            };
+            let handle = self.device.create_image(*create_info)?;
 
-            let memory_requirements =
-                unsafe { self.device.handle().get_image_memory_requirements(handle) };
+            let memory_requirements = self.device.get_image_memory_requirements(handle);
 
             let allocation = self.allocator.borrow_mut().allocate(AllocationCreateInfo {
                 label: Some("Font Texture"),
@@ -342,16 +336,8 @@ impl EguiIntegration {
                 scheme: AllocationScheme::DedicatedImage(handle),
             })?;
 
-            unsafe {
-                self.device
-                    .handle()
-                    .bind_image_memory(
-                        handle,
-                        allocation.handle().memory(),
-                        allocation.handle().offset(),
-                    )
-                    .unwrap();
-            }
+            self.device
+                .bind_image_memory(handle, allocation.memory(), allocation.offset())?;
 
             self.upload_manager
                 .borrow_mut()
@@ -371,12 +357,7 @@ impl EguiIntegration {
                 .components(vk::ComponentMapping::default())
                 .subresource_range(*subsource_range);
 
-            let view = unsafe {
-                self.device
-                    .handle()
-                    .create_image_view(&view_create_info, None)
-                    .unwrap()
-            };
+            let view = self.device.create_image_view(*view_create_info)?;
 
             let sampler_create_info = vk::SamplerCreateInfo::builder()
                 .mag_filter(vk::Filter::LINEAR)
@@ -389,12 +370,7 @@ impl EguiIntegration {
                 .min_lod(0.0)
                 .max_lod(vk::LOD_CLAMP_NONE);
 
-            let sampler = unsafe {
-                self.device
-                    .handle()
-                    .create_sampler(&sampler_create_info, None)
-                    .unwrap()
-            };
+            let sampler = self.device.create_sampler(*sampler_create_info)?;
 
             let combined_image_sampler_handle = self
                 .descriptor_manager

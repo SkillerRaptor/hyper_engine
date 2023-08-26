@@ -5,14 +5,7 @@
  */
 
 use crate::vulkan::{
-    core::{
-        device::{
-            queue_family_indices::QueueFamilyIndices,
-            swapchain_support_details::SwapchainSupportDetails, Device,
-        },
-        instance::Instance,
-        surface::Surface,
-    },
+    core::{device::Device, instance::Instance, surface::Surface},
     memory::allocator::{
         Allocation, AllocationCreateInfo, AllocationScheme, Allocator, MemoryLocation,
     },
@@ -53,25 +46,23 @@ impl Swapchain {
         device: Rc<Device>,
         allocator: Rc<RefCell<Allocator>>,
     ) -> Result<Self> {
-        let swapchain_support_details =
-            SwapchainSupportDetails::new(surface, device.physical_device())?;
+        let surface_details = device.surface_details();
 
-        let capabilities = swapchain_support_details.capabilities();
+        let capabilities = surface_details.capabilities();
 
         let extent = Self::choose_extent(window, capabilities);
-        let surface_format = Self::choose_surface_format(swapchain_support_details.formats());
-        let present_mode = Self::choose_present_mode(swapchain_support_details.present_modes());
+        let surface_format = Self::choose_surface_format(surface_details.formats());
+        let present_mode = Self::choose_present_mode(surface_details.present_modes());
 
         let mut image_count = capabilities.min_image_count + 1;
         if capabilities.max_image_count > 0 && image_count > capabilities.max_image_count {
             image_count = capabilities.max_image_count;
         }
 
-        let queue_family_indices =
-            QueueFamilyIndices::new(instance, surface, device.physical_device())?;
+        let queue_families = device.queue_families();
         let queue_families = [
-            queue_family_indices.graphics_family().unwrap(),
-            queue_family_indices.present_family().unwrap(),
+            queue_families.graphics_family(),
+            queue_families.present_family(),
         ];
 
         let (image_sharing_mode, queue_family_indices_array): (vk::SharingMode, &[u32]) =
@@ -97,7 +88,7 @@ impl Swapchain {
             .clipped(true)
             .old_swapchain(vk::SwapchainKHR::null());
 
-        let loader = khr::Swapchain::new(instance.raw(), device.handle());
+        let loader = khr::Swapchain::new(instance.raw(), device.logical_device().raw());
 
         let handle = unsafe { loader.create_swapchain(&create_info, None) }?;
 
@@ -125,7 +116,7 @@ impl Swapchain {
                 .components(*component_mapping)
                 .subresource_range(*subresource_range);
 
-            let handle = unsafe { device.handle().create_image_view(&create_info, None) }?;
+            let handle = device.create_image_view(*create_info)?;
 
             image_views.push(handle);
         }
@@ -218,9 +209,9 @@ impl Swapchain {
             .queue_family_indices(&[])
             .initial_layout(vk::ImageLayout::UNDEFINED);
 
-        let image = unsafe { device.handle().create_image(&image_create_info, None) }?;
+        let image = device.create_image(*image_create_info)?;
 
-        let memory_requirements = unsafe { device.handle().get_image_memory_requirements(image) };
+        let memory_requirements = device.get_image_memory_requirements(image);
 
         let allocation = allocator.borrow_mut().allocate(AllocationCreateInfo {
             label: Some("depth image"),
@@ -229,13 +220,7 @@ impl Swapchain {
             scheme: AllocationScheme::DedicatedImage(image),
         })?;
 
-        unsafe {
-            device.handle().bind_image_memory(
-                image,
-                allocation.handle().memory(),
-                allocation.handle().offset(),
-            )?;
-        }
+        device.bind_image_memory(image, allocation.memory(), allocation.offset())?;
 
         let subsource_range = vk::ImageSubresourceRange::builder()
             .aspect_mask(vk::ImageAspectFlags::DEPTH)
@@ -251,11 +236,7 @@ impl Swapchain {
             .components(vk::ComponentMapping::default())
             .subresource_range(*subsource_range);
 
-        let image_view = unsafe {
-            device
-                .handle()
-                .create_image_view(&image_view_create_info, None)
-        }?;
+        let image_view = device.create_image_view(*image_view_create_info)?;
 
         Ok((image, image_view, format, allocation))
     }
@@ -263,7 +244,6 @@ impl Swapchain {
     pub(crate) fn acquire_next_image(
         &mut self,
         window: &Window,
-        instance: &Instance,
         surface: &Surface,
         present_semaphore: &BinarySemaphore,
     ) -> Result<Option<u32>> {
@@ -276,7 +256,7 @@ impl Swapchain {
             ) {
                 Ok((index, _)) => Ok(Some(index)),
                 Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => {
-                    self.recreate(window, instance, surface)?;
+                    self.recreate(window, surface)?;
                     Ok(None)
                 }
                 Err(error) => Err(error.into()),
@@ -287,7 +267,6 @@ impl Swapchain {
     pub(crate) fn present_queue(
         &mut self,
         window: &Window,
-        instance: &Instance,
         surface: &Surface,
         queue: vk::Queue,
         render_semaphore: &BinarySemaphore,
@@ -310,7 +289,7 @@ impl Swapchain {
             };
 
             if recreate {
-                self.recreate(window, instance, surface)?;
+                self.recreate(window, surface)?;
             }
         }
 
@@ -318,12 +297,7 @@ impl Swapchain {
     }
 
     // TODO: Improve this by abstracting into functions and avoid repition
-    pub(crate) fn recreate(
-        &mut self,
-        window: &Window,
-        instance: &Instance,
-        surface: &Surface,
-    ) -> Result<()> {
+    pub(crate) fn recreate(&mut self, window: &Window, surface: &Surface) -> Result<()> {
         if window.framebuffer_size() == (0, 0) {
             return Ok(());
         }
@@ -332,26 +306,23 @@ impl Swapchain {
 
         self.destroy();
 
-        let swapchain_support_details =
-            SwapchainSupportDetails::new(surface, self.device.physical_device())?;
+        let surface_details = self.device.surface_details();
 
-        let capabilities = swapchain_support_details.capabilities();
+        let capabilities = surface_details.capabilities();
 
         let extent = Self::choose_extent(window, capabilities);
-        let surface_format = Self::choose_surface_format(swapchain_support_details.formats());
-        let present_mode = Self::choose_present_mode(swapchain_support_details.present_modes());
+        let surface_format = Self::choose_surface_format(surface_details.formats());
+        let present_mode = Self::choose_present_mode(surface_details.present_modes());
 
         let mut image_count = capabilities.min_image_count + 1;
         if capabilities.max_image_count > 0 && image_count > capabilities.max_image_count {
             image_count = capabilities.max_image_count;
         }
 
-        let queue_family_indices =
-            QueueFamilyIndices::new(instance, surface, self.device.physical_device())?;
-
+        let queue_families = self.device.queue_families();
         let queue_families = [
-            queue_family_indices.graphics_family().unwrap(),
-            queue_family_indices.present_family().unwrap(),
+            queue_families.graphics_family(),
+            queue_families.present_family(),
         ];
 
         let (image_sharing_mode, queue_family_indices_array): (vk::SharingMode, &[u32]) =
@@ -403,7 +374,7 @@ impl Swapchain {
                 .components(*component_mapping)
                 .subresource_range(*subresource_range);
 
-            let handle = unsafe { self.device.handle().create_image_view(&create_info, None) }?;
+            let handle = self.device.create_image_view(*create_info)?;
 
             self.image_views.push(handle);
         }
@@ -423,21 +394,18 @@ impl Swapchain {
     }
 
     fn destroy(&mut self) {
+        self.device.destroy_image_view(self.depth_image_view);
+        self.allocator
+            .borrow_mut()
+            .free(self.depth_image_allocation.take().unwrap())
+            .unwrap();
+
+        self.device.destroy_image(self.depth_image);
+        for image_view in &self.image_views {
+            self.device.destroy_image_view(*image_view);
+        }
+
         unsafe {
-            self.device
-                .handle()
-                .destroy_image_view(self.depth_image_view, None);
-            self.allocator
-                .borrow_mut()
-                .free(self.depth_image_allocation.take().unwrap())
-                .unwrap();
-
-            self.device.handle().destroy_image(self.depth_image, None);
-
-            for image_view in &self.image_views {
-                self.device.handle().destroy_image_view(*image_view, None);
-            }
-
             self.loader.destroy_swapchain(self.handle, None);
         }
     }
