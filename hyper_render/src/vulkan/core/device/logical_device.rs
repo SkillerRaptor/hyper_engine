@@ -5,12 +5,14 @@
  */
 
 use crate::vulkan::{
-    command::command_buffer::CommandBuffer,
+    command::{command_buffer::CommandBuffer, command_pool::CommandPool},
     core::{
         device::{physical_device::PhysicalDevice, Device},
         instance::{debug_utils::DebugName, Instance},
     },
     memory::allocator::{Allocator, AllocatorCreateInfo},
+    pipeline::{pipeline_layout::PipelineLayout, Pipeline},
+    resource::buffer::Buffer,
     sync::{binary_semaphore::BinarySemaphore, timeline_semaphore::TimelineSemaphore},
 };
 
@@ -116,24 +118,24 @@ impl LogicalDevice {
 
     pub(crate) fn begin_command_buffer(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         begin_info: vk::CommandBufferBeginInfo,
     ) -> Result<()> {
         unsafe {
-            self.raw.begin_command_buffer(command_buffer, &begin_info)?;
+            self.raw
+                .begin_command_buffer(command_buffer.handle(), &begin_info)?;
         }
 
         Ok(())
     }
 
-    pub(crate) fn bind_buffer_memory(
-        &self,
-        buffer: vk::Buffer,
-        memory: vk::DeviceMemory,
-        offset: u64,
-    ) -> Result<()> {
+    pub(crate) fn bind_buffer_memory(&self, buffer: &Buffer) -> Result<()> {
         unsafe {
-            self.raw.bind_buffer_memory(buffer, memory, offset)?;
+            self.raw.bind_buffer_memory(
+                buffer.raw(),
+                buffer.allocation().memory(),
+                buffer.allocation().offset(),
+            )?;
         }
 
         Ok(())
@@ -154,82 +156,85 @@ impl LogicalDevice {
 
     pub(crate) fn cmd_begin_rendering(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         rendering_info: vk::RenderingInfo,
     ) {
         unsafe {
             self.raw
-                .cmd_begin_rendering(command_buffer, &rendering_info);
+                .cmd_begin_rendering(command_buffer.handle(), &rendering_info);
         }
     }
 
-    pub(crate) fn cmd_end_rendering(&self, command_buffer: vk::CommandBuffer) {
+    pub(crate) fn cmd_end_rendering(&self, command_buffer: &CommandBuffer) {
         unsafe {
-            self.raw.cmd_end_rendering(command_buffer);
+            self.raw.cmd_end_rendering(command_buffer.handle());
         }
     }
 
     pub(crate) fn cmd_bind_pipeline(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         pipeline_bind_point: vk::PipelineBindPoint,
-        pipeline: vk::Pipeline,
+        pipeline: &dyn Pipeline,
     ) {
         unsafe {
-            self.raw
-                .cmd_bind_pipeline(command_buffer, pipeline_bind_point, pipeline);
+            self.raw.cmd_bind_pipeline(
+                command_buffer.handle(),
+                pipeline_bind_point,
+                pipeline.handle(),
+            );
         }
     }
 
     pub(crate) fn cmd_pipeline_barrier2(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         dependency_info: vk::DependencyInfo,
     ) {
         unsafe {
             self.raw
-                .cmd_pipeline_barrier2(command_buffer, &dependency_info);
+                .cmd_pipeline_barrier2(command_buffer.handle(), &dependency_info);
         }
     }
 
     pub(crate) fn cmd_set_viewport(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         first_viewport: u32,
         viewports: &[vk::Viewport],
     ) {
         unsafe {
             self.raw
-                .cmd_set_viewport(command_buffer, first_viewport, viewports);
+                .cmd_set_viewport(command_buffer.handle(), first_viewport, viewports);
         }
     }
 
     pub(crate) fn cmd_set_scissor(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         first_scissor: u32,
         scissors: &[vk::Rect2D],
     ) {
         unsafe {
             self.raw
-                .cmd_set_scissor(command_buffer, first_scissor, scissors);
+                .cmd_set_scissor(command_buffer.handle(), first_scissor, scissors);
         }
     }
 
     pub(crate) fn cmd_bind_descriptor_sets(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         pipeline_bind_point: vk::PipelineBindPoint,
-        layout: vk::PipelineLayout,
+        layout: &PipelineLayout,
         first_set: u32,
         descriptor_sets: &[vk::DescriptorSet],
         dynamic_offsets: &[u32],
     ) {
         unsafe {
             self.raw.cmd_bind_descriptor_sets(
-                command_buffer,
+                command_buffer.handle(),
                 pipeline_bind_point,
-                layout,
+                layout.handle(),
                 first_set,
                 descriptor_sets,
                 dynamic_offsets,
@@ -239,21 +244,26 @@ impl LogicalDevice {
 
     pub(crate) fn cmd_push_constants(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         layout: vk::PipelineLayout,
         stage_flags: vk::ShaderStageFlags,
         offset: u32,
         constants: &[u8],
     ) {
         unsafe {
-            self.raw
-                .cmd_push_constants(command_buffer, layout, stage_flags, offset, constants);
+            self.raw.cmd_push_constants(
+                command_buffer.handle(),
+                layout,
+                stage_flags,
+                offset,
+                constants,
+            );
         }
     }
 
     pub(crate) fn cmd_draw(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         vertex_count: u32,
         instance_count: u32,
         first_vertex: u32,
@@ -261,7 +271,7 @@ impl LogicalDevice {
     ) {
         unsafe {
             self.raw.cmd_draw(
-                command_buffer,
+                command_buffer.handle(),
                 vertex_count,
                 instance_count,
                 first_vertex,
@@ -272,7 +282,7 @@ impl LogicalDevice {
 
     pub(crate) fn cmd_draw_indexed(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         index_count: u32,
         instance_count: u32,
         first_index: u32,
@@ -281,7 +291,7 @@ impl LogicalDevice {
     ) {
         unsafe {
             self.raw.cmd_draw_indexed(
-                command_buffer,
+                command_buffer.handle(),
                 index_count,
                 instance_count,
                 first_index,
@@ -293,44 +303,52 @@ impl LogicalDevice {
 
     pub(crate) fn cmd_bind_index_buffer(
         &self,
-        command_buffer: vk::CommandBuffer,
-        buffer: vk::Buffer,
+        command_buffer: &CommandBuffer,
+        buffer: &Buffer,
         offset: vk::DeviceSize,
         index_type: vk::IndexType,
     ) {
         unsafe {
-            self.raw
-                .cmd_bind_index_buffer(command_buffer, buffer, offset, index_type);
+            self.raw.cmd_bind_index_buffer(
+                command_buffer.handle(),
+                buffer.raw(),
+                offset,
+                index_type,
+            );
         }
     }
 
     pub(crate) fn cmd_copy_buffer(
         &self,
-        command_buffer: vk::CommandBuffer,
-        src_buffer: vk::Buffer,
-        dst_buffer: vk::Buffer,
+        command_buffer: &CommandBuffer,
+        source_buffer: &Buffer,
+        destination_buffer: &Buffer,
         regions: &[vk::BufferCopy],
     ) {
         unsafe {
-            self.raw
-                .cmd_copy_buffer(command_buffer, src_buffer, dst_buffer, regions);
+            self.raw.cmd_copy_buffer(
+                command_buffer.handle(),
+                source_buffer.raw(),
+                destination_buffer.raw(),
+                regions,
+            );
         }
     }
 
     pub(crate) fn cmd_copy_buffer_to_image(
         &self,
-        command_buffer: vk::CommandBuffer,
-        src_buffer: vk::Buffer,
-        dst_image: vk::Image,
-        dst_image_layout: vk::ImageLayout,
+        command_buffer: &CommandBuffer,
+        source_buffer: &Buffer,
+        destination_image: vk::Image,
+        destination_image_layout: vk::ImageLayout,
         regions: &[vk::BufferImageCopy],
     ) {
         unsafe {
             self.raw.cmd_copy_buffer_to_image(
-                command_buffer,
-                src_buffer,
-                dst_image,
-                dst_image_layout,
+                command_buffer.handle(),
+                source_buffer.raw(),
+                destination_image,
+                destination_image_layout,
                 regions,
             );
         }
@@ -496,19 +514,16 @@ impl LogicalDevice {
         }
     }
 
-    pub(crate) fn end_command_buffer(&self, command_buffer: vk::CommandBuffer) -> Result<()> {
+    pub(crate) fn end_command_buffer(&self, command_buffer: &CommandBuffer) -> Result<()> {
         unsafe {
-            self.raw.end_command_buffer(command_buffer)?;
+            self.raw.end_command_buffer(command_buffer.handle())?;
         }
 
         Ok(())
     }
 
-    pub(crate) fn get_buffer_memory_requirements(
-        &self,
-        buffer: vk::Buffer,
-    ) -> vk::MemoryRequirements {
-        unsafe { self.raw.get_buffer_memory_requirements(buffer) }
+    pub(crate) fn get_buffer_memory_requirements(&self, buffer: &Buffer) -> vk::MemoryRequirements {
+        unsafe { self.raw.get_buffer_memory_requirements(buffer.raw()) }
     }
 
     pub(crate) fn get_image_memory_requirements(&self, image: vk::Image) -> vk::MemoryRequirements {
@@ -517,11 +532,12 @@ impl LogicalDevice {
 
     pub(crate) fn reset_command_buffer(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         flags: vk::CommandBufferResetFlags,
     ) -> Result<()> {
         unsafe {
-            self.raw.reset_command_buffer(command_buffer, flags)?;
+            self.raw
+                .reset_command_buffer(command_buffer.handle(), flags)?;
         }
 
         Ok(())
@@ -529,11 +545,11 @@ impl LogicalDevice {
 
     pub(crate) fn reset_command_pool(
         &self,
-        command_pool: vk::CommandPool,
+        command_pool: &CommandPool,
         flags: vk::CommandPoolResetFlags,
     ) -> Result<()> {
         unsafe {
-            self.raw.reset_command_pool(command_pool, flags)?;
+            self.raw.reset_command_pool(command_pool.handle(), flags)?;
         }
 
         Ok(())

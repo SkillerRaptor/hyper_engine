@@ -37,27 +37,27 @@ impl CommandBuffer {
         let command_buffer_begin_info = vk::CommandBufferBeginInfo::builder().flags(usage_flags);
 
         self.device
-            .begin_command_buffer(self.handle, *command_buffer_begin_info)?;
+            .begin_command_buffer(self, *command_buffer_begin_info)?;
         Ok(())
     }
 
     pub(crate) fn end(&self) -> Result<()> {
-        self.device.end_command_buffer(self.handle)?;
+        self.device.end_command_buffer(self)?;
         Ok(())
     }
 
     pub(crate) fn reset(&self) -> Result<()> {
         self.device
-            .reset_command_buffer(self.handle, vk::CommandBufferResetFlags::from_raw(0))?;
+            .reset_command_buffer(self, vk::CommandBufferResetFlags::from_raw(0))?;
         Ok(())
     }
 
     pub(crate) fn begin_rendering(&self, rendering_info: vk::RenderingInfo) {
-        self.device.cmd_begin_rendering(self.handle, rendering_info);
+        self.device.cmd_begin_rendering(self, rendering_info);
     }
 
     pub(crate) fn end_rendering(&self) {
-        self.device.cmd_end_rendering(self.handle);
+        self.device.cmd_end_rendering(self);
     }
 
     pub(crate) fn bind_pipeline(
@@ -66,22 +66,20 @@ impl CommandBuffer {
         pipeline: &dyn Pipeline,
     ) {
         self.device
-            .cmd_bind_pipeline(self.handle, pipeline_bind_point, pipeline.handle());
+            .cmd_bind_pipeline(self, pipeline_bind_point, pipeline);
     }
 
     pub(crate) fn pipeline_barrier2(&self, dependency_info: vk::DependencyInfo) {
-        self.device
-            .cmd_pipeline_barrier2(self.handle, dependency_info);
+        self.device.cmd_pipeline_barrier2(self, dependency_info);
     }
 
     pub(crate) fn set_viewport(&self, first_viewport: u32, viewports: &[vk::Viewport]) {
         self.device
-            .cmd_set_viewport(self.handle, first_viewport, viewports);
+            .cmd_set_viewport(self, first_viewport, viewports);
     }
 
     pub(crate) fn set_scissor(&self, first_scissor: u32, scissors: &[vk::Rect2D]) {
-        self.device
-            .cmd_set_scissor(self.handle, first_scissor, scissors);
+        self.device.cmd_set_scissor(self, first_scissor, scissors);
     }
 
     pub(crate) fn bind_descriptor_sets(
@@ -93,9 +91,9 @@ impl CommandBuffer {
         dynamic_offsets: &[u32],
     ) {
         self.device.cmd_bind_descriptor_sets(
-            self.handle,
+            self,
             pipeline_bind_point,
-            layout.handle(),
+            layout,
             first_set,
             descriptor_sets,
             dynamic_offsets,
@@ -110,7 +108,7 @@ impl CommandBuffer {
         constants: &T,
     ) {
         self.device
-            .cmd_push_constants(self.handle, layout.handle(), stage_flags, offset, unsafe {
+            .cmd_push_constants(self, layout.handle(), stage_flags, offset, unsafe {
                 slice::from_raw_parts(constants as *const T as *const u8, mem::size_of::<T>())
             });
     }
@@ -123,7 +121,7 @@ impl CommandBuffer {
         first_instance: u32,
     ) {
         self.device.cmd_draw(
-            self.handle,
+            self,
             vertex_count,
             instance_count,
             first_vertex,
@@ -140,7 +138,7 @@ impl CommandBuffer {
         first_instance: u32,
     ) {
         self.device.cmd_draw_indexed(
-            self.handle,
+            self,
             index_count,
             instance_count,
             first_index,
@@ -151,7 +149,7 @@ impl CommandBuffer {
 
     pub(crate) fn bind_index_buffer(&self, buffer: &Buffer) {
         self.device
-            .cmd_bind_index_buffer(self.handle, buffer.handle(), 0, vk::IndexType::UINT32);
+            .cmd_bind_index_buffer(self, buffer, 0, vk::IndexType::UINT32);
     }
 
     pub(crate) fn copy_buffer(
@@ -160,12 +158,8 @@ impl CommandBuffer {
         destination_buffer: &Buffer,
         regions: &[vk::BufferCopy],
     ) {
-        self.device.cmd_copy_buffer(
-            self.handle(),
-            source_buffer.handle(),
-            destination_buffer.handle(),
-            regions,
-        )
+        self.device
+            .cmd_copy_buffer(self, source_buffer, destination_buffer, regions)
     }
 
     pub(crate) fn copy_buffer_to_image(
@@ -176,8 +170,8 @@ impl CommandBuffer {
         regions: &[vk::BufferImageCopy],
     ) {
         self.device.cmd_copy_buffer_to_image(
-            self.handle,
-            source_buffer.handle(),
+            self,
+            source_buffer,
             destination_image,
             destination_image_layout,
             regions,

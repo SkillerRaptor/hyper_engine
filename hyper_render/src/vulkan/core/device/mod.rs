@@ -8,7 +8,7 @@ pub(crate) mod logical_device;
 pub(crate) mod physical_device;
 
 use crate::vulkan::{
-    command::command_buffer::CommandBuffer,
+    command::{command_buffer::CommandBuffer, command_pool::CommandPool},
     core::{
         device::{
             logical_device::{LogicalDevice, LogicalDeviceCreateInfo},
@@ -21,6 +21,8 @@ use crate::vulkan::{
         surface::Surface,
     },
     memory::allocator::Allocator,
+    pipeline::{pipeline_layout::PipelineLayout, Pipeline},
+    resource::buffer::Buffer,
     sync::{binary_semaphore::BinarySemaphore, timeline_semaphore::TimelineSemaphore},
 };
 
@@ -92,7 +94,7 @@ impl Device {
 
     pub(crate) fn begin_command_buffer(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         begin_info: vk::CommandBufferBeginInfo,
     ) -> Result<()> {
         self.logical_device
@@ -100,14 +102,8 @@ impl Device {
         Ok(())
     }
 
-    pub(crate) fn bind_buffer_memory(
-        &self,
-        buffer: vk::Buffer,
-        memory: vk::DeviceMemory,
-        offset: u64,
-    ) -> Result<()> {
-        self.logical_device
-            .bind_buffer_memory(buffer, memory, offset)?;
+    pub(crate) fn bind_buffer_memory(&self, buffer: &Buffer) -> Result<()> {
+        self.logical_device.bind_buffer_memory(buffer)?;
         Ok(())
     }
 
@@ -124,22 +120,22 @@ impl Device {
 
     pub(crate) fn cmd_begin_rendering(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         rendering_info: vk::RenderingInfo,
     ) {
         self.logical_device
             .cmd_begin_rendering(command_buffer, rendering_info);
     }
 
-    pub(crate) fn cmd_end_rendering(&self, command_buffer: vk::CommandBuffer) {
+    pub(crate) fn cmd_end_rendering(&self, command_buffer: &CommandBuffer) {
         self.logical_device.cmd_end_rendering(command_buffer);
     }
 
     pub(crate) fn cmd_bind_pipeline(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         pipeline_bind_point: vk::PipelineBindPoint,
-        pipeline: vk::Pipeline,
+        pipeline: &dyn Pipeline,
     ) {
         self.logical_device
             .cmd_bind_pipeline(command_buffer, pipeline_bind_point, pipeline);
@@ -147,7 +143,7 @@ impl Device {
 
     pub(crate) fn cmd_pipeline_barrier2(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         dependency_info: vk::DependencyInfo,
     ) {
         self.logical_device
@@ -156,7 +152,7 @@ impl Device {
 
     pub(crate) fn cmd_set_viewport(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         first_viewport: u32,
         viewports: &[vk::Viewport],
     ) {
@@ -166,7 +162,7 @@ impl Device {
 
     pub(crate) fn cmd_set_scissor(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         first_scissor: u32,
         scissors: &[vk::Rect2D],
     ) {
@@ -176,9 +172,9 @@ impl Device {
 
     pub(crate) fn cmd_bind_descriptor_sets(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         pipeline_bind_point: vk::PipelineBindPoint,
-        layout: vk::PipelineLayout,
+        layout: &PipelineLayout,
         first_set: u32,
         descriptor_sets: &[vk::DescriptorSet],
         dynamic_offsets: &[u32],
@@ -195,7 +191,7 @@ impl Device {
 
     pub(crate) fn cmd_push_constants(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         layout: vk::PipelineLayout,
         stage_flags: vk::ShaderStageFlags,
         offset: u32,
@@ -212,7 +208,7 @@ impl Device {
 
     pub(crate) fn cmd_draw(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         vertex_count: u32,
         instance_count: u32,
         first_vertex: u32,
@@ -229,7 +225,7 @@ impl Device {
 
     pub(crate) fn cmd_draw_indexed(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         index_count: u32,
         instance_count: u32,
         first_index: u32,
@@ -248,8 +244,8 @@ impl Device {
 
     pub(crate) fn cmd_bind_index_buffer(
         &self,
-        command_buffer: vk::CommandBuffer,
-        buffer: vk::Buffer,
+        command_buffer: &CommandBuffer,
+        buffer: &Buffer,
         offset: vk::DeviceSize,
         index_type: vk::IndexType,
     ) {
@@ -259,28 +255,32 @@ impl Device {
 
     pub(crate) fn cmd_copy_buffer(
         &self,
-        command_buffer: vk::CommandBuffer,
-        src_buffer: vk::Buffer,
-        dst_buffer: vk::Buffer,
+        command_buffer: &CommandBuffer,
+        source_buffer: &Buffer,
+        destination_buffer: &Buffer,
         regions: &[vk::BufferCopy],
     ) {
-        self.logical_device
-            .cmd_copy_buffer(command_buffer, src_buffer, dst_buffer, regions);
+        self.logical_device.cmd_copy_buffer(
+            command_buffer,
+            source_buffer,
+            destination_buffer,
+            regions,
+        );
     }
 
     pub(crate) fn cmd_copy_buffer_to_image(
         &self,
-        command_buffer: vk::CommandBuffer,
-        src_buffer: vk::Buffer,
-        dst_image: vk::Image,
-        dst_image_layout: vk::ImageLayout,
+        command_buffer: &CommandBuffer,
+        source_buffer: &Buffer,
+        destination_image: vk::Image,
+        destination_image_layout: vk::ImageLayout,
         regions: &[vk::BufferImageCopy],
     ) {
         self.logical_device.cmd_copy_buffer_to_image(
             command_buffer,
-            src_buffer,
-            dst_image,
-            dst_image_layout,
+            source_buffer,
+            destination_image,
+            destination_image_layout,
             regions,
         );
     }
@@ -420,15 +420,12 @@ impl Device {
         self.logical_device.destroy_semaphore(semaphore);
     }
 
-    pub(crate) fn end_command_buffer(&self, command_buffer: vk::CommandBuffer) -> Result<()> {
+    pub(crate) fn end_command_buffer(&self, command_buffer: &CommandBuffer) -> Result<()> {
         self.logical_device.end_command_buffer(command_buffer)?;
         Ok(())
     }
 
-    pub(crate) fn get_buffer_memory_requirements(
-        &self,
-        buffer: vk::Buffer,
-    ) -> vk::MemoryRequirements {
+    pub(crate) fn get_buffer_memory_requirements(&self, buffer: &Buffer) -> vk::MemoryRequirements {
         self.logical_device.get_buffer_memory_requirements(buffer)
     }
 
@@ -438,7 +435,7 @@ impl Device {
 
     pub(crate) fn reset_command_buffer(
         &self,
-        command_buffer: vk::CommandBuffer,
+        command_buffer: &CommandBuffer,
         flags: vk::CommandBufferResetFlags,
     ) -> Result<()> {
         self.logical_device
@@ -449,7 +446,7 @@ impl Device {
 
     pub(crate) fn reset_command_pool(
         &self,
-        command_pool: vk::CommandPool,
+        command_pool: &CommandPool,
         flags: vk::CommandPoolResetFlags,
     ) -> Result<()> {
         self.logical_device

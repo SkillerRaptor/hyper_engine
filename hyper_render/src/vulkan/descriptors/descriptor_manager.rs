@@ -54,7 +54,7 @@ impl DescriptorManager {
 
     pub(crate) fn update_frame(&mut self, buffer: &Buffer) {
         let buffer_info = vk::DescriptorBufferInfo::builder()
-            .buffer(buffer.handle())
+            .buffer(buffer.raw())
             .offset(0)
             .range(vk::WHOLE_SIZE);
 
@@ -73,7 +73,7 @@ impl DescriptorManager {
 
     pub(crate) fn update_scene(&mut self, buffer: &Buffer) {
         let buffer_info = vk::DescriptorBufferInfo::builder()
-            .buffer(buffer.handle())
+            .buffer(buffer.raw())
             .offset(0)
             .range(vk::WHOLE_SIZE);
 
@@ -92,7 +92,7 @@ impl DescriptorManager {
 
     pub(crate) fn update_camera(&mut self, buffer: &Buffer) {
         let buffer_info = vk::DescriptorBufferInfo::builder()
-            .buffer(buffer.handle())
+            .buffer(buffer.raw())
             .offset(0)
             .range(vk::WHOLE_SIZE);
 
@@ -113,7 +113,7 @@ impl DescriptorManager {
         let handle = self.fetch_handle();
 
         let buffer_info = vk::DescriptorBufferInfo::builder()
-            .buffer(buffer.handle())
+            .buffer(buffer.raw())
             .offset(0)
             .range(vk::WHOLE_SIZE);
 
@@ -134,7 +134,7 @@ impl DescriptorManager {
 
     pub(crate) fn update_buffer_handle(&mut self, handle: ResourceHandle, buffer: &Buffer) {
         let buffer_info = vk::DescriptorBufferInfo::builder()
-            .buffer(buffer.handle())
+            .buffer(buffer.raw())
             .offset(0)
             .range(vk::WHOLE_SIZE);
 

@@ -30,7 +30,7 @@ impl CommandPool {
 
     pub(crate) fn reset(&self) -> Result<()> {
         self.device
-            .reset_command_pool(self.handle, vk::CommandPoolResetFlags::empty())?;
+            .reset_command_pool(self, vk::CommandPoolResetFlags::empty())?;
         Ok(())
     }
 
