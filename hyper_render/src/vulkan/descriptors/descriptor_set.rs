@@ -33,7 +33,7 @@ impl DescriptorSet {
             .descriptor_pool(descriptor_pool.handle())
             .set_layouts(&layouts);
 
-        let handle = device.allocate_descriptor_sets(*allocate_info)?[0];
+        let handle = device.allocate_vk_descriptor_sets(*allocate_info)?[0];
 
         Ok(Self { handle })
     }

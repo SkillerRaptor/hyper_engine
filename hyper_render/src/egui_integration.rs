@@ -325,7 +325,7 @@ impl EguiIntegration {
                 .queue_family_indices(&[])
                 .initial_layout(vk::ImageLayout::UNDEFINED);
 
-            let handle = self.device.create_image(*create_info)?;
+            let handle = self.device.create_vk_image(*create_info)?;
 
             let memory_requirements = self.device.get_image_memory_requirements(handle);
 
@@ -357,7 +357,7 @@ impl EguiIntegration {
                 .components(vk::ComponentMapping::default())
                 .subresource_range(*subsource_range);
 
-            let view = self.device.create_image_view(*view_create_info)?;
+            let view = self.device.create_vk_image_view(*view_create_info)?;
 
             let sampler_create_info = vk::SamplerCreateInfo::builder()
                 .mag_filter(vk::Filter::LINEAR)
@@ -370,7 +370,7 @@ impl EguiIntegration {
                 .min_lod(0.0)
                 .max_lod(vk::LOD_CLAMP_NONE);
 
-            let sampler = self.device.create_sampler(*sampler_create_info)?;
+            let sampler = self.device.create_vk_sampler(*sampler_create_info)?;
 
             let combined_image_sampler_handle = self
                 .descriptor_manager

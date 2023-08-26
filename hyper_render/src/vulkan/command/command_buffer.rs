@@ -28,7 +28,7 @@ impl CommandBuffer {
             .command_buffer_count(1)
             .level(vk::CommandBufferLevel::PRIMARY);
 
-        let handle = device.allocate_command_buffers(*allocate_info)?[0];
+        let handle = device.allocate_vk_command_buffers(*allocate_info)?[0];
 
         Ok(Self { handle, device })
     }

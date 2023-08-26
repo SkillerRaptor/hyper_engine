@@ -33,7 +33,7 @@ impl TimelineSemaphore {
 
         let create_info = vk::SemaphoreCreateInfo::builder().push_next(&mut type_create_info);
 
-        let handle = device.create_semaphore(*create_info)?;
+        let handle = device.create_vk_semaphore(*create_info)?;
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::SEMAPHORE,

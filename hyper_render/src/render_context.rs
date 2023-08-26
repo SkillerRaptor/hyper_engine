@@ -9,7 +9,7 @@ use crate::{
     renderer::Renderer,
     vulkan::{
         core::{
-            device::Device,
+            device::{AllocatorCreateInfo, Device, SwapchainCreateInfo},
             instance::{Instance, InstanceCreateInfo},
             surface::Surface,
             swapchain::Swapchain,
@@ -71,15 +71,12 @@ impl RenderContext {
         let surface = instance.create_surface(window)?;
         let device = instance.create_device(&surface)?;
 
-        let allocator = device.create_allocator(debug)?;
-
-        let swapchain = Swapchain::new(
+        let allocator = device.create_allocator(AllocatorCreateInfo { debug })?;
+        let swapchain = device.create_swapchain(SwapchainCreateInfo {
             window,
-            &instance,
-            &surface,
-            device.clone(),
-            allocator.clone(),
-        )?;
+            surface: &surface,
+            allocator: allocator.clone(),
+        })?;
 
         let descriptor_manager = Rc::new(RefCell::new(DescriptorManager::new(
             &instance,

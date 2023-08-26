@@ -374,7 +374,7 @@ impl Renderer {
             .address_mode_v(vk::SamplerAddressMode::REPEAT)
             .address_mode_w(vk::SamplerAddressMode::REPEAT);
 
-        let sampler = device.create_sampler(*sampler_create_info)?;
+        let sampler = device.create_vk_sampler(*sampler_create_info)?;
 
         let combined_image_sampler_handle = descriptor_manager
             .borrow_mut()

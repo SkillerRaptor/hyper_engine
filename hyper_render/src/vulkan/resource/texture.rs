@@ -75,7 +75,7 @@ impl Texture {
             .queue_family_indices(&[])
             .initial_layout(vk::ImageLayout::UNDEFINED);
 
-        let handle = device.create_image(*create_info)?;
+        let handle = device.create_vk_image(*create_info)?;
 
         let memory_requirements = device.get_image_memory_requirements(handle);
 
@@ -107,7 +107,7 @@ impl Texture {
             .components(vk::ComponentMapping::default())
             .subresource_range(*subsource_range);
 
-        let view = device.create_image_view(*view_create_info)?;
+        let view = device.create_vk_image_view(*view_create_info)?;
 
         Ok(Self {
             allocation: Some(allocation),

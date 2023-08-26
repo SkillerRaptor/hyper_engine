@@ -53,7 +53,7 @@ impl Shader {
 
         let create_info = vk::ShaderModuleCreateInfo::builder().code(code);
 
-        let handle = device.create_shader_module(*create_info)?;
+        let handle = device.create_vk_shader_module(*create_info)?;
 
         Ok(handle)
     }

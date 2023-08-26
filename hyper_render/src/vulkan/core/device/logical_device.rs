@@ -10,7 +10,6 @@ use crate::vulkan::{
         device::{physical_device::PhysicalDevice, Device},
         instance::{debug_utils::DebugName, Instance},
     },
-    memory::allocator::{Allocator, AllocatorCreateInfo},
     pipeline::{pipeline_layout::PipelineLayout, Pipeline},
     resource::buffer::Buffer,
     sync::{binary_semaphore::BinarySemaphore, timeline_semaphore::TimelineSemaphore},
@@ -88,16 +87,6 @@ impl LogicalDevice {
         let raw = instance.create_logical_device(physical_device, &create_info)?;
 
         Ok(Self { raw, instance })
-    }
-
-    pub(crate) fn create_allocator(&self, device: &Device, debug: bool) -> Result<Allocator> {
-        let allocator = Allocator::new(AllocatorCreateInfo {
-            instance: &self.instance,
-            device,
-            log_leaks_on_shutdown: debug,
-        })?;
-
-        Ok(allocator)
     }
 
     pub(crate) fn allocate_command_buffers(

@@ -24,7 +24,7 @@ impl CommandPool {
             .queue_family_index(queue_families.graphics_family())
             .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER);
 
-        let handle = device.create_command_pool(*create_info)?;
+        let handle = device.create_vk_command_pool(*create_info)?;
         Ok(Self { handle, device })
     }
 

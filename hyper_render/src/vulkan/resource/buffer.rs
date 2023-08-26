@@ -64,7 +64,7 @@ impl Buffer {
             .sharing_mode(vk::SharingMode::EXCLUSIVE)
             .queue_family_indices(&[]);
 
-        let raw = device.create_buffer(*create_info)?;
+        let raw = device.create_vk_buffer(*create_info)?;
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::BUFFER,

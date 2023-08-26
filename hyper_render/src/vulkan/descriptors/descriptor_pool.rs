@@ -49,7 +49,7 @@ impl DescriptorPool {
             .max_sets(Self::DESCRIPTOR_TYPES.len() as u32)
             .pool_sizes(&pool_sizes);
 
-        let handle = device.create_descriptor_pool(*create_info)?;
+        let handle = device.create_vk_descriptor_pool(*create_info)?;
         Ok(handle)
     }
 
@@ -134,7 +134,7 @@ impl DescriptorPool {
                 .flags(vk::DescriptorSetLayoutCreateFlags::UPDATE_AFTER_BIND_POOL)
                 .bindings(&descriptor_set_layout_bindings);
 
-            let layout = device.create_descriptor_set_layout(*create_info)?;
+            let layout = device.create_vk_descriptor_set_layout(*create_info)?;
             layouts.push(layout);
         }
 

@@ -42,7 +42,7 @@ impl ComputePipeline {
             .base_pipeline_handle(vk::Pipeline::null())
             .base_pipeline_index(0);
 
-        let handle = device.create_compute_pipelines(&[*create_info])?[0];
+        let handle = device.create_vk_compute_pipelines(&[*create_info])?[0];
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::PIPELINE,

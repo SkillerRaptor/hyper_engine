@@ -39,13 +39,15 @@ pub(crate) struct Swapchain {
 }
 
 impl Swapchain {
-    pub(crate) fn new(
-        window: &Window,
-        instance: &Instance,
-        surface: &Surface,
-        device: Rc<Device>,
-        allocator: Rc<RefCell<Allocator>>,
-    ) -> Result<Self> {
+    pub(crate) fn new(create_info: SwapchainCreateInfo) -> Result<Self> {
+        let SwapchainCreateInfo {
+            window,
+            instance,
+            surface,
+            device,
+            allocator,
+        } = create_info;
+
         let surface_details = device.surface_details();
 
         let capabilities = surface_details.capabilities();
@@ -116,7 +118,7 @@ impl Swapchain {
                 .components(*component_mapping)
                 .subresource_range(*subresource_range);
 
-            let handle = device.create_image_view(*create_info)?;
+            let handle = device.create_vk_image_view(*create_info)?;
 
             image_views.push(handle);
         }
@@ -209,7 +211,7 @@ impl Swapchain {
             .queue_family_indices(&[])
             .initial_layout(vk::ImageLayout::UNDEFINED);
 
-        let image = device.create_image(*image_create_info)?;
+        let image = device.create_vk_image(*image_create_info)?;
 
         let memory_requirements = device.get_image_memory_requirements(image);
 
@@ -236,7 +238,7 @@ impl Swapchain {
             .components(vk::ComponentMapping::default())
             .subresource_range(*subsource_range);
 
-        let image_view = device.create_image_view(*image_view_create_info)?;
+        let image_view = device.create_vk_image_view(*image_view_create_info)?;
 
         Ok((image, image_view, format, allocation))
     }
@@ -374,7 +376,7 @@ impl Swapchain {
                 .components(*component_mapping)
                 .subresource_range(*subresource_range);
 
-            let handle = self.device.create_image_view(*create_info)?;
+            let handle = self.device.create_vk_image_view(*create_info)?;
 
             self.image_views.push(handle);
         }
@@ -439,4 +441,12 @@ impl Drop for Swapchain {
     fn drop(&mut self) {
         self.destroy();
     }
+}
+
+pub(crate) struct SwapchainCreateInfo<'a> {
+    pub(crate) window: &'a Window,
+    pub(crate) instance: &'a Instance,
+    pub(crate) surface: &'a Surface,
+    pub(crate) device: Rc<Device>,
+    pub(crate) allocator: Rc<RefCell<Allocator>>,
 }

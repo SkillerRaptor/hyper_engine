@@ -42,7 +42,7 @@ impl PipelineLayout {
             .set_layouts(descriptor_manager.descriptor_pool().layouts())
             .push_constant_ranges(&push_ranges);
 
-        let handle = device.create_pipeline_layout(*create_info)?;
+        let handle = device.create_vk_pipeline_layout(*create_info)?;
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::PIPELINE_LAYOUT,

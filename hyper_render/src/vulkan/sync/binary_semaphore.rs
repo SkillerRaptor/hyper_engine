@@ -23,7 +23,7 @@ impl BinarySemaphore {
         let create_info =
             vk::SemaphoreCreateInfo::builder().flags(vk::SemaphoreCreateFlags::empty());
 
-        let handle = device.create_semaphore(*create_info)?;
+        let handle = device.create_vk_semaphore(*create_info)?;
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::SEMAPHORE,

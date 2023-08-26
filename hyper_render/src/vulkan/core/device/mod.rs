@@ -19,12 +19,15 @@ use crate::vulkan::{
         instance::debug_utils::DebugName,
         instance::Instance,
         surface::Surface,
+        swapchain::{self, Swapchain},
     },
-    memory::allocator::Allocator,
+    memory::allocator::{self, Allocator},
     pipeline::{pipeline_layout::PipelineLayout, Pipeline},
     resource::buffer::Buffer,
     sync::{binary_semaphore::BinarySemaphore, timeline_semaphore::TimelineSemaphore},
 };
+
+use hyper_platform::window::Window;
 
 use ash::{extensions::khr, vk};
 use color_eyre::Result;
@@ -36,6 +39,8 @@ pub(crate) struct Device {
 
     logical_device: LogicalDevice,
     physical_device: PhysicalDevice,
+
+    instance: Rc<Instance>,
 }
 
 impl Device {
@@ -50,7 +55,7 @@ impl Device {
         })?;
 
         let logical_device = LogicalDevice::new(LogicalDeviceCreateInfo {
-            instance,
+            instance: instance.clone(),
             physical_device: &physical_device,
         })?;
 
@@ -64,15 +69,48 @@ impl Device {
 
             logical_device,
             physical_device,
+
+            instance,
         }))
     }
 
-    pub(crate) fn create_allocator(&self, debug: bool) -> Result<Rc<RefCell<Allocator>>> {
-        let allocator = self.logical_device.create_allocator(self, debug)?;
+    pub(crate) fn create_allocator(
+        &self,
+        create_info: AllocatorCreateInfo,
+    ) -> Result<Rc<RefCell<Allocator>>> {
+        let AllocatorCreateInfo { debug } = create_info;
+
+        let allocator = Allocator::new(allocator::AllocatorCreateInfo {
+            instance: &self.instance,
+            device: self,
+            log_leaks_on_shutdown: debug,
+        })?;
+
         Ok(Rc::new(RefCell::new(allocator)))
     }
 
-    pub(crate) fn allocate_command_buffers(
+    pub(crate) fn create_swapchain(
+        self: &Rc<Self>,
+        create_info: SwapchainCreateInfo,
+    ) -> Result<Swapchain> {
+        let SwapchainCreateInfo {
+            window,
+            surface,
+            allocator,
+        } = create_info;
+
+        let swaphain = Swapchain::new(swapchain::SwapchainCreateInfo {
+            window,
+            instance: &self.instance,
+            surface,
+            device: self.clone(),
+            allocator,
+        })?;
+
+        Ok(swaphain)
+    }
+
+    pub(crate) fn allocate_vk_command_buffers(
         &self,
         allocate_info: vk::CommandBufferAllocateInfo,
     ) -> Result<Vec<vk::CommandBuffer>> {
@@ -82,7 +120,7 @@ impl Device {
         Ok(command_buffers)
     }
 
-    pub(crate) fn allocate_descriptor_sets(
+    pub(crate) fn allocate_vk_descriptor_sets(
         &self,
         allocate_info: vk::DescriptorSetAllocateInfo,
     ) -> Result<Vec<vk::DescriptorSet>> {
@@ -285,12 +323,12 @@ impl Device {
         );
     }
 
-    pub(crate) fn create_buffer(&self, create_info: vk::BufferCreateInfo) -> Result<vk::Buffer> {
+    pub(crate) fn create_vk_buffer(&self, create_info: vk::BufferCreateInfo) -> Result<vk::Buffer> {
         let buffer = self.logical_device.create_buffer(create_info)?;
         Ok(buffer)
     }
 
-    pub(crate) fn create_command_pool(
+    pub(crate) fn create_vk_command_pool(
         &self,
         create_info: vk::CommandPoolCreateInfo,
     ) -> Result<vk::CommandPool> {
@@ -298,7 +336,7 @@ impl Device {
         Ok(command_pool)
     }
 
-    pub(crate) fn create_compute_pipelines(
+    pub(crate) fn create_vk_compute_pipelines(
         &self,
         create_infos: &[vk::ComputePipelineCreateInfo],
     ) -> Result<Vec<vk::Pipeline>> {
@@ -306,7 +344,7 @@ impl Device {
         Ok(compute_pipelines)
     }
 
-    pub(crate) fn create_descriptor_pool(
+    pub(crate) fn create_vk_descriptor_pool(
         &self,
         create_info: vk::DescriptorPoolCreateInfo,
     ) -> Result<vk::DescriptorPool> {
@@ -314,7 +352,7 @@ impl Device {
         Ok(descriptor_pool)
     }
 
-    pub(crate) fn create_descriptor_set_layout(
+    pub(crate) fn create_vk_descriptor_set_layout(
         &self,
         create_info: vk::DescriptorSetLayoutCreateInfo,
     ) -> Result<vk::DescriptorSetLayout> {
@@ -324,7 +362,7 @@ impl Device {
         Ok(descriptor_set_layout)
     }
 
-    pub(crate) fn create_graphics_pipelines(
+    pub(crate) fn create_vk_graphics_pipelines(
         &self,
         create_infos: &[vk::GraphicsPipelineCreateInfo],
     ) -> Result<Vec<vk::Pipeline>> {
@@ -334,12 +372,12 @@ impl Device {
         Ok(graphics_pipelines)
     }
 
-    pub(crate) fn create_image(&self, create_info: vk::ImageCreateInfo) -> Result<vk::Image> {
+    pub(crate) fn create_vk_image(&self, create_info: vk::ImageCreateInfo) -> Result<vk::Image> {
         let image = self.logical_device.create_image(create_info)?;
         Ok(image)
     }
 
-    pub(crate) fn create_image_view(
+    pub(crate) fn create_vk_image_view(
         &self,
         create_info: vk::ImageViewCreateInfo,
     ) -> Result<vk::ImageView> {
@@ -347,7 +385,7 @@ impl Device {
         Ok(image_view)
     }
 
-    pub(crate) fn create_pipeline_layout(
+    pub(crate) fn create_vk_pipeline_layout(
         &self,
         create_info: vk::PipelineLayoutCreateInfo,
     ) -> Result<vk::PipelineLayout> {
@@ -355,12 +393,15 @@ impl Device {
         Ok(pipeline_layout)
     }
 
-    pub(crate) fn create_sampler(&self, create_info: vk::SamplerCreateInfo) -> Result<vk::Sampler> {
+    pub(crate) fn create_vk_sampler(
+        &self,
+        create_info: vk::SamplerCreateInfo,
+    ) -> Result<vk::Sampler> {
         let sampler = self.logical_device.create_sampler(create_info)?;
         Ok(sampler)
     }
 
-    pub(crate) fn create_shader_module(
+    pub(crate) fn create_vk_shader_module(
         &self,
         create_info: vk::ShaderModuleCreateInfo,
     ) -> Result<vk::ShaderModule> {
@@ -368,7 +409,7 @@ impl Device {
         Ok(shader_module)
     }
 
-    pub(crate) fn create_semaphore(
+    pub(crate) fn create_vk_semaphore(
         &self,
         create_info: vk::SemaphoreCreateInfo,
     ) -> Result<vk::Semaphore> {
@@ -542,4 +583,14 @@ impl Device {
 pub(crate) struct DeviceCreateInfo<'a> {
     pub(crate) instance: Rc<Instance>,
     pub(crate) surface: &'a Surface,
+}
+
+pub(crate) struct AllocatorCreateInfo {
+    pub(crate) debug: bool,
+}
+
+pub(crate) struct SwapchainCreateInfo<'a> {
+    pub(crate) window: &'a Window,
+    pub(crate) surface: &'a Surface,
+    pub(crate) allocator: Rc<RefCell<Allocator>>,
 }

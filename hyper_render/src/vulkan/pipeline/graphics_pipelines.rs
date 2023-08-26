@@ -172,7 +172,7 @@ impl GraphicsPipeline {
             .base_pipeline_handle(vk::Pipeline::null())
             .base_pipeline_index(-1);
 
-        let handle = device.create_graphics_pipelines(&[*create_info])?[0];
+        let handle = device.create_vk_graphics_pipelines(&[*create_info])?[0];
 
         device.set_object_name(DebugName {
             ty: vk::ObjectType::PIPELINE,
