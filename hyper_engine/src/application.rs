@@ -7,7 +7,6 @@
 use crate::game::Game;
 
 use hyper_game::camera::free_camera::FpsCamera;
-use hyper_math::vector::Vec2f;
 use hyper_platform::{
     event::Event,
     event_loop::EventLoop,
@@ -17,6 +16,7 @@ use hyper_platform::{
 use hyper_render::render_context::{Frame, RenderContext};
 
 use color_eyre::{eyre::eyre, Result};
+use nalgebra_glm::Vec2;
 use std::time::Instant;
 
 pub struct Application {
@@ -99,7 +99,7 @@ impl Application {
                     position_y,
                 } => {
                     self.input
-                        .set_mouse_position(Vec2f::new(position_x as f32, position_y as f32));
+                        .set_mouse_position(Vec2::new(position_x as f32, position_y as f32));
                 }
                 Event::MousePressed { button } => {
                     self.input.set_mouse(button, true);
@@ -143,11 +143,11 @@ impl Application {
                             unused_3: 0,
                             unused_4: 0,
 
-                            screen_size: Vec2f::new(
+                            screen_size: Vec2::new(
                                 self.window.framebuffer_size().0 as f32,
                                 self.window.framebuffer_size().1 as f32,
                             ),
-                            unused_5: Vec2f::default(),
+                            unused_5: Vec2::default(),
                         };
 
                         self.render_context.update_frame(frame).unwrap();

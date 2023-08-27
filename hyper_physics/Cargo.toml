@@ -15,4 +15,5 @@ hyper_core = { path = "../hyper_core" }
 hyper_math = { path = "../hyper_math" }
 
 color-eyre = "0.6"
+nalgebra-glm = "0.18"
 log = "0.4"

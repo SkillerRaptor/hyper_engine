@@ -823,6 +823,7 @@ dependencies = [
  "hyper_engine",
  "hyper_math",
  "log",
+ "nalgebra-glm",
 ]
 
 [[package]]
@@ -839,6 +840,7 @@ dependencies = [
  "hyper_platform",
  "hyper_render",
  "log",
+ "nalgebra-glm",
 ]
 
 [[package]]
@@ -870,6 +872,7 @@ dependencies = [
  "hyper_core",
  "hyper_math",
  "log",
+ "nalgebra-glm",
 ]
 
 [[package]]

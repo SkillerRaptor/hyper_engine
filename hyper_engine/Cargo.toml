@@ -22,3 +22,4 @@ hyper_render = { path = "../hyper_render" }
 color-eyre = "0.6"
 egui = "0.22"
 log = "0.4"
+nalgebra-glm = "0.18"

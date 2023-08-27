@@ -19,3 +19,4 @@ color-eyre = "0.6"
 egui = "0.22"
 fern = { version = "0.6", features = ["colored"] }
 log = "0.4"
+nalgebra-glm = "0.18"

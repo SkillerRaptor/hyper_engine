@@ -7,11 +7,11 @@
 use hyper_engine::game::Game;
 
 use egui::Context;
-use hyper_math::vector::Vec3f;
+use nalgebra_glm::Vec3;
 
 pub(crate) struct Editor {
     rotation: f32,
-    light_position: Vec3f,
+    light_position: Vec3,
     text: String,
 }
 
@@ -19,7 +19,7 @@ impl Editor {
     pub(crate) fn new() -> Self {
         Self {
             rotation: 0.0,
-            light_position: Vec3f::default(),
+            light_position: Vec3::default(),
             text: String::new(),
         }
     }
