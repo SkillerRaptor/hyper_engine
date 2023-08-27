@@ -87,12 +87,20 @@ impl Application {
         let mut window_focused = true;
         self.event_loop.run(|event| {
             match event {
-                Event::EventsCleared => self.window.request_redraw(),
+                Event::EventsCleared => {
+                    self.window.request_redraw();
+
+                    false
+                }
                 Event::KeyPressed { button } => {
                     self.input.set_key(button, true);
+
+                    false
                 }
                 Event::KeyReleased { button } => {
                     self.input.set_key(button, false);
+
+                    false
                 }
                 Event::MouseMove {
                     position_x,
@@ -100,12 +108,18 @@ impl Application {
                 } => {
                     self.input
                         .set_mouse_position(Vec2::new(position_x as f32, position_y as f32));
+
+                    false
                 }
                 Event::MousePressed { button } => {
                     self.input.set_mouse(button, true);
+
+                    false
                 }
                 Event::MouseReleased { button } => {
                     self.input.set_mouse(button, false);
+
+                    false
                 }
                 Event::UpdateFrame => {
                     let new_time = Instant::now();
@@ -123,6 +137,8 @@ impl Application {
                     camera.update(frame_time, &self.input, window_focused, &mut self.window);
 
                     self.game.update();
+
+                    false
                 }
                 Event::RenderFrame => {
                     // Render Game
@@ -180,27 +196,30 @@ impl Application {
                     self.render_context.submit(&self.window).unwrap();
 
                     self.frame_id += 1;
+
+                    false
                 }
-                Event::WinitWindowEvent { event } => {
-                    self.render_context.handle_gui_event(event);
-                }
+                Event::WinitWindowEvent { event } => self.render_context.handle_gui_event(event),
                 Event::WindowFocused { focused } => {
                     window_focused = focused;
+
+                    false
                 }
                 Event::WindowResized { width, height } => {
                     if self.window.framebuffer_size() == (width, height) {
-                        return;
+                        return false;
                     }
 
                     if width == 0 || height == 0 {
-                        return;
+                        return false;
                     }
 
                     self.render_context.resize(&self.window).unwrap();
 
                     camera.on_window_resize(width, height);
+                    false
                 }
-                _ => {}
+                _ => false,
             }
         });
 

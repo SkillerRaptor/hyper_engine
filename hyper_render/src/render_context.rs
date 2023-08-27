@@ -179,8 +179,8 @@ impl RenderContext {
         Ok(())
     }
 
-    pub fn handle_gui_event(&mut self, winit_event: &WindowEvent<'_>) {
-        self.egui_integration.handle_event(winit_event);
+    pub fn handle_gui_event(&mut self, winit_event: &WindowEvent<'_>) -> bool {
+        self.egui_integration.handle_event(winit_event)
     }
 
     pub fn begin_gui(&mut self, window: &Window) {

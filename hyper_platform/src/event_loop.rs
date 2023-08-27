@@ -29,22 +29,28 @@ impl EventLoop {
 
     pub fn run<F>(&mut self, mut event_handler: F)
     where
-        F: FnMut(Event),
+        F: FnMut(Event) -> bool,
     {
         self.raw.run_return(|event, _, control_flow| {
             *control_flow = ControlFlow::Poll;
 
             match event {
-                WinitEvent::MainEventsCleared => event_handler(Event::EventsCleared),
+                WinitEvent::MainEventsCleared => {
+                    event_handler(Event::EventsCleared);
+                }
                 WinitEvent::DeviceEvent {
                     event: DeviceEvent::MouseMotion { delta },
                     ..
-                } => event_handler(Event::MouseMoved {
-                    delta_x: delta.0,
-                    delta_y: delta.1,
-                }),
+                } => {
+                    event_handler(Event::MouseMoved {
+                        delta_x: delta.0,
+                        delta_y: delta.1,
+                    });
+                }
                 WinitEvent::WindowEvent { event, .. } => {
-                    event_handler(Event::WinitWindowEvent { event: &event });
+                    if event_handler(Event::WinitWindowEvent { event: &event }) {
+                        return;
+                    }
 
                     match event {
                         WindowEvent::CloseRequested => {
@@ -61,10 +67,10 @@ impl EventLoop {
                                 let key_code = KeyCode::from(virtual_key_code);
                                 match input.state {
                                     ElementState::Pressed => {
-                                        event_handler(Event::KeyPressed { button: key_code })
+                                        event_handler(Event::KeyPressed { button: key_code });
                                     }
                                     ElementState::Released => {
-                                        event_handler(Event::KeyReleased { button: key_code })
+                                        event_handler(Event::KeyReleased { button: key_code });
                                     }
                                 }
                             }
@@ -79,10 +85,10 @@ impl EventLoop {
 
                             match state {
                                 ElementState::Pressed => {
-                                    event_handler(Event::MousePressed { button })
+                                    event_handler(Event::MousePressed { button });
                                 }
                                 ElementState::Released => {
-                                    event_handler(Event::MouseReleased { button })
+                                    event_handler(Event::MouseReleased { button });
                                 }
                             }
                         }
@@ -94,19 +100,23 @@ impl EventLoop {
                                     ..
                                 }) => -scroll,
                             };
-                            event_handler(Event::MouseScrolled { delta })
+                            event_handler(Event::MouseScrolled { delta });
                         }
                         WindowEvent::Focused(focused) => {
-                            event_handler(Event::WindowFocused { focused })
+                            event_handler(Event::WindowFocused { focused });
                         }
-                        WindowEvent::Moved(position) => event_handler(Event::WindowMoved {
-                            x: position.x,
-                            y: position.y,
-                        }),
-                        WindowEvent::Resized(size) => event_handler(Event::WindowResized {
-                            width: size.width,
-                            height: size.height,
-                        }),
+                        WindowEvent::Moved(position) => {
+                            event_handler(Event::WindowMoved {
+                                x: position.x,
+                                y: position.y,
+                            });
+                        }
+                        WindowEvent::Resized(size) => {
+                            event_handler(Event::WindowResized {
+                                width: size.width,
+                                height: size.height,
+                            });
+                        }
                         _ => {}
                     }
                 }
