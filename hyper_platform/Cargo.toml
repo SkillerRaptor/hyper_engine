@@ -16,4 +16,5 @@ hyper_math = { path = "../hyper_math" }
 
 color-eyre = "0.6"
 log = "0.4"
+nalgebra-glm = "0.18"
 winit = "0.28"

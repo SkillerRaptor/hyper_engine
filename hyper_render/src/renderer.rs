@@ -36,14 +36,11 @@ use crate::{
 };
 
 use hyper_game::camera::Camera;
-use hyper_math::{
-    matrix::Mat4x4f,
-    vector::{Vec3f, Vec4f},
-};
 use hyper_platform::window::Window;
 
 use ash::vk;
 use color_eyre::Result;
+use nalgebra_glm::{Mat4, Vec3, Vec4};
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 
 #[repr(C)]
@@ -64,10 +61,10 @@ pub(crate) struct ObjectGeometry {
 
 #[repr(C)]
 pub(crate) struct ObjectMaterial {
-    base_color: Vec4f,
-    unused_0: Vec4f,
-    unused_1: Vec4f,
-    unused_2: Vec4f,
+    base_color: Vec4,
+    unused_0: Vec4,
+    unused_1: Vec4,
+    unused_2: Vec4,
 
     textures: ResourceHandle,
     unused_3: u32,
@@ -270,22 +267,22 @@ impl Renderer {
 
         let triangle_vertices = vec![
             Vertex {
-                position: Vec4f::new(1.0, 1.0, 0.5, 1.0),
-                normal: Vec4f::default(),
-                color: Vec4f::new(1.0, 0.0, 0.0, 1.0),
-                uv: Vec4f::default(),
+                position: Vec4::new(1.0, 1.0, 0.5, 1.0),
+                normal: Vec4::default(),
+                color: Vec4::new(1.0, 0.0, 0.0, 1.0),
+                uv: Vec4::default(),
             },
             Vertex {
-                position: Vec4f::new(0.0, -1.0, 0.5, 1.0),
-                normal: Vec4f::default(),
-                color: Vec4f::new(0.0, 0.0, 1.0, 1.0),
-                uv: Vec4f::default(),
+                position: Vec4::new(0.0, -1.0, 0.5, 1.0),
+                normal: Vec4::default(),
+                color: Vec4::new(0.0, 0.0, 1.0, 1.0),
+                uv: Vec4::default(),
             },
             Vertex {
-                position: Vec4f::new(-1.0, 1.0, 0.5, 1.0),
-                normal: Vec4f::default(),
-                color: Vec4f::new(0.0, 1.0, 0.0, 1.0),
-                uv: Vec4f::default(),
+                position: Vec4::new(-1.0, 1.0, 0.5, 1.0),
+                normal: Vec4::default(),
+                color: Vec4::new(0.0, 1.0, 0.0, 1.0),
+                uv: Vec4::default(),
             },
         ];
 
@@ -343,18 +340,18 @@ impl Renderer {
                 label: "Buffer Projection View",
 
                 usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
-                size: mem::size_of::<Mat4x4f>() as u64,
+                size: mem::size_of::<Mat4>() as u64,
                 location: MemoryLocation::GpuOnly,
             },
         )?;
 
-        let camera_position = Vec3f::new(7.0, -15.0, -6.0);
+        let camera_position = Vec3::new(7.0, -15.0, -6.0);
 
-        let mut view_matrix = Mat4x4f::identity();
+        let mut view_matrix = Mat4::identity();
         view_matrix.append_translation_mut(&camera_position);
 
         let projection_matrix =
-            Mat4x4f::new_perspective(f32::to_radians(90.0), 1280.0 / 720.0, 0.1, 200.0);
+            Mat4::new_perspective(f32::to_radians(90.0), 1280.0 / 720.0, 0.1, 200.0);
 
         let projection_view = projection_matrix * view_matrix;
         upload_manager
@@ -395,7 +392,7 @@ impl Renderer {
             upload_manager.clone(),
             "lost_empire",
             "textured",
-            [Mat4x4f::identity()].to_vec(),
+            [Mat4::identity()].to_vec(),
         )?;
 
         renderables.push(lost_empire);
@@ -483,10 +480,10 @@ impl Renderer {
         )?;
 
         let material = ObjectMaterial {
-            base_color: Vec4f::new(1.0, 1.0, 1.0, 1.0),
-            unused_0: Vec4f::default(),
-            unused_1: Vec4f::default(),
-            unused_2: Vec4f::default(),
+            base_color: Vec4::new(1.0, 1.0, 1.0, 1.0),
+            unused_0: Vec4::default(),
+            unused_1: Vec4::default(),
+            unused_2: Vec4::default(),
 
             textures: textures_handle,
             unused_3: 0,
@@ -512,12 +509,12 @@ impl Renderer {
                 label: "Buffer Instances",
 
                 usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
-                size: mem::size_of::<[Mat4x4f; 1]>() as u64,
+                size: mem::size_of::<[Mat4; 1]>() as u64,
                 location: MemoryLocation::GpuOnly,
             },
         )?;
 
-        let instances = [Mat4x4f::identity()];
+        let instances = [Mat4::identity()];
 
         upload_manager
             .borrow_mut()

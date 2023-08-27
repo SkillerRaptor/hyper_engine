@@ -860,7 +860,6 @@ dependencies = [
  "color-eyre",
  "hyper_core",
  "log",
- "nalgebra-glm",
 ]
 
 [[package]]
@@ -881,6 +880,7 @@ dependencies = [
  "hyper_core",
  "hyper_math",
  "log",
+ "nalgebra-glm",
  "winit",
 ]
 
@@ -900,6 +900,7 @@ dependencies = [
  "hyper_platform",
  "image",
  "log",
+ "nalgebra-glm",
  "raw-window-handle",
  "smallvec",
  "tobj",

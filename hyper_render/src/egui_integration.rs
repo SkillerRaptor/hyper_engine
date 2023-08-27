@@ -29,7 +29,6 @@ use crate::{
     },
 };
 
-use hyper_math::vector::Vec4f;
 use hyper_platform::{event_loop::EventLoop, window::Window};
 
 use ash::vk;
@@ -38,16 +37,17 @@ use egui::{
     epaint::Primitive, ClippedPrimitive, Context, FontDefinitions, FullOutput, Style, TextureId,
 };
 use egui_winit::State;
+use nalgebra_glm::Vec4;
 use std::{cell::RefCell, collections::HashMap, mem, rc::Rc};
 use winit::event::WindowEvent;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct Vertex {
-    pub(crate) position: Vec4f,
-    pub(crate) color: Vec4f,
-    pub(crate) uv: Vec4f,
-    pub(crate) unused_0: Vec4f,
+    pub(crate) position: Vec4,
+    pub(crate) color: Vec4,
+    pub(crate) uv: Vec4,
+    pub(crate) unused_0: Vec4,
 }
 
 struct Texture {
@@ -426,20 +426,20 @@ impl EguiIntegration {
             let vertices = vertices
                 .iter()
                 .map(|vertex| Vertex {
-                    position: Vec4f::new(
+                    position: Vec4::new(
                         vertex.pos.x,
                         window.framebuffer_size().1 as f32 - vertex.pos.y,
                         0.0,
                         0.0,
                     ),
-                    color: Vec4f::new(
+                    color: Vec4::new(
                         vertex.color.r() as f32 / 255.0,
                         vertex.color.g() as f32 / 255.0,
                         vertex.color.b() as f32 / 255.0,
                         vertex.color.a() as f32 / 255.0,
                     ),
-                    uv: Vec4f::new(vertex.uv.x, vertex.uv.y, 0.0, 0.0),
-                    unused_0: Vec4f::default(),
+                    uv: Vec4::new(vertex.uv.x, vertex.uv.y, 0.0, 0.0),
+                    unused_0: Vec4::default(),
                 })
                 .collect::<Vec<_>>();
 

@@ -14,20 +14,19 @@ use crate::{
     },
 };
 
-use hyper_math::vector::Vec4f;
-
 use ash::vk;
 use color_eyre::Result;
+use nalgebra_glm::Vec4;
 use std::{cell::RefCell, mem, rc::Rc};
 
-// NOTE: Using Vec4f to avoid alignment issues
+// NOTE: Using Vec4 to avoid alignment issues
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct Vertex {
-    pub(crate) position: Vec4f,
-    pub(crate) normal: Vec4f,
-    pub(crate) color: Vec4f,
-    pub(crate) uv: Vec4f,
+    pub(crate) position: Vec4,
+    pub(crate) normal: Vec4,
+    pub(crate) color: Vec4,
+    pub(crate) uv: Vec4,
 }
 
 pub(crate) struct Mesh {
@@ -121,21 +120,21 @@ impl Mesh {
 
             mesh.indices.iter().for_each(|i| {
                 let index = *i as usize;
-                let position = Vec4f::new(
+                let position = Vec4::new(
                     mesh.positions[3 * index],
                     mesh.positions[3 * index + 1],
                     mesh.positions[3 * index + 2],
                     1.0,
                 );
 
-                let normal = Vec4f::new(
+                let normal = Vec4::new(
                     mesh.normals[3 * index],
                     mesh.normals[3 * index + 1],
                     mesh.normals[3 * index + 2],
                     1.0,
                 );
 
-                let uv = Vec4f::new(
+                let uv = Vec4::new(
                     mesh.texcoords[2 * index],
                     1.0 - mesh.texcoords[2 * index + 1],
                     0.0,

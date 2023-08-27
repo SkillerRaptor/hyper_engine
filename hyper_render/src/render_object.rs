@@ -15,10 +15,9 @@ use crate::{
     },
 };
 
-use hyper_math::matrix::Mat4x4f;
-
 use ash::vk;
 use color_eyre::Result;
+use nalgebra_glm::Mat4;
 use std::{cell::RefCell, mem, rc::Rc};
 
 // NOTE: Temporary
@@ -27,7 +26,7 @@ pub(crate) struct RenderObject {
     mesh: String,
     material: String,
 
-    transforms: Vec<Mat4x4f>,
+    transforms: Vec<Mat4>,
 
     bindings_handle: ResourceHandle,
     _bindings_buffer: Buffer,
@@ -46,7 +45,7 @@ impl RenderObject {
         upload_manager: Rc<RefCell<UploadManager>>,
         mesh: &str,
         material: &str,
-        transforms: Vec<Mat4x4f>,
+        transforms: Vec<Mat4>,
     ) -> Result<Self> {
         ////////////////////////////////////////////////////////////////////////
 
@@ -57,7 +56,7 @@ impl RenderObject {
                 label: "Buffer Transform Render Object",
 
                 usage: vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
-                size: (mem::size_of::<Mat4x4f>() * transforms.len()) as u64,
+                size: (mem::size_of::<Mat4>() * transforms.len()) as u64,
                 location: MemoryLocation::GpuOnly,
             },
         )?;
@@ -127,7 +126,7 @@ impl RenderObject {
         self.bindings_handle
     }
 
-    pub(crate) fn transforms(&self) -> &[Mat4x4f] {
+    pub(crate) fn transforms(&self) -> &[Mat4] {
         &self.transforms
     }
 }

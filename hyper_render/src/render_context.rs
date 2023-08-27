@@ -21,11 +21,11 @@ use crate::{
 };
 
 use hyper_game::camera::Camera;
-use hyper_math::vector::Vec2f;
 use hyper_platform::{event_loop::EventLoop, window::Window};
 
 use color_eyre::Result;
 use egui::{Context, FullOutput};
+use nalgebra_glm::Vec2;
 use std::{cell::RefCell, rc::Rc};
 use winit::event::WindowEvent;
 
@@ -42,8 +42,8 @@ pub struct Frame {
     pub unused_3: u32,
     pub unused_4: u32,
 
-    pub screen_size: Vec2f,
-    pub unused_5: Vec2f,
+    pub screen_size: Vec2,
+    pub unused_5: Vec2,
 }
 
 pub struct RenderContext {

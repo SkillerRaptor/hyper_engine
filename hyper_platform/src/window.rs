@@ -7,7 +7,7 @@
 use crate::event_loop::EventLoop;
 
 use color_eyre::Result;
-use hyper_math::vector::Vec2f;
+use nalgebra_glm::Vec2;
 use winit::{
     dpi::{LogicalPosition, LogicalSize},
     window::{Window as RawWindow, WindowBuilder},
@@ -50,7 +50,7 @@ impl Window {
     }
 
     // TOOD: Make this cleaner
-    pub fn set_cursor_position(&self, position: Vec2f) -> Result<()> {
+    pub fn set_cursor_position(&self, position: Vec2) -> Result<()> {
         self.raw
             .set_cursor_position(LogicalPosition::new(position.x, position.y))?;
         Ok(())

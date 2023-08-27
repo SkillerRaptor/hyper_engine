@@ -7,5 +7,4 @@
 #![allow(dead_code)]
 #![allow(clippy::too_many_arguments)]
 
-pub mod matrix;
-pub mod vector;
+// TODO: Make own math lib

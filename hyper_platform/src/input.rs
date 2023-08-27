@@ -6,14 +6,13 @@
 
 use crate::{key_code::KeyCode, mouse_code::MouseCode};
 
-use hyper_math::vector::Vec2f;
-
+use nalgebra_glm::Vec2;
 use std::collections::HashMap;
 
 pub struct Input {
     key_states: HashMap<KeyCode, bool>,
     mouse_states: HashMap<MouseCode, bool>,
-    mouse_position: Vec2f,
+    mouse_position: Vec2,
 }
 
 impl Input {
@@ -191,7 +190,7 @@ impl Input {
         Self {
             key_states,
             mouse_states,
-            mouse_position: Vec2f::default(),
+            mouse_position: Vec2::default(),
         }
     }
 
@@ -203,7 +202,7 @@ impl Input {
         *self.mouse_states.get_mut(&mouse_button).unwrap() = pressed;
     }
 
-    pub fn set_mouse_position(&mut self, position: Vec2f) {
+    pub fn set_mouse_position(&mut self, position: Vec2) {
         self.mouse_position = position;
     }
 
@@ -215,7 +214,7 @@ impl Input {
         *self.mouse_states.get(&mouse_button).unwrap()
     }
 
-    pub fn get_mouse_position(&self) -> Vec2f {
+    pub fn get_mouse_position(&self) -> Vec2 {
         self.mouse_position
     }
 }
