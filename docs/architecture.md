@@ -9,24 +9,16 @@
 ```mermaid
 graph TD;
     Editor-->Engine;
-    Engine-->Audio;
+
     Engine-->Game;
-    Engine-->Physics;
+    Render-->Game;
+
     Engine-->Render;
 
-    Render-->Render-Hal;
-    Render-Hal-->Render-Core;
-
-    Audio-->Math;
-    Game-->Math;
-    Physics-->Math;
-    Render-Core-->Math;
-
-    Audio-->Platform;
+    Engine-->Platform;
     Game-->Platform;
-    Physics-->Platform;
-    Render-Core-->Platform;
+    Render-->Platform;
 
-    Math-->Core;
+    Engine-->Core;
     Platform-->Core;
 ```

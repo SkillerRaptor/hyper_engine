@@ -795,15 +795,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hyper_audio"
-version = "0.1.0"
-dependencies = [
- "color-eyre",
- "hyper_core",
- "log",
-]
-
-[[package]]
 name = "hyper_core"
 version = "0.1.0"
 dependencies = [
@@ -821,7 +812,6 @@ dependencies = [
  "egui",
  "fern",
  "hyper_engine",
- "hyper_math",
  "log",
  "nalgebra-glm",
 ]
@@ -832,11 +822,8 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "egui",
- "hyper_audio",
  "hyper_core",
  "hyper_game",
- "hyper_math",
- "hyper_physics",
  "hyper_platform",
  "hyper_render",
  "log",
@@ -848,31 +835,10 @@ name = "hyper_game"
 version = "0.1.0"
 dependencies = [
  "hyper_core",
- "hyper_math",
  "hyper_platform",
  "log",
  "nalgebra-glm",
  "paste",
-]
-
-[[package]]
-name = "hyper_math"
-version = "0.1.0"
-dependencies = [
- "color-eyre",
- "hyper_core",
- "log",
-]
-
-[[package]]
-name = "hyper_physics"
-version = "0.1.0"
-dependencies = [
- "color-eyre",
- "hyper_core",
- "hyper_math",
- "log",
- "nalgebra-glm",
 ]
 
 [[package]]
@@ -881,7 +847,6 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
- "hyper_math",
  "log",
  "nalgebra-glm",
  "winit",
@@ -899,7 +864,6 @@ dependencies = [
  "gpu-allocator",
  "hyper_core",
  "hyper_game",
- "hyper_math",
  "hyper_platform",
  "image",
  "log",

@@ -12,7 +12,6 @@ license = "MIT"
 
 [dependencies]
 hyper_core = { path = "../hyper_core" }
-hyper_math = { path = "../hyper_math" }
 
 color-eyre = "0.6"
 log = "0.4"

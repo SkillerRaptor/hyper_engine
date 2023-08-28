@@ -12,7 +12,6 @@ license = "MIT"
 
 [dependencies]
 hyper_engine = { path = "../hyper_engine" }
-hyper_math = { path = "../hyper_math" }
 
 chrono = "0.4"
 color-eyre = "0.6"
