@@ -13,4 +13,3 @@ license = "MIT"
 [dependencies]
 color-eyre = "0.6"
 log = "0.4"
-num-traits = "0.2"

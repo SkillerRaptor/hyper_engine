@@ -302,19 +302,19 @@ mod tests {
     fn create_entities() {
         let mut registry = Registry::new();
         let entity_0 = registry.create_entity();
-        assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.handle(), 0);
-        assert_eq!(entity_0.version(), 1);
+        assert_eq!(entity_0.value(), 0x00001000);
+        assert_eq!(entity_0.id(), 1);
+        assert_eq!(entity_0.version(), 0);
 
         let entity_1 = registry.create_entity();
-        assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.handle(), 1);
-        assert_eq!(entity_1.version(), 1);
+        assert_eq!(entity_1.value(), 0x00002000);
+        assert_eq!(entity_1.id(), 2);
+        assert_eq!(entity_1.version(), 0);
 
         let entity_2 = registry.create_entity();
-        assert_eq!(entity_2.0, 0x100000002);
-        assert_eq!(entity_2.handle(), 2);
-        assert_eq!(entity_2.version(), 1);
+        assert_eq!(entity_2.value(), 0x00003000);
+        assert_eq!(entity_2.id(), 3);
+        assert_eq!(entity_2.version(), 0);
     }
 
     #[test]
@@ -322,37 +322,37 @@ mod tests {
         let mut registry = Registry::new();
 
         let entity_0 = registry.create_entity();
-        assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.handle(), 0);
-        assert_eq!(entity_0.version(), 1);
+        assert_eq!(entity_0.value(), 0x00001000);
+        assert_eq!(entity_0.id(), 1);
+        assert_eq!(entity_0.version(), 0);
 
         let entity_1 = registry.create_entity();
-        assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.handle(), 1);
-        assert_eq!(entity_1.version(), 1);
+        assert_eq!(entity_1.value(), 0x00002000);
+        assert_eq!(entity_1.id(), 2);
+        assert_eq!(entity_1.version(), 0);
 
         let entity_2 = registry.create_entity();
-        assert_eq!(entity_2.0, 0x100000002);
-        assert_eq!(entity_2.handle(), 2);
-        assert_eq!(entity_2.version(), 1);
+        assert_eq!(entity_2.value(), 0x00003000);
+        assert_eq!(entity_2.id(), 3);
+        assert_eq!(entity_2.version(), 0);
 
         registry.destroy_entity(entity_0);
         registry.destroy_entity(entity_2);
 
         let entity_3 = registry.create_entity();
-        assert_eq!(entity_3.0, 0x200000002);
-        assert_eq!(entity_3.handle(), 2);
-        assert_eq!(entity_3.version(), 2);
+        assert_eq!(entity_3.value(), 0x00003001);
+        assert_eq!(entity_3.id(), 3);
+        assert_eq!(entity_3.version(), 1);
 
         let entity_4 = registry.create_entity();
-        assert_eq!(entity_4.0, 0x200000000);
-        assert_eq!(entity_4.handle(), 0);
-        assert_eq!(entity_4.version(), 2);
+        assert_eq!(entity_4.value(), 0x00001001);
+        assert_eq!(entity_4.id(), 1);
+        assert_eq!(entity_4.version(), 1);
 
         let entity_5 = registry.create_entity();
-        assert_eq!(entity_5.0, 0x100000003);
-        assert_eq!(entity_5.handle(), 3);
-        assert_eq!(entity_5.version(), 1);
+        assert_eq!(entity_5.value(), 0x00004000);
+        assert_eq!(entity_5.id(), 4);
+        assert_eq!(entity_5.version(), 0);
     }
 
     #[test]
@@ -360,14 +360,14 @@ mod tests {
         let mut registry = Registry::new();
 
         let entity_0 = registry.create_entity();
-        assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.handle(), 0);
-        assert_eq!(entity_0.version(), 1);
+        assert_eq!(entity_0.value(), 0x00001000);
+        assert_eq!(entity_0.id(), 1);
+        assert_eq!(entity_0.version(), 0);
 
         let entity_1 = registry.create_entity();
-        assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.handle(), 1);
-        assert_eq!(entity_1.version(), 1);
+        assert_eq!(entity_1.value(), 0x00002000);
+        assert_eq!(entity_1.id(), 2);
+        assert_eq!(entity_1.version(), 0);
 
         #[derive(Debug, PartialEq)]
         struct Position {
@@ -394,14 +394,14 @@ mod tests {
         let mut registry = Registry::new();
 
         let entity_0 = registry.create_entity();
-        assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.handle(), 0);
-        assert_eq!(entity_0.version(), 1);
+        assert_eq!(entity_0.value(), 0x00001000);
+        assert_eq!(entity_0.id(), 1);
+        assert_eq!(entity_0.version(), 0);
 
         let entity_1 = registry.create_entity();
-        assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.handle(), 1);
-        assert_eq!(entity_1.version(), 1);
+        assert_eq!(entity_1.value(), 0x00002000);
+        assert_eq!(entity_1.id(), 2);
+        assert_eq!(entity_1.version(), 0);
 
         #[derive(Debug, PartialEq)]
         struct Position {
@@ -434,14 +434,14 @@ mod tests {
         let mut registry = Registry::new();
 
         let entity_0 = registry.create_entity();
-        assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.handle(), 0);
-        assert_eq!(entity_0.version(), 1);
+        assert_eq!(entity_0.value(), 0x00001000);
+        assert_eq!(entity_0.id(), 1);
+        assert_eq!(entity_0.version(), 0);
 
         let entity_1 = registry.create_entity();
-        assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.handle(), 1);
-        assert_eq!(entity_1.version(), 1);
+        assert_eq!(entity_1.value(), 0x00002000);
+        assert_eq!(entity_1.id(), 2);
+        assert_eq!(entity_1.version(), 0);
 
         #[derive(Debug, PartialEq)]
         struct Position {
@@ -476,7 +476,7 @@ mod tests {
 
         let mut i = 0;
         registry.view_one(|entity: Entity, position: &Position| {
-            assert_eq!(entity, Entity::new(i));
+            assert_eq!(entity, Entity::from_id(i + 1));
             assert_eq!(
                 *position,
                 Position {
@@ -488,13 +488,13 @@ mod tests {
         });
 
         registry.view_one(|entity: Entity, velocity: &Velocity| {
-            assert_eq!(entity, Entity::new(1));
+            assert_eq!(entity, Entity::from_id(2));
             assert_eq!(*velocity, Velocity { dx: 1.0, dy: 1.0 });
         });
 
         let mut i = 0;
         registry.view_one_mut(|entity: Entity, position: &mut Position| {
-            assert_eq!(entity, Entity::new(i));
+            assert_eq!(entity, Entity::from_id(i + 1));
             assert_eq!(
                 *position,
                 Position {
@@ -506,19 +506,19 @@ mod tests {
         });
 
         registry.view_one_mut(|entity: Entity, velocity: &mut Velocity| {
-            assert_eq!(entity, Entity::new(1));
+            assert_eq!(entity, Entity::from_id(2));
             assert_eq!(*velocity, Velocity { dx: 1.0, dy: 1.0 });
         });
 
         registry.view_two(|entity: Entity, position: &Position, velocity: &Velocity| {
-            assert_eq!(entity, Entity::new(1));
+            assert_eq!(entity, Entity::from_id(2));
             assert_eq!(*position, Position { x: 1.0, y: 1.0 });
             assert_eq!(*velocity, Velocity { dx: 1.0, dy: 1.0 });
         });
 
         registry.view_two_mut(
             |entity: Entity, position: &mut Position, velocity: &mut Velocity| {
-                assert_eq!(entity, Entity::new(1));
+                assert_eq!(entity, Entity::from_id(2));
                 assert_eq!(*position, Position { x: 1.0, y: 1.0 });
                 assert_eq!(*velocity, Velocity { dx: 1.0, dy: 1.0 });
             },
@@ -531,14 +531,14 @@ mod tests {
         let mut registry = Registry::new();
 
         let entity_0 = registry.create_entity();
-        assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.handle(), 0);
-        assert_eq!(entity_0.version(), 1);
+        assert_eq!(entity_0.value(), 0x00001000);
+        assert_eq!(entity_0.id(), 1);
+        assert_eq!(entity_0.version(), 0);
 
         let entity_1 = registry.create_entity();
-        assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.handle(), 1);
-        assert_eq!(entity_1.version(), 1);
+        assert_eq!(entity_1.value(), 0x00002000);
+        assert_eq!(entity_1.id(), 2);
+        assert_eq!(entity_1.version(), 0);
 
         #[derive(Debug, PartialEq)]
         struct Position {
@@ -569,19 +569,19 @@ mod tests {
         let mut registry = Registry::new();
 
         let entity_0 = registry.create_entity();
-        assert_eq!(entity_0.0, 0x100000000);
-        assert_eq!(entity_0.handle(), 0);
-        assert_eq!(entity_0.version(), 1);
+        assert_eq!(entity_0.value(), 0x00001000);
+        assert_eq!(entity_0.id(), 1);
+        assert_eq!(entity_0.version(), 0);
 
         let entity_1 = registry.create_entity();
-        assert_eq!(entity_1.0, 0x100000001);
-        assert_eq!(entity_1.handle(), 1);
-        assert_eq!(entity_1.version(), 1);
+        assert_eq!(entity_1.value(), 0x00002000);
+        assert_eq!(entity_1.id(), 2);
+        assert_eq!(entity_1.version(), 0);
 
         let entity_2 = registry.create_entity();
-        assert_eq!(entity_2.0, 0x100000002);
-        assert_eq!(entity_2.handle(), 2);
-        assert_eq!(entity_2.version(), 1);
+        assert_eq!(entity_2.value(), 0x00003000);
+        assert_eq!(entity_2.id(), 3);
+        assert_eq!(entity_2.version(), 0);
 
         registry.destroy_entity(entity_1);
 

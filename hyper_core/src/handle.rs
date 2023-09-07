@@ -2,59 +2,80 @@
  * Copyright (c) 2023, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
-use num_traits::{NumCast, One, PrimInt, Zero};
+// NOTE:
+// We use a fixed type for a handle
+// 20-bit Id (1'048'576) | 12-bit Version (4096)
 
-pub trait Handle: Copy + Default + PartialEq + Eq {
-    type FullType: PrimInt;
-    type HalfType: PrimInt;
+pub type ValueType = u32;
 
-    fn create(handle: Self::HalfType) -> Self;
+pub type IdType = u32;
+pub type VersionType = u16;
+
+#[macro_export]
+macro_rules! define_handle {
+    ($visiblity:vis $name:ident) => {
+        #[repr(transparent)]
+        #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+        $visiblity struct $name {
+            value: $crate::handle::ValueType,
+        }
+
+        impl $crate::handle::Handle for $name {
+            fn from_id(id: $crate::handle::IdType) -> Self {
+                Self {
+                    value: (id << Self::ID_SHIFT) | 0x000,
+                }
+            }
+
+            fn value(&self) -> $crate::handle::ValueType {
+                self.value
+            }
+
+            fn value_mut(&mut self) -> &mut $crate::handle::ValueType {
+                &mut self.value
+            }
+        }
+    };
+}
+
+pub trait Handle {
+    const ID_MASK: u32 = 0xfffff000;
+    const ID_SHIFT: u32 = 12;
+    const VERSION_MASK: u32 = 0x00000fff;
+
+    fn from_id(id: IdType) -> Self;
 
     fn increase_version(&mut self) {
-        let current_version = <Self::FullType as NumCast>::from(self.version()).unwrap();
-        let upper_version = (current_version + Self::FullType::one()) << Self::half_shift();
-        let lower_handle = self.value() & Self::handle_mask();
-        *self.value_mut() = upper_version | lower_handle;
+        let upper_id = self.value() & Self::ID_MASK;
+
+        let current_version = self.version();
+        let lower_version = (current_version + 1) as u32;
+
+        *self.value_mut() = upper_id | lower_version;
     }
 
-    fn swap_handle(&mut self, handle: Self::HalfType) -> Self::HalfType {
-        let current_handle_id = self.handle();
-        let upper_version = self.value() & Self::version_mask();
-        let lower_handle = <Self::FullType as NumCast>::from(handle).unwrap();
-        *self.value_mut() = upper_version | lower_handle;
-        current_handle_id
+    fn swap_id(&mut self, new_id: IdType) -> IdType {
+        let current_id = self.id();
+        let upper_id = new_id << Self::ID_SHIFT;
+
+        let lower_version = self.version() as u32;
+
+        *self.value_mut() = upper_id | lower_version;
+
+        current_id
     }
 
-    fn handle(&self) -> Self::HalfType {
-        <Self::HalfType as NumCast>::from(self.value() & Self::handle_mask()).unwrap()
+    fn id(&self) -> IdType {
+        ((self.value() & Self::ID_MASK) >> Self::ID_SHIFT) as IdType
     }
 
-    fn version(&self) -> Self::HalfType {
-        <Self::HalfType as NumCast>::from(
-            (self.value() & Self::version_mask()) >> Self::half_shift(),
-        )
-        .unwrap()
+    fn version(&self) -> VersionType {
+        (self.value() & Self::VERSION_MASK) as VersionType
     }
 
-    fn handle_mask() -> Self::FullType {
-        (Self::FullType::one() << Self::half_shift()) - Self::FullType::one()
-    }
+    fn value(&self) -> ValueType;
 
-    fn version_mask() -> Self::FullType {
-        Self::handle_mask() << Self::half_shift()
-    }
-
-    fn width() -> u32 {
-        Self::FullType::zero().leading_zeros()
-    }
-
-    fn half_shift() -> usize {
-        (Self::width() / 2) as usize
-    }
-
-    fn value(&self) -> Self::FullType;
-
-    fn value_mut(&mut self) -> &mut Self::FullType;
+    fn value_mut(&mut self) -> &mut ValueType;
 }

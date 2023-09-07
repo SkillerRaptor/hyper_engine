@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::handle::Handle;
-
-use num_traits::{Bounded, NumCast, ToPrimitive};
+use crate::handle::{Handle, IdType};
 
 #[derive(Default, Debug)]
 pub struct HandleManager<T>
@@ -14,32 +12,32 @@ where
     T: Handle,
 {
     handles: Vec<T>,
-    next_handle: T::HalfType,
+    next_handle: IdType,
     unrecycled_handles: usize,
 }
 
 impl<T> HandleManager<T>
 where
-    T: Handle,
+    T: Handle + Clone + Copy + PartialEq + Eq,
 {
     pub fn new() -> Self {
         Self {
             handles: Vec::new(),
-            next_handle: T::HalfType::max_value(),
+            next_handle: IdType::MAX,
             unrecycled_handles: 0,
         }
     }
 
     pub fn create_handle(&mut self) -> T {
         if self.unrecycled_handles > 0 {
-            let recyclable_handle_index = self.next_handle.to_usize().unwrap();
+            let recyclable_handle_index = self.next_handle as usize;
 
             let new_index = {
-                let next_handle = self.next_handle;
+                let next_handle = self.next_handle + 1;
                 let handle = &mut self.handles[recyclable_handle_index];
 
                 handle.increase_version();
-                handle.swap_handle(next_handle)
+                handle.swap_id(next_handle)
             };
 
             self.next_handle = new_index;
@@ -48,34 +46,29 @@ where
             return self.handles[recyclable_handle_index];
         }
 
-        let new_handle_id = <T::HalfType as NumCast>::from(self.handles.len()).unwrap();
-        let handle = T::create(new_handle_id);
+        let new_handle_id = (self.handles.len() as IdType) + 1;
+        let handle = T::from_id(new_handle_id);
         self.handles.push(handle);
 
         handle
     }
 
     pub fn destroy_handle(&mut self, handle: T) {
-        let handle_id = handle.handle().to_usize().unwrap();
+        let handle_id = (handle.id() as usize) - 1;
 
         let new_index = {
             let next_handle = self.next_handle;
             let destroyable_handle = &mut self.handles[handle_id];
 
-            destroyable_handle.swap_handle(next_handle)
+            destroyable_handle.swap_id(next_handle)
         };
 
-        self.next_handle = new_index;
+        self.next_handle = new_index - 1;
         self.unrecycled_handles += 1;
     }
 
     pub fn is_handle_valid(&self, handle: T) -> bool {
-        let handle_id = handle.handle().to_usize().unwrap();
-
+        let handle_id = handle.id() as usize - 1;
         self.handles[handle_id] == handle
-    }
-
-    pub fn handles(&self) -> &[T] {
-        &self.handles
     }
 }
