@@ -24,7 +24,7 @@ gpu-allocator = "0.23"
 log = "0.4"
 nalgebra-glm = "0.18"
 smallvec = "1.11"
-raw-window-handle = "0.6"
+raw-window-handle = "0.5.2"
 winit = "0.28"
 
 # NOTE: Temporary

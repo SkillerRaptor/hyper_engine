@@ -8,7 +8,7 @@ use crate::vulkan::core::{device::Device, instance::Instance};
 
 use ash::vk;
 use color_eyre::Result;
-use gpu_allocator::{vulkan, AllocatorDebugSettings};
+use gpu_allocator::{vulkan, AllocationSizes, AllocatorDebugSettings};
 
 pub(crate) struct Allocator {
     raw: vulkan::Allocator,
@@ -38,6 +38,7 @@ impl Allocator {
             physical_device: device.physical_device().raw(),
             debug_settings,
             buffer_device_address: false,
+            allocation_sizes: AllocationSizes::default(),
         };
 
         let raw = vulkan::Allocator::new(&create_info)?;

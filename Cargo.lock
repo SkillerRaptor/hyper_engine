@@ -138,7 +138,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b912285a7c29f3a8f87ca6f55afc48768624e5e33ec17dbd2f2075903f5e35ab"
 dependencies = [
  "ash",
- "raw-window-handle 0.5.2",
+ "raw-window-handle",
  "raw-window-metal",
 ]
 
@@ -517,7 +517,7 @@ dependencies = [
  "arboard",
  "egui",
  "log",
- "raw-window-handle 0.5.2",
+ "raw-window-handle",
  "smithay-clipboard",
  "web-time",
  "webbrowser",
@@ -819,7 +819,7 @@ dependencies = [
  "image",
  "log",
  "nalgebra-glm",
- "raw-window-handle 0.6.0",
+ "raw-window-handle",
  "smallvec",
  "tobj",
  "winit",
@@ -1142,7 +1142,7 @@ dependencies = [
  "jni-sys",
  "ndk-sys",
  "num_enum 0.5.11",
- "raw-window-handle 0.5.2",
+ "raw-window-handle",
  "thiserror",
 ]
 
@@ -1487,12 +1487,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2ff9a1f06a88b01621b7ae906ef0211290d1c8a168a15542486a8f61c0833b9"
 
 [[package]]
-name = "raw-window-handle"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42a9830a0e1b9fb145ebb365b8bc4ccd75f290f98c0247deafbbe2c75cefb544"
-
-[[package]]
 name = "raw-window-metal"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1501,7 +1495,7 @@ dependencies = [
  "cocoa",
  "core-graphics",
  "objc",
- "raw-window-handle 0.5.2",
+ "raw-window-handle",
 ]
 
 [[package]]
@@ -2101,7 +2095,7 @@ dependencies = [
  "log",
  "ndk-context",
  "objc",
- "raw-window-handle 0.5.2",
+ "raw-window-handle",
  "url",
  "web-sys",
 ]
@@ -2343,7 +2337,7 @@ dependencies = [
  "once_cell",
  "orbclient",
  "percent-encoding",
- "raw-window-handle 0.5.2",
+ "raw-window-handle",
  "redox_syscall",
  "sctk-adwaita",
  "smithay-client-toolkit",
