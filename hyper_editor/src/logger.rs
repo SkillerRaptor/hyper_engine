@@ -30,42 +30,6 @@ pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
         .debug(Color::Cyan)
         .trace(Color::Magenta);
 
-    let mut logger = Dispatch::new();
-
-    logger = logger.format(move |out, message, record| {
-        let reset = "\x1B[0m";
-
-        let time = {
-            let current_time = Local::now().format("%Y-%m-%d %H:%M:%S");
-            let bright_black = format!("\x1B[{}m", Color::BrightBlack.to_fg_str());
-            format!("{}[{}]{}", bright_black, current_time, reset)
-        };
-
-        let target = {
-            let current_target = record.target().split_once(':');
-            let white = format!("\x1B[{}m", Color::White.to_fg_str());
-            format!("{}{:<15}{}", white, current_target.unwrap().0, reset)
-        };
-
-        let level = {
-            let current_level = record.level();
-            let color = format!("\x1B[{}m", levels.get_color(&record.level()).to_fg_str());
-            format!("{}{:<5}{}", color, current_level, reset)
-        };
-
-        let color = if record.level() == Level::Trace {
-            format!("\x1B[{}m", Color::White.to_fg_str())
-        } else {
-            format!("\x1B[{}m", Color::BrightWhite.to_fg_str())
-        };
-        let message = format!("{}{}", color, message);
-
-        out.finish(format_args!(
-            "{} {} {} {} {}",
-            time, target, level, message, reset
-        ))
-    });
-
     let level_filter = match verbosity {
         Verbosity::Error => LevelFilter::Error,
         Verbosity::Warning => LevelFilter::Warn,
@@ -74,23 +38,52 @@ pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
         Verbosity::Trace => LevelFilter::Trace,
     };
 
-    logger = logger.level(LevelFilter::Off);
+    Dispatch::new()
+        .format(move |out, message, record| {
+            let reset = "\x1B[0m";
 
-    logger = logger.level_for("hyper_core", level_filter);
+            let time = {
+                let current_time = Local::now().format("%Y-%m-%d %H:%M:%S");
+                let bright_black = format!("\x1B[{}m", Color::BrightBlack.to_fg_str());
+                format!("{}[{}]{}", bright_black, current_time, reset)
+            };
 
-    logger = logger.level_for("hyper_editor", level_filter);
+            let target = {
+                let current_target = record.target().split_once(':');
+                let white = format!("\x1B[{}m", Color::White.to_fg_str());
+                format!("{}{:<15}{}", white, current_target.unwrap().0, reset)
+            };
 
-    logger = logger.level_for("hyper_engine", level_filter);
+            let level = {
+                let current_level = record.level();
+                let color = format!("\x1B[{}m", levels.get_color(&record.level()).to_fg_str());
+                format!("{}{:<5}{}", color, current_level, reset)
+            };
 
-    logger = logger.level_for("hyper_game", level_filter);
+            let message = {
+                let color = if record.level() == Level::Trace {
+                    format!("\x1B[{}m", Color::White.to_fg_str())
+                } else {
+                    format!("\x1B[{}m", Color::BrightWhite.to_fg_str())
+                };
 
-    logger = logger.level_for("hyper_platform", level_filter);
+                format!("{}{}", color, message)
+            };
 
-    logger = logger.level_for("hyper_render", level_filter);
-
-    logger = logger.chain(io::stdout());
-
-    logger.apply()?;
+            out.finish(format_args!(
+                "{} {} {} {} {}",
+                time, target, level, message, reset
+            ))
+        })
+        .level(LevelFilter::Off)
+        .level_for("hyper_core", level_filter)
+        .level_for("hyper_editor", level_filter)
+        .level_for("hyper_engine", level_filter)
+        .level_for("hyper_game", level_filter)
+        .level_for("hyper_platform", level_filter)
+        .level_for("hyper_render", level_filter)
+        .chain(io::stdout())
+        .apply()?;
 
     Ok(())
 }
