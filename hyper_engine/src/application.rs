@@ -15,7 +15,7 @@ use hyper_platform::{
 };
 use hyper_render::render_context::{Frame, RenderContext};
 
-use color_eyre::{eyre::eyre, Result};
+use color_eyre::Result;
 use nalgebra_glm::Vec2;
 use std::time::Instant;
 
@@ -53,7 +53,7 @@ impl Application {
         let render_context = RenderContext::new(&event_loop, &window)?;
 
         log::info!(
-            "Application started in {:.4} seconds",
+            "Application initialized in {:.4} seconds",
             start_time.elapsed().as_secs_f32()
         );
 
@@ -233,9 +233,9 @@ impl Application {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct ApplicationBuilder {
-    title: Option<String>,
+    title: String,
     width: u32,
     height: u32,
     resizable: bool,
@@ -243,16 +243,11 @@ pub struct ApplicationBuilder {
 
 impl ApplicationBuilder {
     pub fn new() -> Self {
-        Self {
-            title: None,
-            width: 1280,
-            height: 720,
-            resizable: true,
-        }
+        Self::default()
     }
 
-    pub fn title(mut self, title: &str) -> Self {
-        self.title = Some(title.to_owned());
+    pub fn title(mut self, title: impl Into<String>) -> Self {
+        self.title = title.into();
         self
     }
 
@@ -272,12 +267,24 @@ impl ApplicationBuilder {
     }
 
     pub fn build(self, game: Box<dyn Game>) -> Result<Application> {
-        let Some(title) = self.title else {
-            return Err(eyre!("field `title` is uninitialized"));
+        let title = if cfg!(debug_assertions) {
+            format!("{} | Debug", self.title)
+        } else {
+            self.title
         };
 
         let application = Application::new(game, title, self.width, self.height, self.resizable)?;
-
         Ok(application)
+    }
+}
+
+impl Default for ApplicationBuilder {
+    fn default() -> Self {
+        Self {
+            title: "HyperApplication".to_owned(),
+            width: 1280,
+            height: 720,
+            resizable: true,
+        }
     }
 }

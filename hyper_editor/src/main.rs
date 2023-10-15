@@ -12,7 +12,7 @@ mod logger;
 
 use crate::editor::Editor;
 
-use hyper_engine::application::ApplicationBuilder;
+use hyper_engine::application::Application;
 
 use color_eyre::Result;
 use logger::Verbosity;
@@ -26,7 +26,7 @@ fn main() -> Result<()> {
         logger::init(Verbosity::Info)?;
     }
 
-    let mut application = ApplicationBuilder::new()
+    let mut application = Application::builder()
         .title("HyperEditor")
         .width(1280)
         .height(720)
