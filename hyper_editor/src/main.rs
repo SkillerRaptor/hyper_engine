@@ -26,13 +26,14 @@ fn main() -> Result<()> {
         logger::init(Verbosity::Info)?;
     }
 
-    ApplicationBuilder::new()
+    let mut application = ApplicationBuilder::new()
         .title("HyperEditor")
         .width(1280)
         .height(720)
         .resizable(true)
-        .build(Box::new(Editor::new()))?
-        .run()?;
+        .build(Box::new(Editor::default()))?;
+
+    application.run()?;
 
     Ok(())
 }
