@@ -74,11 +74,19 @@ pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
         Verbosity::Trace => LevelFilter::Trace,
     };
 
-    logger = logger.level(level_filter);
+    logger = logger.level(LevelFilter::Off);
 
-    logger = logger.level_for("egui", LevelFilter::Off);
+    logger = logger.level_for("hyper_core", level_filter);
 
-    logger = logger.level_for("egui_winit", LevelFilter::Off);
+    logger = logger.level_for("hyper_editor", level_filter);
+
+    logger = logger.level_for("hyper_engine", level_filter);
+
+    logger = logger.level_for("hyper_game", level_filter);
+
+    logger = logger.level_for("hyper_platform", level_filter);
+
+    logger = logger.level_for("hyper_render", level_filter);
 
     logger = logger.chain(io::stdout());
 
