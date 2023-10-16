@@ -6,11 +6,11 @@
 
 use crate::event_loop::EventLoop;
 
-use color_eyre::Result;
+use color_eyre::{eyre::eyre, Result};
 use nalgebra_glm::Vec2;
 use winit::{
     dpi::{LogicalPosition, LogicalSize},
-    window::{Window as RawWindow, WindowBuilder},
+    window::{Window as RawWindow, WindowBuilder as RawWindowBuilder},
 };
 
 pub struct Window {
@@ -18,16 +18,26 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new(create_info: WindowCreateInfo) -> Result<Self> {
-        let WindowCreateInfo {
-            event_loop,
-            title,
-            width,
-            height,
-            resizable,
-        } = create_info;
+    pub fn new(
+        event_loop: &EventLoop,
+        title: String,
+        width: u32,
+        height: u32,
+        resizable: bool,
+    ) -> Result<Self> {
+        if title.is_empty() {
+            return Err(eyre!("The window title has to be non-empty"));
+        }
 
-        let window = WindowBuilder::new()
+        if width == 0 {
+            return Err(eyre!("The window width has to be greater than 0"));
+        }
+
+        if height == 0 {
+            return Err(eyre!("The window height has to be greater than 0"));
+        }
+
+        let window = RawWindowBuilder::new()
             .with_title(title)
             .with_inner_size(LogicalSize::new(width, height))
             .with_resizable(resizable)
@@ -63,12 +73,64 @@ impl Window {
     pub fn raw(&self) -> &RawWindow {
         &self.raw
     }
+
+    pub fn builder() -> WindowBuilder {
+        WindowBuilder::default()
+    }
 }
 
-pub struct WindowCreateInfo<'a> {
-    pub event_loop: &'a EventLoop,
-    pub title: &'a str,
-    pub width: u32,
-    pub height: u32,
-    pub resizable: bool,
+#[derive(Clone, Debug)]
+pub struct WindowBuilder {
+    title: String,
+    width: u32,
+    height: u32,
+    resizable: bool,
+}
+
+impl WindowBuilder {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn title(mut self, title: impl Into<String>) -> Self {
+        self.title = title.into();
+        self
+    }
+
+    pub fn width(mut self, width: u32) -> Self {
+        self.width = width;
+        self
+    }
+
+    pub fn height(mut self, height: u32) -> Self {
+        self.height = height;
+        self
+    }
+
+    pub fn resizable(mut self, resizable: bool) -> Self {
+        self.resizable = resizable;
+        self
+    }
+
+    pub fn build(self, event_loop: &EventLoop) -> Result<Window> {
+        let window = Window::new(
+            event_loop,
+            self.title,
+            self.width,
+            self.height,
+            self.resizable,
+        )?;
+        Ok(window)
+    }
+}
+
+impl Default for WindowBuilder {
+    fn default() -> Self {
+        Self {
+            title: "<unknown window title>".to_owned(),
+            width: 1280,
+            height: 720,
+            resizable: true,
+        }
+    }
 }

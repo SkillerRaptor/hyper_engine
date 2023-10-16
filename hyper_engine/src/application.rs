@@ -7,12 +7,7 @@
 use crate::game::Game;
 
 use hyper_game::camera::free_camera::FpsCamera;
-use hyper_platform::{
-    event::Event,
-    event_loop::EventLoop,
-    input::Input,
-    window::{Window, WindowCreateInfo},
-};
+use hyper_platform::{event::Event, event_loop::EventLoop, input::Input, window::Window};
 use hyper_render::render_context::{Frame, RenderContext};
 
 use color_eyre::Result;
@@ -42,13 +37,12 @@ impl Application {
         let start_time = Instant::now();
 
         let event_loop = EventLoop::default();
-        let window = Window::new(WindowCreateInfo {
-            event_loop: &event_loop,
-            title: &title,
-            width,
-            height,
-            resizable,
-        })?;
+        let window = Window::builder()
+            .title(title)
+            .width(width)
+            .height(height)
+            .resizable(resizable)
+            .build(&event_loop)?;
 
         let render_context = RenderContext::new(&event_loop, &window)?;
 
@@ -268,7 +262,7 @@ impl ApplicationBuilder {
 
     pub fn build(self, game: Box<dyn Game>) -> Result<Application> {
         let title = if cfg!(debug_assertions) {
-            format!("{} | Debug", self.title)
+            format!("{} (Debug Build)", self.title)
         } else {
             self.title
         };
@@ -281,7 +275,7 @@ impl ApplicationBuilder {
 impl Default for ApplicationBuilder {
     fn default() -> Self {
         Self {
-            title: "HyperApplication".to_owned(),
+            title: "<unknown application title>".to_owned(),
             width: 1280,
             height: 720,
             resizable: true,
