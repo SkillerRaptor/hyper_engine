@@ -34,6 +34,12 @@ impl Application {
         height: u32,
         resizable: bool,
     ) -> Result<Self> {
+        let title = if cfg!(debug_assertions) {
+            format!("{} (Debug Build)", title)
+        } else {
+            title
+        };
+
         let start_time = Instant::now();
 
         let event_loop = EventLoop::default();
@@ -261,13 +267,8 @@ impl ApplicationBuilder {
     }
 
     pub fn build(self, game: Box<dyn Game>) -> Result<Application> {
-        let title = if cfg!(debug_assertions) {
-            format!("{} (Debug Build)", self.title)
-        } else {
-            self.title
-        };
-
-        let application = Application::new(game, title, self.width, self.height, self.resizable)?;
+        let application =
+            Application::new(game, self.title, self.width, self.height, self.resizable)?;
         Ok(application)
     }
 }
