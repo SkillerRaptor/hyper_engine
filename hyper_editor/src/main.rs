@@ -31,7 +31,7 @@ fn main() -> Result<()> {
         .width(1280)
         .height(720)
         .resizable(true)
-        .build(Box::new(Editor::default()))?;
+        .build(Box::<Editor>::default())?;
 
     application.run()?;
 
