@@ -7,12 +7,13 @@
 use crate::game::Game;
 
 use hyper_game::camera::free_camera::FpsCamera;
-use hyper_platform::{event::Event, event_loop::EventLoop, input::Input, window::Window};
+use hyper_platform::{event_loop::EventLoop, input::Input, window::Window};
 use hyper_render::render_context::{Frame, RenderContext};
 
 use color_eyre::Result;
 use nalgebra_glm::Vec2;
 use std::time::Instant;
+use winit::event::{Event, WindowEvent};
 
 pub struct Application {
     frame_id: u32,
@@ -42,7 +43,7 @@ impl Application {
 
         let start_time = Instant::now();
 
-        let event_loop = EventLoop::default();
+        let event_loop = EventLoop::new()?;
         let window = Window::builder()
             .title(title)
             .width(width)
@@ -50,7 +51,7 @@ impl Application {
             .resizable(resizable)
             .build(&event_loop)?;
 
-        let render_context = RenderContext::new(&event_loop, &window)?;
+        let render_context = RenderContext::new(&window)?;
 
         log::info!(
             "Application initialized in {:.4} seconds",
@@ -64,7 +65,7 @@ impl Application {
 
             render_context,
 
-            input: Input::new(),
+            input: Input::default(),
             window,
             event_loop,
         })
@@ -83,123 +84,108 @@ impl Application {
             self.window.framebuffer_size().0 as f32 / self.window.framebuffer_size().1 as f32,
         );
 
+        let mut open = true;
+        while open {
+            let new_time = Instant::now();
+            let frame_time = (new_time - current_time).as_secs_f32();
+            current_time = new_time;
+
+            self.event_loop.pump_events(|event| {
+                if let Event::WindowEvent { event, .. } = &event {
+                    match event {
+                        WindowEvent::CloseRequested => {
+                            open = false;
+                        }
+                        WindowEvent::Resized(size) => {
+                            let width = size.width;
+                            let height = size.height;
+                            if self.window.framebuffer_size() == (width, height) {
+                                return;
+                            }
+
+                            if width == 0 || height == 0 {
+                                return;
+                            }
+
+                            self.render_context.resize(&self.window).unwrap();
+
+                            camera.on_window_resize(width, height);
+                        }
+                        _ => {}
+                    }
+
+                    self.input.process_event(event);
+                }
+            });
+
+            accumulator += frame_time;
+
+            while accumulator >= delta_time {
+                self.game.update_fixed(delta_time, time);
+                accumulator -= delta_time;
+                time += delta_time;
+            }
+
+            camera.update(frame_time, &self.input, &mut self.window);
+
+            self.game.update();
+
+            //
+
+            self.render_context
+                .begin(&self.window, &camera, self.frame_id as u64)
+                .unwrap();
+
+            {
+                let frame = Frame {
+                    time,
+                    delta_time,
+
+                    unused_0: 0.0,
+                    unused_1: 0.0,
+
+                    frame_count: self.frame_id,
+                    unused_2: 0,
+                    unused_3: 0,
+                    unused_4: 0,
+
+                    screen_size: Vec2::new(
+                        self.window.framebuffer_size().0 as f32,
+                        self.window.framebuffer_size().1 as f32,
+                    ),
+                    unused_5: Vec2::default(),
+                };
+
+                self.render_context.update_frame(frame).unwrap();
+            }
+
+            {
+                self.render_context.begin_rendering();
+
+                self.render_context.draw_objects();
+                self.game.render();
+
+                self.render_context.end_rendering();
+            }
+
+            self.render_context.end().unwrap();
+
+            self.render_context.submit(&self.window).unwrap();
+
+            self.frame_id += 1;
+        }
+
+        /*
         // TODO: move this somewhere else
         let mut window_focused = true;
         self.event_loop.run(|event| {
             match event {
-                Event::EventsCleared => {
-                    self.window.request_redraw();
-
-                    false
-                }
-                Event::KeyPressed { button } => {
-                    self.input.set_key(button, true);
-
-                    false
-                }
-                Event::KeyReleased { button } => {
-                    self.input.set_key(button, false);
-
-                    false
-                }
-                Event::MouseMove {
-                    position_x,
-                    position_y,
-                } => {
-                    self.input
-                        .set_mouse_position(Vec2::new(position_x as f32, position_y as f32));
-
-                    false
-                }
-                Event::MousePressed { button } => {
-                    self.input.set_mouse(button, true);
-
-                    false
-                }
-                Event::MouseReleased { button } => {
-                    self.input.set_mouse(button, false);
-
-                    false
-                }
-                Event::UpdateFrame => {
-                    let new_time = Instant::now();
-                    let frame_time = (new_time - current_time).as_secs_f32();
-                    current_time = new_time;
-
-                    accumulator += frame_time;
-
-                    while accumulator >= delta_time {
-                        self.game.update_fixed(delta_time, time);
-                        accumulator -= delta_time;
-                        time += delta_time;
-                    }
-
-                    camera.update(frame_time, &self.input, window_focused, &mut self.window);
-
-                    self.game.update();
-
-                    false
-                }
+                Event::UpdateFrame => false,
                 Event::RenderFrame => {
                     // Render Game
-                    self.render_context
-                        .begin(&self.window, &camera, self.frame_id as u64)
-                        .unwrap();
-
-                    {
-                        let frame = Frame {
-                            time,
-                            delta_time,
-
-                            unused_0: 0.0,
-                            unused_1: 0.0,
-
-                            frame_count: self.frame_id,
-                            unused_2: 0,
-                            unused_3: 0,
-                            unused_4: 0,
-
-                            screen_size: Vec2::new(
-                                self.window.framebuffer_size().0 as f32,
-                                self.window.framebuffer_size().1 as f32,
-                            ),
-                            unused_5: Vec2::default(),
-                        };
-
-                        self.render_context.update_frame(frame).unwrap();
-                    }
-
-                    {
-                        self.render_context.begin_rendering();
-
-                        self.render_context.draw_objects();
-                        self.game.render();
-
-                        self.render_context.end_rendering();
-                    }
-
-                    // Render GUI
-                    {
-                        self.render_context.begin_gui(&self.window);
-
-                        self.game.render_gui(self.render_context.egui_context());
-
-                        let output = self.render_context.end_gui(&self.window);
-
-                        self.render_context
-                            .submit_gui(&self.window, output)
-                            .unwrap();
-                    }
-
-                    self.render_context.end().unwrap();
-
-                    self.render_context.submit(&self.window).unwrap();
-
-                    self.frame_id += 1;
 
                     false
                 }
-                Event::WinitWindowEvent { event } => self.render_context.handle_gui_event(event),
                 Event::WindowFocused { focused } => {
                     window_focused = focused;
 
@@ -222,6 +208,7 @@ impl Application {
                 _ => false,
             }
         });
+        */
 
         self.render_context.wait_idle()?;
 

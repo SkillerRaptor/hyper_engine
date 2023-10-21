@@ -7,7 +7,6 @@
 #![allow(dead_code)]
 #![allow(clippy::too_many_arguments)]
 
-pub mod event;
 pub mod event_loop;
 pub mod input;
 pub mod key_code;

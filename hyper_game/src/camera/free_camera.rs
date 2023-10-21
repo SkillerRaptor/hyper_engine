@@ -46,46 +46,45 @@ impl FpsCamera {
         &mut self,
         delta_time: f32,
         input: &Input,
-        window_focused: bool,
         // TODO: Don't pass window
         window: &mut Window,
     ) {
         let mut translation = Vec3::default();
 
-        if input.get_key(KeyCode::W) {
+        if input.is_key_pressed(KeyCode::KeyW) {
             translation += Vec3::new(0.0, 0.0, -1.0);
         }
 
-        if input.get_key(KeyCode::S) {
+        if input.is_key_pressed(KeyCode::KeyS) {
             translation += Vec3::new(0.0, 0.0, 1.0);
         }
 
-        if input.get_key(KeyCode::A) {
+        if input.is_key_pressed(KeyCode::KeyA) {
             translation += Vec3::new(-1.0, 0.0, 0.0);
         }
 
-        if input.get_key(KeyCode::D) {
+        if input.is_key_pressed(KeyCode::KeyD) {
             translation += Vec3::new(1.0, 0.0, 0.0);
         }
 
-        if input.get_key(KeyCode::LShift) {
+        if input.is_key_pressed(KeyCode::ShiftLeft) {
             translation += Vec3::new(0.0, -1.0, 0.0);
         }
 
-        if input.get_key(KeyCode::Space) {
+        if input.is_key_pressed(KeyCode::Space) {
             translation += Vec3::new(0.0, 1.0, 0.0);
         }
 
         // TODO: Check for focus
         let mut delta = Vec2::default();
-        if window_focused && input.get_mouse_button(MouseCode::Middle) {
+        if input.is_mouse_button_pressed(MouseCode::Left) {
             if self.last_pressed {
-                let delta_x = input.get_mouse_position().x - self.last_mouse_position.x;
-                let delta_y = input.get_mouse_position().y - self.last_mouse_position.y;
+                let delta_x = input.mouse_position().x - self.last_mouse_position.x;
+                let delta_y = input.mouse_position().y - self.last_mouse_position.y;
                 delta = Vec2::new(delta_x, delta_y);
             } else {
-                self.last_mouse_position.x = input.get_mouse_position().x;
-                self.last_mouse_position.y = input.get_mouse_position().y;
+                self.last_mouse_position.x = input.mouse_position().x;
+                self.last_mouse_position.y = input.mouse_position().y;
                 self.last_pressed = true;
                 window.set_cursor_visiblity(false);
             }
@@ -98,7 +97,7 @@ impl FpsCamera {
             self.last_pressed = false;
         }
 
-        if input.get_mouse_button(MouseCode::Middle) {
+        if input.is_mouse_button_pressed(MouseCode::Left) {
             let mouse_speed = 0.025;
             self.rotation =
                 nalgebra_glm::quat_angle_axis(delta.x * mouse_speed, &Vec3::new(0.0, -1.0, 0.0))

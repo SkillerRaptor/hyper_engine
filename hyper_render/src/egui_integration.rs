@@ -234,10 +234,12 @@ impl EguiIntegration {
         })
     }
 
+    /*
     pub(crate) fn handle_event(&mut self, winit_event: &WindowEvent<'_>) -> bool {
         let response = self.egui_winit.on_event(&self.egui_context, winit_event);
         response.consumed
     }
+    */
 
     pub(crate) fn begin_gui(&mut self, window: &Window) {
         let raw_input = self.egui_winit.take_egui_input(window.raw());

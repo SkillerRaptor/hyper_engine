@@ -5,7 +5,6 @@
  */
 
 use crate::{
-    egui_integration::EguiIntegration,
     renderer::Renderer,
     vulkan::{
         core::{
@@ -21,13 +20,11 @@ use crate::{
 };
 
 use hyper_game::camera::Camera;
-use hyper_platform::{event_loop::EventLoop, window::Window};
+use hyper_platform::window::Window;
 
 use color_eyre::Result;
-use egui::{Context, FullOutput};
 use nalgebra_glm::Vec2;
 use std::{cell::RefCell, rc::Rc};
-use winit::event::WindowEvent;
 
 // TODO: Temporary
 #[repr(C)]
@@ -47,8 +44,7 @@ pub struct Frame {
 }
 
 pub struct RenderContext {
-    egui_integration: EguiIntegration,
-
+    // egui_integration: EguiIntegration,
     renderer: Renderer,
 
     pipeline_layout: PipelineLayout,
@@ -64,7 +60,7 @@ pub struct RenderContext {
 }
 
 impl RenderContext {
-    pub fn new(event_loop: &EventLoop, window: &Window) -> Result<Self> {
+    pub fn new(window: &Window) -> Result<Self> {
         let debug = cfg!(debug_assertions);
 
         let instance = Instance::new(InstanceCreateInfo { window, debug })?;
@@ -106,6 +102,7 @@ impl RenderContext {
             &pipeline_layout,
         )?;
 
+        /*
         let egui_integration = EguiIntegration::new(
             event_loop,
             device.clone(),
@@ -115,10 +112,10 @@ impl RenderContext {
             descriptor_manager.clone(),
             upload_manager.clone(),
         )?;
+        */
 
         Ok(Self {
-            egui_integration,
-
+            // egui_integration,
             renderer,
 
             pipeline_layout,
@@ -179,6 +176,13 @@ impl RenderContext {
         Ok(())
     }
 
+    pub fn update_frame(&self, frame: Frame) -> Result<()> {
+        self.renderer.update_frame(frame)?;
+
+        Ok(())
+    }
+
+    /*
     pub fn handle_gui_event(&mut self, winit_event: &WindowEvent<'_>) -> bool {
         self.egui_integration.handle_event(winit_event)
     }
@@ -203,13 +207,8 @@ impl RenderContext {
         Ok(())
     }
 
-    pub fn update_frame(&self, frame: Frame) -> Result<()> {
-        self.renderer.update_frame(frame)?;
-
-        Ok(())
-    }
-
     pub fn egui_context(&self) -> &Context {
         self.egui_integration.context()
     }
+    */
 }

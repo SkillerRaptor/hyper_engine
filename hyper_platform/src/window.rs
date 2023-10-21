@@ -9,12 +9,12 @@ use crate::event_loop::EventLoop;
 use color_eyre::{eyre::eyre, Result};
 use nalgebra_glm::Vec2;
 use winit::{
-    dpi::{LogicalPosition, LogicalSize},
-    window::{Window as RawWindow, WindowBuilder as RawWindowBuilder},
+    dpi::{LogicalSize, PhysicalPosition},
+    window,
 };
 
 pub struct Window {
-    raw: RawWindow,
+    raw: window::Window,
 }
 
 impl Window {
@@ -37,13 +37,13 @@ impl Window {
             return Err(eyre!("The window height has to be greater than 0"));
         }
 
-        let window = RawWindowBuilder::new()
+        let raw = window::WindowBuilder::new()
             .with_title(title)
             .with_inner_size(LogicalSize::new(width, height))
             .with_resizable(resizable)
             .build(event_loop.raw())?;
 
-        Ok(Self { raw: window })
+        Ok(Self { raw })
     }
 
     pub fn request_redraw(&self) {
@@ -62,7 +62,7 @@ impl Window {
     // TOOD: Make this cleaner
     pub fn set_cursor_position(&self, position: Vec2) -> Result<()> {
         self.raw
-            .set_cursor_position(LogicalPosition::new(position.x, position.y))?;
+            .set_cursor_position(PhysicalPosition::new(position.x, position.y))?;
         Ok(())
     }
 
@@ -70,7 +70,7 @@ impl Window {
         self.raw.set_cursor_visible(visibility);
     }
 
-    pub fn raw(&self) -> &RawWindow {
+    pub fn raw(&self) -> &window::Window {
         &self.raw
     }
 
