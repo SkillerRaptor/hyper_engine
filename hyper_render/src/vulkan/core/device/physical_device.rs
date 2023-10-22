@@ -169,13 +169,11 @@ impl PhysicalDevice {
     }
 
     pub(crate) fn surface_details(&self, surface: &Surface) -> SurfaceDetails {
-        let surface_details = SurfaceDetails::new(SurfaceDetailsCreateInfo {
+        SurfaceDetails::new(SurfaceDetailsCreateInfo {
             surface,
             physical_device: self,
         })
-        .unwrap();
-
-        surface_details
+        .unwrap()
     }
 }
 
