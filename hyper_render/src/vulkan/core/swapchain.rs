@@ -48,10 +48,10 @@ impl Swapchain {
             allocator,
         } = create_info;
 
-        let settings = Self::choose_settings(window, &device);
+        let settings = Self::choose_settings(window, &device, surface);
 
         let functor = khr::Swapchain::new(instance.raw(), device.logical_device().raw());
-        let raw = Self::create_swapchain(surface, &device, &settings, &functor)?;
+        let raw = Self::create_swapchain(surface, &device, &settings, &functor, None)?;
 
         let (images, image_views) =
             Self::create_images_and_views(&device, &functor, raw, &settings)?;
@@ -78,8 +78,8 @@ impl Swapchain {
         })
     }
 
-    fn choose_settings(window: &Window, device: &Device) -> SwapchainSettings {
-        let surface_details = device.surface_details();
+    fn choose_settings(window: &Window, device: &Device, surface: &Surface) -> SwapchainSettings {
+        let surface_details = device.surface_details(surface);
 
         let capabilities = surface_details.capabilities();
 
@@ -137,8 +137,9 @@ impl Swapchain {
         device: &Device,
         settings: &SwapchainSettings,
         functor: &khr::Swapchain,
+        old_swapchain: Option<vk::SwapchainKHR>,
     ) -> Result<vk::SwapchainKHR> {
-        let surface_details = device.surface_details();
+        let surface_details = device.surface_details(surface);
         let capabilities = surface_details.capabilities();
 
         let mut image_count = capabilities.min_image_count + 1;
@@ -173,7 +174,7 @@ impl Swapchain {
             .composite_alpha(vk::CompositeAlphaFlagsKHR::OPAQUE)
             .present_mode(settings.present_mode)
             .clipped(true)
-            .old_swapchain(vk::SwapchainKHR::null());
+            .old_swapchain(old_swapchain.unwrap_or(vk::SwapchainKHR::null()));
 
         let raw = unsafe { functor.create_swapchain(&create_info, None) }?;
         Ok(raw)
@@ -325,6 +326,7 @@ impl Swapchain {
             };
 
             if recreate {
+                log::error!("RECREATE");
                 self.recreate(window, surface)?;
             }
         }
@@ -339,16 +341,22 @@ impl Swapchain {
 
         self.device.wait_idle()?;
 
-        self.destroy();
+        let settings = Self::choose_settings(window, &self.device, surface);
 
-        let settings = Self::choose_settings(window, &self.device);
-
-        let raw = Self::create_swapchain(surface, &self.device, &settings, &self.functor)?;
+        let raw = Self::create_swapchain(
+            surface,
+            &self.device,
+            &settings,
+            &self.functor,
+            Some(self.raw),
+        )?;
 
         let (images, image_views) =
             Self::create_images_and_views(&self.device, &self.functor, raw, &settings)?;
         let (depth_image, depth_image_view, depth_format, depth_image_allocation) =
             Self::create_depth_image(window, &self.device, &self.allocator)?;
+
+        self.destroy();
 
         self.extent = settings.extent;
         self.format = settings.surface_format.format;

@@ -572,8 +572,8 @@ impl Device {
         self.physical_device.queue_families()
     }
 
-    pub(crate) fn surface_details(&self) -> &SurfaceDetails {
-        self.physical_device.surface_details()
+    pub(crate) fn surface_details(&self, surface: &Surface) -> SurfaceDetails {
+        self.physical_device.surface_details(surface)
     }
 
     pub(crate) fn physical_device(&self) -> &PhysicalDevice {

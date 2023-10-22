@@ -11,7 +11,6 @@ use color_eyre::{eyre::eyre, Result};
 use std::{collections::HashSet, ffi::CStr, str};
 
 pub(crate) struct PhysicalDevice {
-    surface_details: SurfaceDetails,
     queue_families: QueueFamilies,
 
     raw: vk::PhysicalDevice,
@@ -26,7 +25,6 @@ impl PhysicalDevice {
         let mut chosen_physical_device = None;
         for raw in physical_devices {
             let mut physical_device = PhysicalDevice {
-                surface_details: SurfaceDetails::default(),
                 queue_families: QueueFamilies::default(),
                 raw,
             };
@@ -104,7 +102,6 @@ impl PhysicalDevice {
         }
 
         self.queue_families = queue_families;
-        self.surface_details = surface_details;
 
         Ok(true)
     }
@@ -171,8 +168,14 @@ impl PhysicalDevice {
         self.queue_families
     }
 
-    pub(crate) fn surface_details(&self) -> &SurfaceDetails {
-        &self.surface_details
+    pub(crate) fn surface_details(&self, surface: &Surface) -> SurfaceDetails {
+        let surface_details = SurfaceDetails::new(SurfaceDetailsCreateInfo {
+            surface,
+            physical_device: self,
+        })
+        .unwrap();
+
+        surface_details
     }
 }
 
