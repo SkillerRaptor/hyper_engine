@@ -559,7 +559,6 @@ mod tests {
             Some(&Position { x: 1.0, y: 1.0 })
         );
 
-        // Should panic
         registry.view_two(|_: Entity, _: &Position, _: &Position| {});
     }
 
@@ -594,7 +593,6 @@ mod tests {
         registry.add_component(entity_0, Position { x: 0.0, y: 0.0 });
         registry.add_component(entity_2, Position { x: 0.0, y: 0.0 });
 
-        // Should panic
         registry.add_component(entity_1, Position { x: 0.0, y: 0.0 });
     }
 }

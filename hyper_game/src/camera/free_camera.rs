@@ -75,9 +75,8 @@ impl FpsCamera {
             translation += Vec3::new(0.0, 1.0, 0.0);
         }
 
-        // TODO: Check for focus
         let mut delta = Vec2::default();
-        if input.is_mouse_button_pressed(MouseCode::Left) {
+        if input.is_mouse_button_pressed(MouseCode::Middle) {
             if self.last_pressed {
                 let delta_x = input.mouse_position().x - self.last_mouse_position.x;
                 let delta_y = input.mouse_position().y - self.last_mouse_position.y;
@@ -97,7 +96,7 @@ impl FpsCamera {
             self.last_pressed = false;
         }
 
-        if input.is_mouse_button_pressed(MouseCode::Left) {
+        if input.is_mouse_button_pressed(MouseCode::Middle) {
             let mouse_speed = 0.025;
             self.rotation =
                 nalgebra_glm::quat_angle_axis(delta.x * mouse_speed, &Vec3::new(0.0, -1.0, 0.0))

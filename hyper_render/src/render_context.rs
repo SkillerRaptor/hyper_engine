@@ -181,34 +181,4 @@ impl RenderContext {
 
         Ok(())
     }
-
-    /*
-    pub fn handle_gui_event(&mut self, winit_event: &WindowEvent<'_>) -> bool {
-        self.egui_integration.handle_event(winit_event)
-    }
-
-    pub fn begin_gui(&mut self, window: &Window) {
-        self.egui_integration.begin_gui(window);
-    }
-
-    pub fn end_gui(&mut self, window: &Window) -> FullOutput {
-        self.egui_integration.end_gui(window)
-    }
-
-    pub fn submit_gui(&mut self, window: &Window, output: FullOutput) -> Result<()> {
-        self.egui_integration.submit_gui(
-            window,
-            &mut self.swapchain,
-            &self.pipeline_layout,
-            &mut self.renderer,
-            output,
-        )?;
-
-        Ok(())
-    }
-
-    pub fn egui_context(&self) -> &Context {
-        self.egui_integration.context()
-    }
-    */
 }

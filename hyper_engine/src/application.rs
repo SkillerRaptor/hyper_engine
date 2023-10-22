@@ -130,8 +130,6 @@ impl Application {
 
             self.game.update();
 
-            //
-
             self.render_context
                 .begin(&self.window, &camera, self.frame_id as u64)
                 .unwrap();
@@ -174,41 +172,6 @@ impl Application {
 
             self.frame_id += 1;
         }
-
-        /*
-        // TODO: move this somewhere else
-        let mut window_focused = true;
-        self.event_loop.run(|event| {
-            match event {
-                Event::UpdateFrame => false,
-                Event::RenderFrame => {
-                    // Render Game
-
-                    false
-                }
-                Event::WindowFocused { focused } => {
-                    window_focused = focused;
-
-                    false
-                }
-                Event::WindowResized { width, height } => {
-                    if self.window.framebuffer_size() == (width, height) {
-                        return false;
-                    }
-
-                    if width == 0 || height == 0 {
-                        return false;
-                    }
-
-                    self.render_context.resize(&self.window).unwrap();
-
-                    camera.on_window_resize(width, height);
-                    false
-                }
-                _ => false,
-            }
-        });
-        */
 
         self.render_context.wait_idle()?;
 
