@@ -10,4 +10,4 @@ Please make sure to update tests as appropriate.
 
 ## License
 
-HyperEngine is distributed under the [MIT](https://github.com/SkillerRaptor/hyper_engine/blob/master/LICENSE) license.
+HyperEngine is distributed under the [MIT](https://github.com/SkillerRaptor/hyper_engine/blob/dev/LICENSE) license.
