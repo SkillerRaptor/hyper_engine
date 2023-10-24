@@ -6,8 +6,6 @@
 
 use hyper_engine::game::Game;
 
-use egui::Context;
-
 #[derive(Debug, Default)]
 pub(crate) struct Editor {}
 
@@ -17,6 +15,4 @@ impl Game for Editor {
     fn update_fixed(&mut self, _delta_time: f32, _time: f32) {}
 
     fn render(&mut self) {}
-
-    fn render_gui(&mut self, _context: &Context) {}
 }

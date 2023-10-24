@@ -786,50 +786,6 @@ impl Renderer {
         self.command_buffers[side as usize].set_scissor(0, &[*scissor]);
     }
 
-    pub(crate) fn begin_rendering_gui(&mut self, swapchain: &mut Swapchain) {
-        let side = self.current_frame_id % 2;
-
-        let render_area_extent = swapchain.extent();
-        let render_area_offset = vk::Offset2D::builder().x(0).y(0);
-
-        let render_area = vk::Rect2D::builder()
-            .extent(render_area_extent)
-            .offset(*render_area_offset);
-
-        let color_attachment_info = vk::RenderingAttachmentInfo::builder()
-            .image_view(swapchain.image_views()[self.swapchain_image_index as usize])
-            .image_layout(vk::ImageLayout::ATTACHMENT_OPTIMAL)
-            .load_op(vk::AttachmentLoadOp::LOAD)
-            .store_op(vk::AttachmentStoreOp::STORE);
-
-        let color_attachments = [*color_attachment_info];
-
-        let rendering_info = vk::RenderingInfo::builder()
-            .render_area(*render_area)
-            .layer_count(1)
-            .color_attachments(&color_attachments);
-
-        self.command_buffers[side as usize].begin_rendering(*rendering_info);
-
-        let viewport = vk::Viewport::builder()
-            .x(0.0)
-            .y(swapchain.extent().height as f32)
-            .width(swapchain.extent().width as f32)
-            .height(-(swapchain.extent().height as f32))
-            .min_depth(0.0)
-            .max_depth(1.0);
-
-        self.command_buffers[side as usize].set_viewport(0, &[*viewport]);
-
-        let offset = vk::Offset2D::builder().x(0).y(0);
-
-        let scissor = vk::Rect2D::builder()
-            .offset(*offset)
-            .extent(swapchain.extent());
-
-        self.command_buffers[side as usize].set_scissor(0, &[*scissor]);
-    }
-
     pub(crate) fn end_rendering(&self) {
         let side = self.current_frame_id % 2;
 

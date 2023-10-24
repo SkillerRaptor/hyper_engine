@@ -493,18 +493,6 @@ struct ObjectBindings {
   }
 };
 
-struct GuiBindings {
-  ArrayBuffer geometry;
-  Texture font_texture;
-  uint unused_0;
-  uint unused_1;
-
-  template<typename T>
-  inline T get_vertex(uint vertex_id) {
-    return geometry.load<T>(vertex_id);
-  }
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 // Globals
 ////////////////////////////////////////////////////////////////////////////////

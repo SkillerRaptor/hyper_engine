@@ -39,14 +39,3 @@ pub(crate) struct ObjectBindings {
 }
 
 impl Bindings for ObjectBindings {}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug, Default)]
-pub(crate) struct GuiBindings {
-    pub(crate) geometry: ResourceHandle,
-    pub(crate) font_texture: ResourceHandle,
-    pub(crate) unused_0: u32,
-    pub(crate) unused_1: u32,
-}
-
-impl Bindings for GuiBindings {}

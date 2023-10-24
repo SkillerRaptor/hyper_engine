@@ -44,7 +44,6 @@ pub struct Frame {
 }
 
 pub struct RenderContext {
-    // egui_integration: EguiIntegration,
     renderer: Renderer,
 
     pipeline_layout: PipelineLayout,
@@ -102,20 +101,7 @@ impl RenderContext {
             &pipeline_layout,
         )?;
 
-        /*
-        let egui_integration = EguiIntegration::new(
-            event_loop,
-            device.clone(),
-            allocator.clone(),
-            &pipeline_layout,
-            &swapchain,
-            descriptor_manager.clone(),
-            upload_manager.clone(),
-        )?;
-        */
-
         Ok(Self {
-            // egui_integration,
             renderer,
 
             pipeline_layout,

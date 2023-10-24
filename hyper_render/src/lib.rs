@@ -10,7 +10,6 @@
 pub mod render_context;
 
 pub(crate) mod bindings;
-// pub(crate) mod egui_integration;
 pub(crate) mod mesh;
 pub(crate) mod render_object;
 pub(crate) mod renderer;
