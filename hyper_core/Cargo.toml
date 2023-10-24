@@ -11,5 +11,5 @@ edition = "2021"
 license = "MIT"
 
 [dependencies]
-color-eyre = "0.6"
+color-eyre = { version = "0.6", default-features = false }
 log = "0.4"

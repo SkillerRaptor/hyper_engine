@@ -16,4 +16,3 @@ hyper_platform = { path = "../hyper_platform" }
 
 log = "0.4"
 nalgebra-glm = "0.18"
-paste = "1.0"

@@ -17,14 +17,18 @@ hyper_platform = { path = "../hyper_platform" }
 
 ash = "0.37"
 ash-window = "0.12"
-color-eyre = "0.6"
-gpu-allocator = "0.23"
+color-eyre = { version = "0.6", default-features = false }
+gpu-allocator = { version = "0.23", default-features = false, features = [
+    "vulkan",
+] }
 log = "0.4"
 nalgebra-glm = "0.18"
 smallvec = "1.11"
 raw-window-handle = "0.5"
-winit = { version = "0.29", features = ["rwh_05"] }
 
 # NOTE: Temporary
-image = "0.24"
+image = { version = "0.24", default-features = false, features = [
+    "jpeg",
+    "png",
+] }
 tobj = "4.0"
