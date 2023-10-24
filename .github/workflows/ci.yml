@@ -26,12 +26,8 @@ jobs:
         run: |
           sudo apt update -qq
           sudo apt install -y \
-            cmake \
-            extra-cmake-modules \
-            libwayland-dev \
             libxinerama-dev \
             libxkbcommon-dev \
-            wayland-protocols \
             xorg-dev  \
 
       - name: Install Rust-Toolchain
@@ -42,22 +38,10 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           override: true
 
-      - name: Install Cargo-Audit
-        uses: baptiste0928/cargo-install@v2
-        with:
-          crate: cargo-audit
-          locked: true
-
       - name: Install Cargo-Nextest
         uses: baptiste0928/cargo-install@v2
         with:
           crate: cargo-nextest
-          locked: true
-
-      - name: Install Cargo-Deny
-        uses: baptiste0928/cargo-install@v2
-        with:
-          crate: cargo-deny
           locked: true
 
       - name: Cache
