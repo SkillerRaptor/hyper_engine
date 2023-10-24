@@ -17,5 +17,8 @@ float4 main(FragmentInput input) : SV_TARGET {
 
   Texture texture = material.get_texture(OBJECT_TEXTURE_SLOT_ALBEDO_MAP);
   float4 value = texture.sample_2d<float4>(input.tex_coord);
+  if (value.a < 0.1) {
+    discard;
+  }
   return value;
 }
