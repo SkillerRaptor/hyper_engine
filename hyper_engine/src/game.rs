@@ -9,5 +9,5 @@ pub trait Game {
 
     fn update_fixed(&mut self, delta_time: f32, time: f32);
 
-    fn render(&mut self);
+    fn render(&self);
 }
