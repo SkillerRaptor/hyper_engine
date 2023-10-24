@@ -51,7 +51,23 @@ impl Texture {
             },
         )?;
 
-        staging_buffer.set_data(image.as_bytes())?;
+        let bytes = if image.color().has_alpha() {
+            image.as_bytes().to_vec()
+        } else {
+            let mut new_bytes = Vec::with_capacity(image_size as usize);
+            let bytes = image.as_bytes();
+            for (i, element) in bytes.iter().enumerate() {
+                new_bytes.push(*element);
+                if (i + 1) % 3 == 0 {
+                    new_bytes.push(255);
+                }
+            }
+
+            assert_eq!(new_bytes.len(), image_size as usize);
+
+            new_bytes
+        };
+        staging_buffer.set_data(&bytes)?;
 
         let extent = vk::Extent3D::builder()
             .width(image.width())
