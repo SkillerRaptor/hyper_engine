@@ -11,8 +11,10 @@ struct FragmentInput {
 };
 
 float4 main(FragmentInput input) : SV_TARGET {
+  Scene scene = get_scene();
+
   ObjectBindings object = get_bindings<ObjectBindings>();
-  ObjectMaterial material = object.get_material();
+  ObjectMaterial material = object.get_material(scene);
 
   return material.base_color;
 }

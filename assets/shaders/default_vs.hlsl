@@ -25,10 +25,10 @@ VertexOutput main(
   Scene scene = get_scene();
   Camera camera = scene.get_camera();
 
-  ObjectBindings object = get_bindings<ObjectBindings>();
+  ObjectBindings object = get_object_bindings();
 
-  Vertex vertex = object.get_geometry().get_vertex<Vertex>(vertex_id);
-  float4x4 transform = object.get_instance(instance_id);
+  Vertex vertex = object.get_geometry(scene).get_vertex<Vertex>(vertex_id);
+  float4x4 transform = object.get_instance(scene, instance_id);
 
   VertexOutput output = (VertexOutput) 0;
   output.position = mul(mul(camera.view_projection, transform), float4(vertex.position.xyz, 1.0));

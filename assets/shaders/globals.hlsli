@@ -399,7 +399,6 @@ struct Camera {
   float4x4 view_projection;
 };
 
-
 struct ObjectGeometry {
   ArrayBuffer vertices;
   uint unused_0;
@@ -477,21 +476,22 @@ struct ObjectBindings {
   uint instance_index;
   uint unused_0;
 
-  inline ObjectGeometry get_geometry() {
-    Scene scene = get_scene();
+  inline ObjectGeometry get_geometry(Scene scene) {
     return scene.get_geometry(geometry_index);
   }
 
-  inline ObjectMaterial get_material() {
-    Scene scene = get_scene();
+  inline ObjectMaterial get_material(Scene scene) {
     return scene.get_material(geometry_index);
   }
 
-  inline float4x4 get_instance(uint instance_id) {
-    Scene scene = get_scene();
+  inline float4x4 get_instance(Scene scene, uint instance_id) {
     return scene.get_instance(instance_index, instance_id);
   }
 };
+
+inline ObjectBindings get_object_bindings() {
+  return get_bindings<ObjectBindings>();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Globals
