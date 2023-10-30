@@ -8,6 +8,7 @@
 resolver = "2"
 members = [
     "hyper_core",
+    "hyper_ecs",
     "hyper_editor",
     "hyper_engine",
     "hyper_game",

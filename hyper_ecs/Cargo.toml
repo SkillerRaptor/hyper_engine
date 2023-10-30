@@ -5,14 +5,13 @@
 #-------------------------------------------------------------------------------------------
 
 [package]
-name = "hyper_game"
+name = "hyper_ecs"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
 
 [dependencies]
 hyper_core = { path = "../hyper_core" }
-hyper_platform = { path = "../hyper_platform" }
 
 color-eyre = { version = "0.6", default-features = false }
 log = "0.4"

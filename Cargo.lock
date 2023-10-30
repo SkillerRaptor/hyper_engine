@@ -578,6 +578,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "hyper_ecs"
+version = "0.1.0"
+dependencies = [
+ "color-eyre",
+ "hyper_core",
+ "log",
+ "nalgebra-glm",
+]
+
+[[package]]
 name = "hyper_editor"
 version = "0.1.0"
 dependencies = [
@@ -594,6 +604,7 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
+ "hyper_ecs",
  "hyper_game",
  "hyper_platform",
  "hyper_render",
@@ -606,6 +617,7 @@ dependencies = [
 name = "hyper_game"
 version = "0.1.0"
 dependencies = [
+ "color-eyre",
  "hyper_core",
  "hyper_platform",
  "log",
