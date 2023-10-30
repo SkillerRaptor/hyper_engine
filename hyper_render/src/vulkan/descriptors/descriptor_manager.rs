@@ -132,6 +132,7 @@ impl DescriptorManager {
         handle
     }
 
+    #[allow(dead_code)]
     pub(crate) fn update_buffer_handle(&mut self, raw: ResourceHandle, buffer: &Buffer) {
         let buffer_info = vk::DescriptorBufferInfo::builder()
             .buffer(buffer.raw())

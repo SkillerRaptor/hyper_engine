@@ -13,6 +13,7 @@ use fern::{
 use log::{Level, LevelFilter};
 use std::io;
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Verbosity {
     Error,

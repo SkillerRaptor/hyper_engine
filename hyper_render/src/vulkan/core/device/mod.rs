@@ -347,6 +347,7 @@ impl Device {
         Ok(command_pool)
     }
 
+    #[allow(dead_code)]
     pub(crate) fn create_vk_compute_pipelines(
         &self,
         create_infos: &[vk::ComputePipelineCreateInfo],
@@ -584,6 +585,7 @@ impl Device {
         &self.logical_device
     }
 
+    #[allow(dead_code)]
     pub(crate) fn graphics_queue(&self) -> vk::Queue {
         self.graphics_queue
     }

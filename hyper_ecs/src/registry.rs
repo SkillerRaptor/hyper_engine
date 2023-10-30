@@ -586,13 +586,13 @@ mod tests {
 
         #[derive(Debug)]
         struct Position {
-            x: f32,
-            y: f32,
+            _x: f32,
+            _y: f32,
         }
 
-        registry.add_component(entity_0, Position { x: 0.0, y: 0.0 });
-        registry.add_component(entity_2, Position { x: 0.0, y: 0.0 });
+        registry.add_component(entity_0, Position { _x: 0.0, _y: 0.0 });
+        registry.add_component(entity_2, Position { _x: 0.0, _y: 0.0 });
 
-        registry.add_component(entity_1, Position { x: 0.0, y: 0.0 });
+        registry.add_component(entity_1, Position { _x: 0.0, _y: 0.0 });
     }
 }

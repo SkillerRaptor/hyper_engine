@@ -55,7 +55,7 @@ pub struct RenderContext {
     _allocator: Rc<RefCell<Allocator>>,
     device: Rc<Device>,
     surface: Surface,
-    instance: Rc<Instance>,
+    _instance: Rc<Instance>,
 }
 
 impl RenderContext {
@@ -113,7 +113,7 @@ impl RenderContext {
             _allocator: allocator,
             device,
             surface,
-            instance,
+            _instance: instance,
         })
     }
 

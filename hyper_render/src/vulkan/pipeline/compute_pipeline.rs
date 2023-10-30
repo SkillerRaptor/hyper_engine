@@ -21,6 +21,7 @@ pub(crate) struct ComputePipeline {
 }
 
 impl ComputePipeline {
+    #[allow(dead_code)]
     pub(crate) fn new(device: Rc<Device>, create_info: ComputePipelineCreateInfo) -> Result<Self> {
         let ComputePipelineCreateInfo {
             label,
@@ -66,6 +67,7 @@ impl Pipeline for ComputePipeline {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) struct ComputePipelineCreateInfo<'a> {
     label: &'a str,
 

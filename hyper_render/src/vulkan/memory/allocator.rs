@@ -121,6 +121,7 @@ pub(crate) struct AllocationCreateInfo<'a> {
     pub(crate) scheme: AllocationScheme,
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum MemoryLocation {
     Unknown,
@@ -129,6 +130,7 @@ pub(crate) enum MemoryLocation {
     GpuToCpu,
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum AllocationScheme {
     DedicatedBuffer(vk::Buffer),

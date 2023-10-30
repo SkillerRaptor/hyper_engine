@@ -72,6 +72,7 @@ pub(crate) struct ObjectMaterial {
     unused_5: u32,
 }
 
+#[allow(dead_code)]
 pub(crate) struct Renderer {
     scene_buffer: Buffer,
     instance_scene_redirection_handle: ResourceHandle,
@@ -892,81 +893,6 @@ impl Renderer {
         swapchain.recreate(window, surface)?;
 
         Ok(())
-    }
-
-    pub(crate) fn bind_pipeline(
-        &self,
-        pipeline: &GraphicsPipeline,
-        pipeline_layout: &PipelineLayout,
-    ) {
-        let side = self.current_frame_id % 2;
-
-        self.command_buffers[side as usize]
-            .bind_pipeline(vk::PipelineBindPoint::GRAPHICS, pipeline);
-
-        let descriptor_sets = self
-            .descriptor_manager
-            .borrow()
-            .descriptor_sets()
-            .iter()
-            .map(|descriptor_set| descriptor_set.raw())
-            .collect::<Vec<_>>();
-        self.command_buffers[side as usize].bind_descriptor_sets(
-            vk::PipelineBindPoint::GRAPHICS,
-            pipeline_layout,
-            0,
-            &descriptor_sets,
-            &[],
-        );
-    }
-
-    pub(crate) fn set_scissor(&self, offset: vk::Offset2D, extent: vk::Extent2D) {
-        let side = self.current_frame_id % 2;
-
-        let scissor = vk::Rect2D::builder().offset(offset).extent(extent);
-
-        self.command_buffers[side as usize].set_scissor(0, &[*scissor]);
-    }
-
-    pub(crate) fn draw_indexed(
-        &self,
-        index_count: u32,
-        instance_count: u32,
-        first_index: u32,
-        vertex_offset: i32,
-        first_instance: u32,
-    ) {
-        let side = self.current_frame_id % 2;
-
-        self.command_buffers[side as usize].draw_indexed(
-            index_count,
-            instance_count,
-            first_index,
-            vertex_offset,
-            first_instance,
-        );
-    }
-
-    pub(crate) fn push_constants(
-        &self,
-        pipeline_layout: &PipelineLayout,
-        bindings_handle: ResourceHandle,
-    ) {
-        let side = self.current_frame_id % 2;
-
-        let bindings_offset = BindingsOffset::new(bindings_handle);
-        self.command_buffers[side as usize].push_constants(
-            pipeline_layout,
-            vk::ShaderStageFlags::ALL,
-            0,
-            &bindings_offset,
-        );
-    }
-
-    pub(crate) fn bind_index_buffer(&self, index_buffer: &Buffer) {
-        let side = self.current_frame_id % 2;
-
-        self.command_buffers[side as usize].bind_index_buffer(index_buffer);
     }
 
     pub(crate) fn update_frame(&self, frame: Frame) -> Result<()> {

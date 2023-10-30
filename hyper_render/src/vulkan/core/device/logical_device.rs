@@ -334,6 +334,7 @@ impl LogicalDevice {
         Ok(command_pool)
     }
 
+    #[allow(dead_code)]
     pub(crate) fn create_compute_pipelines(
         &self,
         create_infos: &[vk::ComputePipelineCreateInfo],
