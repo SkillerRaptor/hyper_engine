@@ -7,6 +7,7 @@
 use crate::camera::Camera;
 
 use hyper_platform::{input::Input, key_code::KeyCode, mouse_code::MouseCode, window::Window};
+
 use nalgebra_glm::{Mat4, Quat, Vec2, Vec3};
 
 pub struct FpsCamera {
