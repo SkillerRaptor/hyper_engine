@@ -7,8 +7,11 @@
 use crate::game::Game;
 
 use hyper_game::camera::free_camera::FpsCamera;
-use hyper_platform::{event_loop::EventLoop, input::Input, window::Window};
-use hyper_render::render_context::{Frame, RenderContext};
+use hyper_platform::{
+    event_loop::EventLoop,
+    input::Input,
+    window::{Window, WindowDescriptor},
+};
 
 use color_eyre::Result;
 use nalgebra_glm::Vec2;
@@ -35,21 +38,26 @@ impl Application {
         height: u32,
         resizable: bool,
     ) -> Result<Self> {
+        let start_time = Instant::now();
+
         let title = if cfg!(debug_assertions) {
             format!("{} (Debug Build)", title)
         } else {
             title
         };
 
-        let start_time = Instant::now();
-
         let event_loop = EventLoop::new()?;
-        let window = Window::builder()
-            .title(title)
-            .width(width)
-            .height(height)
-            .resizable(resizable)
-            .build(&event_loop)?;
+
+        let window = Window::new(
+            &event_loop,
+            &WindowDescriptor {
+                title: &title,
+                width,
+                height,
+                resizable,
+                ..Default::default()
+            },
+        )?;
 
         let render_context = RenderContext::new(&window)?;
 
