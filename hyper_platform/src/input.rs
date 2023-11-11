@@ -6,9 +6,8 @@
 
 use crate::{key_code::KeyCode, mouse_code::MouseCode};
 
-use std::collections::HashMap;
-
 use nalgebra_glm::Vec2;
+use std::collections::HashMap;
 use winit::{
     event::{ElementState, WindowEvent},
     keyboard::PhysicalKey,
