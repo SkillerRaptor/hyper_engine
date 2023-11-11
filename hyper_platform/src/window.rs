@@ -8,6 +8,9 @@ use crate::event_loop::EventLoop;
 
 use color_eyre::{eyre::eyre, Result};
 use nalgebra_glm::Vec2;
+use raw_window_handle::{
+    HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle,
+};
 use winit::{
     dpi::{LogicalSize, PhysicalPosition},
     window,
@@ -70,8 +73,12 @@ impl Window {
         self.raw.set_cursor_visible(visibility);
     }
 
-    pub fn raw(&self) -> &window::Window {
-        &self.raw
+    pub fn display_handle(&self) -> RawDisplayHandle {
+        self.raw.raw_display_handle()
+    }
+
+    pub fn window_handle(&self) -> RawWindowHandle {
+        self.raw.raw_window_handle()
     }
 
     pub fn builder() -> WindowBuilder {
