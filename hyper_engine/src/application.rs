@@ -12,22 +12,20 @@ use hyper_platform::{
     input::Input,
     window::{Window, WindowDescriptor},
 };
+use hyper_render::vulkan::graphics_context::{GraphicsContext, GraphicsContextDescriptor};
 
 use color_eyre::Result;
-use nalgebra_glm::Vec2;
 use std::time::Instant;
 use winit::event::{Event, WindowEvent};
 
 pub struct Application {
-    frame_id: u32,
-
-    game: Box<dyn Game>,
-
-    render_context: RenderContext,
+    graphics_context: GraphicsContext,
 
     input: Input,
     window: Window,
     event_loop: EventLoop,
+
+    game: Box<dyn Game>,
 }
 
 impl Application {
@@ -55,11 +53,17 @@ impl Application {
                 width,
                 height,
                 resizable,
-                ..Default::default()
             },
         )?;
 
-        let render_context = RenderContext::new(&window)?;
+        let input = Input::default();
+
+        let graphics_context = GraphicsContext::new(
+            &window,
+            &GraphicsContextDescriptor {
+                application_title: &title,
+            },
+        )?;
 
         log::info!(
             "Application initialized in {:.4} seconds",
@@ -67,15 +71,13 @@ impl Application {
         );
 
         Ok(Self {
-            frame_id: 1,
+            graphics_context,
 
-            game,
-
-            render_context,
-
-            input: Input::default(),
+            input,
             window,
             event_loop,
+
+            game,
         })
     }
 
@@ -98,6 +100,9 @@ impl Application {
             let frame_time = (new_time - current_time).as_secs_f32();
             current_time = new_time;
 
+            accumulator += frame_time;
+
+            let mut new_size = None;
             self.event_loop.pump_events(|event| {
                 if let Event::WindowEvent { event, .. } = &event {
                     match event {
@@ -115,9 +120,7 @@ impl Application {
                                 return;
                             }
 
-                            self.render_context.resize(&self.window).unwrap();
-
-                            camera.on_window_resize(width, height);
+                            new_size = Some((width, height));
                         }
                         _ => {}
                     }
@@ -126,7 +129,10 @@ impl Application {
                 }
             });
 
-            accumulator += frame_time;
+            if let Some(new_size) = new_size {
+                camera.on_window_resize(new_size.0, new_size.1);
+                self.graphics_context.resize(new_size.0, new_size.1)?;
+            }
 
             while accumulator >= delta_time {
                 self.game.update_fixed(delta_time, time);
@@ -137,51 +143,7 @@ impl Application {
             camera.update(frame_time, &self.input, &mut self.window);
 
             self.game.update();
-
-            self.render_context
-                .begin(&self.window, &camera, self.frame_id as u64)
-                .unwrap();
-
-            {
-                let frame = Frame {
-                    time,
-                    delta_time,
-
-                    unused_0: 0.0,
-                    unused_1: 0.0,
-
-                    frame_count: self.frame_id,
-                    unused_2: 0,
-                    unused_3: 0,
-                    unused_4: 0,
-
-                    screen_size: Vec2::new(
-                        self.window.framebuffer_size().0 as f32,
-                        self.window.framebuffer_size().1 as f32,
-                    ),
-                    unused_5: Vec2::default(),
-                };
-
-                self.render_context.update_frame(frame).unwrap();
-            }
-
-            {
-                self.render_context.begin_rendering();
-
-                self.render_context.draw_objects();
-                self.game.render();
-
-                self.render_context.end_rendering();
-            }
-
-            self.render_context.end().unwrap();
-
-            self.render_context.submit(&self.window).unwrap();
-
-            self.frame_id += 1;
         }
-
-        self.render_context.wait_idle()?;
 
         Ok(())
     }

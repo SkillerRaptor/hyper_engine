@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub(crate) mod command;
-pub(crate) mod core;
-pub(crate) mod descriptors;
-pub(crate) mod memory;
-pub(crate) mod pipeline;
-pub(crate) mod resource;
-pub(crate) mod sync;
+// TODO: Abstract this
+pub mod graphics_context;
+
+mod device;
+mod instance;
+mod surface;
+mod swapchain;

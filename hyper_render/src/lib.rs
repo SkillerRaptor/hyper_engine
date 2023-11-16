@@ -4,11 +4,7 @@
  * SPDX-License-Identifier: MIT
 */
 
-pub mod render_context;
+#![allow(dead_code)]
 
-pub(crate) mod bindings;
-pub(crate) mod mesh;
-pub(crate) mod render_object;
-pub(crate) mod renderer;
-pub(crate) mod resource_handle;
-pub(crate) mod vulkan;
+// TODO: Abstract this
+pub mod vulkan;
