@@ -28,37 +28,37 @@ use std::{
     thread,
 };
 
-pub(super) struct DebugUtils {
+pub(crate) struct DebugUtils {
     raw: DebugUtilsMessengerEXT,
     functor: DebugUtilsFunctor,
 }
 
 impl DebugUtils {
-    pub(super) fn functor(&self) -> &DebugUtilsFunctor {
+    pub(crate) fn functor(&self) -> &DebugUtilsFunctor {
         &self.functor
     }
 
-    pub(super) fn raw(&self) -> DebugUtilsMessengerEXT {
+    pub(crate) fn raw(&self) -> DebugUtilsMessengerEXT {
         self.raw
     }
 }
 
-pub(super) struct InstanceShared {
+pub(crate) struct InstanceShared {
     debug_utils: Option<DebugUtils>,
     raw: VkInstance,
     entry: Entry,
 }
 
 impl InstanceShared {
-    pub(super) fn entry(&self) -> &Entry {
+    pub(crate) fn entry(&self) -> &Entry {
         &self.entry
     }
 
-    pub(super) fn raw(&self) -> &VkInstance {
+    pub(crate) fn raw(&self) -> &VkInstance {
         &self.raw
     }
 
-    pub(super) fn debug_utils(&self) -> &Option<DebugUtils> {
+    pub(crate) fn debug_utils(&self) -> &Option<DebugUtils> {
         &self.debug_utils
     }
 }
@@ -78,16 +78,16 @@ impl Drop for InstanceShared {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub(super) struct ValidationLayers {
-    pub(super) general: bool,
-    pub(super) gpu_assisted: bool,
-    pub(super) synchronization: bool,
+pub(crate) struct ValidationLayers {
+    pub(crate) general: bool,
+    pub(crate) gpu_assisted: bool,
+    pub(crate) synchronization: bool,
 }
 
 #[derive(Debug)]
-pub(super) struct InstanceDescriptor<'a> {
-    pub(super) application_title: &'a str,
-    pub(super) validation_layers: ValidationLayers,
+pub(crate) struct InstanceDescriptor<'a> {
+    pub(crate) application_title: &'a str,
+    pub(crate) validation_layers: ValidationLayers,
 }
 
 impl<'a> Default for InstanceDescriptor<'a> {
@@ -103,7 +103,7 @@ impl<'a> Default for InstanceDescriptor<'a> {
     }
 }
 
-pub(super) struct Instance {
+pub(crate) struct Instance {
     shared: Arc<InstanceShared>,
 }
 
@@ -112,7 +112,7 @@ impl Instance {
         unsafe { CStr::from_bytes_with_nul_unchecked(b"HyperEngine\0") };
     const VALIDATION_LAYERS: [&'static str; 1] = ["VK_LAYER_KHRONOS_validation"];
 
-    pub(super) fn new(window: &Window, descriptor: &InstanceDescriptor) -> Result<Self> {
+    pub(crate) fn new(window: &Window, descriptor: &InstanceDescriptor) -> Result<Self> {
         let entry = Self::create_entry()?;
 
         let validation_layers_requested = descriptor.validation_layers.general
@@ -429,17 +429,17 @@ impl Instance {
         vk::FALSE
     }
 
-    pub(super) fn create_surface(&self, window: &Window) -> Result<Surface> {
+    pub(crate) fn create_surface(&self, window: &Window) -> Result<Surface> {
         let surface = Surface::new(window, &self.shared)?;
         Ok(surface)
     }
 
-    pub(super) fn create_device(&self, surface: &Surface) -> Result<Device> {
+    pub(crate) fn create_device(&self, surface: &Surface) -> Result<Device> {
         let device = Device::new(Arc::clone(&self.shared), surface)?;
         Ok(device)
     }
 
-    pub(super) fn shared(&self) -> &InstanceShared {
+    pub(crate) fn shared(&self) -> &InstanceShared {
         &self.shared
     }
 }

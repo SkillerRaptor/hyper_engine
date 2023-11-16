@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-// TODO: Change to pub(super)
-
 use crate::vulkan::{
     device::Device,
     instance::{Instance, InstanceDescriptor, ValidationLayers},

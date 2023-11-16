@@ -19,9 +19,9 @@ use color_eyre::Result;
 use std::sync::Arc;
 
 #[derive(Debug)]
-pub(super) struct SwapchainDescriptor {
-    pub(super) width: u32,
-    pub(super) height: u32,
+pub(crate) struct SwapchainDescriptor {
+    pub(crate) width: u32,
+    pub(crate) height: u32,
 }
 
 impl Default for SwapchainDescriptor {
@@ -33,7 +33,7 @@ impl Default for SwapchainDescriptor {
     }
 }
 
-pub(super) struct Swapchain {
+pub(crate) struct Swapchain {
     image_views: Vec<ImageView>,
     images: Vec<Image>,
     raw: SwapchainKHR,
@@ -42,7 +42,7 @@ pub(super) struct Swapchain {
 }
 
 impl Swapchain {
-    pub(super) fn new(
+    pub(crate) fn new(
         surface: &Surface,
         device: Arc<DeviceShared>,
         descriptor: &SwapchainDescriptor,
@@ -192,7 +192,7 @@ impl Swapchain {
         Ok((images, image_views))
     }
 
-    pub(super) fn raw(&self) -> &SwapchainKHR {
+    pub(crate) fn raw(&self) -> &SwapchainKHR {
         &self.raw
     }
 }

@@ -30,7 +30,7 @@ use std::{
 };
 use vma::{Allocator, AllocatorCreateInfo};
 
-pub(super) struct DeviceShared {
+pub(crate) struct DeviceShared {
     allocator: Mutex<Allocator>,
     logical_device: VkDevice,
     queue_family: u32,
@@ -39,23 +39,23 @@ pub(super) struct DeviceShared {
 }
 
 impl DeviceShared {
-    pub(super) fn instance(&self) -> &InstanceShared {
+    pub(crate) fn instance(&self) -> &InstanceShared {
         &self.instance
     }
 
-    pub(super) fn physical_device(&self) -> PhysicalDevice {
+    pub(crate) fn physical_device(&self) -> PhysicalDevice {
         self.physical_device
     }
 
-    pub(super) fn queue_family(&self) -> u32 {
+    pub(crate) fn queue_family(&self) -> u32 {
         self.queue_family
     }
 
-    pub(super) fn logical_device(&self) -> &VkDevice {
+    pub(crate) fn logical_device(&self) -> &VkDevice {
         &self.logical_device
     }
 
-    pub(super) fn query_surface_details(&self, surface: &Surface) -> Result<SurfaceDetails> {
+    pub(crate) fn query_surface_details(&self, surface: &Surface) -> Result<SurfaceDetails> {
         Device::query_surface_details(surface, self.physical_device)
     }
 }
@@ -68,34 +68,34 @@ impl Drop for DeviceShared {
     }
 }
 
-pub(super) struct SurfaceDetails {
+pub(crate) struct SurfaceDetails {
     present_modes: Vec<PresentModeKHR>,
     formats: Vec<SurfaceFormatKHR>,
     capabilities: SurfaceCapabilitiesKHR,
 }
 
 impl SurfaceDetails {
-    pub(super) fn present_modes(&self) -> &[PresentModeKHR] {
+    pub(crate) fn present_modes(&self) -> &[PresentModeKHR] {
         &self.present_modes
     }
 
-    pub(super) fn formats(&self) -> &[SurfaceFormatKHR] {
+    pub(crate) fn formats(&self) -> &[SurfaceFormatKHR] {
         &self.formats
     }
 
-    pub(super) fn capabilities(&self) -> &SurfaceCapabilitiesKHR {
+    pub(crate) fn capabilities(&self) -> &SurfaceCapabilitiesKHR {
         &self.capabilities
     }
 }
 
-pub(super) struct Device {
+pub(crate) struct Device {
     shared: Arc<DeviceShared>,
 }
 
 impl Device {
     const EXTENSIONS: [&'static CStr; 1] = [VkSwapchain::name()];
 
-    pub(super) fn new(instance: Arc<InstanceShared>, surface: &Surface) -> Result<Self> {
+    pub(crate) fn new(instance: Arc<InstanceShared>, surface: &Surface) -> Result<Self> {
         let physical_device = Self::choose_physical_device(&instance, surface)?;
         let queue_family = Self::find_queue_family(&instance, surface, physical_device)?.unwrap();
 
@@ -393,7 +393,7 @@ impl Device {
         Ok(allocator)
     }
 
-    pub(super) fn create_swapchain(
+    pub(crate) fn create_swapchain(
         &self,
         surface: &Surface,
         descriptor: &SwapchainDescriptor,
@@ -402,7 +402,7 @@ impl Device {
         Ok(swapchain)
     }
 
-    pub(super) fn shared(&self) -> &DeviceShared {
+    pub(crate) fn shared(&self) -> &DeviceShared {
         &self.shared
     }
 }

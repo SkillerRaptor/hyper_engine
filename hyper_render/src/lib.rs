@@ -6,5 +6,6 @@
 
 #![allow(dead_code)]
 
-// TODO: Abstract this
-pub mod vulkan;
+pub mod graphics_context;
+
+mod vulkan;

@@ -12,7 +12,7 @@ use hyper_platform::{
     input::Input,
     window::{Window, WindowDescriptor},
 };
-use hyper_render::vulkan::graphics_context::{GraphicsContext, GraphicsContextDescriptor};
+use hyper_render::graphics_context::{GraphicsContext, GraphicsContextDescriptor};
 
 use color_eyre::Result;
 use std::time::Instant;

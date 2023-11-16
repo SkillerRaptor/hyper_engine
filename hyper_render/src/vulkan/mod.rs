@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-// TODO: Abstract this
-pub mod graphics_context;
-
-mod device;
-mod instance;
-mod surface;
-mod swapchain;
+pub(crate) mod device;
+pub(crate) mod instance;
+pub(crate) mod surface;
+pub(crate) mod swapchain;
