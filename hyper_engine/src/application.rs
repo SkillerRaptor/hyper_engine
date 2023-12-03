@@ -19,17 +19,17 @@ use std::time::Instant;
 use winit::event::{Event, WindowEvent};
 
 #[derive(Debug)]
-pub struct ApplicationDescriptor {
-    pub title: String,
+pub struct ApplicationDescriptor<'a> {
+    pub title: &'a str,
     pub width: u32,
     pub height: u32,
     pub resizable: bool,
 }
 
-impl Default for ApplicationDescriptor {
+impl<'a> Default for ApplicationDescriptor<'a> {
     fn default() -> Self {
         Self {
-            title: "<untitled>".to_owned(),
+            title: "<untitled>",
             width: 1280,
             height: 720,
             resizable: true,
@@ -51,10 +51,11 @@ impl Application {
     pub fn new(game: Box<dyn Game>, descriptor: &ApplicationDescriptor) -> Result<Self> {
         let start_time = Instant::now();
 
+        // TODO: Replace with Cow?
         let title = if cfg!(debug_assertions) {
             format!("{} (Debug Build)", descriptor.title)
         } else {
-            descriptor.title.clone()
+            descriptor.title.to_owned()
         };
 
         let event_loop = EventLoop::new()?;
