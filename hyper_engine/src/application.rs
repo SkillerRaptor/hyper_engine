@@ -18,6 +18,25 @@ use color_eyre::Result;
 use std::time::Instant;
 use winit::event::{Event, WindowEvent};
 
+#[derive(Debug)]
+pub struct ApplicationDescriptor {
+    pub title: String,
+    pub width: u32,
+    pub height: u32,
+    pub resizable: bool,
+}
+
+impl Default for ApplicationDescriptor {
+    fn default() -> Self {
+        Self {
+            title: "<untitled>".to_owned(),
+            width: 1280,
+            height: 720,
+            resizable: true,
+        }
+    }
+}
+
 pub struct Application {
     graphics_context: GraphicsContext,
 
@@ -29,19 +48,13 @@ pub struct Application {
 }
 
 impl Application {
-    fn new(
-        game: Box<dyn Game>,
-        title: String,
-        width: u32,
-        height: u32,
-        resizable: bool,
-    ) -> Result<Self> {
+    pub fn new(game: Box<dyn Game>, descriptor: &ApplicationDescriptor) -> Result<Self> {
         let start_time = Instant::now();
 
         let title = if cfg!(debug_assertions) {
-            format!("{} (Debug Build)", title)
+            format!("{} (Debug Build)", descriptor.title)
         } else {
-            title
+            descriptor.title.clone()
         };
 
         let event_loop = EventLoop::new()?;
@@ -50,9 +63,9 @@ impl Application {
             &event_loop,
             &WindowDescriptor {
                 title: &title,
-                width,
-                height,
-                resizable,
+                width: descriptor.width,
+                height: descriptor.height,
+                resizable: descriptor.resizable,
             },
         )?;
 
@@ -146,60 +159,5 @@ impl Application {
         }
 
         Ok(())
-    }
-
-    pub fn builder() -> ApplicationBuilder {
-        ApplicationBuilder::default()
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct ApplicationBuilder {
-    title: String,
-    width: u32,
-    height: u32,
-    resizable: bool,
-}
-
-impl ApplicationBuilder {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn title(mut self, title: impl Into<String>) -> Self {
-        self.title = title.into();
-        self
-    }
-
-    pub fn width(mut self, width: u32) -> Self {
-        self.width = width;
-        self
-    }
-
-    pub fn height(mut self, height: u32) -> Self {
-        self.height = height;
-        self
-    }
-
-    pub fn resizable(mut self, resizable: bool) -> Self {
-        self.resizable = resizable;
-        self
-    }
-
-    pub fn build(self, game: Box<dyn Game>) -> Result<Application> {
-        let application =
-            Application::new(game, self.title, self.width, self.height, self.resizable)?;
-        Ok(application)
-    }
-}
-
-impl Default for ApplicationBuilder {
-    fn default() -> Self {
-        Self {
-            title: "<unknown application title>".to_owned(),
-            width: 1280,
-            height: 720,
-            resizable: true,
-        }
     }
 }
