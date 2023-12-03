@@ -15,7 +15,7 @@ use hyper_platform::{
 use hyper_render::graphics_context::{GraphicsContext, GraphicsContextDescriptor};
 
 use color_eyre::Result;
-use std::time::Instant;
+use std::{borrow::Cow, time::Instant};
 use winit::event::{Event, WindowEvent};
 
 #[derive(Debug)]
@@ -51,11 +51,10 @@ impl Application {
     pub fn new(game: Box<dyn Game>, descriptor: &ApplicationDescriptor) -> Result<Self> {
         let start_time = Instant::now();
 
-        // TODO: Replace with Cow?
         let title = if cfg!(debug_assertions) {
-            format!("{} (Debug Build)", descriptor.title)
+            Cow::from(format!("{} (Debug Build)", descriptor.title))
         } else {
-            descriptor.title.to_owned()
+            Cow::from(descriptor.title)
         };
 
         let event_loop = EventLoop::new()?;
