@@ -4,17 +4,27 @@
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 
+[package]
+name = "hyper_editor"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+hyper_engine = { path = "crates/hyper_engine" }
+
+chrono = { version = "0.4", default-features = false, features = [
+    "alloc",
+    "std",
+    "clock",
+] }
+color-eyre = { version = "0.6", default-features = false }
+fern = { version = "0.6", features = ["colored"] }
+log = "0.4"
+
 [workspace]
 resolver = "2"
-members = [
-    "hyper_core",
-    "hyper_ecs",
-    "hyper_editor",
-    "hyper_engine",
-    "hyper_game",
-    "hyper_platform",
-    "hyper_render",
-]
+members = ["crates/*"]
 
 [profile.dev]
 opt-level = 1
