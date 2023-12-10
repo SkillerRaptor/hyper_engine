@@ -12,7 +12,7 @@ license = "MIT"
 
 [dependencies]
 hyper_core = { path = "../hyper_core" }
+hyper_math = { path = "../hyper_math" }
 
 color-eyre = { version = "0.6", default-features = false }
 log = "0.4"
-nalgebra-glm = "0.18"

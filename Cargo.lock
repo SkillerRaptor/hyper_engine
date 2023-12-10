@@ -478,8 +478,8 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
+ "hyper_math",
  "log",
- "nalgebra-glm",
 ]
 
 [[package]]
@@ -501,10 +501,10 @@ dependencies = [
  "hyper_core",
  "hyper_ecs",
  "hyper_game",
+ "hyper_math",
  "hyper_platform",
  "hyper_render",
  "log",
- "nalgebra-glm",
  "winit",
 ]
 
@@ -514,7 +514,17 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
+ "hyper_math",
  "hyper_platform",
+ "log",
+]
+
+[[package]]
+name = "hyper_math"
+version = "0.1.0"
+dependencies = [
+ "color-eyre",
+ "hyper_core",
  "log",
  "nalgebra-glm",
 ]
@@ -525,8 +535,8 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
+ "hyper_math",
  "log",
- "nalgebra-glm",
  "raw-window-handle 0.5.2",
  "winit",
 ]
@@ -537,6 +547,7 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
+ "hyper_math",
  "hyper_platform",
  "hyper_vulkan",
  "log",
@@ -550,9 +561,9 @@ dependencies = [
  "ash-window",
  "color-eyre",
  "hyper_core",
+ "hyper_math",
  "hyper_platform",
  "log",
- "nalgebra-glm",
  "raw-window-handle 0.5.2",
  "vma",
 ]

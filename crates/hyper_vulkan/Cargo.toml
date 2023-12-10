@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------------------
-# Copyright (c) 2022-2023 SkillerRaptor
+# Copyright (c) 2023 SkillerRaptor
 #
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
@@ -12,12 +12,12 @@ license = "MIT"
 
 [dependencies]
 hyper_core = { path = "../hyper_core" }
+hyper_math = { path = "../hyper_math" }
 hyper_platform = { path = "../hyper_platform" }
 
 ash = "0.37"
 ash-window = "0.12"
 color-eyre = { version = "0.6", default-features = false }
 log = "0.4"
-nalgebra-glm = "0.18"
 raw-window-handle = "0.5"
 vma = "0.3"

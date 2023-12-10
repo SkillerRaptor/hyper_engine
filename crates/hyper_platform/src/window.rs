@@ -6,8 +6,9 @@
 
 use crate::event_loop::EventLoop;
 
+use hyper_math::Vec2;
+
 use color_eyre::{eyre::eyre, Result};
-use nalgebra_glm::Vec2;
 use raw_window_handle::{
     HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle,
 };

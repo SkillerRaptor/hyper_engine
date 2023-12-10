@@ -6,7 +6,7 @@
 
 pub mod free_camera;
 
-use nalgebra_glm::Mat4;
+use hyper_math::Mat4;
 
 pub trait Camera {
     fn projection_matrix(&self) -> Mat4;

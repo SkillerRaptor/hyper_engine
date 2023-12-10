@@ -6,9 +6,8 @@
 
 use crate::camera::Camera;
 
+use hyper_math::{Mat4, Quat, Vec2, Vec3};
 use hyper_platform::{input::Input, key_code::KeyCode, mouse_code::MouseCode, window::Window};
-
-use nalgebra_glm::{Mat4, Quat, Vec2, Vec3};
 
 pub struct FpsCamera {
     aspect_ratio: f32,
@@ -100,16 +99,16 @@ impl FpsCamera {
         if input.is_mouse_button_pressed(MouseCode::Middle) {
             let mouse_speed = 0.025;
             self.rotation =
-                nalgebra_glm::quat_angle_axis(delta.x * mouse_speed, &Vec3::new(0.0, -1.0, 0.0))
+                hyper_math::quat_angle_axis(delta.x * mouse_speed, &Vec3::new(0.0, -1.0, 0.0))
                     * self.rotation;
             self.rotation *=
-                nalgebra_glm::quat_angle_axis(delta.y * mouse_speed, &Vec3::new(-1.0, 0.0, 0.0));
+                hyper_math::quat_angle_axis(delta.y * mouse_speed, &Vec3::new(-1.0, 0.0, 0.0));
             self.rotation = self.rotation.normalize();
         }
 
         // TODO: Replace constants
         self.position +=
-            nalgebra_glm::quat_rotate_vec3(&self.rotation, &(translation * 50.0 * delta_time));
+            hyper_math::quat_rotate_vec3(&self.rotation, &(translation * 50.0 * delta_time));
     }
 
     pub fn on_window_resize(&mut self, width: u32, height: u32) {
@@ -119,13 +118,13 @@ impl FpsCamera {
 
 impl Camera for FpsCamera {
     fn projection_matrix(&self) -> Mat4 {
-        nalgebra_glm::perspective(self.aspect_ratio, self.fov, self.near, self.far)
+        hyper_math::perspective(self.aspect_ratio, self.fov, self.near, self.far)
     }
 
     fn view_matrix(&self) -> Mat4 {
         let translation_matrix = Mat4::new_translation(&self.position);
-        let rotation_matrix = nalgebra_glm::quat_to_mat4(&self.rotation);
+        let rotation_matrix = hyper_math::quat_to_mat4(&self.rotation);
 
-        nalgebra_glm::inverse(&(translation_matrix * rotation_matrix))
+        hyper_math::inverse(&(translation_matrix * rotation_matrix))
     }
 }

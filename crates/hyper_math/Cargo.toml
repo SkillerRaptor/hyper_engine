@@ -1,26 +1,18 @@
 #-------------------------------------------------------------------------------------------
-# Copyright (c) 2022-2023 SkillerRaptor
+# Copyright (c) 2023 SkillerRaptor
 #
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 
 [package]
-name = "hyper_engine"
+name = "hyper_math"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
 
 [dependencies]
 hyper_core = { path = "../hyper_core" }
-hyper_ecs = { path = "../hyper_ecs" }
-hyper_game = { path = "../hyper_game" }
-hyper_math = { path = "../hyper_math" }
-hyper_platform = { path = "../hyper_platform" }
-hyper_render = { path = "../hyper_render" }
 
 color-eyre = { version = "0.6", default-features = false }
 log = "0.4"
-winit = { version = "0.29", default-features = false, features = [
-    "rwh_05",
-    "x11",
-] }
+nalgebra-glm = "0.18"
