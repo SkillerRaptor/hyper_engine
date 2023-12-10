@@ -535,11 +535,21 @@ dependencies = [
 name = "hyper_render"
 version = "0.1.0"
 dependencies = [
+ "color-eyre",
+ "hyper_core",
+ "hyper_platform",
+ "hyper_vulkan",
+ "log",
+]
+
+[[package]]
+name = "hyper_vulkan"
+version = "0.1.0"
+dependencies = [
  "ash",
  "ash-window",
  "color-eyre",
  "hyper_core",
- "hyper_game",
  "hyper_platform",
  "log",
  "nalgebra-glm",

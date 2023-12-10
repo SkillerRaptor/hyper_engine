@@ -7,5 +7,3 @@
 #![allow(dead_code)]
 
 pub mod graphics_context;
-
-mod vulkan;

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::vulkan::{device::DeviceShared, surface::Surface};
+use crate::{device::DeviceShared, surface::Surface};
 
 use ash::{
     extensions::khr::Swapchain as SwapchainFunctor,
@@ -19,9 +19,9 @@ use color_eyre::Result;
 use std::sync::Arc;
 
 #[derive(Debug)]
-pub(crate) struct SwapchainDescriptor {
-    pub(crate) width: u32,
-    pub(crate) height: u32,
+pub struct SwapchainDescriptor {
+    pub width: u32,
+    pub height: u32,
 }
 
 impl Default for SwapchainDescriptor {
@@ -33,7 +33,7 @@ impl Default for SwapchainDescriptor {
     }
 }
 
-pub(crate) struct Swapchain {
+pub struct Swapchain {
     image_views: Vec<ImageView>,
     images: Vec<Image>,
     raw: SwapchainKHR,
@@ -42,7 +42,7 @@ pub(crate) struct Swapchain {
 }
 
 impl Swapchain {
-    pub(crate) fn new(
+    pub fn new(
         surface: &Surface,
         device: Arc<DeviceShared>,
         descriptor: &SwapchainDescriptor,
@@ -192,7 +192,7 @@ impl Swapchain {
         Ok((images, image_views))
     }
 
-    pub(crate) fn raw(&self) -> &SwapchainKHR {
+    pub fn raw(&self) -> &SwapchainKHR {
         &self.raw
     }
 }

@@ -4,14 +4,13 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::vulkan::{
+use hyper_platform::window::Window;
+use hyper_vulkan::{
     device::Device,
     instance::{Instance, InstanceDescriptor, ValidationLayers},
     surface::Surface,
     swapchain::{Swapchain, SwapchainDescriptor},
 };
-
-use hyper_platform::window::Window;
 
 use color_eyre::Result;
 
