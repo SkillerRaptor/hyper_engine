@@ -41,7 +41,7 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new(event_loop: &EventLoop, descriptor: &WindowDescriptor) -> Result<Self> {
+    pub fn new(event_loop: &EventLoop, descriptor: WindowDescriptor) -> Result<Self> {
         if descriptor.title.is_empty() {
             return Err(eyre!("The window title has to be non-empty"));
         }

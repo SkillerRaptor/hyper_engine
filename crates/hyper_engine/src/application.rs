@@ -48,7 +48,7 @@ pub struct Application {
 }
 
 impl Application {
-    pub fn new(game: Box<dyn Game>, descriptor: &ApplicationDescriptor) -> Result<Self> {
+    pub fn new(game: Box<dyn Game>, descriptor: ApplicationDescriptor) -> Result<Self> {
         let start_time = Instant::now();
 
         let title = if cfg!(debug_assertions) {
@@ -61,7 +61,7 @@ impl Application {
 
         let window = Window::new(
             &event_loop,
-            &WindowDescriptor {
+            WindowDescriptor {
                 title: &title,
                 width: descriptor.width,
                 height: descriptor.height,
@@ -73,7 +73,7 @@ impl Application {
 
         let graphics_context = GraphicsContext::new(
             &window,
-            &GraphicsContextDescriptor {
+            GraphicsContextDescriptor {
                 application_title: &title,
             },
         )?;

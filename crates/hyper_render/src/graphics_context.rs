@@ -35,7 +35,7 @@ pub struct GraphicsContext {
 }
 
 impl GraphicsContext {
-    pub fn new(window: &Window, descriptor: &GraphicsContextDescriptor) -> Result<Self> {
+    pub fn new(window: &Window, descriptor: GraphicsContextDescriptor) -> Result<Self> {
         let debug = cfg!(debug_assertions);
 
         let instance = Instance::new(
