@@ -74,7 +74,7 @@ impl Application {
         let graphics_context = GraphicsContext::new(
             &window,
             GraphicsContextDescriptor {
-                application_title: &title,
+                application_title: title.to_string(),
             },
         )?;
 

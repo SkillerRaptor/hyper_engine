@@ -86,12 +86,16 @@ impl Window {
     pub fn set_cursor_visiblity(&self, visibility: bool) {
         self.raw.set_cursor_visible(visibility);
     }
+}
 
-    pub fn display_handle(&self) -> RawDisplayHandle {
+unsafe impl HasRawDisplayHandle for Window {
+    fn raw_display_handle(&self) -> RawDisplayHandle {
         self.raw.raw_display_handle()
     }
+}
 
-    pub fn window_handle(&self) -> RawWindowHandle {
+unsafe impl HasRawWindowHandle for Window {
+    fn raw_window_handle(&self) -> RawWindowHandle {
         self.raw.raw_window_handle()
     }
 }

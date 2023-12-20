@@ -25,7 +25,7 @@ fn main() -> Result<()> {
 
     let mut application = Application::new(
         Box::<Editor>::default(),
-        &ApplicationDescriptor {
+        ApplicationDescriptor {
             title: "HyperEditor",
             width: 1280,
             height: 720,
