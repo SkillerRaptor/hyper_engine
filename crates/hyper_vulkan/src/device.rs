@@ -213,6 +213,132 @@ impl Device {
         log::info!("  Name: {}", physical_device.device_name());
         log::info!("  Type: {}", physical_device.device_type());
 
+        if dynamic_rendering
+            || descriptor_binding_sampled_image_update_after_bind
+            || descriptor_binding_storage_buffer_update_after_bind
+            || descriptor_binding_storage_image_update_after_bind
+            || descriptor_binding_storage_texel_buffer_update_after_bind
+            || descriptor_binding_uniform_buffer_update_after_bind
+            || descriptor_binding_uniform_texel_buffer_update_after_bind
+            || descriptor_binding_update_unused_while_pending
+            || descriptor_binding_partially_bound
+            || descriptor_binding_variable_descriptor_count
+            || runtime_descriptor_array
+            || shader_input_attachment_array_dynamic_indexing
+            || shader_input_attachment_array_non_uniform_indexing
+            || shader_sampled_image_array_non_uniform_indexing
+            || shader_storage_buffer_array_non_uniform_indexing
+            || shader_storage_image_array_non_uniform_indexing
+            || shader_storage_texel_buffer_array_dynamic_indexing
+            || shader_storage_texel_buffer_array_non_uniform_indexing
+            || shader_uniform_buffer_array_non_uniform_indexing
+            || shader_uniform_texel_buffer_array_dynamic_indexing
+            || shader_uniform_texel_buffer_array_non_uniform_indexing
+            || synchronization2
+            || timeline_semaphore
+        {
+            log::debug!("Enabled device features:");
+
+            if dynamic_rendering {
+                log::debug!("  - dynamic_rendering");
+            }
+
+            if descriptor_binding_sampled_image_update_after_bind {
+                log::debug!("  - descriptor_binding_sampled_image_update_after_bind");
+            }
+
+            if descriptor_binding_storage_buffer_update_after_bind {
+                log::debug!("  - descriptor_binding_storage_buffer_update_after_bind");
+            }
+
+            if descriptor_binding_storage_image_update_after_bind {
+                log::debug!("  - descriptor_binding_storage_image_update_after_bind");
+            }
+
+            if descriptor_binding_storage_texel_buffer_update_after_bind {
+                log::debug!("  - descriptor_binding_storage_texel_buffer_update_after_bind");
+            }
+
+            if descriptor_binding_uniform_buffer_update_after_bind {
+                log::debug!("  - descriptor_binding_uniform_buffer_update_after_bind");
+            }
+
+            if descriptor_binding_uniform_texel_buffer_update_after_bind {
+                log::debug!("  - descriptor_binding_uniform_texel_buffer_update_after_bind");
+            }
+
+            if descriptor_binding_update_unused_while_pending {
+                log::debug!("  - descriptor_binding_update_unused_while_pending");
+            }
+
+            if descriptor_binding_partially_bound {
+                log::debug!("  - descriptor_binding_partially_bound");
+            }
+
+            if descriptor_binding_variable_descriptor_count {
+                log::debug!("  - descriptor_binding_variable_descriptor_count");
+            }
+
+            if runtime_descriptor_array {
+                log::debug!("  - runtime_descriptor_array");
+            }
+
+            if shader_input_attachment_array_dynamic_indexing {
+                log::debug!("  - shader_input_attachment_array_dynamic_indexing");
+            }
+
+            if shader_input_attachment_array_non_uniform_indexing {
+                log::debug!("  - shader_input_attachment_array_non_uniform_indexing");
+            }
+
+            if shader_sampled_image_array_non_uniform_indexing {
+                log::debug!("  - shader_sampled_image_array_non_uniform_indexing");
+            }
+
+            if shader_storage_buffer_array_non_uniform_indexing {
+                log::debug!("  - shader_storage_buffer_array_non_uniform_indexing");
+            }
+
+            if shader_storage_image_array_non_uniform_indexing {
+                log::debug!("  - shader_storage_image_array_non_uniform_indexing");
+            }
+
+            if shader_storage_texel_buffer_array_dynamic_indexing {
+                log::debug!("  - shader_storage_texel_buffer_array_dynamic_indexing");
+            }
+
+            if shader_storage_texel_buffer_array_non_uniform_indexing {
+                log::debug!("  - shader_storage_texel_buffer_array_non_uniform_indexing");
+            }
+
+            if shader_uniform_buffer_array_non_uniform_indexing {
+                log::debug!("  - shader_uniform_buffer_array_non_uniform_indexing");
+            }
+
+            if shader_uniform_texel_buffer_array_dynamic_indexing {
+                log::debug!("  - shader_uniform_texel_buffer_array_dynamic_indexing");
+            }
+
+            if shader_uniform_texel_buffer_array_non_uniform_indexing {
+                log::debug!("  - shader_uniform_texel_buffer_array_non_uniform_indexing");
+            }
+
+            if synchronization2 {
+                log::debug!("  - synchronization2");
+            }
+
+            if timeline_semaphore {
+                log::debug!("  - timeline_semaphore");
+            }
+        }
+
+        if !extensions.is_empty() {
+            log::debug!("Enabled device extensions:");
+            for extension in &extensions {
+                log::debug!("  - {}", extension.to_string_lossy());
+            }
+        }
+
         Ok(Self {
             _shared: Arc::new(DeviceShared {
                 raw,
