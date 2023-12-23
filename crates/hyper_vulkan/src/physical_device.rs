@@ -112,8 +112,8 @@ impl PhysicalDevice {
         }?;
         let extension_properties = vk_extension_properties
             .iter()
-            .map(|&extension| ExtensionProperties::try_from(extension))
-            .collect::<Result<Vec<_>, _>>()?;
+            .map(|&extension| ExtensionProperties::from(extension))
+            .collect::<Vec<_>>();
 
         let vk_layer_properties = unsafe {
             instance
@@ -251,7 +251,7 @@ impl PhysicalDevice {
         extensions.iter().all(|extension| {
             self.extension_properties
                 .iter()
-                .any(|extension_property| extension_property.name() == extension)
+                .any(|extension_property| extension_property.name == extension.as_ref())
         })
     }
 

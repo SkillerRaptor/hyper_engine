@@ -14,7 +14,7 @@ use hyper_vulkan::{
     entry::Entry,
     instance::{Instance, InstanceDescriptor},
     physical_device::PhysicalDeviceType,
-    queue_family_properties::QueueFlags,
+    queue_flags::QueueFlags,
     surface::Surface,
     version::Version,
 };
@@ -61,7 +61,7 @@ impl GraphicsContext {
             layers.iter().all(|layer| {
                 layer_properties
                     .iter()
-                    .any(|properties| properties.name() == layer)
+                    .any(|properties| properties.name == *layer)
             })
         } else {
             false
@@ -152,7 +152,7 @@ impl GraphicsContext {
                     .enumerate()
                     .position(|(i, queue_family_properties)| {
                         queue_family_properties
-                            .queue_flags()
+                            .queue_flags
                             .intersects(QueueFlags::GRAPHICS)
                             && physical_device
                                 .support_surface(i as u32, &surface)

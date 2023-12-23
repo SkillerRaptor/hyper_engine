@@ -13,5 +13,6 @@ pub mod instance;
 pub mod layer_properties;
 pub mod physical_device;
 pub mod queue_family_properties;
+pub mod queue_flags;
 pub mod surface;
 pub mod version;

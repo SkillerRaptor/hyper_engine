@@ -4,21 +4,24 @@
  * SPDX-License-Identifier: MIT
  */
 
-use ash::vk::Extent3D;
+use ash::vk;
 
 #[derive(Clone, Copy, Debug, Default)]
-pub struct Extent3d {
+pub struct Extent3D {
     pub width: u32,
     pub height: u32,
     pub depth: u32,
 }
 
-impl From<Extent3D> for Extent3d {
-    fn from(value: Extent3D) -> Self {
+impl From<vk::Extent3D> for Extent3D {
+    fn from(value: vk::Extent3D) -> Self {
+        let width = value.width;
+        let height = value.height;
+        let depth = value.depth;
         Self {
-            width: value.width,
-            height: value.height,
-            depth: value.depth,
+            width,
+            height,
+            depth,
         }
     }
 }
