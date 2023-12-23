@@ -9,7 +9,7 @@ use crate::{instance::InstanceShared, physical_device::PhysicalDevice};
 use ash::{
     extensions::khr,
     vk::{
-        self, DeviceCreateInfo, DeviceQueueCreateInfo, PhysicalDeviceDescriptorIndexingFeatures,
+        DeviceCreateInfo, DeviceQueueCreateInfo, PhysicalDeviceDescriptorIndexingFeatures,
         PhysicalDeviceDynamicRenderingFeatures, PhysicalDeviceFeatures2,
         PhysicalDeviceSynchronization2Features, PhysicalDeviceTimelineSemaphoreFeatures,
     },
@@ -60,7 +60,7 @@ pub struct DeviceDescriptor {
 
 pub(crate) struct DeviceShared {
     raw: AshDevice,
-    _physical_device: vk::PhysicalDevice,
+    _physical_device: PhysicalDevice,
     _instance: Arc<InstanceShared>,
 }
 
@@ -79,7 +79,7 @@ pub struct Device {
 impl Device {
     pub(crate) fn new(
         instance: &Arc<InstanceShared>,
-        physical_device: &PhysicalDevice,
+        physical_device: PhysicalDevice,
         descriptor: DeviceDescriptor,
     ) -> Result<Self> {
         let queue_create_info = DeviceQueueCreateInfo::builder()
@@ -342,7 +342,7 @@ impl Device {
         Ok(Self {
             _shared: Arc::new(DeviceShared {
                 raw,
-                _physical_device: physical_device.raw(),
+                _physical_device: physical_device,
                 _instance: Arc::clone(instance),
             }),
         })

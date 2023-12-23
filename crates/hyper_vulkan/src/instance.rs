@@ -190,7 +190,7 @@ impl Instance {
 
     pub fn create_device(
         &self,
-        physical_device: &PhysicalDevice,
+        physical_device: PhysicalDevice,
         descriptor: DeviceDescriptor,
     ) -> Result<Device> {
         Device::new(&self.shared, physical_device, descriptor)

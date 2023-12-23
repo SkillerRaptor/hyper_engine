@@ -140,39 +140,75 @@ impl GraphicsContext {
             ..Default::default()
         };
 
+        let mut chosen_queue_family_index = 0;
+        let mut suitable_physical_devices = Vec::new();
+
         let physical_devices = instance.enumerate_physical_devices()?;
-        let (physical_device, queue_family_index) = physical_devices
-            .iter()
-            .filter(|physical_device| physical_device.has_extensions(extensions))
-            .filter(|physical_device| physical_device.has_features(features))
-            .filter_map(|physical_device| {
-                physical_device
-                    .queue_family_properties()
-                    .iter()
-                    .enumerate()
-                    .position(|(i, queue_family_properties)| {
-                        queue_family_properties
-                            .queue_flags
-                            .intersects(QueueFlags::GRAPHICS)
-                            && physical_device
-                                .support_surface(i as u32, &surface)
-                                .unwrap_or(false)
-                    })
-                    .map(|i| (physical_device, i as u32))
-            })
-            .min_by_key(|(physical_device, _)| match physical_device.device_type() {
+        for physical_device in physical_devices {
+            if !physical_device.has_extensions(extensions) {
+                continue;
+            }
+
+            if !physical_device.has_features(features) {
+                continue;
+            }
+
+            let mut queue_family_index = None;
+
+            let queue_family_properties = physical_device.queue_family_properties();
+            for (i, queue_family_properties) in queue_family_properties.iter().enumerate() {
+                if !queue_family_properties
+                    .queue_flags
+                    .intersects(QueueFlags::GRAPHICS)
+                {
+                    continue;
+                }
+
+                if !physical_device
+                    .support_surface(i as u32, &surface)
+                    .unwrap_or(false)
+                {
+                    continue;
+                }
+
+                queue_family_index = Some(i);
+            }
+
+            let Some(queue_family_index) = queue_family_index else {
+                return Err(eyre!("Failed to find suitable queue family"));
+            };
+
+            chosen_queue_family_index = queue_family_index;
+
+            suitable_physical_devices.push(physical_device);
+        }
+
+        let mut chosen_physical_device = None;
+
+        let mut smallest_value = u32::MAX;
+        for suitable_physical_device in suitable_physical_devices {
+            let value = match suitable_physical_device.device_type() {
                 PhysicalDeviceType::DiscreteGpu => 0,
                 PhysicalDeviceType::IntegratedGpu => 1,
                 PhysicalDeviceType::VirtualGpu => 2,
                 PhysicalDeviceType::Cpu => 3,
                 PhysicalDeviceType::Other => 4,
-            })
-            .ok_or(eyre!("Failed to find suitable physical device"))?;
+            };
+
+            if smallest_value > value {
+                smallest_value = value;
+                chosen_physical_device = Some(suitable_physical_device);
+            }
+        }
+
+        let Some(physical_device) = chosen_physical_device else {
+            return Err(eyre!("Failed to find suitable physical device"));
+        };
 
         let device = instance.create_device(
             physical_device,
             DeviceDescriptor {
-                queue_family_index,
+                queue_family_index: chosen_queue_family_index as u32,
                 extensions,
                 features,
             },
