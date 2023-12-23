@@ -49,7 +49,21 @@ impl GraphicsContext {
         // TODO: Move everything into RHI
 
         let entry = Entry::new()?;
+        let (instance, validation_layers_enabled) = Self::create_instance(window, &entry)?;
+        let debug_messenger = Self::create_debug_messenger(&instance, validation_layers_enabled)?;
+        let surface = instance.create_surface(window)?;
+        let device = Self::create_device(&instance, &surface)?;
 
+        Ok(Self {
+            device,
+            surface,
+            debug_messenger,
+            instance,
+            entry,
+        })
+    }
+
+    fn create_instance(window: &Window, entry: &Entry) -> Result<(Instance, bool)> {
         let layers = if cfg!(debug_assertions) {
             vec!["VK_LAYER_KHRONOS_validation".to_owned()]
         } else {
@@ -102,6 +116,13 @@ impl GraphicsContext {
             },
         })?;
 
+        Ok((instance, validation_layers_enabled))
+    }
+
+    fn create_debug_messenger(
+        instance: &Instance,
+        validation_layers_enabled: bool,
+    ) -> Result<Option<DebugMessenger>> {
         let debug_messenger = if validation_layers_enabled {
             let debug_messenger = instance.create_debug_messenger(DebugMessengerDescriptor {
                 message_severity: DebugMessengerSeverity::ERROR
@@ -115,8 +136,10 @@ impl GraphicsContext {
             None
         };
 
-        let surface = instance.create_surface(window)?;
+        Ok(debug_messenger)
+    }
 
+    fn create_device(instance: &Instance, surface: &Surface) -> Result<Device> {
         let extensions = DeviceExtensions {
             khr_swapchain: true,
         };
@@ -214,13 +237,7 @@ impl GraphicsContext {
             },
         )?;
 
-        Ok(Self {
-            device,
-            surface,
-            debug_messenger,
-            instance,
-            entry,
-        })
+        Ok(device)
     }
 
     pub fn resize(&mut self, _width: u32, _height: u32) -> Result<()> {
