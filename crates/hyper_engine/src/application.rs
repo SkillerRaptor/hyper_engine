@@ -14,7 +14,7 @@ use hyper_platform::{
 };
 use hyper_render::graphics_context::{GraphicsContext, GraphicsContextDescriptor};
 
-use color_eyre::Result;
+use color_eyre::eyre::Result;
 use std::{borrow::Cow, time::Instant};
 use winit::event::{Event, WindowEvent};
 

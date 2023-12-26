@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use color_eyre::Result;
+use color_eyre::eyre::Result;
 use std::time::Duration;
 use winit::{event::Event, event_loop, platform::pump_events::EventLoopExtPumpEvents};
 

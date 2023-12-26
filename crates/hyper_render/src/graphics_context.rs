@@ -19,7 +19,7 @@ use hyper_vulkan::{
     version::Version,
 };
 
-use color_eyre::{eyre::eyre, Result};
+use color_eyre::eyre::{eyre, Result};
 use log::Level;
 use std::thread;
 
