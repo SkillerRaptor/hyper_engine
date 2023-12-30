@@ -12,7 +12,7 @@ use hyper_platform::{
     input::Input,
     window::{Window, WindowDescriptor},
 };
-use hyper_render::graphics_context::{GraphicsContext, GraphicsContextDescriptor};
+use hyper_render::graphics_context::GraphicsContext;
 
 use color_eyre::eyre::Result;
 use std::{borrow::Cow, time::Instant};
@@ -71,12 +71,7 @@ impl Application {
 
         let input = Input::default();
 
-        let graphics_context = GraphicsContext::new(
-            &window,
-            GraphicsContextDescriptor {
-                application_title: title.to_string(),
-            },
-        )?;
+        let graphics_context = GraphicsContext::new(&window)?;
 
         log::info!(
             "Application initialized in {:.4} seconds",
@@ -144,7 +139,6 @@ impl Application {
 
             if let Some(new_size) = new_size {
                 camera.on_window_resize(new_size.0, new_size.1);
-                self.graphics_context.resize(new_size.0, new_size.1)?;
             }
 
             while accumulator >= delta_time {

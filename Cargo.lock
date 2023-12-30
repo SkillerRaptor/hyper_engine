@@ -559,7 +559,6 @@ version = "0.1.0"
 dependencies = [
  "ash",
  "ash-window",
- "bitflags 2.4.1",
  "color-eyre",
  "hyper_core",
  "hyper_math",
