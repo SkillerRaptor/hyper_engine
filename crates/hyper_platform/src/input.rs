@@ -8,11 +8,12 @@ use crate::{key_code::KeyCode, mouse_code::MouseCode};
 
 use hyper_math::Vec2;
 
-use std::collections::HashMap;
 use winit::{
     event::{ElementState, WindowEvent},
     keyboard::PhysicalKey,
 };
+
+use std::collections::HashMap;
 
 #[derive(Debug, Default)]
 pub struct Input {

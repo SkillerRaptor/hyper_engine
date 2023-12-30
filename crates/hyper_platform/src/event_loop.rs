@@ -5,8 +5,9 @@
  */
 
 use color_eyre::eyre::Result;
-use std::time::Duration;
 use winit::{event::Event, event_loop, platform::pump_events::EventLoopExtPumpEvents};
+
+use std::time::Duration;
 
 pub struct EventLoop {
     raw: event_loop::EventLoop<()>,

@@ -11,6 +11,7 @@ use fern::{
     Dispatch,
 };
 use log::{Level, LevelFilter};
+
 use std::io;
 
 #[allow(dead_code)]

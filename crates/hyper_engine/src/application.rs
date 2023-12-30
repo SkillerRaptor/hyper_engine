@@ -15,8 +15,9 @@ use hyper_platform::{
 use hyper_render::graphics_context::GraphicsContext;
 
 use color_eyre::eyre::Result;
-use std::{borrow::Cow, time::Instant};
 use winit::event::{Event, WindowEvent};
+
+use std::{borrow::Cow, time::Instant};
 
 #[derive(Debug)]
 pub struct ApplicationDescriptor<'a> {
