@@ -466,7 +466,7 @@ checksum = "d77f7ec81a6d05a3abb01ab6eb7590f6083d08449fe5a1c8b1e620283546ccb7"
 
 [[package]]
 name = "hyper_core"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "color-eyre",
  "log",
@@ -474,7 +474,7 @@ dependencies = [
 
 [[package]]
 name = "hyper_ecs"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
@@ -484,7 +484,7 @@ dependencies = [
 
 [[package]]
 name = "hyper_editor"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "chrono",
  "color-eyre",
@@ -495,7 +495,7 @@ dependencies = [
 
 [[package]]
 name = "hyper_engine"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
@@ -510,7 +510,7 @@ dependencies = [
 
 [[package]]
 name = "hyper_game"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
@@ -521,7 +521,7 @@ dependencies = [
 
 [[package]]
 name = "hyper_math"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
@@ -531,7 +531,7 @@ dependencies = [
 
 [[package]]
 name = "hyper_platform"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
@@ -543,7 +543,7 @@ dependencies = [
 
 [[package]]
 name = "hyper_render"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "color-eyre",
  "hyper_core",
@@ -555,7 +555,7 @@ dependencies = [
 
 [[package]]
 name = "hyper_vulkan"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "ash",
  "ash-window",
