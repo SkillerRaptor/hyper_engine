@@ -15,12 +15,14 @@ impl GraphicsContext {
     pub fn new(window: &Window) -> Result<Self> {
         const DEBUG_MODE: bool = cfg!(debug_assertions);
 
-        let _instance = Instance::new(
+        let instance = Instance::new(
             window,
             InstanceDescriptor {
                 validation_layers: DEBUG_MODE,
             },
         )?;
+
+        let _surface = instance.create_surface(window)?;
 
         Ok(Self {})
     }

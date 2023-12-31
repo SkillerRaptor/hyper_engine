@@ -22,6 +22,8 @@ use std::{
     thread,
 };
 
+use crate::surface::Surface;
+
 #[derive(Clone, Debug, Default)]
 pub struct InstanceDescriptor {
     pub validation_layers: bool,
@@ -195,6 +197,10 @@ impl Instance {
             raw: debug_messenger,
             functor,
         })
+    }
+
+    pub fn create_surface(&self, window: &Window) -> Result<Surface> {
+        Surface::new(window, &self.shared)
     }
 }
 
