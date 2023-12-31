@@ -5,13 +5,23 @@
  */
 
 use hyper_platform::window::Window;
+use hyper_vulkan::instance::{Instance, InstanceDescriptor};
 
 use color_eyre::eyre::Result;
 
 pub struct GraphicsContext {}
 
 impl GraphicsContext {
-    pub fn new(_window: &Window) -> Result<Self> {
+    pub fn new(window: &Window) -> Result<Self> {
+        const DEBUG_MODE: bool = cfg!(debug_assertions);
+
+        let _instance = Instance::new(
+            window,
+            InstanceDescriptor {
+                validation_layers: DEBUG_MODE,
+            },
+        )?;
+
         Ok(Self {})
     }
 }
