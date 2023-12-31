@@ -4,20 +4,27 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{device::DeviceShared, surface::Surface};
+use crate::{device::DeviceShared, image::Image, surface::Surface};
 
 use hyper_platform::window::Window;
 
 use ash::{extensions::khr, vk};
 use color_eyre::eyre::Result;
 
+use std::sync::Arc;
+
 pub struct Swapchain {
+    images: Vec<Image>,
     raw: vk::SwapchainKHR,
     functor: khr::Swapchain,
 }
 
 impl Swapchain {
-    pub(crate) fn new(window: &Window, surface: &Surface, device: &DeviceShared) -> Result<Self> {
+    pub(crate) fn new(
+        window: &Window,
+        surface: &Surface,
+        device: &Arc<DeviceShared>,
+    ) -> Result<Self> {
         let functor = khr::Swapchain::new(device.instance().raw(), device.raw());
 
         let surface_capabilities = unsafe {
@@ -66,7 +73,26 @@ impl Swapchain {
 
         let raw = unsafe { functor.create_swapchain(&create_info, None) }?;
 
-        Ok(Self { raw, functor })
+        let swapchain_images = unsafe { functor.get_swapchain_images(raw) }?;
+
+        let images = swapchain_images
+            .iter()
+            .map(|&swapchain_image| {
+                Image::new_external(
+                    device,
+                    swapchain_image,
+                    surface_extent.width,
+                    surface_extent.height,
+                    surface_format.format,
+                )
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(Self {
+            images,
+            raw,
+            functor,
+        })
     }
 
     fn choose_extent(window: &Window, capabilities: &vk::SurfaceCapabilitiesKHR) -> vk::Extent2D {
@@ -105,6 +131,18 @@ impl Swapchain {
             .iter()
             .find(|&present_mode| *present_mode == vk::PresentModeKHR::MAILBOX)
             .unwrap_or(&vk::PresentModeKHR::FIFO)
+    }
+
+    pub(crate) fn functor(&self) -> &khr::Swapchain {
+        &self.functor
+    }
+
+    pub(crate) fn raw(&self) -> vk::SwapchainKHR {
+        self.raw
+    }
+
+    pub(crate) fn images(&self) -> &[Image] {
+        &self.images
     }
 }
 

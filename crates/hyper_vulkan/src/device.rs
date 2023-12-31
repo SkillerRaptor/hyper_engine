@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{instance::InstanceShared, surface::Surface, swapchain::Swapchain};
+use crate::{image::Image, instance::InstanceShared, surface::Surface, swapchain::Swapchain};
 
 use hyper_platform::window::Window;
 
@@ -317,5 +317,10 @@ impl Device {
 
     pub fn create_swapchain(&self, window: &Window, surface: &Surface) -> Result<Swapchain> {
         Swapchain::new(window, surface, &self.shared)
+    }
+
+    // TODO:
+    pub fn create_image(&self) -> Result<Image> {
+        Image::new()
     }
 }
