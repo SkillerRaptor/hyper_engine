@@ -9,11 +9,13 @@ use hyper_vulkan::{
     device::Device,
     instance::{Instance, InstanceDescriptor},
     surface::Surface,
+    swapchain::Swapchain,
 };
 
 use color_eyre::eyre::Result;
 
 pub struct GraphicsContext {
+    swapchain: Swapchain,
     device: Device,
     surface: Surface,
     instance: Instance,
@@ -33,7 +35,10 @@ impl GraphicsContext {
         let surface = instance.create_surface(window)?;
         let device = instance.create_device(&surface)?;
 
+        let swapchain = device.create_swapchain(window, &surface)?;
+
         Ok(Self {
+            swapchain,
             device,
             surface,
             instance,

@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{instance::InstanceShared, surface::Surface};
+use crate::{instance::InstanceShared, surface::Surface, swapchain::Swapchain};
+
+use hyper_platform::window::Window;
 
 use ash::{extensions::khr, vk, Device as AshDevice};
 use color_eyre::eyre::{eyre, Result};
@@ -16,9 +18,14 @@ pub(crate) struct DeviceShared {
     queue_family_index: u32,
     raw: AshDevice,
     physical_device: vk::PhysicalDevice,
+    instance: Arc<InstanceShared>,
 }
 
 impl DeviceShared {
+    pub(crate) fn instance(&self) -> &InstanceShared {
+        &self.instance
+    }
+
     pub(crate) fn physical_device(&self) -> vk::PhysicalDevice {
         self.physical_device
     }
@@ -43,7 +50,7 @@ pub struct Device {
 impl Device {
     const DEVICE_EXTENSIONS: [&'static CStr; 1] = [khr::Swapchain::name()];
 
-    pub(crate) fn new(instance: &InstanceShared, surface: &Surface) -> Result<Self> {
+    pub(crate) fn new(instance: &Arc<InstanceShared>, surface: &Surface) -> Result<Self> {
         let physical_device = Self::choose_physical_device(instance, surface)?;
         let queue_family_index =
             Self::find_queue_family(instance, surface, physical_device)?.unwrap();
@@ -56,6 +63,7 @@ impl Device {
                 queue_family_index,
                 raw: device,
                 physical_device,
+                instance: Arc::clone(instance),
             }),
         })
     }
@@ -305,5 +313,9 @@ impl Device {
                 .create_device(physical_device, &create_info, None)
         }?;
         Ok(device)
+    }
+
+    pub fn create_swapchain(&self, window: &Window, surface: &Surface) -> Result<Swapchain> {
+        Swapchain::new(window, surface, &self.shared)
     }
 }
