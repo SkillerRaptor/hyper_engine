@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-use hyper_core::define_handle;
+use hyper_core::handle::Handle;
 
-define_handle!(pub Entity);
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Handle)]
+pub struct Entity(u32);

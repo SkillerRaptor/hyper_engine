@@ -469,7 +469,17 @@ name = "hyper_core"
 version = "0.0.0"
 dependencies = [
  "color-eyre",
+ "hyper_core_macros",
  "log",
+]
+
+[[package]]
+name = "hyper_core_macros"
+version = "0.0.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

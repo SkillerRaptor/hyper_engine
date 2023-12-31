@@ -1,17 +1,19 @@
 #-------------------------------------------------------------------------------------------
-# Copyright (c) 2022-2023 SkillerRaptor
+# Copyright (c) 2023 SkillerRaptor
 #
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 
 [package]
-name = "hyper_core"
+name = "hyper_core_macros"
 version = "0.0.0"
 edition = "2021"
 license = "MIT"
 
-[dependencies]
-hyper_core_macros = { path = "./macros" }
+[lib]
+proc-macro = true
 
-color-eyre = { version = "0.6", default-features = false }
-log = "0.4"
+[dependencies]
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "2.0", features = ["extra-traits"] }

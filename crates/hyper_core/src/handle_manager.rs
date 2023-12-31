@@ -18,7 +18,7 @@ where
 
 impl<T> HandleManager<T>
 where
-    T: Handle + Clone + Copy + PartialEq + Eq,
+    T: Handle,
 {
     pub fn new() -> Self {
         Self {

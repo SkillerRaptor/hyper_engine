@@ -4,43 +4,15 @@
  * SPDX-License-Identifier: MIT
 */
 
-// NOTE:
-// We use a fixed type for a handle
-// 20-bit Id (1'048'576) | 12-bit Version (4096)
+use std::fmt::Debug;
+
+pub use hyper_core_macros::Handle;
 
 pub type ValueType = u32;
-
 pub type IdType = u32;
 pub type VersionType = u16;
 
-#[macro_export]
-macro_rules! define_handle {
-    ($visiblity:vis $name:ident) => {
-        #[repr(transparent)]
-        #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-        $visiblity struct $name {
-            value: $crate::handle::ValueType,
-        }
-
-        impl $crate::handle::Handle for $name {
-            fn from_id(id: $crate::handle::IdType) -> Self {
-                Self {
-                    value: (id << Self::ID_SHIFT) | 0x000,
-                }
-            }
-
-            fn value(&self) -> $crate::handle::ValueType {
-                self.value
-            }
-
-            fn value_mut(&mut self) -> &mut $crate::handle::ValueType {
-                &mut self.value
-            }
-        }
-    };
-}
-
-pub trait Handle {
+pub trait Handle: Clone + Copy + Debug + Default + PartialEq + Eq {
     const ID_MASK: u32 = 0xfffff000;
     const ID_SHIFT: u32 = 12;
     const VERSION_MASK: u32 = 0x00000fff;
