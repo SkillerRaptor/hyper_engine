@@ -5,11 +5,19 @@
  */
 
 use hyper_platform::window::Window;
-use hyper_vulkan::instance::{Instance, InstanceDescriptor};
+use hyper_vulkan::{
+    device::Device,
+    instance::{Instance, InstanceDescriptor},
+    surface::Surface,
+};
 
 use color_eyre::eyre::Result;
 
-pub struct GraphicsContext {}
+pub struct GraphicsContext {
+    device: Device,
+    surface: Surface,
+    instance: Instance,
+}
 
 impl GraphicsContext {
     pub fn new(window: &Window) -> Result<Self> {
@@ -22,8 +30,13 @@ impl GraphicsContext {
             },
         )?;
 
-        let _surface = instance.create_surface(window)?;
+        let surface = instance.create_surface(window)?;
+        let device = instance.create_device(&surface)?;
 
-        Ok(Self {})
+        Ok(Self {
+            device,
+            surface,
+            instance,
+        })
     }
 }

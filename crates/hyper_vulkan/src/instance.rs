@@ -22,7 +22,7 @@ use std::{
     thread,
 };
 
-use crate::surface::Surface;
+use crate::{device::Device, surface::Surface};
 
 #[derive(Clone, Debug, Default)]
 pub struct InstanceDescriptor {
@@ -201,6 +201,10 @@ impl Instance {
 
     pub fn create_surface(&self, window: &Window) -> Result<Surface> {
         Surface::new(window, &self.shared)
+    }
+
+    pub fn create_device(&self, surface: &Surface) -> Result<Device> {
+        Device::new(&self.shared, surface)
     }
 }
 
