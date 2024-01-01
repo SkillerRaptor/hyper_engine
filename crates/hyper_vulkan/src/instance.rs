@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+use crate::{device::Device, surface::Surface};
+
 use hyper_platform::window::Window;
 
 use ash::{
@@ -21,8 +23,6 @@ use std::{
     sync::Arc,
     thread,
 };
-
-use crate::{device::Device, surface::Surface};
 
 #[derive(Clone, Debug, Default)]
 pub struct InstanceDescriptor {

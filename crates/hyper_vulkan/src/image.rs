@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-use std::sync::Arc;
+use crate::device::DeviceShared;
 
 use ash::vk;
 use color_eyre::eyre::Result;
 
-use crate::device::DeviceShared;
+use std::sync::Arc;
 
 pub struct Image {
     format: vk::Format,
