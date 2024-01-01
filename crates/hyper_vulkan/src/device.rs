@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, SkillerRaptor
+ * Copyright (c) 2023-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
@@ -111,9 +111,29 @@ impl Device {
             _ => unreachable!(),
         };
 
+        let api_version = device_properties.api_version;
+        let device_api_version = format!(
+            "{}.{}.{}.{}",
+            (api_version >> 29) & 0x7,
+            (api_version >> 22) & 0x7f,
+            (api_version >> 12) & 0x3ff,
+            (api_version >> 00) & 0xfff
+        );
+
+        let driver_version = device_properties.driver_version;
+        let device_driver_version = format!(
+            "{}.{}.{}.{}",
+            (driver_version >> 29) & 0x7,
+            (driver_version >> 22) & 0x7f,
+            (driver_version >> 12) & 0x3ff,
+            (driver_version >> 00) & 0xfff
+        );
+
         log::info!("Vulkan Device Info:");
         log::info!("  Name: {}", device_name);
         log::info!("  Type: {}", device_type);
+        log::info!("  API Version: {}", device_api_version);
+        log::info!("  Driver Version: {}", device_driver_version);
 
         Ok(physical_device)
     }
