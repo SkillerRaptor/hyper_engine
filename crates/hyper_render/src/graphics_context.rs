@@ -52,6 +52,18 @@ impl GraphicsContext {
             instance,
         })
     }
+
+    pub fn begin_frame(&mut self) -> Result<()> {
+        self.renderer.begin_frame(&self.swapchain)
+    }
+
+    pub fn end_frame(&self) -> Result<()> {
+        self.renderer.end_frame(&self.swapchain)
+    }
+
+    pub fn submit(&mut self) -> Result<()> {
+        self.renderer.submit(&self.device, &self.swapchain)
+    }
 }
 
 impl Drop for GraphicsContext {

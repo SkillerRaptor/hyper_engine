@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, SkillerRaptor
+ * Copyright (c) 2023-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
@@ -90,6 +90,43 @@ impl Drop for Image {
     fn drop(&mut self) {
         unsafe {
             self.device.raw().destroy_image_view(self.view, None);
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub enum ImageLayout {
+    Undefined,
+    ColorAttachment,
+    PresentSrc,
+}
+
+impl Into<vk::ImageLayout> for ImageLayout {
+    fn into(self) -> vk::ImageLayout {
+        match self {
+            ImageLayout::Undefined => vk::ImageLayout::UNDEFINED,
+            ImageLayout::ColorAttachment => vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+            ImageLayout::PresentSrc => vk::ImageLayout::PRESENT_SRC_KHR,
+        }
+    }
+}
+
+impl Into<vk::AccessFlags2> for ImageLayout {
+    fn into(self) -> vk::AccessFlags2 {
+        match self {
+            ImageLayout::Undefined => vk::AccessFlags2::empty(),
+            ImageLayout::ColorAttachment => vk::AccessFlags2::COLOR_ATTACHMENT_WRITE,
+            ImageLayout::PresentSrc => vk::AccessFlags2::empty(),
+        }
+    }
+}
+
+impl Into<vk::PipelineStageFlags2> for ImageLayout {
+    fn into(self) -> vk::PipelineStageFlags2 {
+        match self {
+            ImageLayout::Undefined => vk::PipelineStageFlags2::TOP_OF_PIPE,
+            ImageLayout::ColorAttachment => vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT,
+            ImageLayout::PresentSrc => vk::PipelineStageFlags2::BOTTOM_OF_PIPE,
         }
     }
 }

@@ -374,6 +374,54 @@ impl Device {
         TimelineSemaphore::new(&self.shared)
     }
 
+    pub fn submit_commands(
+        &self,
+        command_buffer: &CommandBuffer,
+        present_semaphore: &BinarySemaphore,
+        render_semaphore: &BinarySemaphore,
+        submit_semaphore: &TimelineSemaphore,
+        frame: u64,
+    ) -> Result<()> {
+        let present_wait_semaphore_info = vk::SemaphoreSubmitInfo::builder()
+            .semaphore(present_semaphore.raw())
+            .value(0)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
+
+        let command_buffer_info = vk::CommandBufferSubmitInfo::builder()
+            .command_buffer(command_buffer.raw())
+            .device_mask(0);
+
+        let submit_signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
+            .semaphore(submit_semaphore.raw())
+            .value(frame)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
+
+        let render_signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
+            .semaphore(render_semaphore.raw())
+            .value(0)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
+
+        let wait_semaphore_infos = &[*present_wait_semaphore_info];
+        let command_buffer_infos = &[*command_buffer_info];
+        let signal_semaphore_infos =
+            &[*submit_signal_semaphore_info, *render_signal_semaphore_info];
+        let submit_info = vk::SubmitInfo2::builder()
+            .wait_semaphore_infos(wait_semaphore_infos)
+            .command_buffer_infos(command_buffer_infos)
+            .signal_semaphore_infos(signal_semaphore_infos);
+
+        unsafe {
+            self.shared
+                .raw
+                .queue_submit2(self.shared.queue, &[*submit_info], vk::Fence::null())?;
+        }
+
+        Ok(())
+    }
+
     pub fn wait_idle(&self) -> Result<()> {
         unsafe {
             self.shared.raw.device_wait_idle()?;

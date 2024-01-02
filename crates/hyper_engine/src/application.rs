@@ -1,12 +1,11 @@
 /*
- * Copyright (c) 2022-2023, SkillerRaptor
+ * Copyright (c) 2022-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
 
 use crate::game::Game;
 
-use hyper_game::camera::free_camera::FpsCamera;
 use hyper_platform::{
     event_loop::EventLoop,
     input::Input,
@@ -98,11 +97,6 @@ impl Application {
         let mut current_time = Instant::now();
         let mut accumulator = 0.0;
 
-        // TODO: Move this to application and/or ECS
-        let mut camera = FpsCamera::new(
-            self.window.framebuffer_size().0 as f32 / self.window.framebuffer_size().1 as f32,
-        );
-
         let mut open = true;
         while open {
             let new_time = Instant::now();
@@ -138,9 +132,11 @@ impl Application {
                 }
             });
 
-            if let Some(new_size) = new_size {
-                camera.on_window_resize(new_size.0, new_size.1);
+            if let Some(_new_size) = new_size {
+                // Resize
             }
+
+            // Update
 
             while accumulator >= delta_time {
                 self.game.update_fixed(delta_time, time);
@@ -148,9 +144,13 @@ impl Application {
                 time += delta_time;
             }
 
-            camera.update(frame_time, &self.input, &mut self.window);
-
             self.game.update();
+
+            // Render
+
+            self.graphics_context.begin_frame()?;
+            self.graphics_context.end_frame()?;
+            self.graphics_context.submit()?;
         }
 
         Ok(())

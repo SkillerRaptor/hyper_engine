@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 2023, SkillerRaptor
+ * Copyright (c) 2023-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{device::DeviceShared, image::Image, surface::Surface};
+use crate::{
+    binary_semaphore::BinarySemaphore, device::DeviceShared, image::Image, surface::Surface,
+};
 
 use hyper_platform::window::Window;
 
@@ -17,6 +19,7 @@ pub struct Swapchain {
     images: Vec<Image>,
     raw: vk::SwapchainKHR,
     functor: khr::Swapchain,
+    device: Arc<DeviceShared>,
 }
 
 impl Swapchain {
@@ -92,6 +95,7 @@ impl Swapchain {
             images,
             raw,
             functor,
+            device: Arc::clone(device),
         })
     }
 
@@ -133,6 +137,53 @@ impl Swapchain {
             .unwrap_or(&vk::PresentModeKHR::FIFO)
     }
 
+    pub fn acquire_next_image(&self, present_semaphore: &BinarySemaphore) -> Result<Option<u32>> {
+        match unsafe {
+            self.functor.acquire_next_image(
+                self.raw,
+                1_000_000_000,
+                present_semaphore.raw(),
+                vk::Fence::null(),
+            )
+        } {
+            Ok((index, _)) => Ok(Some(index)),
+            Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => Ok(None),
+            Err(error) => Err(error.into()),
+        }
+    }
+
+    pub fn present(
+        &self,
+        render_semaphore: &BinarySemaphore,
+        swapchain_image_index: u32,
+    ) -> Result<()> {
+        let swapchains = &[self.raw];
+        let wait_semaphores = &[render_semaphore.raw()];
+        let image_indices = &[swapchain_image_index];
+
+        let present_info = vk::PresentInfoKHR::builder()
+            .swapchains(swapchains)
+            .wait_semaphores(wait_semaphores)
+            .image_indices(image_indices);
+
+        unsafe {
+            let recreate = match self
+                .functor
+                .queue_present(self.device.queue(), &present_info)
+            {
+                Ok(recreate) => recreate,
+                Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => true,
+                Err(error) => return Err(error.into()),
+            };
+
+            if recreate {
+                todo!("Recreate Swapchain")
+            }
+        }
+
+        Ok(())
+    }
+
     pub(crate) fn functor(&self) -> &khr::Swapchain {
         &self.functor
     }
@@ -141,7 +192,7 @@ impl Swapchain {
         self.raw
     }
 
-    pub(crate) fn images(&self) -> &[Image] {
+    pub fn images(&self) -> &[Image] {
         &self.images
     }
 }

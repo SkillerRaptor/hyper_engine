@@ -32,6 +32,22 @@ impl TimelineSemaphore {
         })
     }
 
+    pub fn wait_for(&self, value: u64) -> Result<()> {
+        let semaphores = [self.raw];
+        let values = [value];
+        let wait_info = vk::SemaphoreWaitInfo::builder()
+            .semaphores(&semaphores)
+            .values(&values);
+
+        unsafe {
+            self.device
+                .raw()
+                .wait_semaphores(&wait_info, 1_000_000_000)?;
+        }
+
+        Ok(())
+    }
+
     pub(crate) fn raw(&self) -> vk::Semaphore {
         self.raw
     }
