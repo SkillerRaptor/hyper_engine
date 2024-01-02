@@ -83,10 +83,10 @@ impl CommandBuffer {
             .layer_count(vk::REMAINING_ARRAY_LAYERS);
 
         let image_memory_barrier = vk::ImageMemoryBarrier2::builder()
-            .src_stage_mask(current_layout.into())
-            .src_access_mask(current_layout.into())
-            .dst_stage_mask(new_layout.into())
-            .dst_access_mask(new_layout.into())
+            .src_stage_mask(vk::PipelineStageFlags2::ALL_COMMANDS)
+            .src_access_mask(vk::AccessFlags2::MEMORY_WRITE)
+            .dst_stage_mask(vk::PipelineStageFlags2::ALL_COMMANDS)
+            .dst_access_mask(vk::AccessFlags2::MEMORY_WRITE | vk::AccessFlags2::MEMORY_READ)
             .old_layout(current_layout.into())
             .new_layout(new_layout.into())
             .src_queue_family_index(vk::QUEUE_FAMILY_IGNORED)
@@ -105,6 +105,67 @@ impl CommandBuffer {
             self.device
                 .raw()
                 .cmd_pipeline_barrier2(self.raw, &dependency_info);
+        }
+    }
+
+    pub fn copy_image_to_image(
+        &self,
+        source: &Image,
+        destination: &Image,
+        source_width: u32,
+        source_height: u32,
+        destination_width: u32,
+        destination_height: u32,
+    ) {
+        let source_subresource_range = vk::ImageSubresourceLayers::builder()
+            .aspect_mask(vk::ImageAspectFlags::COLOR)
+            .mip_level(0)
+            .base_array_layer(0)
+            .layer_count(1);
+
+        let source_offsets = [
+            vk::Offset3D::default(),
+            vk::Offset3D::builder()
+                .x(source_width as i32)
+                .y(source_height as i32)
+                .z(1)
+                .build(),
+        ];
+
+        let destination_subresource_range = vk::ImageSubresourceLayers::builder()
+            .aspect_mask(vk::ImageAspectFlags::COLOR)
+            .mip_level(0)
+            .base_array_layer(0)
+            .layer_count(1);
+
+        let destination_offsets = [
+            vk::Offset3D::default(),
+            vk::Offset3D::builder()
+                .x(destination_width as i32)
+                .y(destination_height as i32)
+                .z(1)
+                .build(),
+        ];
+
+        let blit_region = vk::ImageBlit2::builder()
+            .src_subresource(*source_subresource_range)
+            .src_offsets(source_offsets)
+            .dst_subresource(*destination_subresource_range)
+            .dst_offsets(destination_offsets);
+
+        let regions = [*blit_region];
+        let blit_image_info = vk::BlitImageInfo2::builder()
+            .src_image(source.raw())
+            .src_image_layout(vk::ImageLayout::TRANSFER_SRC_OPTIMAL)
+            .dst_image(destination.raw())
+            .dst_image_layout(vk::ImageLayout::TRANSFER_DST_OPTIMAL)
+            .regions(&regions)
+            .filter(vk::Filter::LINEAR);
+
+        unsafe {
+            self.device
+                .raw()
+                .cmd_blit_image2(self.raw, &blit_image_info);
         }
     }
 

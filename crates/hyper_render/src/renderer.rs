@@ -5,9 +5,14 @@
  */
 
 use hyper_math::Vec4;
+use hyper_platform::window::Window;
 use hyper_vulkan::{
-    binary_semaphore::BinarySemaphore, command_buffer::CommandBuffer, command_pool::CommandPool,
-    device::Device, image::ImageLayout, swapchain::Swapchain,
+    binary_semaphore::BinarySemaphore,
+    command_buffer::CommandBuffer,
+    command_pool::CommandPool,
+    device::Device,
+    image::{Image, ImageDescriptor, ImageFormat, ImageLayout, ImageUsage},
+    swapchain::Swapchain,
     timeline_semaphore::TimelineSemaphore,
 };
 
@@ -23,8 +28,9 @@ struct FrameData {
 
 pub(crate) struct Renderer {
     submit_semaphore: TimelineSemaphore,
-
     swapchain_image_index: usize,
+
+    draw_image: Image,
 
     frames: Vec<FrameData>,
     frame_number: u64,
@@ -33,7 +39,7 @@ pub(crate) struct Renderer {
 impl Renderer {
     const FRAME_OVERLAP: usize = 2;
 
-    pub(crate) fn new(device: &Device) -> Result<Self> {
+    pub(crate) fn new(window: &Window, device: &Device) -> Result<Self> {
         let mut frames = Vec::new();
         for _ in 0..Self::FRAME_OVERLAP {
             let render_semaphore = device.create_binary_semaphore()?;
@@ -53,12 +59,23 @@ impl Renderer {
             frames.push(frame_data);
         }
 
+        let draw_image = device.create_image(ImageDescriptor {
+            width: window.framebuffer_size().0,
+            height: window.framebuffer_size().1,
+            format: ImageFormat::Rgba16Sfloat,
+            usage: ImageUsage::TRANSFER_SOURCE
+                | ImageUsage::TRANSFER_DESTINATION
+                | ImageUsage::STORAGE
+                | ImageUsage::COLOR_ATTACHMENT,
+        })?;
+
         let submit_semaphore = device.create_timeline_semaphore()?;
 
         Ok(Self {
             submit_semaphore,
-
             swapchain_image_index: 0,
+
+            draw_image,
 
             frames,
             frame_number: 1,
@@ -81,7 +98,7 @@ impl Renderer {
         command_buffer.begin()?;
 
         command_buffer.transition_image(
-            &swapchain.images()[self.swapchain_image_index],
+            &self.draw_image,
             ImageLayout::Undefined,
             ImageLayout::General,
         );
@@ -93,9 +110,27 @@ impl Renderer {
         let command_buffer = &self.current_frame().command_buffer;
 
         command_buffer.transition_image(
-            &swapchain.images()[self.swapchain_image_index as usize],
+            &self.draw_image,
             ImageLayout::General,
-            ImageLayout::PresentSrc,
+            ImageLayout::TransferSource,
+        );
+        command_buffer.transition_image(
+            &swapchain.images()[self.swapchain_image_index as usize],
+            ImageLayout::Undefined,
+            ImageLayout::TransferDestination,
+        );
+        command_buffer.copy_image_to_image(
+            &self.draw_image,
+            &swapchain.images()[self.swapchain_image_index as usize],
+            self.draw_image.width(),
+            self.draw_image.height(),
+            swapchain.width(),
+            swapchain.height(),
+        );
+        command_buffer.transition_image(
+            &swapchain.images()[self.swapchain_image_index as usize],
+            ImageLayout::Undefined,
+            ImageLayout::PresentSource,
         );
         command_buffer.end()?;
 
@@ -122,12 +157,10 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn clear(&self, swapchain: &Swapchain, color: Vec4) {
-        let swapchain_image = &swapchain.images()[self.swapchain_image_index as usize];
-
+    pub fn clear(&self, color: Vec4) {
         self.current_frame()
             .command_buffer
-            .clear_color_image(swapchain_image, color);
+            .clear_color_image(&self.draw_image, color);
     }
 
     fn current_frame(&self) -> &FrameData {

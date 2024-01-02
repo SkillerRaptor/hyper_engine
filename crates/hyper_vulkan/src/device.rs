@@ -5,19 +5,33 @@
  */
 
 use crate::{
-    binary_semaphore::BinarySemaphore, command_buffer::CommandBuffer, command_pool::CommandPool,
-    image::Image, instance::InstanceShared, surface::Surface, swapchain::Swapchain,
+    binary_semaphore::BinarySemaphore,
+    command_buffer::CommandBuffer,
+    command_pool::CommandPool,
+    image::{Image, ImageDescriptor},
+    instance::InstanceShared,
+    surface::Surface,
+    swapchain::Swapchain,
     timeline_semaphore::TimelineSemaphore,
 };
 
+use gpu_allocator::{
+    vulkan::{Allocator, AllocatorCreateDesc},
+    AllocationSizes, AllocatorDebugSettings,
+};
 use hyper_platform::window::Window;
 
 use ash::{extensions::khr, vk, Device as AshDevice};
 use color_eyre::eyre::{eyre, Result};
 
-use std::{collections::HashSet, ffi::CStr, sync::Arc};
+use std::{
+    collections::HashSet,
+    ffi::CStr,
+    sync::{Arc, Mutex},
+};
 
 pub(crate) struct DeviceShared {
+    allocator: Mutex<Allocator>,
     queue: vk::Queue,
     queue_family_index: u32,
     raw: AshDevice,
@@ -45,6 +59,10 @@ impl DeviceShared {
     pub(crate) fn queue(&self) -> vk::Queue {
         self.queue
     }
+
+    pub(crate) fn allocator(&self) -> &Mutex<Allocator> {
+        &self.allocator
+    }
 }
 
 impl Drop for DeviceShared {
@@ -68,9 +86,11 @@ impl Device {
             Self::find_queue_family(instance, surface, physical_device)?.unwrap();
         let device = Self::create_device(instance, physical_device, queue_family_index)?;
         let queue = unsafe { device.get_device_queue(queue_family_index, 0) };
+        let allocator = Self::create_allocator(instance, physical_device, &device)?;
 
         Ok(Self {
             shared: Arc::new(DeviceShared {
+                allocator: Mutex::new(allocator),
                 queue,
                 queue_family_index,
                 raw: device,
@@ -347,6 +367,22 @@ impl Device {
         Ok(device)
     }
 
+    fn create_allocator(
+        instance: &InstanceShared,
+        physical_device: vk::PhysicalDevice,
+        device: &AshDevice,
+    ) -> Result<Allocator> {
+        let allocator = Allocator::new(&AllocatorCreateDesc {
+            instance: instance.raw().clone(),
+            device: device.clone(),
+            physical_device,
+            debug_settings: AllocatorDebugSettings::default(),
+            buffer_device_address: false,
+            allocation_sizes: AllocationSizes::default(),
+        })?;
+        Ok(allocator)
+    }
+
     pub fn create_swapchain(&self, window: &Window, surface: &Surface) -> Result<Swapchain> {
         Swapchain::new(window, surface, &self.shared)
     }
@@ -366,8 +402,8 @@ impl Device {
         CommandPool::new(&self.shared)
     }
 
-    pub fn create_image(&self) -> Result<Image> {
-        Image::new()
+    pub fn create_image(&self, descriptor: ImageDescriptor) -> Result<Image> {
+        Image::new(&self.shared, descriptor)
     }
 
     pub fn create_timeline_semaphore(&self) -> Result<TimelineSemaphore> {

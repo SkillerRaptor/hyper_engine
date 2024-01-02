@@ -42,7 +42,7 @@ impl GraphicsContext {
 
         let swapchain = device.create_swapchain(window, &surface)?;
 
-        let renderer = Renderer::new(&device)?;
+        let renderer = Renderer::new(window, &device)?;
 
         Ok(Self {
             renderer,
@@ -67,7 +67,7 @@ impl GraphicsContext {
     }
 
     pub fn clear(&self, color: Vec4) {
-        self.renderer.clear(&self.swapchain, color);
+        self.renderer.clear(color);
     }
 }
 

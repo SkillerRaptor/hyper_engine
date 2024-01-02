@@ -16,6 +16,8 @@ use color_eyre::eyre::Result;
 use std::sync::Arc;
 
 pub struct Swapchain {
+    width: u32,
+    height: u32,
     images: Vec<Image>,
     raw: vk::SwapchainKHR,
     functor: khr::Swapchain,
@@ -84,14 +86,15 @@ impl Swapchain {
                 Image::new_external(
                     device,
                     swapchain_image,
-                    surface_extent.width,
-                    surface_extent.height,
+                    surface_extent,
                     surface_format.format,
                 )
             })
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(Self {
+            width: window.framebuffer_size().0,
+            height: window.framebuffer_size().1,
             images,
             raw,
             functor,
@@ -194,6 +197,14 @@ impl Swapchain {
 
     pub fn images(&self) -> &[Image] {
         &self.images
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
     }
 }
 
