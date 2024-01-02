@@ -5,8 +5,9 @@
  */
 
 use crate::{
-    command_buffer::CommandBuffer, command_pool::CommandPool, image::Image,
-    instance::InstanceShared, surface::Surface, swapchain::Swapchain,
+    binary_semaphore::BinarySemaphore, command_buffer::CommandBuffer, command_pool::CommandPool,
+    image::Image, instance::InstanceShared, surface::Surface, swapchain::Swapchain,
+    timeline_semaphore::TimelineSemaphore,
 };
 
 use hyper_platform::window::Window;
@@ -353,6 +354,10 @@ impl Device {
     // Resources
     // TODO: Create resource table and only return handles
 
+    pub fn create_binary_semaphore(&self) -> Result<BinarySemaphore> {
+        BinarySemaphore::new(&self.shared)
+    }
+
     pub fn create_command_buffer(&self, command_pool: &CommandPool) -> Result<CommandBuffer> {
         CommandBuffer::new(&self.shared, command_pool)
     }
@@ -363,6 +368,10 @@ impl Device {
 
     pub fn create_image(&self) -> Result<Image> {
         Image::new()
+    }
+
+    pub fn create_timeline_semaphore(&self) -> Result<TimelineSemaphore> {
+        TimelineSemaphore::new(&self.shared)
     }
 
     pub fn wait_idle(&self) -> Result<()> {
