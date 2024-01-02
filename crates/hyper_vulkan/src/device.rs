@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{image::Image, instance::InstanceShared, surface::Surface, swapchain::Swapchain};
+use crate::{
+    command_buffer::CommandBuffer, command_pool::CommandPool, image::Image,
+    instance::InstanceShared, surface::Surface, swapchain::Swapchain,
+};
 
 use hyper_platform::window::Window;
 
@@ -32,6 +35,14 @@ impl DeviceShared {
 
     pub(crate) fn raw(&self) -> &AshDevice {
         &self.raw
+    }
+
+    pub(crate) fn queue_family_index(&self) -> u32 {
+        self.queue_family_index
+    }
+
+    pub(crate) fn queue(&self) -> vk::Queue {
+        self.queue
     }
 }
 
@@ -339,8 +350,26 @@ impl Device {
         Swapchain::new(window, surface, &self.shared)
     }
 
-    // TODO:
+    // Resources
+    // TODO: Create resource table and only return handles
+
+    pub fn create_command_buffer(&self, command_pool: &CommandPool) -> Result<CommandBuffer> {
+        CommandBuffer::new(&self.shared, command_pool)
+    }
+
+    pub fn create_command_pool(&self) -> Result<CommandPool> {
+        CommandPool::new(&self.shared)
+    }
+
     pub fn create_image(&self) -> Result<Image> {
         Image::new()
+    }
+
+    pub fn wait_idle(&self) -> Result<()> {
+        unsafe {
+            self.shared.raw.device_wait_idle()?;
+        }
+
+        Ok(())
     }
 }
