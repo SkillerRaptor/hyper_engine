@@ -23,4 +23,8 @@ impl CommandBuffer {
         let raw = unsafe { device.raw().allocate_command_buffers(&allocate_info) }?[0];
         Ok(Self { raw })
     }
+
+    pub(crate) fn raw(&self) -> vk::CommandBuffer {
+        self.raw
+    }
 }
