@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2022-2023 SkillerRaptor
+ * Copyright (c) 2022-2024 SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
 */
 
-#![allow(dead_code)]
-
 pub mod graphics_context;
+
+mod renderer;

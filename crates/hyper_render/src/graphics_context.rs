@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2023, SkillerRaptor
+ * Copyright (c) 2023-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
+
+use crate::renderer::Renderer;
 
 use hyper_platform::window::Window;
 use hyper_vulkan::{
@@ -15,6 +17,8 @@ use hyper_vulkan::{
 use color_eyre::eyre::Result;
 
 pub struct GraphicsContext {
+    renderer: Renderer,
+
     swapchain: Swapchain,
     device: Device,
     surface: Surface,
@@ -37,11 +41,21 @@ impl GraphicsContext {
 
         let swapchain = device.create_swapchain(window, &surface)?;
 
+        let renderer = Renderer::new(&device)?;
+
         Ok(Self {
+            renderer,
+
             swapchain,
             device,
             surface,
             instance,
         })
+    }
+}
+
+impl Drop for GraphicsContext {
+    fn drop(&mut self) {
+        self.device.wait_idle().unwrap();
     }
 }
