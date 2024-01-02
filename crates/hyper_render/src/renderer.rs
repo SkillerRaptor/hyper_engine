@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+use hyper_math::Vec4;
 use hyper_vulkan::{
     binary_semaphore::BinarySemaphore, command_buffer::CommandBuffer, command_pool::CommandPool,
     device::Device, image::ImageLayout, swapchain::Swapchain,
@@ -82,7 +83,7 @@ impl Renderer {
         command_buffer.transition_image(
             &swapchain.images()[self.swapchain_image_index],
             ImageLayout::Undefined,
-            ImageLayout::ColorAttachment,
+            ImageLayout::General,
         );
 
         Ok(())
@@ -93,7 +94,7 @@ impl Renderer {
 
         command_buffer.transition_image(
             &swapchain.images()[self.swapchain_image_index as usize],
-            ImageLayout::ColorAttachment,
+            ImageLayout::General,
             ImageLayout::PresentSrc,
         );
         command_buffer.end()?;
@@ -119,6 +120,14 @@ impl Renderer {
         self.frame_number += 1;
 
         Ok(())
+    }
+
+    pub fn clear(&self, swapchain: &Swapchain, color: Vec4) {
+        let swapchain_image = &swapchain.images()[self.swapchain_image_index as usize];
+
+        self.current_frame()
+            .command_buffer
+            .clear_color_image(swapchain_image, color);
     }
 
     fn current_frame(&self) -> &FrameData {

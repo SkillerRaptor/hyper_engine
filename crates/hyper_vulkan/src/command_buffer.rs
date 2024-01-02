@@ -10,6 +10,8 @@ use crate::{
     image::{Image, ImageLayout},
 };
 
+use hyper_math::Vec4;
+
 use ash::vk;
 use color_eyre::eyre::Result;
 
@@ -103,6 +105,29 @@ impl CommandBuffer {
             self.device
                 .raw()
                 .cmd_pipeline_barrier2(self.raw, &dependency_info);
+        }
+    }
+
+    pub fn clear_color_image(&self, image: &Image, color: Vec4) {
+        let clear_color_value = vk::ClearColorValue {
+            float32: color.as_slice().try_into().unwrap(),
+        };
+
+        let subresource_range = vk::ImageSubresourceRange::builder()
+            .aspect_mask(vk::ImageAspectFlags::COLOR)
+            .base_mip_level(0)
+            .level_count(vk::REMAINING_MIP_LEVELS)
+            .base_array_layer(0)
+            .layer_count(vk::REMAINING_ARRAY_LAYERS);
+
+        unsafe {
+            self.device.raw().cmd_clear_color_image(
+                self.raw,
+                image.raw(),
+                vk::ImageLayout::GENERAL,
+                &clear_color_value,
+                &[*subresource_range],
+            )
         }
     }
 

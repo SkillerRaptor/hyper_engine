@@ -97,6 +97,7 @@ impl Drop for Image {
 #[derive(Clone, Copy)]
 pub enum ImageLayout {
     Undefined,
+    General,
     ColorAttachment,
     PresentSrc,
 }
@@ -105,6 +106,7 @@ impl Into<vk::ImageLayout> for ImageLayout {
     fn into(self) -> vk::ImageLayout {
         match self {
             ImageLayout::Undefined => vk::ImageLayout::UNDEFINED,
+            ImageLayout::General => vk::ImageLayout::GENERAL,
             ImageLayout::ColorAttachment => vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
             ImageLayout::PresentSrc => vk::ImageLayout::PRESENT_SRC_KHR,
         }
@@ -115,6 +117,7 @@ impl Into<vk::AccessFlags2> for ImageLayout {
     fn into(self) -> vk::AccessFlags2 {
         match self {
             ImageLayout::Undefined => vk::AccessFlags2::empty(),
+            ImageLayout::General => vk::AccessFlags2::MEMORY_WRITE | vk::AccessFlags2::MEMORY_READ,
             ImageLayout::ColorAttachment => vk::AccessFlags2::COLOR_ATTACHMENT_WRITE,
             ImageLayout::PresentSrc => vk::AccessFlags2::empty(),
         }
@@ -125,6 +128,7 @@ impl Into<vk::PipelineStageFlags2> for ImageLayout {
     fn into(self) -> vk::PipelineStageFlags2 {
         match self {
             ImageLayout::Undefined => vk::PipelineStageFlags2::TOP_OF_PIPE,
+            ImageLayout::General => vk::PipelineStageFlags2::ALL_COMMANDS,
             ImageLayout::ColorAttachment => vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT,
             ImageLayout::PresentSrc => vk::PipelineStageFlags2::BOTTOM_OF_PIPE,
         }

@@ -6,6 +6,7 @@
 
 use crate::renderer::Renderer;
 
+use hyper_math::Vec4;
 use hyper_platform::window::Window;
 use hyper_vulkan::{
     device::Device,
@@ -63,6 +64,10 @@ impl GraphicsContext {
 
     pub fn submit(&mut self) -> Result<()> {
         self.renderer.submit(&self.device, &self.swapchain)
+    }
+
+    pub fn clear(&self, color: Vec4) {
+        self.renderer.clear(&self.swapchain, color);
     }
 }
 
