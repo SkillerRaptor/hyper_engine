@@ -10,8 +10,6 @@ use crate::{
     command_pool::CommandPool,
     compute_pipeline::{ComputePipeline, ComputePipelineDescriptor},
     descriptor_manager::DescriptorManager,
-    descriptor_pool::DescriptorPool,
-    descriptor_set::DescriptorSet,
     image::{Image, ImageDescriptor},
     instance::InstanceShared,
     pipeline_layout::PipelineLayout,
@@ -154,7 +152,7 @@ impl Device {
             (api_version >> 29) & 0x7,
             (api_version >> 22) & 0x7f,
             (api_version >> 12) & 0x3ff,
-            (api_version >> 00) & 0xfff
+            api_version & 0xfff
         );
 
         let driver_version = device_properties.driver_version;
@@ -163,7 +161,7 @@ impl Device {
             (driver_version >> 29) & 0x7,
             (driver_version >> 22) & 0x7f,
             (driver_version >> 12) & 0x3ff,
-            (driver_version >> 00) & 0xfff
+            driver_version & 0xfff
         );
 
         log::info!("Vulkan Device Info:");

@@ -28,8 +28,8 @@ impl DescriptorPool {
     pub(crate) const DESCRIPTOR_AMOUNT: usize = Self::DESCRIPTOR_TYPES.len();
 
     pub(crate) fn new(instance: &InstanceShared, device: &Arc<DeviceShared>) -> Result<Self> {
-        let (descriptor_pool, limits) = Self::create_descriptor_pool(instance, &device)?;
-        let layouts = Self::create_descriptor_layouts(&device, &limits)?;
+        let (descriptor_pool, limits) = Self::create_descriptor_pool(instance, device)?;
+        let layouts = Self::create_descriptor_layouts(device, &limits)?;
 
         Ok(Self {
             layouts,

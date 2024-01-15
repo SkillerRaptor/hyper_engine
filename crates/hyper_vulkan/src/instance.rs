@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, SkillerRaptor
+ * Copyright (c) 2023-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
@@ -119,8 +119,7 @@ impl Instance {
         entry: &Entry,
         validation_layers_enabled: bool,
     ) -> Result<AshInstance> {
-        const ENGINE_NAME: &'static CStr =
-            unsafe { CStr::from_bytes_with_nul_unchecked(b"HyperEngine\0") };
+        const ENGINE_NAME: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"HyperEngine\0") };
 
         let application_name = CString::new(window.title())?;
         let application_info = vk::ApplicationInfo::builder()

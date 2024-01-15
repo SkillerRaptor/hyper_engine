@@ -24,7 +24,7 @@ struct FrameData {
     render_semaphore: BinarySemaphore,
     present_semaphore: BinarySemaphore,
 
-    command_pool: CommandPool,
+    _command_pool: CommandPool,
     command_buffer: CommandBuffer,
 }
 
@@ -32,7 +32,7 @@ pub(crate) struct Renderer {
     gradient_pipeline: ComputePipeline,
     layout: PipelineLayout,
 
-    draw_image_handle: u32,
+    _draw_image_handle: u32,
     descriptor_manager: DescriptorManager,
 
     submit_semaphore: TimelineSemaphore,
@@ -60,7 +60,7 @@ impl Renderer {
                 render_semaphore,
                 present_semaphore,
 
-                command_pool,
+                _command_pool: command_pool,
                 command_buffer,
             };
 
@@ -98,7 +98,7 @@ impl Renderer {
             gradient_pipeline,
             layout,
 
-            draw_image_handle,
+            _draw_image_handle: draw_image_handle,
             descriptor_manager,
 
             submit_semaphore,
@@ -144,20 +144,20 @@ impl Renderer {
             ImageLayout::TransferSource,
         );
         command_buffer.transition_image(
-            &swapchain.images()[self.swapchain_image_index as usize],
+            &swapchain.images()[self.swapchain_image_index],
             ImageLayout::Undefined,
             ImageLayout::TransferDestination,
         );
         command_buffer.copy_image_to_image(
             &self.draw_image,
-            &swapchain.images()[self.swapchain_image_index as usize],
+            &swapchain.images()[self.swapchain_image_index],
             self.draw_image.width(),
             self.draw_image.height(),
             swapchain.width(),
             swapchain.height(),
         );
         command_buffer.transition_image(
-            &swapchain.images()[self.swapchain_image_index as usize],
+            &swapchain.images()[self.swapchain_image_index],
             ImageLayout::Undefined,
             ImageLayout::PresentSource,
         );

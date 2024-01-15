@@ -38,9 +38,9 @@ pub enum ImageLayout {
     PresentSource,
 }
 
-impl Into<vk::ImageLayout> for ImageLayout {
-    fn into(self) -> vk::ImageLayout {
-        match self {
+impl From<ImageLayout> for vk::ImageLayout {
+    fn from(value: ImageLayout) -> Self {
+        match value {
             ImageLayout::Undefined => vk::ImageLayout::UNDEFINED,
             ImageLayout::General => vk::ImageLayout::GENERAL,
             ImageLayout::ColorAttachment => vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
@@ -75,9 +75,9 @@ pub enum ImageFormat {
     Rgba16Sfloat,
 }
 
-impl Into<vk::Format> for ImageFormat {
-    fn into(self) -> vk::Format {
-        match self {
+impl From<ImageFormat> for vk::Format {
+    fn from(value: ImageFormat) -> Self {
+        match value {
             ImageFormat::Rgba16Sfloat => vk::Format::R16G16B16A16_SFLOAT,
         }
     }
@@ -97,9 +97,9 @@ bitflags::bitflags! {
     }
 }
 
-impl Into<vk::ImageUsageFlags> for ImageUsage {
-    fn into(self) -> vk::ImageUsageFlags {
-        vk::ImageUsageFlags::from_raw(self.bits())
+impl From<ImageUsage> for vk::ImageUsageFlags {
+    fn from(value: ImageUsage) -> Self {
+        vk::ImageUsageFlags::from_raw(value.bits())
     }
 }
 
@@ -112,7 +112,7 @@ pub struct ImageDescriptor {
 }
 
 pub struct Image {
-    format: vk::Format,
+    _format: vk::Format,
     extent: vk::Extent2D,
     allocation: Option<Allocation>,
     view: vk::ImageView,
@@ -184,7 +184,7 @@ impl Image {
         let view = unsafe { device.raw().create_image_view(&create_info, None) }?;
 
         Ok(Self {
-            format: descriptor.format.into(),
+            _format: descriptor.format.into(),
             extent: vk::Extent2D {
                 width: descriptor.width,
                 height: descriptor.height,
@@ -225,7 +225,7 @@ impl Image {
         let view = unsafe { device.raw().create_image_view(&create_info, None) }?;
 
         Ok(Self {
-            format,
+            _format: format,
             extent,
             allocation: None,
             view,
@@ -240,14 +240,6 @@ impl Image {
 
     pub(crate) fn view(&self) -> vk::ImageView {
         self.view
-    }
-
-    pub(crate) fn extent(&self) -> vk::Extent2D {
-        self.extent
-    }
-
-    pub(crate) fn format(&self) -> vk::Format {
-        self.format
     }
 
     pub fn width(&self) -> u32 {

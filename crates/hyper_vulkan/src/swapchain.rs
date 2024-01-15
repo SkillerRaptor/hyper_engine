@@ -187,14 +187,6 @@ impl Swapchain {
         Ok(())
     }
 
-    pub(crate) fn functor(&self) -> &khr::Swapchain {
-        &self.functor
-    }
-
-    pub(crate) fn raw(&self) -> vk::SwapchainKHR {
-        self.raw
-    }
-
     pub fn images(&self) -> &[Image] {
         &self.images
     }

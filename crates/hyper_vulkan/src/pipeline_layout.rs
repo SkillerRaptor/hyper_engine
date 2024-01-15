@@ -31,7 +31,7 @@ impl PipelineLayout {
         let pipeline_layout = unsafe { device.raw().create_pipeline_layout(&create_info, None) }?;
         Ok(Self {
             raw: pipeline_layout,
-            device: Arc::clone(&device),
+            device: Arc::clone(device),
         })
     }
 

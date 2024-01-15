@@ -21,8 +21,8 @@ pub struct GraphicsContext {
 
     swapchain: Swapchain,
     device: Device,
-    surface: Surface,
-    instance: Instance,
+    _surface: Surface,
+    _instance: Instance,
 }
 
 impl GraphicsContext {
@@ -48,8 +48,8 @@ impl GraphicsContext {
 
             swapchain,
             device,
-            surface,
-            instance,
+            _surface: surface,
+            _instance: instance,
         })
     }
 
