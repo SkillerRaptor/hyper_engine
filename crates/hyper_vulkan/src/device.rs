@@ -8,8 +8,13 @@ use crate::{
     binary_semaphore::BinarySemaphore,
     command_buffer::CommandBuffer,
     command_pool::CommandPool,
+    compute_pipeline::{ComputePipeline, ComputePipelineDescriptor},
+    descriptor_manager::DescriptorManager,
+    descriptor_pool::DescriptorPool,
+    descriptor_set::DescriptorSet,
     image::{Image, ImageDescriptor},
     instance::InstanceShared,
+    pipeline_layout::PipelineLayout,
     surface::Surface,
     swapchain::Swapchain,
     timeline_semaphore::TimelineSemaphore,
@@ -270,12 +275,14 @@ impl Device {
         physical_device: vk::PhysicalDevice,
     ) -> bool {
         let mut dynamic_rendering = vk::PhysicalDeviceDynamicRenderingFeatures::builder();
+        let mut buffer_device_address = vk::PhysicalDeviceBufferDeviceAddressFeatures::builder();
         let mut timline_semaphore = vk::PhysicalDeviceTimelineSemaphoreFeatures::builder();
         let mut synchronization2 = vk::PhysicalDeviceSynchronization2Features::builder();
         let mut descriptor_indexing = vk::PhysicalDeviceDescriptorIndexingFeatures::builder();
 
         let mut device_features = vk::PhysicalDeviceFeatures2::builder()
             .push_next(&mut dynamic_rendering)
+            .push_next(&mut buffer_device_address)
             .push_next(&mut timline_semaphore)
             .push_next(&mut synchronization2)
             .push_next(&mut descriptor_indexing);
@@ -287,6 +294,7 @@ impl Device {
         }
 
         let dynamic_rendering_supported = dynamic_rendering.dynamic_rendering;
+        let buffer_device_address_supported = buffer_device_address.buffer_device_address;
         let timeline_semaphore_supported = timline_semaphore.timeline_semaphore;
         let synchronization2_supported = synchronization2.synchronization2;
         let descriptor_indexing_supported = descriptor_indexing
@@ -304,6 +312,7 @@ impl Device {
             & descriptor_indexing.runtime_descriptor_array;
 
         let features_supported = dynamic_rendering_supported
+            & buffer_device_address_supported
             & timeline_semaphore_supported
             & synchronization2_supported
             & descriptor_indexing_supported;
@@ -325,6 +334,8 @@ impl Device {
 
         let mut dynamic_rendering =
             vk::PhysicalDeviceDynamicRenderingFeatures::builder().dynamic_rendering(true);
+        let mut buffer_device_address =
+            vk::PhysicalDeviceBufferDeviceAddressFeatures::builder().buffer_device_address(true);
         let mut timline_semaphore =
             vk::PhysicalDeviceTimelineSemaphoreFeatures::builder().timeline_semaphore(true);
         let mut synchronization2 =
@@ -345,6 +356,7 @@ impl Device {
 
         let mut physical_device_features = vk::PhysicalDeviceFeatures2::builder()
             .push_next(&mut dynamic_rendering)
+            .push_next(&mut buffer_device_address)
             .push_next(&mut timline_semaphore)
             .push_next(&mut synchronization2)
             .push_next(&mut descriptor_indexing);
@@ -377,7 +389,7 @@ impl Device {
             device: device.clone(),
             physical_device,
             debug_settings: AllocatorDebugSettings::default(),
-            buffer_device_address: false,
+            buffer_device_address: true,
             allocation_sizes: AllocationSizes::default(),
         })?;
         Ok(allocator)
@@ -402,12 +414,31 @@ impl Device {
         CommandPool::new(&self.shared)
     }
 
+    pub fn create_descriptor_manager(&self) -> Result<DescriptorManager> {
+        DescriptorManager::new(&self.shared.instance, &self.shared)
+    }
+
     pub fn create_image(&self, descriptor: ImageDescriptor) -> Result<Image> {
         Image::new(&self.shared, descriptor)
     }
 
     pub fn create_timeline_semaphore(&self) -> Result<TimelineSemaphore> {
         TimelineSemaphore::new(&self.shared)
+    }
+
+    pub fn create_pipeline_layout(
+        &self,
+        descriptor_manager: &DescriptorManager,
+    ) -> Result<PipelineLayout> {
+        PipelineLayout::new(&self.shared, descriptor_manager)
+    }
+
+    pub fn create_compute_pipeline(
+        &self,
+        layout: &PipelineLayout,
+        descriptor: ComputePipelineDescriptor,
+    ) -> Result<ComputePipeline> {
+        ComputePipeline::new(&self.shared, layout, descriptor)
     }
 
     pub fn submit_commands(

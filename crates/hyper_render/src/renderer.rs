@@ -4,14 +4,16 @@
  * SPDX-License-Identifier: MIT
  */
 
-use hyper_math::Vec4;
 use hyper_platform::window::Window;
 use hyper_vulkan::{
     binary_semaphore::BinarySemaphore,
     command_buffer::CommandBuffer,
     command_pool::CommandPool,
+    compute_pipeline::{ComputePipeline, ComputePipelineDescriptor},
+    descriptor_manager::DescriptorManager,
     device::Device,
     image::{Image, ImageDescriptor, ImageFormat, ImageLayout, ImageUsage},
+    pipeline_layout::PipelineLayout,
     swapchain::Swapchain,
     timeline_semaphore::TimelineSemaphore,
 };
@@ -27,6 +29,12 @@ struct FrameData {
 }
 
 pub(crate) struct Renderer {
+    gradient_pipeline: ComputePipeline,
+    layout: PipelineLayout,
+
+    draw_image_handle: u32,
+    descriptor_manager: DescriptorManager,
+
     submit_semaphore: TimelineSemaphore,
     swapchain_image_index: usize,
 
@@ -71,7 +79,28 @@ impl Renderer {
 
         let submit_semaphore = device.create_timeline_semaphore()?;
 
+        let mut descriptor_manager = device.create_descriptor_manager()?;
+
+        let draw_image_handle =
+            descriptor_manager.allocate_storage_image_handle(&draw_image, ImageLayout::General);
+
+        let layout = device.create_pipeline_layout(&descriptor_manager)?;
+
+        let gradient_pipeline = device.create_compute_pipeline(
+            &layout,
+            ComputePipelineDescriptor {
+                shader: "./assets/shaders/gradient.spv".to_owned(),
+                entry: "main".to_owned(),
+            },
+        )?;
+
         Ok(Self {
+            gradient_pipeline,
+            layout,
+
+            draw_image_handle,
+            descriptor_manager,
+
             submit_semaphore,
             swapchain_image_index: 0,
 
@@ -157,10 +186,22 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn clear(&self, color: Vec4) {
-        self.current_frame()
+    pub fn clear(&self) {
+        let current_frame = self.current_frame();
+        current_frame
             .command_buffer
-            .clear_color_image(&self.draw_image, color);
+            .bind_compute_pipeline(&self.gradient_pipeline);
+        current_frame
+            .command_buffer
+            .bind_compute_descriptor_sets(&self.descriptor_manager, &self.layout);
+
+        let width = self.draw_image.width();
+        let height = self.draw_image.height();
+        current_frame.command_buffer.dispatch(
+            (width as f32 / 16.0).ceil() as u32,
+            (height as f32 / 16.0).ceil() as u32,
+            1,
+        )
     }
 
     fn current_frame(&self) -> &FrameData {

@@ -6,7 +6,6 @@
 
 use crate::game::Game;
 
-use hyper_math::Vec4;
 use hyper_platform::{
     event_loop::EventLoop,
     input::Input,
@@ -150,7 +149,7 @@ impl Application {
             // Render
 
             self.graphics_context.begin_frame()?;
-            self.graphics_context.clear(Vec4::new(1.0, 0.0, 0.0, 1.0));
+            self.graphics_context.clear();
             self.graphics_context.end_frame()?;
             self.graphics_context.submit()?;
         }

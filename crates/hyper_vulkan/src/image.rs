@@ -6,7 +6,7 @@
 
 use crate::device::DeviceShared;
 
-use ash::vk::{self, MemoryPropertyFlags};
+use ash::vk;
 use color_eyre::eyre::Result;
 use gpu_allocator::{
     vulkan::{Allocation, AllocationCreateDesc, AllocationScheme},
@@ -15,6 +15,7 @@ use gpu_allocator::{
 
 use std::sync::Arc;
 
+// TODO: Remove the most and replace with generic attachment and read only
 #[derive(Clone, Copy)]
 pub enum ImageLayout {
     Undefined,
@@ -102,6 +103,7 @@ impl Into<vk::ImageUsageFlags> for ImageUsage {
     }
 }
 
+// TODO: Add default
 pub struct ImageDescriptor {
     pub width: u32,
     pub height: u32,

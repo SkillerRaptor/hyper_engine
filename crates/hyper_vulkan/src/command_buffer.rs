@@ -6,8 +6,11 @@
 
 use crate::{
     command_pool::CommandPool,
+    compute_pipeline::ComputePipeline,
+    descriptor_manager::DescriptorManager,
     device::DeviceShared,
     image::{Image, ImageLayout},
+    pipeline_layout::PipelineLayout,
 };
 
 use hyper_math::Vec4;
@@ -82,6 +85,7 @@ impl CommandBuffer {
             .base_array_layer(0)
             .layer_count(vk::REMAINING_ARRAY_LAYERS);
 
+        // TODO: Add stage and access mask enum to make it not a broad access barrier
         let image_memory_barrier = vk::ImageMemoryBarrier2::builder()
             .src_stage_mask(vk::PipelineStageFlags2::ALL_COMMANDS)
             .src_access_mask(vk::AccessFlags2::MEMORY_WRITE)
@@ -189,6 +193,46 @@ impl CommandBuffer {
                 &clear_color_value,
                 &[*subresource_range],
             )
+        }
+    }
+
+    pub fn bind_compute_pipeline(&self, pipeline: &ComputePipeline) {
+        unsafe {
+            self.device.raw().cmd_bind_pipeline(
+                self.raw,
+                vk::PipelineBindPoint::COMPUTE,
+                pipeline.raw(),
+            );
+        }
+    }
+
+    pub fn bind_compute_descriptor_sets(
+        &self,
+        descriptor_manager: &DescriptorManager,
+        layout: &PipelineLayout,
+    ) {
+        unsafe {
+            self.device.raw().cmd_bind_descriptor_sets(
+                self.raw,
+                vk::PipelineBindPoint::COMPUTE,
+                layout.raw(),
+                0,
+                descriptor_manager
+                    .descriptor_sets()
+                    .iter()
+                    .map(|set| set.raw())
+                    .collect::<Vec<_>>()
+                    .as_slice(),
+                &[],
+            )
+        }
+    }
+
+    pub fn dispatch(&self, group_count_x: u32, group_count_y: u32, group_count_z: u32) {
+        unsafe {
+            self.device
+                .raw()
+                .cmd_dispatch(self.raw, group_count_x, group_count_y, group_count_z)
         }
     }
 
