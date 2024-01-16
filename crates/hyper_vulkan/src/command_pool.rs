@@ -30,6 +30,16 @@ impl CommandPool {
         })
     }
 
+    pub fn reset(&self) -> Result<()> {
+        unsafe {
+            self.device
+                .raw()
+                .reset_command_pool(self.raw, vk::CommandPoolResetFlags::empty())?;
+        }
+
+        Ok(())
+    }
+
     pub(crate) fn raw(&self) -> vk::CommandPool {
         self.raw
     }

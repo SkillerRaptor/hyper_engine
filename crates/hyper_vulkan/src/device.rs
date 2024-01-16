@@ -487,6 +487,45 @@ impl Device {
         Ok(())
     }
 
+    pub fn submit_immediate(
+        &self,
+        command_buffer: &CommandBuffer,
+        semaphore: &TimelineSemaphore,
+        value: u64,
+    ) -> Result<()> {
+        let command_buffer_info = vk::CommandBufferSubmitInfo::builder()
+            .command_buffer(command_buffer.raw())
+            .device_mask(0);
+
+        let wait_semaphore_info = vk::SemaphoreSubmitInfo::builder()
+            .semaphore(semaphore.raw())
+            .value(value)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
+
+        let signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
+            .semaphore(semaphore.raw())
+            .value(value + 1)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
+
+        let command_buffer_infos = &[*command_buffer_info];
+        let wait_semaphore_infos = &[*wait_semaphore_info];
+        let signal_semaphore_infos = &[*signal_semaphore_info];
+        let submit_info = vk::SubmitInfo2::builder()
+            .wait_semaphore_infos(wait_semaphore_infos)
+            .command_buffer_infos(command_buffer_infos)
+            .signal_semaphore_infos(signal_semaphore_infos);
+
+        unsafe {
+            self.shared
+                .raw
+                .queue_submit2(self.shared.queue, &[*submit_info], vk::Fence::null())?;
+        }
+
+        Ok(())
+    }
+
     pub fn wait_idle(&self) -> Result<()> {
         unsafe {
             self.shared.raw.device_wait_idle()?;

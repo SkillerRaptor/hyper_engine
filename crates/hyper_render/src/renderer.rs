@@ -35,6 +35,11 @@ pub(crate) struct Renderer {
     _draw_image_handle: u32,
     descriptor_manager: DescriptorManager,
 
+    immediate_counter: u64,
+    immediate_semaphore: TimelineSemaphore,
+    immediate_command_buffer: CommandBuffer,
+    immediate_command_pool: CommandPool,
+
     submit_semaphore: TimelineSemaphore,
     swapchain_image_index: usize,
 
@@ -79,6 +84,10 @@ impl Renderer {
 
         let submit_semaphore = device.create_timeline_semaphore()?;
 
+        let immediate_command_pool = device.create_command_pool()?;
+        let immediate_command_buffer = device.create_command_buffer(&immediate_command_pool)?;
+        let immediate_semaphore = device.create_timeline_semaphore()?;
+
         let mut descriptor_manager = device.create_descriptor_manager()?;
 
         let draw_image_handle =
@@ -100,6 +109,11 @@ impl Renderer {
 
             _draw_image_handle: draw_image_handle,
             descriptor_manager,
+
+            immediate_counter: 0,
+            immediate_semaphore,
+            immediate_command_buffer,
+            immediate_command_pool,
 
             submit_semaphore,
             swapchain_image_index: 0,
@@ -202,6 +216,30 @@ impl Renderer {
             (height as f32 / 16.0).ceil() as u32,
             1,
         )
+    }
+
+    fn immediate_submit<F>(&mut self, device: &Device, callback: F) -> Result<()>
+    where
+        F: FnOnce(&CommandBuffer),
+    {
+        self.immediate_command_buffer.begin()?;
+
+        callback(&self.immediate_command_buffer);
+
+        self.immediate_command_buffer.end()?;
+
+        device.submit_immediate(
+            &self.immediate_command_buffer,
+            &self.immediate_semaphore,
+            self.immediate_counter,
+        )?;
+
+        self.immediate_counter += 1;
+        self.immediate_semaphore.wait_for(self.immediate_counter)?;
+
+        self.immediate_command_pool.reset()?;
+
+        Ok(())
     }
 
     fn current_frame(&self) -> &FrameData {
