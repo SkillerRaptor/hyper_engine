@@ -98,7 +98,7 @@ impl Renderer {
         let gradient_pipeline = device.create_compute_pipeline(
             &layout,
             ComputePipelineDescriptor {
-                shader: "./assets/shaders/gradient.spv".to_owned(),
+                shader: "./assets/shaders/compiled/gradient.spv".to_owned(),
                 entry: "main".to_owned(),
             },
         )?;
