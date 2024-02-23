@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::device::DeviceShared;
-
-use ash::vk;
-use color_eyre::eyre::{eyre, Result};
-
 use std::{
     fs::File,
     io::{BufReader, Read},
     sync::Arc,
 };
+
+use ash::vk;
+use color_eyre::eyre::{eyre, Result};
+
+use crate::device::DeviceShared;
 
 pub(crate) struct ShaderModuleDescriptor {
     pub(crate) file: String,

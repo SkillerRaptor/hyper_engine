@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::instance::InstanceShared;
-
-use hyper_platform::window::Window;
-
 use ash::{extensions::khr, vk};
 use color_eyre::eyre::Result;
+use hyper_platform::window::Window;
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
+
+use crate::instance::InstanceShared;
 
 pub struct Surface {
     raw: vk::SurfaceKHR,

@@ -4,19 +4,18 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::game::Game;
+use std::{borrow::Cow, time::Instant};
 
+use color_eyre::eyre::Result;
 use hyper_platform::{
     event_loop::EventLoop,
     input::Input,
     window::{Window, WindowDescriptor},
 };
 use hyper_render::graphics_context::GraphicsContext;
-
-use color_eyre::eyre::Result;
 use winit::event::{Event, WindowEvent};
 
-use std::{borrow::Cow, time::Instant};
+use crate::game::Game;
 
 #[derive(Debug)]
 pub struct ApplicationDescriptor<'a> {

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+use color_eyre::eyre::Result;
 use hyper_platform::window::Window;
 use hyper_vulkan::{
     binary_semaphore::BinarySemaphore,
@@ -17,8 +18,6 @@ use hyper_vulkan::{
     swapchain::Swapchain,
     timeline_semaphore::TimelineSemaphore,
 };
-
-use color_eyre::eyre::Result;
 
 struct FrameData {
     render_semaphore: BinarySemaphore,

@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::renderer::Renderer;
-
+use color_eyre::eyre::Result;
 use hyper_platform::window::Window;
 use hyper_vulkan::{
     device::Device,
@@ -14,7 +13,7 @@ use hyper_vulkan::{
     swapchain::Swapchain,
 };
 
-use color_eyre::eyre::Result;
+use crate::renderer::Renderer;
 
 pub struct GraphicsContext {
     renderer: Renderer,

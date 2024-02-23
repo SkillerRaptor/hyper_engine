@@ -1,0 +1,9 @@
+#-------------------------------------------------------------------------------------------
+# Copyright (c) 2024, SkillerRaptor
+#
+# SPDX-License-Identifier: MIT
+#-------------------------------------------------------------------------------------------
+
+imports_layout = "HorizontalVertical"
+imports_granularity = "Crate"
+group_imports = "StdExternalCrate"

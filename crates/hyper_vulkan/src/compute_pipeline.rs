@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: MIT
  */
 
+use std::{ffi::CString, sync::Arc};
+
+use ash::vk;
+use color_eyre::eyre::Result;
+
 use crate::{
     device::DeviceShared,
     pipeline_layout::PipelineLayout,
     shader_module::{ShaderModule, ShaderModuleDescriptor},
 };
-
-use ash::vk;
-use color_eyre::eyre::Result;
-
-use std::{ffi::CString, sync::Arc};
 
 // TODO: Add default
 pub struct ComputePipelineDescriptor {

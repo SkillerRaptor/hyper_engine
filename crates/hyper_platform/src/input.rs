@@ -4,16 +4,15 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{key_code::KeyCode, mouse_code::MouseCode};
+use std::collections::HashMap;
 
 use hyper_math::Vec2;
-
 use winit::{
     event::{ElementState, WindowEvent},
     keyboard::PhysicalKey,
 };
 
-use std::collections::HashMap;
+use crate::{key_code::KeyCode, mouse_code::MouseCode};
 
 #[derive(Debug, Default)]
 pub struct Input {

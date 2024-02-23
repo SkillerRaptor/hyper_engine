@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{descriptor_pool::DescriptorPool, device::DeviceShared};
-
 use ash::vk;
 use color_eyre::eyre::Result;
+
+use crate::{descriptor_pool::DescriptorPool, device::DeviceShared};
 
 pub(crate) struct DescriptorSet {
     raw: vk::DescriptorSet,

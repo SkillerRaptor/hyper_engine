@@ -4,16 +4,18 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{
-    binary_semaphore::BinarySemaphore, device::DeviceShared, image::Image, surface::Surface,
-};
-
-use hyper_platform::window::Window;
+use std::sync::Arc;
 
 use ash::{extensions::khr, vk};
 use color_eyre::eyre::Result;
+use hyper_platform::window::Window;
 
-use std::sync::Arc;
+use crate::{
+    binary_semaphore::BinarySemaphore,
+    device::DeviceShared,
+    image::Image,
+    surface::Surface,
+};
 
 pub struct Swapchain {
     width: u32,

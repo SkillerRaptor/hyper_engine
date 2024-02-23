@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+use std::io;
+
 use chrono::Local;
 use color_eyre::Result;
 use fern::{
@@ -11,8 +13,6 @@ use fern::{
     Dispatch,
 };
 use log::{Level, LevelFilter};
-
-use std::io;
 
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]

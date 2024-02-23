@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::device::DeviceShared;
+use std::sync::Arc;
 
 use ash::vk;
 use color_eyre::eyre::Result;
 
-use std::sync::Arc;
+use crate::device::DeviceShared;
 
 pub struct BinarySemaphore {
     raw: vk::Semaphore,

@@ -4,6 +4,21 @@
  * SPDX-License-Identifier: MIT
  */
 
+use std::{
+    collections::HashSet,
+    ffi::CStr,
+    sync::{Arc, Mutex},
+};
+
+use ash::{extensions::khr, vk, Device as AshDevice};
+use color_eyre::eyre::{eyre, Result};
+use gpu_allocator::{
+    vulkan::{Allocator, AllocatorCreateDesc},
+    AllocationSizes,
+    AllocatorDebugSettings,
+};
+use hyper_platform::window::Window;
+
 use crate::{
     binary_semaphore::BinarySemaphore,
     command_buffer::CommandBuffer,
@@ -16,21 +31,6 @@ use crate::{
     surface::Surface,
     swapchain::Swapchain,
     timeline_semaphore::TimelineSemaphore,
-};
-
-use gpu_allocator::{
-    vulkan::{Allocator, AllocatorCreateDesc},
-    AllocationSizes, AllocatorDebugSettings,
-};
-use hyper_platform::window::Window;
-
-use ash::{extensions::khr, vk, Device as AshDevice};
-use color_eyre::eyre::{eyre, Result};
-
-use std::{
-    collections::HashSet,
-    ffi::CStr,
-    sync::{Arc, Mutex},
 };
 
 pub(crate) struct DeviceShared {

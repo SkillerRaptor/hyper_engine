@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::entity::Entity;
-
-use hyper_core::handle::Handle;
-
 use std::{
     fmt::Debug,
     slice::{Iter, IterMut},
 };
+
+use hyper_core::handle::Handle;
+
+use crate::entity::Entity;
 
 #[derive(Debug)]
 pub struct Entry<T> {

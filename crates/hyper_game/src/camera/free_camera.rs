@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::camera::Camera;
-
 use hyper_math::{Mat4, Quat, Vec2, Vec3};
 use hyper_platform::{input::Input, key_code::KeyCode, mouse_code::MouseCode, window::Window};
+
+use crate::camera::Camera;
 
 pub struct FpsCamera {
     aspect_ratio: f32,

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::device::DeviceShared;
+use std::sync::Arc;
 
 use ash::vk;
 use color_eyre::eyre::Result;
@@ -13,7 +13,7 @@ use gpu_allocator::{
     MemoryLocation,
 };
 
-use std::sync::Arc;
+use crate::device::DeviceShared;
 
 // TODO: Remove the most and replace with generic attachment and read only
 #[derive(Clone, Copy)]

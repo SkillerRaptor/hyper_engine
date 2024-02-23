@@ -7,12 +7,11 @@
 mod editor;
 mod logger;
 
-use crate::editor::Editor;
-
-use hyper_engine::application::{Application, ApplicationDescriptor};
-
 use color_eyre::Result;
+use hyper_engine::application::{Application, ApplicationDescriptor};
 use logger::Verbosity;
+
+use crate::editor::Editor;
 
 fn main() -> Result<()> {
     color_eyre::install()?;

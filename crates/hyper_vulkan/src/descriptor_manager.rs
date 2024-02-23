@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
+use std::{collections::VecDeque, sync::Arc};
+
+use ash::vk;
+use color_eyre::eyre::Result;
+
 use crate::{
     descriptor_pool::DescriptorPool,
     descriptor_set::DescriptorSet,
@@ -11,11 +16,6 @@ use crate::{
     image::{Image, ImageLayout},
     instance::InstanceShared,
 };
-
-use ash::vk;
-use color_eyre::eyre::Result;
-
-use std::{collections::VecDeque, sync::Arc};
 
 pub struct DescriptorManager {
     recycled_storage_images: VecDeque<u32>,

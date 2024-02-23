@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{entity::Entity, sparse_set::SparseSet};
-
-use hyper_core::handle_manager::HandleManager;
-
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
     fmt::Debug,
 };
+
+use hyper_core::handle_manager::HandleManager;
+
+use crate::{entity::Entity, sparse_set::SparseSet};
 
 pub(crate) trait ComponentList {
     fn as_any(&self) -> &dyn Any;
@@ -294,9 +294,9 @@ impl Registry {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use hyper_core::handle::Handle;
+
+    use super::*;
 
     #[test]
     fn create_entities() {

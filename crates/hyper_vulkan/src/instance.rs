@@ -4,25 +4,25 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{device::Device, surface::Surface};
-
-use hyper_platform::window::Window;
-
-use ash::{
-    extensions::ext,
-    vk::{self, ObjectType},
-    Entry, Instance as AshInstance,
-};
-use color_eyre::eyre::{eyre, Result};
-use log::Level;
-use raw_window_handle::HasRawDisplayHandle;
-
 use std::{
     ffi::{c_void, CStr, CString},
     slice,
     sync::Arc,
     thread,
 };
+
+use ash::{
+    extensions::ext,
+    vk::{self, ObjectType},
+    Entry,
+    Instance as AshInstance,
+};
+use color_eyre::eyre::{eyre, Result};
+use hyper_platform::window::Window;
+use log::Level;
+use raw_window_handle::HasRawDisplayHandle;
+
+use crate::{device::Device, surface::Surface};
 
 #[derive(Clone, Debug, Default)]
 pub struct InstanceDescriptor {

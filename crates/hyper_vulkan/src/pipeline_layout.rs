@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::{descriptor_manager::DescriptorManager, device::DeviceShared};
+use std::sync::Arc;
 
 use ash::vk;
 use color_eyre::eyre::Result;
 
-use std::sync::Arc;
+use crate::{descriptor_manager::DescriptorManager, device::DeviceShared};
 
 pub struct PipelineLayout {
     raw: vk::PipelineLayout,

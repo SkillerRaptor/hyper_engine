@@ -4,18 +4,20 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::event_loop::EventLoop;
-
-use hyper_math::Vec2;
-
 use color_eyre::eyre::{eyre, Result};
+use hyper_math::Vec2;
 use raw_window_handle::{
-    HasRawDisplayHandle, HasRawWindowHandle, RawDisplayHandle, RawWindowHandle,
+    HasRawDisplayHandle,
+    HasRawWindowHandle,
+    RawDisplayHandle,
+    RawWindowHandle,
 };
 use winit::{
     dpi::{LogicalSize, PhysicalPosition},
     window,
 };
+
+use crate::event_loop::EventLoop;
 
 #[derive(Debug)]
 pub struct WindowDescriptor<'a> {

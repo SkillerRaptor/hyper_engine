@@ -4,6 +4,12 @@
  * SPDX-License-Identifier: MIT
  */
 
+use std::sync::Arc;
+
+use ash::vk;
+use color_eyre::eyre::Result;
+use hyper_math::Vec4;
+
 use crate::{
     command_pool::CommandPool,
     compute_pipeline::ComputePipeline,
@@ -12,13 +18,6 @@ use crate::{
     image::{Image, ImageLayout},
     pipeline_layout::PipelineLayout,
 };
-
-use hyper_math::Vec4;
-
-use ash::vk;
-use color_eyre::eyre::Result;
-
-use std::sync::Arc;
 
 pub struct CommandBuffer {
     raw: vk::CommandBuffer,
