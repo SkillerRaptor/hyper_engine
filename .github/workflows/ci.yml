@@ -19,7 +19,7 @@ jobs:
       CARGO_TERM_COLOR: always
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Update System
         if: matrix.os == 'ubuntu-latest'
@@ -31,12 +31,10 @@ jobs:
             xorg-dev  \
 
       - name: Install Rust-Toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@master
         with:
-          default: true
-          profile: default
           toolchain: ${{ matrix.toolchain }}
-          override: true
+          components: rustc, cargo, rustfmt, rust-std, rust-docs, clippy, miri
 
       - name: Install Cargo-Nextest
         uses: baptiste0928/cargo-install@v2
