@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2023, SkillerRaptor
+ * Copyright (c) 2023-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use ash::{extensions::khr, vk};
 use color_eyre::eyre::Result;

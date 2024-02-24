@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2023, SkillerRaptor
+ * Copyright (c) 2023-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use hyper_math::{Mat4, Quat, Vec2, Vec3};
 use hyper_platform::{input::Input, key_code::KeyCode, mouse_code::MouseCode, window::Window};
