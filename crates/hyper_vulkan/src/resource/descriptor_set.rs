@@ -2,12 +2,12 @@
  * Copyright (c) 2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use ash::vk;
 use color_eyre::eyre::Result;
 
-use crate::{descriptor_pool::DescriptorPool, device::DeviceShared};
+use crate::{core::device::DeviceShared, resource::descriptor_pool::DescriptorPool};
 
 pub(crate) struct DescriptorSet {
     raw: vk::DescriptorSet,

@@ -22,7 +22,7 @@ use hyper_platform::window::Window;
 use log::Level;
 use raw_window_handle::HasRawDisplayHandle;
 
-use crate::{device::Device, surface::Surface};
+use crate::core::{device::Device, surface::Surface};
 
 #[derive(Clone, Debug, Default)]
 pub struct InstanceDescriptor {

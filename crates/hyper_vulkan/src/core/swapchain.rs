@@ -2,7 +2,7 @@
  * Copyright (c) 2023-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use std::sync::Arc;
 
@@ -11,10 +11,9 @@ use color_eyre::eyre::Result;
 use hyper_platform::window::Window;
 
 use crate::{
-    binary_semaphore::BinarySemaphore,
-    device::DeviceShared,
-    image::Image,
-    surface::Surface,
+    core::{device::DeviceShared, surface::Surface},
+    resource::image::Image,
+    sync::binary_semaphore::BinarySemaphore,
 };
 
 pub struct Swapchain {

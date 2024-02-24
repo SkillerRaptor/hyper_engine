@@ -2,7 +2,7 @@
  * Copyright (c) 2023-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use std::{
     collections::HashSet,
@@ -20,17 +20,15 @@ use gpu_allocator::{
 use hyper_platform::window::Window;
 
 use crate::{
-    binary_semaphore::BinarySemaphore,
-    command_buffer::CommandBuffer,
-    command_pool::CommandPool,
-    compute_pipeline::{ComputePipeline, ComputePipelineDescriptor},
-    descriptor_manager::DescriptorManager,
-    image::{Image, ImageDescriptor},
-    instance::InstanceShared,
-    pipeline_layout::PipelineLayout,
-    surface::Surface,
-    swapchain::Swapchain,
-    timeline_semaphore::TimelineSemaphore,
+    commands::{command_buffer::CommandBuffer, command_pool::CommandPool},
+    core::{instance::InstanceShared, surface::Surface, swapchain::Swapchain},
+    resource::{
+        compute_pipeline::{ComputePipeline, ComputePipelineDescriptor},
+        descriptor_manager::DescriptorManager,
+        image::{Image, ImageDescriptor},
+        pipeline_layout::PipelineLayout,
+    },
+    sync::{binary_semaphore::BinarySemaphore, timeline_semaphore::TimelineSemaphore},
 };
 
 pub(crate) struct DeviceShared {

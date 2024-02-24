@@ -9,7 +9,7 @@ use color_eyre::eyre::Result;
 use hyper_platform::window::Window;
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
 
-use crate::instance::InstanceShared;
+use crate::core::instance::InstanceShared;
 
 pub struct Surface {
     raw: vk::SurfaceKHR,

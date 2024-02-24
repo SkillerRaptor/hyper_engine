@@ -2,7 +2,7 @@
  * Copyright (c) 2023-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use std::sync::Arc;
 
@@ -13,7 +13,7 @@ use gpu_allocator::{
     MemoryLocation,
 };
 
-use crate::device::DeviceShared;
+use crate::core::device::DeviceShared;
 
 // TODO: Remove the most and replace with generic attachment and read only
 #[derive(Clone, Copy)]

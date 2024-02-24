@@ -10,11 +10,12 @@ use ash::vk;
 use color_eyre::eyre::Result;
 
 use crate::{
-    descriptor_pool::DescriptorPool,
-    descriptor_set::DescriptorSet,
-    device::DeviceShared,
-    image::{Image, ImageLayout},
-    instance::InstanceShared,
+    core::{device::DeviceShared, instance::InstanceShared},
+    resource::{
+        descriptor_pool::DescriptorPool,
+        descriptor_set::DescriptorSet,
+        image::{Image, ImageLayout},
+    },
 };
 
 pub struct DescriptorManager {

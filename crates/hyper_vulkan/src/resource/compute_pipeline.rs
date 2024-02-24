@@ -2,7 +2,7 @@
  * Copyright (c) 2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use std::{ffi::CString, sync::Arc};
 
@@ -10,9 +10,11 @@ use ash::vk;
 use color_eyre::eyre::Result;
 
 use crate::{
-    device::DeviceShared,
-    pipeline_layout::PipelineLayout,
-    shader_module::{ShaderModule, ShaderModuleDescriptor},
+    core::device::DeviceShared,
+    resource::{
+        pipeline_layout::PipelineLayout,
+        shader_module::{ShaderModule, ShaderModuleDescriptor},
+    },
 };
 
 // TODO: Add default

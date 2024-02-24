@@ -2,21 +2,20 @@
  * Copyright (c) 2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use color_eyre::eyre::Result;
 use hyper_platform::window::Window;
 use hyper_vulkan::{
-    binary_semaphore::BinarySemaphore,
-    command_buffer::CommandBuffer,
-    command_pool::CommandPool,
-    compute_pipeline::{ComputePipeline, ComputePipelineDescriptor},
-    descriptor_manager::DescriptorManager,
-    device::Device,
-    image::{Image, ImageDescriptor, ImageFormat, ImageLayout, ImageUsage},
-    pipeline_layout::PipelineLayout,
-    swapchain::Swapchain,
-    timeline_semaphore::TimelineSemaphore,
+    commands::{command_buffer::CommandBuffer, command_pool::CommandPool},
+    core::{device::Device, swapchain::Swapchain},
+    resource::{
+        compute_pipeline::{ComputePipeline, ComputePipelineDescriptor},
+        descriptor_manager::DescriptorManager,
+        image::{Image, ImageDescriptor, ImageFormat, ImageLayout, ImageUsage},
+        pipeline_layout::PipelineLayout,
+    },
+    sync::{binary_semaphore::BinarySemaphore, timeline_semaphore::TimelineSemaphore},
 };
 
 struct FrameData {

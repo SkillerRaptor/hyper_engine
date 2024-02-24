@@ -2,7 +2,7 @@
  * Copyright (c) 2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use std::sync::Arc;
 
@@ -11,12 +11,14 @@ use color_eyre::eyre::Result;
 use hyper_math::Vec4;
 
 use crate::{
-    command_pool::CommandPool,
-    compute_pipeline::ComputePipeline,
-    descriptor_manager::DescriptorManager,
-    device::DeviceShared,
-    image::{Image, ImageLayout},
-    pipeline_layout::PipelineLayout,
+    commands::command_pool::CommandPool,
+    core::device::DeviceShared,
+    resource::{
+        compute_pipeline::ComputePipeline,
+        descriptor_manager::DescriptorManager,
+        image::{Image, ImageLayout},
+        pipeline_layout::PipelineLayout,
+    },
 };
 
 pub struct CommandBuffer {

@@ -2,14 +2,14 @@
  * Copyright (c) 2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use std::sync::Arc;
 
 use ash::vk;
 use color_eyre::eyre::Result;
 
-use crate::{device::DeviceShared, instance::InstanceShared};
+use crate::core::{device::DeviceShared, instance::InstanceShared};
 
 pub(crate) struct DescriptorPool {
     layouts: [vk::DescriptorSetLayout; Self::DESCRIPTOR_AMOUNT],

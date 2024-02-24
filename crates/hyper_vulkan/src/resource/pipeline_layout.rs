@@ -2,14 +2,14 @@
  * Copyright (c) 2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use std::sync::Arc;
 
 use ash::vk;
 use color_eyre::eyre::Result;
 
-use crate::{descriptor_manager::DescriptorManager, device::DeviceShared};
+use crate::{core::device::DeviceShared, resource::descriptor_manager::DescriptorManager};
 
 pub struct PipelineLayout {
     raw: vk::PipelineLayout,

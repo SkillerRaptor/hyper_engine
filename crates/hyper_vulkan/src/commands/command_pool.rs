@@ -9,7 +9,7 @@ use std::sync::Arc;
 use ash::vk;
 use color_eyre::eyre::Result;
 
-use crate::device::DeviceShared;
+use crate::core::device::DeviceShared;
 
 pub struct CommandPool {
     raw: vk::CommandPool,

@@ -2,11 +2,11 @@
  * Copyright (c) 2023-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use color_eyre::eyre::Result;
 use hyper_platform::window::Window;
-use hyper_vulkan::{
+use hyper_vulkan::core::{
     device::Device,
     instance::{Instance, InstanceDescriptor},
     surface::Surface,

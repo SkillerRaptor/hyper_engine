@@ -2,7 +2,7 @@
  * Copyright (c) 2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use std::{
     fs::File,
@@ -13,7 +13,7 @@ use std::{
 use ash::vk;
 use color_eyre::eyre::{eyre, Result};
 
-use crate::device::DeviceShared;
+use crate::core::device::DeviceShared;
 
 pub(crate) struct ShaderModuleDescriptor {
     pub(crate) file: String,
