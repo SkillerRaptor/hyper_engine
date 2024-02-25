@@ -18,7 +18,7 @@ pub struct BinarySemaphore {
 
 impl BinarySemaphore {
     pub(crate) fn new(device: &Arc<DeviceShared>) -> Result<Self> {
-        let create_info = vk::SemaphoreCreateInfo::builder();
+        let create_info = vk::SemaphoreCreateInfo::default();
 
         let raw = unsafe { device.raw().create_semaphore(&create_info, None) }?;
 

@@ -18,7 +18,7 @@ pub struct CommandPool {
 
 impl CommandPool {
     pub(crate) fn new(device: &Arc<DeviceShared>) -> Result<Self> {
-        let create_info = vk::CommandPoolCreateInfo::builder()
+        let create_info = vk::CommandPoolCreateInfo::default()
             .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
             .queue_family_index(device.queue_family_index());
 

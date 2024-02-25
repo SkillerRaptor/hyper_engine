@@ -68,13 +68,11 @@ impl DescriptorManager {
     pub fn allocate_storage_image_handle(&mut self, image: &Image, layout: ImageLayout) -> u32 {
         let storage_image_handle = self.fetch_storage_image_handle();
 
-        let image_info = vk::DescriptorImageInfo::builder()
+        let image_infos = [vk::DescriptorImageInfo::default()
             .image_view(image.view())
-            .image_layout(layout.into());
+            .image_layout(layout.into())];
 
-        let image_infos = [*image_info];
-
-        let write_set = vk::WriteDescriptorSet::builder()
+        let write_set = vk::WriteDescriptorSet::default()
             .dst_set(self.descriptor_sets[0].raw())
             .dst_binding(0)
             .dst_array_element(storage_image_handle)
@@ -82,7 +80,7 @@ impl DescriptorManager {
             .image_info(&image_infos);
 
         unsafe {
-            self.device.raw().update_descriptor_sets(&[*write_set], &[]);
+            self.device.raw().update_descriptor_sets(&[write_set], &[]);
         }
 
         storage_image_handle
@@ -91,13 +89,11 @@ impl DescriptorManager {
     pub fn allocate_sampled_image_handle(&mut self, image: &Image, layout: ImageLayout) -> u32 {
         let sampled_image_handle = self.fetch_sampled_image_handle();
 
-        let image_info = vk::DescriptorImageInfo::builder()
+        let image_infos = [vk::DescriptorImageInfo::default()
             .image_view(image.view())
-            .image_layout(layout.into());
+            .image_layout(layout.into())];
 
-        let image_infos = [*image_info];
-
-        let write_set = vk::WriteDescriptorSet::builder()
+        let write_set = vk::WriteDescriptorSet::default()
             .dst_set(self.descriptor_sets[1].raw())
             .dst_binding(0)
             .dst_array_element(sampled_image_handle)
@@ -105,7 +101,7 @@ impl DescriptorManager {
             .image_info(&image_infos);
 
         unsafe {
-            self.device.raw().update_descriptor_sets(&[*write_set], &[]);
+            self.device.raw().update_descriptor_sets(&[write_set], &[]);
         }
 
         sampled_image_handle
@@ -115,11 +111,9 @@ impl DescriptorManager {
     pub fn allocate_sampler_handle(&mut self, sampler: vk::Sampler) -> u32 {
         let sampler_handle = self.fetch_sampler_handle();
 
-        let image_info = vk::DescriptorImageInfo::builder().sampler(sampler);
+        let image_infos = [vk::DescriptorImageInfo::default().sampler(sampler)];
 
-        let image_infos = [*image_info];
-
-        let write_set = vk::WriteDescriptorSet::builder()
+        let write_set = vk::WriteDescriptorSet::default()
             .dst_set(self.descriptor_sets[2].raw())
             .dst_binding(0)
             .dst_array_element(sampler_handle)
@@ -127,7 +121,7 @@ impl DescriptorManager {
             .image_info(&image_infos);
 
         unsafe {
-            self.device.raw().update_descriptor_sets(&[*write_set], &[]);
+            self.device.raw().update_descriptor_sets(&[write_set], &[]);
         }
 
         sampler_handle

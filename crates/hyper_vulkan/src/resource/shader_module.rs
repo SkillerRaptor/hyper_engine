@@ -43,7 +43,7 @@ impl ShaderModule {
             ));
         }
 
-        let create_info = vk::ShaderModuleCreateInfo::builder().code(code);
+        let create_info = vk::ShaderModuleCreateInfo::default().code(code);
 
         let shader_module = unsafe { device.raw().create_shader_module(&create_info, None) }?;
         Ok(Self {

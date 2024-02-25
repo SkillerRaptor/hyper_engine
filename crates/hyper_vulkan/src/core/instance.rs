@@ -2,7 +2,7 @@
  * Copyright (c) 2023-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use std::{
     ffi::{c_void, CStr, CString},
@@ -98,7 +98,7 @@ impl Instance {
     }
 
     fn check_validation_layer_support(entry: &Entry) -> Result<bool> {
-        let layer_properties = entry.enumerate_instance_layer_properties()?;
+        let layer_properties = unsafe { entry.enumerate_instance_layer_properties() }?;
         if layer_properties.is_empty() {
             return Ok(false);
         }
@@ -122,7 +122,7 @@ impl Instance {
         const ENGINE_NAME: &CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"HyperEngine\0") };
 
         let application_name = CString::new(window.title())?;
-        let application_info = vk::ApplicationInfo::builder()
+        let application_info = vk::ApplicationInfo::default()
             .application_name(&application_name)
             .application_version(vk::make_api_version(0, 1, 0, 0))
             .engine_name(ENGINE_NAME)
@@ -136,7 +136,7 @@ impl Instance {
         }
 
         if validation_layers_enabled {
-            enabled_extensions.push(ext::DebugUtils::name().as_ptr());
+            enabled_extensions.push(ext::DebugUtils::NAME.as_ptr());
         }
 
         let layers = Self::VALIDATION_LAYERS
@@ -150,7 +150,7 @@ impl Instance {
             Vec::new()
         };
 
-        let mut debug_messenger_create_info = vk::DebugUtilsMessengerCreateInfoEXT::builder()
+        let mut debug_messenger_create_info = vk::DebugUtilsMessengerCreateInfoEXT::default()
             .message_severity(
                 vk::DebugUtilsMessageSeverityFlagsEXT::ERROR
                     | vk::DebugUtilsMessageSeverityFlagsEXT::WARNING
@@ -162,7 +162,7 @@ impl Instance {
             )
             .pfn_user_callback(Some(debug_callback));
 
-        let mut create_info = vk::InstanceCreateInfo::builder()
+        let mut create_info = vk::InstanceCreateInfo::default()
             .application_info(&application_info)
             .enabled_extension_names(&enabled_extensions)
             .enabled_layer_names(&enabled_layers);
@@ -178,7 +178,7 @@ impl Instance {
     fn create_debug_utils(entry: &Entry, instance: &AshInstance) -> Result<DebugUtils> {
         let functor = ext::DebugUtils::new(entry, instance);
 
-        let create_info = vk::DebugUtilsMessengerCreateInfoEXT::builder()
+        let create_info = vk::DebugUtilsMessengerCreateInfoEXT::default()
             .message_severity(
                 vk::DebugUtilsMessageSeverityFlagsEXT::ERROR
                     | vk::DebugUtilsMessageSeverityFlagsEXT::WARNING

@@ -18,11 +18,11 @@ pub struct TimelineSemaphore {
 
 impl TimelineSemaphore {
     pub(crate) fn new(device: &Arc<DeviceShared>) -> Result<Self> {
-        let mut type_create_info = vk::SemaphoreTypeCreateInfo::builder()
+        let mut type_create_info = vk::SemaphoreTypeCreateInfo::default()
             .semaphore_type(vk::SemaphoreType::TIMELINE)
             .initial_value(0);
 
-        let create_info = vk::SemaphoreCreateInfo::builder().push_next(&mut type_create_info);
+        let create_info = vk::SemaphoreCreateInfo::default().push_next(&mut type_create_info);
 
         let raw = unsafe { device.raw().create_semaphore(&create_info, None) }?;
 
@@ -35,7 +35,7 @@ impl TimelineSemaphore {
     pub fn wait_for(&self, value: u64) -> Result<()> {
         let semaphores = [self.raw];
         let values = [value];
-        let wait_info = vk::SemaphoreWaitInfo::builder()
+        let wait_info = vk::SemaphoreWaitInfo::default()
             .semaphores(&semaphores)
             .values(&values);
 

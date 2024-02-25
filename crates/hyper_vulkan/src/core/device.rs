@@ -79,7 +79,7 @@ pub struct Device {
 }
 
 impl Device {
-    const DEVICE_EXTENSIONS: [&'static CStr; 1] = [khr::Swapchain::name()];
+    const DEVICE_EXTENSIONS: [&'static CStr; 1] = [khr::Swapchain::NAME];
 
     pub(crate) fn new(instance: &Arc<InstanceShared>, surface: &Surface) -> Result<Self> {
         let physical_device = Self::choose_physical_device(instance, surface)?;
@@ -270,13 +270,13 @@ impl Device {
         instance: &InstanceShared,
         physical_device: vk::PhysicalDevice,
     ) -> bool {
-        let mut dynamic_rendering = vk::PhysicalDeviceDynamicRenderingFeatures::builder();
-        let mut buffer_device_address = vk::PhysicalDeviceBufferDeviceAddressFeatures::builder();
-        let mut timline_semaphore = vk::PhysicalDeviceTimelineSemaphoreFeatures::builder();
-        let mut synchronization2 = vk::PhysicalDeviceSynchronization2Features::builder();
-        let mut descriptor_indexing = vk::PhysicalDeviceDescriptorIndexingFeatures::builder();
+        let mut dynamic_rendering = vk::PhysicalDeviceDynamicRenderingFeatures::default();
+        let mut buffer_device_address = vk::PhysicalDeviceBufferDeviceAddressFeatures::default();
+        let mut timline_semaphore = vk::PhysicalDeviceTimelineSemaphoreFeatures::default();
+        let mut synchronization2 = vk::PhysicalDeviceSynchronization2Features::default();
+        let mut descriptor_indexing = vk::PhysicalDeviceDescriptorIndexingFeatures::default();
 
-        let mut device_features = vk::PhysicalDeviceFeatures2::builder()
+        let mut device_features = vk::PhysicalDeviceFeatures2::default()
             .push_next(&mut dynamic_rendering)
             .push_next(&mut buffer_device_address)
             .push_next(&mut timline_semaphore)
@@ -321,22 +321,19 @@ impl Device {
         physical_device: vk::PhysicalDevice,
         queue_family_index: u32,
     ) -> Result<AshDevice> {
-        let queue_create_info = vk::DeviceQueueCreateInfo::builder()
+        let queue_create_infos = [vk::DeviceQueueCreateInfo::default()
             .queue_family_index(queue_family_index)
-            .queue_priorities(&[1.0])
-            .build();
-
-        let queue_create_infos = [queue_create_info];
+            .queue_priorities(&[1.0])];
 
         let mut dynamic_rendering =
-            vk::PhysicalDeviceDynamicRenderingFeatures::builder().dynamic_rendering(true);
+            vk::PhysicalDeviceDynamicRenderingFeatures::default().dynamic_rendering(true);
         let mut buffer_device_address =
-            vk::PhysicalDeviceBufferDeviceAddressFeatures::builder().buffer_device_address(true);
+            vk::PhysicalDeviceBufferDeviceAddressFeatures::default().buffer_device_address(true);
         let mut timline_semaphore =
-            vk::PhysicalDeviceTimelineSemaphoreFeatures::builder().timeline_semaphore(true);
+            vk::PhysicalDeviceTimelineSemaphoreFeatures::default().timeline_semaphore(true);
         let mut synchronization2 =
-            vk::PhysicalDeviceSynchronization2Features::builder().synchronization2(true);
-        let mut descriptor_indexing = vk::PhysicalDeviceDescriptorIndexingFeatures::builder()
+            vk::PhysicalDeviceSynchronization2Features::default().synchronization2(true);
+        let mut descriptor_indexing = vk::PhysicalDeviceDescriptorIndexingFeatures::default()
             .shader_uniform_buffer_array_non_uniform_indexing(true)
             .shader_sampled_image_array_non_uniform_indexing(true)
             .shader_storage_buffer_array_non_uniform_indexing(true)
@@ -350,7 +347,7 @@ impl Device {
             .descriptor_binding_variable_descriptor_count(true)
             .runtime_descriptor_array(true);
 
-        let mut physical_device_features = vk::PhysicalDeviceFeatures2::builder()
+        let mut physical_device_features = vk::PhysicalDeviceFeatures2::default()
             .push_next(&mut dynamic_rendering)
             .push_next(&mut buffer_device_address)
             .push_next(&mut timline_semaphore)
@@ -362,7 +359,7 @@ impl Device {
             .map(|&extension| extension.as_ptr())
             .collect::<Vec<_>>();
 
-        let create_info = vk::DeviceCreateInfo::builder()
+        let create_info = vk::DeviceCreateInfo::default()
             .push_next(&mut physical_device_features)
             .queue_create_infos(&queue_create_infos)
             .enabled_extension_names(&extension_names);
@@ -397,7 +394,6 @@ impl Device {
 
     // Resources
     // TODO: Create resource table and only return handles
-
     pub fn create_binary_semaphore(&self) -> Result<BinarySemaphore> {
         BinarySemaphore::new(&self.shared)
     }
@@ -445,33 +441,30 @@ impl Device {
         submit_semaphore: &TimelineSemaphore,
         frame: u64,
     ) -> Result<()> {
-        let present_wait_semaphore_info = vk::SemaphoreSubmitInfo::builder()
+        let wait_semaphore_infos = &[vk::SemaphoreSubmitInfo::default()
             .semaphore(present_semaphore.raw())
             .value(0)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
-            .device_index(0);
+            .device_index(0)];
 
-        let command_buffer_info = vk::CommandBufferSubmitInfo::builder()
+        let command_buffer_infos = &[vk::CommandBufferSubmitInfo::default()
             .command_buffer(command_buffer.raw())
-            .device_mask(0);
+            .device_mask(0)];
 
-        let submit_signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
-            .semaphore(submit_semaphore.raw())
-            .value(frame)
-            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
-            .device_index(0);
+        let signal_semaphore_infos = &[
+            vk::SemaphoreSubmitInfo::default()
+                .semaphore(submit_semaphore.raw())
+                .value(frame)
+                .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+                .device_index(0),
+            vk::SemaphoreSubmitInfo::default()
+                .semaphore(render_semaphore.raw())
+                .value(0)
+                .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+                .device_index(0),
+        ];
 
-        let render_signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
-            .semaphore(render_semaphore.raw())
-            .value(0)
-            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
-            .device_index(0);
-
-        let wait_semaphore_infos = &[*present_wait_semaphore_info];
-        let command_buffer_infos = &[*command_buffer_info];
-        let signal_semaphore_infos =
-            &[*submit_signal_semaphore_info, *render_signal_semaphore_info];
-        let submit_info = vk::SubmitInfo2::builder()
+        let submit_info = vk::SubmitInfo2::default()
             .wait_semaphore_infos(wait_semaphore_infos)
             .command_buffer_infos(command_buffer_infos)
             .signal_semaphore_infos(signal_semaphore_infos);
@@ -479,7 +472,7 @@ impl Device {
         unsafe {
             self.shared
                 .raw
-                .queue_submit2(self.shared.queue, &[*submit_info], vk::Fence::null())?;
+                .queue_submit2(self.shared.queue, &[submit_info], vk::Fence::null())?;
         }
 
         Ok(())
@@ -491,26 +484,23 @@ impl Device {
         semaphore: &TimelineSemaphore,
         value: u64,
     ) -> Result<()> {
-        let command_buffer_info = vk::CommandBufferSubmitInfo::builder()
+        let command_buffer_infos = &[vk::CommandBufferSubmitInfo::default()
             .command_buffer(command_buffer.raw())
-            .device_mask(0);
+            .device_mask(0)];
 
-        let wait_semaphore_info = vk::SemaphoreSubmitInfo::builder()
+        let wait_semaphore_infos = &[vk::SemaphoreSubmitInfo::default()
             .semaphore(semaphore.raw())
             .value(value)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
-            .device_index(0);
+            .device_index(0)];
 
-        let signal_semaphore_info = vk::SemaphoreSubmitInfo::builder()
+        let signal_semaphore_infos = &[vk::SemaphoreSubmitInfo::default()
             .semaphore(semaphore.raw())
             .value(value + 1)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
-            .device_index(0);
+            .device_index(0)];
 
-        let command_buffer_infos = &[*command_buffer_info];
-        let wait_semaphore_infos = &[*wait_semaphore_info];
-        let signal_semaphore_infos = &[*signal_semaphore_info];
-        let submit_info = vk::SubmitInfo2::builder()
+        let submit_info = vk::SubmitInfo2::default()
             .wait_semaphore_infos(wait_semaphore_infos)
             .command_buffer_infos(command_buffer_infos)
             .signal_semaphore_infos(signal_semaphore_infos);
@@ -518,7 +508,7 @@ impl Device {
         unsafe {
             self.shared
                 .raw
-                .queue_submit2(self.shared.queue, &[*submit_info], vk::Fence::null())?;
+                .queue_submit2(self.shared.queue, &[submit_info], vk::Fence::null())?;
         }
 
         Ok(())

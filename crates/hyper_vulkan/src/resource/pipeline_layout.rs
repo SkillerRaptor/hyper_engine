@@ -24,7 +24,7 @@ impl PipelineLayout {
         // TODO: Add push constants
         let push_ranges = [];
 
-        let create_info = vk::PipelineLayoutCreateInfo::builder()
+        let create_info = vk::PipelineLayoutCreateInfo::default()
             .set_layouts(descriptor_manager.layouts())
             .push_constant_ranges(&push_ranges);
 

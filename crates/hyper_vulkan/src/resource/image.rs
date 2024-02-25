@@ -122,7 +122,7 @@ pub struct Image {
 
 impl Image {
     pub(crate) fn new(device: &Arc<DeviceShared>, descriptor: ImageDescriptor) -> Result<Self> {
-        let create_info = vk::ImageCreateInfo::builder()
+        let create_info = vk::ImageCreateInfo::default()
             .image_type(vk::ImageType::TYPE_2D)
             .format(descriptor.format.into())
             .extent(vk::Extent3D {
@@ -161,25 +161,25 @@ impl Image {
                 .bind_image_memory(image, allocation.memory(), allocation.offset())
         }?;
 
-        let component_mapping = vk::ComponentMapping::builder()
+        let component_mapping = vk::ComponentMapping::default()
             .r(vk::ComponentSwizzle::IDENTITY)
             .g(vk::ComponentSwizzle::IDENTITY)
             .b(vk::ComponentSwizzle::IDENTITY)
             .a(vk::ComponentSwizzle::IDENTITY);
 
-        let subresource_range = vk::ImageSubresourceRange::builder()
+        let subresource_range = vk::ImageSubresourceRange::default()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
             .base_mip_level(0)
             .level_count(1)
             .base_array_layer(0)
             .layer_count(1);
 
-        let create_info = vk::ImageViewCreateInfo::builder()
+        let create_info = vk::ImageViewCreateInfo::default()
             .image(image)
             .view_type(vk::ImageViewType::TYPE_2D)
             .format(descriptor.format.into())
-            .components(*component_mapping)
-            .subresource_range(*subresource_range);
+            .components(component_mapping)
+            .subresource_range(subresource_range);
 
         let view = unsafe { device.raw().create_image_view(&create_info, None) }?;
 
@@ -202,25 +202,25 @@ impl Image {
         extent: vk::Extent2D,
         format: vk::Format,
     ) -> Result<Self> {
-        let component_mapping = vk::ComponentMapping::builder()
+        let component_mapping = vk::ComponentMapping::default()
             .r(vk::ComponentSwizzle::IDENTITY)
             .g(vk::ComponentSwizzle::IDENTITY)
             .b(vk::ComponentSwizzle::IDENTITY)
             .a(vk::ComponentSwizzle::IDENTITY);
 
-        let subresource_range = vk::ImageSubresourceRange::builder()
+        let subresource_range = vk::ImageSubresourceRange::default()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
             .base_mip_level(0)
             .level_count(1)
             .base_array_layer(0)
             .layer_count(1);
 
-        let create_info = vk::ImageViewCreateInfo::builder()
+        let create_info = vk::ImageViewCreateInfo::default()
             .image(raw)
             .view_type(vk::ImageViewType::TYPE_2D)
             .format(format)
-            .components(*component_mapping)
-            .subresource_range(*subresource_range);
+            .components(component_mapping)
+            .subresource_range(subresource_range);
 
         let view = unsafe { device.raw().create_image_view(&create_info, None) }?;
 

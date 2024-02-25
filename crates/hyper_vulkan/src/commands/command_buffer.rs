@@ -28,7 +28,7 @@ pub struct CommandBuffer {
 
 impl CommandBuffer {
     pub(crate) fn new(device: &Arc<DeviceShared>, command_pool: &CommandPool) -> Result<Self> {
-        let allocate_info = vk::CommandBufferAllocateInfo::builder()
+        let allocate_info = vk::CommandBufferAllocateInfo::default()
             .command_pool(command_pool.raw())
             .command_buffer_count(1)
             .level(vk::CommandBufferLevel::PRIMARY);
@@ -51,7 +51,7 @@ impl CommandBuffer {
     }
 
     pub fn begin(&self) -> Result<()> {
-        let begin_info = vk::CommandBufferBeginInfo::builder()
+        let begin_info = vk::CommandBufferBeginInfo::default()
             .flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
 
         unsafe {
@@ -79,7 +79,7 @@ impl CommandBuffer {
         current_layout: ImageLayout,
         new_layout: ImageLayout,
     ) {
-        let subresource_range = vk::ImageSubresourceRange::builder()
+        let subresource_range = vk::ImageSubresourceRange::default()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
             .base_mip_level(0)
             .level_count(vk::REMAINING_MIP_LEVELS)
@@ -87,7 +87,7 @@ impl CommandBuffer {
             .layer_count(vk::REMAINING_ARRAY_LAYERS);
 
         // TODO: Add stage and access mask enum to make it not a broad access barrier
-        let image_memory_barrier = vk::ImageMemoryBarrier2::builder()
+        let image_memory_barriers = [vk::ImageMemoryBarrier2::default()
             .src_stage_mask(vk::PipelineStageFlags2::ALL_COMMANDS)
             .src_access_mask(vk::AccessFlags2::MEMORY_WRITE)
             .dst_stage_mask(vk::PipelineStageFlags2::ALL_COMMANDS)
@@ -97,10 +97,9 @@ impl CommandBuffer {
             .src_queue_family_index(vk::QUEUE_FAMILY_IGNORED)
             .dst_queue_family_index(vk::QUEUE_FAMILY_IGNORED)
             .image(image.raw())
-            .subresource_range(*subresource_range);
+            .subresource_range(subresource_range)];
 
-        let image_memory_barriers = [*image_memory_barrier];
-        let dependency_info = vk::DependencyInfo::builder()
+        let dependency_info = vk::DependencyInfo::default()
             .dependency_flags(vk::DependencyFlags::empty())
             .memory_barriers(&[])
             .buffer_memory_barriers(&[])
@@ -122,7 +121,7 @@ impl CommandBuffer {
         destination_width: u32,
         destination_height: u32,
     ) {
-        let source_subresource_range = vk::ImageSubresourceLayers::builder()
+        let source_subresource_range = vk::ImageSubresourceLayers::default()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
             .mip_level(0)
             .base_array_layer(0)
@@ -130,14 +129,13 @@ impl CommandBuffer {
 
         let source_offsets = [
             vk::Offset3D::default(),
-            vk::Offset3D::builder()
+            vk::Offset3D::default()
                 .x(source_width as i32)
                 .y(source_height as i32)
-                .z(1)
-                .build(),
+                .z(1),
         ];
 
-        let destination_subresource_range = vk::ImageSubresourceLayers::builder()
+        let destination_subresource_range = vk::ImageSubresourceLayers::default()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
             .mip_level(0)
             .base_array_layer(0)
@@ -145,21 +143,19 @@ impl CommandBuffer {
 
         let destination_offsets = [
             vk::Offset3D::default(),
-            vk::Offset3D::builder()
+            vk::Offset3D::default()
                 .x(destination_width as i32)
                 .y(destination_height as i32)
-                .z(1)
-                .build(),
+                .z(1),
         ];
 
-        let blit_region = vk::ImageBlit2::builder()
-            .src_subresource(*source_subresource_range)
+        let regions = [vk::ImageBlit2::default()
+            .src_subresource(source_subresource_range)
             .src_offsets(source_offsets)
-            .dst_subresource(*destination_subresource_range)
-            .dst_offsets(destination_offsets);
+            .dst_subresource(destination_subresource_range)
+            .dst_offsets(destination_offsets)];
 
-        let regions = [*blit_region];
-        let blit_image_info = vk::BlitImageInfo2::builder()
+        let blit_image_info = vk::BlitImageInfo2::default()
             .src_image(source.raw())
             .src_image_layout(vk::ImageLayout::TRANSFER_SRC_OPTIMAL)
             .dst_image(destination.raw())
@@ -179,7 +175,7 @@ impl CommandBuffer {
             float32: color.as_slice().try_into().unwrap(),
         };
 
-        let subresource_range = vk::ImageSubresourceRange::builder()
+        let subresource_range = vk::ImageSubresourceRange::default()
             .aspect_mask(vk::ImageAspectFlags::COLOR)
             .base_mip_level(0)
             .level_count(vk::REMAINING_MIP_LEVELS)
@@ -192,7 +188,7 @@ impl CommandBuffer {
                 image.raw(),
                 vk::ImageLayout::GENERAL,
                 &clear_color_value,
-                &[*subresource_range],
+                &[subresource_range],
             )
         }
     }

@@ -43,13 +43,13 @@ impl ComputePipeline {
 
         let entry_name = CString::new(descriptor.entry)?;
 
-        let stage_create_info = vk::PipelineShaderStageCreateInfo::builder()
+        let stage_create_info = vk::PipelineShaderStageCreateInfo::default()
             .stage(vk::ShaderStageFlags::COMPUTE)
             .module(shader.raw())
             .name(&entry_name);
 
-        let create_info = vk::ComputePipelineCreateInfo::builder()
-            .stage(*stage_create_info)
+        let create_info = vk::ComputePipelineCreateInfo::default()
+            .stage(stage_create_info)
             .layout(layout.raw())
             .base_pipeline_handle(vk::Pipeline::null())
             .base_pipeline_index(0);
@@ -57,7 +57,7 @@ impl ComputePipeline {
         let compute_pipeline = unsafe {
             device
                 .raw()
-                .create_compute_pipelines(vk::PipelineCache::null(), &[*create_info], None)
+                .create_compute_pipelines(vk::PipelineCache::null(), &[create_info], None)
         }
         .map_err(|error| error.1)?[0];
 

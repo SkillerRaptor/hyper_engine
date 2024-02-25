@@ -72,15 +72,14 @@ impl DescriptorPool {
 
         let mut pool_sizes = Vec::new();
         for (i, &descriptor_type) in Self::DESCRIPTOR_TYPES.iter().enumerate() {
-            let descriptor_pool_size = vk::DescriptorPoolSize::builder()
+            let descriptor_pool_size = vk::DescriptorPoolSize::default()
                 .ty(descriptor_type)
-                .descriptor_count(limits[i])
-                .build();
+                .descriptor_count(limits[i]);
 
             pool_sizes.push(descriptor_pool_size);
         }
 
-        let create_info = vk::DescriptorPoolCreateInfo::builder()
+        let create_info = vk::DescriptorPoolCreateInfo::default()
             .flags(vk::DescriptorPoolCreateFlags::UPDATE_AFTER_BIND)
             .max_sets(Self::DESCRIPTOR_AMOUNT as u32)
             .pool_sizes(&pool_sizes);
@@ -95,22 +94,21 @@ impl DescriptorPool {
     ) -> Result<[vk::DescriptorSetLayout; Self::DESCRIPTOR_AMOUNT]> {
         let mut layouts = [vk::DescriptorSetLayout::null(); Self::DESCRIPTOR_AMOUNT];
         for (i, &descriptor_type) in Self::DESCRIPTOR_TYPES.iter().enumerate() {
-            let descriptor_set_layout_binding = vk::DescriptorSetLayoutBinding::builder()
+            let descriptor_set_layout_binding = vk::DescriptorSetLayoutBinding::default()
                 .binding(0)
                 .descriptor_type(descriptor_type)
                 .descriptor_count(limits[i])
-                .stage_flags(vk::ShaderStageFlags::ALL)
-                .build();
+                .stage_flags(vk::ShaderStageFlags::ALL);
 
             let bindings = [descriptor_set_layout_binding];
             let binding_flags = [vk::DescriptorBindingFlags::PARTIALLY_BOUND
                 | vk::DescriptorBindingFlags::VARIABLE_DESCRIPTOR_COUNT
                 | vk::DescriptorBindingFlags::UPDATE_AFTER_BIND];
 
-            let mut binding_flags = vk::DescriptorSetLayoutBindingFlagsCreateInfo::builder()
+            let mut binding_flags = vk::DescriptorSetLayoutBindingFlagsCreateInfo::default()
                 .binding_flags(&binding_flags);
 
-            let create_info = vk::DescriptorSetLayoutCreateInfo::builder()
+            let create_info = vk::DescriptorSetLayoutCreateInfo::default()
                 .push_next(&mut binding_flags)
                 .flags(vk::DescriptorSetLayoutCreateFlags::UPDATE_AFTER_BIND_POOL)
                 .bindings(&bindings);

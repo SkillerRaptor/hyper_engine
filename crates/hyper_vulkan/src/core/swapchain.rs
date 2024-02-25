@@ -61,7 +61,7 @@ impl Swapchain {
         }
 
         // TODO: Take old swapchain
-        let create_info = vk::SwapchainCreateInfoKHR::builder()
+        let create_info = vk::SwapchainCreateInfoKHR::default()
             .surface(surface.raw())
             .min_image_count(image_count)
             .image_format(surface_format.format)
@@ -165,7 +165,7 @@ impl Swapchain {
         let wait_semaphores = &[render_semaphore.raw()];
         let image_indices = &[swapchain_image_index];
 
-        let present_info = vk::PresentInfoKHR::builder()
+        let present_info = vk::PresentInfoKHR::default()
             .swapchains(swapchains)
             .wait_semaphores(wait_semaphores)
             .image_indices(image_indices);

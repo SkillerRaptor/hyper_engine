@@ -23,12 +23,12 @@ impl DescriptorSet {
         let limits = [limit];
 
         let mut count_allocate_info =
-            vk::DescriptorSetVariableDescriptorCountAllocateInfo::builder()
+            vk::DescriptorSetVariableDescriptorCountAllocateInfo::default()
                 .descriptor_counts(&limits);
 
         let layouts = [layout];
 
-        let allocate_info = vk::DescriptorSetAllocateInfo::builder()
+        let allocate_info = vk::DescriptorSetAllocateInfo::default()
             .push_next(&mut count_allocate_info)
             .descriptor_pool(descriptor_pool.raw())
             .set_layouts(&layouts);
