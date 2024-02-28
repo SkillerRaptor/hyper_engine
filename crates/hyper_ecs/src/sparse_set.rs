@@ -7,6 +7,7 @@
 use std::{
     fmt::Debug,
     slice::{Iter, IterMut},
+    vec::IntoIter,
 };
 
 use hyper_core::handle::Handle;
@@ -143,7 +144,7 @@ impl<T> SparseSet<T> {
 
 impl<T> IntoIterator for SparseSet<T> {
     type Item = Entry<T>;
-    type IntoIter = std::vec::IntoIter<Self::Item>;
+    type IntoIter = IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.dense.into_iter()

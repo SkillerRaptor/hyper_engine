@@ -8,7 +8,7 @@ use proc_macro::TokenStream;
 use syn::{Data, DeriveInput, Error, Fields, Type};
 
 #[proc_macro_derive(Handle)]
-pub fn my_derive(input: proc_macro::TokenStream) -> TokenStream {
+pub fn my_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
     let fields = match &ast.data {
@@ -53,7 +53,7 @@ pub fn my_derive(input: proc_macro::TokenStream) -> TokenStream {
     let field = fields.first().unwrap();
     match &field.ty {
         Type::Path(path) => {
-            let path: &syn::Path = &path.path;
+            let path = &path.path;
             if !path.is_ident("u32") {
                 return Error::new_spanned(
                     fields,
