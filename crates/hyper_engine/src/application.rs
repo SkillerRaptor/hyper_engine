@@ -12,7 +12,6 @@ use hyper_platform::{
     input::Input,
     window::{Window, WindowDescriptor},
 };
-use hyper_render::graphics_context::GraphicsContext;
 use winit::event::{Event, WindowEvent};
 
 use crate::game::Game;
@@ -37,8 +36,6 @@ impl<'a> Default for ApplicationDescriptor<'a> {
 }
 
 pub struct Application {
-    graphics_context: GraphicsContext,
-
     input: Input,
     window: Window,
     event_loop: EventLoop,
@@ -70,16 +67,12 @@ impl Application {
 
         let input = Input::default();
 
-        let graphics_context = GraphicsContext::new(&window)?;
-
         log::info!(
             "Application initialized in {:.4} seconds",
             start_time.elapsed().as_secs_f32()
         );
 
         Ok(Self {
-            graphics_context,
-
             input,
             window,
             event_loop,
@@ -146,11 +139,6 @@ impl Application {
             self.game.update();
 
             // Render
-
-            self.graphics_context.begin_frame()?;
-            self.graphics_context.clear();
-            self.graphics_context.end_frame()?;
-            self.graphics_context.submit()?;
         }
 
         Ok(())

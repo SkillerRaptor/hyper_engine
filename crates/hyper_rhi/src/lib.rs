@@ -3,7 +3,3 @@
  *
  * SPDX-License-Identifier: MIT
 */
-
-pub mod graphics_context;
-
-mod renderer;
