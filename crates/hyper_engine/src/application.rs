@@ -40,7 +40,7 @@ impl Application {
             Cow::from(descriptor.title)
         };
 
-        let window = Window::new(WindowDescriptor {
+        let window = Window::new(&WindowDescriptor {
             title: &title,
             width: descriptor.width,
             height: descriptor.height,

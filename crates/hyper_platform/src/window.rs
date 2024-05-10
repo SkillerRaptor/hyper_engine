@@ -44,6 +44,7 @@ pub enum Error {
     EventLoopError(#[from] EventLoopError),
 }
 
+#[derive(Debug)]
 pub struct Window {
     input: Input,
     close_requested: bool,
@@ -53,7 +54,7 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new(descriptor: WindowDescriptor) -> Result<Self, Error> {
+    pub fn new(descriptor: &WindowDescriptor) -> Result<Self, Error> {
         let event_loop = EventLoop::new()?;
 
         let attributes = WindowAttributes::default()
