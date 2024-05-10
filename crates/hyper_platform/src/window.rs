@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: MIT
 */
 
-use color_eyre::eyre::{eyre, Result};
+use std::num::NonZeroU32;
+
 use hyper_math::Vec2;
 use raw_window_handle::{
     HasRawDisplayHandle,
@@ -12,8 +13,10 @@ use raw_window_handle::{
     RawDisplayHandle,
     RawWindowHandle,
 };
+use thiserror::Error;
 use winit::{
     dpi::{LogicalSize, PhysicalPosition},
+    error::OsError,
     window,
 };
 
@@ -22,20 +25,15 @@ use crate::event_loop::EventLoop;
 #[derive(Debug)]
 pub struct WindowDescriptor<'a> {
     pub title: &'a str,
-    pub width: u32,
-    pub height: u32,
+    pub width: NonZeroU32,
+    pub height: NonZeroU32,
     pub resizable: bool,
 }
 
-impl<'a> Default for WindowDescriptor<'a> {
-    fn default() -> Self {
-        Self {
-            title: "<unknown>",
-            width: 1280,
-            height: 720,
-            resizable: true,
-        }
-    }
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("encountered an error while building the window")]
+    Build(#[from] OsError),
 }
 
 pub struct Window {
@@ -43,22 +41,13 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new(event_loop: &EventLoop, descriptor: WindowDescriptor) -> Result<Self> {
-        if descriptor.title.is_empty() {
-            return Err(eyre!("The window title has to be non-empty"));
-        }
-
-        if descriptor.width == 0 {
-            return Err(eyre!("The window width has to be greater than 0"));
-        }
-
-        if descriptor.height == 0 {
-            return Err(eyre!("The window height has to be greater than 0"));
-        }
-
+    pub fn new(event_loop: &EventLoop, descriptor: WindowDescriptor) -> Result<Self, Error> {
         let raw = window::WindowBuilder::new()
             .with_title(descriptor.title)
-            .with_inner_size(LogicalSize::new(descriptor.width, descriptor.height))
+            .with_inner_size(LogicalSize::new(
+                descriptor.width.get(),
+                descriptor.height.get(),
+            ))
             .with_resizable(descriptor.resizable)
             .build(event_loop.raw())?;
 
@@ -78,11 +67,11 @@ impl Window {
         (inner_size.width, inner_size.height)
     }
 
-    // TOOD: Make this cleaner
-    pub fn set_cursor_position(&self, position: Vec2) -> Result<()> {
+    pub fn set_cursor_position(&self, position: Vec2) {
+        // NOTE: This function will only fail on iOS / Android / Web / Orbital
         self.raw
-            .set_cursor_position(PhysicalPosition::new(position.x, position.y))?;
-        Ok(())
+            .set_cursor_position(PhysicalPosition::new(position.x, position.y))
+            .unwrap();
     }
 
     pub fn set_cursor_visiblity(&self, visibility: bool) {

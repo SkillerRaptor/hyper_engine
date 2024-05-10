@@ -6,15 +6,26 @@
 
 use std::time::Duration;
 
-use color_eyre::eyre::Result;
-use winit::{event::Event, event_loop, platform::pump_events::EventLoopExtPumpEvents};
+use thiserror::Error;
+use winit::{
+    error::EventLoopError,
+    event::Event,
+    event_loop,
+    platform::pump_events::EventLoopExtPumpEvents,
+};
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("encountered an error while constructing the event loop")]
+    Recreation(#[from] EventLoopError),
+}
 
 pub struct EventLoop {
     raw: event_loop::EventLoop<()>,
 }
 
 impl EventLoop {
-    pub fn new() -> Result<Self> {
+    pub fn new() -> Result<Self, Error> {
         Ok(Self {
             raw: event_loop::EventLoop::new()?,
         })

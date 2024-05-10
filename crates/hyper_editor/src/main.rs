@@ -7,32 +7,33 @@
 mod editor;
 mod logger;
 
-use color_eyre::Result;
+use std::num::NonZeroU32;
+
+use anyhow::{Context, Result};
 use hyper_engine::application::{Application, ApplicationDescriptor};
 use logger::Verbosity;
 
 use crate::editor::Editor;
 
 fn main() -> Result<()> {
-    color_eyre::install()?;
-
     if cfg!(debug_assertions) {
         logger::init(Verbosity::Debug)?;
     } else {
         logger::init(Verbosity::Info)?;
     }
 
+    // TODO: Pass editor size from config?
     let mut application = Application::new(
         Box::<Editor>::default(),
         ApplicationDescriptor {
             title: "HyperEditor",
-            width: 1280,
-            height: 720,
+            width: NonZeroU32::new(1280).context("invalid width, expected non-zero value")?,
+            height: NonZeroU32::new(720).context("invalid height, expected non-zero value")?,
             resizable: true,
         },
     )?;
 
-    application.run()?;
+    application.run();
 
     Ok(())
 }

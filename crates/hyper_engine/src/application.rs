@@ -2,37 +2,35 @@
  * Copyright (c) 2022-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
-use std::{borrow::Cow, time::Instant};
+use std::{borrow::Cow, num::NonZeroU32, time::Instant};
 
-use color_eyre::eyre::Result;
 use hyper_platform::{
-    event_loop::EventLoop,
+    event_loop::{self, EventLoop},
     input::Input,
-    window::{Window, WindowDescriptor},
+    window::{self, Window, WindowDescriptor},
 };
+use thiserror::Error;
 use winit::event::{Event, WindowEvent};
 
 use crate::game::Game;
 
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error(transparent)]
+    EventLoop(#[from] event_loop::Error),
+
+    #[error(transparent)]
+    Window(#[from] window::Error),
+}
+
 #[derive(Debug)]
 pub struct ApplicationDescriptor<'a> {
     pub title: &'a str,
-    pub width: u32,
-    pub height: u32,
+    pub width: NonZeroU32,
+    pub height: NonZeroU32,
     pub resizable: bool,
-}
-
-impl<'a> Default for ApplicationDescriptor<'a> {
-    fn default() -> Self {
-        Self {
-            title: "<untitled>",
-            width: 1280,
-            height: 720,
-            resizable: true,
-        }
-    }
 }
 
 pub struct Application {
@@ -44,7 +42,7 @@ pub struct Application {
 }
 
 impl Application {
-    pub fn new(game: Box<dyn Game>, descriptor: ApplicationDescriptor) -> Result<Self> {
+    pub fn new(game: Box<dyn Game>, descriptor: ApplicationDescriptor) -> Result<Self, Error> {
         let start_time = Instant::now();
 
         let title = if cfg!(debug_assertions) {
@@ -81,7 +79,7 @@ impl Application {
         })
     }
 
-    pub fn run(&mut self) -> Result<()> {
+    pub fn run(&mut self) {
         // Fixed at 60 frames per second
         let mut time = 0.0;
         let delta_time = 1.0 / 60.0;
@@ -140,7 +138,5 @@ impl Application {
 
             // Render
         }
-
-        Ok(())
     }
 }

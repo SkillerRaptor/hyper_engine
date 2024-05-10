@@ -2,12 +2,12 @@
  * Copyright (c) 2022-2024, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
+*/
 
 use std::io;
 
+use anyhow::Result;
 use chrono::Local;
-use color_eyre::Result;
 use fern::{
     colors::{Color, ColoredLevelConfig},
     Dispatch,

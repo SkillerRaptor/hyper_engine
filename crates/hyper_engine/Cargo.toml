@@ -18,9 +18,9 @@ hyper_math = { path = "../hyper_math" }
 hyper_platform = { path = "../hyper_platform" }
 hyper_rhi = { path = "../hyper_rhi" }
 
-color-eyre = { version = "0.6", default-features = false }
 log = "0.4"
 winit = { version = "0.29", default-features = false, features = [
     "rwh_05",
     "x11",
 ] }
+thiserror = "1.0"

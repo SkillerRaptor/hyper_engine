@@ -13,11 +13,11 @@ license = "MIT"
 [dependencies]
 hyper_engine = { path = "../hyper_engine" }
 
+anyhow = "1.0"
 chrono = { version = "0.4", default-features = false, features = [
     "alloc",
     "std",
     "clock",
 ] }
-color-eyre = { version = "0.6", default-features = false }
 fern = { version = "0.6", features = ["colored"] }
 log = "0.4"
