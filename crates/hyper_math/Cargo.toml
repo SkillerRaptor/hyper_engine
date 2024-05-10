@@ -13,6 +13,4 @@ license = "MIT"
 [dependencies]
 hyper_core = { path = "../hyper_core" }
 
-color-eyre = { version = "0.6", default-features = false }
-log = "0.4"
-nalgebra-glm = "0.18"
+glam = "0.27"

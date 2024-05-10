@@ -4,4 +4,4 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub use nalgebra_glm::*;
+pub use glam::*;
