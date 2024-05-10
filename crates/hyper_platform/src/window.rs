@@ -4,23 +4,28 @@
  * SPDX-License-Identifier: MIT
 */
 
-use std::num::NonZeroU32;
+use std::{num::NonZeroU32, time::Duration};
 
 use hyper_math::Vec2;
 use raw_window_handle::{
-    HasRawDisplayHandle,
-    HasRawWindowHandle,
-    RawDisplayHandle,
-    RawWindowHandle,
+    DisplayHandle,
+    HandleError,
+    HasDisplayHandle,
+    HasWindowHandle,
+    WindowHandle,
 };
 use thiserror::Error;
 use winit::{
-    dpi::{LogicalSize, PhysicalPosition},
-    error::OsError,
-    window,
+    dpi::LogicalSize,
+    error::{EventLoopError, OsError},
+    event::{ElementState, Event, WindowEvent},
+    event_loop::EventLoop,
+    keyboard::PhysicalKey,
+    platform::pump_events::EventLoopExtPumpEvents,
+    window::{self, WindowAttributes},
 };
 
-use crate::event_loop::EventLoop;
+use crate::{input::Input, key_code::KeyCode, mouse_code::MouseCode};
 
 #[derive(Debug)]
 pub struct WindowDescriptor<'a> {
@@ -32,61 +37,106 @@ pub struct WindowDescriptor<'a> {
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("encountered an error while building the window")]
-    Build(#[from] OsError),
+    #[error("encountered an error while creating the window")]
+    Creation(#[from] OsError),
+
+    #[error("encountered an error while constructing the event loop")]
+    EventLoopError(#[from] EventLoopError),
 }
 
 pub struct Window {
+    input: Input,
+    close_requested: bool,
+    // NOTE: Multiple windows are not allowed
+    event_loop: EventLoop<()>,
     raw: window::Window,
 }
 
 impl Window {
-    pub fn new(event_loop: &EventLoop, descriptor: WindowDescriptor) -> Result<Self, Error> {
-        let raw = window::WindowBuilder::new()
+    pub fn new(descriptor: WindowDescriptor) -> Result<Self, Error> {
+        let event_loop = EventLoop::new()?;
+
+        let attributes = WindowAttributes::default()
             .with_title(descriptor.title)
             .with_inner_size(LogicalSize::new(
                 descriptor.width.get(),
                 descriptor.height.get(),
             ))
-            .with_resizable(descriptor.resizable)
-            .build(event_loop.raw())?;
+            .with_resizable(descriptor.resizable);
 
-        Ok(Self { raw })
+        #[allow(deprecated)]
+        let window = event_loop.create_window(attributes)?;
+
+        let input = Input::default();
+
+        Ok(Self {
+            input,
+            close_requested: false,
+            event_loop,
+            raw: window,
+        })
     }
 
-    pub fn request_redraw(&self) {
-        self.raw.request_redraw();
+    pub fn process_events(&mut self) {
+        #[allow(deprecated)]
+        let _ = self
+            .event_loop
+            .pump_events(Some(Duration::ZERO), |event, _| {
+                let Event::WindowEvent { event, .. } = &event else {
+                    return;
+                };
+
+                match event {
+                    WindowEvent::CloseRequested => {
+                        self.close_requested = true;
+                    }
+                    WindowEvent::CursorMoved { position, .. } => {
+                        self.input
+                            .set_cursor_position(Vec2::new(position.x as f32, position.y as f32));
+                    }
+                    WindowEvent::MouseInput { state, button, .. } => {
+                        let pressed = match state {
+                            ElementState::Pressed => true,
+                            ElementState::Released => false,
+                        };
+
+                        let mouse_code = MouseCode::from(*button);
+                        self.input.set_mouse_state(mouse_code, pressed);
+                    }
+                    WindowEvent::KeyboardInput { event, .. } => {
+                        let pressed = match event.state {
+                            ElementState::Pressed => true,
+                            ElementState::Released => false,
+                        };
+
+                        // Don't support any non native key codes
+                        let PhysicalKey::Code(key_code) = event.physical_key else {
+                            return;
+                        };
+
+                        let key_code = KeyCode::from(key_code);
+                        self.input.set_key_state(key_code, pressed);
+                    }
+                    _ => {}
+                }
+
+                // TODO: Handle events, by adding event system and processing them
+            });
     }
 
-    pub fn title(&self) -> String {
-        self.raw.title()
-    }
-
-    pub fn framebuffer_size(&self) -> (u32, u32) {
-        let inner_size = self.raw.inner_size();
-        (inner_size.width, inner_size.height)
-    }
-
-    pub fn set_cursor_position(&self, position: Vec2) {
-        // NOTE: This function will only fail on iOS / Android / Web / Orbital
-        self.raw
-            .set_cursor_position(PhysicalPosition::new(position.x, position.y))
-            .unwrap();
-    }
-
-    pub fn set_cursor_visiblity(&self, visibility: bool) {
-        self.raw.set_cursor_visible(visibility);
+    pub fn close_requested(&self) -> bool {
+        self.close_requested
     }
 }
 
-unsafe impl HasRawDisplayHandle for Window {
-    fn raw_display_handle(&self) -> RawDisplayHandle {
-        self.raw.raw_display_handle()
+impl HasDisplayHandle for Window {
+    fn display_handle(&self) -> Result<DisplayHandle<'_>, HandleError> {
+        self.raw.display_handle()
     }
 }
 
-unsafe impl HasRawWindowHandle for Window {
-    fn raw_window_handle(&self) -> RawWindowHandle {
-        self.raw.raw_window_handle()
+impl HasWindowHandle for Window {
+    fn window_handle(&self) -> Result<WindowHandle<'_>, HandleError> {
+        self.raw.window_handle()
     }
 }
