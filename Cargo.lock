@@ -407,9 +407,9 @@ checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 name = "hyper_core"
 version = "0.0.0"
 dependencies = [
- "color-eyre",
  "hyper_core_macros",
  "log",
+ "thiserror",
 ]
 
 [[package]]
@@ -425,10 +425,10 @@ dependencies = [
 name = "hyper_ecs"
 version = "0.0.0"
 dependencies = [
- "color-eyre",
  "hyper_core",
  "hyper_math",
  "log",
+ "thiserror",
 ]
 
 [[package]]
@@ -461,11 +461,11 @@ dependencies = [
 name = "hyper_game"
 version = "0.0.0"
 dependencies = [
- "color-eyre",
  "hyper_core",
  "hyper_math",
  "hyper_platform",
  "log",
+ "thiserror",
 ]
 
 [[package]]
@@ -474,6 +474,8 @@ version = "0.0.0"
 dependencies = [
  "glam",
  "hyper_core",
+ "log",
+ "thiserror",
 ]
 
 [[package]]
@@ -492,11 +494,11 @@ dependencies = [
 name = "hyper_rhi"
 version = "0.0.0"
 dependencies = [
- "color-eyre",
  "hyper_core",
  "hyper_math",
  "hyper_platform",
  "log",
+ "thiserror",
 ]
 
 [[package]]

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------------------
-# Copyright (c) 2022-2023, SkillerRaptor
+# Copyright (c) 2022-2024, SkillerRaptor
 #
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
@@ -13,5 +13,5 @@ license = "MIT"
 [dependencies]
 hyper_core_macros = { path = "./macros" }
 
-color-eyre = { version = "0.6", default-features = false }
 log = "0.4"
+thiserror = "1.0"
