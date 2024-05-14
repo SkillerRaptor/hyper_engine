@@ -7,10 +7,12 @@
 use std::{env, fs, io, path::Path};
 
 fn main() {
-    println!("cargo:rerun-if-changed=../../assets");
-
     let output_dir = env::var("OUT_DIR").unwrap() + "/../../..";
-    copy_dir_all("../../assets", format!("{}/assets", output_dir)).unwrap();
+
+    if false {
+        println!("cargo:rerun-if-changed=../../assets");
+        copy_dir_all("../../assets", format!("{}/assets", output_dir)).unwrap();
+    }
 
     if cfg!(target_os = "windows") {
         fs::copy(
