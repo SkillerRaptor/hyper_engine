@@ -41,6 +41,7 @@ impl GraphicsDevice {
     pub(crate) const FRAME_COUNT: u32 = 2;
 
     pub fn new(descriptor: &GraphicsDeviceDescriptor) -> Self {
+        #[allow(unreachable_patterns)]
         let (inner, backend) = match descriptor.graphics_api {
             #[cfg(target_os = "windows")]
             GraphicsApi::D3D12 => (
@@ -51,6 +52,7 @@ impl GraphicsDevice {
                 GraphicsDeviceInner::Vulkan(vulkan::GraphicsDevice::new(descriptor)),
                 "Vulkan",
             ),
+            _ => unreachable!(),
         };
 
         log::info!("Created {} Graphics Device", backend);
