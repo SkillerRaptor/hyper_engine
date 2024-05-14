@@ -628,6 +628,7 @@ dependencies = [
  "hyper_math",
  "hyper_platform",
  "log",
+ "raw-window-handle",
  "thiserror",
  "windows 0.56.0",
 ]

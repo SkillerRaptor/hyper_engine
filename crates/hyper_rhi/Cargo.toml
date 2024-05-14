@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------------------
-# Copyright (c) 2022-2024, SkillerRaptor
+# Copyright (c) 2024, SkillerRaptor
 #
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
@@ -20,6 +20,7 @@ ash-window = "0.13"
 hassle-rs = "0.11"
 gpu-allocator = { git = "https://github.com/Traverse-Research/gpu-allocator.git", branch = "ash-0.38" }
 log = "0.4"
+raw-window-handle = "0.6"
 thiserror = "1.0"
 
 [target.'cfg(windows)'.dependencies]

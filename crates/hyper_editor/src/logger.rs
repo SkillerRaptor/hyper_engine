@@ -85,8 +85,7 @@ pub(crate) fn init(verbosity: Verbosity) -> Result<()> {
         .level_for("hyper_game", level_filter)
         .level_for("hyper_math", level_filter)
         .level_for("hyper_platform", level_filter)
-        .level_for("hyper_render", level_filter)
-        .level_for("hyper_vulkan", level_filter)
+        .level_for("hyper_rhi", level_filter)
         .chain(io::stdout())
         .apply()?;
 

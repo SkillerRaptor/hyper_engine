@@ -7,6 +7,7 @@
 use std::{borrow::Cow, num::NonZeroU32, time::Instant};
 
 use hyper_platform::window::{self, Window, WindowDescriptor};
+use hyper_rhi::graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor};
 use thiserror::Error;
 
 use crate::game::Game;
@@ -26,6 +27,9 @@ pub struct ApplicationDescriptor<'a> {
 }
 
 pub struct Application {
+    // Rendering
+    _graphics_device: GraphicsDevice,
+
     window: Window,
     game: Box<dyn Game>,
 }
@@ -47,12 +51,24 @@ impl Application {
             resizable: descriptor.resizable,
         })?;
 
+        let graphics_device = GraphicsDevice::new(&GraphicsDeviceDescriptor {
+            // TODO: Don't hardcode and use CLI options
+            graphics_api: GraphicsApi::Vulkan,
+            debug_mode: cfg!(debug_assertions),
+            window: &window,
+        });
+
         log::info!(
             "Application initialized in {:.4} seconds",
             start_time.elapsed().as_secs_f32()
         );
 
-        Ok(Self { window, game })
+        Ok(Self {
+            _graphics_device: graphics_device,
+
+            window,
+            game,
+        })
     }
 
     pub fn run(&mut self) {

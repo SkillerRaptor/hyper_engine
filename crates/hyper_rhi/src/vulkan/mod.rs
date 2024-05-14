@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: MIT
 */
 
-pub mod graphics_device;
+pub(crate) mod graphics_device;
 
-mod d3d12;
-mod vulkan;
+pub(crate) use graphics_device::*;
