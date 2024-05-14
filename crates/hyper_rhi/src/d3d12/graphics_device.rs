@@ -4,20 +4,46 @@
  * SPDX-License-Identifier: MIT
 */
 
-use std::ptr;
+use std::{ptr, sync::Arc};
 
-use windows::Win32::Graphics::{Direct3D::*, Direct3D12::*, Dxgi::*};
+use windows::Win32::Graphics::{
+    Direct3D::D3D_FEATURE_LEVEL_12_1,
+    Direct3D12::{
+        D3D12CreateDevice,
+        D3D12GetDebugInterface,
+        ID3D12CommandQueue,
+        ID3D12Debug6,
+        ID3D12Device,
+        D3D12_COMMAND_LIST_TYPE_DIRECT,
+        D3D12_COMMAND_QUEUE_DESC,
+        D3D12_COMMAND_QUEUE_FLAG_NONE,
+    },
+    Dxgi::{
+        CreateDXGIFactory2,
+        IDXGIAdapter4,
+        IDXGIFactory7,
+        DXGI_ADAPTER_FLAG,
+        DXGI_ADAPTER_FLAG_NONE,
+        DXGI_ADAPTER_FLAG_SOFTWARE,
+        DXGI_CREATE_FACTORY_DEBUG,
+        DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+    },
+};
 
-use crate::graphics_device::GraphicsDeviceDescriptor;
+use crate::{
+    d3d12::Surface,
+    graphics_device::GraphicsDeviceDescriptor,
+    surface::SurfaceDescriptor,
+};
 
-pub(crate) struct GraphicsDevice {
-    _command_queue: ID3D12CommandQueue,
-    _device: ID3D12Device,
-    _adapter: IDXGIAdapter4,
-    _factory: IDXGIFactory7,
+pub(crate) struct GrapicsDeviceInner {
+    command_queue: ID3D12CommandQueue,
+    device: ID3D12Device,
+    adapter: IDXGIAdapter4,
+    factory: IDXGIFactory7,
 }
 
-impl GraphicsDevice {
+impl GrapicsDeviceInner {
     pub(crate) fn new(descriptor: &GraphicsDeviceDescriptor) -> Self {
         let debug_enabled = if descriptor.debug_mode {
             Self::enable_debug_layers()
@@ -31,10 +57,10 @@ impl GraphicsDevice {
         let command_queue = Self::create_command_queue(&device);
 
         Self {
-            _command_queue: command_queue,
-            _device: device,
-            _adapter: adapter,
-            _factory: factory,
+            command_queue,
+            device,
+            adapter,
+            factory,
         }
     }
 
@@ -117,5 +143,38 @@ impl GraphicsDevice {
         let command_queue = unsafe { device.CreateCommandQueue(&descriptor) }
             .expect("failed to create command queue");
         command_queue
+    }
+}
+
+#[derive(Clone)]
+pub(crate) struct GraphicsDevice {
+    inner: Arc<GrapicsDeviceInner>,
+}
+
+impl GraphicsDevice {
+    pub(crate) fn new(descriptor: &GraphicsDeviceDescriptor) -> Self {
+        Self {
+            inner: Arc::new(GrapicsDeviceInner::new(descriptor)),
+        }
+    }
+
+    pub(crate) fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Surface {
+        Surface::new(self, descriptor)
+    }
+
+    pub(crate) fn factory(&self) -> &IDXGIFactory7 {
+        &self.inner.factory
+    }
+
+    pub(crate) fn adapter(&self) -> &IDXGIAdapter4 {
+        &self.inner.adapter
+    }
+
+    pub(crate) fn device(&self) -> &ID3D12Device {
+        &self.inner.device
+    }
+
+    pub(crate) fn command_queue(&self) -> &ID3D12CommandQueue {
+        &self.inner.command_queue
     }
 }

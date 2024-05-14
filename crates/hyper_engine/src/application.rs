@@ -7,7 +7,10 @@
 use std::{borrow::Cow, num::NonZeroU32, time::Instant};
 
 use hyper_platform::window::{self, Window, WindowDescriptor};
-use hyper_rhi::graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor};
+use hyper_rhi::{
+    graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
+    surface::{Surface, SurfaceDescriptor},
+};
 use thiserror::Error;
 
 use crate::game::Game;
@@ -28,6 +31,7 @@ pub struct ApplicationDescriptor<'a> {
 
 pub struct Application {
     // Rendering
+    surface: Surface,
     _graphics_device: GraphicsDevice,
 
     window: Window,
@@ -58,12 +62,15 @@ impl Application {
             window: &window,
         });
 
+        let surface = graphics_device.create_surface(&SurfaceDescriptor { window: &window });
+
         log::info!(
             "Application initialized in {:.4} seconds",
             start_time.elapsed().as_secs_f32()
         );
 
         Ok(Self {
+            surface,
             _graphics_device: graphics_device,
 
             window,
@@ -87,6 +94,13 @@ impl Application {
             accumulator += frame_time;
 
             self.window.process_events();
+
+            if self.window.resized() {
+                let size = self.window.inner_size();
+                let width = size.x.max(1);
+                let height = size.y.max(1);
+                self.surface.resize(width, height);
+            }
 
             // Update
             while accumulator >= delta_time {

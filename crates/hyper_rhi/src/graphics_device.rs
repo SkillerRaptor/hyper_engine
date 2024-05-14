@@ -6,7 +6,12 @@
 
 use hyper_platform::window::Window;
 
-use crate::{d3d12, vulkan};
+#[cfg(target_os = "windows")]
+use crate::d3d12;
+use crate::{
+    surface::{Surface, SurfaceDescriptor},
+    vulkan,
+};
 
 #[derive(Clone, Copy, Debug)]
 pub enum GraphicsApi {
@@ -22,32 +27,46 @@ pub struct GraphicsDeviceDescriptor<'a> {
 }
 
 #[allow(unused)] // TODO: Remove this
-enum GraphicsDeviceInternal {
+enum GraphicsDeviceInner {
+    #[cfg(target_os = "windows")]
     D3D12(d3d12::GraphicsDevice),
     Vulkan(vulkan::GraphicsDevice),
 }
 
 pub struct GraphicsDevice {
-    _internal: GraphicsDeviceInternal,
+    inner: GraphicsDeviceInner,
 }
 
 impl GraphicsDevice {
+    pub(crate) const FRAME_COUNT: u32 = 2;
+
     pub fn new(descriptor: &GraphicsDeviceDescriptor) -> Self {
-        let (internal, backend) = match descriptor.graphics_api {
+        let (inner, backend) = match descriptor.graphics_api {
+            #[cfg(target_os = "windows")]
             GraphicsApi::D3D12 => (
-                GraphicsDeviceInternal::D3D12(d3d12::GraphicsDevice::new(descriptor)),
+                GraphicsDeviceInner::D3D12(d3d12::GraphicsDevice::new(descriptor)),
                 "D3D12",
             ),
             GraphicsApi::Vulkan => (
-                GraphicsDeviceInternal::Vulkan(vulkan::GraphicsDevice::new(descriptor)),
+                GraphicsDeviceInner::Vulkan(vulkan::GraphicsDevice::new(descriptor)),
                 "Vulkan",
             ),
         };
 
         log::info!("Created {} Graphics Device", backend);
 
-        Self {
-            _internal: internal,
+        Self { inner }
+    }
+
+    pub fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Surface {
+        match &self.inner {
+            #[cfg(target_os = "windows")]
+            GraphicsDeviceInner::D3D12(inner) => {
+                Surface::new_d3d12(inner.create_surface(descriptor))
+            }
+            GraphicsDeviceInner::Vulkan(inner) => {
+                Surface::new_vulkan(inner.create_surface(descriptor))
+            }
         }
     }
 }

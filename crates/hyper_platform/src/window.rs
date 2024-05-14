@@ -6,7 +6,7 @@
 
 use std::{num::NonZeroU32, time::Duration};
 
-use hyper_math::Vec2;
+use hyper_math::{UVec2, Vec2};
 use raw_window_handle::{
     DisplayHandle,
     HandleError,
@@ -46,6 +46,7 @@ pub enum Error {
 
 #[derive(Debug)]
 pub struct Window {
+    resized: bool,
     input: Input,
     close_requested: bool,
     // NOTE: Multiple windows are not allowed
@@ -71,6 +72,7 @@ impl Window {
         let input = Input::default();
 
         Ok(Self {
+            resized: false,
             input,
             close_requested: false,
             event_loop,
@@ -79,6 +81,11 @@ impl Window {
     }
 
     pub fn process_events(&mut self) {
+        // NOTE: This is hack till event system is implemented
+        if self.resized {
+            self.resized = false;
+        }
+
         #[allow(deprecated)]
         let _ = self
             .event_loop
@@ -90,6 +97,9 @@ impl Window {
                 match event {
                     WindowEvent::CloseRequested => {
                         self.close_requested = true;
+                    }
+                    WindowEvent::Resized(_) => {
+                        self.resized = true;
                     }
                     WindowEvent::CursorMoved { position, .. } => {
                         self.input
@@ -127,6 +137,15 @@ impl Window {
 
     pub fn close_requested(&self) -> bool {
         self.close_requested
+    }
+
+    pub fn resized(&self) -> bool {
+        self.resized
+    }
+
+    pub fn inner_size(&self) -> UVec2 {
+        let size = self.raw.inner_size();
+        UVec2::new(size.width, size.height)
     }
 }
 

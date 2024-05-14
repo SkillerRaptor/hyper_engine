@@ -7,6 +7,7 @@
 use std::{
     collections::HashSet,
     ffi::{c_void, CStr},
+    sync::Arc,
 };
 
 use ash::{
@@ -19,24 +20,28 @@ use ash::{
 };
 use raw_window_handle::{DisplayHandle, HasDisplayHandle, RawDisplayHandle};
 
-use crate::graphics_device::GraphicsDeviceDescriptor;
+use crate::{
+    graphics_device::GraphicsDeviceDescriptor,
+    surface::SurfaceDescriptor,
+    vulkan::Surface,
+};
 
 struct DebugUtils {
     debug_messenger: vk::DebugUtilsMessengerEXT,
     loader: debug_utils::Instance,
 }
 
-pub(crate) struct GraphicsDevice {
-    _queue: vk::Queue,
-    _queue_family_index: u32,
+pub(crate) struct GraphicsDeviceInner {
+    queue: vk::Queue,
+    queue_family_index: u32,
     device: Device,
-    _physical_device: vk::PhysicalDevice,
+    physical_device: vk::PhysicalDevice,
     debug_utils: Option<DebugUtils>,
     instance: Instance,
-    _entry: Entry,
+    entry: Entry,
 }
 
-impl GraphicsDevice {
+impl GraphicsDeviceInner {
     const NAME: &'static CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"Hyper-Rhi\0") };
     const VALIDATION_LAYERS: [&'static CStr; 1] =
         [unsafe { CStr::from_bytes_with_nul_unchecked(b"VK_LAYER_KHRONOS_validation\0") }];
@@ -72,13 +77,13 @@ impl GraphicsDevice {
         let queue = unsafe { device.get_device_queue(queue_family_index, 0) };
 
         Self {
-            _queue: queue,
-            _queue_family_index: queue_family_index,
+            queue,
+            queue_family_index,
             device,
-            _physical_device: physical_device,
+            physical_device,
             debug_utils,
             instance,
-            _entry: entry,
+            entry,
         }
     }
 
@@ -407,7 +412,7 @@ impl GraphicsDevice {
     }
 }
 
-impl Drop for GraphicsDevice {
+impl Drop for GraphicsDeviceInner {
     fn drop(&mut self) {
         unsafe {
             self.device.destroy_device(None);
@@ -420,5 +425,46 @@ impl Drop for GraphicsDevice {
 
             self.instance.destroy_instance(None);
         }
+    }
+}
+
+#[derive(Clone)]
+pub(crate) struct GraphicsDevice {
+    inner: Arc<GraphicsDeviceInner>,
+}
+
+impl GraphicsDevice {
+    pub(crate) fn new(descriptor: &GraphicsDeviceDescriptor) -> Self {
+        Self {
+            inner: Arc::new(GraphicsDeviceInner::new(descriptor)),
+        }
+    }
+
+    pub(crate) fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Surface {
+        Surface::new(self, descriptor)
+    }
+
+    pub(crate) fn entry(&self) -> &Entry {
+        &self.inner.entry
+    }
+
+    pub(crate) fn instance(&self) -> &Instance {
+        &self.inner.instance
+    }
+
+    pub(crate) fn physical_device(&self) -> vk::PhysicalDevice {
+        self.inner.physical_device
+    }
+
+    pub(crate) fn device(&self) -> &Device {
+        &self.inner.device
+    }
+
+    pub(crate) fn queue_family_index(&self) -> u32 {
+        self.inner.queue_family_index
+    }
+
+    pub(crate) fn queue(&self) -> vk::Queue {
+        self.inner.queue
     }
 }
