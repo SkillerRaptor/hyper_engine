@@ -7,20 +7,15 @@
 use std::{
     collections::HashSet,
     ffi::{c_void, CStr},
+    mem,
     sync::Arc,
 };
 
-use ash::{
-    ext::debug_utils,
-    khr::{swapchain, win32_surface},
-    vk,
-    Device,
-    Entry,
-    Instance,
-};
-use raw_window_handle::{DisplayHandle, HasDisplayHandle, RawDisplayHandle};
+use ash::{ext::debug_utils, khr::swapchain, vk, Device, Entry, Instance};
+use raw_window_handle::{DisplayHandle, HasDisplayHandle};
 
 use crate::{
+    bindings::BindingsOffset,
     graphics_device::GraphicsDeviceDescriptor,
     surface::SurfaceDescriptor,
     vulkan::Surface,
@@ -32,6 +27,13 @@ struct DebugUtils {
 }
 
 pub(crate) struct GraphicsDeviceInner {
+    pipeline_layout: vk::PipelineLayout,
+
+    descriptor_sets: [vk::DescriptorSet; Self::DESCRIPTOR_TYPES.len()],
+    layouts: [vk::DescriptorSetLayout; Self::DESCRIPTOR_TYPES.len()],
+    limits: [u32; Self::DESCRIPTOR_TYPES.len()],
+    descriptor_pool: vk::DescriptorPool,
+
     queue: vk::Queue,
     queue_family_index: u32,
     device: Device,
@@ -46,6 +48,11 @@ impl GraphicsDeviceInner {
     const VALIDATION_LAYERS: [&'static CStr; 1] =
         [unsafe { CStr::from_bytes_with_nul_unchecked(b"VK_LAYER_KHRONOS_validation\0") }];
     const DEVICE_EXTENSIONS: [&'static CStr; 1] = [swapchain::NAME];
+    const DESCRIPTOR_TYPES: [vk::DescriptorType; 3] = [
+        vk::DescriptorType::STORAGE_BUFFER,
+        vk::DescriptorType::SAMPLED_IMAGE,
+        vk::DescriptorType::STORAGE_IMAGE,
+    ];
 
     pub(crate) fn new(descriptor: &GraphicsDeviceDescriptor) -> Self {
         let display_handle = descriptor
@@ -76,7 +83,22 @@ impl GraphicsDeviceInner {
         let device = Self::create_device(&instance, physical_device, queue_family_index);
         let queue = unsafe { device.get_device_queue(queue_family_index, 0) };
 
+        let descriptor_pool = Self::create_descriptor_pool(&instance, physical_device, &device);
+        let limits = Self::find_limits(&instance, physical_device);
+        let layouts = Self::create_descriptor_set_layouts(&device, &limits);
+        let descriptor_sets =
+            Self::create_descriptor_sets(&device, descriptor_pool, &limits, &layouts);
+
+        let pipeline_layout = Self::create_pipeline_layout(&device, &layouts);
+
         Self {
+            pipeline_layout,
+
+            descriptor_sets,
+            layouts,
+            limits,
+            descriptor_pool,
+
             queue,
             queue_family_index,
             device,
@@ -260,7 +282,6 @@ impl GraphicsDeviceInner {
                 .queue_flags
                 .contains(vk::QueueFlags::GRAPHICS);
 
-            // TODO: Add support for linux
             let present_supported = ash_window::get_present_support(
                 entry,
                 instance,
@@ -392,6 +413,166 @@ impl GraphicsDeviceInner {
         device
     }
 
+    fn create_descriptor_pool(
+        instance: &Instance,
+        physical_device: vk::PhysicalDevice,
+        device: &Device,
+    ) -> vk::DescriptorPool {
+        let pool_sizes = Self::collect_descriptor_pool_sizes(instance, physical_device);
+
+        let create_info = vk::DescriptorPoolCreateInfo::default()
+            .flags(vk::DescriptorPoolCreateFlags::UPDATE_AFTER_BIND)
+            .max_sets(Self::DESCRIPTOR_TYPES.len() as u32)
+            .pool_sizes(&pool_sizes);
+
+        let descriptor_pool = unsafe { device.create_descriptor_pool(&create_info, None) }
+            .expect("failed to create descriptor pool");
+        descriptor_pool
+    }
+
+    fn collect_descriptor_pool_sizes(
+        instance: &Instance,
+        physical_device: vk::PhysicalDevice,
+    ) -> Vec<vk::DescriptorPoolSize> {
+        let properties = unsafe { instance.get_physical_device_properties(physical_device) };
+
+        let mut descriptor_pool_sizes = Vec::new();
+        for descriptor_type in Self::DESCRIPTOR_TYPES {
+            let limit = Self::find_descriptor_type_limit(descriptor_type, properties.limits);
+
+            let descriptor_pool_size = vk::DescriptorPoolSize::default()
+                .ty(descriptor_type)
+                .descriptor_count(limit);
+
+            descriptor_pool_sizes.push(descriptor_pool_size);
+        }
+
+        descriptor_pool_sizes
+    }
+
+    fn find_descriptor_type_limit(
+        descriptor_type: vk::DescriptorType,
+        limits: vk::PhysicalDeviceLimits,
+    ) -> u32 {
+        const MAX_DESCRIPTOR_COUNT: u32 = crate::graphics_device::GraphicsDevice::DESCRIPTOR_COUNT;
+
+        let limit = match descriptor_type {
+            vk::DescriptorType::STORAGE_BUFFER => limits.max_descriptor_set_storage_buffers,
+            vk::DescriptorType::STORAGE_IMAGE => limits.max_descriptor_set_storage_images,
+            vk::DescriptorType::SAMPLED_IMAGE => limits.max_descriptor_set_sampled_images,
+            _ => unreachable!(),
+        };
+
+        if limit > MAX_DESCRIPTOR_COUNT {
+            MAX_DESCRIPTOR_COUNT
+        } else {
+            limit
+        }
+    }
+
+    fn create_descriptor_set_layouts(
+        device: &Device,
+        limits: &[u32; Self::DESCRIPTOR_TYPES.len()],
+    ) -> [vk::DescriptorSetLayout; Self::DESCRIPTOR_TYPES.len()] {
+        let mut layouts = [vk::DescriptorSetLayout::null(); Self::DESCRIPTOR_TYPES.len()];
+
+        for (i, descriptor_type) in Self::DESCRIPTOR_TYPES.iter().enumerate() {
+            let descriptor_set_layout_binding = vk::DescriptorSetLayoutBinding::default()
+                .binding(0)
+                .descriptor_type(*descriptor_type)
+                .descriptor_count(limits[i])
+                .stage_flags(vk::ShaderStageFlags::ALL);
+
+            let descriptor_set_layout_bindings = [descriptor_set_layout_binding];
+
+            let descriptor_binding_flags = [vk::DescriptorBindingFlags::PARTIALLY_BOUND
+                | vk::DescriptorBindingFlags::VARIABLE_DESCRIPTOR_COUNT
+                | vk::DescriptorBindingFlags::UPDATE_AFTER_BIND];
+
+            let mut create_info_extended = vk::DescriptorSetLayoutBindingFlagsCreateInfo::default()
+                .binding_flags(&descriptor_binding_flags);
+
+            let create_info = vk::DescriptorSetLayoutCreateInfo::default()
+                .push_next(&mut create_info_extended)
+                .flags(vk::DescriptorSetLayoutCreateFlags::UPDATE_AFTER_BIND_POOL)
+                .bindings(&descriptor_set_layout_bindings);
+
+            let layout = unsafe { device.create_descriptor_set_layout(&create_info, None) }
+                .expect("failed to create descriptor set layout");
+            layouts[i] = layout;
+        }
+
+        layouts
+    }
+
+    fn find_limits(
+        instance: &Instance,
+        physical_device: vk::PhysicalDevice,
+    ) -> [u32; Self::DESCRIPTOR_TYPES.len()] {
+        let mut limits = [0; Self::DESCRIPTOR_TYPES.len()];
+
+        for (i, descriptor_type) in Self::DESCRIPTOR_TYPES.iter().enumerate() {
+            let properties = unsafe { instance.get_physical_device_properties(physical_device) };
+            let count = Self::find_descriptor_type_limit(*descriptor_type, properties.limits);
+            limits[i] = count;
+        }
+
+        limits
+    }
+
+    fn create_descriptor_sets(
+        device: &Device,
+        descriptor_pool: vk::DescriptorPool,
+        limits: &[u32; Self::DESCRIPTOR_TYPES.len()],
+        layouts: &[vk::DescriptorSetLayout; Self::DESCRIPTOR_TYPES.len()],
+    ) -> [vk::DescriptorSet; Self::DESCRIPTOR_TYPES.len()] {
+        let mut descriptor_sets = [vk::DescriptorSet::null(); Self::DESCRIPTOR_TYPES.len()];
+        for (i, (layout, limit)) in layouts.iter().zip(limits).enumerate() {
+            let limits = [*limit];
+
+            let mut count_allocate_info =
+                vk::DescriptorSetVariableDescriptorCountAllocateInfo::default()
+                    .descriptor_counts(&limits);
+
+            let layouts = [*layout];
+
+            let allocate_info = vk::DescriptorSetAllocateInfo::default()
+                .push_next(&mut count_allocate_info)
+                .descriptor_pool(descriptor_pool)
+                .set_layouts(&layouts);
+
+            let descriptor_set = unsafe {
+                device
+                    .allocate_descriptor_sets(&allocate_info)
+                    .expect("failed to allocate descriptor set")[0]
+            };
+            descriptor_sets[i] = descriptor_set;
+        }
+
+        descriptor_sets
+    }
+
+    fn create_pipeline_layout(
+        device: &Device,
+        layouts: &[vk::DescriptorSetLayout; Self::DESCRIPTOR_TYPES.len()],
+    ) -> vk::PipelineLayout {
+        let bindings_offset_size = mem::size_of::<BindingsOffset>() as u32;
+
+        let bindings_range = vk::PushConstantRange::default()
+            .stage_flags(vk::ShaderStageFlags::ALL)
+            .offset(0)
+            .size(bindings_offset_size);
+
+        let push_ranges = [bindings_range];
+        let create_info = vk::PipelineLayoutCreateInfo::default()
+            .set_layouts(layouts)
+            .push_constant_ranges(&push_ranges);
+
+        let pipeline_layout = unsafe { device.create_pipeline_layout(&create_info, None) }
+            .expect("failed to create pipeline layout");
+        pipeline_layout
+    }
+
     unsafe extern "system" fn debug_callback(
         _message_severity: vk::DebugUtilsMessageSeverityFlagsEXT,
         _message_type: vk::DebugUtilsMessageTypeFlagsEXT,
@@ -409,6 +590,15 @@ impl GraphicsDeviceInner {
 impl Drop for GraphicsDeviceInner {
     fn drop(&mut self) {
         unsafe {
+            self.device
+                .destroy_pipeline_layout(self.pipeline_layout, None);
+
+            self.layouts.iter().for_each(|layout| {
+                self.device.destroy_descriptor_set_layout(*layout, None);
+            });
+            self.device
+                .destroy_descriptor_pool(self.descriptor_pool, None);
+
             self.device.destroy_device(None);
 
             if let Some(debug_utils) = self.debug_utils.take() {
@@ -460,5 +650,19 @@ impl GraphicsDevice {
 
     pub(crate) fn queue(&self) -> vk::Queue {
         self.inner.queue
+    }
+
+    pub(crate) fn descriptor_pool(&self) -> vk::DescriptorPool {
+        self.inner.descriptor_pool
+    }
+
+    pub(crate) fn descriptor_sets(
+        &self,
+    ) -> &[vk::DescriptorSet; GraphicsDeviceInner::DESCRIPTOR_TYPES.len()] {
+        &self.inner.descriptor_sets
+    }
+
+    pub(crate) fn pipeline_layout(&self) -> vk::PipelineLayout {
+        self.inner.pipeline_layout
     }
 }

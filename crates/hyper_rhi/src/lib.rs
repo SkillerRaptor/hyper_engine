@@ -7,5 +7,7 @@
 pub mod graphics_device;
 pub mod surface;
 
+mod bindings;
 mod d3d12;
+mod resource_handle;
 mod vulkan;

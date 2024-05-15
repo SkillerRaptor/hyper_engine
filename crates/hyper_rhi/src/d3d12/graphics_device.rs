@@ -4,19 +4,31 @@
  * SPDX-License-Identifier: MIT
 */
 
-use std::{ptr, sync::Arc};
+use std::{ptr, slice, sync::Arc};
 
 use windows::Win32::Graphics::{
     Direct3D::D3D_FEATURE_LEVEL_12_1,
     Direct3D12::{
         D3D12CreateDevice,
         D3D12GetDebugInterface,
+        D3D12SerializeRootSignature,
         ID3D12CommandQueue,
         ID3D12Debug6,
+        ID3D12DescriptorHeap,
         ID3D12Device,
+        ID3D12RootSignature,
         D3D12_COMMAND_LIST_TYPE_DIRECT,
         D3D12_COMMAND_QUEUE_DESC,
         D3D12_COMMAND_QUEUE_FLAG_NONE,
+        D3D12_DESCRIPTOR_HEAP_DESC,
+        D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+        D3D12_ROOT_PARAMETER1,
+        D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
+        D3D12_ROOT_SIGNATURE_DESC,
+        D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT,
+        D3D12_SHADER_VISIBILITY_ALL,
+        D3D_ROOT_SIGNATURE_VERSION_1,
     },
     Dxgi::{
         CreateDXGIFactory2,
@@ -37,6 +49,9 @@ use crate::{
 };
 
 pub(crate) struct GrapicsDeviceInner {
+    root_signature: ID3D12RootSignature,
+    descriptor_heap: ID3D12DescriptorHeap,
+
     command_queue: ID3D12CommandQueue,
     device: ID3D12Device,
     adapter: IDXGIAdapter4,
@@ -56,7 +71,13 @@ impl GrapicsDeviceInner {
         let device = Self::create_device(&adapter);
         let command_queue = Self::create_command_queue(&device);
 
+        let descriptor_heap = Self::create_descriptor_heap(&device);
+        let root_signature = Self::create_root_signature(&device);
+
         Self {
+            root_signature,
+            descriptor_heap,
+
             command_queue,
             device,
             adapter,
@@ -144,6 +165,59 @@ impl GrapicsDeviceInner {
             .expect("failed to create command queue");
         command_queue
     }
+
+    fn create_descriptor_heap(device: &ID3D12Device) -> ID3D12DescriptorHeap {
+        let descriptor = D3D12_DESCRIPTOR_HEAP_DESC {
+            Type: D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+            NumDescriptors: crate::graphics_device::GraphicsDevice::DESCRIPTOR_COUNT,
+            Flags: D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+            ..Default::default()
+        };
+
+        let descriptor_heap = unsafe { device.CreateDescriptorHeap(&descriptor) }
+            .expect("failed to create descriptor heap");
+        descriptor_heap
+    }
+
+    fn create_root_signature(device: &ID3D12Device) -> ID3D12RootSignature {
+        let push_constants = D3D12_ROOT_PARAMETER1 {
+            ParameterType: D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
+            ShaderVisibility: D3D12_SHADER_VISIBILITY_ALL,
+            ..Default::default()
+        };
+
+        let mut parameters = [push_constants];
+        let descriptor = D3D12_ROOT_SIGNATURE_DESC {
+            NumParameters: parameters.len() as u32,
+            pParameters: parameters.as_mut_ptr() as *const _,
+            // TODO: Static Samplers
+            Flags: D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT,
+            ..Default::default()
+        };
+
+        let mut signature = None;
+        unsafe {
+            D3D12SerializeRootSignature(
+                &descriptor,
+                D3D_ROOT_SIGNATURE_VERSION_1,
+                &mut signature,
+                None,
+            )
+            .expect("failed to serialize root signature");
+        };
+
+        let signature = signature.unwrap();
+
+        let root_signature = unsafe {
+            device.CreateRootSignature(
+                0,
+                slice::from_raw_parts(signature.GetBufferPointer() as _, signature.GetBufferSize()),
+            )
+        }
+        .expect("failed to create root signature");
+
+        root_signature
+    }
 }
 
 #[derive(Clone)]
@@ -176,5 +250,13 @@ impl GraphicsDevice {
 
     pub(crate) fn command_queue(&self) -> &ID3D12CommandQueue {
         &self.inner.command_queue
+    }
+
+    pub(crate) fn descriptor_heap(&self) -> &ID3D12DescriptorHeap {
+        &self.inner.descriptor_heap
+    }
+
+    pub(crate) fn root_signature(&self) -> &ID3D12RootSignature {
+        &self.inner.root_signature
     }
 }

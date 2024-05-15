@@ -39,6 +39,7 @@ pub struct GraphicsDevice {
 
 impl GraphicsDevice {
     pub(crate) const FRAME_COUNT: u32 = 2;
+    pub(crate) const DESCRIPTOR_COUNT: u32 = 1000 * 1000;
 
     pub fn new(descriptor: &GraphicsDeviceDescriptor) -> Self {
         #[allow(unreachable_patterns)]
