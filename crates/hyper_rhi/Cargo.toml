@@ -15,8 +15,8 @@ hyper_core = { path = "../hyper_core" }
 hyper_math = { path = "../hyper_math" }
 hyper_platform = { path = "../hyper_platform" }
 
-ash = "0.38"
-ash-window = "0.13"
+ash = { git = "https://github.com/SkillerRaptor/ash" }
+ash-window = { git = "https://github.com/SkillerRaptor/ash" }
 hassle-rs = "0.11"
 gpu-allocator = { git = "https://github.com/Traverse-Research/gpu-allocator.git", branch = "ash-0.38" }
 log = "0.4"

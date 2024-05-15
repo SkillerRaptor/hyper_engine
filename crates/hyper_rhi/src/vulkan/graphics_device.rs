@@ -261,19 +261,13 @@ impl GraphicsDeviceInner {
                 .contains(vk::QueueFlags::GRAPHICS);
 
             // TODO: Add support for linux
-            let present_supported = match display_handle.as_raw() {
-                RawDisplayHandle::Windows(_) => {
-                    let extension = win32_surface::Instance::new(entry, instance);
-                    let supported = unsafe {
-                        extension.get_physical_device_win32_presentation_support(
-                            physical_device,
-                            i as u32,
-                        )
-                    };
-                    Ok(supported)
-                }
-                _ => Err(vk::Result::ERROR_EXTENSION_NOT_PRESENT),
-            }
+            let present_supported = ash_window::get_present_support(
+                entry,
+                instance,
+                physical_device,
+                i as u32,
+                display_handle.as_raw(),
+            )
             .expect("failed to query for present support");
 
             if graphics_supported && present_supported {

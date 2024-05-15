@@ -102,6 +102,11 @@ name = "ash"
 version = "0.38.0+1.3.281"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bb44936d800fea8f016d7f2311c6a4f97aebd5dc86f09906139ec848cf3a46f"
+
+[[package]]
+name = "ash"
+version = "0.38.0+1.3.281"
+source = "git+https://github.com/SkillerRaptor/ash#f01c9e8b56677ac183cdd5117b460d5f26d3eb07"
 dependencies = [
  "libloading",
 ]
@@ -109,10 +114,9 @@ dependencies = [
 [[package]]
 name = "ash-window"
 version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52bca67b61cb81e5553babde81b8211f713cb6db79766f80168f3e5f40ea6c82"
+source = "git+https://github.com/SkillerRaptor/ash#f01c9e8b56677ac183cdd5117b460d5f26d3eb07"
 dependencies = [
- "ash",
+ "ash 0.38.0+1.3.281 (git+https://github.com/SkillerRaptor/ash)",
  "raw-window-handle",
  "raw-window-metal",
 ]
@@ -496,7 +500,7 @@ name = "gpu-allocator"
 version = "0.26.0"
 source = "git+https://github.com/Traverse-Research/gpu-allocator.git?branch=ash-0.38#2e2296e3045f6ae83a879928c87e558830d7ab63"
 dependencies = [
- "ash",
+ "ash 0.38.0+1.3.281 (registry+https://github.com/rust-lang/crates.io-index)",
  "log",
  "presser",
  "thiserror",
@@ -620,7 +624,7 @@ dependencies = [
 name = "hyper_rhi"
 version = "0.0.0"
 dependencies = [
- "ash",
+ "ash 0.38.0+1.3.281 (git+https://github.com/SkillerRaptor/ash)",
  "ash-window",
  "gpu-allocator",
  "hassle-rs",
