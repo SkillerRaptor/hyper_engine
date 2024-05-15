@@ -9,6 +9,7 @@ use hyper_platform::window::Window;
 #[cfg(target_os = "windows")]
 use crate::d3d12;
 use crate::{
+    render_pipeline::{RenderPipeline, RenderPipelineDescriptor},
     surface::{Surface, SurfaceDescriptor},
     vulkan,
 };
@@ -69,6 +70,18 @@ impl GraphicsDevice {
             }
             GraphicsDeviceInner::Vulkan(inner) => {
                 Surface::new_vulkan(inner.create_surface(descriptor))
+            }
+        }
+    }
+
+    pub fn create_render_pipeline(&self, descriptor: &RenderPipelineDescriptor) -> RenderPipeline {
+        match &self.inner {
+            #[cfg(target_os = "windows")]
+            GraphicsDeviceInner::D3D12(inner) => {
+                RenderPipeline::new_d3d12(inner.create_render_pipeline(descriptor))
+            }
+            GraphicsDeviceInner::Vulkan(inner) => {
+                RenderPipeline::new_vulkan(inner.create_render_pipeline(descriptor))
             }
         }
     }

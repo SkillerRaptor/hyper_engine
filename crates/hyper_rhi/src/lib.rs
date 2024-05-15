@@ -5,6 +5,7 @@
 */
 
 pub mod graphics_device;
+pub mod render_pipeline;
 pub mod surface;
 
 mod bindings;

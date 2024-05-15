@@ -15,7 +15,6 @@ pub struct SurfaceDescriptor<'a> {
     pub window: &'a Window,
 }
 
-#[allow(unused)] // TODO: Remove this
 enum SurfaceInner {
     #[cfg(target_os = "windows")]
     D3D12(d3d12::Surface),

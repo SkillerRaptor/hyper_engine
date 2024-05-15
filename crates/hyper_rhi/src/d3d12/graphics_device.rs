@@ -26,7 +26,7 @@ use windows::Win32::Graphics::{
         D3D12_ROOT_PARAMETER1,
         D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
         D3D12_ROOT_SIGNATURE_DESC,
-        D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT,
+        D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED,
         D3D12_SHADER_VISIBILITY_ALL,
         D3D_ROOT_SIGNATURE_VERSION_1,
     },
@@ -43,8 +43,9 @@ use windows::Win32::Graphics::{
 };
 
 use crate::{
-    d3d12::Surface,
+    d3d12::{RenderPipeline, Surface},
     graphics_device::GraphicsDeviceDescriptor,
+    render_pipeline::RenderPipelineDescriptor,
     surface::SurfaceDescriptor,
 };
 
@@ -191,7 +192,7 @@ impl GrapicsDeviceInner {
             NumParameters: parameters.len() as u32,
             pParameters: parameters.as_mut_ptr() as *const _,
             // TODO: Static Samplers
-            Flags: D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT,
+            Flags: D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED,
             ..Default::default()
         };
 
@@ -234,6 +235,13 @@ impl GraphicsDevice {
 
     pub(crate) fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Surface {
         Surface::new(self, descriptor)
+    }
+
+    pub(crate) fn create_render_pipeline(
+        &self,
+        descriptor: &RenderPipelineDescriptor,
+    ) -> RenderPipeline {
+        RenderPipeline::new(self, descriptor)
     }
 
     pub(crate) fn factory(&self) -> &IDXGIFactory7 {

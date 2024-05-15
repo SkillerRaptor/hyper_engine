@@ -9,6 +9,7 @@ use std::{borrow::Cow, num::NonZeroU32, time::Instant};
 use hyper_platform::window::{self, Window, WindowDescriptor};
 use hyper_rhi::{
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
+    render_pipeline::{RenderPipeline, RenderPipelineDescriptor},
     surface::{Surface, SurfaceDescriptor},
 };
 use thiserror::Error;
@@ -31,6 +32,7 @@ pub struct ApplicationDescriptor<'a> {
 
 pub struct Application {
     // Rendering
+    _render_pipeline: RenderPipeline,
     surface: Surface,
     _graphics_device: GraphicsDevice,
 
@@ -57,12 +59,17 @@ impl Application {
 
         let graphics_device = GraphicsDevice::new(&GraphicsDeviceDescriptor {
             // TODO: Don't hardcode and use CLI options
-            graphics_api: GraphicsApi::Vulkan,
+            graphics_api: GraphicsApi::D3D12,
             debug_mode: cfg!(debug_assertions),
             window: &window,
         });
 
         let surface = graphics_device.create_surface(&SurfaceDescriptor { window: &window });
+
+        let render_pipeline = graphics_device.create_render_pipeline(&RenderPipelineDescriptor {
+            vertex_shader: "./assets/shaders/vertex_shader.hlsl",
+            pixel_shader: "./assets/shaders/pixel_shader.hlsl",
+        });
 
         log::info!(
             "Application initialized in {:.4} seconds",
@@ -70,6 +77,7 @@ impl Application {
         );
 
         Ok(Self {
+            _render_pipeline: render_pipeline,
             surface,
             _graphics_device: graphics_device,
 

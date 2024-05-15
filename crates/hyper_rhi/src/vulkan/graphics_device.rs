@@ -17,8 +17,9 @@ use raw_window_handle::{DisplayHandle, HasDisplayHandle};
 use crate::{
     bindings::BindingsOffset,
     graphics_device::GraphicsDeviceDescriptor,
+    render_pipeline::RenderPipelineDescriptor,
     surface::SurfaceDescriptor,
-    vulkan::Surface,
+    vulkan::{RenderPipeline, Surface},
 };
 
 struct DebugUtils {
@@ -626,6 +627,13 @@ impl GraphicsDevice {
 
     pub(crate) fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Surface {
         Surface::new(self, descriptor)
+    }
+
+    pub(crate) fn create_render_pipeline(
+        &self,
+        descriptor: &RenderPipelineDescriptor,
+    ) -> RenderPipeline {
+        RenderPipeline::new(self, descriptor)
     }
 
     pub(crate) fn entry(&self) -> &Entry {
