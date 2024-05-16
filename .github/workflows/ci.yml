@@ -37,7 +37,7 @@ jobs:
           components: rustc, cargo, rustfmt, rust-std, rust-docs, clippy, miri
 
       - name: Install Cargo-Nextest
-        uses: baptiste0928/cargo-install@v2
+        uses: baptiste0928/cargo-install@v3
         with:
           crate: cargo-nextest
           locked: true
