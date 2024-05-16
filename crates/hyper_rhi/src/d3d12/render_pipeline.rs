@@ -62,7 +62,7 @@ impl RenderPipeline {
 
         let source = fs::read_to_string(path).expect(&format!("failed to read {} shader", stage));
         let shader = hassle_rs::validate_dxil(
-            &hassle_rs::compile_hlsl(file_name, &source, "main", profile, &["-O0"], &[])
+            &hassle_rs::compile_hlsl(file_name, &source, "main", profile, &[], &[])
                 .expect(&format!("failed to compile {} shader", stage)),
         )
         .expect(&format!("failed to validate {} shader", stage));

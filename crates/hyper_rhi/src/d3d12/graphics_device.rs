@@ -23,7 +23,9 @@ use windows::Win32::Graphics::{
         D3D12_DESCRIPTOR_HEAP_DESC,
         D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
         D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+        D3D12_ROOT_CONSTANTS,
         D3D12_ROOT_PARAMETER1,
+        D3D12_ROOT_PARAMETER1_0,
         D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
         D3D12_ROOT_SIGNATURE_DESC,
         D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED,
@@ -183,6 +185,13 @@ impl GrapicsDeviceInner {
     fn create_root_signature(device: &ID3D12Device) -> ID3D12RootSignature {
         let push_constants = D3D12_ROOT_PARAMETER1 {
             ParameterType: D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
+            Anonymous: D3D12_ROOT_PARAMETER1_0 {
+                Constants: D3D12_ROOT_CONSTANTS {
+                    ShaderRegister: 0,
+                    RegisterSpace: 0,
+                    Num32BitValues: 4,
+                },
+            },
             ShaderVisibility: D3D12_SHADER_VISIBILITY_ALL,
             ..Default::default()
         };
