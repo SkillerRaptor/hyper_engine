@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
 */
 
-use std::{ffi::c_void, fs, mem, path::Path};
+use std::{ffi::c_void, mem};
 
 use windows::Win32::Graphics::{
     Direct3D12::{
