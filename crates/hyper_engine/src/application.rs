@@ -127,7 +127,7 @@ impl Application {
 
             {
                 let mut render_pass = command_list.begin_render_pass(&RenderPassDescriptor {
-                    image_view: swapchain_texture.view(),
+                    image_view: &swapchain_texture.view(),
                 });
 
                 render_pass.bind_pipeline(&self.render_pipeline);

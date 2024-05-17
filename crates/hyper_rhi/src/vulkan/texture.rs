@@ -6,9 +6,17 @@
 
 use std::sync::Arc;
 
-use crate::{texture::TextureDescriptor, vulkan::GraphicsDevice};
+use ash::vk;
+
+use crate::{
+    texture::TextureDescriptor,
+    vulkan::{GraphicsDevice, TextureView, TextureViewDescriptor},
+};
 
 struct TextureInner {
+    view: TextureView,
+    image: vk::Image,
+
     graphics_device: GraphicsDevice,
 }
 
@@ -17,17 +25,33 @@ pub(crate) struct Texture {
 }
 
 impl Texture {
-    pub(crate) fn new(graphics_device: &GraphicsDevice, _descriptor: &TextureDescriptor) -> Self {
+    pub(crate) fn new(_graphics_device: &GraphicsDevice, _descriptor: &TextureDescriptor) -> Self {
         todo!();
+    }
+
+    // NOTE: Maybe add a descriptor for the format and more parameters?
+    pub(super) fn new_external(
+        graphics_device: &GraphicsDevice,
+        image: vk::Image,
+        format: vk::Format,
+    ) -> Self {
+        let view = TextureView::new(graphics_device, image, &TextureViewDescriptor { format });
 
         Self {
             inner: Arc::new(TextureInner {
+                view,
+                image,
+
                 graphics_device: graphics_device.clone(),
             }),
         }
     }
 
-    pub(crate) fn view(&self) {
-        todo!()
+    pub(crate) fn image(&self) -> vk::Image {
+        self.inner.image
+    }
+
+    pub(crate) fn view(&self) -> &TextureView {
+        &self.inner.view
     }
 }

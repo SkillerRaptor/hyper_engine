@@ -10,6 +10,7 @@ pub mod render_pass;
 pub mod render_pipeline;
 pub mod surface;
 pub mod texture;
+pub mod texture_view;
 
 mod bindings;
 mod d3d12;

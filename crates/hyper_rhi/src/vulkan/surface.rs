@@ -16,8 +16,8 @@ use crate::{
 };
 
 pub struct Surface {
-    image_views: Vec<vk::ImageView>,
-    images: Vec<vk::Image>,
+    textures: Vec<Texture>,
+
     swapchain: vk::SwapchainKHR,
     swapchain_loader: swapchain::Device,
     inner: vk::SurfaceKHR,
@@ -44,7 +44,7 @@ impl Surface {
         let size = descriptor.window.inner_size();
         let swapchain_loader =
             swapchain::Device::new(graphics_device.instance(), graphics_device.device());
-        let (swapchain, images, image_views) = Self::create_swapchain(
+        let swapchain = Self::create_swapchain(
             &graphics_device,
             size.x,
             size.y,
@@ -54,9 +54,10 @@ impl Surface {
             vk::SwapchainKHR::null(),
         );
 
+        let textures = Self::create_textures(graphics_device, &swapchain_loader, swapchain);
+
         Self {
-            image_views,
-            images,
+            textures,
             swapchain,
             swapchain_loader,
             inner: surface,
@@ -93,7 +94,7 @@ impl Surface {
         surface: vk::SurfaceKHR,
         loader: &swapchain::Device,
         old_swapchain: vk::SwapchainKHR,
-    ) -> (vk::SwapchainKHR, Vec<vk::Image>, Vec<vk::ImageView>) {
+    ) -> vk::SwapchainKHR {
         let surface_capabilities = unsafe {
             surface_loader.get_physical_device_surface_capabilities(
                 graphics_device.physical_device(),
@@ -144,42 +145,7 @@ impl Surface {
         let swapchain = unsafe { loader.create_swapchain(&create_info, None) }
             .expect("failed to create swapchain");
 
-        let images = unsafe { loader.get_swapchain_images(swapchain) }
-            .expect("failed to get swapchain images");
-        let image_views = images
-            .iter()
-            .map(|&image| {
-                let component_mapping = vk::ComponentMapping::default()
-                    .r(vk::ComponentSwizzle::IDENTITY)
-                    .g(vk::ComponentSwizzle::IDENTITY)
-                    .b(vk::ComponentSwizzle::IDENTITY)
-                    .a(vk::ComponentSwizzle::IDENTITY);
-
-                let subresource_range = vk::ImageSubresourceRange::default()
-                    .aspect_mask(vk::ImageAspectFlags::COLOR)
-                    .base_mip_level(0)
-                    .level_count(1)
-                    .base_array_layer(0)
-                    .layer_count(1);
-
-                let create_info = vk::ImageViewCreateInfo::default()
-                    .image(image)
-                    .view_type(vk::ImageViewType::TYPE_2D)
-                    .format(surface_format.format)
-                    .components(component_mapping)
-                    .subresource_range(subresource_range);
-
-                let view = unsafe {
-                    graphics_device
-                        .device()
-                        .create_image_view(&create_info, None)
-                }
-                .expect("failed to create image view");
-                view
-            })
-            .collect::<Vec<_>>();
-
-        (swapchain, images, image_views)
+        swapchain
     }
 
     fn choose_extent(
@@ -222,13 +188,26 @@ impl Surface {
             .unwrap_or(&vk::PresentModeKHR::FIFO)
     }
 
-    fn destroy_swapchain(&self) {
+    fn create_textures(
+        graphics_device: &GraphicsDevice,
+        loader: &swapchain::Device,
+        swapchain: vk::SwapchainKHR,
+    ) -> Vec<Texture> {
+        let images = unsafe { loader.get_swapchain_images(swapchain) }
+            .expect("failed to get swapchain images");
+
+        // TODO: Don't hardcode the format
+        let textures = images
+            .iter()
+            .map(|&image| Texture::new_external(graphics_device, image, vk::Format::B8G8R8A8_UNORM))
+            .collect::<Vec<_>>();
+
+        textures
+    }
+
+    fn destroy_swapchain(&mut self) {
         unsafe {
-            self.image_views.iter().for_each(|&image_view| {
-                self.graphics_device
-                    .device()
-                    .destroy_image_view(image_view, None);
-            });
+            self.textures.clear();
 
             self.swapchain_loader
                 .destroy_swapchain(self.swapchain, None);
@@ -236,7 +215,7 @@ impl Surface {
     }
 
     pub(crate) fn resize(&mut self, width: u32, height: u32) {
-        let (swapchain, images, image_views) = Self::create_swapchain(
+        let swapchain = Self::create_swapchain(
             &self.graphics_device,
             width,
             height,
@@ -246,11 +225,13 @@ impl Surface {
             self.swapchain,
         );
 
+        let textures =
+            Self::create_textures(&self.graphics_device, &self.swapchain_loader, swapchain);
+
         self.destroy_swapchain();
 
         self.swapchain = swapchain;
-        self.images = images;
-        self.image_views = image_views;
+        self.textures = textures;
     }
 
     pub(crate) fn present(&self) {
@@ -277,12 +258,8 @@ impl Surface {
         self.swapchain
     }
 
-    pub(crate) fn images(&self) -> &[vk::Image] {
-        &self.images
-    }
-
-    pub(crate) fn image_views(&self) -> &[vk::ImageView] {
-        &self.image_views
+    pub(crate) fn textures(&self) -> &[Texture] {
+        &self.textures
     }
 }
 

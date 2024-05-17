@@ -4,12 +4,21 @@
  * SPDX-License-Identifier: MIT
  */
 
-use crate::render_pipeline::RenderPipeline;
+use std::fmt::Debug;
 
-#[derive(Clone, Debug)]
-pub struct RenderPassDescriptor {
+use crate::{render_pipeline::RenderPipeline, texture_view::TextureView};
+
+#[derive(Clone)]
+pub struct RenderPassDescriptor<'a> {
     // TODO: Add image view type
-    pub image_view: (),
+    pub image_view: &'a TextureView<'a>,
+}
+
+impl<'a> Debug for RenderPassDescriptor<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RenderPassDescriptor")
+            .finish_non_exhaustive()
+    }
 }
 
 pub struct RenderPass {}

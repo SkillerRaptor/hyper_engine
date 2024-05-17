@@ -26,7 +26,10 @@ use crate::{
 };
 
 pub struct Surface {
+    textures: Vec<Texture>,
+
     swap_chain: IDXGISwapChain4,
+
     graphics_device: GraphicsDevice,
 }
 
@@ -46,8 +49,13 @@ impl Surface {
 
         let swap_chain = Self::create_swap_chain(graphics_device, size.x, size.y, hwnd);
 
+        let textures = Self::create_textures(graphics_device, &swap_chain);
+
         Self {
+            textures,
+
             swap_chain,
+
             graphics_device: graphics_device.clone(),
         }
     }
@@ -95,7 +103,25 @@ impl Surface {
         swap_chain
     }
 
+    fn create_textures(
+        graphics_device: &GraphicsDevice,
+        swap_chain: &IDXGISwapChain4,
+    ) -> Vec<Texture> {
+        let mut textures = Vec::new();
+        for i in 0..crate::graphics_device::GraphicsDevice::FRAME_COUNT {
+            let render_target =
+                unsafe { swap_chain.GetBuffer(i) }.expect("failed to get swapchain render target");
+
+            let texture = Texture::new_external(graphics_device, render_target);
+            textures.push(texture);
+        }
+
+        textures
+    }
+
     pub(crate) fn resize(&mut self, width: u32, height: u32) {
+        self.textures.clear();
+
         unsafe {
             self.swap_chain
                 .ResizeBuffers(
@@ -107,6 +133,9 @@ impl Surface {
                 )
                 .expect("failed to resize swapchain buffers");
         }
+
+        let textures = Self::create_textures(&self.graphics_device, &self.swap_chain);
+        self.textures = textures;
     }
 
     pub(crate) fn present(&self) {
