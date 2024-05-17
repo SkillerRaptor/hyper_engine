@@ -12,10 +12,12 @@ use windows::Win32::Graphics::{
         D3D12CreateDevice,
         D3D12GetDebugInterface,
         D3D12SerializeRootSignature,
+        ID3D12CommandAllocator,
         ID3D12CommandQueue,
         ID3D12Debug6,
         ID3D12DescriptorHeap,
         ID3D12Device,
+        ID3D12GraphicsCommandList,
         ID3D12RootSignature,
         D3D12_COMMAND_LIST_TYPE_DIRECT,
         D3D12_COMMAND_QUEUE_DESC,
@@ -52,7 +54,14 @@ use crate::{
     texture::TextureDescriptor,
 };
 
+struct FrameData {
+    command_list: ID3D12GraphicsCommandList,
+    command_allocator: ID3D12CommandAllocator,
+}
+
 pub(crate) struct GrapicsDeviceInner {
+    frames: Vec<FrameData>,
+
     root_signature: ID3D12RootSignature,
     descriptor_heap: ID3D12DescriptorHeap,
 
@@ -78,7 +87,20 @@ impl GrapicsDeviceInner {
         let descriptor_heap = Self::create_descriptor_heap(&device);
         let root_signature = Self::create_root_signature(&device);
 
+        let mut frames = Vec::new();
+        for _ in 0..crate::graphics_device::GraphicsDevice::FRAME_COUNT {
+            let command_allocator = Self::create_command_allocator(&device);
+            let command_list = Self::create_command_list(&device, &command_allocator);
+
+            frames.push(FrameData {
+                command_list,
+                command_allocator,
+            });
+        }
+
         Self {
+            frames,
+
             root_signature,
             descriptor_heap,
 
@@ -229,6 +251,29 @@ impl GrapicsDeviceInner {
 
         root_signature
     }
+
+    fn create_command_allocator(device: &ID3D12Device) -> ID3D12CommandAllocator {
+        let command_allocator =
+            unsafe { device.CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT) }
+                .expect("failed to create command allocator");
+        command_allocator
+    }
+
+    fn create_command_list(
+        device: &ID3D12Device,
+        command_allocator: &ID3D12CommandAllocator,
+    ) -> ID3D12GraphicsCommandList {
+        let command_list: ID3D12GraphicsCommandList = unsafe {
+            device.CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, command_allocator, None)
+        }
+        .expect("failed to create command list");
+
+        unsafe {
+            command_list.Close().expect("failed to close command list");
+        }
+
+        command_list
+    }
 }
 
 #[derive(Clone)]
@@ -280,5 +325,9 @@ impl GraphicsDevice {
 
     pub(crate) fn root_signature(&self) -> &ID3D12RootSignature {
         &self.inner.root_signature
+    }
+
+    pub(crate) fn frames(&self) -> &[FrameData] {
+        &self.inner.frames
     }
 }

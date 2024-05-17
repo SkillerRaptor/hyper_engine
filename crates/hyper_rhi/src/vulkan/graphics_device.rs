@@ -23,12 +23,19 @@ use crate::{
     vulkan::{RenderPipeline, Surface, Texture},
 };
 
+struct FrameData {
+    command_buffer: vk::CommandBuffer,
+    command_pool: vk::CommandPool,
+}
+
 struct DebugUtils {
     debug_messenger: vk::DebugUtilsMessengerEXT,
     loader: debug_utils::Instance,
 }
 
 pub(crate) struct GraphicsDeviceInner {
+    frames: Vec<FrameData>,
+
     pipeline_layout: vk::PipelineLayout,
 
     descriptor_sets: [vk::DescriptorSet; Self::DESCRIPTOR_TYPES.len()],
@@ -93,7 +100,20 @@ impl GraphicsDeviceInner {
 
         let pipeline_layout = Self::create_pipeline_layout(&device, &layouts);
 
+        let mut frames = Vec::new();
+        for _ in 0..crate::graphics_device::GraphicsDevice::FRAME_COUNT {
+            let command_pool = Self::create_command_pool(&device, queue_family_index);
+            let command_buffer = Self::create_command_buffer(&device, command_pool);
+
+            frames.push(FrameData {
+                command_buffer,
+                command_pool,
+            });
+        }
+
         Self {
+            frames,
+
             pipeline_layout,
 
             descriptor_sets,
@@ -575,6 +595,27 @@ impl GraphicsDeviceInner {
         pipeline_layout
     }
 
+    fn create_command_pool(device: &Device, queue_family_index: u32) -> vk::CommandPool {
+        let create_info = vk::CommandPoolCreateInfo::default()
+            .queue_family_index(queue_family_index)
+            .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER);
+
+        let command_pool = unsafe { device.create_command_pool(&create_info, None) }
+            .expect("failed to create command pool");
+        command_pool
+    }
+
+    fn create_command_buffer(device: &Device, command_pool: vk::CommandPool) -> vk::CommandBuffer {
+        let allocate_info = vk::CommandBufferAllocateInfo::default()
+            .command_pool(command_pool)
+            .command_buffer_count(1)
+            .level(vk::CommandBufferLevel::PRIMARY);
+
+        let command_buffers = unsafe { device.allocate_command_buffers(&allocate_info) }
+            .expect("failed to allocate commmand buffers");
+        command_buffers[0]
+    }
+
     unsafe extern "system" fn debug_callback(
         _message_severity: vk::DebugUtilsMessageSeverityFlagsEXT,
         _message_type: vk::DebugUtilsMessageTypeFlagsEXT,
@@ -592,6 +633,10 @@ impl GraphicsDeviceInner {
 impl Drop for GraphicsDeviceInner {
     fn drop(&mut self) {
         unsafe {
+            self.frames.iter().for_each(|frame| {
+                self.device.destroy_command_pool(frame.command_pool, None);
+            });
+
             self.device
                 .destroy_pipeline_layout(self.pipeline_layout, None);
 
@@ -677,5 +722,9 @@ impl GraphicsDevice {
 
     pub(crate) fn pipeline_layout(&self) -> vk::PipelineLayout {
         self.inner.pipeline_layout
+    }
+
+    pub(crate) fn frames(&self) -> &[FrameData] {
+        &self.inner.frames
     }
 }
