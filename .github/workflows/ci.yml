@@ -21,26 +21,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Update System
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt update -qq
-          sudo apt install -y \
-            libxinerama-dev \
-            libxkbcommon-dev \
-            xorg-dev  \
-
       - name: Install Rust-Toolchain
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
           components: rustc, cargo, rustfmt, rust-std, rust-docs, clippy, miri
-
-      - name: Install Cargo-Nextest
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: cargo-nextest
-          locked: true
 
       - name: Cache
         uses: Swatinem/rust-cache@v2
@@ -50,43 +35,22 @@ jobs:
           cache-all-crates: true
 
       - name: Cargo Build Debug
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --verbose --workspace
+        run: cargo build --workspace --verbose
 
       - name: Cargo Build Release
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --verbose --workspace --release
+        run: cargo build --workspace --release --verbose
 
       - name: Cargo Build Production
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --verbose --workspace --profile production
+        run: cargo build --workspace --profile production --verbose
 
       - name: Cargo Build Profiling
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --verbose --workspace --profile profiling
+        run: cargo build --workspace --profile profiling --verbose
 
       - name: Cargo Formatter
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: cargo fmt --all -- --check --verbose
 
       - name: Cargo Check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: --all-targets
+        run: cargo check --all-targets --verbose
 
       - name: Cargo Test
-        uses: actions-rs/cargo@v1
-        with:
-          command: nextest
-          args: run
+        run: cargo test --verbose
