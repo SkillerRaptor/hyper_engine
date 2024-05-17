@@ -9,7 +9,7 @@ use hyper_platform::window::Window;
 #[cfg(target_os = "windows")]
 use crate::d3d12;
 use crate::{
-    command_list::{CommandList, FinishedCommandList},
+    command_list::CommandList,
     render_pipeline::{RenderPipeline, RenderPipelineDescriptor},
     surface::{Surface, SurfaceDescriptor},
     texture::{Texture, TextureDescriptor},
@@ -105,7 +105,7 @@ impl GraphicsDevice {
     }
 
     // TODO: Add command list type
-    pub fn execute_commands(&self, _command_list: FinishedCommandList) {
+    pub fn execute_commands(&self, _command_list: CommandList) {
         todo!()
     }
 }

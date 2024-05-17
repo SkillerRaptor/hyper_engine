@@ -134,7 +134,7 @@ impl Application {
                 render_pass.draw(3, 1, 0, 0);
             }
 
-            self.graphics_device.execute_commands(command_list.end());
+            self.graphics_device.execute_commands(command_list);
 
             self.surface.present();
         }
