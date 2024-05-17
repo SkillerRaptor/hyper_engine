@@ -20,7 +20,10 @@ use windows::{
     },
 };
 
-use crate::{d3d12::GraphicsDevice, surface::SurfaceDescriptor};
+use crate::{
+    d3d12::{GraphicsDevice, Texture},
+    surface::SurfaceDescriptor,
+};
 
 pub struct Surface {
     swap_chain: IDXGISwapChain4,
@@ -104,6 +107,14 @@ impl Surface {
                 )
                 .expect("failed to resize swapchain buffers");
         }
+    }
+
+    pub(crate) fn present(&self) {
+        todo!()
+    }
+
+    pub(crate) fn current_texture(&self) -> Texture {
+        todo!()
     }
 
     pub(crate) fn swap_chain(&self) -> &IDXGISwapChain4 {

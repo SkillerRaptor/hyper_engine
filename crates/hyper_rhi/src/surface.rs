@@ -8,7 +8,7 @@ use hyper_platform::window::Window;
 
 #[cfg(target_os = "windows")]
 use crate::d3d12;
-use crate::vulkan;
+use crate::{texture::Texture, vulkan};
 
 #[derive(Clone, Debug)]
 pub struct SurfaceDescriptor<'a> {
@@ -44,6 +44,22 @@ impl Surface {
             #[cfg(target_os = "windows")]
             SurfaceInner::D3D12(inner) => inner.resize(width, height),
             SurfaceInner::Vulkan(inner) => inner.resize(width, height),
+        }
+    }
+
+    pub fn present(&self) {
+        match &self.inner {
+            #[cfg(target_os = "windows")]
+            SurfaceInner::D3D12(inner) => inner.present(),
+            SurfaceInner::Vulkan(inner) => inner.present(),
+        }
+    }
+
+    pub fn current_texture(&self) -> Texture {
+        match &self.inner {
+            #[cfg(target_os = "windows")]
+            SurfaceInner::D3D12(inner) => Texture::new_d3d12(inner.current_texture()),
+            SurfaceInner::Vulkan(inner) => Texture::new_vulkan(inner.current_texture()),
         }
     }
 }

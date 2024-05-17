@@ -9,8 +9,10 @@ use hyper_platform::window::Window;
 #[cfg(target_os = "windows")]
 use crate::d3d12;
 use crate::{
+    command_list::{CommandList, FinishedCommandList},
     render_pipeline::{RenderPipeline, RenderPipelineDescriptor},
     surface::{Surface, SurfaceDescriptor},
+    texture::{Texture, TextureDescriptor},
     vulkan,
 };
 
@@ -84,5 +86,26 @@ impl GraphicsDevice {
                 RenderPipeline::new_vulkan(inner.create_render_pipeline(descriptor))
             }
         }
+    }
+
+    pub fn create_texture(&self, descriptor: &TextureDescriptor) -> Texture {
+        match &self.inner {
+            #[cfg(target_os = "windows")]
+            GraphicsDeviceInner::D3D12(inner) => {
+                Texture::new_d3d12(inner.create_texture(descriptor))
+            }
+            GraphicsDeviceInner::Vulkan(inner) => {
+                Texture::new_vulkan(inner.create_texture(descriptor))
+            }
+        }
+    }
+
+    pub fn create_command_list(&self) -> CommandList {
+        CommandList::new()
+    }
+
+    // TODO: Add command list type
+    pub fn execute_commands(&self, _command_list: FinishedCommandList) {
+        todo!()
     }
 }

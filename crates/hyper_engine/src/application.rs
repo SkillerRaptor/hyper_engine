@@ -9,6 +9,7 @@ use std::{borrow::Cow, num::NonZeroU32, time::Instant};
 use hyper_platform::window::{self, Window, WindowDescriptor};
 use hyper_rhi::{
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
+    render_pass::RenderPassDescriptor,
     render_pipeline::{RenderPipeline, RenderPipelineDescriptor},
     surface::{Surface, SurfaceDescriptor},
 };
@@ -32,9 +33,9 @@ pub struct ApplicationDescriptor<'a> {
 
 pub struct Application {
     // Rendering
-    _render_pipeline: RenderPipeline,
+    render_pipeline: RenderPipeline,
     surface: Surface,
-    _graphics_device: GraphicsDevice,
+    graphics_device: GraphicsDevice,
 
     window: Window,
     game: Box<dyn Game>,
@@ -77,9 +78,9 @@ impl Application {
         );
 
         Ok(Self {
-            _render_pipeline: render_pipeline,
+            render_pipeline,
             surface,
-            _graphics_device: graphics_device,
+            graphics_device,
 
             window,
             game,
@@ -120,6 +121,22 @@ impl Application {
             self.game.update();
 
             // Render
+            let swapchain_texture = self.surface.current_texture();
+
+            let mut command_list = self.graphics_device.create_command_list();
+
+            {
+                let mut render_pass = command_list.begin_render_pass(&RenderPassDescriptor {
+                    image_view: swapchain_texture.view(),
+                });
+
+                render_pass.bind_pipeline(&self.render_pipeline);
+                render_pass.draw(3, 1, 0, 0);
+            }
+
+            self.graphics_device.execute_commands(command_list.end());
+
+            self.surface.present();
         }
     }
 }

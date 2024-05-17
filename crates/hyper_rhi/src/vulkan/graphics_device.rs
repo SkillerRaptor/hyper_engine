@@ -19,7 +19,8 @@ use crate::{
     graphics_device::GraphicsDeviceDescriptor,
     render_pipeline::RenderPipelineDescriptor,
     surface::SurfaceDescriptor,
-    vulkan::{RenderPipeline, Surface},
+    texture::TextureDescriptor,
+    vulkan::{RenderPipeline, Surface, Texture},
 };
 
 struct DebugUtils {
@@ -634,6 +635,10 @@ impl GraphicsDevice {
         descriptor: &RenderPipelineDescriptor,
     ) -> RenderPipeline {
         RenderPipeline::new(self, descriptor)
+    }
+
+    pub(crate) fn create_texture(&self, descriptor: &TextureDescriptor) -> Texture {
+        Texture::new(self, descriptor)
     }
 
     pub(crate) fn entry(&self) -> &Entry {

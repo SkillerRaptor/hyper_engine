@@ -10,7 +10,10 @@ use ash::{
 };
 use raw_window_handle::{DisplayHandle, HasDisplayHandle, HasWindowHandle, WindowHandle};
 
-use crate::{surface::SurfaceDescriptor, vulkan::GraphicsDevice};
+use crate::{
+    surface::SurfaceDescriptor,
+    vulkan::{GraphicsDevice, Texture},
+};
 
 pub struct Surface {
     image_views: Vec<vk::ImageView>,
@@ -248,6 +251,14 @@ impl Surface {
         self.swapchain = swapchain;
         self.images = images;
         self.image_views = image_views;
+    }
+
+    pub(crate) fn present(&self) {
+        todo!()
+    }
+
+    pub(crate) fn current_texture(&self) -> Texture {
+        todo!()
     }
 
     pub(crate) fn loader(&self) -> &surface::Instance {

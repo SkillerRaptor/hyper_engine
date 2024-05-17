@@ -45,10 +45,11 @@ use windows::Win32::Graphics::{
 };
 
 use crate::{
-    d3d12::{RenderPipeline, Surface},
+    d3d12::{RenderPipeline, Surface, Texture},
     graphics_device::GraphicsDeviceDescriptor,
     render_pipeline::RenderPipelineDescriptor,
     surface::SurfaceDescriptor,
+    texture::TextureDescriptor,
 };
 
 pub(crate) struct GrapicsDeviceInner {
@@ -251,6 +252,10 @@ impl GraphicsDevice {
         descriptor: &RenderPipelineDescriptor,
     ) -> RenderPipeline {
         RenderPipeline::new(self, descriptor)
+    }
+
+    pub(crate) fn create_texture(&self, descriptor: &TextureDescriptor) -> Texture {
+        Texture::new(self, descriptor)
     }
 
     pub(crate) fn factory(&self) -> &IDXGIFactory7 {
