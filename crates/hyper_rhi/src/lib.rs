@@ -14,4 +14,5 @@ pub mod texture;
 mod bindings;
 mod d3d12;
 mod resource_handle;
+mod shader_compiler;
 mod vulkan;

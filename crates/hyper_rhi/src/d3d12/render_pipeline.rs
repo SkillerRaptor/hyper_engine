@@ -27,7 +27,11 @@ use windows::Win32::Graphics::{
     Dxgi::Common::{DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SAMPLE_DESC},
 };
 
-use crate::{d3d12::GraphicsDevice, render_pipeline::RenderPipelineDescriptor};
+use crate::{
+    d3d12::GraphicsDevice,
+    render_pipeline::RenderPipelineDescriptor,
+    shader_compiler::{self, OutputApi, ShaderStage},
+};
 
 pub struct RenderPipeline {
     pipeline_state: ID3D12PipelineState,
@@ -39,8 +43,20 @@ impl RenderPipeline {
         graphics_device: &GraphicsDevice,
         descriptor: &RenderPipelineDescriptor,
     ) -> Self {
-        let mut vertex_shader = Self::compile_shader(descriptor.vertex_shader, "vertex");
-        let mut pixel_shader = Self::compile_shader(descriptor.pixel_shader, "pixel");
+        // NOTE: Maybe instead of failure compile shaders on its own for multiple pipelines and don't panic
+        let mut vertex_shader = shader_compiler::compile(
+            descriptor.vertex_shader,
+            ShaderStage::Vertex,
+            OutputApi::D3D12,
+        )
+        .expect("failed to compile vertex shader");
+        let mut pixel_shader = shader_compiler::compile(
+            descriptor.pixel_shader,
+            ShaderStage::Pixel,
+            OutputApi::D3D12,
+        )
+        .expect("failed to compile pixel shader");
+
         let pipeline_state =
             Self::create_pipeline_state(graphics_device, &mut vertex_shader, &mut pixel_shader);
 
@@ -48,26 +64,6 @@ impl RenderPipeline {
             pipeline_state,
             graphics_device: graphics_device.clone(),
         }
-    }
-
-    fn compile_shader(shader_path: &str, stage: &str) -> Vec<u8> {
-        let path = Path::new(shader_path);
-        let file_name = path.file_name().unwrap().to_str().unwrap();
-
-        let profile = match stage {
-            "vertex" => "vs_6_6",
-            "pixel" => "ps_6_6",
-            _ => unreachable!(),
-        };
-
-        let source = fs::read_to_string(path).expect(&format!("failed to read {} shader", stage));
-        let shader = hassle_rs::validate_dxil(
-            &hassle_rs::compile_hlsl(file_name, &source, "main", profile, &[], &[])
-                .expect(&format!("failed to compile {} shader", stage)),
-        )
-        .expect(&format!("failed to validate {} shader", stage));
-
-        shader
     }
 
     fn create_pipeline_state(

@@ -4,11 +4,15 @@
  * SPDX-License-Identifier: MIT
 */
 
-use std::{ffi::CStr, fs, path::Path};
+use std::ffi::CStr;
 
 use ash::vk;
 
-use crate::{render_pipeline::RenderPipelineDescriptor, vulkan::GraphicsDevice};
+use crate::{
+    render_pipeline::RenderPipelineDescriptor,
+    shader_compiler::{self, OutputApi, ShaderStage},
+    vulkan::GraphicsDevice,
+};
 
 pub struct RenderPipeline {
     pipeline: vk::Pipeline,
@@ -20,11 +24,22 @@ impl RenderPipeline {
         graphics_device: &GraphicsDevice,
         descriptor: &RenderPipelineDescriptor,
     ) -> Self {
-        let vertex_shader = Self::compile_shader(descriptor.vertex_shader, "vertex");
+        // NOTE: Maybe instead of failure compile shaders on its own for multiple pipelines and don't panic
+        let vertex_shader = shader_compiler::compile(
+            descriptor.vertex_shader,
+            ShaderStage::Vertex,
+            OutputApi::Vulkan,
+        )
+        .expect("failed to compile vertex shader");
         let vertex_shader_module =
             Self::create_shader_module(graphics_device, &vertex_shader, "vertex");
 
-        let pixel_shader = Self::compile_shader(descriptor.pixel_shader, "pixel");
+        let pixel_shader = shader_compiler::compile(
+            descriptor.pixel_shader,
+            ShaderStage::Pixel,
+            OutputApi::Vulkan,
+        )
+        .expect("failed to compile pixel shader");
         let pixel_shader_module =
             Self::create_shader_module(graphics_device, &pixel_shader, "pixel");
 
@@ -44,30 +59,6 @@ impl RenderPipeline {
             pipeline,
             graphics_device: graphics_device.clone(),
         }
-    }
-
-    fn compile_shader(shader_path: &str, stage: &str) -> Vec<u8> {
-        let path = Path::new(shader_path);
-        let file_name = path.file_name().unwrap().to_str().unwrap();
-
-        let profile = match stage {
-            "vertex" => "vs_6_6",
-            "pixel" => "ps_6_6",
-            _ => unreachable!(),
-        };
-
-        let source = fs::read_to_string(path).expect(&format!("failed to read {} shader", stage));
-        let shader = hassle_rs::compile_hlsl(
-            file_name,
-            &source,
-            "main",
-            profile,
-            &["-spirv"],
-            &[("HYPER_ENGINE_VULKAN", None)],
-        )
-        .expect(&format!("failed to compile {} shader", stage));
-
-        shader
     }
 
     fn create_shader_module(
