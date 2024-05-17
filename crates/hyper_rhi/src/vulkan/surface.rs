@@ -206,7 +206,7 @@ impl Surface {
         *formats
             .iter()
             .find(|&format| {
-                format.format == vk::Format::B8G8R8A8_SRGB
+                format.format == vk::Format::B8G8R8A8_UNORM
                     && format.color_space == vk::ColorSpaceKHR::SRGB_NONLINEAR
             })
             .unwrap_or_else(|| &formats[0])
