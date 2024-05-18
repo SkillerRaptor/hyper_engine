@@ -82,6 +82,10 @@ impl Texture {
         self.inner.image
     }
 
+    pub(crate) fn view(&self) -> vk::ImageView {
+        self.inner.view
+    }
+
     pub(crate) fn width(&self) -> u32 {
         self.inner.width
     }

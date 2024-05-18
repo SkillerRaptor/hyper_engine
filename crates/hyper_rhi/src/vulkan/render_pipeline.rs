@@ -175,7 +175,7 @@ impl RenderPipeline {
             .attachments(attachments)
             .blend_constants([0.0; 4]);
 
-        let color_attachment_formats = &[vk::Format::B8G8R8A8_SRGB];
+        let color_attachment_formats = &[vk::Format::B8G8R8A8_UNORM];
         let mut rendering_create_info = vk::PipelineRenderingCreateInfoKHR::default()
             .color_attachment_formats(color_attachment_formats);
 

@@ -731,7 +731,44 @@ impl GraphicsDevice {
     }
 
     pub(crate) fn execute_commands(&self, command_list: &CommandList) {
-        todo!()
+        command_list.end();
+
+        let command_buffer = self.current_frame().command_buffer;
+        let present_wait_semaphore_info = vk::SemaphoreSubmitInfo::default()
+            .semaphore(self.current_frame().present_semaphore)
+            .value(0)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
+
+        let command_buffer_info = vk::CommandBufferSubmitInfo::default()
+            .command_buffer(command_buffer)
+            .device_mask(0);
+
+        let submit_signal_semaphore_info = vk::SemaphoreSubmitInfo::default()
+            .semaphore(self.submit_semaphore())
+            .value(self.current_frame_index().load(Ordering::Relaxed) as u64)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
+
+        let render_signal_semaphore_info = vk::SemaphoreSubmitInfo::default()
+            .semaphore(self.current_frame().render_semaphore)
+            .value(0)
+            .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+            .device_index(0);
+
+        let wait_semaphore_infos = &[present_wait_semaphore_info];
+        let command_buffer_infos = &[command_buffer_info];
+        let signal_semaphore_infos = &[submit_signal_semaphore_info, render_signal_semaphore_info];
+        let submit_info = vk::SubmitInfo2::default()
+            .wait_semaphore_infos(wait_semaphore_infos)
+            .command_buffer_infos(command_buffer_infos)
+            .signal_semaphore_infos(signal_semaphore_infos);
+
+        unsafe {
+            self.device()
+                .queue_submit2(self.queue(), &[submit_info], vk::Fence::null())
+                .expect("failed to submit queue");
+        }
     }
 
     pub(crate) fn entry(&self) -> &Entry {

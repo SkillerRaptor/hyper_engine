@@ -60,7 +60,7 @@ impl Application {
 
         let graphics_device = GraphicsDevice::new(&GraphicsDeviceDescriptor {
             // TODO: Don't hardcode and use CLI options
-            graphics_api: GraphicsApi::D3D12,
+            graphics_api: GraphicsApi::Vulkan,
             debug_mode: cfg!(debug_assertions),
             window: &window,
         });

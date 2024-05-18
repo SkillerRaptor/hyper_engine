@@ -328,7 +328,8 @@ impl Surface {
         let value = self
             .graphics_device
             .current_frame_index()
-            .load(Ordering::Relaxed);
+            .load(Ordering::Relaxed)
+            + 1;
         self.graphics_device
             .current_frame_index()
             .store(value, Ordering::Relaxed);
