@@ -101,11 +101,26 @@ impl GraphicsDevice {
     }
 
     pub fn create_command_list(&self) -> CommandList {
-        CommandList::new()
+        match &self.inner {
+            #[cfg(target_os = "windows")]
+            GraphicsDeviceInner::D3D12(inner) => {
+                CommandList::new_d3d12(inner.create_command_list())
+            }
+            GraphicsDeviceInner::Vulkan(inner) => {
+                CommandList::new_vulkan(inner.create_command_list())
+            }
+        }
     }
 
-    // TODO: Add command list type
-    pub fn execute_commands(&self, _command_list: CommandList) {
-        todo!()
+    pub fn execute_commands(&self, command_list: CommandList) {
+        match &self.inner {
+            #[cfg(target_os = "windows")]
+            GraphicsDeviceInner::D3D12(inner) => {
+                inner.execute_commands(command_list.d3d12_command_list());
+            }
+            GraphicsDeviceInner::Vulkan(inner) => {
+                inner.execute_commands(command_list.vulkan_command_list());
+            }
+        }
     }
 }

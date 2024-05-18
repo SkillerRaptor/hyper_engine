@@ -23,7 +23,7 @@ use crate::{
     render_pipeline::RenderPipelineDescriptor,
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
-    vulkan::{RenderPipeline, Surface, Texture},
+    vulkan::{CommandList, RenderPipeline, Surface, Texture},
 };
 
 pub(crate) struct FrameData {
@@ -665,6 +665,10 @@ impl GraphicsDeviceInner {
 impl Drop for GraphicsDeviceInner {
     fn drop(&mut self) {
         unsafe {
+            self.device
+                .device_wait_idle()
+                .expect("failed to wait for device idle");
+
             self.frames.iter().for_each(|frame| {
                 self.device.destroy_semaphore(frame.render_semaphore, None);
                 self.device.destroy_semaphore(frame.present_semaphore, None);
@@ -720,6 +724,14 @@ impl GraphicsDevice {
 
     pub(crate) fn create_texture(&self, descriptor: &TextureDescriptor) -> Texture {
         Texture::new(self, descriptor)
+    }
+
+    pub(crate) fn create_command_list(&self) -> CommandList {
+        CommandList::new(self)
+    }
+
+    pub(crate) fn execute_commands(&self, command_list: &CommandList) {
+        todo!()
     }
 
     pub(crate) fn entry(&self) -> &Entry {

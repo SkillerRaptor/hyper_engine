@@ -6,15 +6,16 @@
 
 use std::sync::Arc;
 
-use windows::Win32::Graphics::Direct3D12::ID3D12Resource;
+use windows::Win32::Graphics::Direct3D12::{ID3D12Resource, D3D12_CPU_DESCRIPTOR_HANDLE};
 
-use crate::{
-    d3d12::{GraphicsDevice, TextureView},
-    texture::TextureDescriptor,
-};
+use crate::{d3d12::GraphicsDevice, texture::TextureDescriptor};
 
 struct TextureInner {
-    view: TextureView,
+    height: u32,
+    width: u32,
+
+    // NOTE: This is an index into the Heap, may change later
+    index: u32,
     resource: ID3D12Resource,
 
     graphics_device: GraphicsDevice,
@@ -30,12 +31,30 @@ impl Texture {
         todo!();
     }
 
-    pub(super) fn new_external(graphics_device: &GraphicsDevice, resource: ID3D12Resource) -> Self {
-        let view = TextureView::new(graphics_device, &resource);
+    pub(super) fn new_external(
+        graphics_device: &GraphicsDevice,
+        resource: ID3D12Resource,
+        width: u32,
+        height: u32,
+        index: u32,
+    ) -> Self {
+        let rtv_heap = graphics_device.rtv_heap();
+        unsafe {
+            graphics_device.device().CreateRenderTargetView(
+                &resource,
+                None,
+                D3D12_CPU_DESCRIPTOR_HANDLE {
+                    ptr: rtv_heap.handle().ptr + index as usize * rtv_heap.size(),
+                },
+            );
+        }
 
         Self {
             inner: Arc::new(TextureInner {
-                view,
+                height,
+                width,
+
+                index,
                 resource,
 
                 graphics_device: graphics_device.clone(),
@@ -47,7 +66,11 @@ impl Texture {
         &self.inner.resource
     }
 
-    pub(crate) fn view(&self) -> &TextureView {
-        &self.inner.view
+    pub(crate) fn width(&self) -> u32 {
+        self.inner.width
+    }
+
+    pub(crate) fn height(&self) -> u32 {
+        self.inner.height
     }
 }

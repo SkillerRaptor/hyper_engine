@@ -37,4 +37,21 @@ impl RenderPipeline {
             inner: RenderPipelineInner::Vulkan(render_pipeline),
         }
     }
+
+    #[cfg(target_os = "windows")]
+    pub(crate) fn d3d12_render_pipeline(&self) -> &d3d12::RenderPipeline {
+        let RenderPipelineInner::D3D12(render_pipeline) = &self.inner else {
+            panic!()
+        };
+
+        render_pipeline
+    }
+
+    pub(crate) fn vulkan_render_pipeline(&self) -> &vulkan::RenderPipeline {
+        let RenderPipelineInner::Vulkan(render_pipeline) = &self.inner else {
+            panic!()
+        };
+
+        render_pipeline
+    }
 }

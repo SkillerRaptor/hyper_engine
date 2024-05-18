@@ -6,7 +6,7 @@
 
 #[cfg(target_os = "windows")]
 use crate::d3d12;
-use crate::{texture_view::TextureView, vulkan};
+use crate::vulkan;
 
 #[derive(Clone, Debug)]
 pub struct TextureDescriptor {}
@@ -35,11 +35,20 @@ impl Texture {
         }
     }
 
-    pub fn view(&self) -> TextureView {
-        match &self.inner {
-            #[cfg(target_os = "windows")]
-            TextureInner::D3D12(inner) => TextureView::new_d3d12(inner.view()),
-            TextureInner::Vulkan(inner) => TextureView::new_vulkan(inner.view()),
-        }
+    #[cfg(target_os = "windows")]
+    pub(crate) fn d3d12_texture(&self) -> &d3d12::Texture {
+        let TextureInner::D3D12(texture) = &self.inner else {
+            panic!()
+        };
+
+        texture
+    }
+
+    pub(crate) fn vulkan_texture(&self) -> &vulkan::Texture {
+        let TextureInner::Vulkan(texture) = &self.inner else {
+            panic!()
+        };
+
+        texture
     }
 }

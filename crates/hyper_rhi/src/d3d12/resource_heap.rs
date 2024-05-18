@@ -70,4 +70,16 @@ impl ResourceHeap {
             descriptor_heap,
         }
     }
+
+    pub(crate) fn descriptor_heap(&self) -> &ID3D12DescriptorHeap {
+        &self.descriptor_heap
+    }
+
+    pub(crate) fn size(&self) -> usize {
+        self.size
+    }
+
+    pub(crate) fn handle(&self) -> D3D12_CPU_DESCRIPTOR_HANDLE {
+        self.handle
+    }
 }

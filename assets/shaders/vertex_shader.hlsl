@@ -21,8 +21,8 @@ struct VertexOutput {
 };
 
 static const float3 positions[3] = {
-  float3( 0.0, -0.5, 0.0),
-  float3( 0.5,  0.5, 0.0),
+  float3( 0.0,  0.5, 0.0),
+  float3( 0.5, -0.5, 0.0),
   float3(-0.5, -0.5, 0.0),
 };
 

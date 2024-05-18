@@ -61,7 +61,13 @@ impl Surface {
             vk::SwapchainKHR::null(),
         );
 
-        let textures = Self::create_textures(graphics_device, &swapchain_loader, swapchain);
+        let textures = Self::create_textures(
+            graphics_device,
+            &swapchain_loader,
+            swapchain,
+            size.x,
+            size.y,
+        );
 
         Self {
             height: size.y,
@@ -205,6 +211,8 @@ impl Surface {
         graphics_device: &GraphicsDevice,
         loader: &swapchain::Device,
         swapchain: vk::SwapchainKHR,
+        width: u32,
+        height: u32,
     ) -> Vec<Texture> {
         let images = unsafe { loader.get_swapchain_images(swapchain) }
             .expect("failed to get swapchain images");
@@ -212,7 +220,15 @@ impl Surface {
         // TODO: Don't hardcode the format
         let textures = images
             .iter()
-            .map(|&image| Texture::new_external(graphics_device, image, vk::Format::B8G8R8A8_UNORM))
+            .map(|&image| {
+                Texture::new_external(
+                    graphics_device,
+                    image,
+                    width,
+                    height,
+                    vk::Format::B8G8R8A8_UNORM,
+                )
+            })
             .collect::<Vec<_>>();
 
         textures
@@ -246,8 +262,13 @@ impl Surface {
                 self.swapchain,
             );
 
-            let textures =
-                Self::create_textures(&self.graphics_device, &self.swapchain_loader, swapchain);
+            let textures = Self::create_textures(
+                &self.graphics_device,
+                &self.swapchain_loader,
+                swapchain,
+                self.width,
+                self.height,
+            );
 
             self.destroy_swapchain();
 

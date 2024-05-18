@@ -13,51 +13,55 @@ use std::{
     },
 };
 
-use windows::Win32::{
-    Foundation::HANDLE,
-    Graphics::{
-        Direct3D::D3D_FEATURE_LEVEL_12_1,
-        Direct3D12::{
-            D3D12CreateDevice,
-            D3D12GetDebugInterface,
-            D3D12SerializeRootSignature,
-            ID3D12CommandAllocator,
-            ID3D12CommandQueue,
-            ID3D12Debug6,
-            ID3D12Device,
-            ID3D12Fence,
-            ID3D12GraphicsCommandList,
-            ID3D12RootSignature,
-            D3D12_COMMAND_LIST_TYPE_DIRECT,
-            D3D12_COMMAND_QUEUE_DESC,
-            D3D12_COMMAND_QUEUE_FLAG_NONE,
-            D3D12_FENCE_FLAG_NONE,
-            D3D12_ROOT_CONSTANTS,
-            D3D12_ROOT_PARAMETER1,
-            D3D12_ROOT_PARAMETER1_0,
-            D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
-            D3D12_ROOT_SIGNATURE_DESC,
-            D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED,
-            D3D12_SHADER_VISIBILITY_ALL,
-            D3D_ROOT_SIGNATURE_VERSION_1,
+use windows::{
+    core::Interface,
+    Win32::{
+        Foundation::HANDLE,
+        Graphics::{
+            Direct3D::D3D_FEATURE_LEVEL_12_1,
+            Direct3D12::{
+                D3D12CreateDevice,
+                D3D12GetDebugInterface,
+                D3D12SerializeRootSignature,
+                ID3D12CommandAllocator,
+                ID3D12CommandQueue,
+                ID3D12Debug6,
+                ID3D12Device,
+                ID3D12Fence,
+                ID3D12GraphicsCommandList,
+                ID3D12RootSignature,
+                D3D12_COMMAND_LIST_TYPE_DIRECT,
+                D3D12_COMMAND_QUEUE_DESC,
+                D3D12_COMMAND_QUEUE_FLAG_NONE,
+                D3D12_FENCE_FLAG_NONE,
+                D3D12_ROOT_CONSTANTS,
+                D3D12_ROOT_PARAMETER1,
+                D3D12_ROOT_PARAMETER1_0,
+                D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
+                D3D12_ROOT_SIGNATURE_DESC,
+                D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED,
+                D3D12_SHADER_VISIBILITY_ALL,
+                D3D_ROOT_SIGNATURE_VERSION_1,
+            },
+            Dxgi::{
+                CreateDXGIFactory2,
+                IDXGIAdapter4,
+                IDXGIFactory7,
+                DXGI_ADAPTER_FLAG,
+                DXGI_ADAPTER_FLAG_NONE,
+                DXGI_ADAPTER_FLAG_SOFTWARE,
+                DXGI_CREATE_FACTORY_DEBUG,
+                DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+            },
         },
-        Dxgi::{
-            CreateDXGIFactory2,
-            IDXGIAdapter4,
-            IDXGIFactory7,
-            DXGI_ADAPTER_FLAG,
-            DXGI_ADAPTER_FLAG_NONE,
-            DXGI_ADAPTER_FLAG_SOFTWARE,
-            DXGI_CREATE_FACTORY_DEBUG,
-            DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-        },
+        System::Threading::CreateEventA,
     },
-    System::Threading::CreateEventA,
 };
 
 use crate::{
     d3d12::{
         resource_heap::{ResourceHeap, ResourceHeapDescriptor, ResourceHeapType},
+        CommandList,
         RenderPipeline,
         Surface,
         Texture,
@@ -75,6 +79,9 @@ pub(crate) struct FrameData {
 
 pub(crate) struct GrapicsDeviceInner {
     current_frame: AtomicU32,
+
+    // NOTE: This should be in the surface struct
+    current_texture_index: AtomicU32,
 
     frames: Vec<FrameData>,
     fence_event: HANDLE,
@@ -144,6 +151,7 @@ impl GrapicsDeviceInner {
 
         Self {
             current_frame: AtomicU32::new(1),
+            current_texture_index: AtomicU32::new(0),
 
             frames,
             fence_event,
@@ -323,6 +331,12 @@ impl GrapicsDeviceInner {
     }
 }
 
+impl Drop for GrapicsDeviceInner {
+    fn drop(&mut self) {
+        // TODO: Wait for all work to be finished
+    }
+}
+
 #[derive(Clone)]
 pub(crate) struct GraphicsDevice {
     inner: Arc<GrapicsDeviceInner>,
@@ -350,6 +364,27 @@ impl GraphicsDevice {
         Texture::new(self, descriptor)
     }
 
+    pub(crate) fn create_command_list(&self) -> CommandList {
+        CommandList::new(self)
+    }
+
+    // TODO: Use command list
+    pub(crate) fn execute_commands(&self, command_list: &CommandList) {
+        command_list.end();
+
+        let current_command_list = &self.current_frame().command_list;
+        let command_list = Some(
+            current_command_list
+                .cast()
+                .expect("failed to cast command list"),
+        );
+        unsafe {
+            self.inner
+                .command_queue
+                .ExecuteCommandLists(&[command_list]);
+        }
+    }
+
     pub(crate) fn factory(&self) -> &IDXGIFactory7 {
         &self.inner.factory
     }
@@ -366,6 +401,18 @@ impl GraphicsDevice {
         &self.inner.command_queue
     }
 
+    pub(super) fn cbv_srv_uav_heap(&self) -> &ResourceHeap {
+        &self.inner.cbv_srv_uav_heap
+    }
+
+    pub(super) fn rtv_heap(&self) -> &ResourceHeap {
+        &self.inner.rtv_heap
+    }
+
+    pub(super) fn dsv_heap(&self) -> &ResourceHeap {
+        &self.inner.dsv_heap
+    }
+
     pub(crate) fn root_signature(&self) -> &ID3D12RootSignature {
         &self.inner.root_signature
     }
@@ -376,6 +423,10 @@ impl GraphicsDevice {
 
     pub(crate) fn fence_event(&self) -> HANDLE {
         self.inner.fence_event
+    }
+
+    pub(crate) fn current_texture_index(&self) -> &AtomicU32 {
+        &self.inner.current_texture_index
     }
 
     pub(crate) fn current_frame_index(&self) -> &AtomicU32 {

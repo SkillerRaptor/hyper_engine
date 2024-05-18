@@ -33,7 +33,6 @@ pub struct Surface {
     width: u32,
     resized: bool,
 
-    current_texture_index: u32,
     textures: Vec<Texture>,
 
     swap_chain: IDXGISwapChain4,
@@ -57,7 +56,7 @@ impl Surface {
 
         let swap_chain = Self::create_swap_chain(graphics_device, size.x, size.y, hwnd);
 
-        let textures = Self::create_textures(graphics_device, &swap_chain);
+        let textures = Self::create_textures(graphics_device, &swap_chain, size.x, size.y);
 
         Self {
             height: size.y,
@@ -65,7 +64,6 @@ impl Surface {
             resized: false,
 
             textures,
-            current_texture_index: 0,
 
             swap_chain,
 
@@ -119,13 +117,15 @@ impl Surface {
     fn create_textures(
         graphics_device: &GraphicsDevice,
         swap_chain: &IDXGISwapChain4,
+        width: u32,
+        height: u32,
     ) -> Vec<Texture> {
         let mut textures = Vec::new();
         for i in 0..crate::graphics_device::GraphicsDevice::FRAME_COUNT {
             let render_target =
                 unsafe { swap_chain.GetBuffer(i) }.expect("failed to get swapchain render target");
 
-            let texture = Texture::new_external(graphics_device, render_target);
+            let texture = Texture::new_external(graphics_device, render_target, width, height, i);
             textures.push(texture);
         }
 
@@ -154,7 +154,12 @@ impl Surface {
                     .expect("failed to resize swapchain buffers");
             }
 
-            let textures = Self::create_textures(&self.graphics_device, &self.swap_chain);
+            let textures = Self::create_textures(
+                &self.graphics_device,
+                &self.swap_chain,
+                self.width,
+                self.height,
+            );
             self.textures = textures;
 
             self.resized = false;
@@ -182,9 +187,12 @@ impl Surface {
             }
         }
 
-        self.current_texture_index = unsafe { self.swap_chain.GetCurrentBackBufferIndex() };
+        let value = unsafe { self.swap_chain.GetCurrentBackBufferIndex() };
+        self.graphics_device
+            .current_texture_index()
+            .store(value, Ordering::Relaxed);
 
-        self.textures[self.current_texture_index as usize].clone()
+        self.textures[value as usize].clone()
     }
 
     pub(crate) fn present(&mut self) {
@@ -198,7 +206,8 @@ impl Surface {
         let value = self
             .graphics_device
             .current_frame_index()
-            .load(Ordering::Relaxed);
+            .load(Ordering::Relaxed)
+            + 1;
         self.graphics_device
             .current_frame_index()
             .store(value, Ordering::Relaxed);
