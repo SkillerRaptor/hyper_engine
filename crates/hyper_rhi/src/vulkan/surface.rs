@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
 */
 
+use std::sync::atomic::Ordering;
+
 use ash::{
     khr::{surface, swapchain},
     vk,
@@ -16,6 +18,11 @@ use crate::{
 };
 
 pub struct Surface {
+    height: u32,
+    width: u32,
+    resized: bool,
+
+    current_texture_index: u32,
     textures: Vec<Texture>,
 
     swapchain: vk::SwapchainKHR,
@@ -57,6 +64,12 @@ impl Surface {
         let textures = Self::create_textures(graphics_device, &swapchain_loader, swapchain);
 
         Self {
+            height: size.y,
+            width: size.x,
+            resized: false,
+
+            current_texture_index: 0,
+
             textures,
             swapchain,
             swapchain_loader,
@@ -215,31 +228,89 @@ impl Surface {
     }
 
     pub(crate) fn resize(&mut self, width: u32, height: u32) {
-        let swapchain = Self::create_swapchain(
-            &self.graphics_device,
-            width,
-            height,
-            &self.loader,
-            self.inner,
-            &self.swapchain_loader,
-            self.swapchain,
-        );
-
-        let textures =
-            Self::create_textures(&self.graphics_device, &self.swapchain_loader, swapchain);
-
-        self.destroy_swapchain();
-
-        self.swapchain = swapchain;
-        self.textures = textures;
+        self.height = height;
+        self.width = width;
+        self.resized = true;
     }
 
-    pub(crate) fn present(&self) {
-        todo!()
+    pub(crate) fn current_texture(&mut self) -> Texture {
+        // Resize
+        if self.resized {
+            let swapchain = Self::create_swapchain(
+                &self.graphics_device,
+                self.width,
+                self.height,
+                &self.loader,
+                self.inner,
+                &self.swapchain_loader,
+                self.swapchain,
+            );
+
+            let textures =
+                Self::create_textures(&self.graphics_device, &self.swapchain_loader, swapchain);
+
+            self.destroy_swapchain();
+
+            self.swapchain = swapchain;
+            self.textures = textures;
+
+            self.resized = false;
+        }
+
+        let semaphores = [self.graphics_device.submit_semaphore()];
+        let values = [self
+            .graphics_device
+            .current_frame_index()
+            .load(Ordering::Relaxed) as u64
+            - 1];
+        let wait_info = vk::SemaphoreWaitInfo::default()
+            .semaphores(&semaphores)
+            .values(&values);
+
+        unsafe {
+            self.graphics_device
+                .device()
+                .wait_semaphores(&wait_info, u64::MAX)
+                .expect("failed to wait for semaphore");
+        }
+
+        let (index, _) = unsafe {
+            self.swapchain_loader.acquire_next_image(
+                self.swapchain,
+                u64::MAX,
+                self.graphics_device.current_frame().present_semaphore,
+                vk::Fence::null(),
+            )
+        }
+        .expect("failed to acquire next image index");
+
+        self.current_texture_index = index;
+
+        self.textures[self.current_texture_index as usize].clone()
     }
 
-    pub(crate) fn current_texture(&self) -> Texture {
-        todo!()
+    pub(crate) fn present(&mut self) {
+        let swapchains = [self.swapchain];
+        let wait_semaphores = [self.graphics_device.current_frame().render_semaphore];
+        let image_indices = [self.current_texture_index];
+        let present_info = vk::PresentInfoKHR::default()
+            .swapchains(&swapchains)
+            .wait_semaphores(&wait_semaphores)
+            .image_indices(&image_indices);
+
+        unsafe {
+            self.swapchain_loader
+                .queue_present(self.graphics_device.queue(), &present_info)
+                .expect("failed to present swap chain");
+        };
+
+        let value = self
+            .graphics_device
+            .current_frame_index()
+            .load(Ordering::Relaxed);
+        self.graphics_device
+            .current_frame_index()
+            .store(value, Ordering::Relaxed);
     }
 
     pub(crate) fn loader(&self) -> &surface::Instance {

@@ -20,6 +20,7 @@ struct TextureInner {
     graphics_device: GraphicsDevice,
 }
 
+#[derive(Clone)]
 pub(crate) struct Texture {
     inner: Arc<TextureInner>,
 }

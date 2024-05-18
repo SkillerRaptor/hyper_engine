@@ -4,7 +4,14 @@
  * SPDX-License-Identifier: MIT
 */
 
-use std::{ptr, slice, sync::Arc};
+use std::{
+    ptr,
+    slice,
+    sync::{
+        atomic::{AtomicU32, Ordering},
+        Arc,
+    },
+};
 
 use windows::Win32::{
     Foundation::HANDLE,
@@ -67,6 +74,8 @@ pub(crate) struct FrameData {
 }
 
 pub(crate) struct GrapicsDeviceInner {
+    current_frame: AtomicU32,
+
     frames: Vec<FrameData>,
     fence_event: HANDLE,
     fence: ID3D12Fence,
@@ -134,6 +143,8 @@ impl GrapicsDeviceInner {
         }
 
         Self {
+            current_frame: AtomicU32::new(1),
+
             frames,
             fence_event,
             fence,
@@ -367,7 +378,13 @@ impl GraphicsDevice {
         self.inner.fence_event
     }
 
-    pub(crate) fn frames(&self) -> &[FrameData] {
-        &self.inner.frames
+    pub(crate) fn current_frame_index(&self) -> &AtomicU32 {
+        &self.inner.current_frame
+    }
+
+    pub(crate) fn current_frame(&self) -> &FrameData {
+        let index = self.inner.current_frame.load(Ordering::Relaxed)
+            % crate::graphics_device::GraphicsDevice::FRAME_COUNT;
+        &self.inner.frames[index as usize]
     }
 }

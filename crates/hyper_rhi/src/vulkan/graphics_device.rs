@@ -8,7 +8,10 @@ use std::{
     collections::HashSet,
     ffi::{c_void, CStr},
     mem,
-    sync::Arc,
+    sync::{
+        atomic::{AtomicU32, Ordering},
+        Arc,
+    },
 };
 
 use ash::{ext::debug_utils, khr::swapchain, vk, Device, Entry, Instance};
@@ -37,6 +40,8 @@ struct DebugUtils {
 }
 
 pub(crate) struct GraphicsDeviceInner {
+    current_frame: AtomicU32,
+
     frames: Vec<FrameData>,
     submit_semaphore: vk::Semaphore,
 
@@ -124,6 +129,8 @@ impl GraphicsDeviceInner {
         }
 
         Self {
+            current_frame: AtomicU32::new(1),
+
             frames,
             submit_semaphore,
 
@@ -757,7 +764,13 @@ impl GraphicsDevice {
         self.inner.submit_semaphore
     }
 
-    pub(crate) fn frames(&self) -> &[FrameData] {
-        &self.inner.frames
+    pub(crate) fn current_frame_index(&self) -> &AtomicU32 {
+        &self.inner.current_frame
+    }
+
+    pub(crate) fn current_frame(&self) -> &FrameData {
+        let index = self.inner.current_frame.load(Ordering::Relaxed)
+            % crate::graphics_device::GraphicsDevice::FRAME_COUNT;
+        &self.inner.frames[index as usize]
     }
 }

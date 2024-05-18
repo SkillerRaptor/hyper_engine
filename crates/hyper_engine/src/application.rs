@@ -60,7 +60,7 @@ impl Application {
 
         let graphics_device = GraphicsDevice::new(&GraphicsDeviceDescriptor {
             // TODO: Don't hardcode and use CLI options
-            graphics_api: GraphicsApi::D3D12,
+            graphics_api: GraphicsApi::Vulkan,
             debug_mode: cfg!(debug_assertions),
             window: &window,
         });
@@ -123,6 +123,7 @@ impl Application {
             // Render
             let swapchain_texture = self.surface.current_texture();
 
+            /*
             let mut command_list = self.graphics_device.create_command_list();
 
             {
@@ -135,6 +136,7 @@ impl Application {
             }
 
             self.graphics_device.execute_commands(command_list);
+            */
 
             self.surface.present();
         }
