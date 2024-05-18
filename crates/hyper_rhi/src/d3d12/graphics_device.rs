@@ -47,7 +47,12 @@ use windows::Win32::Graphics::{
 };
 
 use crate::{
-    d3d12::{RenderPipeline, Surface, Texture},
+    d3d12::{
+        resource_heap::{ResourceHeap, ResourceHeapDescriptor, ResourceHeapType},
+        RenderPipeline,
+        Surface,
+        Texture,
+    },
     graphics_device::GraphicsDeviceDescriptor,
     render_pipeline::RenderPipelineDescriptor,
     surface::SurfaceDescriptor,
@@ -63,7 +68,10 @@ pub(crate) struct GrapicsDeviceInner {
     frames: Vec<FrameData>,
 
     root_signature: ID3D12RootSignature,
-    descriptor_heap: ID3D12DescriptorHeap,
+
+    dsv_heap: ResourceHeap,
+    rtv_heap: ResourceHeap,
+    cbv_srv_uav_heap: ResourceHeap,
 
     command_queue: ID3D12CommandQueue,
     device: ID3D12Device,
@@ -84,7 +92,28 @@ impl GrapicsDeviceInner {
         let device = Self::create_device(&adapter);
         let command_queue = Self::create_command_queue(&device);
 
-        let descriptor_heap = Self::create_descriptor_heap(&device);
+        let cbv_srv_uav_heap = ResourceHeap::new(
+            &device,
+            &ResourceHeapDescriptor {
+                ty: ResourceHeapType::CbvSrvUav,
+                count: crate::graphics_device::GraphicsDevice::DESCRIPTOR_COUNT,
+            },
+        );
+        let rtv_heap = ResourceHeap::new(
+            &device,
+            &ResourceHeapDescriptor {
+                ty: ResourceHeapType::Rtv,
+                count: 2048,
+            },
+        );
+        let dsv_heap = ResourceHeap::new(
+            &device,
+            &ResourceHeapDescriptor {
+                ty: ResourceHeapType::Dsv,
+                count: 2048,
+            },
+        );
+
         let root_signature = Self::create_root_signature(&device);
 
         let mut frames = Vec::new();
@@ -102,7 +131,10 @@ impl GrapicsDeviceInner {
             frames,
 
             root_signature,
-            descriptor_heap,
+
+            dsv_heap,
+            rtv_heap,
+            cbv_srv_uav_heap,
 
             command_queue,
             device,
@@ -190,19 +222,6 @@ impl GrapicsDeviceInner {
         let command_queue = unsafe { device.CreateCommandQueue(&descriptor) }
             .expect("failed to create command queue");
         command_queue
-    }
-
-    fn create_descriptor_heap(device: &ID3D12Device) -> ID3D12DescriptorHeap {
-        let descriptor = D3D12_DESCRIPTOR_HEAP_DESC {
-            Type: D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-            NumDescriptors: crate::graphics_device::GraphicsDevice::DESCRIPTOR_COUNT,
-            Flags: D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-            ..Default::default()
-        };
-
-        let descriptor_heap = unsafe { device.CreateDescriptorHeap(&descriptor) }
-            .expect("failed to create descriptor heap");
-        descriptor_heap
     }
 
     fn create_root_signature(device: &ID3D12Device) -> ID3D12RootSignature {
@@ -317,10 +336,6 @@ impl GraphicsDevice {
 
     pub(crate) fn command_queue(&self) -> &ID3D12CommandQueue {
         &self.inner.command_queue
-    }
-
-    pub(crate) fn descriptor_heap(&self) -> &ID3D12DescriptorHeap {
-        &self.inner.descriptor_heap
     }
 
     pub(crate) fn root_signature(&self) -> &ID3D12RootSignature {

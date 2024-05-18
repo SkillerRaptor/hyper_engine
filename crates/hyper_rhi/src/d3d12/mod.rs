@@ -12,6 +12,8 @@ pub(crate) mod surface;
 pub(crate) mod texture;
 pub(crate) mod texture_view;
 
+mod resource_heap;
+
 pub(crate) use graphics_device::*;
 pub(crate) use render_pipeline::*;
 pub(crate) use surface::*;
