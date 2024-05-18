@@ -23,9 +23,12 @@ use crate::{
     vulkan::{RenderPipeline, Surface, Texture},
 };
 
-struct FrameData {
-    command_buffer: vk::CommandBuffer,
-    command_pool: vk::CommandPool,
+pub(crate) struct FrameData {
+    pub(crate) present_semaphore: vk::Semaphore,
+    pub(crate) render_semaphore: vk::Semaphore,
+
+    pub(crate) command_buffer: vk::CommandBuffer,
+    pub(crate) command_pool: vk::CommandPool,
 }
 
 struct DebugUtils {
@@ -35,6 +38,7 @@ struct DebugUtils {
 
 pub(crate) struct GraphicsDeviceInner {
     frames: Vec<FrameData>,
+    submit_semaphore: vk::Semaphore,
 
     pipeline_layout: vk::PipelineLayout,
 
@@ -100,12 +104,20 @@ impl GraphicsDeviceInner {
 
         let pipeline_layout = Self::create_pipeline_layout(&device, &layouts);
 
+        let submit_semaphore = Self::create_semaphore(&device, vk::SemaphoreType::TIMELINE);
+
         let mut frames = Vec::new();
         for _ in 0..crate::graphics_device::GraphicsDevice::FRAME_COUNT {
             let command_pool = Self::create_command_pool(&device, queue_family_index);
             let command_buffer = Self::create_command_buffer(&device, command_pool);
 
+            let render_semaphore = Self::create_semaphore(&device, vk::SemaphoreType::BINARY);
+            let present_semaphore = Self::create_semaphore(&device, vk::SemaphoreType::BINARY);
+
             frames.push(FrameData {
+                present_semaphore,
+                render_semaphore,
+
                 command_buffer,
                 command_pool,
             });
@@ -113,6 +125,7 @@ impl GraphicsDeviceInner {
 
         Self {
             frames,
+            submit_semaphore,
 
             pipeline_layout,
 
@@ -616,6 +629,18 @@ impl GraphicsDeviceInner {
         command_buffers[0]
     }
 
+    fn create_semaphore(device: &Device, ty: vk::SemaphoreType) -> vk::Semaphore {
+        let mut type_create_info = vk::SemaphoreTypeCreateInfo::default()
+            .semaphore_type(ty)
+            .initial_value(0);
+
+        let create_info = vk::SemaphoreCreateInfo::default().push_next(&mut type_create_info);
+
+        let semaphore = unsafe { device.create_semaphore(&create_info, None) }
+            .expect("failed to create semaphore");
+        semaphore
+    }
+
     unsafe extern "system" fn debug_callback(
         _message_severity: vk::DebugUtilsMessageSeverityFlagsEXT,
         _message_type: vk::DebugUtilsMessageTypeFlagsEXT,
@@ -634,8 +659,12 @@ impl Drop for GraphicsDeviceInner {
     fn drop(&mut self) {
         unsafe {
             self.frames.iter().for_each(|frame| {
+                self.device.destroy_semaphore(frame.render_semaphore, None);
+                self.device.destroy_semaphore(frame.present_semaphore, None);
                 self.device.destroy_command_pool(frame.command_pool, None);
             });
+
+            self.device.destroy_semaphore(self.submit_semaphore, None);
 
             self.device
                 .destroy_pipeline_layout(self.pipeline_layout, None);
@@ -722,6 +751,10 @@ impl GraphicsDevice {
 
     pub(crate) fn pipeline_layout(&self) -> vk::PipelineLayout {
         self.inner.pipeline_layout
+    }
+
+    pub(crate) fn submit_semaphore(&self) -> vk::Semaphore {
+        self.inner.submit_semaphore
     }
 
     pub(crate) fn frames(&self) -> &[FrameData] {

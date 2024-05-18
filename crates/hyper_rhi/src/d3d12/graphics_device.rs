@@ -6,44 +6,46 @@
 
 use std::{ptr, slice, sync::Arc};
 
-use windows::Win32::Graphics::{
-    Direct3D::D3D_FEATURE_LEVEL_12_1,
-    Direct3D12::{
-        D3D12CreateDevice,
-        D3D12GetDebugInterface,
-        D3D12SerializeRootSignature,
-        ID3D12CommandAllocator,
-        ID3D12CommandQueue,
-        ID3D12Debug6,
-        ID3D12DescriptorHeap,
-        ID3D12Device,
-        ID3D12GraphicsCommandList,
-        ID3D12RootSignature,
-        D3D12_COMMAND_LIST_TYPE_DIRECT,
-        D3D12_COMMAND_QUEUE_DESC,
-        D3D12_COMMAND_QUEUE_FLAG_NONE,
-        D3D12_DESCRIPTOR_HEAP_DESC,
-        D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
-        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-        D3D12_ROOT_CONSTANTS,
-        D3D12_ROOT_PARAMETER1,
-        D3D12_ROOT_PARAMETER1_0,
-        D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
-        D3D12_ROOT_SIGNATURE_DESC,
-        D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED,
-        D3D12_SHADER_VISIBILITY_ALL,
-        D3D_ROOT_SIGNATURE_VERSION_1,
+use windows::Win32::{
+    Foundation::HANDLE,
+    Graphics::{
+        Direct3D::D3D_FEATURE_LEVEL_12_1,
+        Direct3D12::{
+            D3D12CreateDevice,
+            D3D12GetDebugInterface,
+            D3D12SerializeRootSignature,
+            ID3D12CommandAllocator,
+            ID3D12CommandQueue,
+            ID3D12Debug6,
+            ID3D12Device,
+            ID3D12Fence,
+            ID3D12GraphicsCommandList,
+            ID3D12RootSignature,
+            D3D12_COMMAND_LIST_TYPE_DIRECT,
+            D3D12_COMMAND_QUEUE_DESC,
+            D3D12_COMMAND_QUEUE_FLAG_NONE,
+            D3D12_FENCE_FLAG_NONE,
+            D3D12_ROOT_CONSTANTS,
+            D3D12_ROOT_PARAMETER1,
+            D3D12_ROOT_PARAMETER1_0,
+            D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
+            D3D12_ROOT_SIGNATURE_DESC,
+            D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED,
+            D3D12_SHADER_VISIBILITY_ALL,
+            D3D_ROOT_SIGNATURE_VERSION_1,
+        },
+        Dxgi::{
+            CreateDXGIFactory2,
+            IDXGIAdapter4,
+            IDXGIFactory7,
+            DXGI_ADAPTER_FLAG,
+            DXGI_ADAPTER_FLAG_NONE,
+            DXGI_ADAPTER_FLAG_SOFTWARE,
+            DXGI_CREATE_FACTORY_DEBUG,
+            DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+        },
     },
-    Dxgi::{
-        CreateDXGIFactory2,
-        IDXGIAdapter4,
-        IDXGIFactory7,
-        DXGI_ADAPTER_FLAG,
-        DXGI_ADAPTER_FLAG_NONE,
-        DXGI_ADAPTER_FLAG_SOFTWARE,
-        DXGI_CREATE_FACTORY_DEBUG,
-        DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-    },
+    System::Threading::CreateEventA,
 };
 
 use crate::{
@@ -59,13 +61,15 @@ use crate::{
     texture::TextureDescriptor,
 };
 
-struct FrameData {
-    command_list: ID3D12GraphicsCommandList,
-    command_allocator: ID3D12CommandAllocator,
+pub(crate) struct FrameData {
+    pub(crate) command_list: ID3D12GraphicsCommandList,
+    pub(crate) command_allocator: ID3D12CommandAllocator,
 }
 
 pub(crate) struct GrapicsDeviceInner {
     frames: Vec<FrameData>,
+    fence_event: HANDLE,
+    fence: ID3D12Fence,
 
     root_signature: ID3D12RootSignature,
 
@@ -116,6 +120,8 @@ impl GrapicsDeviceInner {
 
         let root_signature = Self::create_root_signature(&device);
 
+        let (fence, fence_event) = Self::create_fence(&device);
+
         let mut frames = Vec::new();
         for _ in 0..crate::graphics_device::GraphicsDevice::FRAME_COUNT {
             let command_allocator = Self::create_command_allocator(&device);
@@ -129,6 +135,8 @@ impl GrapicsDeviceInner {
 
         Self {
             frames,
+            fence_event,
+            fence,
 
             root_signature,
 
@@ -271,6 +279,15 @@ impl GrapicsDeviceInner {
         root_signature
     }
 
+    fn create_fence(device: &ID3D12Device) -> (ID3D12Fence, HANDLE) {
+        let fence = unsafe { device.CreateFence(0, D3D12_FENCE_FLAG_NONE) }
+            .expect("failed to create fence");
+        let fence_event = unsafe { CreateEventA(None, false, false, None) }
+            .expect("failed to create fence event");
+
+        (fence, fence_event)
+    }
+
     fn create_command_allocator(device: &ID3D12Device) -> ID3D12CommandAllocator {
         let command_allocator =
             unsafe { device.CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT) }
@@ -340,6 +357,14 @@ impl GraphicsDevice {
 
     pub(crate) fn root_signature(&self) -> &ID3D12RootSignature {
         &self.inner.root_signature
+    }
+
+    pub(crate) fn fence(&self) -> &ID3D12Fence {
+        &self.inner.fence
+    }
+
+    pub(crate) fn fence_event(&self) -> HANDLE {
+        self.inner.fence_event
     }
 
     pub(crate) fn frames(&self) -> &[FrameData] {
