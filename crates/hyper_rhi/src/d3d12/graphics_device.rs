@@ -379,7 +379,8 @@ impl GraphicsDevice {
     }
 
     // TODO: Use command list
-    pub(crate) fn execute_commands(&self, command_list: &CommandList) {
+    pub(crate) fn execute_commands(&self, command_list: &crate::command_list::CommandList) {
+        let command_list = command_list.d3d12_command_list().unwrap();
         command_list.end();
 
         let current_command_list = &self.current_frame().command_list;

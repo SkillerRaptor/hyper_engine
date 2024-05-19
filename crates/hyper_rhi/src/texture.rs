@@ -36,19 +36,17 @@ impl Texture {
     }
 
     #[cfg(target_os = "windows")]
-    pub(crate) fn d3d12_texture(&self) -> &d3d12::Texture {
-        let TextureInner::D3D12(texture) = &self.inner else {
-            panic!()
-        };
-
-        texture
+    pub(crate) fn d3d12_texture(&self) -> Option<&d3d12::Texture> {
+        match &self.inner {
+            TextureInner::D3D12(inner) => Some(inner),
+            TextureInner::Vulkan(_) => None,
+        }
     }
 
-    pub(crate) fn vulkan_texture(&self) -> &vulkan::Texture {
-        let TextureInner::Vulkan(texture) = &self.inner else {
-            panic!()
-        };
-
-        texture
+    pub(crate) fn vulkan_texture(&self) -> Option<&vulkan::Texture> {
+        match &self.inner {
+            TextureInner::D3D12(_) => None,
+            TextureInner::Vulkan(inner) => Some(inner),
+        }
     }
 }

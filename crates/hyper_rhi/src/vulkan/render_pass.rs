@@ -20,7 +20,7 @@ pub(crate) struct RenderPass {
 
 impl RenderPass {
     pub(crate) fn new(graphics_device: &GraphicsDevice, descriptor: &RenderPassDescriptor) -> Self {
-        let texture = descriptor.texture.vulkan_texture();
+        let texture = descriptor.texture.vulkan_texture().unwrap();
 
         let subresource_range = vk::ImageSubresourceRange::default()
             .aspect_mask(vk::ImageAspectFlags::COLOR)

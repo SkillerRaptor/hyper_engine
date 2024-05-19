@@ -128,14 +128,14 @@ impl GraphicsDevice {
         }
     }
 
-    pub fn execute_commands(&self, command_list: CommandList) {
+    pub fn execute_commands(&self, command_list: &CommandList) {
         match &self.inner {
             #[cfg(target_os = "windows")]
             GraphicsDeviceInner::D3D12(inner) => {
-                inner.execute_commands(command_list.d3d12_command_list());
+                inner.execute_commands(command_list);
             }
             GraphicsDeviceInner::Vulkan(inner) => {
-                inner.execute_commands(command_list.vulkan_command_list());
+                inner.execute_commands(command_list);
             }
         }
     }

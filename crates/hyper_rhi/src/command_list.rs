@@ -48,19 +48,17 @@ impl CommandList {
     }
 
     #[cfg(target_os = "windows")]
-    pub(crate) fn d3d12_command_list(&self) -> &d3d12::CommandList {
-        let CommandListInner::D3D12(command_list) = &self.inner else {
-            panic!()
-        };
-
-        command_list
+    pub(crate) fn d3d12_command_list(&self) -> Option<&d3d12::CommandList> {
+        match &self.inner {
+            CommandListInner::D3D12(inner) => Some(inner),
+            CommandListInner::Vulkan(_) => None,
+        }
     }
 
-    pub(crate) fn vulkan_command_list(&self) -> &vulkan::CommandList {
-        let CommandListInner::Vulkan(command_list) = &self.inner else {
-            panic!()
-        };
-
-        command_list
+    pub(crate) fn vulkan_command_list(&self) -> Option<&vulkan::CommandList> {
+        match &self.inner {
+            CommandListInner::D3D12(_) => None,
+            CommandListInner::Vulkan(inner) => Some(inner),
+        }
     }
 }

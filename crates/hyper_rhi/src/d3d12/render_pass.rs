@@ -44,7 +44,7 @@ pub(crate) struct RenderPass {
 
 impl RenderPass {
     pub(crate) fn new(graphics_device: &GraphicsDevice, descriptor: &RenderPassDescriptor) -> Self {
-        let texture = descriptor.texture.d3d12_texture();
+        let texture = descriptor.texture.d3d12_texture().unwrap();
 
         Self {
             texture: texture.clone(),
