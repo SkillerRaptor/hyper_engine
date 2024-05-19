@@ -4,18 +4,15 @@
  * SPDX-License-Identifier: MIT
 */
 
-use std::ffi::CStr;
+use std::ffi::CString;
 
 use ash::vk;
 
-use crate::{
-    render_pipeline::RenderPipelineDescriptor,
-    shader_compiler::{self, OutputApi, ShaderStage},
-    vulkan::GraphicsDevice,
-};
+use crate::{render_pipeline::RenderPipelineDescriptor, vulkan::GraphicsDevice};
 
-pub struct RenderPipeline {
+pub(crate) struct RenderPipeline {
     pipeline: vk::Pipeline,
+
     graphics_device: GraphicsDevice,
 }
 
@@ -24,80 +21,21 @@ impl RenderPipeline {
         graphics_device: &GraphicsDevice,
         descriptor: &RenderPipelineDescriptor,
     ) -> Self {
-        // NOTE: Maybe instead of failure compile shaders on its own for multiple pipelines and don't panic
-        let vertex_shader = shader_compiler::compile(
-            descriptor.vertex_shader,
-            ShaderStage::Vertex,
-            OutputApi::Vulkan,
-        )
-        .expect("failed to compile vertex shader");
-        let vertex_shader_module =
-            Self::create_shader_module(graphics_device, &vertex_shader, "vertex");
-
-        let pixel_shader = shader_compiler::compile(
-            descriptor.pixel_shader,
-            ShaderStage::Pixel,
-            OutputApi::Vulkan,
-        )
-        .expect("failed to compile pixel shader");
-        let pixel_shader_module =
-            Self::create_shader_module(graphics_device, &pixel_shader, "pixel");
-
-        let pipeline =
-            Self::create_pipeline(graphics_device, vertex_shader_module, pixel_shader_module);
-
-        unsafe {
-            graphics_device
-                .device()
-                .destroy_shader_module(vertex_shader_module, None);
-            graphics_device
-                .device()
-                .destroy_shader_module(pixel_shader_module, None);
-        }
-
-        Self {
-            pipeline,
-            graphics_device: graphics_device.clone(),
-        }
-    }
-
-    fn create_shader_module(
-        graphics_device: &GraphicsDevice,
-        code: &[u8],
-        stage: &str,
-    ) -> vk::ShaderModule {
-        let (prefix, code, suffix) = unsafe { code.align_to::<u32>() };
-        if !prefix.is_empty() || !suffix.is_empty() {
-            panic!("failed to align {} shader", stage);
-        }
-
-        let create_info = vk::ShaderModuleCreateInfo::default().code(code);
-
-        let shader_module = unsafe {
-            graphics_device
-                .device()
-                .create_shader_module(&create_info, None)
-        }
-        .expect(&format!("failed to create {} shader module", stage));
-        shader_module
-    }
-
-    fn create_pipeline(
-        graphics_device: &GraphicsDevice,
-        vertex_shader: vk::ShaderModule,
-        pixel_shader: vk::ShaderModule,
-    ) -> vk::Pipeline {
-        let entry_name = unsafe { CStr::from_bytes_with_nul_unchecked(b"main\0") };
-
+        let vertex_shader = descriptor.vertex_shader.vulkan_shader_module().unwrap();
+        let vertex_shader_entry =
+            CString::new(vertex_shader.entry()).expect("failed to create vertex shader entry");
         let vertex_shader_stage_create_info = vk::PipelineShaderStageCreateInfo::default()
             .stage(vk::ShaderStageFlags::VERTEX)
-            .module(vertex_shader)
-            .name(entry_name);
+            .module(vertex_shader.shader_module())
+            .name(&vertex_shader_entry);
 
+        let pixel_shader = descriptor.pixel_shader.vulkan_shader_module().unwrap();
+        let pixel_shader_entry =
+            CString::new(pixel_shader.entry()).expect("failed to create pixel shader entry");
         let pixel_shader_stage_create_info = vk::PipelineShaderStageCreateInfo::default()
             .stage(vk::ShaderStageFlags::FRAGMENT)
-            .module(pixel_shader)
-            .name(entry_name);
+            .module(pixel_shader.shader_module())
+            .name(&pixel_shader_entry);
 
         let shader_stages = [
             vertex_shader_stage_create_info,
@@ -203,7 +141,12 @@ impl RenderPipeline {
                 .create_graphics_pipelines(vk::PipelineCache::null(), &[create_info], None)
                 .expect("failed to create render pipeline")[0]
         };
-        pipeline
+
+        Self {
+            pipeline,
+
+            graphics_device: graphics_device.clone(),
+        }
     }
 
     pub(crate) fn pipeline(&self) -> vk::Pipeline {

@@ -9,8 +9,10 @@ use std::{fs, io, path::Path};
 use hassle_rs::HassleError;
 use thiserror::Error;
 
+use crate::shader_module::ShaderStage;
+
 #[derive(Debug, Error)]
-pub(crate) enum ShaderCompilationError {
+pub enum ShaderCompilationError {
     #[error("failed to find shader '{0}'")]
     NotFound(String),
 
@@ -27,39 +29,29 @@ pub(crate) enum ShaderCompilationError {
     Validation(HassleError, String),
 }
 
-#[derive(Clone, Copy, Debug)]
-pub(crate) enum ShaderStage {
-    Compute,
-    Pixel,
-    Vertex,
-}
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum OutputApi {
     D3D12,
     Vulkan,
 }
 
-pub(crate) fn compile<P>(
-    path: P,
+pub(crate) fn compile(
+    path: &str,
+    entry: &str,
     stage: ShaderStage,
     output_api: OutputApi,
-) -> Result<Vec<u8>, ShaderCompilationError>
-where
-    P: AsRef<Path>,
-{
-    let path = path.as_ref();
-    let path_display = path.display().to_string();
+) -> Result<Vec<u8>, ShaderCompilationError> {
+    let fs_path = Path::new(path);
 
-    if !path.exists() {
-        return Err(ShaderCompilationError::NotFound(path_display));
+    if !fs_path.exists() {
+        return Err(ShaderCompilationError::NotFound(path.to_owned()));
     }
 
-    if !path.is_file() {
-        return Err(ShaderCompilationError::NotAFile(path_display));
+    if !fs_path.is_file() {
+        return Err(ShaderCompilationError::NotAFile(path.to_owned()));
     }
 
-    let file_name_os = path.file_name().unwrap();
+    let file_name_os = fs_path.file_name().unwrap();
     let file_name = file_name_os.to_str().unwrap();
 
     let profile = match stage {
@@ -68,8 +60,8 @@ where
         ShaderStage::Vertex => "vs_6_6",
     };
 
-    let source = fs::read_to_string(path)
-        .map_err(|error| ShaderCompilationError::Io(error, path_display.clone()))?;
+    let source = fs::read_to_string(fs_path)
+        .map_err(|error| ShaderCompilationError::Io(error, path.to_owned()))?;
 
     let mut args = Vec::new();
     let mut defines = Vec::new();
@@ -79,12 +71,12 @@ where
     }
 
     let mut shader_bytes =
-        hassle_rs::compile_hlsl(file_name, &source, "main", profile, &args, &defines)
-            .map_err(|error| ShaderCompilationError::Compilation(error, path_display.clone()))?;
+        hassle_rs::compile_hlsl(file_name, &source, entry, profile, &args, &defines)
+            .map_err(|error| ShaderCompilationError::Compilation(error, path.to_owned()))?;
 
     if output_api == OutputApi::D3D12 {
         shader_bytes = hassle_rs::validate_dxil(&shader_bytes)
-            .map_err(|error| ShaderCompilationError::Validation(error, path_display))?;
+            .map_err(|error| ShaderCompilationError::Validation(error, path.to_owned()))?;
     }
 
     Ok(shader_bytes)

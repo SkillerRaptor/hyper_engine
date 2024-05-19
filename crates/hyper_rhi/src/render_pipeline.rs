@@ -6,12 +6,12 @@
 
 #[cfg(target_os = "windows")]
 use crate::d3d12;
-use crate::vulkan;
+use crate::{shader_module::ShaderModule, vulkan};
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct RenderPipelineDescriptor<'a> {
-    pub vertex_shader: &'a str,
-    pub pixel_shader: &'a str,
+    pub vertex_shader: &'a ShaderModule,
+    pub pixel_shader: &'a ShaderModule,
 }
 
 enum RenderPipelineInner {
@@ -39,19 +39,17 @@ impl RenderPipeline {
     }
 
     #[cfg(target_os = "windows")]
-    pub(crate) fn d3d12_render_pipeline(&self) -> &d3d12::RenderPipeline {
-        let RenderPipelineInner::D3D12(render_pipeline) = &self.inner else {
-            panic!()
-        };
-
-        render_pipeline
+    pub(crate) fn d3d12_render_pipeline(&self) -> Option<&d3d12::RenderPipeline> {
+        match &self.inner {
+            RenderPipelineInner::D3D12(inner) => Some(inner),
+            RenderPipelineInner::Vulkan(_) => None,
+        }
     }
 
-    pub(crate) fn vulkan_render_pipeline(&self) -> &vulkan::RenderPipeline {
-        let RenderPipelineInner::Vulkan(render_pipeline) = &self.inner else {
-            panic!()
-        };
-
-        render_pipeline
+    pub(crate) fn vulkan_render_pipeline(&self) -> Option<&vulkan::RenderPipeline> {
+        match &self.inner {
+            RenderPipelineInner::D3D12(_) => None,
+            RenderPipelineInner::Vulkan(inner) => Some(inner),
+        }
     }
 }

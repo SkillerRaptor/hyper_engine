@@ -50,10 +50,8 @@ impl RenderPass {
     pub fn bind_pipeline(&self, pipeline: &RenderPipeline) {
         match &self.inner {
             #[cfg(target_os = "windows")]
-            RenderPassInner::D3D12(inner) => inner.bind_pipeline(pipeline.d3d12_render_pipeline()),
-            RenderPassInner::Vulkan(inner) => {
-                inner.bind_pipeline(pipeline.vulkan_render_pipeline())
-            }
+            RenderPassInner::D3D12(inner) => inner.bind_pipeline(pipeline),
+            RenderPassInner::Vulkan(inner) => inner.bind_pipeline(pipeline),
         }
     }
 

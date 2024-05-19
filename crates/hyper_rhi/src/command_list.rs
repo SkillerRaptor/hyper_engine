@@ -35,22 +35,6 @@ impl CommandList {
         }
     }
 
-    pub(crate) fn begin(&self) {
-        match &self.inner {
-            #[cfg(target_os = "windows")]
-            CommandListInner::D3D12(inner) => inner.begin(),
-            CommandListInner::Vulkan(inner) => inner.begin(),
-        }
-    }
-
-    pub(crate) fn end(&self) {
-        match &self.inner {
-            #[cfg(target_os = "windows")]
-            CommandListInner::D3D12(inner) => inner.end(),
-            CommandListInner::Vulkan(inner) => inner.end(),
-        }
-    }
-
     pub fn begin_render_pass(&self, descriptor: &RenderPassDescriptor) -> RenderPass {
         match &self.inner {
             #[cfg(target_os = "windows")]

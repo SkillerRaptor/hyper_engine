@@ -11,6 +11,7 @@ use crate::d3d12;
 use crate::{
     command_list::CommandList,
     render_pipeline::{RenderPipeline, RenderPipelineDescriptor},
+    shader_module::{ShaderModule, ShaderModuleDescriptor, ShaderModuleError},
     surface::{Surface, SurfaceDescriptor},
     texture::{Texture, TextureDescriptor},
     vulkan,
@@ -86,6 +87,21 @@ impl GraphicsDevice {
                 RenderPipeline::new_vulkan(inner.create_render_pipeline(descriptor))
             }
         }
+    }
+
+    pub fn create_shader_module(
+        &self,
+        descriptor: &ShaderModuleDescriptor,
+    ) -> Result<ShaderModule, ShaderModuleError> {
+        Ok(match &self.inner {
+            #[cfg(target_os = "windows")]
+            GraphicsDeviceInner::D3D12(inner) => {
+                ShaderModule::new_d3d12(inner.create_shader_module(descriptor)?)
+            }
+            GraphicsDeviceInner::Vulkan(inner) => {
+                ShaderModule::new_vulkan(inner.create_shader_module(descriptor)?)
+            }
+        })
     }
 
     pub fn create_texture(&self, descriptor: &TextureDescriptor) -> Texture {

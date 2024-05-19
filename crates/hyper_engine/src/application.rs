@@ -11,6 +11,7 @@ use hyper_rhi::{
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
     render_pass::RenderPassDescriptor,
     render_pipeline::{RenderPipeline, RenderPipelineDescriptor},
+    shader_module::{ShaderModuleDescriptor, ShaderModuleError, ShaderStage},
     surface::{Surface, SurfaceDescriptor},
 };
 use thiserror::Error;
@@ -18,9 +19,12 @@ use thiserror::Error;
 use crate::game::Game;
 
 #[derive(Debug, Error)]
-pub enum Error {
+pub enum ApplicationError {
     #[error(transparent)]
     Window(#[from] window::Error),
+
+    #[error("failed to create shader module")]
+    ShaderModuleCreation(#[from] ShaderModuleError),
 }
 
 #[derive(Debug)]
@@ -42,7 +46,10 @@ pub struct Application {
 }
 
 impl Application {
-    pub fn new(game: Box<dyn Game>, descriptor: ApplicationDescriptor) -> Result<Self, Error> {
+    pub fn new(
+        game: Box<dyn Game>,
+        descriptor: ApplicationDescriptor,
+    ) -> Result<Self, ApplicationError> {
         let start_time = Instant::now();
 
         let title = if cfg!(debug_assertions) {
@@ -60,16 +67,28 @@ impl Application {
 
         let graphics_device = GraphicsDevice::new(&GraphicsDeviceDescriptor {
             // TODO: Don't hardcode and use CLI options
-            graphics_api: GraphicsApi::Vulkan,
+            graphics_api: GraphicsApi::D3D12,
             debug_mode: cfg!(debug_assertions),
             window: &window,
         });
 
         let surface = graphics_device.create_surface(&SurfaceDescriptor { window: &window });
 
+        let vertex_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
+            path: "./assets/shaders/vertex_shader.hlsl",
+            entry: "main",
+            stage: ShaderStage::Vertex,
+        })?;
+
+        let pixel_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
+            path: "./assets/shaders/pixel_shader.hlsl",
+            entry: "main",
+            stage: ShaderStage::Pixel,
+        })?;
+
         let render_pipeline = graphics_device.create_render_pipeline(&RenderPipelineDescriptor {
-            vertex_shader: "./assets/shaders/vertex_shader.hlsl",
-            pixel_shader: "./assets/shaders/pixel_shader.hlsl",
+            vertex_shader: &vertex_shader,
+            pixel_shader: &pixel_shader,
         });
 
         log::info!(

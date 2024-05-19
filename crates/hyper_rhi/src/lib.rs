@@ -8,6 +8,7 @@ pub mod command_list;
 pub mod graphics_device;
 pub mod render_pass;
 pub mod render_pipeline;
+pub mod shader_module;
 pub mod surface;
 pub mod texture;
 

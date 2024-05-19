@@ -21,9 +21,10 @@ use crate::{
     bindings::BindingsOffset,
     graphics_device::GraphicsDeviceDescriptor,
     render_pipeline::RenderPipelineDescriptor,
+    shader_module::ShaderModuleDescriptor,
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
-    vulkan::{CommandList, RenderPipeline, Surface, Texture},
+    vulkan::{CommandList, RenderPipeline, ShaderModule, ShaderModuleError, Surface, Texture},
 };
 
 pub(crate) struct FrameData {
@@ -720,6 +721,13 @@ impl GraphicsDevice {
         descriptor: &RenderPipelineDescriptor,
     ) -> RenderPipeline {
         RenderPipeline::new(self, descriptor)
+    }
+
+    pub(crate) fn create_shader_module(
+        &self,
+        descriptor: &ShaderModuleDescriptor,
+    ) -> Result<ShaderModule, ShaderModuleError> {
+        ShaderModule::new(self, descriptor)
     }
 
     pub(crate) fn create_texture(&self, descriptor: &TextureDescriptor) -> Texture {

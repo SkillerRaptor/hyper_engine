@@ -63,11 +63,14 @@ use crate::{
         resource_heap::{ResourceHeap, ResourceHeapDescriptor, ResourceHeapType},
         CommandList,
         RenderPipeline,
+        ShaderModule,
+        ShaderModuleError,
         Surface,
         Texture,
     },
     graphics_device::GraphicsDeviceDescriptor,
     render_pipeline::RenderPipelineDescriptor,
+    shader_module::ShaderModuleDescriptor,
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
 };
@@ -362,6 +365,13 @@ impl GraphicsDevice {
 
     pub(crate) fn create_texture(&self, descriptor: &TextureDescriptor) -> Texture {
         Texture::new(self, descriptor)
+    }
+
+    pub(crate) fn create_shader_module(
+        &self,
+        descriptor: &ShaderModuleDescriptor,
+    ) -> Result<ShaderModule, ShaderModuleError> {
+        ShaderModule::new(descriptor)
     }
 
     pub(crate) fn create_command_list(&self) -> CommandList {

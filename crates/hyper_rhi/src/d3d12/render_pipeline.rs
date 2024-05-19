@@ -27,15 +27,10 @@ use windows::Win32::Graphics::{
     Dxgi::Common::{DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SAMPLE_DESC},
 };
 
-use crate::{
-    d3d12::GraphicsDevice,
-    render_pipeline::RenderPipelineDescriptor,
-    shader_compiler::{self, OutputApi, ShaderStage},
-};
+use crate::{d3d12::GraphicsDevice, render_pipeline::RenderPipelineDescriptor};
 
 pub struct RenderPipeline {
     pipeline_state: ID3D12PipelineState,
-    graphics_device: GraphicsDevice,
 }
 
 impl RenderPipeline {
@@ -43,43 +38,20 @@ impl RenderPipeline {
         graphics_device: &GraphicsDevice,
         descriptor: &RenderPipelineDescriptor,
     ) -> Self {
-        // NOTE: Maybe instead of failure compile shaders on its own for multiple pipelines and don't panic
-        let mut vertex_shader = shader_compiler::compile(
-            descriptor.vertex_shader,
-            ShaderStage::Vertex,
-            OutputApi::D3D12,
-        )
-        .expect("failed to compile vertex shader");
-        let mut pixel_shader = shader_compiler::compile(
-            descriptor.pixel_shader,
-            ShaderStage::Pixel,
-            OutputApi::D3D12,
-        )
-        .expect("failed to compile pixel shader");
+        let vertex_shader = descriptor.vertex_shader.d3d12_shader_module().unwrap();
+        let vertex_shader_code = vertex_shader.code();
 
-        let pipeline_state =
-            Self::create_pipeline_state(graphics_device, &mut vertex_shader, &mut pixel_shader);
-
-        Self {
-            pipeline_state,
-            graphics_device: graphics_device.clone(),
-        }
-    }
-
-    fn create_pipeline_state(
-        graphics_device: &GraphicsDevice,
-        vertex_shader: &mut [u8],
-        pixel_shader: &mut [u8],
-    ) -> ID3D12PipelineState {
+        let pixel_shader = descriptor.pixel_shader.d3d12_shader_module().unwrap();
+        let pixel_shader_code = pixel_shader.code();
         let mut descriptor = D3D12_GRAPHICS_PIPELINE_STATE_DESC {
             pRootSignature: unsafe { mem::transmute_copy(graphics_device.root_signature()) },
             VS: D3D12_SHADER_BYTECODE {
-                pShaderBytecode: vertex_shader.as_mut_ptr() as *const c_void,
-                BytecodeLength: vertex_shader.len(),
+                pShaderBytecode: vertex_shader_code.as_ptr() as *const c_void,
+                BytecodeLength: vertex_shader_code.len(),
             },
             PS: D3D12_SHADER_BYTECODE {
-                pShaderBytecode: pixel_shader.as_mut_ptr() as *const c_void,
-                BytecodeLength: pixel_shader.len(),
+                pShaderBytecode: pixel_shader_code.as_ptr() as *const c_void,
+                BytecodeLength: pixel_shader_code.len(),
             },
             RasterizerState: D3D12_RASTERIZER_DESC {
                 FillMode: D3D12_FILL_MODE_SOLID,
@@ -130,7 +102,7 @@ impl RenderPipeline {
         }
         .expect("failed to create render pipeline state");
 
-        pipeline_state
+        Self { pipeline_state }
     }
 
     pub(crate) fn pipeline_state(&self) -> &ID3D12PipelineState {
