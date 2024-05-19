@@ -73,6 +73,7 @@ impl ShaderModule {
     #[cfg(target_os = "windows")]
     pub(crate) fn d3d12_shader_module(&self) -> Option<&d3d12::ShaderModule> {
         match &self.inner {
+            #[cfg(target_os = "windows")]
             ShaderModuleInner::D3D12(inner) => Some(inner),
             ShaderModuleInner::Vulkan(_) => None,
         }
@@ -80,6 +81,7 @@ impl ShaderModule {
 
     pub(crate) fn vulkan_shader_module(&self) -> Option<&vulkan::ShaderModule> {
         match &self.inner {
+            #[cfg(target_os = "windows")]
             ShaderModuleInner::D3D12(_) => None,
             ShaderModuleInner::Vulkan(inner) => Some(inner),
         }

@@ -41,6 +41,7 @@ impl RenderPipeline {
     #[cfg(target_os = "windows")]
     pub(crate) fn d3d12_render_pipeline(&self) -> Option<&d3d12::RenderPipeline> {
         match &self.inner {
+            #[cfg(target_os = "windows")]
             RenderPipelineInner::D3D12(inner) => Some(inner),
             RenderPipelineInner::Vulkan(_) => None,
         }
@@ -48,6 +49,7 @@ impl RenderPipeline {
 
     pub(crate) fn vulkan_render_pipeline(&self) -> Option<&vulkan::RenderPipeline> {
         match &self.inner {
+            #[cfg(target_os = "windows")]
             RenderPipelineInner::D3D12(_) => None,
             RenderPipelineInner::Vulkan(inner) => Some(inner),
         }

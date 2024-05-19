@@ -50,6 +50,7 @@ impl CommandList {
     #[cfg(target_os = "windows")]
     pub(crate) fn d3d12_command_list(&self) -> Option<&d3d12::CommandList> {
         match &self.inner {
+            #[cfg(target_os = "windows")]
             CommandListInner::D3D12(inner) => Some(inner),
             CommandListInner::Vulkan(_) => None,
         }
@@ -57,6 +58,7 @@ impl CommandList {
 
     pub(crate) fn vulkan_command_list(&self) -> Option<&vulkan::CommandList> {
         match &self.inner {
+            #[cfg(target_os = "windows")]
             CommandListInner::D3D12(_) => None,
             CommandListInner::Vulkan(inner) => Some(inner),
         }
