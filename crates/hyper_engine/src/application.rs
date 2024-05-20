@@ -18,7 +18,7 @@ use thiserror::Error;
 
 use crate::game::Game;
 
-#[derive(Error)]
+#[derive(Debug, Error)]
 pub enum ApplicationError {
     #[error(transparent)]
     Window(#[from] window::Error),
