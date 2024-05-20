@@ -7,7 +7,6 @@
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
-    fmt::Debug,
 };
 
 use hyper_core::handle_manager::HandleManager;
@@ -22,7 +21,7 @@ pub(crate) trait ComponentList {
 
 impl<T> ComponentList for SparseSet<T>
 where
-    T: 'static + Debug,
+    T: 'static,
 {
     fn as_any(&self) -> &dyn Any {
         self
@@ -59,7 +58,7 @@ impl Registry {
         self.handle_manager.destroy_handle(entity)
     }
 
-    pub fn add_component<T: 'static + Debug>(&mut self, entity: Entity, component: T) {
+    pub fn add_component<T: 'static>(&mut self, entity: Entity, component: T) {
         assert!(self.handle_manager.is_handle_valid(entity));
 
         let component_id = self.get_component_id_or_construct::<T>();
@@ -76,7 +75,7 @@ impl Registry {
         specific_set.push(entity, component);
     }
 
-    pub fn remove_component<T: 'static + Debug>(&mut self, entity: Entity) {
+    pub fn remove_component<T: 'static>(&mut self, entity: Entity) {
         assert!(self.handle_manager.is_handle_valid(entity));
 
         let component_id = self.get_component_id_or_construct::<T>();
@@ -93,7 +92,7 @@ impl Registry {
         specific_set.remove(entity);
     }
 
-    pub fn get_component<T: 'static + Debug>(&self, entity: Entity) -> Option<&T> {
+    pub fn get_component<T: 'static>(&self, entity: Entity) -> Option<&T> {
         assert!(self.handle_manager.is_handle_valid(entity));
 
         let Some(component_id) = self.get_component_id::<T>() else {
@@ -113,7 +112,7 @@ impl Registry {
         specific_set.get(entity)
     }
 
-    pub fn get_component_mut<T: 'static + Debug>(&mut self, entity: Entity) -> Option<&mut T> {
+    pub fn get_component_mut<T: 'static>(&mut self, entity: Entity) -> Option<&mut T> {
         assert!(self.handle_manager.is_handle_valid(entity));
 
         let component_id = self.get_component_id_or_construct::<T>();
@@ -132,7 +131,7 @@ impl Registry {
 
     pub fn view_one<F, A>(&self, mut f: F)
     where
-        A: 'static + Debug,
+        A: 'static,
         F: FnMut(Entity, &A),
     {
         let Some(component_id) = self.get_component_id::<A>() else {
@@ -152,7 +151,7 @@ impl Registry {
 
     pub fn view_one_mut<F, A>(&mut self, mut f: F)
     where
-        A: 'static + Debug,
+        A: 'static,
         F: FnMut(Entity, &mut A),
     {
         let Some(component_id) = self.get_component_id::<A>() else {
@@ -172,8 +171,8 @@ impl Registry {
 
     pub fn view_two<F, A, B>(&self, mut f: F)
     where
-        A: 'static + Debug,
-        B: 'static + Debug,
+        A: 'static,
+        B: 'static,
         F: FnMut(Entity, &A, &B),
     {
         let Some(a_component_id) = self.get_component_id::<A>() else {
@@ -223,8 +222,8 @@ impl Registry {
 
     pub fn view_two_mut<F, A, B>(&mut self, mut f: F)
     where
-        A: 'static + Debug,
-        B: 'static + Debug,
+        A: 'static,
+        B: 'static,
         F: FnMut(Entity, &mut A, &mut B),
     {
         let Some(a_component_id) = self.get_component_id::<A>() else {
@@ -268,7 +267,7 @@ impl Registry {
         };
     }
 
-    fn get_component_id<T: 'static + Debug>(&self) -> Option<usize> {
+    fn get_component_id<T: 'static>(&self) -> Option<usize> {
         let type_id = TypeId::of::<T>();
         if self.component_indices.contains_key(&type_id) {
             Some(self.component_indices[&type_id])
@@ -277,7 +276,7 @@ impl Registry {
         }
     }
 
-    fn get_component_id_or_construct<T: 'static + Debug>(&mut self) -> usize {
+    fn get_component_id_or_construct<T: 'static>(&mut self) -> usize {
         let component = self.get_component_id::<T>();
         if let Some(component_id) = component {
             return component_id;
@@ -584,7 +583,6 @@ mod tests {
 
         registry.destroy_entity(entity_1);
 
-        #[derive(Debug)]
         struct Position {
             _x: f32,
             _y: f32,

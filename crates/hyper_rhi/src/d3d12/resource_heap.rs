@@ -16,14 +16,14 @@ use windows::Win32::Graphics::Direct3D12::{
     D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 };
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) enum ResourceHeapType {
     CbvSrvUav,
     Rtv,
     Dsv,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub(super) struct ResourceHeapDescriptor {
     pub(super) ty: ResourceHeapType,
     pub(super) count: u32,

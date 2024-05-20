@@ -10,7 +10,7 @@ use hyper_platform::window::Window;
 use crate::d3d12;
 use crate::{texture::Texture, vulkan};
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct SurfaceDescriptor<'a> {
     pub window: &'a Window,
 }

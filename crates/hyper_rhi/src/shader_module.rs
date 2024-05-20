@@ -39,7 +39,7 @@ impl Display for ShaderStage {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct ShaderModuleDescriptor<'a> {
     pub path: &'a str,
     pub entry: &'a str,

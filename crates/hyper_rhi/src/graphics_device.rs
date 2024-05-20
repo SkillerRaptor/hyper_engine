@@ -17,20 +17,19 @@ use crate::{
     vulkan,
 };
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub enum GraphicsApi {
     D3D12,
     Vulkan,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct GraphicsDeviceDescriptor<'a> {
     pub graphics_api: GraphicsApi,
     pub debug_mode: bool,
     pub window: &'a Window,
 }
 
-#[allow(unused)] // TODO: Remove this
 enum GraphicsDeviceInner {
     #[cfg(target_os = "windows")]
     D3D12(d3d12::GraphicsDevice),

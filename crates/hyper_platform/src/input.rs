@@ -10,7 +10,7 @@ use hyper_math::Vec2;
 
 use crate::{key_code::KeyCode, mouse_code::MouseCode};
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct Input {
     key_codes: HashMap<KeyCode, bool>,
     mouse_codes: HashMap<MouseCode, bool>,

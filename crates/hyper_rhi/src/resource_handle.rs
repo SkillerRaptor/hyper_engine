@@ -5,5 +5,5 @@
  */
 
 #[repr(transparent)]
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Default)]
 pub(crate) struct ResourceHandle(u32);

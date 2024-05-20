@@ -9,8 +9,8 @@ use std::{borrow::Cow, num::NonZeroU32, time::Instant};
 use hyper_platform::window::{self, Window, WindowDescriptor};
 use hyper_rhi::{
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
-    render_pass::RenderPassDescriptor,
     graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
+    render_pass::RenderPassDescriptor,
     shader_module::{ShaderModuleDescriptor, ShaderModuleError, ShaderStage},
     surface::{Surface, SurfaceDescriptor},
 };
@@ -18,7 +18,7 @@ use thiserror::Error;
 
 use crate::game::Game;
 
-#[derive(Debug, Error)]
+#[derive(Error)]
 pub enum ApplicationError {
     #[error(transparent)]
     Window(#[from] window::Error),
@@ -27,7 +27,6 @@ pub enum ApplicationError {
     ShaderModuleCreation(#[from] ShaderModuleError),
 }
 
-#[derive(Debug)]
 pub struct ApplicationDescriptor<'a> {
     pub title: &'a str,
     pub width: NonZeroU32,
@@ -86,10 +85,11 @@ impl Application {
             stage: ShaderStage::Pixel,
         })?;
 
-        let graphics_pipeline = graphics_device.create_graphics_pipeline(&GraphicsPipelineDescriptor {
-            vertex_shader: &vertex_shader,
-            pixel_shader: &pixel_shader,
-        });
+        let graphics_pipeline =
+            graphics_device.create_graphics_pipeline(&GraphicsPipelineDescriptor {
+                vertex_shader: &vertex_shader,
+                pixel_shader: &pixel_shader,
+            });
 
         log::info!(
             "Application initialized in {:.4} seconds",

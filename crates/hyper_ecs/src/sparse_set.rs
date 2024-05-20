@@ -5,7 +5,6 @@
 */
 
 use std::{
-    fmt::Debug,
     slice::{Iter, IterMut},
     vec::IntoIter,
 };
@@ -14,7 +13,6 @@ use hyper_core::handle::Handle;
 
 use crate::entity::Entity;
 
-#[derive(Debug)]
 pub struct Entry<T> {
     key: Entity,
     value: T,
@@ -34,7 +32,7 @@ impl<T> Entry<T> {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct SparseSet<T> {
     sparse: Vec<usize>,
     dense: Vec<Entry<T>>,

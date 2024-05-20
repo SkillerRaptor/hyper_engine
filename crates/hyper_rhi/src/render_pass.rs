@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: MIT
 */
 
-use std::fmt::Debug;
-
 #[cfg(target_os = "windows")]
 use crate::d3d12;
 use crate::{graphics_pipeline::GraphicsPipeline, texture::Texture, vulkan};
@@ -14,13 +12,6 @@ use crate::{graphics_pipeline::GraphicsPipeline, texture::Texture, vulkan};
 pub struct RenderPassDescriptor<'a> {
     // TODO: Add image view type
     pub texture: &'a Texture,
-}
-
-impl<'a> Debug for RenderPassDescriptor<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("RenderPassDescriptor")
-            .finish_non_exhaustive()
-    }
 }
 
 enum RenderPassInner {

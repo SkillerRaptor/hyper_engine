@@ -8,7 +8,7 @@
 use crate::d3d12;
 use crate::vulkan;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct TextureDescriptor {}
 
 enum TextureInner {

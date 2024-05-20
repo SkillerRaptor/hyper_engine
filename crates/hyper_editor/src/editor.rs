@@ -6,7 +6,7 @@
 
 use hyper_engine::game::Game;
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub(crate) struct Editor {}
 
 impl Game for Editor {

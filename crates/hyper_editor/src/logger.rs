@@ -15,7 +15,7 @@ use fern::{
 use log::{Level, LevelFilter};
 
 #[allow(dead_code)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub(crate) enum Verbosity {
     Error,
     Warning,

@@ -29,7 +29,7 @@ pub enum ShaderCompilationError {
     Validation(HassleError, String),
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum OutputApi {
     D3D12,
     Vulkan,

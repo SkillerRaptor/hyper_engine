@@ -6,7 +6,7 @@
 
 use crate::handle::{Handle, IdType};
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct HandleManager<T>
 where
     T: Handle,

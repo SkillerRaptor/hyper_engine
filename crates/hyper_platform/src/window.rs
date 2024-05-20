@@ -27,7 +27,6 @@ use winit::{
 
 use crate::{input::Input, key_code::KeyCode, mouse_code::MouseCode};
 
-#[derive(Debug)]
 pub struct WindowDescriptor<'a> {
     pub title: &'a str,
     pub width: NonZeroU32,
@@ -44,7 +43,6 @@ pub enum Error {
     EventLoopError(#[from] EventLoopError),
 }
 
-#[derive(Debug)]
 pub struct Window {
     resized: bool,
     input: Input,

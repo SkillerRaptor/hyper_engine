@@ -4,15 +4,13 @@
  * SPDX-License-Identifier: MIT
 */
 
-use std::fmt::Debug;
-
 pub use hyper_core_macros::Handle;
 
 pub type ValueType = u32;
 pub type IdType = u32;
 pub type VersionType = u16;
 
-pub trait Handle: Clone + Copy + Debug + Default + PartialEq + Eq {
+pub trait Handle: Clone + Copy + Default + PartialEq + Eq {
     const ID_MASK: u32 = 0xfffff000;
     const ID_SHIFT: u32 = 12;
     const VERSION_MASK: u32 = 0x00000fff;
