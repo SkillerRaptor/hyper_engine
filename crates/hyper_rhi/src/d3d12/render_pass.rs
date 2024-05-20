@@ -32,8 +32,8 @@ use windows::Win32::{
 
 use crate::{
     d3d12::{GraphicsDevice, Texture},
-    render_pass::RenderPassDescriptor,
     graphics_pipeline::GraphicsPipeline,
+    render_pass::RenderPassDescriptor,
 };
 
 pub(crate) struct RenderPass {
@@ -45,6 +45,29 @@ pub(crate) struct RenderPass {
 impl RenderPass {
     pub(crate) fn new(graphics_device: &GraphicsDevice, descriptor: &RenderPassDescriptor) -> Self {
         let texture = descriptor.texture.d3d12_texture().unwrap();
+
+        let current_frame = graphics_device.current_frame();
+        let command_allocator = &current_frame.command_allocator;
+        let command_list = &current_frame.command_list;
+
+        unsafe {
+            command_list
+                .Reset(command_allocator, None)
+                .expect("failed to reset command list");
+
+            command_list.ResourceBarrier(&[D3D12_RESOURCE_BARRIER {
+                Type: D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
+                Flags: D3D12_RESOURCE_BARRIER_FLAG_NONE,
+                Anonymous: D3D12_RESOURCE_BARRIER_0 {
+                    Transition: ManuallyDrop::new(D3D12_RESOURCE_TRANSITION_BARRIER {
+                        pResource: mem::transmute_copy(texture.resource()),
+                        StateBefore: D3D12_RESOURCE_STATE_PRESENT,
+                        StateAfter: D3D12_RESOURCE_STATE_RENDER_TARGET,
+                        Subresource: D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+                    }),
+                },
+            }]);
+        }
 
         Self {
             texture: texture.clone(),
@@ -77,30 +100,13 @@ impl RenderPass {
         };
 
         let current_frame = self.graphics_device.current_frame();
-        let command_allocator = &current_frame.command_allocator;
         let command_list = &current_frame.command_list;
 
         unsafe {
-            command_list
-                .Reset(command_allocator, pipeline.pipeline_state())
-                .expect("failed to reset command list");
-
             command_list.SetGraphicsRootSignature(self.graphics_device.root_signature());
+            command_list.SetPipelineState(pipeline.pipeline_state());
             command_list.RSSetViewports(&[viewport]);
             command_list.RSSetScissorRects(&[scissor_rect]);
-
-            command_list.ResourceBarrier(&[D3D12_RESOURCE_BARRIER {
-                Type: D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
-                Flags: D3D12_RESOURCE_BARRIER_FLAG_NONE,
-                Anonymous: D3D12_RESOURCE_BARRIER_0 {
-                    Transition: ManuallyDrop::new(D3D12_RESOURCE_TRANSITION_BARRIER {
-                        pResource: mem::transmute_copy(self.texture.resource()),
-                        StateBefore: D3D12_RESOURCE_STATE_PRESENT,
-                        StateAfter: D3D12_RESOURCE_STATE_RENDER_TARGET,
-                        Subresource: D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-                    }),
-                },
-            }]);
 
             let frame_index = self
                 .graphics_device
