@@ -10,7 +10,7 @@ use hyper_platform::window::{self, Window, WindowDescriptor};
 use hyper_rhi::{
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
     render_pass::RenderPassDescriptor,
-    render_pipeline::{RenderPipeline, RenderPipelineDescriptor},
+    graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
     shader_module::{ShaderModuleDescriptor, ShaderModuleError, ShaderStage},
     surface::{Surface, SurfaceDescriptor},
 };
@@ -37,7 +37,7 @@ pub struct ApplicationDescriptor<'a> {
 
 pub struct Application {
     // Rendering
-    render_pipeline: RenderPipeline,
+    graphics_pipeline: GraphicsPipeline,
     surface: Surface,
     graphics_device: GraphicsDevice,
 
@@ -86,7 +86,7 @@ impl Application {
             stage: ShaderStage::Pixel,
         })?;
 
-        let render_pipeline = graphics_device.create_render_pipeline(&RenderPipelineDescriptor {
+        let graphics_pipeline = graphics_device.create_graphics_pipeline(&GraphicsPipelineDescriptor {
             vertex_shader: &vertex_shader,
             pixel_shader: &pixel_shader,
         });
@@ -97,7 +97,7 @@ impl Application {
         );
 
         Ok(Self {
-            render_pipeline,
+            graphics_pipeline,
             surface,
             graphics_device,
 
@@ -149,7 +149,7 @@ impl Application {
                     texture: &swapchain_texture,
                 });
 
-                render_pass.bind_pipeline(&self.render_pipeline);
+                render_pass.bind_pipeline(&self.graphics_pipeline);
                 render_pass.draw(3, 1, 0, 0);
             }
 

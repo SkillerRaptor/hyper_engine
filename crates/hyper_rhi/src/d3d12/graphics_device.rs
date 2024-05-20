@@ -62,14 +62,14 @@ use crate::{
     d3d12::{
         resource_heap::{ResourceHeap, ResourceHeapDescriptor, ResourceHeapType},
         CommandList,
-        RenderPipeline,
+        GraphicsPipeline,
         ShaderModule,
         ShaderModuleError,
         Surface,
         Texture,
     },
     graphics_device::GraphicsDeviceDescriptor,
-    render_pipeline::RenderPipelineDescriptor,
+    graphics_pipeline::GraphicsPipelineDescriptor,
     shader_module::ShaderModuleDescriptor,
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
@@ -356,11 +356,11 @@ impl GraphicsDevice {
         Surface::new(self, descriptor)
     }
 
-    pub(crate) fn create_render_pipeline(
+    pub(crate) fn create_graphics_pipeline(
         &self,
-        descriptor: &RenderPipelineDescriptor,
-    ) -> RenderPipeline {
-        RenderPipeline::new(self, descriptor)
+        descriptor: &GraphicsPipelineDescriptor,
+    ) -> GraphicsPipeline {
+        GraphicsPipeline::new(self, descriptor)
     }
 
     pub(crate) fn create_texture(&self, descriptor: &TextureDescriptor) -> Texture {

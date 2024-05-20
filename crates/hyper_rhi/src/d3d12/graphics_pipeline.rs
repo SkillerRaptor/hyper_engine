@@ -27,16 +27,16 @@ use windows::Win32::Graphics::{
     Dxgi::Common::{DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SAMPLE_DESC},
 };
 
-use crate::{d3d12::GraphicsDevice, render_pipeline::RenderPipelineDescriptor};
+use crate::{d3d12::GraphicsDevice, graphics_pipeline::GraphicsPipelineDescriptor};
 
-pub struct RenderPipeline {
+pub struct GraphicsPipeline {
     pipeline_state: ID3D12PipelineState,
 }
 
-impl RenderPipeline {
+impl GraphicsPipeline {
     pub(crate) fn new(
         graphics_device: &GraphicsDevice,
-        descriptor: &RenderPipelineDescriptor,
+        descriptor: &GraphicsPipelineDescriptor,
     ) -> Self {
         let vertex_shader = descriptor.vertex_shader.d3d12_shader_module().unwrap();
         let vertex_shader_code = vertex_shader.code();
@@ -100,7 +100,7 @@ impl RenderPipeline {
                 .device()
                 .CreateGraphicsPipelineState(&descriptor)
         }
-        .expect("failed to create render pipeline state");
+        .expect("failed to create graphics pipeline state");
 
         Self { pipeline_state }
     }

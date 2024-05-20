@@ -20,11 +20,11 @@ use raw_window_handle::{DisplayHandle, HasDisplayHandle};
 use crate::{
     bindings::BindingsOffset,
     graphics_device::GraphicsDeviceDescriptor,
-    render_pipeline::RenderPipelineDescriptor,
+    graphics_pipeline::GraphicsPipelineDescriptor,
     shader_module::ShaderModuleDescriptor,
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
-    vulkan::{CommandList, RenderPipeline, ShaderModule, ShaderModuleError, Surface, Texture},
+    vulkan::{CommandList, GraphicsPipeline, ShaderModule, ShaderModuleError, Surface, Texture},
 };
 
 pub(crate) struct FrameData {
@@ -716,11 +716,11 @@ impl GraphicsDevice {
         Surface::new(self, descriptor)
     }
 
-    pub(crate) fn create_render_pipeline(
+    pub(crate) fn create_graphics_pipeline(
         &self,
-        descriptor: &RenderPipelineDescriptor,
-    ) -> RenderPipeline {
-        RenderPipeline::new(self, descriptor)
+        descriptor: &GraphicsPipelineDescriptor,
+    ) -> GraphicsPipeline {
+        GraphicsPipeline::new(self, descriptor)
     }
 
     pub(crate) fn create_shader_module(

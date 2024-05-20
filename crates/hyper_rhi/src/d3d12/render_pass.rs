@@ -33,7 +33,7 @@ use windows::Win32::{
 use crate::{
     d3d12::{GraphicsDevice, Texture},
     render_pass::RenderPassDescriptor,
-    render_pipeline::RenderPipeline,
+    graphics_pipeline::GraphicsPipeline,
 };
 
 pub(crate) struct RenderPass {
@@ -53,8 +53,8 @@ impl RenderPass {
         }
     }
 
-    pub(crate) fn bind_pipeline(&self, pipeline: &RenderPipeline) {
-        let pipeline = pipeline.d3d12_render_pipeline().unwrap();
+    pub(crate) fn bind_pipeline(&self, pipeline: &GraphicsPipeline) {
+        let pipeline = pipeline.d3d12_graphics_pipeline().unwrap();
 
         let width = self.texture.width();
         let height = self.texture.height();

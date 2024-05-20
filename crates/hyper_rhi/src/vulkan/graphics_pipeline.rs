@@ -8,18 +8,18 @@ use std::ffi::CString;
 
 use ash::vk;
 
-use crate::{render_pipeline::RenderPipelineDescriptor, vulkan::GraphicsDevice};
+use crate::{graphics_pipeline::GraphicsPipelineDescriptor, vulkan::GraphicsDevice};
 
-pub(crate) struct RenderPipeline {
+pub(crate) struct GraphicsPipeline {
     pipeline: vk::Pipeline,
 
     graphics_device: GraphicsDevice,
 }
 
-impl RenderPipeline {
+impl GraphicsPipeline {
     pub(crate) fn new(
         graphics_device: &GraphicsDevice,
-        descriptor: &RenderPipelineDescriptor,
+        descriptor: &GraphicsPipelineDescriptor,
     ) -> Self {
         let vertex_shader = descriptor.vertex_shader.vulkan_shader_module().unwrap();
         let vertex_shader_entry =
@@ -139,7 +139,7 @@ impl RenderPipeline {
             graphics_device
                 .device()
                 .create_graphics_pipelines(vk::PipelineCache::null(), &[create_info], None)
-                .expect("failed to create render pipeline")[0]
+                .expect("failed to create graphics pipeline")[0]
         };
 
         Self {
@@ -154,7 +154,7 @@ impl RenderPipeline {
     }
 }
 
-impl Drop for RenderPipeline {
+impl Drop for GraphicsPipeline {
     fn drop(&mut self) {
         unsafe {
             self.graphics_device

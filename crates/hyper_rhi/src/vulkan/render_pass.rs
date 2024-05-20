@@ -8,7 +8,7 @@ use ash::vk;
 
 use crate::{
     render_pass::RenderPassDescriptor,
-    render_pipeline::RenderPipeline,
+    graphics_pipeline::GraphicsPipeline,
     vulkan::{GraphicsDevice, Texture},
 };
 
@@ -61,8 +61,8 @@ impl RenderPass {
         }
     }
 
-    pub(crate) fn bind_pipeline(&self, pipeline: &RenderPipeline) {
-        let pipeline = pipeline.vulkan_render_pipeline().unwrap();
+    pub(crate) fn bind_pipeline(&self, pipeline: &GraphicsPipeline) {
+        let pipeline = pipeline.vulkan_graphics_pipeline().unwrap();
 
         let render_area_extent = vk::Extent2D {
             width: self.texture.width(),

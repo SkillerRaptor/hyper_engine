@@ -8,7 +8,7 @@ use std::fmt::Debug;
 
 #[cfg(target_os = "windows")]
 use crate::d3d12;
-use crate::{render_pipeline::RenderPipeline, texture::Texture, vulkan};
+use crate::{graphics_pipeline::GraphicsPipeline, texture::Texture, vulkan};
 
 #[derive(Clone)]
 pub struct RenderPassDescriptor<'a> {
@@ -47,7 +47,7 @@ impl RenderPass {
         }
     }
 
-    pub fn bind_pipeline(&self, pipeline: &RenderPipeline) {
+    pub fn bind_pipeline(&self, pipeline: &GraphicsPipeline) {
         match &self.inner {
             #[cfg(target_os = "windows")]
             RenderPassInner::D3D12(inner) => inner.bind_pipeline(pipeline),
