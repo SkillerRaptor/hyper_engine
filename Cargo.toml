@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------------------
-# Copyright (c) 2022-2023, SkillerRaptor
+# Copyright (c) 2022-2024, SkillerRaptor
 #
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
@@ -7,6 +7,21 @@
 [workspace]
 resolver = "2"
 members = ["crates/*"]
+
+[package]
+name = "hyper_engine"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+hyper_core = { path = "./crates/hyper_core" }
+hyper_ecs = { path = "./crates/hyper_ecs" }
+hyper_math = { path = "./crates/hyper_math" }
+hyper_platform = { path = "./crates/hyper_platform" }
+hyper_rhi = { path = "./crates/hyper_rhi" }
+
+log = "0.4"
+thiserror = "1.0"
 
 [profile.dev]
 opt-level = 1

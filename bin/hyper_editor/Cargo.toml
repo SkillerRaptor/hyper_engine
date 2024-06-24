@@ -1,19 +1,22 @@
 #-------------------------------------------------------------------------------------------
-# Copyright (c) 2023-2024, SkillerRaptor
+# Copyright (c) 2023, SkillerRaptor
 #
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 
 [package]
-name = "hyper_game"
+name = "hyper_editor"
 version = "0.0.0"
 edition = "2021"
-license = "MIT"
 
 [dependencies]
-hyper_core = { path = "../hyper_core" }
-hyper_math = { path = "../hyper_math" }
-hyper_platform = { path = "../hyper_platform" }
+hyper_engine = { path = ".." }
 
+anyhow = "1.0"
+chrono = { version = "0.4", default-features = false, features = [
+    "alloc",
+    "std",
+    "clock",
+] }
+fern = { version = "0.6", features = ["colored"] }
 log = "0.4"
-thiserror = "1.0"

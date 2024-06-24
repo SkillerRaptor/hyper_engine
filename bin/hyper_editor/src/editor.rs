@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use hyper_engine::game::Game;
+use hyper_engine::Game;
 
 #[derive(Default)]
 pub(crate) struct Editor {}
