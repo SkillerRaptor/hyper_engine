@@ -7,8 +7,8 @@
 use ash::vk;
 
 use crate::{
-    render_pass::RenderPassDescriptor,
     graphics_pipeline::GraphicsPipeline,
+    render_pass::RenderPassDescriptor,
     vulkan::{GraphicsDevice, Texture},
 };
 

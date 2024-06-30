@@ -10,8 +10,8 @@ pub use application::*;
 mod game;
 pub use game::*;
 
-// Aliasing hyper crates to reduce import modulelength
-
+// Aliasing hyper crates to reduce import module length
+#[rustfmt::skip]
 pub use hyper_core as core;
 pub use hyper_ecs as ecs;
 pub use hyper_math as math;
