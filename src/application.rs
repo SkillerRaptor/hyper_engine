@@ -6,6 +6,8 @@
 
 use std::{borrow::Cow, num::NonZeroU32, time::Instant};
 
+use thiserror::Error;
+
 use hyper_platform::window::{self, Window, WindowDescriptor};
 use hyper_rhi::{
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
@@ -14,7 +16,6 @@ use hyper_rhi::{
     shader_module::{ShaderModuleDescriptor, ShaderModuleError, ShaderStage},
     surface::{Surface, SurfaceDescriptor},
 };
-use thiserror::Error;
 
 use crate::game::Game;
 

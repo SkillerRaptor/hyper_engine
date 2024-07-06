@@ -6,7 +6,6 @@
 
 use std::{num::NonZeroU32, time::Duration};
 
-use hyper_math::{UVec2, Vec2};
 use raw_window_handle::{
     DisplayHandle,
     HandleError,
@@ -24,6 +23,8 @@ use winit::{
     platform::pump_events::EventLoopExtPumpEvents,
     window::{self, WindowAttributes},
 };
+
+use hyper_math::{UVec2, Vec2};
 
 use crate::{input::Input, key_code::KeyCode, mouse_code::MouseCode};
 

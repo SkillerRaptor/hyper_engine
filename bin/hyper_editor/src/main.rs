@@ -10,8 +10,9 @@ mod logger;
 use std::num::NonZeroU32;
 
 use anyhow::{Context, Result};
-use hyper_engine::{Application, ApplicationDescriptor};
 use logger::Verbosity;
+
+use hyper_engine::{Application, ApplicationDescriptor};
 
 use crate::editor::Editor;
 

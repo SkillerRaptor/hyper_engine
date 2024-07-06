@@ -6,4 +6,3 @@
 
 imports_layout = "HorizontalVertical"
 imports_granularity = "Crate"
-group_imports = "StdExternalCrate"
