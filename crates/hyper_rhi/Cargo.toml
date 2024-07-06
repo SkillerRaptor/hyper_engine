@@ -17,13 +17,13 @@ hyper_platform = { path = "../hyper_platform" }
 ash = { git = "https://github.com/SkillerRaptor/ash" }
 ash-window = { git = "https://github.com/SkillerRaptor/ash" }
 hassle-rs = "0.11"
-gpu-allocator = { git = "https://github.com/Traverse-Research/gpu-allocator.git", branch = "ash-0.38" }
+gpu-allocator = { git = "https://github.com/Traverse-Research/gpu-allocator.git" }
 log = "0.4"
 raw-window-handle = "0.6"
 thiserror = "1.0"
 
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.56", features = [
+windows = { version = "0.58", features = [
     "Win32_Graphics_Direct3D_Fxc",
     "Win32_Graphics_Direct3D12",
     "Win32_Graphics_Dxgi_Common",

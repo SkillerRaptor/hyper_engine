@@ -15,7 +15,9 @@ use windows::{
             Common::{DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SAMPLE_DESC},
             IDXGISwapChain4,
             DXGI_MWA_NO_ALT_ENTER,
+            DXGI_PRESENT,
             DXGI_SWAP_CHAIN_DESC1,
+            DXGI_SWAP_CHAIN_FLAG,
             DXGI_SWAP_EFFECT_FLIP_DISCARD,
             DXGI_USAGE_RENDER_TARGET_OUTPUT,
         },
@@ -50,7 +52,7 @@ impl Surface {
             .expect("failed to get window handle")
             .as_raw()
         {
-            RawWindowHandle::Win32(handle) => HWND(handle.hwnd.get()),
+            RawWindowHandle::Win32(handle) => HWND(handle.hwnd.get() as _),
             _ => panic!(),
         };
 
@@ -149,7 +151,7 @@ impl Surface {
                         self.width,
                         self.height,
                         DXGI_FORMAT_R8G8B8A8_UNORM,
-                        0,
+                        DXGI_SWAP_CHAIN_FLAG(0),
                     )
                     .expect("failed to resize swapchain buffers");
             }
@@ -198,7 +200,7 @@ impl Surface {
     pub(crate) fn present(&mut self) {
         unsafe {
             self.swap_chain
-                .Present(1, 0)
+                .Present(1, DXGI_PRESENT(0))
                 .ok()
                 .expect("failed to present swap chain");
         }

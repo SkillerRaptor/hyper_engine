@@ -51,6 +51,7 @@ use windows::{
                 DXGI_ADAPTER_FLAG_NONE,
                 DXGI_ADAPTER_FLAG_SOFTWARE,
                 DXGI_CREATE_FACTORY_DEBUG,
+                DXGI_CREATE_FACTORY_FLAGS,
                 DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
             },
         },
@@ -186,7 +187,7 @@ impl GrapicsDeviceInner {
     }
 
     fn create_factory(debug_enabled: bool) -> IDXGIFactory7 {
-        let mut dxgi_factory_flags = 0;
+        let mut dxgi_factory_flags = DXGI_CREATE_FACTORY_FLAGS(0);
         if debug_enabled {
             dxgi_factory_flags |= DXGI_CREATE_FACTORY_DEBUG;
         }
@@ -203,12 +204,11 @@ impl GrapicsDeviceInner {
             }
             .expect("failed to find adapter");
 
-            let mut description = Default::default();
-            unsafe {
+            let description = unsafe {
                 adapter
-                    .GetDesc1(&mut description)
-                    .expect("failed to get adapter description");
-            }
+                    .GetDesc1()
+                    .expect("failed to get adapter description")
+            };
 
             if (DXGI_ADAPTER_FLAG(description.Flags as i32) & DXGI_ADAPTER_FLAG_SOFTWARE)
                 != DXGI_ADAPTER_FLAG_NONE
