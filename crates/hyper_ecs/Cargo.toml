@@ -13,5 +13,5 @@ edition = "2021"
 hyper_core = { path = "../hyper_core" }
 hyper_math = { path = "../hyper_math" }
 
-log = "0.4"
-thiserror = "1.0"
+log = { workspace = true }
+thiserror = { workspace = true }

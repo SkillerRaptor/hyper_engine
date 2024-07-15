@@ -12,6 +12,6 @@ edition = "2021"
 [dependencies]
 hyper_core = { path = "../hyper_core" }
 
-glam = "0.28"
-log = "0.4"
-thiserror = "1.0"
+glam = { workspace = true }
+log = { workspace = true }
+thiserror = { workspace = true }

@@ -8,20 +8,27 @@
 resolver = "2"
 members = ["crates/*"]
 
-[package]
-name = "hyper_engine"
-version = "0.0.0"
-edition = "2021"
-
-[dependencies]
-hyper_core = { path = "./crates/hyper_core" }
-hyper_ecs = { path = "./crates/hyper_ecs" }
-hyper_math = { path = "./crates/hyper_math" }
-hyper_platform = { path = "./crates/hyper_platform" }
-hyper_rhi = { path = "./crates/hyper_rhi" }
-
+[workspace.dependencies]
+ash = { git = "https://github.com/SkillerRaptor/ash" }
+ash-window = { git = "https://github.com/SkillerRaptor/ash" }
+glam = "0.28"
+gpu-allocator = { git = "https://github.com/Traverse-Research/gpu-allocator.git" }
+hassle-rs = "0.11"
 log = "0.4"
+proc-macro2 = "1.0"
+quote = "1.0"
+raw-window-handle = "0.6"
+syn = { version = "2.0", features = ["extra-traits"] }
 thiserror = "1.0"
+winit = "0.30"
+windows = { version = "0.58", features = [
+    "Win32_Graphics_Direct3D_Fxc",
+    "Win32_Graphics_Direct3D12",
+    "Win32_Graphics_Dxgi_Common",
+    "Win32_Security",
+    "Win32_System_Threading",
+] }
+
 
 [profile.dev]
 opt-level = 1

@@ -1,16 +1,20 @@
 #-------------------------------------------------------------------------------------------
-# Copyright (c) 2022-2024, SkillerRaptor
+# Copyright (c) 2024, SkillerRaptor
 #
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 
 [package]
-name = "hyper_core"
+name = "hyper_engine"
 version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-hyper_core_macros = { path = "./macros" }
+hyper_core = { path = "../hyper_core" }
+hyper_ecs = { path = "../hyper_ecs" }
+hyper_math = { path = "../hyper_math" }
+hyper_platform = { path = "../hyper_platform" }
+hyper_rhi = { path = "../hyper_rhi" }
 
 log = { workspace = true }
 thiserror = { workspace = true }
