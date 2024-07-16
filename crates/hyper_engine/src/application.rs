@@ -6,8 +6,6 @@
 
 use std::{borrow::Cow, num::NonZeroU32, time::Instant};
 
-use anyhow::Result;
-
 use hyper_platform::window::{Window, WindowDescriptor};
 use hyper_rhi::{
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
@@ -34,7 +32,7 @@ pub struct Application {
 }
 
 impl Application {
-    pub fn new(descriptor: ApplicationDescriptor) -> Result<Self> {
+    pub fn new(descriptor: ApplicationDescriptor) -> Self {
         let start_time = Instant::now();
 
         let title = if cfg!(debug_assertions) {
@@ -48,7 +46,8 @@ impl Application {
             width: descriptor.width,
             height: descriptor.height,
             resizable: descriptor.resizable,
-        })?;
+        })
+        .unwrap();
 
         let graphics_device = GraphicsDevice::new(&GraphicsDeviceDescriptor {
             // TODO: Don't hardcode and use CLI options
@@ -59,17 +58,21 @@ impl Application {
 
         let surface = graphics_device.create_surface(&SurfaceDescriptor { window: &window });
 
-        let vertex_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
-            path: "./assets/shaders/vertex_shader.hlsl",
-            entry: "main",
-            stage: ShaderStage::Vertex,
-        })?;
+        let vertex_shader = graphics_device
+            .create_shader_module(&ShaderModuleDescriptor {
+                path: "./assets/shaders/vertex_shader.hlsl",
+                entry: "main",
+                stage: ShaderStage::Vertex,
+            })
+            .unwrap();
 
-        let pixel_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
-            path: "./assets/shaders/pixel_shader.hlsl",
-            entry: "main",
-            stage: ShaderStage::Pixel,
-        })?;
+        let pixel_shader = graphics_device
+            .create_shader_module(&ShaderModuleDescriptor {
+                path: "./assets/shaders/pixel_shader.hlsl",
+                entry: "main",
+                stage: ShaderStage::Pixel,
+            })
+            .unwrap();
 
         let graphics_pipeline =
             graphics_device.create_graphics_pipeline(&GraphicsPipelineDescriptor {
@@ -82,13 +85,13 @@ impl Application {
             start_time.elapsed().as_secs_f32()
         );
 
-        Ok(Self {
+        Self {
             graphics_pipeline,
             surface,
             graphics_device,
 
             window,
-        })
+        }
     }
 
     pub fn run(&mut self) {

@@ -16,10 +16,7 @@ fn main() {
         width: NonZeroU32::new(1280).unwrap(),
         height: NonZeroU32::new(720).unwrap(),
         resizable: false,
-    })
-    .unwrap();
+    });
 
     application.run();
-
-    Ok(())
 }
