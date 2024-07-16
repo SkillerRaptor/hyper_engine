@@ -17,4 +17,3 @@ hyper_platform = { path = "../hyper_platform" }
 hyper_rhi = { path = "../hyper_rhi" }
 
 log = { workspace = true }
-thiserror = { workspace = true }

@@ -518,7 +518,6 @@ dependencies = [
  "hyper_platform",
  "hyper_rhi",
  "log",
- "thiserror",
 ]
 
 [[package]]

@@ -6,27 +6,16 @@
 
 use std::{borrow::Cow, num::NonZeroU32, time::Instant};
 
-use thiserror::Error;
+use anyhow::Result;
 
-use hyper_platform::window::{self, Window, WindowDescriptor};
+use hyper_platform::window::{Window, WindowDescriptor};
 use hyper_rhi::{
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
     graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
     render_pass::RenderPassDescriptor,
-    shader_module::{ShaderModuleDescriptor, ShaderModuleError, ShaderStage},
+    shader_module::{ShaderModuleDescriptor, ShaderStage},
     surface::{Surface, SurfaceDescriptor},
 };
-
-use crate::game::Game;
-
-#[derive(Debug, Error)]
-pub enum ApplicationError {
-    #[error(transparent)]
-    Window(#[from] window::Error),
-
-    #[error("failed to create shader module")]
-    ShaderModuleCreation(#[from] ShaderModuleError),
-}
 
 pub struct ApplicationDescriptor<'a> {
     pub title: &'a str,
@@ -42,14 +31,10 @@ pub struct Application {
     graphics_device: GraphicsDevice,
 
     window: Window,
-    game: Box<dyn Game>,
 }
 
 impl Application {
-    pub fn new(
-        game: Box<dyn Game>,
-        descriptor: ApplicationDescriptor,
-    ) -> Result<Self, ApplicationError> {
+    pub fn new(descriptor: ApplicationDescriptor) -> Result<Self> {
         let start_time = Instant::now();
 
         let title = if cfg!(debug_assertions) {
@@ -103,13 +88,12 @@ impl Application {
             graphics_device,
 
             window,
-            game,
         })
     }
 
     pub fn run(&mut self) {
         // Fixed at 60 frames per second
-        let mut time = 0.0;
+        let mut _time = 0.0;
         let delta_time = 1.0 / 60.0;
 
         let mut current_time = Instant::now();
@@ -133,12 +117,12 @@ impl Application {
 
             // Update
             while accumulator >= delta_time {
-                self.game.update_fixed(delta_time, time);
+                // Update Fixed
                 accumulator -= delta_time;
-                time += delta_time;
+                _time += delta_time;
             }
 
-            self.game.update();
+            // Normal Update
 
             // Render
             let swapchain_texture = self.surface.current_texture();
