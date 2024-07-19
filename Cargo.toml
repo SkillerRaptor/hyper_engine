@@ -12,7 +12,7 @@ members = ["crates/*"]
 ash = { git = "https://github.com/SkillerRaptor/ash" }
 ash-window = { git = "https://github.com/SkillerRaptor/ash" }
 glam = "0.28"
-gpu-allocator = { git = "https://github.com/Traverse-Research/gpu-allocator.git" }
+gpu-allocator = "0.27"
 hassle-rs = "0.11"
 log = "0.4"
 proc-macro2 = "1.0"
