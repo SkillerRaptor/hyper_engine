@@ -4,19 +4,49 @@
  * SPDX-License-Identifier: MIT
 */
 
-use std::num::NonZeroU32;
+use clap::{Parser, ValueEnum};
 
-use crate::application::{Application, ApplicationDescriptor};
+use crate::engine::{Engine, EngineDescriptor, RendererApi};
 
-mod application;
+mod engine;
+
+#[derive(Clone, Copy, Debug, ValueEnum)]
+enum Renderer {
+    D3D12,
+    Vulkan,
+}
+
+#[derive(Debug, Parser)]
+struct Arguments {
+    /// Width of the window
+    #[arg(long, default_value_t = 1280)]
+    width: u32,
+
+    /// Height of the window
+    #[arg(long, default_value_t = 720)]
+    height: u32,
+
+    /// Renderer API of the engine
+    #[arg(long, value_enum, default_value_t = Renderer::Vulkan)]
+    renderer: Renderer,
+
+    /// Enables renderer debug mode
+    #[arg(long, default_value_t = false)]
+    debug: bool,
+}
 
 fn main() {
-    let mut application = Application::new(ApplicationDescriptor {
-        title: "Hyper Engine",
-        width: NonZeroU32::new(1280).unwrap(),
-        height: NonZeroU32::new(720).unwrap(),
-        resizable: false,
+    let arguments = Arguments::parse();
+
+    let mut engine = Engine::new(&EngineDescriptor {
+        width: arguments.width,
+        height: arguments.height,
+        renderer: match arguments.renderer {
+            Renderer::D3D12 => RendererApi::D3D12,
+            Renderer::Vulkan => RendererApi::Vulkan,
+        },
+        debug: arguments.debug,
     });
 
-    application.run();
+    engine.run();
 }

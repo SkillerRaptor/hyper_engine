@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
 */
 
-use std::{num::NonZeroU32, time::Duration};
+use std::time::Duration;
 
 use raw_window_handle::{
     DisplayHandle,
@@ -30,9 +30,8 @@ use crate::{input::Input, key_code::KeyCode, mouse_code::MouseCode};
 
 pub struct WindowDescriptor<'a> {
     pub title: &'a str,
-    pub width: NonZeroU32,
-    pub height: NonZeroU32,
-    pub resizable: bool,
+    pub width: u32,
+    pub height: u32,
 }
 
 #[derive(Debug, Error)]
@@ -57,13 +56,12 @@ impl Window {
     pub fn new(descriptor: &WindowDescriptor) -> Result<Self, Error> {
         let event_loop = EventLoop::new()?;
 
+        // TODO: Do resolution checks
+
         let attributes = WindowAttributes::default()
             .with_title(descriptor.title)
-            .with_inner_size(LogicalSize::new(
-                descriptor.width.get(),
-                descriptor.height.get(),
-            ))
-            .with_resizable(descriptor.resizable);
+            .with_inner_size(LogicalSize::new(descriptor.width, descriptor.height))
+            .with_resizable(true);
 
         #[allow(deprecated)]
         let window = event_loop.create_window(attributes)?;

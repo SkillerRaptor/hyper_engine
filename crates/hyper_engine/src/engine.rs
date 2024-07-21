@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
 */
 
-use std::{borrow::Cow, num::NonZeroU32, time::Instant};
+use std::time::Instant;
 
 use hyper_platform::window::{Window, WindowDescriptor};
 use hyper_rhi::{
@@ -15,14 +15,21 @@ use hyper_rhi::{
     surface::{Surface, SurfaceDescriptor},
 };
 
-pub struct ApplicationDescriptor<'a> {
-    pub title: &'a str,
-    pub width: NonZeroU32,
-    pub height: NonZeroU32,
-    pub resizable: bool,
+#[derive(Clone, Copy, Debug)]
+pub enum RendererApi {
+    D3D12,
+    Vulkan,
 }
 
-pub struct Application {
+#[derive(Debug)]
+pub struct EngineDescriptor {
+    pub width: u32,
+    pub height: u32,
+    pub renderer: RendererApi,
+    pub debug: bool,
+}
+
+pub struct Engine {
     // Rendering
     graphics_pipeline: GraphicsPipeline,
     surface: Surface,
@@ -31,28 +38,32 @@ pub struct Application {
     window: Window,
 }
 
-impl Application {
-    pub fn new(descriptor: ApplicationDescriptor) -> Self {
+impl Engine {
+    pub fn new(descriptor: &EngineDescriptor) -> Self {
         let start_time = Instant::now();
 
+        // Assuming that the engine will run in editor-mode
+        // FIXME: When adding game mode change the title to the game
         let title = if cfg!(debug_assertions) {
-            Cow::from(format!("{} (Debug Build)", descriptor.title))
+            "Hyper Engine (Debug Build)"
         } else {
-            Cow::from(descriptor.title)
+            "Hyper Engine"
         };
 
         let window = Window::new(&WindowDescriptor {
             title: &title,
             width: descriptor.width,
             height: descriptor.height,
-            resizable: descriptor.resizable,
         })
         .unwrap();
 
         let graphics_device = GraphicsDevice::new(&GraphicsDeviceDescriptor {
             // TODO: Don't hardcode and use CLI options
-            graphics_api: GraphicsApi::D3D12,
-            debug_mode: cfg!(debug_assertions),
+            graphics_api: match descriptor.renderer {
+                RendererApi::D3D12 => GraphicsApi::D3D12,
+                RendererApi::Vulkan => GraphicsApi::Vulkan,
+            },
+            debug_mode: descriptor.debug,
             window: &window,
         });
 
