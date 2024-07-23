@@ -1,8 +1,8 @@
-/*
- * Copyright (c) 2024, SkillerRaptor
- *
- * SPDX-License-Identifier: MIT
-*/
+//
+// Copyright (c) 2024, SkillerRaptor
+//
+// SPDX-License-Identifier: MIT
+//
 
 mod bindings;
 mod command_list;

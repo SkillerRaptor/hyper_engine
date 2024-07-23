@@ -1,8 +1,8 @@
-/*
- * Copyright (c) 2024, SkillerRaptor
- *
- * SPDX-License-Identifier: MIT
-*/
+//
+// Copyright (c) 2023-2024, SkillerRaptor
+//
+// SPDX-License-Identifier: MIT
+//
 
 use proc_macro::TokenStream;
 use syn::{Data, DeriveInput, Error, Fields, Type};

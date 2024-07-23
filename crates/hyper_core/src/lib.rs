@@ -1,8 +1,8 @@
-/*
- * Copyright (c) 2022-2023, SkillerRaptor
- *
- * SPDX-License-Identifier: MIT
-*/
+//
+// Copyright (c) 2022-2024, SkillerRaptor
+//
+// SPDX-License-Identifier: MIT
+//
 
 pub mod handle;
 mod handle_manager;

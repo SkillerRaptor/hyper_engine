@@ -1,8 +1,8 @@
-/*
- * Copyright (c) 2023-2024, SkillerRaptor
- *
- * SPDX-License-Identifier: MIT
-*/
+//
+// Copyright (c) 2023-2024, SkillerRaptor
+//
+// SPDX-License-Identifier: MIT
+//
 
 use std::{
     any::{Any, TypeId},

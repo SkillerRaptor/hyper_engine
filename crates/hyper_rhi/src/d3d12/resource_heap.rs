@@ -1,8 +1,8 @@
-/*
- * Copyright (c) 2024, SkillerRaptor
- *
- * SPDX-License-Identifier: MIT
-*/
+//
+// Copyright (c) 2024, SkillerRaptor
+//
+// SPDX-License-Identifier: MIT
+//
 
 use windows::Win32::Graphics::Direct3D12::{
     ID3D12DescriptorHeap,

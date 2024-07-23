@@ -1,8 +1,8 @@
-/*
- * Copyright (c) 2023, SkillerRaptor
- *
- * SPDX-License-Identifier: MIT
-*/
+//
+// Copyright (c) 2023-2024, SkillerRaptor
+//
+// SPDX-License-Identifier: MIT
+//
 
 pub use hyper_core_macros::Handle;
 

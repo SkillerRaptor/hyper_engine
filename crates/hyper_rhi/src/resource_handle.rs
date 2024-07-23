@@ -1,8 +1,8 @@
-/*
- * Copyright (c) 2024, SkillerRaptor
- *
- * SPDX-License-Identifier: MIT
- */
+//
+// Copyright (c) 2024, SkillerRaptor
+//
+// SPDX-License-Identifier: MIT
+//
 
 #[repr(transparent)]
 #[derive(Clone, Copy, Default)]
