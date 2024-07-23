@@ -6,7 +6,9 @@
 
 use clap::{Parser, ValueEnum};
 
-use crate::engine::{Engine, EngineDescriptor, RendererApi};
+use hyper_rhi::graphics_device::GraphicsApi;
+
+use crate::engine::{Engine, EngineDescriptor};
 
 mod engine;
 
@@ -41,9 +43,9 @@ fn main() {
     let mut engine = Engine::new(&EngineDescriptor {
         width: arguments.width,
         height: arguments.height,
-        renderer: match arguments.renderer {
-            Renderer::D3D12 => RendererApi::D3D12,
-            Renderer::Vulkan => RendererApi::Vulkan,
+        graphics_api: match arguments.renderer {
+            Renderer::D3D12 => GraphicsApi::D3D12,
+            Renderer::Vulkan => GraphicsApi::Vulkan,
         },
         debug: arguments.debug,
     });

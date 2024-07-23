@@ -17,7 +17,7 @@ use crate::{
     vulkan,
 };
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum GraphicsApi {
     D3D12,
     Vulkan,

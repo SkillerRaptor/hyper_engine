@@ -15,17 +15,11 @@ use hyper_rhi::{
     surface::{Surface, SurfaceDescriptor},
 };
 
-#[derive(Clone, Copy, Debug)]
-pub enum RendererApi {
-    D3D12,
-    Vulkan,
-}
-
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct EngineDescriptor {
     pub width: u32,
     pub height: u32,
-    pub renderer: RendererApi,
+    pub graphics_api: GraphicsApi,
     pub debug: bool,
 }
 
@@ -59,10 +53,7 @@ impl Engine {
 
         let graphics_device = GraphicsDevice::new(&GraphicsDeviceDescriptor {
             // TODO: Don't hardcode and use CLI options
-            graphics_api: match descriptor.renderer {
-                RendererApi::D3D12 => GraphicsApi::D3D12,
-                RendererApi::Vulkan => GraphicsApi::Vulkan,
-            },
+            graphics_api: descriptor.graphics_api,
             debug_mode: descriptor.debug,
             window: &window,
         });
