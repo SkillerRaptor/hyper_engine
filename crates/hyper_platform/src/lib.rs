@@ -2,10 +2,13 @@
  * Copyright (c) 2022-2023, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
- */
-
-pub mod key_code;
-pub mod mouse_code;
-pub mod window;
+*/
 
 mod input;
+mod key_code;
+mod mouse_code;
+mod window;
+
+pub use key_code::*;
+pub use mouse_code::*;
+pub use window::*;

@@ -9,7 +9,7 @@ use std::{
     collections::HashMap,
 };
 
-use hyper_core::handle_manager::HandleManager;
+use hyper_core::HandleManager;
 
 use crate::{entity::Entity, sparse_set::SparseSet};
 
@@ -293,7 +293,7 @@ impl Registry {
 
 #[cfg(test)]
 mod tests {
-    use hyper_core::handle::Handle;
+    use hyper_core::Handle;
 
     use super::*;
 

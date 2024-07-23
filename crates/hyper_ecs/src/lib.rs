@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-pub mod entity;
-pub mod registry;
+mod entity;
+mod registry;
+mod sparse_set;
 
-pub(crate) mod sparse_set;
+pub use entity::*;
+pub use registry::*;

@@ -8,7 +8,7 @@ mod engine;
 
 use clap::{Parser, ValueEnum};
 
-use hyper_rhi::graphics_device::GraphicsApi;
+use hyper_rhi::GraphicsApi;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{
     filter,

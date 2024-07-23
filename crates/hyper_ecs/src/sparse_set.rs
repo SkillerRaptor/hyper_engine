@@ -9,7 +9,7 @@ use std::{
     vec::IntoIter,
 };
 
-use hyper_core::handle::Handle;
+use hyper_core::Handle;
 
 use crate::entity::Entity;
 

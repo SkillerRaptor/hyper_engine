@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-use hyper_core::handle::Handle;
+use hyper_core::Handle;
 
 #[repr(transparent)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Handle)]

@@ -6,13 +6,18 @@
 
 use std::time::Instant;
 
-use hyper_platform::window::{Window, WindowDescriptor};
+use hyper_platform::{Window, WindowDescriptor};
 use hyper_rhi::{
-    graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
-    graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
-    render_pass::RenderPassDescriptor,
-    shader_module::{ShaderModuleDescriptor, ShaderStage},
-    surface::{Surface, SurfaceDescriptor},
+    GraphicsApi,
+    GraphicsDevice,
+    GraphicsDeviceDescriptor,
+    GraphicsPipeline,
+    GraphicsPipelineDescriptor,
+    RenderPassDescriptor,
+    ShaderModuleDescriptor,
+    ShaderStage,
+    Surface,
+    SurfaceDescriptor,
 };
 
 #[derive(Clone, Debug)]

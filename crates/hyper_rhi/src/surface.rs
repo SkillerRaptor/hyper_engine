@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
 */
 
-use hyper_platform::window::Window;
+use hyper_platform::Window;
 
 #[cfg(target_os = "windows")]
 use crate::d3d12;
