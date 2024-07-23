@@ -66,6 +66,13 @@ impl Window {
         #[allow(deprecated)]
         let window = event_loop.create_window(attributes)?;
 
+        tracing::debug!(
+            "Created Window \"{}\" with the resolution of {}x{}",
+            descriptor.title,
+            descriptor.width,
+            descriptor.height
+        );
+
         let input = Input::default();
 
         Ok(Self {

@@ -83,7 +83,7 @@ impl Engine {
             });
 
         tracing::info!(
-            "Application initialized in {:.4} seconds",
+            "Engine initialized in {:.2} seconds",
             start_time.elapsed().as_secs_f32()
         );
 
