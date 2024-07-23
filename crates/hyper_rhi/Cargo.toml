@@ -18,9 +18,9 @@ ash = { workspace = true }
 ash-window = { workspace = true }
 hassle-rs = { workspace = true }
 gpu-allocator = { workspace = true }
-log = { workspace = true }
 raw-window-handle = { workspace = true }
 thiserror = { workspace = true }
+tracing = { workspace = true }
 
 [target.'cfg(windows)'.dependencies]
 windows = { workspace = true }

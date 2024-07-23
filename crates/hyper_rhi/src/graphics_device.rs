@@ -59,7 +59,7 @@ impl GraphicsDevice {
             _ => unreachable!(),
         };
 
-        log::info!("Created {} Graphics Device", backend);
+        tracing::info!("Created {} Graphics Device", backend);
 
         Self { inner }
     }

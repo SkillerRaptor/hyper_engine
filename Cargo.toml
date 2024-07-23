@@ -15,12 +15,13 @@ clap = { version = "4.5", features = ["derive"] }
 glam = "0.28"
 gpu-allocator = "0.27"
 hassle-rs = "0.11"
-log = "0.4"
 proc-macro2 = "1.0"
 quote = "1.0"
 raw-window-handle = "0.6"
 syn = { version = "2.0", features = ["extra-traits"] }
 thiserror = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["registry"] }
 winit = "0.30"
 windows = { version = "0.58", features = [
     "Win32_Graphics_Direct3D_Fxc",

@@ -4,13 +4,19 @@
  * SPDX-License-Identifier: MIT
 */
 
+mod engine;
+
 use clap::{Parser, ValueEnum};
 
 use hyper_rhi::graphics_device::GraphicsApi;
+use tracing::level_filters::LevelFilter;
+use tracing_subscriber::{
+    filter,
+    layer::{Layer, SubscriberExt},
+    util::SubscriberInitExt,
+};
 
 use crate::engine::{Engine, EngineDescriptor};
-
-mod engine;
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
 enum Renderer {
@@ -20,6 +26,10 @@ enum Renderer {
 
 #[derive(Debug, Parser)]
 struct Arguments {
+    /// Enables logging mode
+    #[arg(long, default_value_t = false)]
+    log: bool,
+
     /// Width of the window
     #[arg(long, default_value_t = 1280)]
     width: u32,
@@ -39,6 +49,17 @@ struct Arguments {
 
 fn main() {
     let arguments = Arguments::parse();
+
+    if arguments.log {
+        let filter = filter::filter_fn(|metadata| metadata.target().starts_with("hyper_"));
+
+        let fmt_layer = tracing_subscriber::fmt::layer()
+            .with_thread_names(true)
+            .with_filter(LevelFilter::TRACE)
+            .with_filter(filter);
+
+        tracing_subscriber::registry().with(fmt_layer).init();
+    }
 
     let mut engine = Engine::new(&EngineDescriptor {
         width: arguments.width,

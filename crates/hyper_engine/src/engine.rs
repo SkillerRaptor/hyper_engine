@@ -82,7 +82,7 @@ impl Engine {
                 pixel_shader: &pixel_shader,
             });
 
-        log::info!(
+        tracing::info!(
             "Application initialized in {:.4} seconds",
             start_time.elapsed().as_secs_f32()
         );

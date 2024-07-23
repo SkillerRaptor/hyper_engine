@@ -13,5 +13,5 @@ edition = "2021"
 hyper_core = { path = "../hyper_core" }
 
 glam = { workspace = true }
-log = { workspace = true }
 thiserror = { workspace = true }
+tracing = { workspace = true }

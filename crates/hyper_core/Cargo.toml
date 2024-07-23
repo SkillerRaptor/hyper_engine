@@ -12,5 +12,5 @@ edition = "2021"
 [dependencies]
 hyper_core_macros = { path = "./macros" }
 
-log = { workspace = true }
 thiserror = { workspace = true }
+tracing = { workspace = true }
