@@ -9,8 +9,6 @@ use std::{
     vec::IntoIter,
 };
 
-use hyper_core::Handle;
-
 use crate::entity::Entity;
 
 pub struct Entry<T> {
@@ -177,13 +175,13 @@ mod tests {
         assert!(sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 0);
 
-        sparse_set.push(Entity::from_id(0), 0);
-        sparse_set.push(Entity::from_id(1), 0);
+        sparse_set.push(Entity::new(0), 0);
+        sparse_set.push(Entity::new(1), 0);
 
         assert!(!sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 2);
 
-        sparse_set.push(Entity::from_id(1), 0);
+        sparse_set.push(Entity::new(1), 0);
 
         assert!(!sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 2);
@@ -195,25 +193,25 @@ mod tests {
         assert!(sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 0);
 
-        sparse_set.push(Entity::from_id(0), 0);
-        sparse_set.push(Entity::from_id(1), 0);
+        sparse_set.push(Entity::new(0), 0);
+        sparse_set.push(Entity::new(1), 0);
 
         assert!(!sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 2);
 
-        sparse_set.remove(Entity::from_id(0));
+        sparse_set.remove(Entity::new(0));
 
         assert!(!sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 1);
-        assert!(!sparse_set.contains(Entity::from_id(0)));
-        assert!(sparse_set.contains(Entity::from_id(1)));
+        assert!(!sparse_set.contains(Entity::new(0)));
+        assert!(sparse_set.contains(Entity::new(1)));
 
-        sparse_set.remove(Entity::from_id(1));
+        sparse_set.remove(Entity::new(1));
 
         assert!(sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 0);
-        assert!(!sparse_set.contains(Entity::from_id(0)));
-        assert!(!sparse_set.contains(Entity::from_id(1)));
+        assert!(!sparse_set.contains(Entity::new(0)));
+        assert!(!sparse_set.contains(Entity::new(1)));
     }
 
     #[test]
@@ -222,14 +220,14 @@ mod tests {
         assert!(sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 0);
 
-        sparse_set.push(Entity::from_id(0), 0);
-        sparse_set.push(Entity::from_id(1), 0);
+        sparse_set.push(Entity::new(0), 0);
+        sparse_set.push(Entity::new(1), 0);
 
         assert!(!sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 2);
 
-        assert!(sparse_set.contains(Entity::from_id(0)));
-        assert!(sparse_set.contains(Entity::from_id(1)));
+        assert!(sparse_set.contains(Entity::new(0)));
+        assert!(sparse_set.contains(Entity::new(1)));
     }
 
     #[test]
@@ -238,17 +236,17 @@ mod tests {
         assert!(sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 0);
 
-        sparse_set.push(Entity::from_id(0), 0);
-        sparse_set.push(Entity::from_id(1), 1);
+        sparse_set.push(Entity::new(0), 0);
+        sparse_set.push(Entity::new(1), 1);
 
         assert!(!sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 2);
 
-        assert!(sparse_set.contains(Entity::from_id(0)));
-        assert!(sparse_set.contains(Entity::from_id(1)));
+        assert!(sparse_set.contains(Entity::new(0)));
+        assert!(sparse_set.contains(Entity::new(1)));
 
-        assert_eq!(sparse_set.get(Entity::from_id(0)), Some(&0));
-        assert_eq!(sparse_set.get(Entity::from_id(1)), Some(&1));
+        assert_eq!(sparse_set.get(Entity::new(0)), Some(&0));
+        assert_eq!(sparse_set.get(Entity::new(1)), Some(&1));
     }
 
     #[test]
@@ -257,8 +255,8 @@ mod tests {
         assert!(sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 0);
 
-        sparse_set.push(Entity::from_id(0), 0);
-        sparse_set.push(Entity::from_id(1), 0);
+        sparse_set.push(Entity::new(0), 0);
+        sparse_set.push(Entity::new(1), 0);
 
         assert!(!sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 2);
@@ -275,14 +273,14 @@ mod tests {
         assert!(sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 0);
 
-        sparse_set.push(Entity::from_id(0), 0);
-        sparse_set.push(Entity::from_id(1), 1);
+        sparse_set.push(Entity::new(0), 0);
+        sparse_set.push(Entity::new(1), 1);
 
         assert!(!sparse_set.is_empty());
         assert_eq!(sparse_set.len(), 2);
 
         for (i, entry) in sparse_set.iter().enumerate() {
-            assert_eq!(entry.key(), Entity::from_id(i as u32));
+            assert_eq!(entry.key(), Entity::new(i as u32));
             assert_eq!(*entry.value(), i as i32);
         }
     }

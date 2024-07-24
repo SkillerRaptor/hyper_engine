@@ -10,7 +10,5 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-hyper_core_macros = { path = "./macros" }
-
 thiserror = { workspace = true }
 tracing = { workspace = true }

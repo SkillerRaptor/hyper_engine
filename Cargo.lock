@@ -586,18 +586,8 @@ checksum = "fbf6a919d6cf397374f7dfeeea91d974c7c0a7221d0d0f4f20d859d329e53fcc"
 name = "hyper_core"
 version = "0.0.0"
 dependencies = [
- "hyper_core_macros",
  "thiserror",
  "tracing",
-]
-
-[[package]]
-name = "hyper_core_macros"
-version = "0.0.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.68",
 ]
 
 [[package]]

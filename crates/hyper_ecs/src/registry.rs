@@ -9,8 +9,6 @@ use std::{
     collections::HashMap,
 };
 
-use hyper_core::HandleManager;
-
 use crate::{entity::Entity, sparse_set::SparseSet};
 
 pub(crate) trait ComponentList {
@@ -34,7 +32,9 @@ where
 
 #[derive(Default)]
 pub struct Registry {
-    pub handle_manager: HandleManager<Entity>,
+    handles: Vec<Entity>,
+    next_handle: u32,
+    unrecycled_handles: usize,
 
     components: Vec<Box<dyn ComponentList>>,
     component_indices: HashMap<TypeId, usize>,
@@ -43,7 +43,9 @@ pub struct Registry {
 impl Registry {
     pub fn new() -> Self {
         Self {
-            handle_manager: HandleManager::new(),
+            handles: Vec::new(),
+            next_handle: u32::MAX,
+            unrecycled_handles: 0,
 
             components: Vec::new(),
             component_indices: HashMap::new(),
@@ -51,15 +53,15 @@ impl Registry {
     }
 
     pub fn create_entity(&mut self) -> Entity {
-        self.handle_manager.create_handle()
+        self.create_handle()
     }
 
     pub fn destroy_entity(&mut self, entity: Entity) {
-        self.handle_manager.destroy_handle(entity)
+        self.destroy_handle(entity)
     }
 
     pub fn add_component<T: 'static>(&mut self, entity: Entity, component: T) {
-        assert!(self.handle_manager.is_handle_valid(entity));
+        assert!(self.is_handle_valid(entity));
 
         let component_id = self.get_component_id_or_construct::<T>();
         let component_set = &mut self.components[component_id];
@@ -76,7 +78,7 @@ impl Registry {
     }
 
     pub fn remove_component<T: 'static>(&mut self, entity: Entity) {
-        assert!(self.handle_manager.is_handle_valid(entity));
+        assert!(self.is_handle_valid(entity));
 
         let component_id = self.get_component_id_or_construct::<T>();
         let component_set = &mut self.components[component_id];
@@ -93,7 +95,7 @@ impl Registry {
     }
 
     pub fn get_component<T: 'static>(&self, entity: Entity) -> Option<&T> {
-        assert!(self.handle_manager.is_handle_valid(entity));
+        assert!(self.is_handle_valid(entity));
 
         let Some(component_id) = self.get_component_id::<T>() else {
             return None;
@@ -113,7 +115,7 @@ impl Registry {
     }
 
     pub fn get_component_mut<T: 'static>(&mut self, entity: Entity) -> Option<&mut T> {
-        assert!(self.handle_manager.is_handle_valid(entity));
+        assert!(self.is_handle_valid(entity));
 
         let component_id = self.get_component_id_or_construct::<T>();
         let component_set = &mut self.components[component_id];
@@ -289,12 +291,54 @@ impl Registry {
         self.components.push(Box::new(SparseSet::<T>::new()));
         new_index
     }
+
+    fn create_handle(&mut self) -> Entity {
+        if self.unrecycled_handles > 0 {
+            let recyclable_handle_index = self.next_handle as usize;
+
+            let new_index = {
+                let next_handle = self.next_handle + 1;
+                let handle = &mut self.handles[recyclable_handle_index];
+
+                handle.increase_version();
+                handle.swap_id(next_handle)
+            };
+
+            self.next_handle = new_index;
+            self.unrecycled_handles -= 1;
+
+            return self.handles[recyclable_handle_index];
+        }
+
+        let new_handle_id = (self.handles.len() as u32) + 1;
+        let handle = Entity::new(new_handle_id);
+        self.handles.push(handle);
+
+        handle
+    }
+
+    fn destroy_handle(&mut self, handle: Entity) {
+        let handle_id = (handle.id() as usize) - 1;
+
+        let new_index = {
+            let next_handle = self.next_handle;
+            let destroyable_handle = &mut self.handles[handle_id];
+
+            destroyable_handle.swap_id(next_handle)
+        };
+
+        self.next_handle = new_index - 1;
+        self.unrecycled_handles += 1;
+    }
+
+    fn is_handle_valid(&self, handle: Entity) -> bool {
+        let handle_id = handle.id() as usize - 1;
+        self.handles[handle_id] == handle
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use hyper_core::Handle;
-
     use super::*;
 
     #[test]
@@ -475,7 +519,7 @@ mod tests {
 
         let mut i = 0;
         registry.view_one(|entity: Entity, position: &Position| {
-            assert_eq!(entity, Entity::from_id(i + 1));
+            assert_eq!(entity, Entity::new(i + 1));
             assert_eq!(
                 *position,
                 Position {
@@ -487,13 +531,13 @@ mod tests {
         });
 
         registry.view_one(|entity: Entity, velocity: &Velocity| {
-            assert_eq!(entity, Entity::from_id(2));
+            assert_eq!(entity, Entity::new(2));
             assert_eq!(*velocity, Velocity { dx: 1.0, dy: 1.0 });
         });
 
         let mut i = 0;
         registry.view_one_mut(|entity: Entity, position: &mut Position| {
-            assert_eq!(entity, Entity::from_id(i + 1));
+            assert_eq!(entity, Entity::new(i + 1));
             assert_eq!(
                 *position,
                 Position {
@@ -505,19 +549,19 @@ mod tests {
         });
 
         registry.view_one_mut(|entity: Entity, velocity: &mut Velocity| {
-            assert_eq!(entity, Entity::from_id(2));
+            assert_eq!(entity, Entity::new(2));
             assert_eq!(*velocity, Velocity { dx: 1.0, dy: 1.0 });
         });
 
         registry.view_two(|entity: Entity, position: &Position, velocity: &Velocity| {
-            assert_eq!(entity, Entity::from_id(2));
+            assert_eq!(entity, Entity::new(2));
             assert_eq!(*position, Position { x: 1.0, y: 1.0 });
             assert_eq!(*velocity, Velocity { dx: 1.0, dy: 1.0 });
         });
 
         registry.view_two_mut(
             |entity: Entity, position: &mut Position, velocity: &mut Velocity| {
-                assert_eq!(entity, Entity::from_id(2));
+                assert_eq!(entity, Entity::new(2));
                 assert_eq!(*position, Position { x: 1.0, y: 1.0 });
                 assert_eq!(*velocity, Velocity { dx: 1.0, dy: 1.0 });
             },
