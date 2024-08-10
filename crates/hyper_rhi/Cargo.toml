@@ -12,10 +12,10 @@ edition = "2021"
 [dependencies]
 hyper_core = { path = "../hyper_core" }
 hyper_math = { path = "../hyper_math" }
-hyper_platform = { path = "../hyper_platform" }
 
 ash = { workspace = true }
 ash-window = { workspace = true }
+downcast-rs = { workspace = true }
 hassle-rs = { workspace = true }
 gpu-allocator = { workspace = true }
 raw-window-handle = { workspace = true }

@@ -27,8 +27,12 @@ use windows::Win32::Graphics::{
     Dxgi::Common::{DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SAMPLE_DESC},
 };
 
-use crate::{d3d12::GraphicsDevice, graphics_pipeline::GraphicsPipelineDescriptor};
+use crate::{
+    d3d12::{graphics_device::GraphicsDevice, shader_module::ShaderModule},
+    graphics_pipeline::GraphicsPipelineDescriptor,
+};
 
+#[derive(Debug)]
 pub struct GraphicsPipeline {
     pipeline_state: ID3D12PipelineState,
 }
@@ -38,11 +42,17 @@ impl GraphicsPipeline {
         graphics_device: &GraphicsDevice,
         descriptor: &GraphicsPipelineDescriptor,
     ) -> Self {
-        let vertex_shader = descriptor.vertex_shader.d3d12_shader_module().unwrap();
-        let vertex_shader_code = vertex_shader.code();
+        let vertex_shader_code = descriptor
+            .vertex_shader
+            .downcast_ref::<ShaderModule>()
+            .unwrap()
+            .code();
 
-        let pixel_shader = descriptor.pixel_shader.d3d12_shader_module().unwrap();
-        let pixel_shader_code = pixel_shader.code();
+        let fragment_shader_code = descriptor
+            .fragment_shader
+            .downcast_ref::<ShaderModule>()
+            .unwrap()
+            .code();
         let mut descriptor = D3D12_GRAPHICS_PIPELINE_STATE_DESC {
             pRootSignature: unsafe { mem::transmute_copy(graphics_device.root_signature()) },
             VS: D3D12_SHADER_BYTECODE {
@@ -50,8 +60,8 @@ impl GraphicsPipeline {
                 BytecodeLength: vertex_shader_code.len(),
             },
             PS: D3D12_SHADER_BYTECODE {
-                pShaderBytecode: pixel_shader_code.as_ptr() as *const c_void,
-                BytecodeLength: pixel_shader_code.len(),
+                pShaderBytecode: fragment_shader_code.as_ptr() as *const c_void,
+                BytecodeLength: fragment_shader_code.len(),
             },
             RasterizerState: D3D12_RASTERIZER_DESC {
                 FillMode: D3D12_FILL_MODE_SOLID,
@@ -100,7 +110,7 @@ impl GraphicsPipeline {
                 .device()
                 .CreateGraphicsPipelineState(&descriptor)
         }
-        .expect("failed to create graphics pipeline state");
+        .unwrap();
 
         Self { pipeline_state }
     }
@@ -109,3 +119,5 @@ impl GraphicsPipeline {
         &self.pipeline_state
     }
 }
+
+impl crate::graphics_pipeline::GraphicsPipeline for GraphicsPipeline {}

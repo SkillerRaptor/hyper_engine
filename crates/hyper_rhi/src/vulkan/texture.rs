@@ -8,31 +8,35 @@ use std::sync::Arc;
 
 use ash::vk;
 
-use crate::{texture::TextureDescriptor, vulkan::GraphicsDevice};
+use crate::{
+    texture::TextureDescriptor,
+    vulkan::graphics_device::{GraphicsDevice, ResourceHandler},
+};
 
-struct TextureInner {
+#[derive(Debug)]
+pub(crate) struct Texture {
     height: u32,
     width: u32,
 
     view: vk::ImageView,
     image: vk::Image,
 
-    graphics_device: GraphicsDevice,
-}
-
-#[derive(Clone)]
-pub(crate) struct Texture {
-    inner: Arc<TextureInner>,
+    resource_handler: Arc<ResourceHandler>,
 }
 
 impl Texture {
-    pub(crate) fn new(_graphics_device: &GraphicsDevice, _descriptor: &TextureDescriptor) -> Self {
+    pub(crate) fn new(
+        _graphics_device: &GraphicsDevice,
+        _resource_handler: &Arc<ResourceHandler>,
+        _descriptor: &TextureDescriptor,
+    ) -> Self {
         todo!();
     }
 
     // NOTE: Maybe add a descriptor for the format and more parameters?
     pub(super) fn new_external(
         graphics_device: &GraphicsDevice,
+        resource_handler: &Arc<ResourceHandler>,
         image: vk::Image,
         width: u32,
         height: u32,
@@ -63,34 +67,46 @@ impl Texture {
                 .device()
                 .create_image_view(&create_info, None)
         }
-        .expect("failed to create image view");
+        .unwrap();
 
         Self {
-            inner: Arc::new(TextureInner {
-                height,
-                width,
+            height,
+            width,
 
-                view,
-                image,
+            view,
+            image,
 
-                graphics_device: graphics_device.clone(),
-            }),
+            resource_handler: Arc::clone(resource_handler),
         }
     }
 
     pub(crate) fn image(&self) -> vk::Image {
-        self.inner.image
+        self.image
     }
 
     pub(crate) fn view(&self) -> vk::ImageView {
-        self.inner.view
+        self.view
     }
 
     pub(crate) fn width(&self) -> u32 {
-        self.inner.width
+        self.width
     }
 
     pub(crate) fn height(&self) -> u32 {
-        self.inner.height
+        self.height
     }
 }
+
+impl Drop for Texture {
+    fn drop(&mut self) {
+        // TODO: Destroy texture allocation too if present
+
+        self.resource_handler
+            .texture_views
+            .lock()
+            .unwrap()
+            .push(self.view);
+    }
+}
+
+impl crate::texture::Texture for Texture {}

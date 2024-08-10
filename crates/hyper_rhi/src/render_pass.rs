@@ -4,63 +4,53 @@
 // SPDX-License-Identifier: MIT
 //
 
-#[cfg(target_os = "windows")]
-use crate::d3d12;
-use crate::{graphics_pipeline::GraphicsPipeline, texture::Texture, vulkan};
+use std::{fmt::Debug, sync::Arc};
 
-#[derive(Clone)]
+use crate::{command_list::Command, graphics_pipeline::GraphicsPipeline, texture::Texture};
+
+#[derive(Clone, Debug)]
 pub struct RenderPassDescriptor<'a> {
     // TODO: Add image view type
-    pub texture: &'a Texture,
+    pub texture: &'a Arc<dyn Texture>,
 }
 
-enum RenderPassInner {
-    #[cfg(target_os = "windows")]
-    D3D12(d3d12::RenderPass),
-    Vulkan(vulkan::RenderPass),
+pub struct RenderPass<'a> {
+    commands: &'a mut Vec<Command>,
 }
 
-pub struct RenderPass {
-    inner: RenderPassInner,
-}
+impl<'a> RenderPass<'a> {
+    pub(crate) fn new(commands: &'a mut Vec<Command>, descriptor: &RenderPassDescriptor) -> Self {
+        commands.push(Command::BeginRenderPass {
+            texture: Arc::clone(descriptor.texture),
+        });
 
-impl RenderPass {
-    #[cfg(target_os = "windows")]
-    pub(crate) fn new_d3d12(render_pass: d3d12::RenderPass) -> Self {
-        Self {
-            inner: RenderPassInner::D3D12(render_pass),
-        }
+        Self { commands }
     }
 
-    pub(crate) fn new_vulkan(render_pass: vulkan::RenderPass) -> Self {
-        Self {
-            inner: RenderPassInner::Vulkan(render_pass),
-        }
-    }
-
-    pub fn bind_pipeline(&self, pipeline: &GraphicsPipeline) {
-        match &self.inner {
-            #[cfg(target_os = "windows")]
-            RenderPassInner::D3D12(inner) => inner.bind_pipeline(pipeline),
-            RenderPassInner::Vulkan(inner) => inner.bind_pipeline(pipeline),
-        }
+    pub fn bind_pipeline(&mut self, pipeline: &Arc<dyn GraphicsPipeline>) {
+        self.commands.push(Command::BindPipeline {
+            graphics_pipeline: Arc::clone(pipeline),
+        });
     }
 
     pub fn draw(
-        &self,
+        &mut self,
         vertex_count: u32,
         instance_count: u32,
         first_vertex: u32,
         first_instance: u32,
     ) {
-        match &self.inner {
-            #[cfg(target_os = "windows")]
-            RenderPassInner::D3D12(inner) => {
-                inner.draw(vertex_count, instance_count, first_vertex, first_instance)
-            }
-            RenderPassInner::Vulkan(inner) => {
-                inner.draw(vertex_count, instance_count, first_vertex, first_instance)
-            }
-        }
+        self.commands.push(Command::Draw {
+            vertex_count,
+            instance_count,
+            first_vertex,
+            first_instance,
+        });
+    }
+}
+
+impl<'a> Drop for RenderPass<'a> {
+    fn drop(&mut self) {
+        self.commands.push(Command::EndRenderPass);
     }
 }

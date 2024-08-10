@@ -12,13 +12,11 @@ members = ["crates/*"]
 ash = { git = "https://github.com/SkillerRaptor/ash" }
 ash-window = { git = "https://github.com/SkillerRaptor/ash" }
 clap = { version = "4.5", features = ["derive"] }
+downcast-rs = "1.2.1"
 glam = "0.28"
 gpu-allocator = "0.27"
 hassle-rs = "0.11"
-proc-macro2 = "1.0"
-quote = "1.0"
 raw-window-handle = "0.6"
-syn = { version = "2.0", features = ["extra-traits"] }
 thiserror = "1.0"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["registry"] }

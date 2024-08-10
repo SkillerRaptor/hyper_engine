@@ -4,26 +4,18 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::sync::Arc;
-
 use windows::Win32::Graphics::Direct3D12::{ID3D12Resource, D3D12_CPU_DESCRIPTOR_HANDLE};
 
-use crate::{d3d12::GraphicsDevice, texture::TextureDescriptor};
+use crate::{d3d12::graphics_device::GraphicsDevice, texture::TextureDescriptor};
 
-struct TextureInner {
+#[derive(Debug)]
+pub(crate) struct Texture {
     height: u32,
     width: u32,
 
     // NOTE: This is an index into the Heap, may change later
     index: u32,
     resource: ID3D12Resource,
-
-    graphics_device: GraphicsDevice,
-}
-
-#[derive(Clone)]
-pub(crate) struct Texture {
-    inner: Arc<TextureInner>,
 }
 
 impl Texture {
@@ -31,7 +23,7 @@ impl Texture {
         todo!();
     }
 
-    pub(super) fn new_external(
+    pub(crate) fn new_external(
         graphics_device: &GraphicsDevice,
         resource: ID3D12Resource,
         width: u32,
@@ -50,27 +42,29 @@ impl Texture {
         }
 
         Self {
-            inner: Arc::new(TextureInner {
-                height,
-                width,
+            height,
+            width,
 
-                index,
-                resource,
-
-                graphics_device: graphics_device.clone(),
-            }),
+            index,
+            resource,
         }
     }
 
     pub(crate) fn resource(&self) -> &ID3D12Resource {
-        &self.inner.resource
+        &self.resource
     }
 
     pub(crate) fn width(&self) -> u32 {
-        self.inner.width
+        self.width
     }
 
     pub(crate) fn height(&self) -> u32 {
-        self.inner.height
+        self.height
+    }
+
+    pub(crate) fn index(&self) -> u32 {
+        self.index
     }
 }
+
+impl crate::texture::Texture for Texture {}

@@ -29,7 +29,7 @@ pub enum ShaderCompilationError {
     Validation(HassleError, String),
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum OutputApi {
     D3D12,
     Vulkan,
@@ -56,7 +56,7 @@ pub(crate) fn compile(
 
     let profile = match stage {
         ShaderStage::Compute => "cs_6_6",
-        ShaderStage::Pixel => "ps_6_6",
+        ShaderStage::Fragment => "ps_6_6",
         ShaderStage::Vertex => "vs_6_6",
     };
 

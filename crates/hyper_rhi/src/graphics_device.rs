@@ -4,141 +4,82 @@
 // SPDX-License-Identifier: MIT
 //
 
-use hyper_platform::Window;
+use std::{fmt::Debug, sync::Arc};
+
+use downcast_rs::Downcast;
+use raw_window_handle::DisplayHandle;
+
+use crate::{
+    command_encoder::CommandEncoder,
+    command_list::CommandList,
+    graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
+    shader_module::{ShaderModule, ShaderModuleDescriptor},
+    surface::{Surface, SurfaceDescriptor},
+    texture::{Texture, TextureDescriptor},
+};
 
 #[cfg(target_os = "windows")]
 use crate::d3d12;
-use crate::{
-    command_list::CommandList,
-    graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
-    shader_module::{ShaderModule, ShaderModuleDescriptor, ShaderModuleError},
-    surface::{Surface, SurfaceDescriptor},
-    texture::{Texture, TextureDescriptor},
-    vulkan,
-};
+use crate::vulkan;
 
 #[derive(Clone, Copy, Debug)]
 pub enum GraphicsApi {
+    #[cfg(target_os = "windows")]
     D3D12,
     Vulkan,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GraphicsDeviceDescriptor<'a> {
     pub graphics_api: GraphicsApi,
     pub debug_mode: bool,
-    pub window: &'a Window,
+    pub display_handle: DisplayHandle<'a>,
 }
 
-enum GraphicsDeviceInner {
-    #[cfg(target_os = "windows")]
-    D3D12(d3d12::GraphicsDevice),
-    Vulkan(vulkan::GraphicsDevice),
-}
+pub(crate) const FRAME_COUNT: u32 = 2;
+pub(crate) const DESCRIPTOR_COUNT: u32 = 1000 * 1000;
 
-pub struct GraphicsDevice {
-    inner: GraphicsDeviceInner,
-}
+pub trait GraphicsDevice: Downcast {
+    fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Box<dyn Surface>;
 
-impl GraphicsDevice {
-    pub(crate) const FRAME_COUNT: u32 = 2;
-    pub(crate) const DESCRIPTOR_COUNT: u32 = 1000 * 1000;
+    // TODO: Add compute pipeline
 
-    pub fn new(descriptor: &GraphicsDeviceDescriptor) -> Self {
-        #[allow(unreachable_patterns)]
-        let (inner, backend) = match descriptor.graphics_api {
-            #[cfg(target_os = "windows")]
-            GraphicsApi::D3D12 => (
-                GraphicsDeviceInner::D3D12(d3d12::GraphicsDevice::new(descriptor)),
-                "D3D12",
-            ),
-            GraphicsApi::Vulkan => (
-                GraphicsDeviceInner::Vulkan(vulkan::GraphicsDevice::new(descriptor)),
-                "Vulkan",
-            ),
-            _ => unreachable!(),
-        };
-
-        tracing::debug!("Created Graphics Device with {} API", backend);
-
-        Self { inner }
-    }
-
-    pub fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Surface {
-        match &self.inner {
-            #[cfg(target_os = "windows")]
-            GraphicsDeviceInner::D3D12(inner) => {
-                Surface::new_d3d12(inner.create_surface(descriptor))
-            }
-            GraphicsDeviceInner::Vulkan(inner) => {
-                Surface::new_vulkan(inner.create_surface(descriptor))
-            }
-        }
-    }
-
-    pub fn create_graphics_pipeline(
+    fn create_graphics_pipeline(
         &self,
         descriptor: &GraphicsPipelineDescriptor,
-    ) -> GraphicsPipeline {
-        match &self.inner {
-            #[cfg(target_os = "windows")]
-            GraphicsDeviceInner::D3D12(inner) => {
-                GraphicsPipeline::new_d3d12(inner.create_graphics_pipeline(descriptor))
-            }
-            GraphicsDeviceInner::Vulkan(inner) => {
-                GraphicsPipeline::new_vulkan(inner.create_graphics_pipeline(descriptor))
-            }
-        }
-    }
+    ) -> Arc<dyn GraphicsPipeline>;
 
-    pub fn create_shader_module(
-        &self,
-        descriptor: &ShaderModuleDescriptor,
-    ) -> Result<ShaderModule, ShaderModuleError> {
-        Ok(match &self.inner {
-            #[cfg(target_os = "windows")]
-            GraphicsDeviceInner::D3D12(inner) => {
-                ShaderModule::new_d3d12(inner.create_shader_module(descriptor)?)
-            }
-            GraphicsDeviceInner::Vulkan(inner) => {
-                ShaderModule::new_vulkan(inner.create_shader_module(descriptor)?)
-            }
-        })
-    }
+    // TODO: Add buffer
 
-    pub fn create_texture(&self, descriptor: &TextureDescriptor) -> Texture {
-        match &self.inner {
-            #[cfg(target_os = "windows")]
-            GraphicsDeviceInner::D3D12(inner) => {
-                Texture::new_d3d12(inner.create_texture(descriptor))
-            }
-            GraphicsDeviceInner::Vulkan(inner) => {
-                Texture::new_vulkan(inner.create_texture(descriptor))
-            }
-        }
-    }
+    fn create_shader_module(&self, descriptor: &ShaderModuleDescriptor) -> Arc<dyn ShaderModule>;
 
-    pub fn create_command_list(&self) -> CommandList {
-        match &self.inner {
-            #[cfg(target_os = "windows")]
-            GraphicsDeviceInner::D3D12(inner) => {
-                CommandList::new_d3d12(inner.create_command_list())
-            }
-            GraphicsDeviceInner::Vulkan(inner) => {
-                CommandList::new_vulkan(inner.create_command_list())
-            }
-        }
-    }
+    fn create_texture(&self, descriptor: &TextureDescriptor) -> Arc<dyn Texture>;
 
-    pub fn execute_commands(&self, command_list: &CommandList) {
-        match &self.inner {
-            #[cfg(target_os = "windows")]
-            GraphicsDeviceInner::D3D12(inner) => {
-                inner.execute_commands(command_list);
-            }
-            GraphicsDeviceInner::Vulkan(inner) => {
-                inner.execute_commands(command_list);
-            }
-        }
-    }
+    fn create_command_encoder(&self) -> CommandEncoder;
+
+    fn begin_frame(&self, surface: &mut Box<dyn Surface>, frame_index: u32);
+
+    fn end_frame(&self);
+
+    // NOTE: This function assumes, that there will be only 1 command buffer and 1 submission per frame
+    fn submit(&self, command_list: CommandList);
+
+    fn present(&self, surface: &dyn Surface);
+}
+
+downcast_rs::impl_downcast!(GraphicsDevice);
+
+pub fn create_graphics_device(descriptor: &GraphicsDeviceDescriptor) -> Arc<dyn GraphicsDevice> {
+    let graphics_device: Arc<dyn GraphicsDevice> = match descriptor.graphics_api {
+        #[cfg(target_os = "windows")]
+        GraphicsApi::D3D12 => Arc::new(d3d12::graphics_device::GraphicsDevice::new(descriptor)),
+        GraphicsApi::Vulkan => Arc::new(vulkan::graphics_device::GraphicsDevice::new(descriptor)),
+    };
+
+    tracing::debug!(
+        "Create Graphics Device with the {:?} API",
+        descriptor.graphics_api
+    );
+
+    graphics_device
 }

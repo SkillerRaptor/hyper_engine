@@ -19,3 +19,4 @@ hyper_rhi = { path = "../hyper_rhi" }
 clap = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+raw-window-handle = { workspace = true }

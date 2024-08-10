@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::sync::atomic::Ordering;
+use std::sync::Arc;
 
-use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+use raw_window_handle::RawWindowHandle;
 use windows::{
     core::Interface,
     Win32::{
@@ -15,18 +15,16 @@ use windows::{
             Common::{DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SAMPLE_DESC},
             IDXGISwapChain4,
             DXGI_MWA_NO_ALT_ENTER,
-            DXGI_PRESENT,
             DXGI_SWAP_CHAIN_DESC1,
             DXGI_SWAP_CHAIN_FLAG,
             DXGI_SWAP_EFFECT_FLIP_DISCARD,
             DXGI_USAGE_RENDER_TARGET_OUTPUT,
         },
-        System::Threading::{WaitForSingleObject, INFINITE},
     },
 };
 
 use crate::{
-    d3d12::{GraphicsDevice, Texture},
+    d3d12::{graphics_device::GraphicsDevice, texture::Texture},
     surface::SurfaceDescriptor,
 };
 
@@ -35,23 +33,16 @@ pub struct Surface {
     width: u32,
     resized: bool,
 
-    textures: Vec<Texture>,
+    textures: Vec<Arc<dyn crate::texture::Texture>>,
 
     swap_chain: IDXGISwapChain4,
-
-    graphics_device: GraphicsDevice,
 }
 
 impl Surface {
     pub(crate) fn new(graphics_device: &GraphicsDevice, descriptor: &SurfaceDescriptor) -> Self {
-        let size = descriptor.window.inner_size();
+        let size = descriptor.window_size;
 
-        let hwnd = match descriptor
-            .window
-            .window_handle()
-            .expect("failed to get window handle")
-            .as_raw()
-        {
+        let hwnd = match descriptor.window_handle.as_raw() {
             RawWindowHandle::Win32(handle) => HWND(handle.hwnd.get() as _),
             _ => panic!(),
         };
@@ -68,8 +59,6 @@ impl Surface {
             textures,
 
             swap_chain,
-
-            graphics_device: graphics_device.clone(),
         }
     }
 
@@ -80,7 +69,7 @@ impl Surface {
         hwnd: HWND,
     ) -> IDXGISwapChain4 {
         let descriptor = DXGI_SWAP_CHAIN_DESC1 {
-            BufferCount: crate::graphics_device::GraphicsDevice::FRAME_COUNT,
+            BufferCount: crate::graphics_device::FRAME_COUNT,
             Width: width,
             Height: height,
             Format: DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -102,15 +91,15 @@ impl Surface {
                 None,
             )
         }
-        .expect("failed to create swapchain")
+        .unwrap()
         .cast()
-        .expect("failed to promote swapchain");
+        .unwrap();
 
         unsafe {
             graphics_device
                 .factory()
                 .MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER)
-                .expect("failed to make window association");
+                .unwrap();
         }
 
         swap_chain
@@ -121,101 +110,68 @@ impl Surface {
         swap_chain: &IDXGISwapChain4,
         width: u32,
         height: u32,
-    ) -> Vec<Texture> {
+    ) -> Vec<Arc<dyn crate::texture::Texture>> {
         let mut textures = Vec::new();
-        for i in 0..crate::graphics_device::GraphicsDevice::FRAME_COUNT {
-            let render_target =
-                unsafe { swap_chain.GetBuffer(i) }.expect("failed to get swapchain render target");
+        for i in 0..crate::graphics_device::FRAME_COUNT {
+            let render_target = unsafe { swap_chain.GetBuffer(i) }.unwrap();
 
-            let texture = Texture::new_external(graphics_device, render_target, width, height, i);
+            let texture: Arc<dyn crate::texture::Texture> = Arc::new(Texture::new_external(
+                graphics_device,
+                render_target,
+                width,
+                height,
+                i,
+            ));
             textures.push(texture);
         }
 
         textures
     }
 
-    pub(crate) fn resize(&mut self, width: u32, height: u32) {
+    pub(crate) fn rebuild(&mut self, graphics_device: &GraphicsDevice) {
+        self.textures.clear();
+
+        unsafe {
+            self.swap_chain
+                .ResizeBuffers(
+                    crate::graphics_device::FRAME_COUNT,
+                    self.width,
+                    self.height,
+                    DXGI_FORMAT_R8G8B8A8_UNORM,
+                    DXGI_SWAP_CHAIN_FLAG(0),
+                )
+                .unwrap();
+        }
+
+        let textures =
+            Self::create_textures(graphics_device, &self.swap_chain, self.width, self.height);
+        self.textures = textures;
+
+        self.resized = false;
+    }
+
+    pub(crate) fn current_texture_index(&self) -> u32 {
+        unsafe { self.swap_chain.GetCurrentBackBufferIndex() }
+    }
+
+    pub(crate) fn swap_chain(&self) -> &IDXGISwapChain4 {
+        &self.swap_chain
+    }
+
+    pub(crate) fn resized(&self) -> bool {
+        self.resized
+    }
+}
+
+impl crate::surface::Surface for Surface {
+    fn resize(&mut self, width: u32, height: u32) {
         self.height = height;
         self.width = width;
         self.resized = true;
     }
 
-    pub(crate) fn current_texture(&mut self) -> Texture {
-        if self.resized {
-            self.textures.clear();
-
-            unsafe {
-                self.swap_chain
-                    .ResizeBuffers(
-                        crate::graphics_device::GraphicsDevice::FRAME_COUNT,
-                        self.width,
-                        self.height,
-                        DXGI_FORMAT_R8G8B8A8_UNORM,
-                        DXGI_SWAP_CHAIN_FLAG(0),
-                    )
-                    .expect("failed to resize swapchain buffers");
-            }
-
-            let textures = Self::create_textures(
-                &self.graphics_device,
-                &self.swap_chain,
-                self.width,
-                self.height,
-            );
-            self.textures = textures;
-
-            self.resized = false;
-        }
-
-        let value = self
-            .graphics_device
-            .current_frame_index()
-            .load(Ordering::Relaxed) as u64;
-
-        unsafe {
-            self.graphics_device
-                .command_queue()
-                .Signal(self.graphics_device.fence(), value)
-                .expect("failed to signal command queue");
-        }
-
-        if unsafe { self.graphics_device.fence().GetCompletedValue() } < value {
-            unsafe {
-                self.graphics_device
-                    .fence()
-                    .SetEventOnCompletion(value, self.graphics_device.fence_event())
-                    .expect("failed to set fence event on completion");
-                WaitForSingleObject(self.graphics_device.fence_event(), INFINITE);
-            }
-        }
-
-        let value = unsafe { self.swap_chain.GetCurrentBackBufferIndex() };
-        self.graphics_device
-            .current_texture_index()
-            .store(value, Ordering::Relaxed);
-
-        self.textures[value as usize].clone()
-    }
-
-    pub(crate) fn present(&mut self) {
-        unsafe {
-            self.swap_chain
-                .Present(1, DXGI_PRESENT(0))
-                .ok()
-                .expect("failed to present swap chain");
-        }
-
-        let value = self
-            .graphics_device
-            .current_frame_index()
-            .load(Ordering::Relaxed)
-            + 1;
-        self.graphics_device
-            .current_frame_index()
-            .store(value, Ordering::Relaxed);
-    }
-
-    pub(crate) fn swap_chain(&self) -> &IDXGISwapChain4 {
-        &self.swap_chain
+    fn current_texture(&self) -> Arc<dyn crate::texture::Texture> {
+        let texture = &self.textures[self.current_texture_index() as usize];
+        Arc::clone(texture)
     }
 }

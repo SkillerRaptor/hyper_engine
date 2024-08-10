@@ -32,7 +32,7 @@ pub(super) struct ResourceHeapDescriptor {
 pub(super) struct ResourceHeap {
     handle: D3D12_CPU_DESCRIPTOR_HANDLE,
     size: usize,
-    descriptor_heap: ID3D12DescriptorHeap,
+    _descriptor_heap: ID3D12DescriptorHeap,
 }
 
 impl ResourceHeap {
@@ -57,8 +57,7 @@ impl ResourceHeap {
         };
 
         let descriptor_heap: ID3D12DescriptorHeap =
-            unsafe { device.CreateDescriptorHeap(&descriptor) }
-                .expect("failed to create descriptor heap");
+            unsafe { device.CreateDescriptorHeap(&descriptor) }.unwrap();
         let size =
             unsafe { device.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) }
                 as usize;
@@ -67,12 +66,8 @@ impl ResourceHeap {
         Self {
             handle,
             size,
-            descriptor_heap,
+            _descriptor_heap: descriptor_heap,
         }
-    }
-
-    pub(crate) fn descriptor_heap(&self) -> &ID3D12DescriptorHeap {
-        &self.descriptor_heap
     }
 
     pub(crate) fn size(&self) -> usize {

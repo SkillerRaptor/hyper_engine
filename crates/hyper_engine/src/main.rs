@@ -8,7 +8,6 @@ mod engine;
 
 use clap::{Parser, ValueEnum};
 
-use hyper_rhi::GraphicsApi;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{
     filter,
@@ -16,10 +15,13 @@ use tracing_subscriber::{
     util::SubscriberInitExt,
 };
 
+use hyper_rhi::graphics_device::GraphicsApi;
+
 use crate::engine::{Engine, EngineDescriptor};
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
 enum Renderer {
+    #[cfg(target_os = "windows")]
     D3D12,
     Vulkan,
 }
@@ -65,6 +67,7 @@ fn main() {
         width: arguments.width,
         height: arguments.height,
         graphics_api: match arguments.renderer {
+            #[cfg(target_os = "windows")]
             Renderer::D3D12 => GraphicsApi::D3D12,
             Renderer::Vulkan => GraphicsApi::Vulkan,
         },

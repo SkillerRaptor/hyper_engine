@@ -4,42 +4,58 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::ffi::CString;
+use std::{ffi::CString, sync::Arc};
 
 use ash::vk;
 
-use crate::{graphics_pipeline::GraphicsPipelineDescriptor, vulkan::GraphicsDevice};
+use crate::{
+    graphics_pipeline::GraphicsPipelineDescriptor,
+    vulkan::{
+        graphics_device::{GraphicsDevice, ResourceHandler},
+        shader_module::ShaderModule,
+    },
+};
 
+#[derive(Debug)]
 pub(crate) struct GraphicsPipeline {
     pipeline: vk::Pipeline,
 
-    graphics_device: GraphicsDevice,
+    resource_handler: Arc<ResourceHandler>,
 }
 
 impl GraphicsPipeline {
     pub(crate) fn new(
         graphics_device: &GraphicsDevice,
+        resource_handler: &Arc<ResourceHandler>,
         descriptor: &GraphicsPipelineDescriptor,
     ) -> Self {
-        let vertex_shader = descriptor.vertex_shader.vulkan_shader_module().unwrap();
-        let vertex_shader_entry =
-            CString::new(vertex_shader.entry()).expect("failed to create vertex shader entry");
+        let vertex_shader_entry = CString::new(descriptor.vertex_shader.entry()).unwrap();
         let vertex_shader_stage_create_info = vk::PipelineShaderStageCreateInfo::default()
             .stage(vk::ShaderStageFlags::VERTEX)
-            .module(vertex_shader.shader_module())
+            .module(
+                descriptor
+                    .vertex_shader
+                    .downcast_ref::<ShaderModule>()
+                    .unwrap()
+                    .shader_module(),
+            )
             .name(&vertex_shader_entry);
 
-        let pixel_shader = descriptor.pixel_shader.vulkan_shader_module().unwrap();
-        let pixel_shader_entry =
-            CString::new(pixel_shader.entry()).expect("failed to create pixel shader entry");
-        let pixel_shader_stage_create_info = vk::PipelineShaderStageCreateInfo::default()
+        let fragment_shader_entry = CString::new(descriptor.fragment_shader.entry()).unwrap();
+        let fragment_shader_stage_create_info = vk::PipelineShaderStageCreateInfo::default()
             .stage(vk::ShaderStageFlags::FRAGMENT)
-            .module(pixel_shader.shader_module())
-            .name(&pixel_shader_entry);
+            .module(
+                descriptor
+                    .fragment_shader
+                    .downcast_ref::<ShaderModule>()
+                    .unwrap()
+                    .shader_module(),
+            )
+            .name(&fragment_shader_entry);
 
         let shader_stages = [
             vertex_shader_stage_create_info,
-            pixel_shader_stage_create_info,
+            fragment_shader_stage_create_info,
         ];
         let dynamic_states = [vk::DynamicState::VIEWPORT, vk::DynamicState::SCISSOR];
 
@@ -139,13 +155,13 @@ impl GraphicsPipeline {
             graphics_device
                 .device()
                 .create_graphics_pipelines(vk::PipelineCache::null(), &[create_info], None)
-                .expect("failed to create graphics pipeline")[0]
+                .unwrap()[0]
         };
 
         Self {
             pipeline,
 
-            graphics_device: graphics_device.clone(),
+            resource_handler: Arc::clone(resource_handler),
         }
     }
 
@@ -156,10 +172,12 @@ impl GraphicsPipeline {
 
 impl Drop for GraphicsPipeline {
     fn drop(&mut self) {
-        unsafe {
-            self.graphics_device
-                .device()
-                .destroy_pipeline(self.pipeline, None);
-        }
+        self.resource_handler
+            .graphics_pipeline
+            .lock()
+            .unwrap()
+            .push(self.pipeline);
     }
 }
+
+impl crate::graphics_pipeline::GraphicsPipeline for GraphicsPipeline {}

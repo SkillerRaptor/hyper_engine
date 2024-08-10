@@ -4,21 +4,17 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::time::Instant;
+use std::{sync::Arc, time::Instant};
 
 use hyper_platform::{Window, WindowDescriptor};
 use hyper_rhi::{
-    GraphicsApi,
-    GraphicsDevice,
-    GraphicsDeviceDescriptor,
-    GraphicsPipeline,
-    GraphicsPipelineDescriptor,
-    RenderPassDescriptor,
-    ShaderModuleDescriptor,
-    ShaderStage,
-    Surface,
-    SurfaceDescriptor,
+    graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
+    graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
+    render_pass::RenderPassDescriptor,
+    shader_module::{ShaderModuleDescriptor, ShaderStage},
+    surface::{Surface, SurfaceDescriptor},
 };
+use raw_window_handle::{HasDisplayHandle, HasWindowHandle};
 
 #[derive(Clone, Debug)]
 pub struct EngineDescriptor {
@@ -29,10 +25,11 @@ pub struct EngineDescriptor {
 }
 
 pub struct Engine {
-    // Rendering
-    graphics_pipeline: GraphicsPipeline,
-    surface: Surface,
-    graphics_device: GraphicsDevice,
+    frame_index: u32,
+
+    graphics_pipeline: Arc<dyn GraphicsPipeline>,
+    surface: Box<dyn Surface>,
+    graphics_device: Arc<dyn GraphicsDevice>,
 
     window: Window,
 }
@@ -56,35 +53,36 @@ impl Engine {
         })
         .unwrap();
 
-        let graphics_device = GraphicsDevice::new(&GraphicsDeviceDescriptor {
-            // TODO: Don't hardcode and use CLI options
-            graphics_api: descriptor.graphics_api,
-            debug_mode: descriptor.debug,
-            window: &window,
+        let graphics_device =
+            hyper_rhi::graphics_device::create_graphics_device(&GraphicsDeviceDescriptor {
+                graphics_api: descriptor.graphics_api,
+                debug_mode: descriptor.debug,
+                display_handle: window.display_handle().unwrap(),
+            });
+
+        let surface = graphics_device.create_surface(&SurfaceDescriptor {
+            display_handle: window.display_handle().unwrap(),
+            window_handle: window.window_handle().unwrap(),
+            window_size: window.inner_size(),
         });
 
-        let surface = graphics_device.create_surface(&SurfaceDescriptor { window: &window });
+        let opaque_vertex_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
+            path: "./assets/shaders/opaque_shader.hlsl",
+            entry: "vs_main",
+            stage: ShaderStage::Vertex,
+        });
 
-        let vertex_shader = graphics_device
-            .create_shader_module(&ShaderModuleDescriptor {
-                path: "./assets/shaders/vertex_shader.hlsl",
-                entry: "main",
-                stage: ShaderStage::Vertex,
-            })
-            .unwrap();
-
-        let pixel_shader = graphics_device
-            .create_shader_module(&ShaderModuleDescriptor {
-                path: "./assets/shaders/pixel_shader.hlsl",
-                entry: "main",
-                stage: ShaderStage::Pixel,
-            })
-            .unwrap();
+        let opaque_fragment_shader =
+            graphics_device.create_shader_module(&ShaderModuleDescriptor {
+                path: "./assets/shaders/opaque_shader.hlsl",
+                entry: "fs_main",
+                stage: ShaderStage::Fragment,
+            });
 
         let graphics_pipeline =
             graphics_device.create_graphics_pipeline(&GraphicsPipelineDescriptor {
-                vertex_shader: &vertex_shader,
-                pixel_shader: &pixel_shader,
+                vertex_shader: &opaque_vertex_shader,
+                fragment_shader: &opaque_fragment_shader,
             });
 
         tracing::info!(
@@ -93,6 +91,8 @@ impl Engine {
         );
 
         Self {
+            frame_index: 1,
+
             graphics_pipeline,
             surface,
             graphics_device,
@@ -125,22 +125,24 @@ impl Engine {
                 self.surface.resize(width, height);
             }
 
-            // Update
             while accumulator >= delta_time {
                 // Update Fixed
                 accumulator -= delta_time;
                 _time += delta_time;
             }
 
-            // Normal Update
+            // Update
 
             // Render
+            self.graphics_device
+                .begin_frame(&mut self.surface, self.frame_index);
+
             let swapchain_texture = self.surface.current_texture();
 
-            let command_list = self.graphics_device.create_command_list();
+            let mut command_encoder = self.graphics_device.create_command_encoder();
 
             {
-                let render_pass = command_list.begin_render_pass(&RenderPassDescriptor {
+                let mut render_pass = command_encoder.begin_render_pass(&RenderPassDescriptor {
                     texture: &swapchain_texture,
                 });
 
@@ -148,9 +150,12 @@ impl Engine {
                 render_pass.draw(3, 1, 0, 0);
             }
 
-            self.graphics_device.execute_commands(&command_list);
+            self.graphics_device.end_frame();
 
-            self.surface.present();
+            self.graphics_device.submit(command_encoder.finish());
+            self.graphics_device.present(&self.surface);
+
+            self.frame_index += 1;
         }
     }
 }

@@ -7,6 +7,7 @@
 use crate::resource_handle::ResourceHandle;
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug)]
 pub(crate) struct BindingsOffset {
     bindings_offset: ResourceHandle,
     unused_0: u32,

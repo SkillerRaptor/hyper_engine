@@ -32,7 +32,7 @@ static const float3 colors[3] = {
   float3(0.0, 0.0, 1.0),
 };
 
-VertexOutput main(
+VertexOutput vs_main(
   uint vertex_id : SV_VertexID
 ) {
   // Bindings bindings = load_bindings<Bindings>();
@@ -42,4 +42,8 @@ VertexOutput main(
   output.position = float4(positions[vertex_id], 1.0);
   output.color = float4(colors[vertex_id], 1.0);
   return output;
+}
+
+float4 fs_main(VertexOutput input) : SV_TARGET {
+  return input.color;
 }

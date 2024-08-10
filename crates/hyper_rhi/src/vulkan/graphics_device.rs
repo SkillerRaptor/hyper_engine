@@ -8,24 +8,35 @@ use std::{
     collections::HashSet,
     ffi::{c_void, CStr},
     mem,
-    sync::{
-        atomic::{AtomicU32, Ordering},
-        Arc,
-    },
+    sync::{Arc, Mutex},
 };
 
 use ash::{ext::debug_utils, khr::swapchain, vk, Device, Entry, Instance};
-use raw_window_handle::{DisplayHandle, HasDisplayHandle};
+use raw_window_handle::DisplayHandle;
 
 use crate::{
     bindings::BindingsOffset,
+    command_encoder::CommandEncoder,
+    command_list::{Command, CommandList},
     graphics_device::GraphicsDeviceDescriptor,
     graphics_pipeline::GraphicsPipelineDescriptor,
     shader_module::ShaderModuleDescriptor,
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
-    vulkan::{CommandList, GraphicsPipeline, ShaderModule, ShaderModuleError, Surface, Texture},
+    vulkan::{
+        graphics_pipeline::GraphicsPipeline,
+        shader_module::ShaderModule,
+        surface::Surface,
+        texture::Texture,
+    },
 };
+
+#[derive(Debug)]
+pub(crate) struct ResourceHandler {
+    pub(crate) graphics_pipeline: Mutex<Vec<vk::Pipeline>>,
+    pub(crate) shader_modules: Mutex<Vec<vk::ShaderModule>>,
+    pub(crate) texture_views: Mutex<Vec<vk::ImageView>>,
+}
 
 pub(crate) struct FrameData {
     pub(crate) present_semaphore: vk::Semaphore,
@@ -40,21 +51,23 @@ struct DebugUtils {
     loader: debug_utils::Instance,
 }
 
-pub(crate) struct GraphicsDeviceInner {
-    current_frame: AtomicU32,
+pub(crate) struct GraphicsDevice {
+    current_frame_index: Mutex<u32>,
+
+    resource_handler: Arc<ResourceHandler>,
 
     frames: Vec<FrameData>,
     submit_semaphore: vk::Semaphore,
 
     pipeline_layout: vk::PipelineLayout,
 
-    descriptor_sets: [vk::DescriptorSet; Self::DESCRIPTOR_TYPES.len()],
+    _descriptor_sets: [vk::DescriptorSet; Self::DESCRIPTOR_TYPES.len()],
     layouts: [vk::DescriptorSetLayout; Self::DESCRIPTOR_TYPES.len()],
-    limits: [u32; Self::DESCRIPTOR_TYPES.len()],
+    _limits: [u32; Self::DESCRIPTOR_TYPES.len()],
     descriptor_pool: vk::DescriptorPool,
 
     queue: vk::Queue,
-    queue_family_index: u32,
+    _queue_family_index: u32,
     device: Device,
     physical_device: vk::PhysicalDevice,
     debug_utils: Option<DebugUtils>,
@@ -62,10 +75,9 @@ pub(crate) struct GraphicsDeviceInner {
     entry: Entry,
 }
 
-impl GraphicsDeviceInner {
-    const NAME: &'static CStr = unsafe { CStr::from_bytes_with_nul_unchecked(b"Hyper-Rhi\0") };
-    const VALIDATION_LAYERS: [&'static CStr; 1] =
-        [unsafe { CStr::from_bytes_with_nul_unchecked(b"VK_LAYER_KHRONOS_validation\0") }];
+impl GraphicsDevice {
+    const ENGINE_NAME: &'static CStr = c"Hyper Engine";
+    const VALIDATION_LAYERS: [&'static CStr; 1] = [c"VK_LAYER_KHRONOS_validation"];
     const DEVICE_EXTENSIONS: [&'static CStr; 1] = [swapchain::NAME];
     const DESCRIPTOR_TYPES: [vk::DescriptorType; 3] = [
         vk::DescriptorType::STORAGE_BUFFER,
@@ -74,30 +86,32 @@ impl GraphicsDeviceInner {
     ];
 
     pub(crate) fn new(descriptor: &GraphicsDeviceDescriptor) -> Self {
-        let display_handle = descriptor
-            .window
-            .display_handle()
-            .expect("failed to get display handle");
+        let entry = unsafe { Entry::load() }.unwrap();
 
-        let entry = unsafe { Entry::load() }.expect("failed to create entry");
-
-        let debug_enabled = if descriptor.debug_mode {
+        let validation_layers_enabled = if descriptor.debug_mode {
             Self::check_validation_layer_support(&entry)
         } else {
             false
         };
 
-        let instance = Self::create_instance(&display_handle, debug_enabled, &entry);
+        let instance =
+            Self::create_instance(descriptor.display_handle, &entry, validation_layers_enabled);
 
-        let debug_utils = if debug_enabled {
+        let debug_utils = if validation_layers_enabled {
             Some(Self::create_debug_utils(&entry, &instance))
         } else {
             None
         };
 
-        let physical_device = Self::choose_physical_device(&entry, &instance, &display_handle);
-        let queue_family_index =
-            Self::find_queue_family(&entry, &instance, &display_handle, physical_device).unwrap();
+        let physical_device =
+            Self::choose_physical_device(descriptor.display_handle, &entry, &instance);
+        let queue_family_index = Self::find_queue_family(
+            descriptor.display_handle,
+            &entry,
+            &instance,
+            physical_device,
+        )
+        .unwrap();
 
         let device = Self::create_device(&instance, physical_device, queue_family_index);
         let queue = unsafe { device.get_device_queue(queue_family_index, 0) };
@@ -113,7 +127,7 @@ impl GraphicsDeviceInner {
         let submit_semaphore = Self::create_semaphore(&device, vk::SemaphoreType::TIMELINE);
 
         let mut frames = Vec::new();
-        for _ in 0..crate::graphics_device::GraphicsDevice::FRAME_COUNT {
+        for _ in 0..crate::graphics_device::FRAME_COUNT {
             let command_pool = Self::create_command_pool(&device, queue_family_index);
             let command_buffer = Self::create_command_buffer(&device, command_pool);
 
@@ -130,20 +144,26 @@ impl GraphicsDeviceInner {
         }
 
         Self {
-            current_frame: AtomicU32::new(1),
+            current_frame_index: Mutex::new(u32::MAX),
+
+            resource_handler: Arc::new(ResourceHandler {
+                graphics_pipeline: Mutex::new(Vec::new()),
+                shader_modules: Mutex::new(Vec::new()),
+                texture_views: Mutex::new(Vec::new()),
+            }),
 
             frames,
             submit_semaphore,
 
             pipeline_layout,
 
-            descriptor_sets,
+            _descriptor_sets: descriptor_sets,
             layouts,
-            limits,
+            _limits: limits,
             descriptor_pool,
 
             queue,
-            queue_family_index,
+            _queue_family_index: queue_family_index,
             device,
             physical_device,
             debug_utils,
@@ -153,37 +173,34 @@ impl GraphicsDeviceInner {
     }
 
     fn check_validation_layer_support(entry: &Entry) -> bool {
-        let layer_properties = unsafe { entry.enumerate_instance_layer_properties() }
-            .expect("failed to enumerate instance layer properties");
+        let layer_properties = unsafe { entry.enumerate_instance_layer_properties() }.unwrap();
         if layer_properties.is_empty() {
             return false;
         }
 
-        let validation_layers_supported = Self::VALIDATION_LAYERS.iter().all(|&validation_layer| {
+        Self::VALIDATION_LAYERS.iter().all(|&validation_layer| {
             layer_properties.iter().any(|property| {
                 let name = unsafe { CStr::from_ptr(property.layer_name.as_ptr()) };
                 name == validation_layer
             })
-        });
-
-        validation_layers_supported
+        })
     }
 
     fn create_instance(
-        display_handle: &DisplayHandle<'_>,
-        validation_layers_enabled: bool,
+        display_handle: DisplayHandle<'_>,
         entry: &Entry,
+        validation_layers_enabled: bool,
     ) -> Instance {
         let application_info = vk::ApplicationInfo::default()
-            .application_name(Self::NAME)
+            .application_name(Self::ENGINE_NAME)
             .application_version(vk::make_api_version(0, 1, 0, 0))
-            .engine_name(Self::NAME)
+            .engine_name(Self::ENGINE_NAME)
             .engine_version(vk::make_api_version(0, 1, 0, 0))
             .api_version(vk::API_VERSION_1_3);
 
         let mut enabled_extensions =
             ash_window::enumerate_required_extensions(display_handle.as_raw())
-                .expect("failed to enumerate required instance extensions")
+                .unwrap()
                 .to_vec();
         if validation_layers_enabled {
             enabled_extensions.push(debug_utils::NAME.as_ptr());
@@ -218,8 +235,7 @@ impl GraphicsDeviceInner {
             create_info = create_info.push_next(&mut debug_messenger_create_info);
         }
 
-        let instance = unsafe { entry.create_instance(&create_info, None) }
-            .expect("failed to create instance");
+        let instance = unsafe { entry.create_instance(&create_info, None) }.unwrap();
         instance
     }
 
@@ -238,8 +254,8 @@ impl GraphicsDeviceInner {
             )
             .pfn_user_callback(Some(Self::debug_callback));
 
-        let debug_messenger = unsafe { loader.create_debug_utils_messenger(&create_info, None) }
-            .expect("failed to create debug messenger");
+        let debug_messenger =
+            unsafe { loader.create_debug_utils_messenger(&create_info, None) }.unwrap();
 
         DebugUtils {
             debug_messenger,
@@ -248,17 +264,16 @@ impl GraphicsDeviceInner {
     }
 
     fn choose_physical_device(
+        display_handle: DisplayHandle<'_>,
         entry: &Entry,
         instance: &Instance,
-        display_handle: &DisplayHandle<'_>,
     ) -> vk::PhysicalDevice {
-        let physical_devices = unsafe { instance.enumerate_physical_devices() }
-            .expect("failed to enumerate physical devices");
+        let physical_devices = unsafe { instance.enumerate_physical_devices() }.unwrap();
 
         let mut scored_physical_devices = Vec::new();
         for physical_device in physical_devices {
             let score =
-                Self::rate_physical_device(entry, instance, display_handle, physical_device);
+                Self::rate_physical_device(display_handle, entry, instance, physical_device);
             scored_physical_devices.push((score, physical_device));
         }
 
@@ -268,20 +283,20 @@ impl GraphicsDeviceInner {
             .max_by(|(score_a, _), (score_b, _)| score_a.partial_cmp(score_b).unwrap())
             .map(|(_, physical_device)| *physical_device);
 
-        let physical_device = physical_device.expect("failed to find suitable physical device");
+        let physical_device = physical_device.unwrap();
         physical_device
     }
 
     fn rate_physical_device(
+        display_handle: DisplayHandle<'_>,
         entry: &Entry,
         instance: &Instance,
-        display_handle: &DisplayHandle<'_>,
         physical_device: vk::PhysicalDevice,
     ) -> u32 {
         let mut score = 0;
 
         let queue_family =
-            Self::find_queue_family(entry, instance, display_handle, physical_device);
+            Self::find_queue_family(display_handle, entry, instance, physical_device);
         if queue_family.is_none() {
             return 0;
         }
@@ -311,9 +326,9 @@ impl GraphicsDeviceInner {
     }
 
     fn find_queue_family(
+        display_handle: DisplayHandle<'_>,
         entry: &Entry,
         instance: &Instance,
-        display_handle: &DisplayHandle<'_>,
         physical_device: vk::PhysicalDevice,
     ) -> Option<u32> {
         let queue_family_properties =
@@ -332,7 +347,7 @@ impl GraphicsDeviceInner {
                 i as u32,
                 display_handle.as_raw(),
             )
-            .expect("failed to query for present support");
+            .unwrap();
 
             if graphics_supported && present_supported {
                 family = Some(i as u32);
@@ -344,8 +359,7 @@ impl GraphicsDeviceInner {
 
     fn check_extension_support(instance: &Instance, physical_device: vk::PhysicalDevice) -> bool {
         let extension_properties =
-            unsafe { instance.enumerate_device_extension_properties(physical_device) }
-                .expect("failed to enumerate device extension properties");
+            unsafe { instance.enumerate_device_extension_properties(physical_device) }.unwrap();
 
         let extensions = extension_properties
             .iter()
@@ -451,8 +465,8 @@ impl GraphicsDeviceInner {
             .queue_create_infos(&queue_create_infos)
             .enabled_extension_names(&extension_names);
 
-        let device = unsafe { instance.create_device(physical_device, &create_info, None) }
-            .expect("failed to create device");
+        let device =
+            unsafe { instance.create_device(physical_device, &create_info, None) }.unwrap();
         device
     }
 
@@ -468,8 +482,7 @@ impl GraphicsDeviceInner {
             .max_sets(Self::DESCRIPTOR_TYPES.len() as u32)
             .pool_sizes(&pool_sizes);
 
-        let descriptor_pool = unsafe { device.create_descriptor_pool(&create_info, None) }
-            .expect("failed to create descriptor pool");
+        let descriptor_pool = unsafe { device.create_descriptor_pool(&create_info, None) }.unwrap();
         descriptor_pool
     }
 
@@ -497,7 +510,7 @@ impl GraphicsDeviceInner {
         descriptor_type: vk::DescriptorType,
         limits: vk::PhysicalDeviceLimits,
     ) -> u32 {
-        const MAX_DESCRIPTOR_COUNT: u32 = crate::graphics_device::GraphicsDevice::DESCRIPTOR_COUNT;
+        const MAX_DESCRIPTOR_COUNT: u32 = crate::graphics_device::DESCRIPTOR_COUNT;
 
         let limit = match descriptor_type {
             vk::DescriptorType::STORAGE_BUFFER => limits.max_descriptor_set_storage_buffers,
@@ -540,8 +553,8 @@ impl GraphicsDeviceInner {
                 .flags(vk::DescriptorSetLayoutCreateFlags::UPDATE_AFTER_BIND_POOL)
                 .bindings(&descriptor_set_layout_bindings);
 
-            let layout = unsafe { device.create_descriptor_set_layout(&create_info, None) }
-                .expect("failed to create descriptor set layout");
+            let layout =
+                unsafe { device.create_descriptor_set_layout(&create_info, None) }.unwrap();
             layouts[i] = layout;
         }
 
@@ -584,11 +597,8 @@ impl GraphicsDeviceInner {
                 .descriptor_pool(descriptor_pool)
                 .set_layouts(&layouts);
 
-            let descriptor_set = unsafe {
-                device
-                    .allocate_descriptor_sets(&allocate_info)
-                    .expect("failed to allocate descriptor set")[0]
-            };
+            let descriptor_set =
+                unsafe { device.allocate_descriptor_sets(&allocate_info).unwrap()[0] };
             descriptor_sets[i] = descriptor_set;
         }
 
@@ -611,8 +621,7 @@ impl GraphicsDeviceInner {
             .set_layouts(layouts)
             .push_constant_ranges(&push_ranges);
 
-        let pipeline_layout = unsafe { device.create_pipeline_layout(&create_info, None) }
-            .expect("failed to create pipeline layout");
+        let pipeline_layout = unsafe { device.create_pipeline_layout(&create_info, None) }.unwrap();
         pipeline_layout
     }
 
@@ -621,8 +630,7 @@ impl GraphicsDeviceInner {
             .queue_family_index(queue_family_index)
             .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER);
 
-        let command_pool = unsafe { device.create_command_pool(&create_info, None) }
-            .expect("failed to create command pool");
+        let command_pool = unsafe { device.create_command_pool(&create_info, None) }.unwrap();
         command_pool
     }
 
@@ -632,8 +640,7 @@ impl GraphicsDeviceInner {
             .command_buffer_count(1)
             .level(vk::CommandBufferLevel::PRIMARY);
 
-        let command_buffers = unsafe { device.allocate_command_buffers(&allocate_info) }
-            .expect("failed to allocate commmand buffers");
+        let command_buffers = unsafe { device.allocate_command_buffers(&allocate_info) }.unwrap();
         command_buffers[0]
     }
 
@@ -644,8 +651,7 @@ impl GraphicsDeviceInner {
 
         let create_info = vk::SemaphoreCreateInfo::default().push_next(&mut type_create_info);
 
-        let semaphore = unsafe { device.create_semaphore(&create_info, None) }
-            .expect("failed to create semaphore");
+        let semaphore = unsafe { device.create_semaphore(&create_info, None) }.unwrap();
         semaphore
     }
 
@@ -657,18 +663,46 @@ impl GraphicsDeviceInner {
     ) -> vk::Bool32 {
         let callback_data = *callback_data;
         let message = CStr::from_ptr(callback_data.p_message).to_str().unwrap();
-        println!("{}", message);
+
+        tracing::error!("{}", message);
 
         vk::FALSE
     }
+
+    pub(crate) fn entry(&self) -> &Entry {
+        &self.entry
+    }
+
+    pub(crate) fn instance(&self) -> &Instance {
+        &self.instance
+    }
+
+    pub(crate) fn physical_device(&self) -> vk::PhysicalDevice {
+        self.physical_device
+    }
+
+    pub(crate) fn device(&self) -> &Device {
+        &self.device
+    }
+
+    pub(crate) fn pipeline_layout(&self) -> vk::PipelineLayout {
+        self.pipeline_layout
+    }
+
+    pub(crate) fn submit_semaphore(&self) -> vk::Semaphore {
+        self.submit_semaphore
+    }
+
+    pub(crate) fn current_frame(&self) -> &FrameData {
+        let index = *self.current_frame_index.lock().unwrap() % crate::graphics_device::FRAME_COUNT;
+        &self.frames[index as usize]
+    }
 }
 
-impl Drop for GraphicsDeviceInner {
+impl Drop for GraphicsDevice {
     fn drop(&mut self) {
         unsafe {
-            self.device
-                .device_wait_idle()
-                .expect("failed to wait for device idle");
+            self.device.device_wait_idle().unwrap();
 
             self.frames.iter().for_each(|frame| {
                 self.device.destroy_semaphore(frame.render_semaphore, None);
@@ -700,50 +734,302 @@ impl Drop for GraphicsDeviceInner {
     }
 }
 
-#[derive(Clone)]
-pub(crate) struct GraphicsDevice {
-    inner: Arc<GraphicsDeviceInner>,
-}
-
-impl GraphicsDevice {
-    pub(crate) fn new(descriptor: &GraphicsDeviceDescriptor) -> Self {
-        Self {
-            inner: Arc::new(GraphicsDeviceInner::new(descriptor)),
-        }
+impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
+    fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Box<dyn crate::surface::Surface> {
+        Box::new(Surface::new(self, &self.resource_handler, descriptor))
     }
 
-    pub(crate) fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Surface {
-        Surface::new(self, descriptor)
-    }
-
-    pub(crate) fn create_graphics_pipeline(
+    fn create_graphics_pipeline(
         &self,
         descriptor: &GraphicsPipelineDescriptor,
-    ) -> GraphicsPipeline {
-        GraphicsPipeline::new(self, descriptor)
+    ) -> Arc<dyn crate::graphics_pipeline::GraphicsPipeline> {
+        Arc::new(GraphicsPipeline::new(
+            self,
+            &self.resource_handler,
+            descriptor,
+        ))
     }
 
-    pub(crate) fn create_shader_module(
+    fn create_shader_module(
         &self,
         descriptor: &ShaderModuleDescriptor,
-    ) -> Result<ShaderModule, ShaderModuleError> {
-        ShaderModule::new(self, descriptor)
+    ) -> Arc<dyn crate::shader_module::ShaderModule> {
+        Arc::new(ShaderModule::new(self, &self.resource_handler, descriptor))
     }
 
-    pub(crate) fn create_texture(&self, descriptor: &TextureDescriptor) -> Texture {
-        Texture::new(self, descriptor)
+    fn create_texture(&self, descriptor: &TextureDescriptor) -> Arc<dyn crate::texture::Texture> {
+        Arc::new(Texture::new(self, &self.resource_handler, descriptor))
     }
 
-    pub(crate) fn create_command_list(&self) -> CommandList {
-        CommandList::new(self)
+    fn create_command_encoder(&self) -> CommandEncoder {
+        CommandEncoder::new()
     }
 
-    pub(crate) fn execute_commands(&self, command_list: &crate::command_list::CommandList) {
-        let command_list = command_list.vulkan_command_list().unwrap();
+    fn begin_frame(&self, surface: &mut Box<dyn crate::surface::Surface>, frame_index: u32) {
+        *self.current_frame_index.lock().unwrap() = frame_index;
 
-        command_list.end();
+        let surface = surface.downcast_mut::<Surface>().unwrap();
+
+        let semaphores = [self.submit_semaphore];
+        let values = [*self.current_frame_index.lock().unwrap() as u64 - 1];
+        let wait_info = vk::SemaphoreWaitInfo::default()
+            .semaphores(&semaphores)
+            .values(&values);
+
+        unsafe {
+            self.device().wait_semaphores(&wait_info, u64::MAX).unwrap();
+        }
+
+        // Rebuild swapchain
+        if surface.resized() {
+            surface.rebuild(self, &self.resource_handler);
+        }
+
+        let (index, _) = unsafe {
+            surface.swapchain_loader().acquire_next_image(
+                surface.swapchain(),
+                u64::MAX,
+                self.current_frame().present_semaphore,
+                vk::Fence::null(),
+            )
+        }
+        .unwrap();
+
+        surface.set_current_texture_index(index);
+    }
+
+    fn end_frame(&self) {}
+
+    // NOTE: This function assumes, that there will be only 1 command buffer and 1 submission per frame
+    fn submit(&self, command_list: CommandList) {
+        // Clean everything before new command will be submitted
+
+        {
+            let mut graphics_pipelines = self.resource_handler.graphics_pipeline.lock().unwrap();
+            for &graphics_pipeline in graphics_pipelines.iter() {
+                unsafe {
+                    self.device.destroy_pipeline(graphics_pipeline, None);
+                }
+            }
+            graphics_pipelines.clear();
+
+            let mut shader_modules = self.resource_handler.shader_modules.lock().unwrap();
+            for &shader_module in shader_modules.iter() {
+                unsafe {
+                    self.device.destroy_shader_module(shader_module, None);
+                }
+            }
+            shader_modules.clear();
+
+            let mut texture_views = self.resource_handler.texture_views.lock().unwrap();
+            for &texture_view in texture_views.iter() {
+                unsafe {
+                    self.device.destroy_image_view(texture_view, None);
+                }
+            }
+            texture_views.clear();
+        }
 
         let command_buffer = self.current_frame().command_buffer;
+
+        unsafe {
+            self.device()
+                .reset_command_buffer(command_buffer, vk::CommandBufferResetFlags::empty())
+                .unwrap();
+
+            let command_buffer_begin_info = vk::CommandBufferBeginInfo::default()
+                .flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
+            self.device()
+                .begin_command_buffer(command_buffer, &command_buffer_begin_info)
+                .unwrap();
+        }
+
+        let mut current_pipeline_texture = Option::None;
+        for command in command_list.commands() {
+            match command {
+                Command::BeginRenderPass { texture } => {
+                    let vulkan_texture = texture.downcast_ref::<Texture>().unwrap();
+
+                    let subresource_range = vk::ImageSubresourceRange::default()
+                        .aspect_mask(vk::ImageAspectFlags::COLOR)
+                        .base_mip_level(0)
+                        .level_count(1)
+                        .base_array_layer(0)
+                        .layer_count(1);
+
+                    let image_memory_barrier = vk::ImageMemoryBarrier2::default()
+                        .src_stage_mask(vk::PipelineStageFlags2::TOP_OF_PIPE)
+                        .dst_stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+                        .dst_access_mask(vk::AccessFlags2::COLOR_ATTACHMENT_WRITE)
+                        .old_layout(vk::ImageLayout::UNDEFINED)
+                        .new_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+                        .src_queue_family_index(0)
+                        .dst_queue_family_index(0)
+                        .image(vulkan_texture.image())
+                        .subresource_range(subresource_range);
+
+                    let image_memory_barriers = [image_memory_barrier];
+                    let dependency_info = vk::DependencyInfo::default()
+                        .dependency_flags(vk::DependencyFlags::empty())
+                        .memory_barriers(&[])
+                        .buffer_memory_barriers(&[])
+                        .image_memory_barriers(&image_memory_barriers);
+
+                    unsafe {
+                        self.device.cmd_pipeline_barrier2(
+                            self.current_frame().command_buffer,
+                            &dependency_info,
+                        );
+                    }
+
+                    current_pipeline_texture = Some(Arc::clone(texture));
+                }
+                Command::EndRenderPass => unsafe {
+                    let vulkan_texture = current_pipeline_texture
+                        .as_ref()
+                        .unwrap()
+                        .downcast_ref::<Texture>()
+                        .unwrap();
+
+                    self.device
+                        .cmd_end_rendering(self.current_frame().command_buffer);
+
+                    let subresource_range = vk::ImageSubresourceRange::default()
+                        .aspect_mask(vk::ImageAspectFlags::COLOR)
+                        .base_mip_level(0)
+                        .level_count(1)
+                        .base_array_layer(0)
+                        .layer_count(1);
+
+                    let image_memory_barrier = vk::ImageMemoryBarrier2::default()
+                        .src_stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
+                        .src_access_mask(vk::AccessFlags2::COLOR_ATTACHMENT_WRITE)
+                        .dst_stage_mask(vk::PipelineStageFlags2::BOTTOM_OF_PIPE)
+                        .old_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+                        .new_layout(vk::ImageLayout::PRESENT_SRC_KHR)
+                        .src_queue_family_index(0)
+                        .dst_queue_family_index(0)
+                        .image(vulkan_texture.image())
+                        .subresource_range(subresource_range);
+
+                    let image_memory_barriers = [image_memory_barrier];
+
+                    let dependency_info = vk::DependencyInfo::default()
+                        .dependency_flags(vk::DependencyFlags::empty())
+                        .memory_barriers(&[])
+                        .buffer_memory_barriers(&[])
+                        .image_memory_barriers(&image_memory_barriers);
+
+                    self.device.cmd_pipeline_barrier2(
+                        self.current_frame().command_buffer,
+                        &dependency_info,
+                    );
+                },
+                Command::BindPipeline { graphics_pipeline } => {
+                    // NOTE: Maybe save graphics pipeline to ensure lifetime?
+                    let vulkan_graphics_pipeline = graphics_pipeline
+                        .downcast_ref::<GraphicsPipeline>()
+                        .unwrap();
+                    let vulkan_texture = current_pipeline_texture
+                        .as_ref()
+                        .unwrap()
+                        .downcast_ref::<Texture>()
+                        .unwrap();
+
+                    let render_area_extent = vk::Extent2D {
+                        width: vulkan_texture.width(),
+                        height: vulkan_texture.height(),
+                    };
+                    let render_area_offset = vk::Offset2D::default().x(0).y(0);
+
+                    let render_area = vk::Rect2D::default()
+                        .extent(render_area_extent)
+                        .offset(render_area_offset);
+
+                    let color_clear = vk::ClearValue {
+                        color: vk::ClearColorValue {
+                            float32: [0.0, 0.2, 0.4, 1.0],
+                        },
+                    };
+
+                    let color_attachment_info = vk::RenderingAttachmentInfo::default()
+                        .image_view(vulkan_texture.view())
+                        .image_layout(vk::ImageLayout::ATTACHMENT_OPTIMAL)
+                        .load_op(vk::AttachmentLoadOp::CLEAR)
+                        .store_op(vk::AttachmentStoreOp::STORE)
+                        .clear_value(color_clear);
+
+                    let color_attachments = [color_attachment_info];
+
+                    let rendering_info = vk::RenderingInfo::default()
+                        .render_area(render_area)
+                        .layer_count(1)
+                        .color_attachments(&color_attachments);
+
+                    unsafe {
+                        self.device.cmd_begin_rendering(
+                            self.current_frame().command_buffer,
+                            &rendering_info,
+                        );
+                    }
+
+                    let viewport = vk::Viewport::default()
+                        .x(0.0)
+                        .y(render_area_extent.height as f32)
+                        .width(render_area_extent.width as f32)
+                        .height(-(render_area_extent.height as f32))
+                        .min_depth(0.0)
+                        .max_depth(1.0);
+
+                    unsafe {
+                        self.device.cmd_set_viewport(
+                            self.current_frame().command_buffer,
+                            0,
+                            &[viewport],
+                        );
+                    }
+
+                    let offset = vk::Offset2D::default().x(0).y(0);
+
+                    let scissor = vk::Rect2D::default()
+                        .offset(offset)
+                        .extent(render_area_extent);
+
+                    unsafe {
+                        self.device.cmd_set_scissor(
+                            self.current_frame().command_buffer,
+                            0,
+                            &[scissor],
+                        );
+
+                        self.device.cmd_bind_pipeline(
+                            self.current_frame().command_buffer,
+                            vk::PipelineBindPoint::GRAPHICS,
+                            vulkan_graphics_pipeline.pipeline(),
+                        );
+                    }
+                }
+                Command::Draw {
+                    vertex_count,
+                    instance_count,
+                    first_vertex,
+                    first_instance,
+                } => unsafe {
+                    self.device.cmd_draw(
+                        command_buffer,
+                        *vertex_count,
+                        *instance_count,
+                        *first_vertex,
+                        *first_instance,
+                    );
+                },
+            }
+        }
+
+        unsafe {
+            self.device().end_command_buffer(command_buffer).unwrap();
+        }
+
         let present_wait_semaphore_info = vk::SemaphoreSubmitInfo::default()
             .semaphore(self.current_frame().present_semaphore)
             .value(0)
@@ -756,7 +1042,7 @@ impl GraphicsDevice {
 
         let submit_signal_semaphore_info = vk::SemaphoreSubmitInfo::default()
             .semaphore(self.submit_semaphore())
-            .value(self.current_frame_index().load(Ordering::Relaxed) as u64)
+            .value(*self.current_frame_index.lock().unwrap() as u64)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
 
@@ -775,61 +1061,28 @@ impl GraphicsDevice {
             .signal_semaphore_infos(signal_semaphore_infos);
 
         unsafe {
-            self.device()
-                .queue_submit2(self.queue(), &[submit_info], vk::Fence::null())
-                .expect("failed to submit queue");
+            self.device
+                .queue_submit2(self.queue, &[submit_info], vk::Fence::null())
+                .unwrap();
         }
     }
 
-    pub(crate) fn entry(&self) -> &Entry {
-        &self.inner.entry
-    }
+    fn present(&self, surface: &dyn crate::surface::Surface) {
+        let surface = surface.downcast_ref::<Surface>().unwrap();
 
-    pub(crate) fn instance(&self) -> &Instance {
-        &self.inner.instance
-    }
+        let swapchains = [surface.swapchain()];
+        let wait_semaphores = [self.current_frame().render_semaphore];
+        let image_indices = [surface.current_texture_index()];
+        let present_info = vk::PresentInfoKHR::default()
+            .swapchains(&swapchains)
+            .wait_semaphores(&wait_semaphores)
+            .image_indices(&image_indices);
 
-    pub(crate) fn physical_device(&self) -> vk::PhysicalDevice {
-        self.inner.physical_device
-    }
-
-    pub(crate) fn device(&self) -> &Device {
-        &self.inner.device
-    }
-
-    pub(crate) fn queue_family_index(&self) -> u32 {
-        self.inner.queue_family_index
-    }
-
-    pub(crate) fn queue(&self) -> vk::Queue {
-        self.inner.queue
-    }
-
-    pub(crate) fn descriptor_pool(&self) -> vk::DescriptorPool {
-        self.inner.descriptor_pool
-    }
-
-    pub(crate) fn descriptor_sets(
-        &self,
-    ) -> &[vk::DescriptorSet; GraphicsDeviceInner::DESCRIPTOR_TYPES.len()] {
-        &self.inner.descriptor_sets
-    }
-
-    pub(crate) fn pipeline_layout(&self) -> vk::PipelineLayout {
-        self.inner.pipeline_layout
-    }
-
-    pub(crate) fn submit_semaphore(&self) -> vk::Semaphore {
-        self.inner.submit_semaphore
-    }
-
-    pub(crate) fn current_frame_index(&self) -> &AtomicU32 {
-        &self.inner.current_frame
-    }
-
-    pub(crate) fn current_frame(&self) -> &FrameData {
-        let index = self.inner.current_frame.load(Ordering::Relaxed)
-            % crate::graphics_device::GraphicsDevice::FRAME_COUNT;
-        &self.inner.frames[index as usize]
+        unsafe {
+            surface
+                .swapchain_loader()
+                .queue_present(self.queue, &present_info)
+                .unwrap();
+        };
     }
 }

@@ -4,62 +4,46 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::sync::Arc;
-
-use thiserror::Error;
-
 use crate::{
-    shader_compiler::{self, OutputApi, ShaderCompilationError},
+    shader_compiler::{self, OutputApi},
     shader_module::{ShaderModuleDescriptor, ShaderStage},
 };
 
-#[derive(Debug, Error)]
-pub enum ShaderModuleError {
-    #[error("failed to compile {stage} shader at '{path}'")]
-    Compilation {
-        #[source]
-        source: ShaderCompilationError,
-        path: String,
-        stage: ShaderStage,
-    },
-}
-
-struct ShaderModuleInner {
+#[derive(Debug)]
+pub(crate) struct ShaderModule {
+    entry: String,
     stage: ShaderStage,
     code: Vec<u8>,
 }
 
-pub(crate) struct ShaderModule {
-    inner: Arc<ShaderModuleInner>,
-}
-
 impl ShaderModule {
-    pub(super) fn new(descriptor: &ShaderModuleDescriptor) -> Result<Self, ShaderModuleError> {
+    pub(super) fn new(descriptor: &ShaderModuleDescriptor) -> Self {
         let code = shader_compiler::compile(
             descriptor.path,
             descriptor.entry,
             descriptor.stage,
             OutputApi::D3D12,
         )
-        .map_err(|error| ShaderModuleError::Compilation {
-            source: error,
-            path: descriptor.path.to_owned(),
+        .unwrap();
+
+        Self {
+            entry: descriptor.entry.to_owned(),
             stage: descriptor.stage,
-        })?;
-
-        Ok(Self {
-            inner: Arc::new(ShaderModuleInner {
-                stage: descriptor.stage,
-                code,
-            }),
-        })
+            code,
+        }
     }
 
-    pub(crate) fn stage(&self) -> ShaderStage {
-        self.inner.stage
+    pub(crate) fn code(&self) -> &[u8] {
+        &self.code
+    }
+}
+
+impl crate::shader_module::ShaderModule for ShaderModule {
+    fn entry(&self) -> &str {
+        &self.entry
     }
 
-    pub(super) fn code(&self) -> &[u8] {
-        &self.inner.code
+    fn stage(&self) -> ShaderStage {
+        self.stage
     }
 }
