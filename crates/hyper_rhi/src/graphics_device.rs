@@ -64,7 +64,7 @@ pub trait GraphicsDevice: Downcast {
     // NOTE: This function assumes, that there will be only 1 command buffer and 1 submission per frame
     fn submit(&self, command_list: CommandList);
 
-    fn present(&self, surface: &dyn Surface);
+    fn present(&self, surface: &Box<dyn Surface>);
 }
 
 downcast_rs::impl_downcast!(GraphicsDevice);

@@ -553,7 +553,7 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
         }
     }
 
-    fn present(&self, surface: &dyn crate::surface::Surface) {
+    fn present(&self, surface: &Box<dyn crate::surface::Surface>) {
         let surface = surface.downcast_ref::<Surface>().unwrap();
 
         unsafe {
