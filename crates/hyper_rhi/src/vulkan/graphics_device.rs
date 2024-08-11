@@ -17,13 +17,14 @@ use raw_window_handle::DisplayHandle;
 use crate::{
     bindings::BindingsOffset,
     command_encoder::CommandEncoder,
-    command_list::{Command, CommandList},
+    command_list::CommandList,
     graphics_device::GraphicsDeviceDescriptor,
     graphics_pipeline::GraphicsPipelineDescriptor,
     shader_module::ShaderModuleDescriptor,
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
     vulkan::{
+        command_decoder::CommandDecoder,
         graphics_pipeline::GraphicsPipeline,
         shader_module::ShaderModule,
         surface::Surface,
@@ -61,7 +62,7 @@ pub(crate) struct GraphicsDevice {
 
     pipeline_layout: vk::PipelineLayout,
 
-    _descriptor_sets: [vk::DescriptorSet; Self::DESCRIPTOR_TYPES.len()],
+    descriptor_sets: [vk::DescriptorSet; Self::DESCRIPTOR_TYPES.len()],
     layouts: [vk::DescriptorSetLayout; Self::DESCRIPTOR_TYPES.len()],
     _limits: [u32; Self::DESCRIPTOR_TYPES.len()],
     descriptor_pool: vk::DescriptorPool,
@@ -157,7 +158,7 @@ impl GraphicsDevice {
 
             pipeline_layout,
 
-            _descriptor_sets: descriptor_sets,
+            descriptor_sets,
             layouts,
             _limits: limits,
             descriptor_pool,
@@ -689,6 +690,10 @@ impl GraphicsDevice {
         self.pipeline_layout
     }
 
+    pub(crate) fn descriptor_sets(&self) -> &[vk::DescriptorSet; Self::DESCRIPTOR_TYPES.len()] {
+        &self.descriptor_sets
+    }
+
     pub(crate) fn submit_semaphore(&self) -> vk::Semaphore {
         self.submit_semaphore
     }
@@ -801,7 +806,7 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
     fn end_frame(&self) {}
 
     // NOTE: This function assumes, that there will be only 1 command buffer and 1 submission per frame
-    fn submit(&self, command_list: CommandList) {
+    fn submit(&self, mut command_list: CommandList) {
         // Clean everything before new command will be submitted
 
         {
@@ -844,187 +849,8 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
                 .unwrap();
         }
 
-        let mut current_pipeline_texture = Option::None;
-        for command in command_list.commands() {
-            match command {
-                Command::BeginRenderPass { texture } => {
-                    let vulkan_texture = texture.downcast_ref::<Texture>().unwrap();
-
-                    let subresource_range = vk::ImageSubresourceRange::default()
-                        .aspect_mask(vk::ImageAspectFlags::COLOR)
-                        .base_mip_level(0)
-                        .level_count(1)
-                        .base_array_layer(0)
-                        .layer_count(1);
-
-                    let image_memory_barrier = vk::ImageMemoryBarrier2::default()
-                        .src_stage_mask(vk::PipelineStageFlags2::TOP_OF_PIPE)
-                        .dst_stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
-                        .dst_access_mask(vk::AccessFlags2::COLOR_ATTACHMENT_WRITE)
-                        .old_layout(vk::ImageLayout::UNDEFINED)
-                        .new_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
-                        .src_queue_family_index(0)
-                        .dst_queue_family_index(0)
-                        .image(vulkan_texture.image())
-                        .subresource_range(subresource_range);
-
-                    let image_memory_barriers = [image_memory_barrier];
-                    let dependency_info = vk::DependencyInfo::default()
-                        .dependency_flags(vk::DependencyFlags::empty())
-                        .memory_barriers(&[])
-                        .buffer_memory_barriers(&[])
-                        .image_memory_barriers(&image_memory_barriers);
-
-                    unsafe {
-                        self.device.cmd_pipeline_barrier2(
-                            self.current_frame().command_buffer,
-                            &dependency_info,
-                        );
-                    }
-
-                    current_pipeline_texture = Some(Arc::clone(texture));
-                }
-                Command::EndRenderPass => unsafe {
-                    let vulkan_texture = current_pipeline_texture
-                        .as_ref()
-                        .unwrap()
-                        .downcast_ref::<Texture>()
-                        .unwrap();
-
-                    self.device
-                        .cmd_end_rendering(self.current_frame().command_buffer);
-
-                    let subresource_range = vk::ImageSubresourceRange::default()
-                        .aspect_mask(vk::ImageAspectFlags::COLOR)
-                        .base_mip_level(0)
-                        .level_count(1)
-                        .base_array_layer(0)
-                        .layer_count(1);
-
-                    let image_memory_barrier = vk::ImageMemoryBarrier2::default()
-                        .src_stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
-                        .src_access_mask(vk::AccessFlags2::COLOR_ATTACHMENT_WRITE)
-                        .dst_stage_mask(vk::PipelineStageFlags2::BOTTOM_OF_PIPE)
-                        .old_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
-                        .new_layout(vk::ImageLayout::PRESENT_SRC_KHR)
-                        .src_queue_family_index(0)
-                        .dst_queue_family_index(0)
-                        .image(vulkan_texture.image())
-                        .subresource_range(subresource_range);
-
-                    let image_memory_barriers = [image_memory_barrier];
-
-                    let dependency_info = vk::DependencyInfo::default()
-                        .dependency_flags(vk::DependencyFlags::empty())
-                        .memory_barriers(&[])
-                        .buffer_memory_barriers(&[])
-                        .image_memory_barriers(&image_memory_barriers);
-
-                    self.device.cmd_pipeline_barrier2(
-                        self.current_frame().command_buffer,
-                        &dependency_info,
-                    );
-                },
-                Command::BindPipeline { graphics_pipeline } => {
-                    // NOTE: Maybe save graphics pipeline to ensure lifetime?
-                    let vulkan_graphics_pipeline = graphics_pipeline
-                        .downcast_ref::<GraphicsPipeline>()
-                        .unwrap();
-                    let vulkan_texture = current_pipeline_texture
-                        .as_ref()
-                        .unwrap()
-                        .downcast_ref::<Texture>()
-                        .unwrap();
-
-                    let render_area_extent = vk::Extent2D {
-                        width: vulkan_texture.width(),
-                        height: vulkan_texture.height(),
-                    };
-                    let render_area_offset = vk::Offset2D::default().x(0).y(0);
-
-                    let render_area = vk::Rect2D::default()
-                        .extent(render_area_extent)
-                        .offset(render_area_offset);
-
-                    let color_clear = vk::ClearValue {
-                        color: vk::ClearColorValue {
-                            float32: [0.0, 0.2, 0.4, 1.0],
-                        },
-                    };
-
-                    let color_attachment_info = vk::RenderingAttachmentInfo::default()
-                        .image_view(vulkan_texture.view())
-                        .image_layout(vk::ImageLayout::ATTACHMENT_OPTIMAL)
-                        .load_op(vk::AttachmentLoadOp::CLEAR)
-                        .store_op(vk::AttachmentStoreOp::STORE)
-                        .clear_value(color_clear);
-
-                    let color_attachments = [color_attachment_info];
-
-                    let rendering_info = vk::RenderingInfo::default()
-                        .render_area(render_area)
-                        .layer_count(1)
-                        .color_attachments(&color_attachments);
-
-                    unsafe {
-                        self.device.cmd_begin_rendering(
-                            self.current_frame().command_buffer,
-                            &rendering_info,
-                        );
-                    }
-
-                    let viewport = vk::Viewport::default()
-                        .x(0.0)
-                        .y(render_area_extent.height as f32)
-                        .width(render_area_extent.width as f32)
-                        .height(-(render_area_extent.height as f32))
-                        .min_depth(0.0)
-                        .max_depth(1.0);
-
-                    unsafe {
-                        self.device.cmd_set_viewport(
-                            self.current_frame().command_buffer,
-                            0,
-                            &[viewport],
-                        );
-                    }
-
-                    let offset = vk::Offset2D::default().x(0).y(0);
-
-                    let scissor = vk::Rect2D::default()
-                        .offset(offset)
-                        .extent(render_area_extent);
-
-                    unsafe {
-                        self.device.cmd_set_scissor(
-                            self.current_frame().command_buffer,
-                            0,
-                            &[scissor],
-                        );
-
-                        self.device.cmd_bind_pipeline(
-                            self.current_frame().command_buffer,
-                            vk::PipelineBindPoint::GRAPHICS,
-                            vulkan_graphics_pipeline.pipeline(),
-                        );
-                    }
-                }
-                Command::Draw {
-                    vertex_count,
-                    instance_count,
-                    first_vertex,
-                    first_instance,
-                } => unsafe {
-                    self.device.cmd_draw(
-                        command_buffer,
-                        *vertex_count,
-                        *instance_count,
-                        *first_vertex,
-                        *first_instance,
-                    );
-                },
-            }
-        }
+        let command_decoder = CommandDecoder::new(self, command_buffer);
+        command_list.execute(&command_decoder);
 
         unsafe {
             self.device().end_command_buffer(command_buffer).unwrap();

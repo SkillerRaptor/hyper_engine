@@ -5,7 +5,6 @@
 //
 
 use std::{
-    mem::{self, ManuallyDrop},
     ptr,
     slice,
     sync::{Arc, Mutex},
@@ -14,9 +13,9 @@ use std::{
 use windows::{
     core::Interface,
     Win32::{
-        Foundation::{HANDLE, RECT},
+        Foundation::HANDLE,
         Graphics::{
-            Direct3D::{D3D_FEATURE_LEVEL_12_1, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST},
+            Direct3D::D3D_FEATURE_LEVEL_12_1,
             Direct3D12::{
                 D3D12CreateDevice,
                 D3D12GetDebugInterface,
@@ -31,18 +30,7 @@ use windows::{
                 D3D12_COMMAND_LIST_TYPE_DIRECT,
                 D3D12_COMMAND_QUEUE_DESC,
                 D3D12_COMMAND_QUEUE_FLAG_NONE,
-                D3D12_CPU_DESCRIPTOR_HANDLE,
                 D3D12_FENCE_FLAG_NONE,
-                D3D12_MAX_DEPTH,
-                D3D12_MIN_DEPTH,
-                D3D12_RESOURCE_BARRIER,
-                D3D12_RESOURCE_BARRIER_0,
-                D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-                D3D12_RESOURCE_BARRIER_FLAG_NONE,
-                D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
-                D3D12_RESOURCE_STATE_PRESENT,
-                D3D12_RESOURCE_STATE_RENDER_TARGET,
-                D3D12_RESOURCE_TRANSITION_BARRIER,
                 D3D12_ROOT_CONSTANTS,
                 D3D12_ROOT_PARAMETER1,
                 D3D12_ROOT_PARAMETER1_0,
@@ -50,7 +38,6 @@ use windows::{
                 D3D12_ROOT_SIGNATURE_DESC,
                 D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED,
                 D3D12_SHADER_VISIBILITY_ALL,
-                D3D12_VIEWPORT,
                 D3D_ROOT_SIGNATURE_VERSION_1,
             },
             Dxgi::{
@@ -72,8 +59,9 @@ use windows::{
 
 use crate::{
     command_encoder::CommandEncoder,
-    command_list::Command,
+    command_list::CommandList,
     d3d12::{
+        command_decoder::CommandDecoder,
         graphics_pipeline::GraphicsPipeline,
         resource_heap::{ResourceHeap, ResourceHeapDescriptor, ResourceHeapType},
         shader_module::ShaderModule,
@@ -411,136 +399,16 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
 
     fn end_frame(&self) {}
 
-    fn submit(&self, command_list: crate::command_list::CommandList) {
-        let current_command_list = &self.current_frame().command_list;
+    fn submit(&self, mut command_list: CommandList) {
         let command_allocator = &self.current_frame().command_allocator;
+        let current_command_list = &self.current_frame().command_list;
 
         unsafe {
             command_allocator.Reset().unwrap();
         }
 
-        let mut current_pipeline_texture = Option::None;
-        for command in command_list.commands() {
-            match command {
-                Command::BeginRenderPass { texture } => {
-                    let d3d12_texture = texture.downcast_ref::<Texture>().unwrap();
-
-                    unsafe {
-                        current_command_list.Reset(command_allocator, None).unwrap();
-
-                        current_command_list.ResourceBarrier(&[D3D12_RESOURCE_BARRIER {
-                            Type: D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
-                            Flags: D3D12_RESOURCE_BARRIER_FLAG_NONE,
-                            Anonymous: D3D12_RESOURCE_BARRIER_0 {
-                                Transition: ManuallyDrop::new(D3D12_RESOURCE_TRANSITION_BARRIER {
-                                    pResource: mem::transmute_copy(d3d12_texture.resource()),
-                                    StateBefore: D3D12_RESOURCE_STATE_PRESENT,
-                                    StateAfter: D3D12_RESOURCE_STATE_RENDER_TARGET,
-                                    Subresource: D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-                                }),
-                            },
-                        }]);
-                    }
-
-                    current_pipeline_texture = Some(Arc::clone(texture));
-                }
-                Command::EndRenderPass => unsafe {
-                    let d3d12_texture = current_pipeline_texture
-                        .as_ref()
-                        .unwrap()
-                        .downcast_ref::<Texture>()
-                        .unwrap();
-
-                    current_command_list.ResourceBarrier(&[D3D12_RESOURCE_BARRIER {
-                        Type: D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
-                        Flags: D3D12_RESOURCE_BARRIER_FLAG_NONE,
-                        Anonymous: D3D12_RESOURCE_BARRIER_0 {
-                            Transition: ManuallyDrop::new(D3D12_RESOURCE_TRANSITION_BARRIER {
-                                pResource: mem::transmute_copy(d3d12_texture.resource()),
-                                StateBefore: D3D12_RESOURCE_STATE_RENDER_TARGET,
-                                StateAfter: D3D12_RESOURCE_STATE_PRESENT,
-                                Subresource: D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
-                            }),
-                        },
-                    }]);
-                },
-                Command::BindPipeline { graphics_pipeline } => {
-                    // NOTE: Maybe save graphics pipeline to ensure lifetime?
-                    let d3d12_graphics_pipeline = graphics_pipeline
-                        .downcast_ref::<GraphicsPipeline>()
-                        .unwrap();
-                    let d3d12_texture = current_pipeline_texture
-                        .as_ref()
-                        .unwrap()
-                        .downcast_ref::<Texture>()
-                        .unwrap();
-
-                    let width = d3d12_texture.width();
-                    let height = d3d12_texture.height();
-
-                    // TODO: Get depth info from pipeline
-                    let viewport = D3D12_VIEWPORT {
-                        TopLeftX: 0.0,
-                        TopLeftY: 0.0,
-                        Width: width as f32,
-                        Height: height as f32,
-                        MinDepth: D3D12_MIN_DEPTH,
-                        MaxDepth: D3D12_MAX_DEPTH,
-                    };
-
-                    let scissor_rect = RECT {
-                        left: 0,
-                        top: 0,
-                        right: width as i32,
-                        bottom: height as i32,
-                    };
-
-                    unsafe {
-                        current_command_list.SetGraphicsRootSignature(&self.root_signature);
-                        current_command_list
-                            .SetPipelineState(d3d12_graphics_pipeline.pipeline_state());
-                        current_command_list.RSSetViewports(&[viewport]);
-                        current_command_list.RSSetScissorRects(&[scissor_rect]);
-
-                        // TODO: Texture should save index into heap
-
-                        let frame_index = d3d12_texture.index();
-
-                        let descriptor_heap = &self.rtv_heap;
-                        let rtv_handle = D3D12_CPU_DESCRIPTOR_HANDLE {
-                            ptr: descriptor_heap.handle().ptr
-                                + frame_index as usize * descriptor_heap.size(),
-                        };
-
-                        current_command_list.OMSetRenderTargets(1, Some(&rtv_handle), false, None);
-
-                        current_command_list.ClearRenderTargetView(
-                            rtv_handle,
-                            &[0.0_f32, 0.2_f32, 0.4_f32, 1.0_f32],
-                            None,
-                        );
-                    }
-                }
-                Command::Draw {
-                    vertex_count,
-                    instance_count,
-                    first_vertex,
-                    first_instance,
-                } => {
-                    unsafe {
-                        current_command_list
-                            .IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-                        // command_list.IASetVertexBuffers(0, Some(&[vertex_buffer_view]));
-                        current_command_list.DrawInstanced(
-                            *vertex_count,
-                            *instance_count,
-                            *first_vertex,
-                            *first_instance,
-                        );
-                    }
-                }
-            }
-        }
+        let command_decoder = CommandDecoder::new(self, command_allocator, current_command_list);
+        command_list.execute(&command_decoder);
 
         unsafe {
             current_command_list.Close().unwrap();

@@ -8,6 +8,7 @@ mod d3d12;
 mod vulkan;
 
 mod bindings;
+mod command_decoder;
 mod resource_handle;
 mod shader_compiler;
 
