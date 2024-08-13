@@ -785,30 +785,7 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
             self.device().wait_semaphores(&wait_info, u64::MAX).unwrap();
         }
 
-        // Rebuild swapchain
-        if surface.resized() {
-            surface.rebuild(self, &self.resource_handler);
-        }
-
-        let (index, _) = unsafe {
-            surface.swapchain_loader().acquire_next_image(
-                surface.swapchain(),
-                u64::MAX,
-                self.current_frame().present_semaphore,
-                vk::Fence::null(),
-            )
-        }
-        .unwrap();
-
-        surface.set_current_texture_index(index);
-    }
-
-    fn end_frame(&self) {}
-
-    // NOTE: This function assumes, that there will be only 1 command buffer and 1 submission per frame
-    fn submit(&self, mut command_list: CommandList) {
-        // Clean everything before new command will be submitted
-
+        // Clean everything before new frame will be started
         {
             let mut graphics_pipelines = self.resource_handler.graphics_pipeline.lock().unwrap();
             for &graphics_pipeline in graphics_pipelines.iter() {
@@ -835,6 +812,28 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
             texture_views.clear();
         }
 
+        // Rebuild swapchain
+        if surface.resized() {
+            surface.rebuild(self, &self.resource_handler);
+        }
+
+        let (index, _) = unsafe {
+            surface.swapchain_loader().acquire_next_image(
+                surface.swapchain(),
+                u64::MAX,
+                self.current_frame().present_semaphore,
+                vk::Fence::null(),
+            )
+        }
+        .unwrap();
+
+        surface.set_current_texture_index(index);
+    }
+
+    fn end_frame(&self) {}
+
+    // NOTE: This function assumes, that there will be only 1 command buffer and 1 submission per frame
+    fn submit(&self, mut command_list: CommandList) {
         let command_buffer = self.current_frame().command_buffer;
 
         unsafe {
