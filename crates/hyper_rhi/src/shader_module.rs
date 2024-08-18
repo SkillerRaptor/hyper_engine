@@ -10,9 +10,9 @@ use downcast_rs::Downcast;
 
 #[derive(Clone, Copy, Debug)]
 pub enum ShaderStage {
-    Compute,
-    Fragment,
     Vertex,
+    Fragment,
+    Compute,
 }
 
 #[derive(Clone, Debug)]

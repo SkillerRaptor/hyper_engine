@@ -87,14 +87,6 @@ impl Texture {
     pub(crate) fn view(&self) -> vk::ImageView {
         self.view
     }
-
-    pub(crate) fn width(&self) -> u32 {
-        self.width
-    }
-
-    pub(crate) fn height(&self) -> u32 {
-        self.height
-    }
 }
 
 impl Drop for Texture {
@@ -109,7 +101,15 @@ impl Drop for Texture {
     }
 }
 
-impl crate::texture::Texture for Texture {}
+impl crate::texture::Texture for Texture {
+    fn width(&self) -> u32 {
+        self.width
+    }
+
+    fn height(&self) -> u32 {
+        self.height
+    }
+}
 
 impl crate::resource::Resource for Texture {
     fn resource_handle(&self) -> crate::resource::ResourceHandle {

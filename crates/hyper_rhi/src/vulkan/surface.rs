@@ -308,13 +308,21 @@ impl Drop for Surface {
 
 impl crate::surface::Surface for Surface {
     fn resize(&mut self, width: u32, height: u32) {
-        self.height = height;
         self.width = width;
+        self.height = height;
         self.resized = true;
     }
 
     fn current_texture(&self) -> Arc<dyn crate::texture::Texture> {
         let texture = &self.textures[*self.current_texture_index.borrow() as usize];
         Arc::clone(texture)
+    }
+
+    fn width(&self) -> u32 {
+        self.width
+    }
+
+    fn height(&self) -> u32 {
+        self.height
     }
 }

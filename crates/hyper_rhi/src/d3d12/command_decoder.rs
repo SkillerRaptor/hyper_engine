@@ -29,10 +29,13 @@ use windows::Win32::{
     },
 };
 
-use crate::d3d12::{
-    graphics_device::GraphicsDevice,
-    graphics_pipeline::GraphicsPipeline,
-    texture::Texture,
+use crate::{
+    d3d12::{
+        graphics_device::GraphicsDevice,
+        graphics_pipeline::GraphicsPipeline,
+        texture::Texture,
+    },
+    texture::Texture as _,
 };
 
 pub(crate) struct CommandDecoder<'a> {

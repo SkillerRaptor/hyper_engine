@@ -13,6 +13,9 @@ use crate::resource::Resource;
 #[derive(Clone, Debug)]
 pub struct TextureDescriptor {}
 
-pub trait Texture: Debug + Downcast + Resource {}
+pub trait Texture: Debug + Downcast + Resource {
+    fn width(&self) -> u32;
+    fn height(&self) -> u32;
+}
 
 downcast_rs::impl_downcast!(Texture);

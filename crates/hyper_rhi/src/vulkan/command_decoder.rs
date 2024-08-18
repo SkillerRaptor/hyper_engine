@@ -9,6 +9,7 @@ use ash::vk;
 use crate::{
     bindings_offset::BindingsOffset,
     resource::Resource,
+    texture::Texture as _,
     vulkan::{
         buffer::Buffer,
         graphics_device::GraphicsDevice,

@@ -26,6 +26,7 @@ pub struct BufferDescriptor<'a> {
 }
 
 pub trait Buffer: Debug + Downcast + Resource {
+    fn usage(&self) -> BufferUsage;
     fn size(&self) -> usize;
 }
 

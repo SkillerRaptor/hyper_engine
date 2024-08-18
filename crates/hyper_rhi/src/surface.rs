@@ -22,7 +22,11 @@ pub struct SurfaceDescriptor<'a> {
 
 pub trait Surface: Downcast {
     fn resize(&mut self, width: u32, height: u32);
+
     fn current_texture(&self) -> Arc<dyn Texture>;
+
+    fn width(&self) -> u32;
+    fn height(&self) -> u32;
 }
 
 downcast_rs::impl_downcast!(Surface);

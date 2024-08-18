@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{buffer::BufferDescriptor, d3d12::graphics_device::GraphicsDevice};
+use crate::{
+    buffer::{BufferDescriptor, BufferUsage},
+    d3d12::graphics_device::GraphicsDevice,
+};
 
 #[derive(Debug)]
 pub(crate) struct Buffer {}
@@ -16,6 +19,10 @@ impl Buffer {
 }
 
 impl crate::buffer::Buffer for Buffer {
+    fn usage(&self) -> BufferUsage {
+        todo!()
+    }
+
     fn size(&self) -> usize {
         todo!()
     }

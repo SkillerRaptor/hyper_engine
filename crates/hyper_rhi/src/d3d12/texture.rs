@@ -54,20 +54,20 @@ impl Texture {
         &self.resource
     }
 
-    pub(crate) fn width(&self) -> u32 {
-        self.width
-    }
-
-    pub(crate) fn height(&self) -> u32 {
-        self.height
-    }
-
     pub(crate) fn index(&self) -> u32 {
         self.index
     }
 }
 
-impl crate::texture::Texture for Texture {}
+impl crate::texture::Texture for Texture {
+    fn width(&self) -> u32 {
+        self.width
+    }
+
+    fn height(&self) -> u32 {
+        self.height
+    }
+}
 
 impl crate::resource::Resource for Texture {
     fn resource_handle(&self) -> crate::resource::ResourceHandle {
