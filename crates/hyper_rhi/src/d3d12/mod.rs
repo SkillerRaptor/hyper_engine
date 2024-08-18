@@ -6,11 +6,13 @@
 
 #![cfg(target_os = "windows")]
 
+mod buffer;
+mod command_decoder;
+mod graphics_pipeline;
+mod resource_handle_pair;
 mod resource_heap;
+mod shader_module;
+mod surface;
+mod texture;
 
-pub(crate) mod command_decoder;
 pub(crate) mod graphics_device;
-pub(crate) mod graphics_pipeline;
-pub(crate) mod shader_module;
-pub(crate) mod surface;
-pub(crate) mod texture;

@@ -10,6 +10,11 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use gpu_allocator::{
+    d3d12::{Allocator, AllocatorCreateDesc, ID3D12DeviceVersion},
+    AllocationSizes,
+    AllocatorDebugSettings,
+};
 use windows::{
     core::Interface,
     Win32::{
@@ -58,9 +63,11 @@ use windows::{
 };
 
 use crate::{
+    buffer::BufferDescriptor,
     command_encoder::CommandEncoder,
     command_list::CommandList,
     d3d12::{
+        buffer::Buffer,
         command_decoder::CommandDecoder,
         graphics_pipeline::GraphicsPipeline,
         resource_heap::{ResourceHeap, ResourceHeapDescriptor, ResourceHeapType},
@@ -92,7 +99,9 @@ pub(crate) struct GraphicsDevice {
 
     _dsv_heap: ResourceHeap,
     rtv_heap: ResourceHeap,
-    _cbv_srv_uav_heap: ResourceHeap,
+    cbv_srv_uav_heap: ResourceHeap,
+
+    allocator: Arc<Mutex<Allocator>>,
 
     command_queue: ID3D12CommandQueue,
     device: ID3D12Device,
@@ -112,6 +121,15 @@ impl GraphicsDevice {
         let adapter = Self::choose_adapter(&factory);
         let device = Self::create_device(&adapter);
         let command_queue = Self::create_command_queue(&device);
+
+        let allocator = Arc::new(Mutex::new(
+            Allocator::new(&AllocatorCreateDesc {
+                device: ID3D12DeviceVersion::Device(device.clone()),
+                debug_settings: AllocatorDebugSettings::default(),
+                allocation_sizes: AllocationSizes::default(),
+            })
+            .unwrap(),
+        ));
 
         let cbv_srv_uav_heap = ResourceHeap::new(
             &device,
@@ -161,7 +179,9 @@ impl GraphicsDevice {
 
             _dsv_heap: dsv_heap,
             rtv_heap,
-            _cbv_srv_uav_heap: cbv_srv_uav_heap,
+            cbv_srv_uav_heap,
+
+            allocator,
 
             command_queue,
             device,
@@ -331,6 +351,14 @@ impl GraphicsDevice {
         &self.command_queue
     }
 
+    pub(crate) fn allocator(&self) -> &Arc<Mutex<Allocator>> {
+        &self.allocator
+    }
+
+    pub(super) fn cbv_srv_uav_heap(&self) -> &ResourceHeap {
+        &self.cbv_srv_uav_heap
+    }
+
     pub(super) fn rtv_heap(&self) -> &ResourceHeap {
         &self.rtv_heap
     }
@@ -355,6 +383,10 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
         descriptor: &GraphicsPipelineDescriptor,
     ) -> Arc<dyn crate::graphics_pipeline::GraphicsPipeline> {
         Arc::new(GraphicsPipeline::new(self, descriptor))
+    }
+
+    fn create_buffer(&self, descriptor: &BufferDescriptor) -> Arc<dyn crate::buffer::Buffer> {
+        Arc::new(Buffer::new(self, descriptor))
     }
 
     fn create_shader_module(

@@ -32,7 +32,7 @@ pub(super) struct ResourceHeapDescriptor {
 pub(super) struct ResourceHeap {
     handle: D3D12_CPU_DESCRIPTOR_HANDLE,
     size: usize,
-    _descriptor_heap: ID3D12DescriptorHeap,
+    descriptor_heap: ID3D12DescriptorHeap,
 }
 
 impl ResourceHeap {
@@ -66,8 +66,12 @@ impl ResourceHeap {
         Self {
             handle,
             size,
-            _descriptor_heap: descriptor_heap,
+            descriptor_heap,
         }
+    }
+
+    pub(super) fn descriptor_heap(&self) -> &ID3D12DescriptorHeap {
+        &self.descriptor_heap
     }
 
     pub(crate) fn size(&self) -> usize {

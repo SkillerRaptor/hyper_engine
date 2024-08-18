@@ -98,6 +98,10 @@ impl<'a> crate::command_decoder::CommandDecoder for CommandDecoder<'a> {
         }
     }
 
+    fn bind_bindings(&self, _buffer: &dyn crate::buffer::Buffer) {
+        todo!();
+    }
+
     fn bind_pipeline(
         &self,
         graphics_pipeline: &dyn crate::graphics_pipeline::GraphicsPipeline,
@@ -131,10 +135,20 @@ impl<'a> crate::command_decoder::CommandDecoder for CommandDecoder<'a> {
         unsafe {
             self.command_list
                 .SetGraphicsRootSignature(self.graphics_device.root_signature());
+            // TODO: Is cloning really necessary?
+            self.command_list.SetDescriptorHeaps(&[Some(
+                self.graphics_device
+                    .cbv_srv_uav_heap()
+                    .descriptor_heap()
+                    .clone(),
+            )]);
             self.command_list
                 .SetPipelineState(graphics_pipeline.pipeline_state());
             self.command_list.RSSetViewports(&[viewport]);
             self.command_list.RSSetScissorRects(&[scissor_rect]);
+
+            self.command_list
+                .IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
             let descriptor_heap = self.graphics_device.rtv_heap();
             let rtv_handle = D3D12_CPU_DESCRIPTOR_HANDLE {
@@ -153,14 +167,35 @@ impl<'a> crate::command_decoder::CommandDecoder for CommandDecoder<'a> {
         }
     }
 
+    fn bind_index_buffer(&self, _buffer: &dyn crate::buffer::Buffer) {
+        todo!();
+    }
+
     fn draw(&self, vertex_count: u32, instance_count: u32, first_vertex: u32, first_instance: u32) {
         unsafe {
-            self.command_list
-                .IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             self.command_list.DrawInstanced(
                 vertex_count,
                 instance_count,
                 first_vertex,
+                first_instance,
+            );
+        }
+    }
+
+    fn draw_indexed(
+        &self,
+        index_count: u32,
+        instance_count: u32,
+        first_index: u32,
+        vertex_offset: i32,
+        first_instance: u32,
+    ) {
+        unsafe {
+            self.command_list.DrawIndexedInstanced(
+                index_count,
+                instance_count,
+                first_index,
+                vertex_offset,
                 first_instance,
             );
         }
