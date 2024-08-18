@@ -16,6 +16,7 @@ hyper_math = { path = "../hyper_math" }
 hyper_platform = { path = "../hyper_platform" }
 hyper_rhi = { path = "../hyper_rhi" }
 
+bytemuck = { workspace = true }
 clap = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }

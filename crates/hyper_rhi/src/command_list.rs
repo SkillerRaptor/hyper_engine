@@ -7,6 +7,7 @@
 use std::sync::Arc;
 
 use crate::{
+    buffer::Buffer,
     command_decoder::CommandDecoder,
     graphics_pipeline::GraphicsPipeline,
     texture::Texture,
@@ -21,14 +22,30 @@ pub(crate) enum Command {
     },
     EndRenderPass,
 
+    BindBindings {
+        buffer: Arc<dyn Buffer>,
+    },
+
     BindPipeline {
         graphics_pipeline: Arc<dyn GraphicsPipeline>,
+    },
+
+    BindIndexBuffer {
+        buffer: Arc<dyn Buffer>,
     },
 
     Draw {
         vertex_count: u32,
         instance_count: u32,
         first_vertex: u32,
+        first_instance: u32,
+    },
+
+    DrawIndexed {
+        index_count: u32,
+        instance_count: u32,
+        first_index: u32,
+        vertex_offset: i32,
         first_instance: u32,
     },
 }
@@ -72,6 +89,11 @@ impl CommandList {
 
                     self.render_pass_state = None;
                 }
+                Command::BindBindings { buffer } => {
+                    debug_assert!(self.render_pass_state.is_some());
+
+                    command_decoder.bind_bindings(&**buffer);
+                }
                 Command::BindPipeline { graphics_pipeline } => {
                     debug_assert!(self.render_pass_state.is_some());
 
@@ -82,6 +104,11 @@ impl CommandList {
                         &**render_pass_state.graphics_pipeline.as_ref().unwrap(),
                         &*render_pass_state.texture,
                     );
+                }
+                Command::BindIndexBuffer { buffer } => {
+                    debug_assert!(self.render_pass_state.is_some());
+
+                    command_decoder.bind_index_buffer(&**buffer);
                 }
                 Command::Draw {
                     vertex_count,
@@ -98,6 +125,26 @@ impl CommandList {
                         *vertex_count,
                         *instance_count,
                         *first_vertex,
+                        *first_instance,
+                    );
+                }
+                Command::DrawIndexed {
+                    index_count,
+                    instance_count,
+                    first_index,
+                    vertex_offset,
+                    first_instance,
+                } => {
+                    debug_assert!(self.render_pass_state.is_some());
+
+                    let render_pass_state = self.render_pass_state.as_ref().unwrap();
+                    debug_assert!(render_pass_state.graphics_pipeline.is_some());
+
+                    command_decoder.draw_indexed(
+                        *index_count,
+                        *instance_count,
+                        *first_index,
+                        *vertex_offset,
                         *first_instance,
                     );
                 }

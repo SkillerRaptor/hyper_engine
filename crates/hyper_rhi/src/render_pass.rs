@@ -6,7 +6,12 @@
 
 use std::{fmt::Debug, sync::Arc};
 
-use crate::{command_list::Command, graphics_pipeline::GraphicsPipeline, texture::Texture};
+use crate::{
+    buffer::Buffer,
+    command_list::Command,
+    graphics_pipeline::GraphicsPipeline,
+    texture::Texture,
+};
 
 #[derive(Clone, Debug)]
 pub struct RenderPassDescriptor<'a> {
@@ -27,9 +32,21 @@ impl<'a> RenderPass<'a> {
         Self { commands }
     }
 
+    pub fn bind_bindings(&mut self, buffer: &Arc<dyn Buffer>) {
+        self.commands.push(Command::BindBindings {
+            buffer: Arc::clone(buffer),
+        });
+    }
+
     pub fn bind_pipeline(&mut self, pipeline: &Arc<dyn GraphicsPipeline>) {
         self.commands.push(Command::BindPipeline {
             graphics_pipeline: Arc::clone(pipeline),
+        });
+    }
+
+    pub fn bind_index_buffer(&mut self, buffer: &Arc<dyn Buffer>) {
+        self.commands.push(Command::BindIndexBuffer {
+            buffer: Arc::clone(buffer),
         });
     }
 
@@ -44,6 +61,23 @@ impl<'a> RenderPass<'a> {
             vertex_count,
             instance_count,
             first_vertex,
+            first_instance,
+        });
+    }
+
+    pub fn draw_indexed(
+        &mut self,
+        index_count: u32,
+        instance_count: u32,
+        first_index: u32,
+        vertex_offset: i32,
+        first_instance: u32,
+    ) {
+        self.commands.push(Command::DrawIndexed {
+            index_count,
+            instance_count,
+            first_index,
+            vertex_offset,
             first_instance,
         });
     }

@@ -6,10 +6,15 @@
 
 use ash::vk;
 
-use crate::vulkan::{
-    graphics_device::GraphicsDevice,
-    graphics_pipeline::GraphicsPipeline,
-    texture::Texture,
+use crate::{
+    bindings_offset::BindingsOffset,
+    resource::Resource,
+    vulkan::{
+        buffer::Buffer,
+        graphics_device::GraphicsDevice,
+        graphics_pipeline::GraphicsPipeline,
+        texture::Texture,
+    },
 };
 
 pub(crate) struct CommandDecoder<'a> {
@@ -107,6 +112,22 @@ impl<'a> crate::command_decoder::CommandDecoder for CommandDecoder<'a> {
         }
     }
 
+    fn bind_bindings(&self, buffer: &dyn crate::buffer::Buffer) {
+        let buffer = buffer.downcast_ref::<Buffer>().unwrap();
+
+        let bindings_offset = BindingsOffset::new(buffer.resource_handle());
+
+        unsafe {
+            self.graphics_device.device().cmd_push_constants(
+                self.command_buffer,
+                self.graphics_device.pipeline_layout(),
+                vk::ShaderStageFlags::ALL,
+                0,
+                bytemuck::cast_slice(&[bindings_offset]),
+            );
+        }
+    }
+
     fn bind_pipeline(
         &self,
         graphics_pipeline: &dyn crate::graphics_pipeline::GraphicsPipeline,
@@ -195,6 +216,19 @@ impl<'a> crate::command_decoder::CommandDecoder for CommandDecoder<'a> {
         }
     }
 
+    fn bind_index_buffer(&self, buffer: &dyn crate::buffer::Buffer) {
+        let buffer = buffer.downcast_ref::<Buffer>().unwrap();
+
+        unsafe {
+            self.graphics_device.device().cmd_bind_index_buffer(
+                self.command_buffer,
+                buffer.raw(),
+                0,
+                vk::IndexType::UINT32,
+            );
+        }
+    }
+
     fn draw(&self, vertex_count: u32, instance_count: u32, first_vertex: u32, first_instance: u32) {
         unsafe {
             self.graphics_device.device().cmd_draw(
@@ -202,6 +236,26 @@ impl<'a> crate::command_decoder::CommandDecoder for CommandDecoder<'a> {
                 vertex_count,
                 instance_count,
                 first_vertex,
+                first_instance,
+            );
+        }
+    }
+
+    fn draw_indexed(
+        &self,
+        index_count: u32,
+        instance_count: u32,
+        first_index: u32,
+        vertex_offset: i32,
+        first_instance: u32,
+    ) {
+        unsafe {
+            self.graphics_device.device().cmd_draw_indexed(
+                self.command_buffer,
+                index_count,
+                instance_count,
+                first_index,
+                vertex_offset,
                 first_instance,
             );
         }

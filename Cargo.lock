@@ -128,13 +128,7 @@ checksum = "175571dd1d178ced59193a6fc02dde1b972eb0bc56c892cde9beeceac5bf0f6b"
 [[package]]
 name = "ash"
 version = "0.38.0+1.3.281"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0bb44936d800fea8f016d7f2311c6a4f97aebd5dc86f09906139ec848cf3a46f"
-
-[[package]]
-name = "ash"
-version = "0.38.0+1.3.281"
-source = "git+https://github.com/SkillerRaptor/ash#f01c9e8b56677ac183cdd5117b460d5f26d3eb07"
+source = "git+https://github.com/SkillerRaptor/ash#16bba3444de970be3d573988d176511c2b2cbfb0"
 dependencies = [
  "libloading",
 ]
@@ -142,9 +136,9 @@ dependencies = [
 [[package]]
 name = "ash-window"
 version = "0.13.0"
-source = "git+https://github.com/SkillerRaptor/ash#f01c9e8b56677ac183cdd5117b460d5f26d3eb07"
+source = "git+https://github.com/SkillerRaptor/ash#16bba3444de970be3d573988d176511c2b2cbfb0"
 dependencies = [
- "ash 0.38.0+1.3.281 (git+https://github.com/SkillerRaptor/ash)",
+ "ash",
  "raw-window-handle",
  "raw-window-metal",
 ]
@@ -199,6 +193,20 @@ name = "bytemuck"
 version = "1.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b236fc92302c97ed75b38da1f4917b5cdda4984745740f153a5d3059e48d725e"
+dependencies = [
+ "bytemuck_derive",
+]
+
+[[package]]
+name = "bytemuck_derive"
+version = "1.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ee891b04274a59bd38b412188e24b849617b2e45a0fd8d057deb63e7403761b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.68",
+]
 
 [[package]]
 name = "bytes"
@@ -535,14 +543,16 @@ name = "glam"
 version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "779ae4bf7e8421cf91c0b3b64e7e8b40b862fba4d393f59150042de7c4965a94"
+dependencies = [
+ "bytemuck",
+]
 
 [[package]]
 name = "gpu-allocator"
 version = "0.27.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c151a2a5ef800297b4e79efa4f4bec035c5f51d5ae587287c9b952bdf734cacd"
+source = "git+https://github.com/SkillerRaptor/gpu-allocator#e96bbdf6819ff4a3cc12526cdad37dbfa970ca58"
 dependencies = [
- "ash 0.38.0+1.3.281 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ash",
  "log",
  "presser",
  "thiserror",
@@ -604,6 +614,7 @@ dependencies = [
 name = "hyper_engine"
 version = "0.0.0"
 dependencies = [
+ "bytemuck",
  "clap",
  "hyper_core",
  "hyper_ecs",
@@ -641,8 +652,10 @@ dependencies = [
 name = "hyper_rhi"
 version = "0.0.0"
 dependencies = [
- "ash 0.38.0+1.3.281 (git+https://github.com/SkillerRaptor/ash)",
+ "ash",
  "ash-window",
+ "bitflags 2.6.0",
+ "bytemuck",
  "downcast-rs",
  "gpu-allocator",
  "hassle-rs",
@@ -729,7 +742,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e310b3a6b5907f99202fcdb4960ff45b93735d7c7d96b760fcff8db2dc0e103d"
 dependencies = [
  "cfg-if",
- "windows-targets 0.52.6",
+ "windows-targets 0.48.5",
 ]
 
 [[package]]

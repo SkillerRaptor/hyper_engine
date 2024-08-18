@@ -8,8 +8,10 @@ use std::{fmt::Debug, sync::Arc};
 
 use downcast_rs::Downcast;
 use raw_window_handle::DisplayHandle;
+use tracing::Value;
 
 use crate::{
+    buffer::{Buffer, BufferDescriptor},
     command_encoder::CommandEncoder,
     command_list::CommandList,
     graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
@@ -49,6 +51,8 @@ pub trait GraphicsDevice: Downcast {
         descriptor: &GraphicsPipelineDescriptor,
     ) -> Arc<dyn GraphicsPipeline>;
 
+    fn create_buffer(&self, descriptor: &BufferDescriptor) -> Arc<dyn Buffer>;
+
     // TODO: Add buffer
 
     fn create_shader_module(&self, descriptor: &ShaderModuleDescriptor) -> Arc<dyn ShaderModule>;
@@ -76,10 +80,7 @@ pub fn create_graphics_device(descriptor: &GraphicsDeviceDescriptor) -> Arc<dyn 
         GraphicsApi::Vulkan => Arc::new(vulkan::graphics_device::GraphicsDevice::new(descriptor)),
     };
 
-    tracing::debug!(
-        "Create Graphics Device with the {:?} API",
-        descriptor.graphics_api
-    );
+    tracing::debug!(api = ?descriptor.graphics_api, "Graphics Device created");
 
     graphics_device
 }

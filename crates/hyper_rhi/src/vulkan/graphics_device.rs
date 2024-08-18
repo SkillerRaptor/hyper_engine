@@ -8,14 +8,20 @@ use std::{
     collections::HashSet,
     ffi::{c_void, CStr},
     mem,
-    sync::{Arc, Mutex},
+    sync::{atomic::AtomicU32, Arc, Mutex},
 };
 
 use ash::{ext::debug_utils, khr::swapchain, vk, Device, Entry, Instance};
+use gpu_allocator::{
+    vulkan::{Allocation, Allocator, AllocatorCreateDesc},
+    AllocationSizes,
+    AllocatorDebugSettings,
+};
 use raw_window_handle::DisplayHandle;
 
 use crate::{
-    bindings::BindingsOffset,
+    bindings_offset::BindingsOffset,
+    buffer::BufferDescriptor,
     command_encoder::CommandEncoder,
     command_list::CommandList,
     graphics_device::GraphicsDeviceDescriptor,
@@ -24,6 +30,7 @@ use crate::{
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
     vulkan::{
+        buffer::Buffer,
         command_decoder::CommandDecoder,
         graphics_pipeline::GraphicsPipeline,
         shader_module::ShaderModule,
@@ -33,7 +40,14 @@ use crate::{
 };
 
 #[derive(Debug)]
+pub(crate) struct ResourceBuffer {
+    pub(crate) allocation: Option<Allocation>,
+    pub(crate) buffer: vk::Buffer,
+}
+
+#[derive(Debug)]
 pub(crate) struct ResourceHandler {
+    pub(crate) buffers: Mutex<Vec<ResourceBuffer>>,
     pub(crate) graphics_pipeline: Mutex<Vec<vk::Pipeline>>,
     pub(crate) shader_modules: Mutex<Vec<vk::ShaderModule>>,
     pub(crate) texture_views: Mutex<Vec<vk::ImageView>>,
@@ -53,6 +67,9 @@ struct DebugUtils {
 }
 
 pub(crate) struct GraphicsDevice {
+    // TODO: Descriptor Manager
+    resource_number: Arc<AtomicU32>,
+
     current_frame_index: Mutex<u32>,
 
     resource_handler: Arc<ResourceHandler>,
@@ -67,8 +84,9 @@ pub(crate) struct GraphicsDevice {
     _limits: [u32; Self::DESCRIPTOR_TYPES.len()],
     descriptor_pool: vk::DescriptorPool,
 
+    allocator: Arc<Mutex<Allocator>>,
+
     queue: vk::Queue,
-    _queue_family_index: u32,
     device: Device,
     physical_device: vk::PhysicalDevice,
     debug_utils: Option<DebugUtils>,
@@ -117,6 +135,18 @@ impl GraphicsDevice {
         let device = Self::create_device(&instance, physical_device, queue_family_index);
         let queue = unsafe { device.get_device_queue(queue_family_index, 0) };
 
+        let allocator = Arc::new(Mutex::new(
+            Allocator::new(&AllocatorCreateDesc {
+                instance: instance.clone(),
+                device: device.clone(),
+                physical_device: physical_device,
+                debug_settings: AllocatorDebugSettings::default(),
+                buffer_device_address: false,
+                allocation_sizes: AllocationSizes::default(),
+            })
+            .unwrap(),
+        ));
+
         let descriptor_pool = Self::create_descriptor_pool(&instance, physical_device, &device);
         let limits = Self::find_limits(&instance, physical_device);
         let layouts = Self::create_descriptor_set_layouts(&device, &limits);
@@ -145,9 +175,12 @@ impl GraphicsDevice {
         }
 
         Self {
+            resource_number: Arc::new(AtomicU32::new(0)),
+
             current_frame_index: Mutex::new(u32::MAX),
 
             resource_handler: Arc::new(ResourceHandler {
+                buffers: Mutex::new(Vec::new()),
                 graphics_pipeline: Mutex::new(Vec::new()),
                 shader_modules: Mutex::new(Vec::new()),
                 texture_views: Mutex::new(Vec::new()),
@@ -163,8 +196,9 @@ impl GraphicsDevice {
             _limits: limits,
             descriptor_pool,
 
+            allocator,
+
             queue,
-            _queue_family_index: queue_family_index,
             device,
             physical_device,
             debug_utils,
@@ -426,8 +460,6 @@ impl GraphicsDevice {
 
         let mut dynamic_rendering =
             vk::PhysicalDeviceDynamicRenderingFeatures::default().dynamic_rendering(true);
-        let mut buffer_device_address =
-            vk::PhysicalDeviceBufferDeviceAddressFeatures::default().buffer_device_address(true);
         let mut timline_semaphore =
             vk::PhysicalDeviceTimelineSemaphoreFeatures::default().timeline_semaphore(true);
         let mut synchronization2 =
@@ -450,7 +482,6 @@ impl GraphicsDevice {
 
         let mut physical_device_features2 = vk::PhysicalDeviceFeatures2::default()
             .push_next(&mut dynamic_rendering)
-            .push_next(&mut buffer_device_address)
             .push_next(&mut timline_semaphore)
             .push_next(&mut synchronization2)
             .push_next(&mut descriptor_indexing)
@@ -670,6 +701,42 @@ impl GraphicsDevice {
         vk::FALSE
     }
 
+    fn clean_resources(&self) {
+        let mut buffers = self.resource_handler.buffers.lock().unwrap();
+        buffers.iter_mut().for_each(|resource_buffer| {
+            self.allocator
+                .lock()
+                .unwrap()
+                .free(resource_buffer.allocation.take().unwrap())
+                .unwrap();
+
+            unsafe {
+                self.device.destroy_buffer(resource_buffer.buffer, None);
+            }
+        });
+        buffers.clear();
+
+        let mut graphics_pipelines = self.resource_handler.graphics_pipeline.lock().unwrap();
+        graphics_pipelines
+            .iter()
+            .for_each(|&graphics_pipeline| unsafe {
+                self.device.destroy_pipeline(graphics_pipeline, None);
+            });
+        graphics_pipelines.clear();
+
+        let mut shader_modules = self.resource_handler.shader_modules.lock().unwrap();
+        shader_modules.iter().for_each(|&shader_module| unsafe {
+            self.device.destroy_shader_module(shader_module, None);
+        });
+        shader_modules.clear();
+
+        let mut texture_views = self.resource_handler.texture_views.lock().unwrap();
+        texture_views.iter().for_each(|&texture_view| unsafe {
+            self.device.destroy_image_view(texture_view, None);
+        });
+        texture_views.clear();
+    }
+
     pub(crate) fn entry(&self) -> &Entry {
         &self.entry
     }
@@ -684,6 +751,14 @@ impl GraphicsDevice {
 
     pub(crate) fn device(&self) -> &Device {
         &self.device
+    }
+
+    pub(crate) fn resource_handler(&self) -> &Arc<ResourceHandler> {
+        &self.resource_handler
+    }
+
+    pub(crate) fn allocator(&self) -> &Arc<Mutex<Allocator>> {
+        &self.allocator
     }
 
     pub(crate) fn pipeline_layout(&self) -> vk::PipelineLayout {
@@ -702,12 +777,18 @@ impl GraphicsDevice {
         let index = *self.current_frame_index.lock().unwrap() % crate::graphics_device::FRAME_COUNT;
         &self.frames[index as usize]
     }
+
+    pub(crate) fn resource_number(&self) -> &Arc<AtomicU32> {
+        &self.resource_number
+    }
 }
 
 impl Drop for GraphicsDevice {
     fn drop(&mut self) {
         unsafe {
             self.device.device_wait_idle().unwrap();
+
+            self.clean_resources();
 
             self.frames.iter().for_each(|frame| {
                 self.device.destroy_semaphore(frame.render_semaphore, None);
@@ -755,6 +836,10 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
         ))
     }
 
+    fn create_buffer(&self, descriptor: &BufferDescriptor) -> Arc<dyn crate::buffer::Buffer> {
+        Arc::new(Buffer::new(self, descriptor))
+    }
+
     fn create_shader_module(
         &self,
         descriptor: &ShaderModuleDescriptor,
@@ -785,32 +870,7 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
             self.device().wait_semaphores(&wait_info, u64::MAX).unwrap();
         }
 
-        // Clean everything before new frame will be started
-        {
-            let mut graphics_pipelines = self.resource_handler.graphics_pipeline.lock().unwrap();
-            for &graphics_pipeline in graphics_pipelines.iter() {
-                unsafe {
-                    self.device.destroy_pipeline(graphics_pipeline, None);
-                }
-            }
-            graphics_pipelines.clear();
-
-            let mut shader_modules = self.resource_handler.shader_modules.lock().unwrap();
-            for &shader_module in shader_modules.iter() {
-                unsafe {
-                    self.device.destroy_shader_module(shader_module, None);
-                }
-            }
-            shader_modules.clear();
-
-            let mut texture_views = self.resource_handler.texture_views.lock().unwrap();
-            for &texture_view in texture_views.iter() {
-                unsafe {
-                    self.device.destroy_image_view(texture_view, None);
-                }
-            }
-            texture_views.clear();
-        }
+        self.clean_resources();
 
         // Rebuild swapchain
         if surface.resized() {

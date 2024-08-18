@@ -305,10 +305,7 @@ struct RwTexture {
 ////////////////////////////////////////////////////////////////////////////////
 
 struct BindingsOffset {
-  RenderResourceHandle bindings_offset;
-  uint unused_0;
-  uint unused_1;
-  uint unused_2;
+  RenderResourceHandle offset;
 };
 
 #ifdef HYPER_ENGINE_VULKAN
@@ -319,7 +316,7 @@ struct BindingsOffset {
 
 template <typename T>
 inline T load_bindings() {
-  SimpleBuffer buffer = (SimpleBuffer) g_bindings_offset.bindings_offset.read_index();
+  SimpleBuffer buffer = (SimpleBuffer) g_bindings_offset.offset.read_index();
   T result = buffer.load<T>();
   return result;
 }

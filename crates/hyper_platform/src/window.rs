@@ -67,10 +67,10 @@ impl Window {
         let window = event_loop.create_window(attributes)?;
 
         tracing::debug!(
-            "Created Window \"{}\" with the resolution of {}x{}",
-            descriptor.title,
-            descriptor.width,
-            descriptor.height
+            title = descriptor.title,
+            width = descriptor.width,
+            height = descriptor.height,
+            "Window created",
         );
 
         let input = Input::default();

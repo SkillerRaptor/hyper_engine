@@ -4,9 +4,11 @@
 // SPDX-License-Identifier: MIT
 //
 
-pub(crate) mod command_decoder;
+mod buffer;
+mod command_decoder;
+mod graphics_pipeline;
+mod shader_module;
+mod surface;
+mod texture;
+
 pub(crate) mod graphics_device;
-pub(crate) mod graphics_pipeline;
-pub(crate) mod shader_module;
-pub(crate) mod surface;
-pub(crate) mod texture;

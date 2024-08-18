@@ -6,11 +6,15 @@
 
 use std::{sync::Arc, time::Instant};
 
+use bytemuck::NoUninit;
+use hyper_math::Vec4;
 use hyper_platform::{Window, WindowDescriptor};
 use hyper_rhi::{
+    buffer::{Buffer, BufferDescriptor, BufferUsage},
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
     graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
     render_pass::RenderPassDescriptor,
+    resource::ResourceHandle,
     shader_module::{ShaderModuleDescriptor, ShaderStage},
     surface::{Surface, SurfaceDescriptor},
 };
@@ -26,6 +30,10 @@ pub struct EngineDescriptor {
 
 pub struct Engine {
     frame_index: u32,
+
+    bindings_buffer: Arc<dyn Buffer>,
+    index_buffer: Arc<dyn Buffer>,
+    vertex_buffer: Arc<dyn Buffer>,
 
     graphics_pipeline: Arc<dyn GraphicsPipeline>,
     surface: Box<dyn Surface>,
@@ -85,6 +93,53 @@ impl Engine {
                 fragment_shader: &opaque_fragment_shader,
             });
 
+        #[repr(C)]
+        #[derive(Copy, Clone, NoUninit)]
+        struct Vertex {
+            position: Vec4,
+            color: Vec4,
+        }
+
+        #[repr(C)]
+        #[derive(Copy, Clone, NoUninit)]
+        struct BindingsBuffer {
+            vertices: ResourceHandle,
+        }
+
+        let vertex_buffer = graphics_device.create_buffer(&BufferDescriptor {
+            data: bytemuck::cast_slice(&[
+                Vertex {
+                    position: Vec4::new(-0.5, -0.5, 0.0, 1.0),
+                    color: Vec4::new(1.0, 0.0, 0.0, 1.0),
+                },
+                Vertex {
+                    position: Vec4::new(0.5, -0.5, 0.0, 1.0),
+                    color: Vec4::new(0.0, 1.0, 0.0, 1.0),
+                },
+                Vertex {
+                    position: Vec4::new(0.5, 0.5, 0.0, 1.0),
+                    color: Vec4::new(0.0, 0.0, 1.0, 1.0),
+                },
+                Vertex {
+                    position: Vec4::new(-0.5, 0.5, 0.0, 1.0),
+                    color: Vec4::new(1.0, 1.0, 1.0, 1.0),
+                },
+            ]),
+            usage: BufferUsage::STORAGE,
+        });
+
+        let index_buffer = graphics_device.create_buffer(&BufferDescriptor {
+            data: bytemuck::cast_slice(&[0_u32, 1_u32, 2_u32, 2_u32, 3_u32, 0_u32]),
+            usage: BufferUsage::INDEX,
+        });
+
+        let bindings_buffer = graphics_device.create_buffer(&BufferDescriptor {
+            data: bytemuck::cast_slice(&[BindingsBuffer {
+                vertices: vertex_buffer.resource_handle(),
+            }]),
+            usage: BufferUsage::STORAGE,
+        });
+
         tracing::info!(
             "Engine initialized in {:.2} seconds",
             start_time.elapsed().as_secs_f32()
@@ -92,6 +147,10 @@ impl Engine {
 
         Self {
             frame_index: 1,
+
+            bindings_buffer,
+            index_buffer,
+            vertex_buffer,
 
             graphics_pipeline,
             surface,
@@ -147,7 +206,9 @@ impl Engine {
                 });
 
                 render_pass.bind_pipeline(&self.graphics_pipeline);
-                render_pass.draw(3, 1, 0, 0);
+                render_pass.bind_bindings(&self.bindings_buffer);
+                render_pass.bind_index_buffer(&self.index_buffer);
+                render_pass.draw_indexed(6, 1, 0, 0, 0);
             }
 
             self.graphics_device.end_frame();

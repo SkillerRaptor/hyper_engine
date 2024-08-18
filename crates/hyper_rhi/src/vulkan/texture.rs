@@ -110,3 +110,9 @@ impl Drop for Texture {
 }
 
 impl crate::texture::Texture for Texture {}
+
+impl crate::resource::Resource for Texture {
+    fn resource_handle(&self) -> crate::resource::ResourceHandle {
+        todo!()
+    }
+}
