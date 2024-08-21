@@ -8,14 +8,13 @@ use std::{fmt::Debug, sync::Arc};
 
 use crate::{
     buffer::Buffer,
-    command_list::Command,
+    commands::command_list::Command,
     graphics_pipeline::GraphicsPipeline,
     texture::Texture,
 };
 
 #[derive(Clone, Debug)]
 pub struct RenderPassDescriptor<'a> {
-    // TODO: Add image view type
     pub texture: &'a Arc<dyn Texture>,
 }
 

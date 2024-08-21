@@ -8,7 +8,7 @@ use std::sync::Arc;
 
 use crate::{
     buffer::Buffer,
-    command_decoder::CommandDecoder,
+    commands::command_decoder::CommandDecoder,
     graphics_pipeline::GraphicsPipeline,
     texture::Texture,
 };

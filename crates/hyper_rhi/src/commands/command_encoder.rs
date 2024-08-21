@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{
+use crate::commands::{
     command_list::{Command, CommandList},
     render_pass::{RenderPass, RenderPassDescriptor},
 };

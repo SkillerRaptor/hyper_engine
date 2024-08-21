@@ -11,15 +11,12 @@ mod d3d12;
 mod vulkan;
 
 mod bindings_offset;
-mod command_decoder;
 mod shader_compiler;
 
 pub mod buffer;
-pub mod command_encoder;
-pub mod command_list;
+pub mod commands;
 pub mod graphics_device;
 pub mod graphics_pipeline;
-pub mod render_pass;
 pub mod resource;
 pub mod shader_module;
 pub mod surface;

@@ -22,8 +22,7 @@ use raw_window_handle::DisplayHandle;
 use crate::{
     bindings_offset::BindingsOffset,
     buffer::BufferDescriptor,
-    command_encoder::CommandEncoder,
-    command_list::CommandList,
+    commands::{command_encoder::CommandEncoder, command_list::CommandList},
     graphics_device::GraphicsDeviceDescriptor,
     graphics_pipeline::GraphicsPipelineDescriptor,
     shader_module::ShaderModuleDescriptor,

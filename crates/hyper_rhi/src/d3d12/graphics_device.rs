@@ -64,8 +64,7 @@ use windows::{
 
 use crate::{
     buffer::BufferDescriptor,
-    command_encoder::CommandEncoder,
-    command_list::CommandList,
+    commands::{command_encoder::CommandEncoder, command_list::CommandList},
     d3d12::{
         buffer::Buffer,
         command_decoder::CommandDecoder,

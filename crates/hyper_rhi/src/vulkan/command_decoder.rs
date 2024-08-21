@@ -35,7 +35,7 @@ impl<'a> CommandDecoder<'a> {
     }
 }
 
-impl<'a> crate::command_decoder::CommandDecoder for CommandDecoder<'a> {
+impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a> {
     fn begin_render_pass(&self, texture: &dyn crate::texture::Texture) {
         let texture = texture.downcast_ref::<Texture>().unwrap();
 

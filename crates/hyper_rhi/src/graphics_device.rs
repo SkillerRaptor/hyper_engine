@@ -8,12 +8,10 @@ use std::{fmt::Debug, sync::Arc};
 
 use downcast_rs::Downcast;
 use raw_window_handle::DisplayHandle;
-use tracing::Value;
 
 use crate::{
     buffer::{Buffer, BufferDescriptor},
-    command_encoder::CommandEncoder,
-    command_list::CommandList,
+    commands::{command_encoder::CommandEncoder, command_list::CommandList},
     graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
     shader_module::{ShaderModule, ShaderModuleDescriptor},
     surface::{Surface, SurfaceDescriptor},
@@ -44,16 +42,12 @@ pub(crate) const DESCRIPTOR_COUNT: u32 = 1000 * 1000;
 pub trait GraphicsDevice: Downcast {
     fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Box<dyn Surface>;
 
-    // TODO: Add compute pipeline
-
     fn create_graphics_pipeline(
         &self,
         descriptor: &GraphicsPipelineDescriptor,
     ) -> Arc<dyn GraphicsPipeline>;
 
     fn create_buffer(&self, descriptor: &BufferDescriptor) -> Arc<dyn Buffer>;
-
-    // TODO: Add buffer
 
     fn create_shader_module(&self, descriptor: &ShaderModuleDescriptor) -> Arc<dyn ShaderModule>;
 

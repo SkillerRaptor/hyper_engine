@@ -12,11 +12,7 @@ pub trait CommandDecoder {
 
     fn bind_bindings(&self, buffer: &dyn Buffer);
 
-    fn bind_pipeline(
-        &self,
-        graphics_pipeline: &dyn GraphicsPipeline,
-        texture: &dyn crate::texture::Texture,
-    );
+    fn bind_pipeline(&self, graphics_pipeline: &dyn GraphicsPipeline, texture: &dyn Texture);
     fn bind_index_buffer(&self, buffer: &dyn Buffer);
 
     fn draw(&self, vertex_count: u32, instance_count: u32, first_vertex: u32, first_instance: u32);

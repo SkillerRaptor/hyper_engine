@@ -11,9 +11,9 @@ use hyper_math::Vec4;
 use hyper_platform::{Window, WindowDescriptor};
 use hyper_rhi::{
     buffer::{Buffer, BufferDescriptor, BufferUsage},
+    commands::render_pass::RenderPassDescriptor,
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
     graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
-    render_pass::RenderPassDescriptor,
     resource::ResourceHandle,
     shader_module::{ShaderModuleDescriptor, ShaderStage},
     surface::{Surface, SurfaceDescriptor},
