@@ -11,10 +11,12 @@ use hyper_math::Vec4;
 use hyper_platform::{Window, WindowDescriptor};
 use hyper_rhi::{
     buffer::{Buffer, BufferDescriptor, BufferUsage},
-    commands::render_pass::RenderPassDescriptor,
+    commands::{
+        descriptor::{Descriptor, DescriptorBuilder},
+        render_pass::RenderPassDescriptor,
+    },
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
     graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
-    resource::ResourceHandle,
     shader_module::{ShaderModuleDescriptor, ShaderStage},
     surface::{Surface, SurfaceDescriptor},
 };
@@ -31,7 +33,7 @@ pub struct EngineDescriptor {
 pub struct Engine {
     frame_index: u32,
 
-    bindings_buffer: Arc<dyn Buffer>,
+    opaque_descriptor: Descriptor,
     index_buffer: Arc<dyn Buffer>,
     vertex_buffer: Arc<dyn Buffer>,
 
@@ -100,12 +102,6 @@ impl Engine {
             color: Vec4,
         }
 
-        #[repr(C)]
-        #[derive(Copy, Clone, NoUninit)]
-        struct BindingsBuffer {
-            vertices: ResourceHandle,
-        }
-
         let vertex_buffer = graphics_device.create_buffer(&BufferDescriptor {
             data: bytemuck::cast_slice(&[
                 Vertex {
@@ -133,12 +129,9 @@ impl Engine {
             usage: BufferUsage::INDEX,
         });
 
-        let bindings_buffer = graphics_device.create_buffer(&BufferDescriptor {
-            data: bytemuck::cast_slice(&[BindingsBuffer {
-                vertices: vertex_buffer.resource_handle(),
-            }]),
-            usage: BufferUsage::STORAGE,
-        });
+        let opaque_descriptor = DescriptorBuilder::default()
+            .read_buffer(0, &vertex_buffer)
+            .build(&graphics_device);
 
         tracing::info!(
             "Engine initialized in {:.2} seconds",
@@ -148,7 +141,7 @@ impl Engine {
         Self {
             frame_index: 1,
 
-            bindings_buffer,
+            opaque_descriptor,
             index_buffer,
             vertex_buffer,
 
@@ -206,7 +199,7 @@ impl Engine {
                 });
 
                 render_pass.bind_pipeline(&self.graphics_pipeline);
-                render_pass.bind_bindings(&self.bindings_buffer);
+                render_pass.bind_descriptor(&self.opaque_descriptor);
                 render_pass.bind_index_buffer(&self.index_buffer);
                 render_pass.draw_indexed(6, 1, 0, 0, 0);
             }

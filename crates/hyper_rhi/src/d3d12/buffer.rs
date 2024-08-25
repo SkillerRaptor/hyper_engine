@@ -7,6 +7,7 @@
 use crate::{
     buffer::{BufferDescriptor, BufferUsage},
     d3d12::graphics_device::GraphicsDevice,
+    resource::{Resource, ResourceHandle},
 };
 
 #[derive(Debug)]
@@ -28,8 +29,8 @@ impl crate::buffer::Buffer for Buffer {
     }
 }
 
-impl crate::resource::Resource for Buffer {
-    fn resource_handle(&self) -> crate::resource::ResourceHandle {
+impl Resource for Buffer {
+    fn handle(&self) -> ResourceHandle {
         todo!()
     }
 }

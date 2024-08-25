@@ -7,8 +7,7 @@
 use ash::vk;
 
 use crate::{
-    bindings_offset::BindingsOffset,
-    resource::Resource,
+    resource::ResourceHandle,
     texture::Texture as _,
     vulkan::{
         buffer::Buffer,
@@ -113,10 +112,8 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
         }
     }
 
-    fn bind_bindings(&self, buffer: &dyn crate::buffer::Buffer) {
-        let buffer = buffer.downcast_ref::<Buffer>().unwrap();
-
-        let bindings_offset = BindingsOffset::new(buffer.resource_handle());
+    fn bind_descriptor(&self, buffer: ResourceHandle) {
+        let bindings_offset = buffer.0;
 
         unsafe {
             self.graphics_device.device().cmd_push_constants(

@@ -10,6 +10,7 @@ use crate::{
     buffer::Buffer,
     commands::command_decoder::CommandDecoder,
     graphics_pipeline::GraphicsPipeline,
+    resource::ResourceHandle,
     texture::Texture,
 };
 
@@ -22,8 +23,8 @@ pub(crate) enum Command {
     },
     EndRenderPass,
 
-    BindBindings {
-        buffer: Arc<dyn Buffer>,
+    BindDescriptor {
+        buffer: ResourceHandle,
     },
 
     BindPipeline {
@@ -89,10 +90,10 @@ impl CommandList {
 
                     self.render_pass_state = None;
                 }
-                Command::BindBindings { buffer } => {
+                Command::BindDescriptor { buffer } => {
                     debug_assert!(self.render_pass_state.is_some());
 
-                    command_decoder.bind_bindings(&**buffer);
+                    command_decoder.bind_descriptor(*buffer);
                 }
                 Command::BindPipeline { graphics_pipeline } => {
                     debug_assert!(self.render_pass_state.is_some());

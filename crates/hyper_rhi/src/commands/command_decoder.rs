@@ -4,13 +4,18 @@
 // SPDX-License-Identifier: MIT
 //
 
-use crate::{buffer::Buffer, graphics_pipeline::GraphicsPipeline, texture::Texture};
+use crate::{
+    buffer::Buffer,
+    graphics_pipeline::GraphicsPipeline,
+    resource::ResourceHandle,
+    texture::Texture,
+};
 
 pub trait CommandDecoder {
     fn begin_render_pass(&self, texture: &dyn Texture);
     fn end_render_pass(&self, texture: &dyn Texture);
 
-    fn bind_bindings(&self, buffer: &dyn Buffer);
+    fn bind_descriptor(&self, buffer: ResourceHandle);
 
     fn bind_pipeline(&self, graphics_pipeline: &dyn GraphicsPipeline, texture: &dyn Texture);
     fn bind_index_buffer(&self, buffer: &dyn Buffer);

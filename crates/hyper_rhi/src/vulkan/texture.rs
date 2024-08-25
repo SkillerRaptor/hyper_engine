@@ -9,6 +9,7 @@ use std::sync::Arc;
 use ash::vk;
 
 use crate::{
+    resource::{Resource, ResourceHandle},
     texture::TextureDescriptor,
     vulkan::graphics_device::{GraphicsDevice, ResourceHandler},
 };
@@ -111,8 +112,8 @@ impl crate::texture::Texture for Texture {
     }
 }
 
-impl crate::resource::Resource for Texture {
-    fn resource_handle(&self) -> crate::resource::ResourceHandle {
+impl Resource for Texture {
+    fn handle(&self) -> ResourceHandle {
         todo!()
     }
 }

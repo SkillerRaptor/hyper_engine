@@ -11,5 +11,5 @@ use bytemuck::NoUninit;
 pub struct ResourceHandle(pub(crate) u32);
 
 pub trait Resource {
-    fn resource_handle(&self) -> ResourceHandle;
+    fn handle(&self) -> ResourceHandle;
 }

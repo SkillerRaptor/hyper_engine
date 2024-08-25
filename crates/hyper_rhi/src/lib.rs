@@ -10,7 +10,6 @@
 mod d3d12;
 mod vulkan;
 
-mod bindings_offset;
 mod shader_compiler;
 
 pub mod buffer;

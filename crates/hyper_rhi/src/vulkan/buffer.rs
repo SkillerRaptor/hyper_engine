@@ -17,7 +17,7 @@ use gpu_allocator::{
 
 use crate::{
     buffer::{BufferDescriptor, BufferUsage},
-    resource::ResourceHandle,
+    resource::{Resource, ResourceHandle},
     vulkan::graphics_device::{GraphicsDevice, ResourceBuffer, ResourceHandler},
 };
 
@@ -170,8 +170,8 @@ impl crate::buffer::Buffer for Buffer {
     }
 }
 
-impl crate::resource::Resource for Buffer {
-    fn resource_handle(&self) -> ResourceHandle {
+impl Resource for Buffer {
+    fn handle(&self) -> ResourceHandle {
         self.resource_handle
     }
 }

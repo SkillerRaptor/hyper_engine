@@ -100,7 +100,7 @@ pub(crate) struct GraphicsDevice {
     rtv_heap: ResourceHeap,
     cbv_srv_uav_heap: ResourceHeap,
 
-    allocator: Arc<Mutex<Allocator>>,
+    _allocator: Arc<Mutex<Allocator>>,
 
     command_queue: ID3D12CommandQueue,
     device: ID3D12Device,
@@ -180,7 +180,7 @@ impl GraphicsDevice {
             rtv_heap,
             cbv_srv_uav_heap,
 
-            allocator,
+            _allocator: allocator,
 
             command_queue,
             device,
@@ -351,7 +351,7 @@ impl GraphicsDevice {
     }
 
     pub(crate) fn allocator(&self) -> &Arc<Mutex<Allocator>> {
-        &self.allocator
+        &self._allocator
     }
 
     pub(super) fn cbv_srv_uav_heap(&self) -> &ResourceHeap {

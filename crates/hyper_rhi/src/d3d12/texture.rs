@@ -6,7 +6,11 @@
 
 use windows::Win32::Graphics::Direct3D12::{ID3D12Resource, D3D12_CPU_DESCRIPTOR_HANDLE};
 
-use crate::{d3d12::graphics_device::GraphicsDevice, texture::TextureDescriptor};
+use crate::{
+    d3d12::graphics_device::GraphicsDevice,
+    resource::{Resource, ResourceHandle},
+    texture::TextureDescriptor,
+};
 
 #[derive(Debug)]
 pub(crate) struct Texture {
@@ -69,8 +73,8 @@ impl crate::texture::Texture for Texture {
     }
 }
 
-impl crate::resource::Resource for Texture {
-    fn resource_handle(&self) -> crate::resource::ResourceHandle {
+impl Resource for Texture {
+    fn handle(&self) -> ResourceHandle {
         todo!()
     }
 }

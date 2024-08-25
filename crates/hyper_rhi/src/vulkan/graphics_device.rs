@@ -20,11 +20,11 @@ use gpu_allocator::{
 use raw_window_handle::DisplayHandle;
 
 use crate::{
-    bindings_offset::BindingsOffset,
     buffer::BufferDescriptor,
     commands::{command_encoder::CommandEncoder, command_list::CommandList},
     graphics_device::GraphicsDeviceDescriptor,
     graphics_pipeline::GraphicsPipelineDescriptor,
+    resource::ResourceHandle,
     shader_module::ShaderModuleDescriptor,
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
@@ -640,7 +640,8 @@ impl GraphicsDevice {
         device: &Device,
         layouts: &[vk::DescriptorSetLayout; Self::DESCRIPTOR_TYPES.len()],
     ) -> vk::PipelineLayout {
-        let bindings_offset_size = mem::size_of::<BindingsOffset>() as u32;
+        // NOTE: Only push a single u32 for the resource handle
+        let bindings_offset_size = mem::size_of::<ResourceHandle>() as u32;
 
         let bindings_range = vk::PushConstantRange::default()
             .stage_flags(vk::ShaderStageFlags::ALL)
