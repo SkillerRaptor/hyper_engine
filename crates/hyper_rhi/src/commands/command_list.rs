@@ -80,13 +80,13 @@ impl CommandList {
                     });
 
                     let render_pass_state = self.render_pass_state.as_ref().unwrap();
-                    command_decoder.begin_render_pass(&*render_pass_state.texture);
+                    command_decoder.begin_render_pass(&render_pass_state.texture);
                 }
                 Command::EndRenderPass => {
                     debug_assert!(self.render_pass_state.is_some());
 
                     let render_pass_state = self.render_pass_state.as_ref().unwrap();
-                    command_decoder.end_render_pass(&*render_pass_state.texture);
+                    command_decoder.end_render_pass(&render_pass_state.texture);
 
                     self.render_pass_state = None;
                 }
@@ -102,14 +102,14 @@ impl CommandList {
                     render_pass_state.graphics_pipeline = Some(Arc::clone(graphics_pipeline));
 
                     command_decoder.bind_pipeline(
-                        &**render_pass_state.graphics_pipeline.as_ref().unwrap(),
-                        &*render_pass_state.texture,
+                        render_pass_state.graphics_pipeline.as_ref().unwrap(),
+                        &render_pass_state.texture,
                     );
                 }
                 Command::BindIndexBuffer { buffer } => {
                     debug_assert!(self.render_pass_state.is_some());
 
-                    command_decoder.bind_index_buffer(&**buffer);
+                    command_decoder.bind_index_buffer(buffer);
                 }
                 Command::Draw {
                     vertex_count,

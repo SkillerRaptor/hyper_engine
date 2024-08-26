@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::mem::{self, ManuallyDrop};
+use std::{
+    mem::{self, ManuallyDrop},
+    sync::Arc,
+};
 
 use windows::Win32::{
     Foundation::RECT,
@@ -60,7 +63,7 @@ impl<'a> CommandDecoder<'a> {
 }
 
 impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a> {
-    fn begin_render_pass(&self, texture: &dyn crate::texture::Texture) {
+    fn begin_render_pass(&self, texture: &Arc<dyn crate::texture::Texture>) {
         let texture = texture.downcast_ref::<Texture>().unwrap();
 
         unsafe {
@@ -83,7 +86,7 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
         }
     }
 
-    fn end_render_pass(&self, texture: &dyn crate::texture::Texture) {
+    fn end_render_pass(&self, texture: &Arc<dyn crate::texture::Texture>) {
         let texture = texture.downcast_ref::<Texture>().unwrap();
 
         unsafe {
@@ -108,8 +111,8 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
 
     fn bind_pipeline(
         &self,
-        graphics_pipeline: &dyn crate::graphics_pipeline::GraphicsPipeline,
-        texture: &dyn crate::texture::Texture,
+        graphics_pipeline: &Arc<dyn crate::graphics_pipeline::GraphicsPipeline>,
+        texture: &Arc<dyn crate::texture::Texture>,
     ) {
         let graphics_pipeline = graphics_pipeline
             .downcast_ref::<GraphicsPipeline>()
@@ -171,7 +174,7 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
         }
     }
 
-    fn bind_index_buffer(&self, _buffer: &dyn crate::buffer::Buffer) {
+    fn bind_index_buffer(&self, _buffer: &Arc<dyn crate::buffer::Buffer>) {
         todo!();
     }
 
