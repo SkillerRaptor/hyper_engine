@@ -78,14 +78,14 @@ impl Engine {
 
         let opaque_vertex_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
             path: "./assets/shaders/opaque_shader.hlsl",
-            entry: "vs_main",
+            entry_point: "vs_main",
             stage: ShaderStage::Vertex,
         });
 
         let opaque_fragment_shader =
             graphics_device.create_shader_module(&ShaderModuleDescriptor {
                 path: "./assets/shaders/opaque_shader.hlsl",
-                entry: "fs_main",
+                entry_point: "fs_main",
                 stage: ShaderStage::Fragment,
             });
 

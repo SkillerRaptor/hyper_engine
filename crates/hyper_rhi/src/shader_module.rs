@@ -18,12 +18,12 @@ pub enum ShaderStage {
 #[derive(Clone, Debug)]
 pub struct ShaderModuleDescriptor<'a> {
     pub path: &'a str,
-    pub entry: &'a str,
+    pub entry_point: &'a str,
     pub stage: ShaderStage,
 }
 
 pub trait ShaderModule: Debug + Downcast {
-    fn entry(&self) -> &str;
+    fn entry_point(&self) -> &str;
     fn stage(&self) -> ShaderStage;
 }
 

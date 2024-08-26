@@ -11,7 +11,7 @@ use crate::{
 
 #[derive(Debug)]
 pub(crate) struct ShaderModule {
-    entry: String,
+    entry_point: String,
     stage: ShaderStage,
     code: Vec<u8>,
 }
@@ -20,14 +20,13 @@ impl ShaderModule {
     pub(super) fn new(descriptor: &ShaderModuleDescriptor) -> Self {
         let code = shader_compiler::compile(
             descriptor.path,
-            descriptor.entry,
+            descriptor.entry_point,
             descriptor.stage,
             OutputApi::D3D12,
-        )
-        .unwrap();
+        );
 
         Self {
-            entry: descriptor.entry.to_owned(),
+            entry_point: descriptor.entry_point.to_owned(),
             stage: descriptor.stage,
             code,
         }
@@ -39,8 +38,8 @@ impl ShaderModule {
 }
 
 impl crate::shader_module::ShaderModule for ShaderModule {
-    fn entry(&self) -> &str {
-        &self.entry
+    fn entry_point(&self) -> &str {
+        &self.entry_point
     }
 
     fn stage(&self) -> ShaderStage {

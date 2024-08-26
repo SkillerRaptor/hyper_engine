@@ -29,7 +29,7 @@ impl GraphicsPipeline {
         resource_handler: &Arc<ResourceHandler>,
         descriptor: &GraphicsPipelineDescriptor,
     ) -> Self {
-        let vertex_shader_entry = CString::new(descriptor.vertex_shader.entry()).unwrap();
+        let vertex_shader_entry = CString::new(descriptor.vertex_shader.entry_point()).unwrap();
         let vertex_shader_stage_create_info = vk::PipelineShaderStageCreateInfo::default()
             .stage(vk::ShaderStageFlags::VERTEX)
             .module(
@@ -41,7 +41,7 @@ impl GraphicsPipeline {
             )
             .name(&vertex_shader_entry);
 
-        let fragment_shader_entry = CString::new(descriptor.fragment_shader.entry()).unwrap();
+        let fragment_shader_entry = CString::new(descriptor.fragment_shader.entry_point()).unwrap();
         let fragment_shader_stage_create_info = vk::PipelineShaderStageCreateInfo::default()
             .stage(vk::ShaderStageFlags::FRAGMENT)
             .module(

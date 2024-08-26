@@ -16,7 +16,7 @@ use crate::{
 
 #[derive(Debug)]
 pub(crate) struct ShaderModule {
-    entry: String,
+    entry_point: String,
     stage: ShaderStage,
     shader_module: vk::ShaderModule,
 
@@ -31,16 +31,14 @@ impl ShaderModule {
     ) -> Self {
         let bytes = shader_compiler::compile(
             descriptor.path,
-            descriptor.entry,
+            descriptor.entry_point,
             descriptor.stage,
             OutputApi::Vulkan,
-        )
-        .unwrap();
+        );
 
         let (prefix, code, suffix) = unsafe { bytes.align_to::<u32>() };
-        if !prefix.is_empty() || !suffix.is_empty() {
-            panic!("unaligned shader module code");
-        }
+        assert!(prefix.is_empty());
+        assert!(suffix.is_empty());
 
         let create_info = vk::ShaderModuleCreateInfo::default().code(code);
 
@@ -52,7 +50,7 @@ impl ShaderModule {
         .unwrap();
 
         Self {
-            entry: descriptor.entry.to_owned(),
+            entry_point: descriptor.entry_point.to_owned(),
             stage: descriptor.stage,
             shader_module,
 
@@ -76,8 +74,8 @@ impl Drop for ShaderModule {
 }
 
 impl crate::shader_module::ShaderModule for ShaderModule {
-    fn entry(&self) -> &str {
-        &self.entry
+    fn entry_point(&self) -> &str {
+        &self.entry_point
     }
 
     fn stage(&self) -> ShaderStage {
