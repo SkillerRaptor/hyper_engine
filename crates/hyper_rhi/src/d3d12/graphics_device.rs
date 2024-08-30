@@ -430,7 +430,7 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
 
     fn end_frame(&self) {}
 
-    fn submit(&self, mut command_list: CommandList) {
+    fn submit(&self, command_list: CommandList) {
         let command_allocator = &self.current_frame().command_allocator;
         let current_command_list = &self.current_frame().command_list;
 

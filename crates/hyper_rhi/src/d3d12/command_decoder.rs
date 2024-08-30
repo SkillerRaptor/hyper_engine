@@ -38,7 +38,6 @@ use crate::{
         graphics_pipeline::GraphicsPipeline,
         texture::Texture,
     },
-    resource::ResourceHandle,
     texture::Texture as _,
 };
 
@@ -105,7 +104,7 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
         }
     }
 
-    fn bind_descriptor(&self, buffer: ResourceHandle) {
+    fn bind_descriptor(&self, _buffer: &Arc<dyn crate::buffer::Buffer>) {
         todo!()
     }
 

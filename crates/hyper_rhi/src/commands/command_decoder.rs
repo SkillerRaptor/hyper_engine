@@ -17,7 +17,7 @@ pub trait CommandDecoder {
     fn begin_render_pass(&self, texture: &Arc<dyn Texture>);
     fn end_render_pass(&self, texture: &Arc<dyn Texture>);
 
-    fn bind_descriptor(&self, buffer: ResourceHandle);
+    fn bind_descriptor(&self, buffer: &Arc<dyn Buffer>);
 
     fn bind_pipeline(
         &self,

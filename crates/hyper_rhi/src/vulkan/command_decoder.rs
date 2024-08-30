@@ -9,7 +9,6 @@ use std::sync::Arc;
 use ash::vk;
 
 use crate::{
-    resource::ResourceHandle,
     texture::Texture as _,
     vulkan::{
         buffer::Buffer,
@@ -114,8 +113,8 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
         }
     }
 
-    fn bind_descriptor(&self, buffer: ResourceHandle) {
-        let bindings_offset = buffer.0;
+    fn bind_descriptor(&self, buffer: &Arc<dyn crate::buffer::Buffer>) {
+        let bindings_offset = buffer.handle().0;
 
         unsafe {
             self.graphics_device.device().cmd_push_constants(

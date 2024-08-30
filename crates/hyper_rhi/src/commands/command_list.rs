@@ -7,49 +7,12 @@
 use std::sync::Arc;
 
 use crate::{
-    buffer::Buffer,
-    commands::command_decoder::CommandDecoder,
+    commands::{command::Command, command_decoder::CommandDecoder},
     graphics_pipeline::GraphicsPipeline,
-    resource::ResourceHandle,
     texture::Texture,
 };
 
 // NOTE: As the command list holds the commands in the vector, all arc resources are automatically held on till the list gets dropped
-
-#[derive(Clone, Debug)]
-pub(crate) enum Command {
-    BeginRenderPass {
-        texture: Arc<dyn Texture>,
-    },
-    EndRenderPass,
-
-    BindDescriptor {
-        buffer: ResourceHandle,
-    },
-
-    BindPipeline {
-        graphics_pipeline: Arc<dyn GraphicsPipeline>,
-    },
-
-    BindIndexBuffer {
-        buffer: Arc<dyn Buffer>,
-    },
-
-    Draw {
-        vertex_count: u32,
-        instance_count: u32,
-        first_vertex: u32,
-        first_instance: u32,
-    },
-
-    DrawIndexed {
-        index_count: u32,
-        instance_count: u32,
-        first_index: u32,
-        vertex_offset: i32,
-        first_instance: u32,
-    },
-}
 
 struct RenderPassState {
     graphics_pipeline: Option<Arc<dyn GraphicsPipeline>>,
@@ -57,98 +20,91 @@ struct RenderPassState {
 }
 
 pub struct CommandList {
-    render_pass_state: Option<RenderPassState>,
-
     commands: Vec<Command>,
 }
 
 impl CommandList {
     pub(crate) fn new(commands: Vec<Command>) -> Self {
-        Self {
-            render_pass_state: None,
-            commands,
-        }
+        Self { commands }
     }
 
-    pub(crate) fn execute(&mut self, command_decoder: &dyn CommandDecoder) {
-        for command in &self.commands {
-            match command {
-                Command::BeginRenderPass { texture } => {
-                    self.render_pass_state = Some(RenderPassState {
-                        graphics_pipeline: None,
-                        texture: Arc::clone(texture),
-                    });
+    pub(crate) fn execute(self, command_decoder: &dyn CommandDecoder) {
+        // TODO: Add compute pass state
+        let mut current_compute_pass_state: Option<()> = None;
+        let mut current_render_pass_state = None;
 
-                    let render_pass_state = self.render_pass_state.as_ref().unwrap();
-                    command_decoder.begin_render_pass(&render_pass_state.texture);
-                }
-                Command::EndRenderPass => {
-                    debug_assert!(self.render_pass_state.is_some());
+        for command in self.commands.into_iter() {
+            match (
+                current_compute_pass_state.as_mut(),
+                current_render_pass_state.as_mut(),
+            ) {
+                (None, None) => match command {
+                    Command::BeginRenderPass { texture } => {
+                        current_render_pass_state = Some(RenderPassState {
+                            graphics_pipeline: None,
+                            texture: Arc::clone(&texture),
+                        });
 
-                    let render_pass_state = self.render_pass_state.as_ref().unwrap();
-                    command_decoder.end_render_pass(&render_pass_state.texture);
+                        command_decoder.begin_render_pass(&texture);
+                    }
+                    _ => unreachable!(),
+                },
+                (None, Some(render_pass_state)) => match command {
+                    Command::EndRenderPass => {
+                        command_decoder.end_render_pass(&render_pass_state.texture);
 
-                    self.render_pass_state = None;
-                }
-                Command::BindDescriptor { buffer } => {
-                    debug_assert!(self.render_pass_state.is_some());
+                        current_render_pass_state = None;
+                    }
+                    Command::BindDescriptor { buffer } => {
+                        command_decoder.bind_descriptor(&buffer);
+                    }
+                    Command::BindGraphicsPipeline { graphics_pipeline } => {
+                        render_pass_state.graphics_pipeline = Some(Arc::clone(&graphics_pipeline));
 
-                    command_decoder.bind_descriptor(*buffer);
-                }
-                Command::BindPipeline { graphics_pipeline } => {
-                    debug_assert!(self.render_pass_state.is_some());
+                        command_decoder.bind_pipeline(
+                            render_pass_state.graphics_pipeline.as_ref().unwrap(),
+                            &render_pass_state.texture,
+                        );
+                    }
+                    Command::BindIndexBuffer { buffer } => {
+                        command_decoder.bind_index_buffer(&buffer);
+                    }
+                    Command::Draw {
+                        vertex_count,
+                        instance_count,
+                        first_vertex,
+                        first_instance,
+                    } => {
+                        debug_assert!(render_pass_state.graphics_pipeline.is_some());
 
-                    let render_pass_state = self.render_pass_state.as_mut().unwrap();
-                    render_pass_state.graphics_pipeline = Some(Arc::clone(graphics_pipeline));
+                        command_decoder.draw(
+                            vertex_count,
+                            instance_count,
+                            first_vertex,
+                            first_instance,
+                        );
+                    }
+                    Command::DrawIndexed {
+                        index_count,
+                        instance_count,
+                        first_index,
+                        vertex_offset,
+                        first_instance,
+                    } => {
+                        debug_assert!(render_pass_state.graphics_pipeline.is_some());
 
-                    command_decoder.bind_pipeline(
-                        render_pass_state.graphics_pipeline.as_ref().unwrap(),
-                        &render_pass_state.texture,
-                    );
-                }
-                Command::BindIndexBuffer { buffer } => {
-                    debug_assert!(self.render_pass_state.is_some());
-
-                    command_decoder.bind_index_buffer(buffer);
-                }
-                Command::Draw {
-                    vertex_count,
-                    instance_count,
-                    first_vertex,
-                    first_instance,
-                } => {
-                    debug_assert!(self.render_pass_state.is_some());
-
-                    let render_pass_state = self.render_pass_state.as_ref().unwrap();
-                    debug_assert!(render_pass_state.graphics_pipeline.is_some());
-
-                    command_decoder.draw(
-                        *vertex_count,
-                        *instance_count,
-                        *first_vertex,
-                        *first_instance,
-                    );
-                }
-                Command::DrawIndexed {
-                    index_count,
-                    instance_count,
-                    first_index,
-                    vertex_offset,
-                    first_instance,
-                } => {
-                    debug_assert!(self.render_pass_state.is_some());
-
-                    let render_pass_state = self.render_pass_state.as_ref().unwrap();
-                    debug_assert!(render_pass_state.graphics_pipeline.is_some());
-
-                    command_decoder.draw_indexed(
-                        *index_count,
-                        *instance_count,
-                        *first_index,
-                        *vertex_offset,
-                        *first_instance,
-                    );
-                }
+                        command_decoder.draw_indexed(
+                            index_count,
+                            instance_count,
+                            first_index,
+                            vertex_offset,
+                            first_instance,
+                        );
+                    }
+                    _ => unreachable!(),
+                },
+                (Some(_compute_pass_state), None) => todo!(),
+                (Some(_), Some(_)) => unreachable!(),
             }
         }
     }

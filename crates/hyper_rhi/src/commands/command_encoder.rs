@@ -5,7 +5,8 @@
 //
 
 use crate::commands::{
-    command_list::{Command, CommandList},
+    command::Command,
+    command_list::CommandList,
     render_pass::{RenderPass, RenderPassDescriptor},
 };
 
@@ -19,8 +20,6 @@ impl CommandEncoder {
             commands: Vec::new(),
         }
     }
-
-    // TODO: Add compute pass
 
     pub fn begin_render_pass(&mut self, descriptor: &RenderPassDescriptor) -> RenderPass {
         RenderPass::new(&mut self.commands, descriptor)

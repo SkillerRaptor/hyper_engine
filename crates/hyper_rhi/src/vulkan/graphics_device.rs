@@ -893,7 +893,7 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
     fn end_frame(&self) {}
 
     // NOTE: This function assumes, that there will be only 1 command buffer and 1 submission per frame
-    fn submit(&self, mut command_list: CommandList) {
+    fn submit(&self, command_list: CommandList) {
         let command_buffer = self.current_frame().command_buffer;
 
         unsafe {
