@@ -25,6 +25,8 @@ VertexOutput vs_main(
 ) {
   Bindings bindings = load_bindings<Bindings>();
   Vertex vertex = bindings.vertices.load<Vertex>(vertex_id);
+  //ByteAddressBuffer buffer = ResourceDescriptorHeap[2];
+  //Vertex vertex = buffer.Load<Vertex>(sizeof(Vertex) * vertex_id);
 
   VertexOutput output = (VertexOutput) 0;
   output.position = float4(vertex.position.xyz, 1.0);

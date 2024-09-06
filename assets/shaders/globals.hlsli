@@ -306,6 +306,9 @@ struct RwTexture {
 
 struct BindingsOffset {
   RenderResourceHandle offset;
+  uint unused_0;
+  uint unused_1;
+  uint unused_2;
 };
 
 #ifdef HYPER_ENGINE_VULKAN

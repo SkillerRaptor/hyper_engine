@@ -122,7 +122,7 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
                 self.graphics_device.pipeline_layout(),
                 vk::ShaderStageFlags::ALL,
                 0,
-                bytemuck::cast_slice(&[bindings_offset]),
+                bytemuck::cast_slice(&[bindings_offset, 0, 0, 0]),
             );
         }
     }

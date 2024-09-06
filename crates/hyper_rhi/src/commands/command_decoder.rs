@@ -6,12 +6,7 @@
 
 use std::sync::Arc;
 
-use crate::{
-    buffer::Buffer,
-    graphics_pipeline::GraphicsPipeline,
-    resource::ResourceHandle,
-    texture::Texture,
-};
+use crate::{buffer::Buffer, graphics_pipeline::GraphicsPipeline, texture::Texture};
 
 pub trait CommandDecoder {
     fn begin_render_pass(&self, texture: &Arc<dyn Texture>);

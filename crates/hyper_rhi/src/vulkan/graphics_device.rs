@@ -646,7 +646,7 @@ impl GraphicsDevice {
         let bindings_range = vk::PushConstantRange::default()
             .stage_flags(vk::ShaderStageFlags::ALL)
             .offset(0)
-            .size(bindings_offset_size);
+            .size(bindings_offset_size * 4);
 
         let push_ranges = [bindings_range];
         let create_info = vk::PipelineLayoutCreateInfo::default()

@@ -129,12 +129,6 @@ impl Buffer {
         allocation
     }
 
-    pub(crate) fn set_data(&self, data: &[u8]) {
-        assert_eq!(data.len(), self.size);
-
-        Self::set_data_internal(self.allocation.as_ref().unwrap(), data);
-    }
-
     fn set_data_internal(allocation: &Allocation, data: &[u8]) {
         let memory = allocation.mapped_ptr().unwrap().as_ptr() as *mut u8;
         unsafe {

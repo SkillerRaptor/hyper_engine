@@ -17,6 +17,7 @@ use windows::Win32::{
             ID3D12CommandAllocator,
             ID3D12GraphicsCommandList,
             D3D12_CPU_DESCRIPTOR_HANDLE,
+            D3D12_INDEX_BUFFER_VIEW,
             D3D12_MAX_DEPTH,
             D3D12_MIN_DEPTH,
             D3D12_RESOURCE_BARRIER,
@@ -29,11 +30,14 @@ use windows::Win32::{
             D3D12_RESOURCE_TRANSITION_BARRIER,
             D3D12_VIEWPORT,
         },
+        Dxgi::Common::DXGI_FORMAT_R32_UINT,
     },
 };
 
 use crate::{
+    buffer::Buffer as _,
     d3d12::{
+        buffer::Buffer,
         graphics_device::GraphicsDevice,
         graphics_pipeline::GraphicsPipeline,
         texture::Texture,
@@ -104,8 +108,18 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
         }
     }
 
-    fn bind_descriptor(&self, _buffer: &Arc<dyn crate::buffer::Buffer>) {
-        todo!()
+    fn bind_descriptor(&self, buffer: &Arc<dyn crate::buffer::Buffer>) {
+        let bindings_offset = buffer.handle().0;
+        let bindings_offsets = [bindings_offset, 0, 0, 0];
+
+        unsafe {
+            self.command_list.SetGraphicsRoot32BitConstants(
+                0,
+                4,
+                bindings_offsets.as_ptr() as *const _,
+                0,
+            );
+        }
     }
 
     fn bind_pipeline(
@@ -139,8 +153,6 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
         };
 
         unsafe {
-            self.command_list
-                .SetGraphicsRootSignature(self.graphics_device.root_signature());
             // TODO: Is cloning really necessary?
             self.command_list.SetDescriptorHeaps(&[Some(
                 self.graphics_device
@@ -148,6 +160,8 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
                     .descriptor_heap()
                     .clone(),
             )]);
+            self.command_list
+                .SetGraphicsRootSignature(self.graphics_device.root_signature());
             self.command_list
                 .SetPipelineState(graphics_pipeline.pipeline_state());
             self.command_list.RSSetViewports(&[viewport]);
@@ -173,8 +187,18 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
         }
     }
 
-    fn bind_index_buffer(&self, _buffer: &Arc<dyn crate::buffer::Buffer>) {
-        todo!();
+    fn bind_index_buffer(&self, buffer: &Arc<dyn crate::buffer::Buffer>) {
+        let buffer = buffer.downcast_ref::<Buffer>().unwrap();
+
+        let index_buffer_view = D3D12_INDEX_BUFFER_VIEW {
+            BufferLocation: buffer.gpu_address(),
+            SizeInBytes: buffer.size() as u32,
+            Format: DXGI_FORMAT_R32_UINT,
+        };
+
+        unsafe {
+            self.command_list.IASetIndexBuffer(Some(&index_buffer_view));
+        }
     }
 
     fn draw(&self, vertex_count: u32, instance_count: u32, first_vertex: u32, first_instance: u32) {

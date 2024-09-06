@@ -41,11 +41,11 @@ struct Arguments {
     height: u32,
 
     /// Renderer API of the engine
-    #[arg(long, value_enum, default_value_t = Renderer::Vulkan)]
+    #[arg(long, value_enum, default_value_t = Renderer::D3D12)]
     renderer: Renderer,
 
     /// Enables renderer debug mode
-    #[arg(long, default_value_t = false)]
+    #[arg(long, default_value_t = true)]
     debug: bool,
 }
 

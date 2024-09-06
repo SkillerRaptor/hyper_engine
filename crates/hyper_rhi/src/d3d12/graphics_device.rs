@@ -7,7 +7,7 @@
 use std::{
     ptr,
     slice,
-    sync::{Arc, Mutex},
+    sync::{atomic::AtomicU32, Arc, Mutex},
 };
 
 use gpu_allocator::{
@@ -16,7 +16,7 @@ use gpu_allocator::{
     AllocatorDebugSettings,
 };
 use windows::{
-    core::Interface,
+    core::{Interface, PCSTR},
     Win32::{
         Foundation::HANDLE,
         Graphics::{
@@ -29,13 +29,23 @@ use windows::{
                 ID3D12CommandQueue,
                 ID3D12Debug6,
                 ID3D12Device,
+                ID3D12DeviceRemovedExtendedDataSettings1,
                 ID3D12Fence,
                 ID3D12GraphicsCommandList,
+                ID3D12InfoQueue1,
                 ID3D12RootSignature,
                 D3D12_COMMAND_LIST_TYPE_DIRECT,
                 D3D12_COMMAND_QUEUE_DESC,
                 D3D12_COMMAND_QUEUE_FLAG_NONE,
+                D3D12_DRED_ENABLEMENT_FORCED_ON,
                 D3D12_FENCE_FLAG_NONE,
+                D3D12_INFO_QUEUE_FILTER,
+                D3D12_MESSAGE_CALLBACK_IGNORE_FILTERS,
+                D3D12_MESSAGE_CATEGORY,
+                D3D12_MESSAGE_ID,
+                D3D12_MESSAGE_SEVERITY,
+                D3D12_MESSAGE_SEVERITY_CORRUPTION,
+                D3D12_MESSAGE_SEVERITY_ERROR,
                 D3D12_ROOT_CONSTANTS,
                 D3D12_ROOT_PARAMETER1,
                 D3D12_ROOT_PARAMETER1_0,
@@ -49,12 +59,16 @@ use windows::{
                 CreateDXGIFactory2,
                 IDXGIAdapter4,
                 IDXGIFactory7,
+                IDXGIInfoQueue,
                 DXGI_ADAPTER_FLAG,
                 DXGI_ADAPTER_FLAG_NONE,
                 DXGI_ADAPTER_FLAG_SOFTWARE,
                 DXGI_CREATE_FACTORY_DEBUG,
                 DXGI_CREATE_FACTORY_FLAGS,
+                DXGI_DEBUG_ALL,
                 DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+                DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION,
+                DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR,
                 DXGI_PRESENT,
             },
         },
@@ -88,6 +102,9 @@ pub(crate) struct FrameData {
 }
 
 pub(crate) struct GraphicsDevice {
+    // TODO: Descriptor Manager
+    resource_number: Arc<AtomicU32>,
+
     current_frame_index: Mutex<u32>,
 
     frames: Vec<FrameData>,
@@ -168,6 +185,8 @@ impl GraphicsDevice {
         }
 
         Self {
+            resource_number: Arc::new(AtomicU32::new(0)),
+
             current_frame_index: Mutex::new(u32::MAX),
 
             frames,
@@ -192,12 +211,14 @@ impl GraphicsDevice {
     fn enable_debug_layers() -> bool {
         unsafe {
             let mut debug: Option<ID3D12Debug6> = None;
-            if let Some(debug) = D3D12GetDebugInterface(&mut debug).ok().and(debug) {
+            let enabled = if let Some(debug) = D3D12GetDebugInterface(&mut debug).ok().and(debug) {
                 debug.EnableDebugLayer();
                 true
             } else {
                 false
-            }
+            };
+
+            enabled
         }
     }
 
@@ -369,6 +390,10 @@ impl GraphicsDevice {
     pub(crate) fn current_frame(&self) -> &FrameData {
         let index = *self.current_frame_index.lock().unwrap() % crate::graphics_device::FRAME_COUNT;
         &self.frames[index as usize]
+    }
+
+    pub(crate) fn resource_number(&self) -> &Arc<AtomicU32> {
+        &self.resource_number
     }
 }
 

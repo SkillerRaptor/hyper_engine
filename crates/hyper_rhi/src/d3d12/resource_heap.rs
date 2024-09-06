@@ -43,8 +43,7 @@ impl ResourceHeap {
             ResourceHeapType::Dsv => D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
         };
 
-        let mut flags: windows::Win32::Graphics::Direct3D12::D3D12_DESCRIPTOR_HEAP_FLAGS =
-            D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+        let mut flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
         if descriptor.ty == ResourceHeapType::CbvSrvUav {
             flags |= D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         }
@@ -58,9 +57,7 @@ impl ResourceHeap {
 
         let descriptor_heap: ID3D12DescriptorHeap =
             unsafe { device.CreateDescriptorHeap(&descriptor) }.unwrap();
-        let size =
-            unsafe { device.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV) }
-                as usize;
+        let size = unsafe { device.GetDescriptorHandleIncrementSize(ty) } as usize;
         let handle = unsafe { descriptor_heap.GetCPUDescriptorHandleForHeapStart() };
 
         Self {

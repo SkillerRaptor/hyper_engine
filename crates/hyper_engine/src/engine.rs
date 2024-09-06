@@ -125,7 +125,7 @@ impl Engine {
         });
 
         let index_buffer = graphics_device.create_buffer(&BufferDescriptor {
-            data: bytemuck::cast_slice(&[0_u32, 1_u32, 2_u32, 2_u32, 3_u32, 0_u32]),
+            data: bytemuck::cast_slice(&[0_u32, 1_u32, 2_u32, 2_u32, 3_u32, 0_u32, 0, 0]),
             usage: BufferUsage::INDEX,
         });
 
