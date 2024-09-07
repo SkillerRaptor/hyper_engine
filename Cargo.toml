@@ -15,7 +15,7 @@ bitflags = "2.6"
 bytemuck = { version = "1.16", features = ["derive"] }
 clap = { version = "4.5", features = ["derive"] }
 downcast-rs = "1.2.1"
-glam = { version = "0.28", features = ["bytemuck"] }
+glam = { version = "0.29", features = ["bytemuck"] }
 gpu-allocator = { git = "https://github.com/SkillerRaptor/gpu-allocator" }
 hassle-rs = "0.11"
 raw-window-handle = "0.6"
