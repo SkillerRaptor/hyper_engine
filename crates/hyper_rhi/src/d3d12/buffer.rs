@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::sync::atomic::Ordering;
+use std::{
+    collections::VecDeque,
+    sync::{Arc, Mutex},
+};
 
 use gpu_allocator::{
     d3d12::{ResourceCategory, ResourceCreateDesc, ResourceStateOrBarrierLayout, ResourceType},
@@ -18,15 +21,9 @@ use windows::{
                 ID3D12CommandAllocator,
                 ID3D12Fence,
                 ID3D12GraphicsCommandList,
-                D3D12_BUFFER_SRV,
-                D3D12_BUFFER_SRV_FLAG_RAW,
-                D3D12_BUFFER_UAV,
-                D3D12_BUFFER_UAV_FLAG_RAW,
                 D3D12_COMMAND_LIST_TYPE_DIRECT,
-                D3D12_CPU_DESCRIPTOR_HANDLE,
                 D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
                 D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT,
-                D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
                 D3D12_FENCE_FLAG_NONE,
                 D3D12_HEAP_FLAG_NONE,
                 D3D12_HEAP_PROPERTIES,
@@ -40,15 +37,9 @@ use windows::{
                 D3D12_RESOURCE_FLAG_NONE,
                 D3D12_RESOURCE_STATE_COPY_DEST,
                 D3D12_RESOURCE_STATE_GENERIC_READ,
-                D3D12_SHADER_RESOURCE_VIEW_DESC,
-                D3D12_SHADER_RESOURCE_VIEW_DESC_0,
-                D3D12_SRV_DIMENSION_BUFFER,
                 D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
-                D3D12_UAV_DIMENSION_BUFFER,
-                D3D12_UNORDERED_ACCESS_VIEW_DESC,
-                D3D12_UNORDERED_ACCESS_VIEW_DESC_0,
             },
-            Dxgi::Common::{DXGI_FORMAT_R32_TYPELESS, DXGI_FORMAT_UNKNOWN, DXGI_SAMPLE_DESC},
+            Dxgi::Common::{DXGI_FORMAT_UNKNOWN, DXGI_SAMPLE_DESC},
         },
         System::Threading::{CreateEventA, WaitForSingleObject, INFINITE},
     },
@@ -56,13 +47,14 @@ use windows::{
 
 use crate::{
     buffer::{BufferDescriptor, BufferUsage},
-    d3d12::graphics_device::GraphicsDevice,
+    d3d12::{graphics_device::GraphicsDevice, resource_handle_pair::ResourceHandlePair},
     resource::{Resource, ResourceHandle},
 };
 
 #[derive(Debug)]
 pub(crate) struct Buffer {
-    resource_handle: ResourceHandle,
+    recycled_descriptors: Arc<Mutex<VecDeque<ResourceHandle>>>,
+    resource_handle_pair: ResourceHandlePair,
 
     size: usize,
 
@@ -231,66 +223,41 @@ impl Buffer {
             }
         }
 
-        let index = graphics_device.resource_number().load(Ordering::Relaxed);
-        graphics_device
-            .resource_number()
-            .store(index + 2, Ordering::Relaxed);
+        let data_size = descriptor.data.len();
+        let resource_handle_pair =
+            graphics_device.allocate_buffer_handle(resource.resource(), data_size);
 
-        let cbv_srv_uav_heap = graphics_device.cbv_srv_uav_heap();
-        unsafe {
-            graphics_device.device().CreateUnorderedAccessView(
-                resource.resource(),
-                None,
-                Some(&mut D3D12_UNORDERED_ACCESS_VIEW_DESC {
-                    Format: DXGI_FORMAT_R32_TYPELESS,
-                    ViewDimension: D3D12_UAV_DIMENSION_BUFFER,
-                    Anonymous: D3D12_UNORDERED_ACCESS_VIEW_DESC_0 {
-                        Buffer: D3D12_BUFFER_UAV {
-                            NumElements: descriptor.data.len() as u32 / size_of::<u32>() as u32,
-                            Flags: D3D12_BUFFER_UAV_FLAG_RAW,
-                            ..Default::default()
-                        },
-                    },
-                }),
-                D3D12_CPU_DESCRIPTOR_HANDLE {
-                    ptr: cbv_srv_uav_heap.handle().ptr + index as usize * cbv_srv_uav_heap.size(),
-                },
-            );
-        }
-
-        unsafe {
-            graphics_device.device().CreateShaderResourceView(
-                resource.resource(),
-                Some(&mut D3D12_SHADER_RESOURCE_VIEW_DESC {
-                    Format: DXGI_FORMAT_R32_TYPELESS,
-                    ViewDimension: D3D12_SRV_DIMENSION_BUFFER,
-                    Shader4ComponentMapping: D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-                    Anonymous: D3D12_SHADER_RESOURCE_VIEW_DESC_0 {
-                        Buffer: D3D12_BUFFER_SRV {
-                            NumElements: descriptor.data.len() as u32 / size_of::<u32>() as u32,
-                            Flags: D3D12_BUFFER_SRV_FLAG_RAW,
-                            ..Default::default()
-                        },
-                    },
-                }),
-                D3D12_CPU_DESCRIPTOR_HANDLE {
-                    ptr: cbv_srv_uav_heap.handle().ptr
-                        + (index as usize + 1) * cbv_srv_uav_heap.size(),
-                },
-            );
-        }
-
-        tracing::debug!(size, index, "Buffer created");
+        tracing::debug!(
+            size,
+            srv_index = resource_handle_pair.srv().0,
+            uav_index = resource_handle_pair.uav().0,
+            "Buffer created"
+        );
 
         Self {
-            resource,
+            recycled_descriptors: Arc::clone(graphics_device.recycled_descriptors()),
+            resource_handle_pair,
+
             size: size as usize,
-            resource_handle: ResourceHandle(index),
+            resource,
         }
     }
 
     pub(crate) fn gpu_address(&self) -> u64 {
         unsafe { self.resource.resource().GetGPUVirtualAddress() }
+    }
+}
+
+impl Drop for Buffer {
+    fn drop(&mut self) {
+        self.recycled_descriptors
+            .lock()
+            .unwrap()
+            .push_back(self.resource_handle_pair.srv());
+        self.recycled_descriptors
+            .lock()
+            .unwrap()
+            .push_back(self.resource_handle_pair.uav());
     }
 }
 
@@ -306,6 +273,6 @@ impl crate::buffer::Buffer for Buffer {
 
 impl Resource for Buffer {
     fn handle(&self) -> ResourceHandle {
-        self.resource_handle
+        self.resource_handle_pair.into()
     }
 }

@@ -5,8 +5,9 @@
 //
 
 use std::{
+    collections::VecDeque,
     mem,
-    sync::{atomic::Ordering, Arc},
+    sync::{Arc, Mutex},
 };
 
 use ash::vk;
@@ -23,6 +24,7 @@ use crate::{
 
 #[derive(Debug)]
 pub(crate) struct Buffer {
+    recycled_descriptors: Arc<Mutex<VecDeque<ResourceHandle>>>,
     resource_handle: ResourceHandle,
 
     size: usize,
@@ -40,35 +42,17 @@ impl Buffer {
 
         Self::set_data_internal(&allocation, descriptor.data);
 
-        let buffer_info = vk::DescriptorBufferInfo::default()
-            .buffer(buffer)
-            .offset(0)
-            .range(vk::WHOLE_SIZE);
+        let resource_handle = graphics_device.allocate_buffer_handle(buffer);
 
-        let buffer_infos = [buffer_info];
-
-        let index = graphics_device.resource_number().load(Ordering::Relaxed);
-        graphics_device
-            .resource_number()
-            .store(index + 1, Ordering::Relaxed);
-
-        let write_set = vk::WriteDescriptorSet::default()
-            .dst_set(graphics_device.descriptor_sets()[0])
-            .dst_binding(0)
-            .dst_array_element(index)
-            .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
-            .buffer_info(&buffer_infos);
-
-        unsafe {
-            graphics_device
-                .device()
-                .update_descriptor_sets(&[write_set], &[]);
-        }
-
-        tracing::debug!(size = descriptor.data.len(), index, "Buffer created");
+        tracing::debug!(
+            size = descriptor.data.len(),
+            index = resource_handle.0,
+            "Buffer created"
+        );
 
         Self {
-            resource_handle: ResourceHandle(index),
+            recycled_descriptors: Arc::clone(graphics_device.recycled_descriptors()),
+            resource_handle,
 
             size: descriptor.data.len(),
 
@@ -151,6 +135,10 @@ impl Drop for Buffer {
                 allocation: Some(self.allocation.take().unwrap()),
                 buffer: self.raw,
             });
+        self.recycled_descriptors
+            .lock()
+            .unwrap()
+            .push_back(self.resource_handle);
     }
 }
 

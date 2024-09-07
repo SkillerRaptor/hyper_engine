@@ -5,10 +5,14 @@
 //
 
 use std::{
-    collections::HashSet,
+    collections::{HashSet, VecDeque},
     ffi::{c_void, CStr},
     mem,
-    sync::{atomic::AtomicU32, Arc, Mutex},
+    sync::{
+        atomic::{AtomicU32, Ordering},
+        Arc,
+        Mutex,
+    },
 };
 
 use ash::{ext::debug_utils, khr::swapchain, vk, Device, Entry, Instance};
@@ -66,8 +70,8 @@ struct DebugUtils {
 }
 
 pub(crate) struct GraphicsDevice {
-    // TODO: Descriptor Manager
-    resource_number: Arc<AtomicU32>,
+    recycled_descriptors: Arc<Mutex<VecDeque<ResourceHandle>>>,
+    current_index: Mutex<AtomicU32>,
 
     current_frame_index: Mutex<u32>,
 
@@ -174,7 +178,8 @@ impl GraphicsDevice {
         }
 
         Self {
-            resource_number: Arc::new(AtomicU32::new(0)),
+            recycled_descriptors: Arc::new(Mutex::new(VecDeque::new())),
+            current_index: Mutex::new(AtomicU32::new(0)),
 
             current_frame_index: Mutex::new(u32::MAX),
 
@@ -737,6 +742,48 @@ impl GraphicsDevice {
         texture_views.clear();
     }
 
+    pub(crate) fn allocate_buffer_handle(&self, buffer: vk::Buffer) -> ResourceHandle {
+        let handle = self.fetch_handle();
+
+        let buffer_info = vk::DescriptorBufferInfo::default()
+            .buffer(buffer)
+            .offset(0)
+            .range(vk::WHOLE_SIZE);
+
+        let buffer_infos = [buffer_info];
+
+        let write_set = vk::WriteDescriptorSet::default()
+            .dst_set(self.descriptor_sets[0])
+            .dst_binding(0)
+            .dst_array_element(handle.0)
+            .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
+            .buffer_info(&buffer_infos);
+
+        unsafe {
+            self.device.update_descriptor_sets(&[write_set], &[]);
+        }
+
+        handle
+    }
+
+    // TODO: Add texture
+
+    fn fetch_handle(&self) -> ResourceHandle {
+        self.recycled_descriptors
+            .lock()
+            .unwrap()
+            .pop_front()
+            .unwrap_or_else(|| {
+                let index = self.current_index.lock().unwrap().load(Ordering::Relaxed);
+                self.current_index
+                    .lock()
+                    .unwrap()
+                    .store(index + 1, Ordering::Relaxed);
+
+                ResourceHandle(index)
+            })
+    }
+
     pub(crate) fn entry(&self) -> &Entry {
         &self.entry
     }
@@ -773,13 +820,13 @@ impl GraphicsDevice {
         self.submit_semaphore
     }
 
+    pub(crate) fn recycled_descriptors(&self) -> &Arc<Mutex<VecDeque<ResourceHandle>>> {
+        &self.recycled_descriptors
+    }
+
     pub(crate) fn current_frame(&self) -> &FrameData {
         let index = *self.current_frame_index.lock().unwrap() % crate::graphics_device::FRAME_COUNT;
         &self.frames[index as usize]
-    }
-
-    pub(crate) fn resource_number(&self) -> &Arc<AtomicU32> {
-        &self.resource_number
     }
 }
 
