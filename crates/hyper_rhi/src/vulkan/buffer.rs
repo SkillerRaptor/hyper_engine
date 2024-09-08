@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::{
-    collections::VecDeque,
-    sync::{Arc, Mutex},
-};
+use std::sync::Arc;
 
 use ash::vk;
 use gpu_allocator::{
@@ -24,7 +21,6 @@ use crate::{
 
 #[derive(Debug)]
 pub(crate) struct Buffer {
-    recycled_descriptors: Arc<Mutex<VecDeque<ResourceHandle>>>,
     resource_handle: ResourceHandle,
 
     size: usize,
@@ -56,7 +52,6 @@ impl Buffer {
         );
 
         Self {
-            recycled_descriptors: Arc::clone(graphics_device.recycled_descriptors()),
             resource_handle,
 
             size: descriptor.data.len(),
@@ -139,11 +134,8 @@ impl Drop for Buffer {
             .push(ResourceBuffer {
                 allocation: Some(self.allocation.take().unwrap()),
                 buffer: self.raw,
+                handle: self.resource_handle,
             });
-        self.recycled_descriptors
-            .lock()
-            .unwrap()
-            .push_back(self.resource_handle);
     }
 }
 

@@ -8,6 +8,7 @@
 
 mod buffer;
 mod command_decoder;
+mod descriptor_manager;
 mod graphics_pipeline;
 mod resource_handle_pair;
 mod resource_heap;

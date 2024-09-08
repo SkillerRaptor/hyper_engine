@@ -5,14 +5,9 @@
 //
 
 use std::{
-    collections::VecDeque,
     ptr,
     slice,
-    sync::{
-        atomic::{AtomicU32, Ordering},
-        Arc,
-        Mutex,
-    },
+    sync::{Arc, Mutex},
 };
 
 use gpu_allocator::{
@@ -38,15 +33,9 @@ use windows::{
                 ID3D12GraphicsCommandList,
                 ID3D12Resource,
                 ID3D12RootSignature,
-                D3D12_BUFFER_SRV,
-                D3D12_BUFFER_SRV_FLAG_RAW,
-                D3D12_BUFFER_UAV,
-                D3D12_BUFFER_UAV_FLAG_RAW,
                 D3D12_COMMAND_LIST_TYPE_DIRECT,
                 D3D12_COMMAND_QUEUE_DESC,
                 D3D12_COMMAND_QUEUE_FLAG_NONE,
-                D3D12_CPU_DESCRIPTOR_HANDLE,
-                D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
                 D3D12_FENCE_FLAG_NONE,
                 D3D12_ROOT_CONSTANTS,
                 D3D12_ROOT_PARAMETER1,
@@ -54,17 +43,10 @@ use windows::{
                 D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
                 D3D12_ROOT_SIGNATURE_DESC,
                 D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED,
-                D3D12_SHADER_RESOURCE_VIEW_DESC,
-                D3D12_SHADER_RESOURCE_VIEW_DESC_0,
                 D3D12_SHADER_VISIBILITY_ALL,
-                D3D12_SRV_DIMENSION_BUFFER,
-                D3D12_UAV_DIMENSION_BUFFER,
-                D3D12_UNORDERED_ACCESS_VIEW_DESC,
-                D3D12_UNORDERED_ACCESS_VIEW_DESC_0,
                 D3D_ROOT_SIGNATURE_VERSION_1,
             },
             Dxgi::{
-                Common::DXGI_FORMAT_R32_TYPELESS,
                 CreateDXGIFactory2,
                 IDXGIAdapter4,
                 IDXGIFactory7,
@@ -87,6 +69,7 @@ use crate::{
     d3d12::{
         buffer::Buffer,
         command_decoder::CommandDecoder,
+        descriptor_manager::DescriptorManager,
         graphics_pipeline::GraphicsPipeline,
         resource_handle_pair::ResourceHandlePair,
         resource_heap::{ResourceHeap, ResourceHeapDescriptor, ResourceHeapType},
@@ -96,11 +79,15 @@ use crate::{
     },
     graphics_device::GraphicsDeviceDescriptor,
     graphics_pipeline::GraphicsPipelineDescriptor,
-    resource::ResourceHandle,
     shader_module::ShaderModuleDescriptor,
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
 };
+
+#[derive(Debug)]
+pub(crate) struct ResourceHandler {
+    pub(crate) buffers: Mutex<Vec<ResourceHandlePair>>,
+}
 
 #[derive(Debug)]
 pub(crate) struct FrameData {
@@ -109,10 +96,9 @@ pub(crate) struct FrameData {
 }
 
 pub(crate) struct GraphicsDevice {
-    recycled_descriptors: Arc<Mutex<VecDeque<ResourceHandle>>>,
-    current_index: Mutex<AtomicU32>,
-
     current_frame_index: Mutex<u32>,
+
+    resource_handler: Arc<ResourceHandler>,
 
     frames: Vec<FrameData>,
     fence_event: HANDLE,
@@ -122,7 +108,7 @@ pub(crate) struct GraphicsDevice {
 
     _dsv_heap: ResourceHeap,
     rtv_heap: ResourceHeap,
-    cbv_srv_uav_heap: ResourceHeap,
+    descriptor_manager: DescriptorManager,
 
     _allocator: Arc<Mutex<Allocator>>,
 
@@ -154,13 +140,7 @@ impl GraphicsDevice {
             .unwrap(),
         ));
 
-        let cbv_srv_uav_heap = ResourceHeap::new(
-            &device,
-            &ResourceHeapDescriptor {
-                ty: ResourceHeapType::CbvSrvUav,
-                count: crate::graphics_device::DESCRIPTOR_COUNT,
-            },
-        );
+        let descriptor_manager = DescriptorManager::new(&device);
         let rtv_heap = ResourceHeap::new(
             &device,
             &ResourceHeapDescriptor {
@@ -192,10 +172,11 @@ impl GraphicsDevice {
         }
 
         Self {
-            recycled_descriptors: Arc::new(Mutex::new(VecDeque::new())),
-            current_index: Mutex::new(AtomicU32::new(0)),
-
             current_frame_index: Mutex::new(u32::MAX),
+
+            resource_handler: Arc::new(ResourceHandler {
+                buffers: Mutex::new(Vec::new()),
+            }),
 
             frames,
             fence_event,
@@ -205,7 +186,7 @@ impl GraphicsDevice {
 
             _dsv_heap: dsv_heap,
             rtv_heap,
-            cbv_srv_uav_heap,
+            descriptor_manager,
 
             _allocator: allocator,
 
@@ -372,73 +353,8 @@ impl GraphicsDevice {
         resource: &ID3D12Resource,
         size: usize,
     ) -> ResourceHandlePair {
-        let shader_resource_handle = self.fetch_handle();
-        let unordered_access_handle = self.fetch_handle();
-
-        let cbv_srv_uav_handle = self.cbv_srv_uav_heap.handle();
-        let cbv_srv_uav_size = self.cbv_srv_uav_heap.size();
-        let element_count = (size / size_of::<u32>()) as u32;
-        unsafe {
-            self.device.CreateShaderResourceView(
-                resource,
-                Some(&mut D3D12_SHADER_RESOURCE_VIEW_DESC {
-                    Format: DXGI_FORMAT_R32_TYPELESS,
-                    ViewDimension: D3D12_SRV_DIMENSION_BUFFER,
-                    Shader4ComponentMapping: D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-                    Anonymous: D3D12_SHADER_RESOURCE_VIEW_DESC_0 {
-                        Buffer: D3D12_BUFFER_SRV {
-                            NumElements: element_count,
-                            Flags: D3D12_BUFFER_SRV_FLAG_RAW,
-                            ..Default::default()
-                        },
-                    },
-                }),
-                D3D12_CPU_DESCRIPTOR_HANDLE {
-                    ptr: cbv_srv_uav_handle.ptr
-                        + shader_resource_handle.0 as usize * cbv_srv_uav_size,
-                },
-            );
-
-            self.device.CreateUnorderedAccessView(
-                resource,
-                None,
-                Some(&mut D3D12_UNORDERED_ACCESS_VIEW_DESC {
-                    Format: DXGI_FORMAT_R32_TYPELESS,
-                    ViewDimension: D3D12_UAV_DIMENSION_BUFFER,
-                    Anonymous: D3D12_UNORDERED_ACCESS_VIEW_DESC_0 {
-                        Buffer: D3D12_BUFFER_UAV {
-                            NumElements: element_count,
-                            Flags: D3D12_BUFFER_UAV_FLAG_RAW,
-                            ..Default::default()
-                        },
-                    },
-                }),
-                D3D12_CPU_DESCRIPTOR_HANDLE {
-                    ptr: cbv_srv_uav_handle.ptr
-                        + unordered_access_handle.0 as usize * cbv_srv_uav_size,
-                },
-            );
-        }
-
-        ResourceHandlePair::new(shader_resource_handle, unordered_access_handle)
-    }
-
-    // TODO: Add texture
-
-    fn fetch_handle(&self) -> ResourceHandle {
-        self.recycled_descriptors
-            .lock()
-            .unwrap()
-            .pop_front()
-            .unwrap_or_else(|| {
-                let index = self.current_index.lock().unwrap().load(Ordering::Relaxed);
-                self.current_index
-                    .lock()
-                    .unwrap()
-                    .store(index + 1, Ordering::Relaxed);
-
-                ResourceHandle(index)
-            })
+        self.descriptor_manager
+            .allocate_buffer_handle(&self.device, resource, size)
     }
 
     pub(crate) fn factory(&self) -> &IDXGIFactory7 {
@@ -458,7 +374,7 @@ impl GraphicsDevice {
     }
 
     pub(super) fn cbv_srv_uav_heap(&self) -> &ResourceHeap {
-        &self.cbv_srv_uav_heap
+        &self.descriptor_manager.cbv_srv_uav_heap()
     }
 
     pub(super) fn rtv_heap(&self) -> &ResourceHeap {
@@ -469,8 +385,8 @@ impl GraphicsDevice {
         &self.root_signature
     }
 
-    pub(crate) fn recycled_descriptors(&self) -> &Arc<Mutex<VecDeque<ResourceHandle>>> {
-        &self.recycled_descriptors
+    pub(crate) fn resource_handler(&self) -> &Arc<ResourceHandler> {
+        &self.resource_handler
     }
 
     pub(crate) fn current_frame(&self) -> &FrameData {
@@ -529,6 +445,15 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
                 WaitForSingleObject(self.fence_event, INFINITE);
             }
         }
+
+        let mut buffers = self.resource_handler.buffers.lock().unwrap();
+        buffers.iter_mut().for_each(|resource_handle_pair| {
+            self.descriptor_manager
+                .retire_handle(resource_handle_pair.srv());
+            self.descriptor_manager
+                .retire_handle(resource_handle_pair.uav());
+        });
+        buffers.clear();
 
         if surface.resized() {
             surface.rebuild(self);

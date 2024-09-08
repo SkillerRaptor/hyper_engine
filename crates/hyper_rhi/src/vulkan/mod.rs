@@ -6,6 +6,7 @@
 
 mod buffer;
 mod command_decoder;
+mod descriptor_manager;
 mod graphics_pipeline;
 mod shader_module;
 mod surface;

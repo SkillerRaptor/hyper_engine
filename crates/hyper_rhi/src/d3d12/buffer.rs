@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::{
-    collections::VecDeque,
-    sync::{Arc, Mutex},
-};
+use std::sync::Arc;
 
 use gpu_allocator::{
     d3d12::{ResourceCategory, ResourceCreateDesc, ResourceStateOrBarrierLayout, ResourceType},
@@ -48,18 +45,21 @@ use windows::{
 
 use crate::{
     buffer::{self, BufferDescriptor, BufferUsage},
-    d3d12::{graphics_device::GraphicsDevice, resource_handle_pair::ResourceHandlePair},
+    d3d12::{
+        graphics_device::{GraphicsDevice, ResourceHandler},
+        resource_handle_pair::ResourceHandlePair,
+    },
     resource::{Resource, ResourceHandle},
 };
 
 #[derive(Debug)]
 pub(crate) struct Buffer {
-    recycled_descriptors: Arc<Mutex<VecDeque<ResourceHandle>>>,
     resource_handle_pair: ResourceHandlePair,
 
     size: usize,
-
     resource: gpu_allocator::d3d12::Resource,
+
+    resource_handler: Arc<ResourceHandler>,
 }
 
 impl Buffer {
@@ -228,11 +228,12 @@ impl Buffer {
         );
 
         Self {
-            recycled_descriptors: Arc::clone(graphics_device.recycled_descriptors()),
             resource_handle_pair,
 
             size: size as usize,
             resource,
+
+            resource_handler: Arc::clone(graphics_device.resource_handler()),
         }
     }
 
@@ -243,14 +244,11 @@ impl Buffer {
 
 impl Drop for Buffer {
     fn drop(&mut self) {
-        self.recycled_descriptors
+        self.resource_handler
+            .buffers
             .lock()
             .unwrap()
-            .push_back(self.resource_handle_pair.srv());
-        self.recycled_descriptors
-            .lock()
-            .unwrap()
-            .push_back(self.resource_handle_pair.uav());
+            .push(self.resource_handle_pair);
     }
 }
 
