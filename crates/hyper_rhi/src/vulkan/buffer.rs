@@ -6,7 +6,6 @@
 
 use std::{
     collections::VecDeque,
-    mem,
     sync::{Arc, Mutex},
 };
 
@@ -15,9 +14,10 @@ use gpu_allocator::{
     vulkan::{Allocation, AllocationCreateDesc, AllocationScheme},
     MemoryLocation,
 };
+use hyper_core::alignment::Alignment;
 
 use crate::{
-    buffer::{BufferDescriptor, BufferUsage},
+    buffer::{self, BufferDescriptor, BufferUsage},
     resource::{Resource, ResourceHandle},
     vulkan::graphics_device::{GraphicsDevice, ResourceBuffer, ResourceHandler},
 };
@@ -37,15 +37,20 @@ pub(crate) struct Buffer {
 
 impl Buffer {
     pub(crate) fn new(graphics_device: &GraphicsDevice, descriptor: &BufferDescriptor) -> Self {
-        let buffer = Self::create_buffer(graphics_device, descriptor.data);
+        let size = descriptor.data.len();
+        let aligned_size = size.align_up(buffer::ALIGNMENT);
+
+        let buffer = Self::create_buffer(graphics_device, aligned_size);
         let allocation = Self::create_allocation(graphics_device, buffer);
 
+        // TODO: Add staging buffer
         Self::set_data_internal(&allocation, descriptor.data);
 
         let resource_handle = graphics_device.allocate_buffer_handle(buffer);
 
         tracing::debug!(
-            size = descriptor.data.len(),
+            size,
+            aligned_size,
             index = resource_handle.0,
             "Buffer created"
         );
@@ -63,7 +68,7 @@ impl Buffer {
         }
     }
 
-    fn create_buffer(graphics_device: &GraphicsDevice, data: &[u8]) -> vk::Buffer {
+    fn create_buffer(graphics_device: &GraphicsDevice, aligned_size: usize) -> vk::Buffer {
         // NOTE: Will this hurt any performance?
         let usage = vk::BufferUsageFlags::STORAGE_BUFFER
             | vk::BufferUsageFlags::INDEX_BUFFER
@@ -71,7 +76,7 @@ impl Buffer {
             | vk::BufferUsageFlags::TRANSFER_DST;
 
         let create_info = vk::BufferCreateInfo::default()
-            .size(mem::size_of_val(data) as u64)
+            .size(aligned_size as u64)
             .usage(usage)
             .sharing_mode(vk::SharingMode::EXCLUSIVE)
             .queue_family_indices(&[]);

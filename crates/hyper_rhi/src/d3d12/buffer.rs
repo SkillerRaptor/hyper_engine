@@ -13,6 +13,7 @@ use gpu_allocator::{
     d3d12::{ResourceCategory, ResourceCreateDesc, ResourceStateOrBarrierLayout, ResourceType},
     MemoryLocation,
 };
+use hyper_core::alignment::Alignment;
 use windows::{
     core::Interface,
     Win32::{
@@ -46,7 +47,7 @@ use windows::{
 };
 
 use crate::{
-    buffer::{BufferDescriptor, BufferUsage},
+    buffer::{self, BufferDescriptor, BufferUsage},
     d3d12::{graphics_device::GraphicsDevice, resource_handle_pair::ResourceHandlePair},
     resource::{Resource, ResourceHandle},
 };
@@ -63,10 +64,8 @@ pub(crate) struct Buffer {
 
 impl Buffer {
     pub(crate) fn new(graphics_device: &GraphicsDevice, descriptor: &BufferDescriptor) -> Self {
-        let aligned_size =
-            ((descriptor.data.len() as u32 + D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT - 1)
-                / D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT)
-                * D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+        let size = descriptor.data.len();
+        let aligned_size = size.align_up(buffer::ALIGNMENT);
 
         let create_info = ResourceCreateDesc {
             name: "",
@@ -154,19 +153,13 @@ impl Buffer {
             .create_resource(&upload_create_info)
             .unwrap();
 
-        let size = aligned_size;
-
         unsafe {
             let mut data = std::ptr::null_mut();
             upload_resource
                 .resource()
                 .Map(0, Some(&D3D12_RANGE { Begin: 0, End: 0 }), Some(&mut data))
                 .unwrap();
-            std::ptr::copy_nonoverlapping(
-                descriptor.data.as_ptr(),
-                data as *mut u8,
-                descriptor.data.len(),
-            );
+            std::ptr::copy_nonoverlapping(descriptor.data.as_ptr(), data as *mut u8, size);
             upload_resource.resource().Unmap(0, None);
         }
 
@@ -223,12 +216,12 @@ impl Buffer {
             }
         }
 
-        let data_size = descriptor.data.len();
         let resource_handle_pair =
-            graphics_device.allocate_buffer_handle(resource.resource(), data_size);
+            graphics_device.allocate_buffer_handle(resource.resource(), size);
 
         tracing::debug!(
             size,
+            aligned_size,
             srv_index = resource_handle_pair.srv().0,
             uav_index = resource_handle_pair.uav().0,
             "Buffer created"
