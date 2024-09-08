@@ -14,7 +14,7 @@ use std::{
 
 use ash::{vk, Device, Instance};
 
-use crate::resource::ResourceHandle;
+use crate::{resource::ResourceHandle, vulkan::graphics_device::GraphicsDevice};
 
 pub(crate) struct DescriptorManager {
     current_index: AtomicU32,
@@ -188,19 +188,23 @@ impl DescriptorManager {
         descriptor_sets
     }
 
-    pub(crate) fn destroy(&self, device: &Device) {
+    pub(crate) fn destroy(&self, graphics_device: &GraphicsDevice) {
         unsafe {
             self.layouts.iter().for_each(|layout| {
-                device.destroy_descriptor_set_layout(*layout, None);
+                graphics_device
+                    .device()
+                    .destroy_descriptor_set_layout(*layout, None);
             });
 
-            device.destroy_descriptor_pool(self.descriptor_pool, None);
+            graphics_device
+                .device()
+                .destroy_descriptor_pool(self.descriptor_pool, None);
         }
     }
 
     pub(crate) fn allocate_buffer_handle(
         &self,
-        device: &Device,
+        graphics_device: &GraphicsDevice,
         buffer: vk::Buffer,
     ) -> ResourceHandle {
         let handle = self.fetch_handle();
@@ -220,7 +224,9 @@ impl DescriptorManager {
             .buffer_info(&buffer_infos);
 
         unsafe {
-            device.update_descriptor_sets(&[write_set], &[]);
+            graphics_device
+                .device()
+                .update_descriptor_sets(&[write_set], &[]);
         }
 
         handle
@@ -240,7 +246,9 @@ impl DescriptorManager {
     }
 
     pub(crate) fn retire_handle(&self, handle: ResourceHandle) {
-        self.recycled_descriptors.lock().unwrap().push_back(handle);
+        if handle.0 != u32::MAX {
+            self.recycled_descriptors.lock().unwrap().push_back(handle);
+        }
     }
 
     pub(crate) fn layouts(&self) -> &[vk::DescriptorSetLayout; Self::DESCRIPTOR_TYPES.len()] {

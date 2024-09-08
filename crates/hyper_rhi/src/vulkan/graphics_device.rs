@@ -36,6 +36,7 @@ use crate::{
         shader_module::ShaderModule,
         surface::Surface,
         texture::Texture,
+        upload_manager::UploadManager,
     },
 };
 
@@ -74,6 +75,8 @@ pub(crate) struct GraphicsDevice {
 
     frames: Vec<FrameData>,
     submit_semaphore: vk::Semaphore,
+
+    upload_manager: UploadManager,
 
     pipeline_layout: vk::PipelineLayout,
     descriptor_manager: DescriptorManager,
@@ -139,6 +142,8 @@ impl GraphicsDevice {
         let descriptor_manager = DescriptorManager::new(&instance, physical_device, &device);
         let pipeline_layout = Self::create_pipeline_layout(&device, &descriptor_manager);
 
+        let upload_manager = UploadManager::new(&device, queue_family_index);
+
         let submit_semaphore = Self::create_semaphore(&device, vk::SemaphoreType::TIMELINE);
 
         let mut frames = Vec::new();
@@ -170,6 +175,8 @@ impl GraphicsDevice {
 
             frames,
             submit_semaphore,
+
+            upload_manager,
 
             pipeline_layout,
             descriptor_manager,
@@ -585,8 +592,11 @@ impl GraphicsDevice {
     }
 
     pub(crate) fn allocate_buffer_handle(&self, buffer: vk::Buffer) -> ResourceHandle {
-        self.descriptor_manager
-            .allocate_buffer_handle(&self.device, buffer)
+        self.descriptor_manager.allocate_buffer_handle(self, buffer)
+    }
+
+    pub(crate) fn upload_buffer(&self, source: &[u8], destination: vk::Buffer) {
+        self.upload_manager.upload_buffer(self, source, destination);
     }
 
     pub(crate) fn entry(&self) -> &Entry {
@@ -603,6 +613,10 @@ impl GraphicsDevice {
 
     pub(crate) fn device(&self) -> &Device {
         &self.device
+    }
+
+    pub(crate) fn queue(&self) -> vk::Queue {
+        self.queue
     }
 
     pub(crate) fn resource_handler(&self) -> &Arc<ResourceHandler> {
@@ -648,10 +662,12 @@ impl Drop for GraphicsDevice {
 
             self.device.destroy_semaphore(self.submit_semaphore, None);
 
+            self.upload_manager.destroy(self);
+
             self.device
                 .destroy_pipeline_layout(self.pipeline_layout, None);
 
-            self.descriptor_manager.destroy(&self.device);
+            self.descriptor_manager.destroy(self);
 
             self.device.destroy_device(None);
 

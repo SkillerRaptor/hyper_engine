@@ -76,6 +76,7 @@ use crate::{
         shader_module::ShaderModule,
         surface::Surface,
         texture::Texture,
+        upload_manager::UploadManager,
     },
     graphics_device::GraphicsDeviceDescriptor,
     graphics_pipeline::GraphicsPipelineDescriptor,
@@ -103,6 +104,8 @@ pub(crate) struct GraphicsDevice {
     frames: Vec<FrameData>,
     fence_event: HANDLE,
     fence: ID3D12Fence,
+
+    upload_manager: UploadManager,
 
     root_signature: ID3D12RootSignature,
 
@@ -158,6 +161,8 @@ impl GraphicsDevice {
 
         let root_signature = Self::create_root_signature(&device);
 
+        let upload_manager = UploadManager::new(&device);
+
         let (fence, fence_event) = Self::create_fence(&device);
 
         let mut frames = Vec::new();
@@ -181,6 +186,8 @@ impl GraphicsDevice {
             frames,
             fence_event,
             fence,
+
+            upload_manager,
 
             root_signature,
 
@@ -355,6 +362,10 @@ impl GraphicsDevice {
     ) -> ResourceHandlePair {
         self.descriptor_manager
             .allocate_buffer_handle(&self.device, resource, size)
+    }
+
+    pub(crate) fn upload_buffer(&self, source: &[u8], destination: &ID3D12Resource) {
+        self.upload_manager.upload_buffer(self, source, destination);
     }
 
     pub(crate) fn factory(&self) -> &IDXGIFactory7 {

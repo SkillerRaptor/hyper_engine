@@ -11,5 +11,6 @@ mod graphics_pipeline;
 mod shader_module;
 mod surface;
 mod texture;
+mod upload_manager;
 
 pub(crate) mod graphics_device;

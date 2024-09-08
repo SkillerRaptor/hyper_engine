@@ -37,10 +37,9 @@ impl Buffer {
         let aligned_size = size.align_up(buffer::ALIGNMENT);
 
         let buffer = Self::create_buffer(graphics_device, aligned_size);
-        let allocation = Self::create_allocation(graphics_device, buffer);
+        let allocation = Self::create_allocation(graphics_device, false, buffer);
 
-        // TODO: Add staging buffer
-        Self::set_data_internal(&allocation, descriptor.data);
+        graphics_device.upload_buffer(descriptor.data, buffer);
 
         let resource_handle = graphics_device.allocate_buffer_handle(buffer);
 
@@ -53,6 +52,35 @@ impl Buffer {
 
         Self {
             resource_handle,
+
+            size: descriptor.data.len(),
+
+            allocation: Some(allocation),
+            raw: buffer,
+
+            resource_handler: Arc::clone(graphics_device.resource_handler()),
+        }
+    }
+
+    pub(crate) fn new_staging(
+        graphics_device: &GraphicsDevice,
+        descriptor: &BufferDescriptor,
+    ) -> Self {
+        let size = descriptor.data.len();
+        let aligned_size = size.align_up(buffer::ALIGNMENT);
+
+        let buffer = Self::create_buffer(graphics_device, aligned_size);
+        let allocation = Self::create_allocation(graphics_device, true, buffer);
+
+        unsafe {
+            let memory = allocation.mapped_ptr().unwrap().as_ptr() as *mut u8;
+            memory.copy_from_nonoverlapping(descriptor.data.as_ptr(), descriptor.data.len());
+        }
+
+        tracing::trace!(size, aligned_size, "Staging Buffer created");
+
+        Self {
+            resource_handle: ResourceHandle::default(),
 
             size: descriptor.data.len(),
 
@@ -79,7 +107,11 @@ impl Buffer {
         unsafe { graphics_device.device().create_buffer(&create_info, None) }.unwrap()
     }
 
-    fn create_allocation(graphics_device: &GraphicsDevice, buffer: vk::Buffer) -> Allocation {
+    fn create_allocation(
+        graphics_device: &GraphicsDevice,
+        staging: bool,
+        buffer: vk::Buffer,
+    ) -> Allocation {
         let requirements = unsafe {
             graphics_device
                 .device()
@@ -87,11 +119,13 @@ impl Buffer {
         };
 
         let create_description = AllocationCreateDesc {
-            // TODO: Add buffer label
             name: "",
             requirements,
-            // TODO: Add memory location option for staging buffers
-            location: MemoryLocation::CpuToGpu,
+            location: if staging {
+                MemoryLocation::CpuToGpu
+            } else {
+                MemoryLocation::GpuOnly
+            },
             linear: true,
             allocation_scheme: AllocationScheme::DedicatedBuffer(buffer),
         };
@@ -111,13 +145,6 @@ impl Buffer {
         };
 
         allocation
-    }
-
-    fn set_data_internal(allocation: &Allocation, data: &[u8]) {
-        let memory = allocation.mapped_ptr().unwrap().as_ptr() as *mut u8;
-        unsafe {
-            memory.copy_from_nonoverlapping(data.as_ptr(), data.len());
-        }
     }
 
     pub(crate) fn raw(&self) -> vk::Buffer {

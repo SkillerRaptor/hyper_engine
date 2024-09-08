@@ -136,7 +136,9 @@ impl DescriptorManager {
     }
 
     pub(crate) fn retire_handle(&self, handle: ResourceHandle) {
-        self.recycled_descriptors.lock().unwrap().push_back(handle);
+        if handle.0 != u32::MAX {
+            self.recycled_descriptors.lock().unwrap().push_back(handle);
+        }
     }
 
     pub(crate) fn cbv_srv_uav_heap(&self) -> &ResourceHeap {
