@@ -622,8 +622,6 @@ impl GraphicsDevice {
 impl Drop for GraphicsDevice {
     fn drop(&mut self) {
         unsafe {
-            self.device.device_wait_idle().unwrap();
-
             self.clean_resources();
 
             self.frames.iter().for_each(|frame| {
@@ -806,5 +804,11 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
                 .queue_present(self.queue, &present_info)
                 .unwrap();
         };
+    }
+
+    fn wait_idle(&self) {
+        unsafe {
+            self.device.device_wait_idle().unwrap();
+        }
     }
 }

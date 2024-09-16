@@ -69,6 +69,9 @@ pub trait GraphicsDevice: Downcast {
     fn submit(&self, command_list: CommandList);
 
     fn present(&self, surface: &Box<dyn Surface>);
+
+    // Destruction
+    fn wait_idle(&self);
 }
 
 downcast_rs::impl_downcast!(GraphicsDevice);

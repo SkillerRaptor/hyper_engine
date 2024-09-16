@@ -342,23 +342,6 @@ impl GraphicsDevice {
 
 impl Drop for GraphicsDevice {
     fn drop(&mut self) {
-        let frame_index = *self.current_frame_index.lock().unwrap() + 1;
-
-        unsafe {
-            self.command_queue
-                .Signal(&self.fence, frame_index as u64)
-                .unwrap();
-        }
-
-        if unsafe { self.fence.GetCompletedValue() } < frame_index as u64 {
-            unsafe {
-                self.fence
-                    .SetEventOnCompletion(frame_index as u64, self.fence_event)
-                    .unwrap();
-                WaitForSingleObject(self.fence_event, INFINITE);
-            }
-        }
-
         unsafe {
             CloseHandle(self.fence_event).unwrap();
         }
@@ -477,6 +460,25 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
                 .Present(1, DXGI_PRESENT(0))
                 .ok()
                 .unwrap();
+        }
+    }
+
+    fn wait_idle(&self) {
+        let frame_index = *self.current_frame_index.lock().unwrap() + 1;
+
+        unsafe {
+            self.command_queue
+                .Signal(&self.fence, frame_index as u64)
+                .unwrap();
+        }
+
+        if unsafe { self.fence.GetCompletedValue() } < frame_index as u64 {
+            unsafe {
+                self.fence
+                    .SetEventOnCompletion(frame_index as u64, self.fence_event)
+                    .unwrap();
+                WaitForSingleObject(self.fence_event, INFINITE);
+            }
         }
     }
 }
