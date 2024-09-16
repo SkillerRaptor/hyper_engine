@@ -55,8 +55,13 @@ impl CommandList {
 
                         current_render_pass_state = None;
                     }
-                    Command::BindDescriptor { buffer } => {
-                        command_decoder.bind_descriptor(&buffer);
+                    Command::PushConstants { data } => {
+                        debug_assert!(render_pass_state.graphics_pipeline.is_some());
+
+                        command_decoder.push_constants(
+                            render_pass_state.graphics_pipeline.as_ref().unwrap(),
+                            &data,
+                        );
                     }
                     Command::BindGraphicsPipeline { graphics_pipeline } => {
                         render_pass_state.graphics_pipeline = Some(Arc::clone(&graphics_pipeline));

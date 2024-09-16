@@ -13,6 +13,7 @@ use crate::{
     buffer::{Buffer, BufferDescriptor},
     commands::{command_encoder::CommandEncoder, command_list::CommandList},
     graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
+    pipeline_layout::{PipelineLayout, PipelineLayoutDescriptor},
     shader_module::{ShaderModule, ShaderModuleDescriptor},
     surface::{Surface, SurfaceDescriptor},
     texture::{Texture, TextureDescriptor},
@@ -41,6 +42,11 @@ pub(crate) const DESCRIPTOR_COUNT: u32 = 1000 * 1000;
 
 pub trait GraphicsDevice: Downcast {
     fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Box<dyn Surface>;
+
+    fn create_pipeline_layout(
+        &self,
+        descriptor: &PipelineLayoutDescriptor,
+    ) -> Arc<dyn PipelineLayout>;
 
     fn create_graphics_pipeline(
         &self,

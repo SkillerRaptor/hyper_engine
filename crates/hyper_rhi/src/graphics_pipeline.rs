@@ -8,10 +8,11 @@ use std::{fmt::Debug, sync::Arc};
 
 use downcast_rs::Downcast;
 
-use crate::shader_module::ShaderModule;
+use crate::{pipeline_layout::PipelineLayout, shader_module::ShaderModule};
 
 #[derive(Clone, Debug)]
 pub struct GraphicsPipelineDescriptor<'a> {
+    pub layout: &'a Arc<dyn PipelineLayout>,
     pub vertex_shader: &'a Arc<dyn ShaderModule>,
     pub fragment_shader: &'a Arc<dyn ShaderModule>,
 }

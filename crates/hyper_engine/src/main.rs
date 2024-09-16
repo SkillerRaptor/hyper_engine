@@ -15,7 +15,7 @@ use tracing_subscriber::{
     util::SubscriberInitExt,
 };
 
-use hyper_rhi::graphics_device::GraphicsApi;
+use hyper_render::graphics_device::GraphicsApi;
 
 use crate::engine::{Engine, EngineDescriptor};
 

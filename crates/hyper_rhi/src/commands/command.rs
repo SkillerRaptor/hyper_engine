@@ -16,11 +16,11 @@ pub(crate) enum Command {
     },
     EndRenderPass,
 
-    // Bind Commands
-    BindDescriptor {
-        buffer: Arc<dyn Buffer>,
+    PushConstants {
+        data: Vec<u8>,
     },
 
+    // Bind Commands
     BindGraphicsPipeline {
         graphics_pipeline: Arc<dyn GraphicsPipeline>,
     },

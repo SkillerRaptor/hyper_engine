@@ -1,11 +1,11 @@
 #-------------------------------------------------------------------------------------------
-# Copyright (c) 2024, SkillerRaptor
+# Copyright (c) 2023-2024, SkillerRaptor
 #
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 
 [package]
-name = "hyper_engine"
+name = "hyper_render"
 version = "0.0.0"
 edition = "2021"
 
@@ -13,11 +13,8 @@ edition = "2021"
 hyper_core = { path = "../hyper_core" }
 hyper_ecs = { path = "../hyper_ecs" }
 hyper_math = { path = "../hyper_math" }
-hyper_platform = { path = "../hyper_platform" }
-hyper_render = { path = "../hyper_render" }
+hyper_rhi = { path = "../hyper_rhi" }
 
 bytemuck = { workspace = true }
-clap = { workspace = true }
+thiserror = { workspace = true }
 tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
-raw-window-handle = { workspace = true }

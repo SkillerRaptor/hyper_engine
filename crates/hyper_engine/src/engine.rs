@@ -6,18 +6,11 @@
 
 use std::{sync::Arc, time::Instant};
 
-use bytemuck::NoUninit;
-use hyper_math::Vec4;
 use hyper_platform::{Window, WindowDescriptor};
-use hyper_rhi::{
-    buffer::{Buffer, BufferDescriptor, BufferUsage},
-    commands::{
-        descriptor::{Descriptor, DescriptorBuilder},
-        render_pass::RenderPassDescriptor,
-    },
+use hyper_render::{
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
-    graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
-    shader_module::{ShaderModuleDescriptor, ShaderStage},
+    renderer::Renderer,
+    scene::Scene,
     surface::{Surface, SurfaceDescriptor},
 };
 use raw_window_handle::{HasDisplayHandle, HasWindowHandle};
@@ -31,13 +24,10 @@ pub struct EngineDescriptor {
 }
 
 pub struct Engine {
-    frame_index: u32,
+    scene: Scene,
 
-    opaque_descriptor: Descriptor,
-    index_buffer: Arc<dyn Buffer>,
-    vertex_buffer: Arc<dyn Buffer>,
-
-    graphics_pipeline: Arc<dyn GraphicsPipeline>,
+    // NOTE: Maybe adding multiple kinds of renderer?
+    renderer: Renderer,
     surface: Box<dyn Surface>,
     graphics_device: Arc<dyn GraphicsDevice>,
 
@@ -64,7 +54,7 @@ impl Engine {
         .unwrap();
 
         let graphics_device =
-            hyper_rhi::graphics_device::create_graphics_device(&GraphicsDeviceDescriptor {
+            hyper_render::graphics_device::create_graphics_device(&GraphicsDeviceDescriptor {
                 graphics_api: descriptor.graphics_api,
                 debug_mode: descriptor.debug,
                 display_handle: window.display_handle().unwrap(),
@@ -76,62 +66,10 @@ impl Engine {
             window_size: window.inner_size(),
         });
 
-        let opaque_vertex_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
-            path: "./assets/shaders/opaque_shader.hlsl",
-            entry_point: "vs_main",
-            stage: ShaderStage::Vertex,
-        });
+        let renderer = Renderer::new(&graphics_device);
 
-        let opaque_fragment_shader =
-            graphics_device.create_shader_module(&ShaderModuleDescriptor {
-                path: "./assets/shaders/opaque_shader.hlsl",
-                entry_point: "fs_main",
-                stage: ShaderStage::Fragment,
-            });
-
-        let graphics_pipeline =
-            graphics_device.create_graphics_pipeline(&GraphicsPipelineDescriptor {
-                vertex_shader: &opaque_vertex_shader,
-                fragment_shader: &opaque_fragment_shader,
-            });
-
-        #[repr(C)]
-        #[derive(Copy, Clone, NoUninit)]
-        struct Vertex {
-            position: Vec4,
-            color: Vec4,
-        }
-
-        let vertex_buffer = graphics_device.create_buffer(&BufferDescriptor {
-            data: bytemuck::cast_slice(&[
-                Vertex {
-                    position: Vec4::new(-0.5, -0.5, 0.0, 1.0),
-                    color: Vec4::new(1.0, 0.0, 0.0, 1.0),
-                },
-                Vertex {
-                    position: Vec4::new(0.5, -0.5, 0.0, 1.0),
-                    color: Vec4::new(0.0, 1.0, 0.0, 1.0),
-                },
-                Vertex {
-                    position: Vec4::new(0.5, 0.5, 0.0, 1.0),
-                    color: Vec4::new(0.0, 0.0, 1.0, 1.0),
-                },
-                Vertex {
-                    position: Vec4::new(-0.5, 0.5, 0.0, 1.0),
-                    color: Vec4::new(1.0, 1.0, 1.0, 1.0),
-                },
-            ]),
-            usage: BufferUsage::STORAGE,
-        });
-
-        let index_buffer = graphics_device.create_buffer(&BufferDescriptor {
-            data: bytemuck::cast_slice(&[0_u32, 1_u32, 2_u32, 2_u32, 3_u32, 0_u32, 0, 0]),
-            usage: BufferUsage::INDEX,
-        });
-
-        let opaque_descriptor = DescriptorBuilder::default()
-            .read_buffer(0, &vertex_buffer)
-            .build(&graphics_device);
+        // NOTE: This is temporary till real scene switch will be implemented
+        let scene = Scene::new();
 
         tracing::info!(
             "Engine initialized in {:.2} seconds",
@@ -139,13 +77,9 @@ impl Engine {
         );
 
         Self {
-            frame_index: 1,
+            scene,
 
-            opaque_descriptor,
-            index_buffer,
-            vertex_buffer,
-
-            graphics_pipeline,
+            renderer,
             surface,
             graphics_device,
 
@@ -186,30 +120,7 @@ impl Engine {
             // Update
 
             // Render
-            self.graphics_device
-                .begin_frame(&mut self.surface, self.frame_index);
-
-            let swapchain_texture = self.surface.current_texture();
-
-            let mut command_encoder = self.graphics_device.create_command_encoder();
-
-            {
-                let mut render_pass = command_encoder.begin_render_pass(&RenderPassDescriptor {
-                    texture: &swapchain_texture,
-                });
-
-                render_pass.bind_pipeline(&self.graphics_pipeline);
-                render_pass.bind_descriptor(&self.opaque_descriptor);
-                render_pass.bind_index_buffer(&self.index_buffer);
-                render_pass.draw_indexed(6, 1, 0, 0, 0);
-            }
-
-            self.graphics_device.end_frame();
-
-            self.graphics_device.submit(command_encoder.finish());
-            self.graphics_device.present(&self.surface);
-
-            self.frame_index += 1;
+            self.renderer.render(&mut self.surface, &self.scene);
         }
     }
 }

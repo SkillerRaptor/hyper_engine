@@ -39,9 +39,23 @@ where
     };
 
     let (args, defines) = if output_api == OutputApi::Vulkan {
-        (vec!["-spirv"], vec![("HYPER_ENGINE_VULKAN", None)])
+        (
+            vec!["-spirv"],
+            vec![
+                ("HYPER_ENGINE_VULKAN", None),
+                ("DESCRIPTOR_SET_SLOT_FRAME", Some("0")),
+                ("DESCRIPTOR_SET_SLOT_CAMERA", Some("1")),
+            ],
+        )
     } else {
-        (Vec::new(), vec![("HYPER_ENGINE_D3D12", None)])
+        (
+            Vec::new(),
+            vec![
+                ("HYPER_ENGINE_D3D12", None),
+                ("DESCRIPTOR_SET_SLOT_FRAME", Some("0")),
+                ("DESCRIPTOR_SET_SLOT_CAMERA", Some("1")),
+            ],
+        )
     };
 
     let mut shader_bytes = hassle_rs::compile_hlsl(

@@ -16,6 +16,7 @@ pub mod buffer;
 pub mod commands;
 pub mod graphics_device;
 pub mod graphics_pipeline;
+pub mod pipeline_layout;
 pub mod resource;
 pub mod shader_module;
 pub mod surface;

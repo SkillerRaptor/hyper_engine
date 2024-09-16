@@ -10,6 +10,7 @@ mod buffer;
 mod command_decoder;
 mod descriptor_manager;
 mod graphics_pipeline;
+mod pipeline_layout;
 mod resource_handle_pair;
 mod resource_heap;
 mod shader_module;

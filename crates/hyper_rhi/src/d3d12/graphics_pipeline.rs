@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::{ffi::c_void, mem};
+use std::{ffi::c_void, mem, sync::Arc};
 
 use windows::Win32::Graphics::{
     Direct3D12::{
@@ -28,13 +28,19 @@ use windows::Win32::Graphics::{
 };
 
 use crate::{
-    d3d12::{graphics_device::GraphicsDevice, shader_module::ShaderModule},
+    d3d12::{
+        graphics_device::GraphicsDevice,
+        pipeline_layout::PipelineLayout,
+        shader_module::ShaderModule,
+    },
     graphics_pipeline::GraphicsPipelineDescriptor,
 };
 
 #[derive(Debug)]
 pub struct GraphicsPipeline {
     pipeline_state: ID3D12PipelineState,
+
+    layout: Arc<dyn crate::pipeline_layout::PipelineLayout>,
 }
 
 impl GraphicsPipeline {
@@ -42,6 +48,8 @@ impl GraphicsPipeline {
         graphics_device: &GraphicsDevice,
         descriptor: &GraphicsPipelineDescriptor,
     ) -> Self {
+        let layout = descriptor.layout.downcast_ref::<PipelineLayout>().unwrap();
+
         let vertex_shader_code = descriptor
             .vertex_shader
             .downcast_ref::<ShaderModule>()
@@ -53,8 +61,8 @@ impl GraphicsPipeline {
             .downcast_ref::<ShaderModule>()
             .unwrap()
             .code();
-        let mut descriptor = D3D12_GRAPHICS_PIPELINE_STATE_DESC {
-            pRootSignature: unsafe { mem::transmute_copy(graphics_device.root_signature()) },
+        let mut state_descriptor = D3D12_GRAPHICS_PIPELINE_STATE_DESC {
+            pRootSignature: unsafe { mem::transmute_copy(layout.root_signature()) },
             VS: D3D12_SHADER_BYTECODE {
                 pShaderBytecode: vertex_shader_code.as_ptr() as *const c_void,
                 BytecodeLength: vertex_shader_code.len(),
@@ -103,16 +111,24 @@ impl GraphicsPipeline {
             },
             ..Default::default()
         };
-        descriptor.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+        state_descriptor.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 
         let pipeline_state = unsafe {
             graphics_device
                 .device()
-                .CreateGraphicsPipelineState(&descriptor)
+                .CreateGraphicsPipelineState(&state_descriptor)
         }
         .unwrap();
 
-        Self { pipeline_state }
+        Self {
+            pipeline_state,
+
+            layout: Arc::clone(descriptor.layout),
+        }
+    }
+
+    pub(crate) fn layout(&self) -> &Arc<dyn crate::pipeline_layout::PipelineLayout> {
+        &self.layout
     }
 
     pub(crate) fn pipeline_state(&self) -> &ID3D12PipelineState {

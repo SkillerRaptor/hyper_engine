@@ -46,7 +46,7 @@ pub(crate) struct Buffer {
     resource_handle_pair: ResourceHandlePair,
 
     size: usize,
-    resource: gpu_allocator::d3d12::Resource,
+    resource: Option<gpu_allocator::d3d12::Resource>,
 
     resource_handler: Arc<ResourceHandler>,
 }
@@ -75,7 +75,7 @@ impl Buffer {
             resource_handle_pair,
 
             size: size as usize,
-            resource,
+            resource: Some(resource),
 
             resource_handler: Arc::clone(graphics_device.resource_handler()),
         }
@@ -106,7 +106,7 @@ impl Buffer {
             resource_handle_pair: ResourceHandlePair::default(),
 
             size: size as usize,
-            resource,
+            resource: Some(resource),
 
             resource_handler: Arc::clone(graphics_device.resource_handler()),
         }
@@ -172,21 +172,26 @@ impl Buffer {
     }
 
     pub(crate) fn gpu_address(&self) -> u64 {
-        unsafe { self.resource.resource().GetGPUVirtualAddress() }
+        unsafe {
+            self.resource
+                .as_ref()
+                .unwrap()
+                .resource()
+                .GetGPUVirtualAddress()
+        }
     }
 
     pub(crate) fn resource(&self) -> &gpu_allocator::d3d12::Resource {
-        &self.resource
+        self.resource.as_ref().unwrap()
     }
 }
 
 impl Drop for Buffer {
     fn drop(&mut self) {
-        self.resource_handler
-            .buffers
-            .lock()
-            .unwrap()
-            .push(self.resource_handle_pair);
+        self.resource_handler.buffers.lock().unwrap().push((
+            self.resource_handle_pair,
+            Some(self.resource.take().unwrap()),
+        ));
     }
 }
 

@@ -8,6 +8,7 @@ mod buffer;
 mod command_decoder;
 mod descriptor_manager;
 mod graphics_pipeline;
+mod pipeline_layout;
 mod shader_module;
 mod surface;
 mod texture;

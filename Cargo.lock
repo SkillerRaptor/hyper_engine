@@ -620,7 +620,7 @@ dependencies = [
  "hyper_ecs",
  "hyper_math",
  "hyper_platform",
- "hyper_rhi",
+ "hyper_render",
  "raw-window-handle",
  "tracing",
  "tracing-subscriber",
@@ -646,6 +646,19 @@ dependencies = [
  "thiserror",
  "tracing",
  "winit",
+]
+
+[[package]]
+name = "hyper_render"
+version = "0.0.0"
+dependencies = [
+ "bytemuck",
+ "hyper_core",
+ "hyper_ecs",
+ "hyper_math",
+ "hyper_rhi",
+ "thiserror",
+ "tracing",
 ]
 
 [[package]]

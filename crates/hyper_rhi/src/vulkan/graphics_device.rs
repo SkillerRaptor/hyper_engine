@@ -7,7 +7,6 @@
 use std::{
     collections::HashSet,
     ffi::{c_void, CStr},
-    mem,
     sync::{Arc, Mutex},
 };
 
@@ -24,6 +23,7 @@ use crate::{
     commands::{command_encoder::CommandEncoder, command_list::CommandList},
     graphics_device::GraphicsDeviceDescriptor,
     graphics_pipeline::GraphicsPipelineDescriptor,
+    pipeline_layout::PipelineLayoutDescriptor,
     resource::ResourceHandle,
     shader_module::ShaderModuleDescriptor,
     surface::SurfaceDescriptor,
@@ -33,6 +33,7 @@ use crate::{
         command_decoder::CommandDecoder,
         descriptor_manager::DescriptorManager,
         graphics_pipeline::GraphicsPipeline,
+        pipeline_layout::PipelineLayout,
         shader_module::ShaderModule,
         surface::Surface,
         texture::Texture,
@@ -77,8 +78,6 @@ pub(crate) struct GraphicsDevice {
     submit_semaphore: vk::Semaphore,
 
     upload_manager: UploadManager,
-
-    pipeline_layout: vk::PipelineLayout,
     descriptor_manager: DescriptorManager,
 
     allocator: Arc<Mutex<Allocator>>,
@@ -140,8 +139,6 @@ impl GraphicsDevice {
         ));
 
         let descriptor_manager = DescriptorManager::new(&instance, physical_device, &device);
-        let pipeline_layout = Self::create_pipeline_layout(&device, &descriptor_manager);
-
         let upload_manager = UploadManager::new(&device, queue_family_index);
 
         let submit_semaphore = Self::create_semaphore(&device, vk::SemaphoreType::TIMELINE);
@@ -177,8 +174,6 @@ impl GraphicsDevice {
             submit_semaphore,
 
             upload_manager,
-
-            pipeline_layout,
             descriptor_manager,
 
             allocator,
@@ -487,27 +482,6 @@ impl GraphicsDevice {
         device
     }
 
-    fn create_pipeline_layout(
-        device: &Device,
-        descriptor_manager: &DescriptorManager,
-    ) -> vk::PipelineLayout {
-        // NOTE: Only push a single u32 for the resource handle
-        let bindings_offset_size = mem::size_of::<ResourceHandle>() as u32;
-
-        let bindings_range = vk::PushConstantRange::default()
-            .stage_flags(vk::ShaderStageFlags::ALL)
-            .offset(0)
-            .size(bindings_offset_size * 4);
-
-        let push_ranges = [bindings_range];
-        let create_info = vk::PipelineLayoutCreateInfo::default()
-            .set_layouts(descriptor_manager.layouts())
-            .push_constant_ranges(&push_ranges);
-
-        let pipeline_layout = unsafe { device.create_pipeline_layout(&create_info, None) }.unwrap();
-        pipeline_layout
-    }
-
     fn create_command_pool(device: &Device, queue_family_index: u32) -> vk::CommandPool {
         let create_info = vk::CommandPoolCreateInfo::default()
             .queue_family_index(queue_family_index)
@@ -571,11 +545,9 @@ impl GraphicsDevice {
         buffers.clear();
 
         let mut graphics_pipelines = self.resource_handler.graphics_pipeline.lock().unwrap();
-        graphics_pipelines
-            .iter()
-            .for_each(|&graphics_pipeline| unsafe {
-                self.device.destroy_pipeline(graphics_pipeline, None);
-            });
+        graphics_pipelines.iter().for_each(|&pipeline| unsafe {
+            self.device.destroy_pipeline(pipeline, None);
+        });
         graphics_pipelines.clear();
 
         let mut shader_modules = self.resource_handler.shader_modules.lock().unwrap();
@@ -633,8 +605,8 @@ impl GraphicsDevice {
         self.descriptor_manager.descriptor_sets()
     }
 
-    pub(crate) fn pipeline_layout(&self) -> vk::PipelineLayout {
-        self.pipeline_layout
+    pub(crate) fn descriptor_manager(&self) -> &DescriptorManager {
+        &self.descriptor_manager
     }
 
     pub(crate) fn submit_semaphore(&self) -> vk::Semaphore {
@@ -663,10 +635,6 @@ impl Drop for GraphicsDevice {
             self.device.destroy_semaphore(self.submit_semaphore, None);
 
             self.upload_manager.destroy(self);
-
-            self.device
-                .destroy_pipeline_layout(self.pipeline_layout, None);
-
             self.descriptor_manager.destroy(self);
 
             self.device.destroy_device(None);
@@ -685,6 +653,13 @@ impl Drop for GraphicsDevice {
 impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
     fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Box<dyn crate::surface::Surface> {
         Box::new(Surface::new(self, &self.resource_handler, descriptor))
+    }
+
+    fn create_pipeline_layout(
+        &self,
+        descriptor: &PipelineLayoutDescriptor,
+    ) -> Arc<dyn crate::pipeline_layout::PipelineLayout> {
+        Arc::new(PipelineLayout::new(self, descriptor))
     }
 
     fn create_graphics_pipeline(

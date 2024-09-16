@@ -14,6 +14,7 @@ use crate::{
         buffer::Buffer,
         graphics_device::GraphicsDevice,
         graphics_pipeline::GraphicsPipeline,
+        pipeline_layout::PipelineLayout,
         texture::Texture,
     },
 };
@@ -113,16 +114,27 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
         }
     }
 
-    fn bind_descriptor(&self, buffer: &Arc<dyn crate::buffer::Buffer>) {
-        let bindings_offset = buffer.handle().0;
+    fn push_constants(
+        &self,
+        graphics_pipeline: &Arc<dyn crate::graphics_pipeline::GraphicsPipeline>,
+        data: &[u8],
+    ) {
+        let graphics_pipeline = graphics_pipeline
+            .downcast_ref::<GraphicsPipeline>()
+            .unwrap();
+
+        let layout = graphics_pipeline
+            .layout()
+            .downcast_ref::<PipelineLayout>()
+            .unwrap();
 
         unsafe {
             self.graphics_device.device().cmd_push_constants(
                 self.command_buffer,
-                self.graphics_device.pipeline_layout(),
+                layout.layout(),
                 vk::ShaderStageFlags::ALL,
                 0,
-                bytemuck::cast_slice(&[bindings_offset, 0, 0, 0]),
+                data,
             );
         }
     }
@@ -136,6 +148,11 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
             .downcast_ref::<GraphicsPipeline>()
             .unwrap();
         let texture = texture.downcast_ref::<Texture>().unwrap();
+
+        let layout = graphics_pipeline
+            .layout()
+            .downcast_ref::<PipelineLayout>()
+            .unwrap();
 
         let render_area_extent = vk::Extent2D {
             width: texture.width(),
@@ -201,7 +218,7 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
             self.graphics_device.device().cmd_bind_descriptor_sets(
                 self.command_buffer,
                 vk::PipelineBindPoint::GRAPHICS,
-                self.graphics_device.pipeline_layout(),
+                layout.layout(),
                 0,
                 self.graphics_device.descriptor_sets(),
                 &[],

@@ -6,7 +6,6 @@
 
 use std::{
     ptr,
-    slice,
     sync::{Arc, Mutex},
 };
 
@@ -18,13 +17,12 @@ use gpu_allocator::{
 use windows::{
     core::Interface,
     Win32::{
-        Foundation::HANDLE,
+        Foundation::{CloseHandle, HANDLE},
         Graphics::{
             Direct3D::D3D_FEATURE_LEVEL_12_1,
             Direct3D12::{
                 D3D12CreateDevice,
                 D3D12GetDebugInterface,
-                D3D12SerializeRootSignature,
                 ID3D12CommandAllocator,
                 ID3D12CommandQueue,
                 ID3D12Debug6,
@@ -32,19 +30,10 @@ use windows::{
                 ID3D12Fence,
                 ID3D12GraphicsCommandList,
                 ID3D12Resource,
-                ID3D12RootSignature,
                 D3D12_COMMAND_LIST_TYPE_DIRECT,
                 D3D12_COMMAND_QUEUE_DESC,
                 D3D12_COMMAND_QUEUE_FLAG_NONE,
                 D3D12_FENCE_FLAG_NONE,
-                D3D12_ROOT_CONSTANTS,
-                D3D12_ROOT_PARAMETER1,
-                D3D12_ROOT_PARAMETER1_0,
-                D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
-                D3D12_ROOT_SIGNATURE_DESC,
-                D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED,
-                D3D12_SHADER_VISIBILITY_ALL,
-                D3D_ROOT_SIGNATURE_VERSION_1,
             },
             Dxgi::{
                 CreateDXGIFactory2,
@@ -71,6 +60,7 @@ use crate::{
         command_decoder::CommandDecoder,
         descriptor_manager::DescriptorManager,
         graphics_pipeline::GraphicsPipeline,
+        pipeline_layout::PipelineLayout,
         resource_handle_pair::ResourceHandlePair,
         resource_heap::{ResourceHeap, ResourceHeapDescriptor, ResourceHeapType},
         shader_module::ShaderModule,
@@ -80,6 +70,7 @@ use crate::{
     },
     graphics_device::GraphicsDeviceDescriptor,
     graphics_pipeline::GraphicsPipelineDescriptor,
+    pipeline_layout::PipelineLayoutDescriptor,
     shader_module::ShaderModuleDescriptor,
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
@@ -87,7 +78,7 @@ use crate::{
 
 #[derive(Debug)]
 pub(crate) struct ResourceHandler {
-    pub(crate) buffers: Mutex<Vec<ResourceHandlePair>>,
+    pub(crate) buffers: Mutex<Vec<(ResourceHandlePair, Option<gpu_allocator::d3d12::Resource>)>>,
 }
 
 #[derive(Debug)]
@@ -106,14 +97,12 @@ pub(crate) struct GraphicsDevice {
     fence: ID3D12Fence,
 
     upload_manager: UploadManager,
-
-    root_signature: ID3D12RootSignature,
+    descriptor_manager: DescriptorManager,
 
     _dsv_heap: ResourceHeap,
     rtv_heap: ResourceHeap,
-    descriptor_manager: DescriptorManager,
 
-    _allocator: Arc<Mutex<Allocator>>,
+    allocator: Arc<Mutex<Allocator>>,
 
     command_queue: ID3D12CommandQueue,
     device: ID3D12Device,
@@ -143,7 +132,6 @@ impl GraphicsDevice {
             .unwrap(),
         ));
 
-        let descriptor_manager = DescriptorManager::new(&device);
         let rtv_heap = ResourceHeap::new(
             &device,
             &ResourceHeapDescriptor {
@@ -159,8 +147,7 @@ impl GraphicsDevice {
             },
         );
 
-        let root_signature = Self::create_root_signature(&device);
-
+        let descriptor_manager = DescriptorManager::new(&device);
         let upload_manager = UploadManager::new(&device);
 
         let (fence, fence_event) = Self::create_fence(&device);
@@ -188,14 +175,12 @@ impl GraphicsDevice {
             fence,
 
             upload_manager,
-
-            root_signature,
+            descriptor_manager,
 
             _dsv_heap: dsv_heap,
             rtv_heap,
-            descriptor_manager,
 
-            _allocator: allocator,
+            allocator,
 
             command_queue,
             device,
@@ -279,53 +264,6 @@ impl GraphicsDevice {
         command_queue
     }
 
-    fn create_root_signature(device: &ID3D12Device) -> ID3D12RootSignature {
-        let push_constants = D3D12_ROOT_PARAMETER1 {
-            ParameterType: D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
-            Anonymous: D3D12_ROOT_PARAMETER1_0 {
-                Constants: D3D12_ROOT_CONSTANTS {
-                    ShaderRegister: 0,
-                    RegisterSpace: 0,
-                    Num32BitValues: 4,
-                },
-            },
-            ShaderVisibility: D3D12_SHADER_VISIBILITY_ALL,
-            ..Default::default()
-        };
-
-        let mut parameters = [push_constants];
-        let descriptor = D3D12_ROOT_SIGNATURE_DESC {
-            NumParameters: parameters.len() as u32,
-            pParameters: parameters.as_mut_ptr() as *const _,
-            // TODO: Static Samplers
-            Flags: D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED,
-            ..Default::default()
-        };
-
-        let mut signature = None;
-        unsafe {
-            D3D12SerializeRootSignature(
-                &descriptor,
-                D3D_ROOT_SIGNATURE_VERSION_1,
-                &mut signature,
-                None,
-            )
-            .unwrap();
-        };
-
-        let signature = signature.unwrap();
-
-        let root_signature = unsafe {
-            device.CreateRootSignature(
-                0,
-                slice::from_raw_parts(signature.GetBufferPointer() as _, signature.GetBufferSize()),
-            )
-        }
-        .unwrap();
-
-        root_signature
-    }
-
     fn create_fence(device: &ID3D12Device) -> (ID3D12Fence, HANDLE) {
         let fence = unsafe { device.CreateFence(0, D3D12_FENCE_FLAG_NONE) }.unwrap();
         let fence_event = unsafe { CreateEventA(None, false, false, None) }.unwrap();
@@ -381,7 +319,7 @@ impl GraphicsDevice {
     }
 
     pub(crate) fn allocator(&self) -> &Arc<Mutex<Allocator>> {
-        &self._allocator
+        &self.allocator
     }
 
     pub(super) fn cbv_srv_uav_heap(&self) -> &ResourceHeap {
@@ -390,10 +328,6 @@ impl GraphicsDevice {
 
     pub(super) fn rtv_heap(&self) -> &ResourceHeap {
         &self.rtv_heap
-    }
-
-    pub(crate) fn root_signature(&self) -> &ID3D12RootSignature {
-        &self.root_signature
     }
 
     pub(crate) fn resource_handler(&self) -> &Arc<ResourceHandler> {
@@ -406,9 +340,41 @@ impl GraphicsDevice {
     }
 }
 
+impl Drop for GraphicsDevice {
+    fn drop(&mut self) {
+        let frame_index = *self.current_frame_index.lock().unwrap() + 1;
+
+        unsafe {
+            self.command_queue
+                .Signal(&self.fence, frame_index as u64)
+                .unwrap();
+        }
+
+        if unsafe { self.fence.GetCompletedValue() } < frame_index as u64 {
+            unsafe {
+                self.fence
+                    .SetEventOnCompletion(frame_index as u64, self.fence_event)
+                    .unwrap();
+                WaitForSingleObject(self.fence_event, INFINITE);
+            }
+        }
+
+        unsafe {
+            CloseHandle(self.fence_event).unwrap();
+        }
+    }
+}
+
 impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
     fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Box<dyn crate::surface::Surface> {
         Box::new(Surface::new(self, descriptor))
+    }
+
+    fn create_pipeline_layout(
+        &self,
+        descriptor: &PipelineLayoutDescriptor,
+    ) -> Arc<dyn crate::pipeline_layout::PipelineLayout> {
+        Arc::new(PipelineLayout::new(self, descriptor))
     }
 
     fn create_graphics_pipeline(
@@ -458,12 +424,19 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
         }
 
         let mut buffers = self.resource_handler.buffers.lock().unwrap();
-        buffers.iter_mut().for_each(|resource_handle_pair| {
-            self.descriptor_manager
-                .retire_handle(resource_handle_pair.srv());
-            self.descriptor_manager
-                .retire_handle(resource_handle_pair.uav());
-        });
+        buffers
+            .iter_mut()
+            .for_each(|(resource_handle_pair, resource)| {
+                self.descriptor_manager
+                    .retire_handle(resource_handle_pair.srv());
+                self.descriptor_manager
+                    .retire_handle(resource_handle_pair.uav());
+                self.allocator
+                    .lock()
+                    .unwrap()
+                    .free_resource(resource.take().unwrap())
+                    .unwrap();
+            });
         buffers.clear();
 
         if surface.resized() {

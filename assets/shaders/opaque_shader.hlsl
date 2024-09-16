@@ -6,14 +6,7 @@
 
 #include "./assets/shaders/globals.hlsli"
 
-struct Bindings {
-  ArrayBuffer vertices;
-};
-
-struct Vertex {
-  float4 position;
-  float4 color;
-};
+DEFINE_PUSH_CONSTANT(ObjectPushConstants, g_push);
 
 struct VertexOutput {
   float4 position : SV_POSITION;
@@ -23,14 +16,15 @@ struct VertexOutput {
 VertexOutput vs_main(
   uint vertex_id : SV_VertexID
 ) {
-  Bindings bindings = load_bindings<Bindings>();
-  Vertex vertex = bindings.vertices.load<Vertex>(vertex_id);
-  //ByteAddressBuffer buffer = ResourceDescriptorHeap[2];
-  //Vertex vertex = buffer.Load<Vertex>(sizeof(Vertex) * vertex_id);
+  const Mesh mesh = g_push.get_mesh();
+  const float4 position = mesh.get_position(vertex_id);
+
+  const Material material = g_push.get_material();
+  const float4 base_color = material.base_color;
 
   VertexOutput output = (VertexOutput) 0;
-  output.position = float4(vertex.position.xyz, 1.0);
-  output.color = float4(vertex.color.xyz, 1.0);
+  output.position = float4(position.xyz, 1.0);
+  output.color = float4(base_color.xyz, 1.0);
   return output;
 }
 

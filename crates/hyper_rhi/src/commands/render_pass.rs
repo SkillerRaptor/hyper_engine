@@ -8,7 +8,7 @@ use std::{fmt::Debug, sync::Arc};
 
 use crate::{
     buffer::Buffer,
-    commands::{command::Command, descriptor::Descriptor},
+    commands::command::Command,
     graphics_pipeline::GraphicsPipeline,
     texture::Texture,
 };
@@ -31,10 +31,10 @@ impl<'a> RenderPass<'a> {
         Self { commands }
     }
 
-    pub fn bind_descriptor(&mut self, descriptor: &Descriptor) {
-        self.commands.push(Command::BindDescriptor {
-            buffer: Arc::clone(&descriptor.buffer),
-        });
+    pub fn push_constants(&mut self, data: &[u8]) {
+        self.commands.push(Command::PushConstants {
+            data: data.to_vec(),
+        })
     }
 
     pub fn bind_pipeline(&mut self, pipeline: &Arc<dyn GraphicsPipeline>) {

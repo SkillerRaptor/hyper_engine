@@ -12,7 +12,11 @@ pub trait CommandDecoder {
     fn begin_render_pass(&self, texture: &Arc<dyn Texture>);
     fn end_render_pass(&self, texture: &Arc<dyn Texture>);
 
-    fn bind_descriptor(&self, buffer: &Arc<dyn Buffer>);
+    fn push_constants(
+        &self,
+        graphics_pipeline: &Arc<dyn crate::graphics_pipeline::GraphicsPipeline>,
+        data: &[u8],
+    );
 
     fn bind_pipeline(
         &self,

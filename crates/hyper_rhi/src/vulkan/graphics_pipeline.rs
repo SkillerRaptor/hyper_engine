@@ -12,6 +12,7 @@ use crate::{
     graphics_pipeline::GraphicsPipelineDescriptor,
     vulkan::{
         graphics_device::{GraphicsDevice, ResourceHandler},
+        pipeline_layout::PipelineLayout,
         shader_module::ShaderModule,
     },
 };
@@ -20,6 +21,7 @@ use crate::{
 pub(crate) struct GraphicsPipeline {
     pipeline: vk::Pipeline,
 
+    layout: Arc<dyn crate::pipeline_layout::PipelineLayout>,
     resource_handler: Arc<ResourceHandler>,
 }
 
@@ -29,6 +31,8 @@ impl GraphicsPipeline {
         resource_handler: &Arc<ResourceHandler>,
         descriptor: &GraphicsPipelineDescriptor,
     ) -> Self {
+        let layout = descriptor.layout.downcast_ref::<PipelineLayout>().unwrap();
+
         let vertex_shader_entry = CString::new(descriptor.vertex_shader.entry_point()).unwrap();
         let vertex_shader_stage_create_info = vk::PipelineShaderStageCreateInfo::default()
             .stage(vk::ShaderStageFlags::VERTEX)
@@ -145,7 +149,7 @@ impl GraphicsPipeline {
             .depth_stencil_state(&depth_stencil_state_create_info)
             .color_blend_state(&color_blend_state_create_info)
             .dynamic_state(&dynamic_state_create_info)
-            .layout(graphics_device.pipeline_layout())
+            .layout(layout.layout())
             .render_pass(vk::RenderPass::null())
             .subpass(0)
             .base_pipeline_handle(vk::Pipeline::null())
@@ -161,8 +165,13 @@ impl GraphicsPipeline {
         Self {
             pipeline,
 
+            layout: Arc::clone(descriptor.layout),
             resource_handler: Arc::clone(resource_handler),
         }
+    }
+
+    pub(crate) fn layout(&self) -> &Arc<dyn crate::pipeline_layout::PipelineLayout> {
+        &self.layout
     }
 
     pub(crate) fn pipeline(&self) -> vk::Pipeline {

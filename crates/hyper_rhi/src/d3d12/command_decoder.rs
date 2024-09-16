@@ -40,6 +40,7 @@ use crate::{
         buffer::Buffer,
         graphics_device::GraphicsDevice,
         graphics_pipeline::GraphicsPipeline,
+        pipeline_layout::PipelineLayout,
         texture::Texture,
     },
     texture::Texture as _,
@@ -108,15 +109,17 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
         }
     }
 
-    fn bind_descriptor(&self, buffer: &Arc<dyn crate::buffer::Buffer>) {
-        let bindings_offset = buffer.handle().0;
-        let bindings_offsets = [bindings_offset, 0, 0, 0];
-
+    fn push_constants(
+        &self,
+        _graphics_pipeline: &Arc<dyn crate::graphics_pipeline::GraphicsPipeline>,
+        data: &[u8],
+    ) {
+        // TODO: Ensure data is same size as push constant
         unsafe {
             self.command_list.SetGraphicsRoot32BitConstants(
                 0,
-                4,
-                bindings_offsets.as_ptr() as *const _,
+                data.len() as u32 / 4,
+                data.as_ptr() as *const _,
                 0,
             );
         }
@@ -131,6 +134,11 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
             .downcast_ref::<GraphicsPipeline>()
             .unwrap();
         let texture = texture.downcast_ref::<Texture>().unwrap();
+
+        let layout = graphics_pipeline
+            .layout()
+            .downcast_ref::<PipelineLayout>()
+            .unwrap();
 
         let width = texture.width();
         let height = texture.height();
@@ -161,7 +169,7 @@ impl<'a> crate::commands::command_decoder::CommandDecoder for CommandDecoder<'a>
                     .clone(),
             )]);
             self.command_list
-                .SetGraphicsRootSignature(self.graphics_device.root_signature());
+                .SetGraphicsRootSignature(layout.root_signature());
             self.command_list
                 .SetPipelineState(graphics_pipeline.pipeline_state());
             self.command_list.RSSetViewports(&[viewport]);
