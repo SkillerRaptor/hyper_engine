@@ -11,7 +11,9 @@ use downcast_rs::Downcast;
 use crate::resource::Resource;
 
 #[derive(Clone, Debug)]
-pub struct TextureDescriptor {}
+pub struct TextureDescriptor<'a> {
+    pub label: Option<&'a str>,
+}
 
 pub trait Texture: Debug + Downcast + Resource {
     fn width(&self) -> u32;

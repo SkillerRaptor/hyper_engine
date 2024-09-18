@@ -162,6 +162,10 @@ impl GraphicsPipeline {
                 .unwrap()[0]
         };
 
+        if let Some(label) = descriptor.label {
+            graphics_device.set_debug_name(pipeline, label);
+        }
+
         Self {
             pipeline,
 

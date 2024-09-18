@@ -38,23 +38,27 @@ impl Renderer {
     pub fn new(graphics_device: &Arc<dyn GraphicsDevice>) -> Self {
         let object_pipeline_layout =
             graphics_device.create_pipeline_layout(&PipelineLayoutDescriptor {
+                label: Some("Object Pipeline Layout"),
                 push_constants_size: size_of::<ObjectPushConstants>(),
             });
 
         let opaque_pipeline = {
             let vertex_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
+                label: Some(""),
                 path: "./assets/shaders/opaque_shader.hlsl",
                 entry_point: "vs_main",
                 stage: ShaderStage::Vertex,
             });
 
             let fragment_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
+                label: Some(""),
                 path: "./assets/shaders/opaque_shader.hlsl",
                 entry_point: "fs_main",
                 stage: ShaderStage::Fragment,
             });
 
             graphics_device.create_graphics_pipeline(&GraphicsPipelineDescriptor {
+                label: Some("Opaque Graphics Pipeline"),
                 layout: &object_pipeline_layout,
                 vertex_shader: &vertex_shader,
                 fragment_shader: &fragment_shader,
@@ -62,6 +66,7 @@ impl Renderer {
         };
 
         let material = graphics_device.create_buffer(&BufferDescriptor {
+            label: Some("Material Buffer"),
             data: bytemuck::cast_slice(&[Material {
                 base_color: Vec4::new(1.0, 0.0, 0.0, 1.0),
             }]),
@@ -69,6 +74,7 @@ impl Renderer {
         });
 
         let positions = graphics_device.create_buffer(&BufferDescriptor {
+            label: Some("Positions Buffer"),
             data: bytemuck::cast_slice(&[
                 Vec4::new(-0.5, -0.5, 0.0, 1.0),
                 Vec4::new(0.5, -0.5, 0.0, 1.0),
@@ -79,11 +85,13 @@ impl Renderer {
         });
 
         let normals = graphics_device.create_buffer(&BufferDescriptor {
+            label: Some("Normals Buffer"),
             data: bytemuck::cast_slice(&[Vec4::ZERO, Vec4::ZERO, Vec4::ZERO, Vec4::ZERO]),
             usage: BufferUsage::STORAGE,
         });
 
         let mesh = graphics_device.create_buffer(&BufferDescriptor {
+            label: Some("Mesh Buffer"),
             data: bytemuck::cast_slice(&[Mesh {
                 positions: positions.handle(),
                 normals: normals.handle(),
@@ -93,6 +101,7 @@ impl Renderer {
         });
 
         let indices = graphics_device.create_buffer(&BufferDescriptor {
+            label: Some("Index Buffer"),
             data: bytemuck::cast_slice(&[0_u32, 1_u32, 2_u32, 2_u32, 3_u32, 0_u32, 0, 0]),
             usage: BufferUsage::INDEX,
         });
@@ -123,6 +132,7 @@ impl Renderer {
 
         {
             let mut render_pass = command_encoder.begin_render_pass(&RenderPassDescriptor {
+                label: Some("Main Render Pass"),
                 texture: &swapchain_texture,
             });
 

@@ -17,6 +17,7 @@ pub enum ShaderStage {
 
 #[derive(Clone, Debug)]
 pub struct ShaderModuleDescriptor<'a> {
+    pub label: Option<&'a str>,
     pub path: &'a str,
     pub entry_point: &'a str,
     pub stage: ShaderStage,

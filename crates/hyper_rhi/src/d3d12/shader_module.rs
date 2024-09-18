@@ -25,6 +25,8 @@ impl ShaderModule {
             OutputApi::D3D12,
         );
 
+        // TODO: Add label
+
         Self {
             entry_point: descriptor.entry_point.to_owned(),
             stage: descriptor.stage,

@@ -15,7 +15,7 @@ use gpu_allocator::{
     AllocatorDebugSettings,
 };
 use windows::{
-    core::Interface,
+    core::{Interface, HSTRING},
     Win32::{
         Foundation::{CloseHandle, HANDLE},
         Graphics::{
@@ -29,6 +29,7 @@ use windows::{
                 ID3D12Device,
                 ID3D12Fence,
                 ID3D12GraphicsCommandList,
+                ID3D12Object,
                 ID3D12Resource,
                 D3D12_COMMAND_LIST_TYPE_DIRECT,
                 D3D12_COMMAND_QUEUE_DESC,
@@ -291,6 +292,12 @@ impl GraphicsDevice {
         }
 
         command_list
+    }
+
+    pub(crate) fn set_debug_name(&self, object: &ID3D12Object, label: &str) {
+        unsafe {
+            object.SetName(&HSTRING::from(label)).unwrap();
+        }
     }
 
     pub(crate) fn allocate_buffer_handle(

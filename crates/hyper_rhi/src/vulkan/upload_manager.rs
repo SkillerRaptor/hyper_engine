@@ -155,6 +155,7 @@ impl UploadManager {
         let buffer = Buffer::new_staging(
             graphics_device,
             &BufferDescriptor {
+                label: Some("Staging Buffer"),
                 data: source,
                 usage: BufferUsage::STORAGE,
             },

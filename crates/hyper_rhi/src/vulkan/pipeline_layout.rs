@@ -36,6 +36,10 @@ impl PipelineLayout {
         }
         .unwrap();
 
+        if let Some(label) = descriptor.label {
+            graphics_device.set_debug_name(layout, label);
+        }
+
         Self {
             push_constants_size: descriptor.push_constants_size,
             layout,

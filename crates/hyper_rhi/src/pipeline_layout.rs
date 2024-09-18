@@ -9,7 +9,8 @@ use std::fmt::Debug;
 use downcast_rs::Downcast;
 
 #[derive(Clone, Debug)]
-pub struct PipelineLayoutDescriptor {
+pub struct PipelineLayoutDescriptor<'a> {
+    pub label: Option<&'a str>,
     pub push_constants_size: usize,
 }
 

@@ -67,13 +67,17 @@ impl PipelineLayout {
 
         let signature = signature.unwrap();
 
-        let root_signature = unsafe {
+        let root_signature: ID3D12RootSignature = unsafe {
             graphics_device.device().CreateRootSignature(
                 0,
                 slice::from_raw_parts(signature.GetBufferPointer() as _, signature.GetBufferSize()),
             )
         }
         .unwrap();
+
+        if let Some(label) = descriptor.label {
+            graphics_device.set_debug_name(&root_signature, label);
+        }
 
         Self {
             push_constants_size: descriptor.push_constants_size,

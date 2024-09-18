@@ -23,6 +23,7 @@ pub(crate) const ALIGNMENT: usize = 64 * 1024;
 
 #[derive(Clone, Debug)]
 pub struct BufferDescriptor<'a> {
+    pub label: Option<&'a str>,
     pub data: &'a [u8],
     pub usage: BufferUsage,
 }

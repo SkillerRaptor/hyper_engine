@@ -49,6 +49,10 @@ impl ShaderModule {
         }
         .unwrap();
 
+        if let Some(label) = descriptor.label {
+            graphics_device.set_debug_name(shader_module, label);
+        }
+
         Self {
             entry_point: descriptor.entry_point.to_owned(),
             stage: descriptor.stage,

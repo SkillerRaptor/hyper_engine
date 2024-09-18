@@ -15,6 +15,7 @@ use crate::{
 
 #[derive(Clone, Debug)]
 pub struct RenderPassDescriptor<'a> {
+    pub label: Option<&'a str>,
     pub texture: &'a Arc<dyn Texture>,
 }
 

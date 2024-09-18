@@ -6,7 +6,7 @@
 
 use std::{
     collections::HashSet,
-    ffi::{c_void, CStr},
+    ffi::{c_void, CStr, CString},
     sync::{Arc, Mutex},
 };
 
@@ -66,6 +66,7 @@ pub(crate) struct FrameData {
 
 struct DebugUtils {
     debug_messenger: vk::DebugUtilsMessengerEXT,
+    device: Option<debug_utils::Device>,
     loader: debug_utils::Instance,
 }
 
@@ -107,7 +108,7 @@ impl GraphicsDevice {
         let instance =
             Self::create_instance(descriptor.display_handle, &entry, validation_layers_enabled);
 
-        let debug_utils = if validation_layers_enabled {
+        let mut debug_utils = if validation_layers_enabled {
             Some(Self::create_debug_utils(&entry, &instance))
         } else {
             None
@@ -125,6 +126,10 @@ impl GraphicsDevice {
 
         let device = Self::create_device(&instance, physical_device, queue_family_index);
         let queue = unsafe { device.get_device_queue(queue_family_index, 0) };
+
+        if let Some(debug_utils) = debug_utils.as_mut() {
+            debug_utils.device = Some(debug_utils::Device::new(&instance, &device));
+        }
 
         let allocator = Arc::new(Mutex::new(
             Allocator::new(&AllocatorCreateDesc {
@@ -274,6 +279,7 @@ impl GraphicsDevice {
 
         DebugUtils {
             debug_messenger,
+            device: None,
             loader,
         }
     }
@@ -561,6 +567,30 @@ impl GraphicsDevice {
             self.device.destroy_image_view(texture_view, None);
         });
         texture_views.clear();
+    }
+
+    pub(crate) fn set_debug_name<T>(&self, object: T, label: &str)
+    where
+        T: vk::Handle,
+    {
+        // TODO: Ensure debug is enabled
+
+        let label = CString::new(label).unwrap();
+        let label_str = label.as_c_str();
+        let name_info = vk::DebugUtilsObjectNameInfoEXT::default()
+            .object_handle(object)
+            .object_name(label_str);
+
+        unsafe {
+            self.debug_utils
+                .as_ref()
+                .unwrap()
+                .device
+                .as_ref()
+                .unwrap()
+                .set_debug_utils_object_name(&name_info)
+                .unwrap();
+        }
     }
 
     pub(crate) fn allocate_buffer_handle(&self, buffer: vk::Buffer) -> ResourceHandle {

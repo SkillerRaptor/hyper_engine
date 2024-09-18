@@ -113,12 +113,16 @@ impl GraphicsPipeline {
         };
         state_descriptor.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-        let pipeline_state = unsafe {
+        let pipeline_state: ID3D12PipelineState = unsafe {
             graphics_device
                 .device()
                 .CreateGraphicsPipelineState(&state_descriptor)
         }
         .unwrap();
+
+        if let Some(label) = descriptor.label {
+            graphics_device.set_debug_name(&pipeline_state, label);
+        }
 
         Self {
             pipeline_state,

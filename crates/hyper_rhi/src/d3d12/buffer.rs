@@ -63,6 +63,10 @@ impl Buffer {
         let resource_handle_pair =
             graphics_device.allocate_buffer_handle(resource.resource(), size);
 
+        if let Some(label) = descriptor.label {
+            graphics_device.set_debug_name(resource.resource(), label);
+        }
+
         tracing::debug!(
             size,
             aligned_size,
