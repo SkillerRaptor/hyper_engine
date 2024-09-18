@@ -122,5 +122,7 @@ impl Engine {
             // Render
             self.renderer.render(&mut self.surface, &self.scene);
         }
+
+        self.graphics_device.wait_idle();
     }
 }

@@ -147,9 +147,3 @@ impl Renderer {
 
     pub fn render_ui(&self) {}
 }
-
-impl Drop for Renderer {
-    fn drop(&mut self) {
-        self.graphics_device.wait_idle();
-    }
-}
