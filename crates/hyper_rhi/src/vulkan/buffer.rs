@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::sync::Arc;
+use std::{
+    fmt::{self, Debug, Formatter},
+    sync::Arc,
+};
 
 use ash::vk;
 use gpu_allocator::{
@@ -16,10 +19,9 @@ use hyper_core::alignment::Alignment;
 use crate::{
     buffer::{self, BufferDescriptor, BufferUsage},
     resource::{Resource, ResourceHandle},
-    vulkan::graphics_device::{GraphicsDevice, ResourceBuffer, ResourceHandler},
+    vulkan::graphics_device::GraphicsDeviceShared,
 };
 
-#[derive(Debug)]
 pub(crate) struct Buffer {
     resource_handle: ResourceHandle,
 
@@ -28,11 +30,14 @@ pub(crate) struct Buffer {
     allocation: Option<Allocation>,
     raw: vk::Buffer,
 
-    resource_handler: Arc<ResourceHandler>,
+    graphics_device: Arc<GraphicsDeviceShared>,
 }
 
 impl Buffer {
-    pub(crate) fn new(graphics_device: &GraphicsDevice, descriptor: &BufferDescriptor) -> Self {
+    pub(crate) fn new(
+        graphics_device: &Arc<GraphicsDeviceShared>,
+        descriptor: &BufferDescriptor,
+    ) -> Self {
         let size = descriptor.data.len();
         let aligned_size = size.align_up(buffer::ALIGNMENT);
 
@@ -64,12 +69,12 @@ impl Buffer {
             allocation: Some(allocation),
             raw: buffer,
 
-            resource_handler: Arc::clone(graphics_device.resource_handler()),
+            graphics_device: Arc::clone(graphics_device),
         }
     }
 
     pub(crate) fn new_staging(
-        graphics_device: &GraphicsDevice,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         descriptor: &BufferDescriptor,
     ) -> Self {
         let size = descriptor.data.len();
@@ -93,11 +98,11 @@ impl Buffer {
             allocation: Some(allocation),
             raw: buffer,
 
-            resource_handler: Arc::clone(graphics_device.resource_handler()),
+            graphics_device: Arc::clone(graphics_device),
         }
     }
 
-    fn create_buffer(graphics_device: &GraphicsDevice, aligned_size: usize) -> vk::Buffer {
+    fn create_buffer(graphics_device: &GraphicsDeviceShared, aligned_size: usize) -> vk::Buffer {
         // NOTE: Will this hurt any performance?
         let usage = vk::BufferUsageFlags::STORAGE_BUFFER
             | vk::BufferUsageFlags::INDEX_BUFFER
@@ -114,7 +119,7 @@ impl Buffer {
     }
 
     fn create_allocation(
-        graphics_device: &GraphicsDevice,
+        graphics_device: &GraphicsDeviceShared,
         staging: bool,
         buffer: vk::Buffer,
     ) -> Allocation {
@@ -160,15 +165,29 @@ impl Buffer {
 
 impl Drop for Buffer {
     fn drop(&mut self) {
-        self.resource_handler
-            .buffers
-            .lock()
-            .unwrap()
-            .push(ResourceBuffer {
-                allocation: Some(self.allocation.take().unwrap()),
-                buffer: self.raw,
-                handle: self.resource_handle,
-            });
+        unsafe {
+            self.graphics_device
+                .descriptor_manager()
+                .retire_handle(self.resource_handle);
+            self.graphics_device
+                .allocator()
+                .lock()
+                .unwrap()
+                .free(self.allocation.take().unwrap())
+                .unwrap();
+            self.graphics_device.device().destroy_buffer(self.raw, None);
+        }
+    }
+}
+
+impl Debug for Buffer {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Buffer")
+            .field("resource_handle", &self.resource_handle)
+            .field("size", &self.size)
+            .field("allocation", &self.allocation)
+            .field("raw", &self.raw)
+            .finish()
     }
 }
 

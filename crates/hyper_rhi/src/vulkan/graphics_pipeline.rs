@@ -4,31 +4,34 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::{ffi::CString, sync::Arc};
+use std::{
+    ffi::CString,
+    fmt::{self, Debug, Formatter},
+    sync::Arc,
+};
 
 use ash::vk;
 
 use crate::{
     graphics_pipeline::GraphicsPipelineDescriptor,
     vulkan::{
-        graphics_device::{GraphicsDevice, ResourceHandler},
+        graphics_device::GraphicsDeviceShared,
         pipeline_layout::PipelineLayout,
         shader_module::ShaderModule,
     },
 };
 
-#[derive(Debug)]
 pub(crate) struct GraphicsPipeline {
-    pipeline: vk::Pipeline,
+    raw: vk::Pipeline,
 
     layout: Arc<dyn crate::pipeline_layout::PipelineLayout>,
-    resource_handler: Arc<ResourceHandler>,
+
+    graphics_device: Arc<GraphicsDeviceShared>,
 }
 
 impl GraphicsPipeline {
     pub(crate) fn new(
-        graphics_device: &GraphicsDevice,
-        resource_handler: &Arc<ResourceHandler>,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         descriptor: &GraphicsPipelineDescriptor,
     ) -> Self {
         let layout = descriptor.layout.downcast_ref::<PipelineLayout>().unwrap();
@@ -167,10 +170,11 @@ impl GraphicsPipeline {
         }
 
         Self {
-            pipeline,
+            raw: pipeline,
 
             layout: Arc::clone(descriptor.layout),
-            resource_handler: Arc::clone(resource_handler),
+
+            graphics_device: Arc::clone(graphics_device),
         }
     }
 
@@ -179,17 +183,26 @@ impl GraphicsPipeline {
     }
 
     pub(crate) fn pipeline(&self) -> vk::Pipeline {
-        self.pipeline
+        self.raw
     }
 }
 
 impl Drop for GraphicsPipeline {
     fn drop(&mut self) {
-        self.resource_handler
-            .graphics_pipeline
-            .lock()
-            .unwrap()
-            .push(self.pipeline);
+        unsafe {
+            self.graphics_device
+                .device()
+                .destroy_pipeline(self.raw, None);
+        }
+    }
+}
+
+impl Debug for GraphicsPipeline {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("GraphicsPipeline")
+            .field("raw", &self.raw)
+            .field("layout", &self.layout)
+            .finish()
     }
 }
 

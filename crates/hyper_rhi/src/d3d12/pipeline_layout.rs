@@ -4,7 +4,11 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::slice;
+use std::{
+    fmt::{self, Debug, Formatter},
+    slice,
+    sync::Arc,
+};
 
 use windows::Win32::Graphics::Direct3D12::{
     D3D12SerializeRootSignature,
@@ -19,17 +23,20 @@ use windows::Win32::Graphics::Direct3D12::{
     D3D_ROOT_SIGNATURE_VERSION_1,
 };
 
-use crate::{d3d12::graphics_device::GraphicsDevice, pipeline_layout::PipelineLayoutDescriptor};
-
-#[derive(Debug)]
+use crate::{
+    d3d12::graphics_device::GraphicsDeviceShared,
+    pipeline_layout::PipelineLayoutDescriptor,
+};
 pub(crate) struct PipelineLayout {
     push_constants_size: usize,
     root_signature: ID3D12RootSignature,
+
+    graphics_device: Arc<GraphicsDeviceShared>,
 }
 
 impl PipelineLayout {
     pub(crate) fn new(
-        graphics_device: &GraphicsDevice,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         descriptor: &PipelineLayoutDescriptor,
     ) -> Self {
         let push_constants = D3D12_ROOT_PARAMETER1 {
@@ -82,11 +89,22 @@ impl PipelineLayout {
         Self {
             push_constants_size: descriptor.push_constants_size,
             root_signature,
+
+            graphics_device: Arc::clone(graphics_device),
         }
     }
 
     pub(crate) fn root_signature(&self) -> &ID3D12RootSignature {
         &self.root_signature
+    }
+}
+
+impl Debug for PipelineLayout {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("PipelineLayout")
+            .field("push_constants_size", &self.push_constants_size)
+            .field("root_signature", &self.root_signature)
+            .finish()
     }
 }
 

@@ -4,7 +4,12 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::{ffi::c_void, mem, sync::Arc};
+use std::{
+    ffi::c_void,
+    fmt::{self, Debug, Formatter},
+    mem,
+    sync::Arc,
+};
 
 use windows::Win32::Graphics::{
     Direct3D12::{
@@ -29,23 +34,24 @@ use windows::Win32::Graphics::{
 
 use crate::{
     d3d12::{
-        graphics_device::GraphicsDevice,
+        graphics_device::GraphicsDeviceShared,
         pipeline_layout::PipelineLayout,
         shader_module::ShaderModule,
     },
     graphics_pipeline::GraphicsPipelineDescriptor,
 };
 
-#[derive(Debug)]
 pub struct GraphicsPipeline {
     pipeline_state: ID3D12PipelineState,
 
     layout: Arc<dyn crate::pipeline_layout::PipelineLayout>,
+
+    graphics_device: Arc<GraphicsDeviceShared>,
 }
 
 impl GraphicsPipeline {
     pub(crate) fn new(
-        graphics_device: &GraphicsDevice,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         descriptor: &GraphicsPipelineDescriptor,
     ) -> Self {
         let layout = descriptor.layout.downcast_ref::<PipelineLayout>().unwrap();
@@ -128,6 +134,8 @@ impl GraphicsPipeline {
             pipeline_state,
 
             layout: Arc::clone(descriptor.layout),
+
+            graphics_device: Arc::clone(graphics_device),
         }
     }
 
@@ -137,6 +145,15 @@ impl GraphicsPipeline {
 
     pub(crate) fn pipeline_state(&self) -> &ID3D12PipelineState {
         &self.pipeline_state
+    }
+}
+
+impl Debug for GraphicsPipeline {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("GraphicsPipeline")
+            .field("pipeline_state", &self.pipeline_state)
+            .field("layout", &self.layout)
+            .finish()
     }
 }
 

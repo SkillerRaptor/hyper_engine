@@ -55,10 +55,9 @@ use windows::{
 
 use crate::{
     buffer::BufferDescriptor,
-    commands::{command_encoder::CommandEncoder, command_list::CommandList},
     d3d12::{
         buffer::Buffer,
-        command_decoder::CommandDecoder,
+        command_list::CommandList,
         descriptor_manager::DescriptorManager,
         graphics_pipeline::GraphicsPipeline,
         pipeline_layout::PipelineLayout,
@@ -78,20 +77,13 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub(crate) struct ResourceHandler {
-    pub(crate) buffers: Mutex<Vec<(ResourceHandlePair, Option<gpu_allocator::d3d12::Resource>)>>,
-}
-
-#[derive(Debug)]
 pub(crate) struct FrameData {
     pub(crate) command_list: ID3D12GraphicsCommandList,
     pub(crate) command_allocator: ID3D12CommandAllocator,
 }
 
-pub(crate) struct GraphicsDevice {
+pub(crate) struct GraphicsDeviceShared {
     current_frame_index: Mutex<u32>,
-
-    resource_handler: Arc<ResourceHandler>,
 
     frames: Vec<FrameData>,
     fence_event: HANDLE,
@@ -103,12 +95,78 @@ pub(crate) struct GraphicsDevice {
     _dsv_heap: ResourceHeap,
     rtv_heap: ResourceHeap,
 
-    allocator: Arc<Mutex<Allocator>>,
+    allocator: Mutex<Allocator>,
 
     command_queue: ID3D12CommandQueue,
     device: ID3D12Device,
     _adapter: IDXGIAdapter4,
     factory: IDXGIFactory7,
+}
+
+impl GraphicsDeviceShared {
+    pub(crate) fn set_debug_name(&self, object: &ID3D12Object, label: &str) {
+        unsafe {
+            object.SetName(&HSTRING::from(label)).unwrap();
+        }
+    }
+
+    pub(crate) fn allocate_buffer_handle(
+        &self,
+        resource: &ID3D12Resource,
+        size: usize,
+    ) -> ResourceHandlePair {
+        self.descriptor_manager
+            .allocate_buffer_handle(&self.device, resource, size)
+    }
+
+    pub(crate) fn upload_buffer(
+        self: &Arc<GraphicsDeviceShared>,
+        source: &[u8],
+        destination: &ID3D12Resource,
+    ) {
+        self.upload_manager.upload_buffer(self, source, destination);
+    }
+
+    pub(crate) fn factory(&self) -> &IDXGIFactory7 {
+        &self.factory
+    }
+
+    pub(crate) fn device(&self) -> &ID3D12Device {
+        &self.device
+    }
+
+    pub(crate) fn command_queue(&self) -> &ID3D12CommandQueue {
+        &self.command_queue
+    }
+
+    pub(crate) fn allocator(&self) -> &Mutex<Allocator> {
+        &self.allocator
+    }
+
+    pub(super) fn cbv_srv_uav_heap(&self) -> &ResourceHeap {
+        &self.descriptor_manager.cbv_srv_uav_heap()
+    }
+
+    pub(super) fn rtv_heap(&self) -> &ResourceHeap {
+        &self.rtv_heap
+    }
+
+    pub(crate) fn current_frame(&self) -> &FrameData {
+        let index = *self.current_frame_index.lock().unwrap() % crate::graphics_device::FRAME_COUNT;
+        &self.frames[index as usize]
+    }
+}
+
+impl Drop for GraphicsDeviceShared {
+    fn drop(&mut self) {
+        unsafe {
+            CloseHandle(self.fence_event).unwrap();
+        }
+    }
+}
+
+pub(crate) struct GraphicsDevice {
+    shared: Arc<GraphicsDeviceShared>,
 }
 
 impl GraphicsDevice {
@@ -124,14 +182,14 @@ impl GraphicsDevice {
         let device = Self::create_device(&adapter);
         let command_queue = Self::create_command_queue(&device);
 
-        let allocator = Arc::new(Mutex::new(
+        let allocator = Mutex::new(
             Allocator::new(&AllocatorCreateDesc {
                 device: ID3D12DeviceVersion::Device(device.clone()),
                 debug_settings: AllocatorDebugSettings::default(),
                 allocation_sizes: AllocationSizes::default(),
             })
             .unwrap(),
-        ));
+        );
 
         let rtv_heap = ResourceHeap::new(
             &device,
@@ -165,28 +223,26 @@ impl GraphicsDevice {
         }
 
         Self {
-            current_frame_index: Mutex::new(u32::MAX),
+            shared: Arc::new(GraphicsDeviceShared {
+                current_frame_index: Mutex::new(u32::MAX),
 
-            resource_handler: Arc::new(ResourceHandler {
-                buffers: Mutex::new(Vec::new()),
+                frames,
+                fence_event,
+                fence,
+
+                upload_manager,
+                descriptor_manager,
+
+                _dsv_heap: dsv_heap,
+                rtv_heap,
+
+                allocator,
+
+                command_queue,
+                device,
+                _adapter: adapter,
+                factory,
             }),
-
-            frames,
-            fence_event,
-            fence,
-
-            upload_manager,
-            descriptor_manager,
-
-            _dsv_heap: dsv_heap,
-            rtv_heap,
-
-            allocator,
-
-            command_queue,
-            device,
-            _adapter: adapter,
-            factory,
         }
     }
 
@@ -293,168 +349,81 @@ impl GraphicsDevice {
 
         command_list
     }
-
-    pub(crate) fn set_debug_name(&self, object: &ID3D12Object, label: &str) {
-        unsafe {
-            object.SetName(&HSTRING::from(label)).unwrap();
-        }
-    }
-
-    pub(crate) fn allocate_buffer_handle(
-        &self,
-        resource: &ID3D12Resource,
-        size: usize,
-    ) -> ResourceHandlePair {
-        self.descriptor_manager
-            .allocate_buffer_handle(&self.device, resource, size)
-    }
-
-    pub(crate) fn upload_buffer(&self, source: &[u8], destination: &ID3D12Resource) {
-        self.upload_manager.upload_buffer(self, source, destination);
-    }
-
-    pub(crate) fn factory(&self) -> &IDXGIFactory7 {
-        &self.factory
-    }
-
-    pub(crate) fn device(&self) -> &ID3D12Device {
-        &self.device
-    }
-
-    pub(crate) fn command_queue(&self) -> &ID3D12CommandQueue {
-        &self.command_queue
-    }
-
-    pub(crate) fn allocator(&self) -> &Arc<Mutex<Allocator>> {
-        &self.allocator
-    }
-
-    pub(super) fn cbv_srv_uav_heap(&self) -> &ResourceHeap {
-        &self.descriptor_manager.cbv_srv_uav_heap()
-    }
-
-    pub(super) fn rtv_heap(&self) -> &ResourceHeap {
-        &self.rtv_heap
-    }
-
-    pub(crate) fn resource_handler(&self) -> &Arc<ResourceHandler> {
-        &self.resource_handler
-    }
-
-    pub(crate) fn current_frame(&self) -> &FrameData {
-        let index = *self.current_frame_index.lock().unwrap() % crate::graphics_device::FRAME_COUNT;
-        &self.frames[index as usize]
-    }
-}
-
-impl Drop for GraphicsDevice {
-    fn drop(&mut self) {
-        unsafe {
-            CloseHandle(self.fence_event).unwrap();
-        }
-    }
 }
 
 impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
     fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Box<dyn crate::surface::Surface> {
-        Box::new(Surface::new(self, descriptor))
+        Box::new(Surface::new(&self.shared, descriptor))
     }
 
     fn create_pipeline_layout(
         &self,
         descriptor: &PipelineLayoutDescriptor,
     ) -> Arc<dyn crate::pipeline_layout::PipelineLayout> {
-        Arc::new(PipelineLayout::new(self, descriptor))
+        Arc::new(PipelineLayout::new(&self.shared, descriptor))
     }
 
     fn create_graphics_pipeline(
         &self,
         descriptor: &GraphicsPipelineDescriptor,
     ) -> Arc<dyn crate::graphics_pipeline::GraphicsPipeline> {
-        Arc::new(GraphicsPipeline::new(self, descriptor))
+        Arc::new(GraphicsPipeline::new(&self.shared, descriptor))
     }
 
     fn create_buffer(&self, descriptor: &BufferDescriptor) -> Arc<dyn crate::buffer::Buffer> {
-        Arc::new(Buffer::new(self, descriptor))
+        Arc::new(Buffer::new(&self.shared, descriptor))
     }
 
     fn create_shader_module(
         &self,
         descriptor: &ShaderModuleDescriptor,
     ) -> Arc<dyn crate::shader_module::ShaderModule> {
-        Arc::new(ShaderModule::new(descriptor))
+        Arc::new(ShaderModule::new(&self.shared, descriptor))
     }
 
     fn create_texture(&self, descriptor: &TextureDescriptor) -> Arc<dyn crate::texture::Texture> {
-        Arc::new(Texture::new(self, descriptor))
+        Arc::new(Texture::new(&self.shared, descriptor))
     }
 
-    fn create_command_encoder(&self) -> CommandEncoder {
-        CommandEncoder::new()
+    fn create_command_list(&self) -> Arc<dyn crate::command_list::CommandList> {
+        Arc::new(CommandList::new(&self.shared))
     }
 
     fn begin_frame(&self, surface: &mut Box<dyn crate::surface::Surface>, frame_index: u32) {
-        *self.current_frame_index.lock().unwrap() = frame_index;
+        *self.shared.current_frame_index.lock().unwrap() = frame_index;
 
         let surface = surface.downcast_mut::<Surface>().unwrap();
 
         unsafe {
-            self.command_queue
-                .Signal(&self.fence, frame_index as u64)
+            self.shared
+                .command_queue
+                .Signal(&self.shared.fence, frame_index as u64)
                 .unwrap();
         }
 
-        if unsafe { self.fence.GetCompletedValue() } < frame_index as u64 {
+        if unsafe { self.shared.fence.GetCompletedValue() } < frame_index as u64 {
             unsafe {
-                self.fence
-                    .SetEventOnCompletion(frame_index as u64, self.fence_event)
+                self.shared
+                    .fence
+                    .SetEventOnCompletion(frame_index as u64, self.shared.fence_event)
                     .unwrap();
-                WaitForSingleObject(self.fence_event, INFINITE);
+                WaitForSingleObject(self.shared.fence_event, INFINITE);
             }
         }
 
-        let mut buffers = self.resource_handler.buffers.lock().unwrap();
-        buffers
-            .iter_mut()
-            .for_each(|(resource_handle_pair, resource)| {
-                self.descriptor_manager
-                    .retire_handle(resource_handle_pair.srv());
-                self.descriptor_manager
-                    .retire_handle(resource_handle_pair.uav());
-                self.allocator
-                    .lock()
-                    .unwrap()
-                    .free_resource(resource.take().unwrap())
-                    .unwrap();
-            });
-        buffers.clear();
-
         if surface.resized() {
-            surface.rebuild(self);
+            surface.rebuild();
         }
     }
 
     fn end_frame(&self) {}
 
-    fn submit(&self, command_list: CommandList) {
-        let command_allocator = &self.current_frame().command_allocator;
-        let current_command_list = &self.current_frame().command_list;
-
+    fn execute(&self, _command_list: &Arc<dyn crate::command_list::CommandList>) {
+        let command_list = Some(self.shared.current_frame().command_list.cast().unwrap());
         unsafe {
-            command_allocator.Reset().unwrap();
-        }
-
-        let command_decoder = CommandDecoder::new(self, command_allocator, current_command_list);
-        command_list.execute(&command_decoder);
-
-        unsafe {
-            current_command_list.Close().unwrap();
-        }
-
-        let executeable_command_list = Some(current_command_list.cast().unwrap());
-        unsafe {
-            self.command_queue
-                .ExecuteCommandLists(&[executeable_command_list]);
+            self.shared
+                .command_queue
+                .ExecuteCommandLists(&[command_list]);
         }
     }
 
@@ -470,21 +439,23 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
         }
     }
 
-    fn wait_idle(&self) {
-        let frame_index = *self.current_frame_index.lock().unwrap() + 1;
+    fn wait_for_idle(&self) {
+        let frame_index = *self.shared.current_frame_index.lock().unwrap() + 1;
 
         unsafe {
-            self.command_queue
-                .Signal(&self.fence, frame_index as u64)
+            self.shared
+                .command_queue
+                .Signal(&self.shared.fence, frame_index as u64)
                 .unwrap();
         }
 
-        if unsafe { self.fence.GetCompletedValue() } < frame_index as u64 {
+        if unsafe { self.shared.fence.GetCompletedValue() } < frame_index as u64 {
             unsafe {
-                self.fence
-                    .SetEventOnCompletion(frame_index as u64, self.fence_event)
+                self.shared
+                    .fence
+                    .SetEventOnCompletion(frame_index as u64, self.shared.fence_event)
                     .unwrap();
-                WaitForSingleObject(self.fence_event, INFINITE);
+                WaitForSingleObject(self.shared.fence_event, INFINITE);
             }
         }
     }

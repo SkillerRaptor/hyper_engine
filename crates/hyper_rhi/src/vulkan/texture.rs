@@ -4,31 +4,32 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::sync::Arc;
+use std::{
+    fmt::{self, Debug, Formatter},
+    sync::Arc,
+};
 
 use ash::vk;
 
 use crate::{
     resource::{Resource, ResourceHandle},
     texture::TextureDescriptor,
-    vulkan::graphics_device::{GraphicsDevice, ResourceHandler},
+    vulkan::graphics_device::GraphicsDeviceShared,
 };
 
-#[derive(Debug)]
 pub(crate) struct Texture {
     height: u32,
     width: u32,
 
     view: vk::ImageView,
-    image: vk::Image,
+    raw: vk::Image,
 
-    resource_handler: Arc<ResourceHandler>,
+    graphics_device: Arc<GraphicsDeviceShared>,
 }
 
 impl Texture {
     pub(crate) fn new(
-        _graphics_device: &GraphicsDevice,
-        _resource_handler: &Arc<ResourceHandler>,
+        _graphics_device: &Arc<GraphicsDeviceShared>,
         _descriptor: &TextureDescriptor,
     ) -> Self {
         todo!();
@@ -36,8 +37,7 @@ impl Texture {
 
     // NOTE: Maybe add a descriptor for the format and more parameters?
     pub(super) fn new_external(
-        graphics_device: &GraphicsDevice,
-        resource_handler: &Arc<ResourceHandler>,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         image: vk::Image,
         width: u32,
         height: u32,
@@ -75,14 +75,14 @@ impl Texture {
             width,
 
             view,
-            image,
+            raw: image,
 
-            resource_handler: Arc::clone(resource_handler),
+            graphics_device: Arc::clone(graphics_device),
         }
     }
 
     pub(crate) fn image(&self) -> vk::Image {
-        self.image
+        self.raw
     }
 
     pub(crate) fn view(&self) -> vk::ImageView {
@@ -94,11 +94,22 @@ impl Drop for Texture {
     fn drop(&mut self) {
         // TODO: Destroy texture allocation too if present
 
-        self.resource_handler
-            .texture_views
-            .lock()
-            .unwrap()
-            .push(self.view);
+        unsafe {
+            self.graphics_device
+                .device()
+                .destroy_image_view(self.view, None);
+        }
+    }
+}
+
+impl Debug for Texture {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Texture")
+            .field("height", &self.height)
+            .field("width", &self.width)
+            .field("view", &self.view)
+            .field("raw", &self.raw)
+            .finish()
     }
 }
 

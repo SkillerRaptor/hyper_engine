@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{
+    atomic::{AtomicU64, Ordering},
+    Arc,
+};
 
 use windows::{
     core::Interface,
@@ -25,7 +28,7 @@ use windows::{
 
 use crate::{
     buffer::{BufferDescriptor, BufferUsage},
-    d3d12::{buffer::Buffer, graphics_device::GraphicsDevice},
+    d3d12::{buffer::Buffer, graphics_device::GraphicsDeviceShared},
 };
 
 pub(crate) struct UploadManager {
@@ -85,7 +88,7 @@ impl UploadManager {
         (fence, event)
     }
 
-    fn immediate_submit<F>(&self, graphics_device: &GraphicsDevice, function: F)
+    fn immediate_submit<F>(&self, graphics_device: &GraphicsDeviceShared, function: F)
     where
         F: FnOnce(&ID3D12GraphicsCommandList),
     {
@@ -119,7 +122,7 @@ impl UploadManager {
 
     pub(crate) fn upload_buffer(
         &self,
-        graphics_device: &GraphicsDevice,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         source: &[u8],
         destination: &ID3D12Resource,
     ) {

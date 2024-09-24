@@ -14,10 +14,7 @@ use raw_window_handle::{DisplayHandle, WindowHandle};
 
 use crate::{
     surface::SurfaceDescriptor,
-    vulkan::{
-        graphics_device::{GraphicsDevice, ResourceHandler},
-        texture::Texture,
-    },
+    vulkan::{graphics_device::GraphicsDeviceShared, texture::Texture},
 };
 
 pub struct Surface {
@@ -31,14 +28,15 @@ pub struct Surface {
     swapchain: vk::SwapchainKHR,
     swapchain_loader: swapchain::Device,
 
-    inner: vk::SurfaceKHR,
+    raw: vk::SurfaceKHR,
     loader: surface::Instance,
+
+    graphics_device: Arc<GraphicsDeviceShared>,
 }
 
 impl Surface {
     pub(crate) fn new(
-        graphics_device: &GraphicsDevice,
-        resource_handler: &Arc<ResourceHandler>,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         descriptor: &SurfaceDescriptor,
     ) -> Self {
         let loader = surface::Instance::new(graphics_device.entry(), graphics_device.instance());
@@ -63,7 +61,6 @@ impl Surface {
 
         let textures = Self::create_textures(
             graphics_device,
-            resource_handler,
             &swapchain_loader,
             swapchain,
             size.x,
@@ -81,13 +78,15 @@ impl Surface {
             swapchain,
             swapchain_loader,
 
-            inner: surface,
+            raw: surface,
             loader,
+
+            graphics_device: Arc::clone(graphics_device),
         }
     }
 
     fn create_surface(
-        graphics_device: &GraphicsDevice,
+        graphics_device: &GraphicsDeviceShared,
         display_handle: &DisplayHandle<'_>,
         window_handle: &WindowHandle<'_>,
     ) -> vk::SurfaceKHR {
@@ -106,7 +105,7 @@ impl Surface {
     }
 
     fn create_swapchain(
-        graphics_device: &GraphicsDevice,
+        graphics_device: &GraphicsDeviceShared,
         width: u32,
         height: u32,
         surface_loader: &surface::Instance,
@@ -207,8 +206,7 @@ impl Surface {
     }
 
     fn create_textures(
-        graphics_device: &GraphicsDevice,
-        resource_handler: &Arc<ResourceHandler>,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         loader: &swapchain::Device,
         swapchain: vk::SwapchainKHR,
         width: u32,
@@ -222,7 +220,6 @@ impl Surface {
             .map(|&image| -> Arc<dyn crate::texture::Texture> {
                 Arc::new(Texture::new_external(
                     graphics_device,
-                    resource_handler,
                     image,
                     width,
                     height,
@@ -243,24 +240,19 @@ impl Surface {
         }
     }
 
-    pub(crate) fn rebuild(
-        &mut self,
-        graphics_device: &GraphicsDevice,
-        resource_handler: &Arc<ResourceHandler>,
-    ) {
+    pub(crate) fn rebuild(&mut self) {
         let swapchain = Self::create_swapchain(
-            graphics_device,
+            &self.graphics_device,
             self.width,
             self.height,
             &self.loader,
-            self.inner,
+            self.raw,
             &self.swapchain_loader,
             self.swapchain,
         );
 
         let textures = Self::create_textures(
-            graphics_device,
-            resource_handler,
+            &self.graphics_device,
             &self.swapchain_loader,
             swapchain,
             self.width,
@@ -301,7 +293,7 @@ impl Drop for Surface {
         self.destroy_swapchain();
 
         unsafe {
-            self.loader.destroy_surface(self.inner, None);
+            self.loader.destroy_surface(self.raw, None);
         }
     }
 }

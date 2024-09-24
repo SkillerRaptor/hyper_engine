@@ -123,6 +123,6 @@ impl Engine {
             self.renderer.render(&mut self.surface, &self.scene);
         }
 
-        self.graphics_device.wait_idle();
+        self.graphics_device.wait_for_idle();
     }
 }

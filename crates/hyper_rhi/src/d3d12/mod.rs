@@ -7,10 +7,11 @@
 #![cfg(target_os = "windows")]
 
 mod buffer;
-mod command_decoder;
+mod command_list;
 mod descriptor_manager;
 mod graphics_pipeline;
 mod pipeline_layout;
+mod render_pass;
 mod resource_handle_pair;
 mod resource_heap;
 mod shader_module;

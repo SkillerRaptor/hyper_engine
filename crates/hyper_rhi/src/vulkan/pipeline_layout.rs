@@ -4,19 +4,28 @@
 // SPDX-License-Identifier: MIT
 //
 
+use std::{
+    fmt::{self, Debug, Formatter},
+    sync::Arc,
+};
+
 use ash::vk;
 
-use crate::{pipeline_layout::PipelineLayoutDescriptor, vulkan::graphics_device::GraphicsDevice};
+use crate::{
+    pipeline_layout::PipelineLayoutDescriptor,
+    vulkan::graphics_device::GraphicsDeviceShared,
+};
 
-#[derive(Debug)]
 pub(crate) struct PipelineLayout {
     push_constants_size: usize,
-    layout: vk::PipelineLayout,
+    raw: vk::PipelineLayout,
+
+    graphics_device: Arc<GraphicsDeviceShared>,
 }
 
 impl PipelineLayout {
     pub(crate) fn new(
-        graphics_device: &GraphicsDevice,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         descriptor: &PipelineLayoutDescriptor,
     ) -> Self {
         let bindings_range = vk::PushConstantRange::default()
@@ -29,7 +38,7 @@ impl PipelineLayout {
             .set_layouts(graphics_device.descriptor_manager().layouts())
             .push_constant_ranges(&push_ranges);
 
-        let layout = unsafe {
+        let pipeline_layout = unsafe {
             graphics_device
                 .device()
                 .create_pipeline_layout(&create_info, None)
@@ -37,23 +46,38 @@ impl PipelineLayout {
         .unwrap();
 
         if let Some(label) = descriptor.label {
-            graphics_device.set_debug_name(layout, label);
+            graphics_device.set_debug_name(pipeline_layout, label);
         }
 
         Self {
             push_constants_size: descriptor.push_constants_size,
-            layout,
+            raw: pipeline_layout,
+
+            graphics_device: Arc::clone(graphics_device),
         }
     }
 
     pub(crate) fn layout(&self) -> vk::PipelineLayout {
-        self.layout
+        self.raw
     }
 }
 
 impl Drop for PipelineLayout {
     fn drop(&mut self) {
-        // TODO: Drop
+        unsafe {
+            self.graphics_device
+                .device()
+                .destroy_pipeline_layout(self.raw, None);
+        }
+    }
+}
+
+impl Debug for PipelineLayout {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("PipelineLayout")
+            .field("push_constants_size", &self.push_constants_size)
+            .field("raw", &self.raw)
+            .finish()
     }
 }
 

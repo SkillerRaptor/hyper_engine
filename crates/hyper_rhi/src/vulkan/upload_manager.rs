@@ -4,13 +4,16 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{
+    atomic::{AtomicU64, Ordering},
+    Arc,
+};
 
 use ash::{vk, Device};
 
 use crate::{
     buffer::{Buffer as _, BufferDescriptor, BufferUsage},
-    vulkan::{buffer::Buffer, graphics_device::GraphicsDevice},
+    vulkan::{buffer::Buffer, graphics_device::GraphicsDeviceShared},
 };
 
 pub(crate) struct UploadManager {
@@ -64,7 +67,7 @@ impl UploadManager {
         unsafe { device.create_semaphore(&create_info, None) }.unwrap()
     }
 
-    pub(crate) fn destroy(&self, graphics_device: &GraphicsDevice) {
+    pub(crate) fn destroy(&self, graphics_device: &GraphicsDeviceShared) {
         unsafe {
             graphics_device
                 .device()
@@ -76,7 +79,7 @@ impl UploadManager {
         }
     }
 
-    fn immediate_submit<F>(&self, graphics_device: &GraphicsDevice, function: F)
+    fn immediate_submit<F>(&self, graphics_device: &GraphicsDeviceShared, function: F)
     where
         F: FnOnce(vk::CommandBuffer),
     {
@@ -148,7 +151,7 @@ impl UploadManager {
 
     pub(crate) fn upload_buffer(
         &self,
-        graphics_device: &GraphicsDevice,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         source: &[u8],
         destination: vk::Buffer,
     ) {

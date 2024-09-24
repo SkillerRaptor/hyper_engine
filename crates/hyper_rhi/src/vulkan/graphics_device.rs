@@ -12,7 +12,7 @@ use std::{
 
 use ash::{ext::debug_utils, khr::swapchain, vk, Device, Entry, Instance};
 use gpu_allocator::{
-    vulkan::{Allocation, Allocator, AllocatorCreateDesc},
+    vulkan::{Allocator, AllocatorCreateDesc},
     AllocationSizes,
     AllocatorDebugSettings,
 };
@@ -20,7 +20,6 @@ use raw_window_handle::DisplayHandle;
 
 use crate::{
     buffer::BufferDescriptor,
-    commands::{command_encoder::CommandEncoder, command_list::CommandList},
     graphics_device::GraphicsDeviceDescriptor,
     graphics_pipeline::GraphicsPipelineDescriptor,
     pipeline_layout::PipelineLayoutDescriptor,
@@ -30,7 +29,7 @@ use crate::{
     texture::TextureDescriptor,
     vulkan::{
         buffer::Buffer,
-        command_decoder::CommandDecoder,
+        command_list::CommandList,
         descriptor_manager::DescriptorManager,
         graphics_pipeline::GraphicsPipeline,
         pipeline_layout::PipelineLayout,
@@ -40,21 +39,6 @@ use crate::{
         upload_manager::UploadManager,
     },
 };
-
-#[derive(Debug)]
-pub(crate) struct ResourceBuffer {
-    pub(crate) allocation: Option<Allocation>,
-    pub(crate) buffer: vk::Buffer,
-    pub(crate) handle: ResourceHandle,
-}
-
-#[derive(Debug)]
-pub(crate) struct ResourceHandler {
-    pub(crate) buffers: Mutex<Vec<ResourceBuffer>>,
-    pub(crate) graphics_pipeline: Mutex<Vec<vk::Pipeline>>,
-    pub(crate) shader_modules: Mutex<Vec<vk::ShaderModule>>,
-    pub(crate) texture_views: Mutex<Vec<vk::ImageView>>,
-}
 
 pub(crate) struct FrameData {
     pub(crate) present_semaphore: vk::Semaphore,
@@ -70,10 +54,8 @@ struct DebugUtils {
     loader: debug_utils::Instance,
 }
 
-pub(crate) struct GraphicsDevice {
+pub(crate) struct GraphicsDeviceShared {
     current_frame_index: Mutex<u32>,
-
-    resource_handler: Arc<ResourceHandler>,
 
     frames: Vec<FrameData>,
     submit_semaphore: vk::Semaphore,
@@ -81,7 +63,7 @@ pub(crate) struct GraphicsDevice {
     upload_manager: UploadManager,
     descriptor_manager: DescriptorManager,
 
-    allocator: Arc<Mutex<Allocator>>,
+    allocator: Mutex<Allocator>,
 
     queue: vk::Queue,
     device: Device,
@@ -89,6 +71,113 @@ pub(crate) struct GraphicsDevice {
     debug_utils: Option<DebugUtils>,
     instance: Instance,
     entry: Entry,
+}
+
+impl GraphicsDeviceShared {
+    pub(crate) fn set_debug_name<T>(&self, object: T, label: &str)
+    where
+        T: vk::Handle,
+    {
+        // TODO: Ensure debug is enabled
+
+        let label = CString::new(label).unwrap();
+        let label_str = label.as_c_str();
+        let name_info = vk::DebugUtilsObjectNameInfoEXT::default()
+            .object_handle(object)
+            .object_name(label_str);
+
+        unsafe {
+            self.debug_utils
+                .as_ref()
+                .unwrap()
+                .device
+                .as_ref()
+                .unwrap()
+                .set_debug_utils_object_name(&name_info)
+                .unwrap();
+        }
+    }
+
+    pub(crate) fn allocate_buffer_handle(&self, buffer: vk::Buffer) -> ResourceHandle {
+        self.descriptor_manager.allocate_buffer_handle(self, buffer)
+    }
+
+    pub(crate) fn upload_buffer(
+        self: &Arc<GraphicsDeviceShared>,
+        source: &[u8],
+        destination: vk::Buffer,
+    ) {
+        self.upload_manager.upload_buffer(self, source, destination);
+    }
+
+    pub(crate) fn entry(&self) -> &Entry {
+        &self.entry
+    }
+
+    pub(crate) fn instance(&self) -> &Instance {
+        &self.instance
+    }
+
+    pub(crate) fn physical_device(&self) -> vk::PhysicalDevice {
+        self.physical_device
+    }
+
+    pub(crate) fn device(&self) -> &Device {
+        &self.device
+    }
+
+    pub(crate) fn queue(&self) -> vk::Queue {
+        self.queue
+    }
+
+    pub(crate) fn allocator(&self) -> &Mutex<Allocator> {
+        &self.allocator
+    }
+
+    pub(crate) fn descriptor_sets(
+        &self,
+    ) -> &[vk::DescriptorSet; DescriptorManager::DESCRIPTOR_TYPES.len()] {
+        self.descriptor_manager.descriptor_sets()
+    }
+
+    pub(crate) fn descriptor_manager(&self) -> &DescriptorManager {
+        &self.descriptor_manager
+    }
+    pub(crate) fn current_frame(&self) -> &FrameData {
+        let index = *self.current_frame_index.lock().unwrap() % crate::graphics_device::FRAME_COUNT;
+        &self.frames[index as usize]
+    }
+}
+
+impl Drop for GraphicsDeviceShared {
+    fn drop(&mut self) {
+        unsafe {
+            self.frames.iter().for_each(|frame| {
+                self.device.destroy_semaphore(frame.render_semaphore, None);
+                self.device.destroy_semaphore(frame.present_semaphore, None);
+                self.device.destroy_command_pool(frame.command_pool, None);
+            });
+
+            self.device.destroy_semaphore(self.submit_semaphore, None);
+
+            self.upload_manager.destroy(self);
+            self.descriptor_manager.destroy(self);
+
+            self.device.destroy_device(None);
+
+            if let Some(debug_utils) = self.debug_utils.take() {
+                debug_utils
+                    .loader
+                    .destroy_debug_utils_messenger(debug_utils.debug_messenger, None);
+            }
+
+            self.instance.destroy_instance(None);
+        }
+    }
+}
+
+pub(crate) struct GraphicsDevice {
+    shared: Arc<GraphicsDeviceShared>,
 }
 
 impl GraphicsDevice {
@@ -131,7 +220,7 @@ impl GraphicsDevice {
             debug_utils.device = Some(debug_utils::Device::new(&instance, &device));
         }
 
-        let allocator = Arc::new(Mutex::new(
+        let allocator = Mutex::new(
             Allocator::new(&AllocatorCreateDesc {
                 instance: instance.clone(),
                 device: device.clone(),
@@ -141,7 +230,7 @@ impl GraphicsDevice {
                 allocation_sizes: AllocationSizes::default(),
             })
             .unwrap(),
-        ));
+        );
 
         let descriptor_manager = DescriptorManager::new(&instance, physical_device, &device);
         let upload_manager = UploadManager::new(&device, queue_family_index);
@@ -166,29 +255,24 @@ impl GraphicsDevice {
         }
 
         Self {
-            current_frame_index: Mutex::new(u32::MAX),
+            shared: Arc::new(GraphicsDeviceShared {
+                current_frame_index: Mutex::new(u32::MAX),
 
-            resource_handler: Arc::new(ResourceHandler {
-                buffers: Mutex::new(Vec::new()),
-                graphics_pipeline: Mutex::new(Vec::new()),
-                shader_modules: Mutex::new(Vec::new()),
-                texture_views: Mutex::new(Vec::new()),
+                frames,
+                submit_semaphore,
+
+                upload_manager,
+                descriptor_manager,
+
+                allocator,
+
+                queue,
+                device,
+                physical_device,
+                debug_utils,
+                instance,
+                entry,
             }),
-
-            frames,
-            submit_semaphore,
-
-            upload_manager,
-            descriptor_manager,
-
-            allocator,
-
-            queue,
-            device,
-            physical_device,
-            debug_utils,
-            instance,
-            entry,
         }
     }
 
@@ -531,222 +615,76 @@ impl GraphicsDevice {
 
         vk::FALSE
     }
-
-    fn clean_resources(&self) {
-        let mut buffers = self.resource_handler.buffers.lock().unwrap();
-        buffers.iter_mut().for_each(|resource_buffer| {
-            self.allocator
-                .lock()
-                .unwrap()
-                .free(resource_buffer.allocation.take().unwrap())
-                .unwrap();
-
-            unsafe {
-                self.device.destroy_buffer(resource_buffer.buffer, None);
-            }
-
-            self.descriptor_manager
-                .retire_handle(resource_buffer.handle);
-        });
-        buffers.clear();
-
-        let mut graphics_pipelines = self.resource_handler.graphics_pipeline.lock().unwrap();
-        graphics_pipelines.iter().for_each(|&pipeline| unsafe {
-            self.device.destroy_pipeline(pipeline, None);
-        });
-        graphics_pipelines.clear();
-
-        let mut shader_modules = self.resource_handler.shader_modules.lock().unwrap();
-        shader_modules.iter().for_each(|&shader_module| unsafe {
-            self.device.destroy_shader_module(shader_module, None);
-        });
-        shader_modules.clear();
-
-        let mut texture_views = self.resource_handler.texture_views.lock().unwrap();
-        texture_views.iter().for_each(|&texture_view| unsafe {
-            self.device.destroy_image_view(texture_view, None);
-        });
-        texture_views.clear();
-    }
-
-    pub(crate) fn set_debug_name<T>(&self, object: T, label: &str)
-    where
-        T: vk::Handle,
-    {
-        // TODO: Ensure debug is enabled
-
-        let label = CString::new(label).unwrap();
-        let label_str = label.as_c_str();
-        let name_info = vk::DebugUtilsObjectNameInfoEXT::default()
-            .object_handle(object)
-            .object_name(label_str);
-
-        unsafe {
-            self.debug_utils
-                .as_ref()
-                .unwrap()
-                .device
-                .as_ref()
-                .unwrap()
-                .set_debug_utils_object_name(&name_info)
-                .unwrap();
-        }
-    }
-
-    pub(crate) fn allocate_buffer_handle(&self, buffer: vk::Buffer) -> ResourceHandle {
-        self.descriptor_manager.allocate_buffer_handle(self, buffer)
-    }
-
-    pub(crate) fn upload_buffer(&self, source: &[u8], destination: vk::Buffer) {
-        self.upload_manager.upload_buffer(self, source, destination);
-    }
-
-    pub(crate) fn entry(&self) -> &Entry {
-        &self.entry
-    }
-
-    pub(crate) fn instance(&self) -> &Instance {
-        &self.instance
-    }
-
-    pub(crate) fn physical_device(&self) -> vk::PhysicalDevice {
-        self.physical_device
-    }
-
-    pub(crate) fn device(&self) -> &Device {
-        &self.device
-    }
-
-    pub(crate) fn queue(&self) -> vk::Queue {
-        self.queue
-    }
-
-    pub(crate) fn resource_handler(&self) -> &Arc<ResourceHandler> {
-        &self.resource_handler
-    }
-
-    pub(crate) fn allocator(&self) -> &Arc<Mutex<Allocator>> {
-        &self.allocator
-    }
-
-    pub(crate) fn descriptor_sets(
-        &self,
-    ) -> &[vk::DescriptorSet; DescriptorManager::DESCRIPTOR_TYPES.len()] {
-        self.descriptor_manager.descriptor_sets()
-    }
-
-    pub(crate) fn descriptor_manager(&self) -> &DescriptorManager {
-        &self.descriptor_manager
-    }
-
-    pub(crate) fn submit_semaphore(&self) -> vk::Semaphore {
-        self.submit_semaphore
-    }
-
-    pub(crate) fn current_frame(&self) -> &FrameData {
-        let index = *self.current_frame_index.lock().unwrap() % crate::graphics_device::FRAME_COUNT;
-        &self.frames[index as usize]
-    }
-}
-
-impl Drop for GraphicsDevice {
-    fn drop(&mut self) {
-        unsafe {
-            self.clean_resources();
-
-            self.frames.iter().for_each(|frame| {
-                self.device.destroy_semaphore(frame.render_semaphore, None);
-                self.device.destroy_semaphore(frame.present_semaphore, None);
-                self.device.destroy_command_pool(frame.command_pool, None);
-            });
-
-            self.device.destroy_semaphore(self.submit_semaphore, None);
-
-            self.upload_manager.destroy(self);
-            self.descriptor_manager.destroy(self);
-
-            self.device.destroy_device(None);
-
-            if let Some(debug_utils) = self.debug_utils.take() {
-                debug_utils
-                    .loader
-                    .destroy_debug_utils_messenger(debug_utils.debug_messenger, None);
-            }
-
-            self.instance.destroy_instance(None);
-        }
-    }
 }
 
 impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
     fn create_surface(&self, descriptor: &SurfaceDescriptor) -> Box<dyn crate::surface::Surface> {
-        Box::new(Surface::new(self, &self.resource_handler, descriptor))
+        Box::new(Surface::new(&self.shared, descriptor))
     }
 
     fn create_pipeline_layout(
         &self,
         descriptor: &PipelineLayoutDescriptor,
     ) -> Arc<dyn crate::pipeline_layout::PipelineLayout> {
-        Arc::new(PipelineLayout::new(self, descriptor))
+        Arc::new(PipelineLayout::new(&self.shared, descriptor))
     }
 
     fn create_graphics_pipeline(
         &self,
         descriptor: &GraphicsPipelineDescriptor,
     ) -> Arc<dyn crate::graphics_pipeline::GraphicsPipeline> {
-        Arc::new(GraphicsPipeline::new(
-            self,
-            &self.resource_handler,
-            descriptor,
-        ))
+        Arc::new(GraphicsPipeline::new(&self.shared, descriptor))
     }
 
     fn create_buffer(&self, descriptor: &BufferDescriptor) -> Arc<dyn crate::buffer::Buffer> {
-        Arc::new(Buffer::new(self, descriptor))
+        Arc::new(Buffer::new(&self.shared, descriptor))
     }
 
     fn create_shader_module(
         &self,
         descriptor: &ShaderModuleDescriptor,
     ) -> Arc<dyn crate::shader_module::ShaderModule> {
-        Arc::new(ShaderModule::new(self, &self.resource_handler, descriptor))
+        Arc::new(ShaderModule::new(&self.shared, descriptor))
     }
 
     fn create_texture(&self, descriptor: &TextureDescriptor) -> Arc<dyn crate::texture::Texture> {
-        Arc::new(Texture::new(self, &self.resource_handler, descriptor))
+        Arc::new(Texture::new(&self.shared, descriptor))
     }
 
-    fn create_command_encoder(&self) -> CommandEncoder {
-        CommandEncoder::new()
+    fn create_command_list(&self) -> Arc<dyn crate::command_list::CommandList> {
+        Arc::new(CommandList::new(&self.shared))
     }
 
     fn begin_frame(&self, surface: &mut Box<dyn crate::surface::Surface>, frame_index: u32) {
-        *self.current_frame_index.lock().unwrap() = frame_index;
+        *self.shared.current_frame_index.lock().unwrap() = frame_index;
 
         let surface = surface.downcast_mut::<Surface>().unwrap();
 
-        let semaphores = [self.submit_semaphore];
-        let values = [*self.current_frame_index.lock().unwrap() as u64 - 1];
+        let semaphores = [self.shared.submit_semaphore];
+        let values = [*self.shared.current_frame_index.lock().unwrap() as u64 - 1];
         let wait_info = vk::SemaphoreWaitInfo::default()
             .semaphores(&semaphores)
             .values(&values);
 
         unsafe {
-            self.device().wait_semaphores(&wait_info, u64::MAX).unwrap();
+            self.shared
+                .device
+                .wait_semaphores(&wait_info, u64::MAX)
+                .unwrap();
         }
 
-        self.clean_resources();
+        // TODO: Clean resources
 
         // Rebuild swapchain
         if surface.resized() {
-            surface.rebuild(self, &self.resource_handler);
+            surface.rebuild();
         }
 
         let (index, _) = unsafe {
             surface.swapchain_loader().acquire_next_image(
                 surface.swapchain(),
                 u64::MAX,
-                self.current_frame().present_semaphore,
+                self.shared.current_frame().present_semaphore,
                 vk::Fence::null(),
             )
         }
@@ -757,47 +695,27 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
 
     fn end_frame(&self) {}
 
-    // NOTE: This function assumes, that there will be only 1 command buffer and 1 submission per frame
-    fn submit(&self, command_list: CommandList) {
-        let command_buffer = self.current_frame().command_buffer;
-
-        unsafe {
-            self.device()
-                .reset_command_buffer(command_buffer, vk::CommandBufferResetFlags::empty())
-                .unwrap();
-
-            let command_buffer_begin_info = vk::CommandBufferBeginInfo::default()
-                .flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
-            self.device()
-                .begin_command_buffer(command_buffer, &command_buffer_begin_info)
-                .unwrap();
-        }
-
-        let command_decoder = CommandDecoder::new(self, command_buffer);
-        command_list.execute(&command_decoder);
-
-        unsafe {
-            self.device().end_command_buffer(command_buffer).unwrap();
-        }
+    fn execute(&self, _command_list: &Arc<dyn crate::command_list::CommandList>) {
+        // TODO: Grab command buffer from command list
 
         let present_wait_semaphore_info = vk::SemaphoreSubmitInfo::default()
-            .semaphore(self.current_frame().present_semaphore)
+            .semaphore(self.shared.current_frame().present_semaphore)
             .value(0)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
 
         let command_buffer_info = vk::CommandBufferSubmitInfo::default()
-            .command_buffer(command_buffer)
+            .command_buffer(self.shared.current_frame().command_buffer)
             .device_mask(0);
 
         let submit_signal_semaphore_info = vk::SemaphoreSubmitInfo::default()
-            .semaphore(self.submit_semaphore())
-            .value(*self.current_frame_index.lock().unwrap() as u64)
+            .semaphore(self.shared.submit_semaphore)
+            .value(*self.shared.current_frame_index.lock().unwrap() as u64)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
 
         let render_signal_semaphore_info = vk::SemaphoreSubmitInfo::default()
-            .semaphore(self.current_frame().render_semaphore)
+            .semaphore(self.shared.current_frame().render_semaphore)
             .value(0)
             .stage_mask(vk::PipelineStageFlags2::COLOR_ATTACHMENT_OUTPUT)
             .device_index(0);
@@ -811,8 +729,9 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
             .signal_semaphore_infos(signal_semaphore_infos);
 
         unsafe {
-            self.device
-                .queue_submit2(self.queue, &[submit_info], vk::Fence::null())
+            self.shared
+                .device
+                .queue_submit2(self.shared.queue, &[submit_info], vk::Fence::null())
                 .unwrap();
         }
     }
@@ -821,7 +740,7 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
         let surface = surface.downcast_ref::<Surface>().unwrap();
 
         let swapchains = [surface.swapchain()];
-        let wait_semaphores = [self.current_frame().render_semaphore];
+        let wait_semaphores = [self.shared.current_frame().render_semaphore];
         let image_indices = [surface.current_texture_index()];
         let present_info = vk::PresentInfoKHR::default()
             .swapchains(&swapchains)
@@ -831,14 +750,14 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
         unsafe {
             surface
                 .swapchain_loader()
-                .queue_present(self.queue, &present_info)
+                .queue_present(self.shared.queue, &present_info)
                 .unwrap();
         };
     }
 
-    fn wait_idle(&self) {
+    fn wait_for_idle(&self) {
         unsafe {
-            self.device.device_wait_idle().unwrap();
+            self.shared.device.device_wait_idle().unwrap();
         }
     }
 }

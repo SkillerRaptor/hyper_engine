@@ -9,10 +9,11 @@ use std::sync::Arc;
 use hyper_math::Vec4;
 use hyper_rhi::{
     buffer::{Buffer, BufferDescriptor, BufferUsage},
-    commands::render_pass::RenderPassDescriptor,
+    command_list::CommandList,
     graphics_device::GraphicsDevice,
     graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
     pipeline_layout::{PipelineLayout, PipelineLayoutDescriptor},
+    render_pass::{DrawIndexedArguments, RenderPassDescriptor},
     shader_module::{ShaderModuleDescriptor, ShaderStage},
     surface::Surface,
 };
@@ -28,42 +29,43 @@ pub struct Renderer {
     positions: Arc<dyn Buffer>,
     material: Arc<dyn Buffer>,
 
-    opaque_pipeline: Arc<dyn GraphicsPipeline>,
-    object_pipeline_layout: Arc<dyn PipelineLayout>,
+    pipeline: Arc<dyn GraphicsPipeline>,
+    pipeline_layout: Arc<dyn PipelineLayout>,
+
+    command_list: Arc<dyn CommandList>,
 
     graphics_device: Arc<dyn GraphicsDevice>,
 }
 
 impl Renderer {
     pub fn new(graphics_device: &Arc<dyn GraphicsDevice>) -> Self {
-        let object_pipeline_layout =
-            graphics_device.create_pipeline_layout(&PipelineLayoutDescriptor {
-                label: Some("Object Pipeline Layout"),
-                push_constants_size: size_of::<ObjectPushConstants>(),
-            });
+        let command_list = graphics_device.create_command_list();
 
-        let opaque_pipeline = {
-            let vertex_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
-                label: Some(""),
-                path: "./assets/shaders/opaque_shader.hlsl",
-                entry_point: "vs_main",
-                stage: ShaderStage::Vertex,
-            });
+        let pipeline_layout = graphics_device.create_pipeline_layout(&PipelineLayoutDescriptor {
+            label: Some("Object Pipeline Layout"),
+            push_constants_size: size_of::<ObjectPushConstants>(),
+        });
 
-            let fragment_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
-                label: Some(""),
-                path: "./assets/shaders/opaque_shader.hlsl",
-                entry_point: "fs_main",
-                stage: ShaderStage::Fragment,
-            });
+        let vertex_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
+            label: Some("Opaque Vertex Shader"),
+            path: "./assets/shaders/opaque_shader.hlsl",
+            entry_point: "vs_main",
+            stage: ShaderStage::Vertex,
+        });
 
-            graphics_device.create_graphics_pipeline(&GraphicsPipelineDescriptor {
-                label: Some("Opaque Graphics Pipeline"),
-                layout: &object_pipeline_layout,
-                vertex_shader: &vertex_shader,
-                fragment_shader: &fragment_shader,
-            })
-        };
+        let fragment_shader = graphics_device.create_shader_module(&ShaderModuleDescriptor {
+            label: Some("Opaque Fragment Shader"),
+            path: "./assets/shaders/opaque_shader.hlsl",
+            entry_point: "fs_main",
+            stage: ShaderStage::Fragment,
+        });
+
+        let pipeline = graphics_device.create_graphics_pipeline(&GraphicsPipelineDescriptor {
+            label: Some("Opaque Graphics Pipeline"),
+            layout: &pipeline_layout,
+            vertex_shader: &vertex_shader,
+            fragment_shader: &fragment_shader,
+        });
 
         let material = graphics_device.create_buffer(&BufferDescriptor {
             label: Some("Material Buffer"),
@@ -115,8 +117,10 @@ impl Renderer {
             positions,
             material,
 
-            opaque_pipeline,
-            object_pipeline_layout,
+            pipeline,
+            pipeline_layout,
+
+            command_list,
 
             graphics_device: Arc::clone(graphics_device),
         }
@@ -128,28 +132,35 @@ impl Renderer {
 
         let swapchain_texture = surface.current_texture();
 
-        let mut command_encoder = self.graphics_device.create_command_encoder();
+        self.command_list.begin();
 
         {
-            let mut render_pass = command_encoder.begin_render_pass(&RenderPassDescriptor {
+            let render_pass = self.command_list.begin_render_pass(&RenderPassDescriptor {
                 label: Some("Main Render Pass"),
-                texture: &swapchain_texture,
+                color_attachment: &swapchain_texture,
+                depth_stencil_attachment: None,
             });
 
-            render_pass.bind_pipeline(&self.opaque_pipeline);
-
-            render_pass.bind_index_buffer(&self.indices);
-            render_pass.push_constants(bytemuck::bytes_of(&ObjectPushConstants {
+            render_pass.set_pipeline(&self.pipeline);
+            render_pass.set_index_buffer(&self.indices);
+            render_pass.set_push_constants(bytemuck::bytes_of(&ObjectPushConstants {
                 mesh: self.mesh.handle(),
                 material: self.material.handle(),
                 ..Default::default()
             }));
-            render_pass.draw_indexed(6, 1, 0, 0, 0);
+
+            render_pass.draw_indexed(&DrawIndexedArguments {
+                index_count: 6,
+                instance_count: 1,
+                first_index: 0,
+                vertex_offset: 0,
+                first_instance: 0,
+            });
         }
 
-        self.graphics_device.end_frame();
+        self.command_list.end();
 
-        self.graphics_device.submit(command_encoder.finish());
+        self.graphics_device.execute(&self.command_list);
         self.graphics_device.present(surface);
 
         self.frame_index += 1;

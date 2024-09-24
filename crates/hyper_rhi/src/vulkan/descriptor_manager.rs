@@ -14,7 +14,7 @@ use std::{
 
 use ash::{vk, Device, Instance};
 
-use crate::{resource::ResourceHandle, vulkan::graphics_device::GraphicsDevice};
+use crate::{resource::ResourceHandle, vulkan::graphics_device::GraphicsDeviceShared};
 
 pub(crate) struct DescriptorManager {
     current_index: AtomicU32,
@@ -188,7 +188,7 @@ impl DescriptorManager {
         descriptor_sets
     }
 
-    pub(crate) fn destroy(&self, graphics_device: &GraphicsDevice) {
+    pub(crate) fn destroy(&self, graphics_device: &GraphicsDeviceShared) {
         unsafe {
             self.layouts.iter().for_each(|layout| {
                 graphics_device
@@ -204,7 +204,7 @@ impl DescriptorManager {
 
     pub(crate) fn allocate_buffer_handle(
         &self,
-        graphics_device: &GraphicsDevice,
+        graphics_device: &GraphicsDeviceShared,
         buffer: vk::Buffer,
     ) -> ResourceHandle {
         let handle = self.fetch_handle();

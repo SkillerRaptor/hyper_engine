@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::sync::Arc;
+use std::{
+    fmt::{self, Debug, Formatter},
+    sync::Arc,
+};
 
 use gpu_allocator::{
     d3d12::{ResourceCategory, ResourceCreateDesc, ResourceStateOrBarrierLayout, ResourceType},
@@ -34,25 +37,24 @@ use windows::Win32::Graphics::{
 
 use crate::{
     buffer::{self, BufferDescriptor, BufferUsage},
-    d3d12::{
-        graphics_device::{GraphicsDevice, ResourceHandler},
-        resource_handle_pair::ResourceHandlePair,
-    },
+    d3d12::{graphics_device::GraphicsDeviceShared, resource_handle_pair::ResourceHandlePair},
     resource::{Resource, ResourceHandle},
 };
 
-#[derive(Debug)]
 pub(crate) struct Buffer {
     resource_handle_pair: ResourceHandlePair,
 
     size: usize,
     resource: Option<gpu_allocator::d3d12::Resource>,
 
-    resource_handler: Arc<ResourceHandler>,
+    graphics_device: Arc<GraphicsDeviceShared>,
 }
 
 impl Buffer {
-    pub(crate) fn new(graphics_device: &GraphicsDevice, descriptor: &BufferDescriptor) -> Self {
+    pub(crate) fn new(
+        graphics_device: &Arc<GraphicsDeviceShared>,
+        descriptor: &BufferDescriptor,
+    ) -> Self {
         let size = descriptor.data.len();
         let aligned_size = size.align_up(buffer::ALIGNMENT);
 
@@ -81,12 +83,12 @@ impl Buffer {
             size: size as usize,
             resource: Some(resource),
 
-            resource_handler: Arc::clone(graphics_device.resource_handler()),
+            graphics_device: Arc::clone(graphics_device),
         }
     }
 
     pub(crate) fn new_staging(
-        graphics_device: &GraphicsDevice,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         descriptor: &BufferDescriptor,
     ) -> Self {
         let size = descriptor.data.len();
@@ -112,12 +114,12 @@ impl Buffer {
             size: size as usize,
             resource: Some(resource),
 
-            resource_handler: Arc::clone(graphics_device.resource_handler()),
+            graphics_device: Arc::clone(graphics_device),
         }
     }
 
     fn create_resoure(
-        graphics_device: &GraphicsDevice,
+        graphics_device: &GraphicsDeviceShared,
         aligned_size: usize,
         staging: bool,
     ) -> gpu_allocator::d3d12::Resource {
@@ -192,10 +194,17 @@ impl Buffer {
 
 impl Drop for Buffer {
     fn drop(&mut self) {
-        self.resource_handler.buffers.lock().unwrap().push((
-            self.resource_handle_pair,
-            Some(self.resource.take().unwrap()),
-        ));
+        // TODO: Drop resources
+    }
+}
+
+impl Debug for Buffer {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Buffer")
+            .field("resource_handle_pair", &self.resource_handle_pair)
+            .field("size", &self.size)
+            .field("resource", &self.resource)
+            .finish()
     }
 }
 

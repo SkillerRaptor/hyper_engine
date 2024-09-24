@@ -11,7 +11,7 @@ use raw_window_handle::DisplayHandle;
 
 use crate::{
     buffer::{Buffer, BufferDescriptor},
-    commands::{command_encoder::CommandEncoder, command_list::CommandList},
+    command_list::CommandList,
     graphics_pipeline::{GraphicsPipeline, GraphicsPipelineDescriptor},
     pipeline_layout::{PipelineLayout, PipelineLayoutDescriptor},
     shader_module::{ShaderModule, ShaderModuleDescriptor},
@@ -59,19 +59,17 @@ pub trait GraphicsDevice: Downcast {
 
     fn create_texture(&self, descriptor: &TextureDescriptor) -> Arc<dyn Texture>;
 
-    fn create_command_encoder(&self) -> CommandEncoder;
+    fn create_command_list(&self) -> Arc<dyn CommandList>;
 
     fn begin_frame(&self, surface: &mut Box<dyn Surface>, frame_index: u32);
 
     fn end_frame(&self);
 
-    // NOTE: This function assumes, that there will be only 1 command buffer and 1 submission per frame
-    fn submit(&self, command_list: CommandList);
+    fn execute(&self, command_list: &Arc<dyn CommandList>);
 
     fn present(&self, surface: &Box<dyn Surface>);
 
-    // Destruction
-    fn wait_idle(&self);
+    fn wait_for_idle(&self);
 }
 
 downcast_rs::impl_downcast!(GraphicsDevice);

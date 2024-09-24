@@ -24,7 +24,7 @@ use windows::{
 };
 
 use crate::{
-    d3d12::{graphics_device::GraphicsDevice, texture::Texture},
+    d3d12::{graphics_device::GraphicsDeviceShared, texture::Texture},
     surface::SurfaceDescriptor,
 };
 
@@ -34,12 +34,16 @@ pub struct Surface {
     resized: bool,
 
     textures: Vec<Arc<dyn crate::texture::Texture>>,
-
     swap_chain: IDXGISwapChain4,
+
+    graphics_device: Arc<GraphicsDeviceShared>,
 }
 
 impl Surface {
-    pub(crate) fn new(graphics_device: &GraphicsDevice, descriptor: &SurfaceDescriptor) -> Self {
+    pub(crate) fn new(
+        graphics_device: &Arc<GraphicsDeviceShared>,
+        descriptor: &SurfaceDescriptor,
+    ) -> Self {
         let size = descriptor.window_size;
 
         let hwnd = match descriptor.window_handle.as_raw() {
@@ -48,7 +52,6 @@ impl Surface {
         };
 
         let swap_chain = Self::create_swap_chain(graphics_device, size.x, size.y, hwnd);
-
         let textures = Self::create_textures(graphics_device, &swap_chain, size.x, size.y);
 
         Self {
@@ -57,13 +60,14 @@ impl Surface {
             resized: false,
 
             textures,
-
             swap_chain,
+
+            graphics_device: Arc::clone(graphics_device),
         }
     }
 
     fn create_swap_chain(
-        graphics_device: &GraphicsDevice,
+        graphics_device: &GraphicsDeviceShared,
         width: u32,
         height: u32,
         hwnd: HWND,
@@ -106,7 +110,7 @@ impl Surface {
     }
 
     fn create_textures(
-        graphics_device: &GraphicsDevice,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         swap_chain: &IDXGISwapChain4,
         width: u32,
         height: u32,
@@ -128,7 +132,7 @@ impl Surface {
         textures
     }
 
-    pub(crate) fn rebuild(&mut self, graphics_device: &GraphicsDevice) {
+    pub(crate) fn rebuild(&mut self) {
         self.textures.clear();
 
         unsafe {
@@ -143,8 +147,12 @@ impl Surface {
                 .unwrap();
         }
 
-        let textures =
-            Self::create_textures(graphics_device, &self.swap_chain, self.width, self.height);
+        let textures = Self::create_textures(
+            &self.graphics_device,
+            &self.swap_chain,
+            self.width,
+            self.height,
+        );
         self.textures = textures;
 
         self.resized = false;

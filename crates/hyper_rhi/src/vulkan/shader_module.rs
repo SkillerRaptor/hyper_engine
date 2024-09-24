@@ -4,29 +4,30 @@
 // SPDX-License-Identifier: MIT
 //
 
-use std::sync::Arc;
+use std::{
+    fmt::{self, Debug, Formatter},
+    sync::Arc,
+};
 
 use ash::vk;
 
 use crate::{
     shader_compiler::{self, OutputApi},
     shader_module::{ShaderModuleDescriptor, ShaderStage},
-    vulkan::graphics_device::{GraphicsDevice, ResourceHandler},
+    vulkan::graphics_device::GraphicsDeviceShared,
 };
 
-#[derive(Debug)]
 pub(crate) struct ShaderModule {
     entry_point: String,
     stage: ShaderStage,
-    shader_module: vk::ShaderModule,
+    raw: vk::ShaderModule,
 
-    resource_handler: Arc<ResourceHandler>,
+    graphics_device: Arc<GraphicsDeviceShared>,
 }
 
 impl ShaderModule {
     pub(super) fn new(
-        graphics_device: &GraphicsDevice,
-        resource_handler: &Arc<ResourceHandler>,
+        graphics_device: &Arc<GraphicsDeviceShared>,
         descriptor: &ShaderModuleDescriptor,
     ) -> Self {
         let bytes = shader_compiler::compile(
@@ -56,24 +57,34 @@ impl ShaderModule {
         Self {
             entry_point: descriptor.entry_point.to_owned(),
             stage: descriptor.stage,
-            shader_module,
+            raw: shader_module,
 
-            resource_handler: Arc::clone(resource_handler),
+            graphics_device: Arc::clone(graphics_device),
         }
     }
 
     pub(crate) fn shader_module(&self) -> vk::ShaderModule {
-        self.shader_module
+        self.raw
     }
 }
 
 impl Drop for ShaderModule {
     fn drop(&mut self) {
-        self.resource_handler
-            .shader_modules
-            .lock()
-            .unwrap()
-            .push(self.shader_module);
+        unsafe {
+            self.graphics_device
+                .device()
+                .destroy_shader_module(self.raw, None);
+        }
+    }
+}
+
+impl Debug for ShaderModule {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ShaderModule")
+            .field("entry_point", &self.entry_point)
+            .field("stage", &self.stage)
+            .field("raw", &self.raw)
+            .finish()
     }
 }
 
