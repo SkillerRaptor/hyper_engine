@@ -71,6 +71,7 @@ use crate::{
     graphics_device::GraphicsDeviceDescriptor,
     graphics_pipeline::GraphicsPipelineDescriptor,
     pipeline_layout::PipelineLayoutDescriptor,
+    resource::ResourceHandle,
     shader_module::ShaderModuleDescriptor,
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
@@ -117,6 +118,10 @@ impl GraphicsDeviceShared {
     ) -> ResourceHandlePair {
         self.descriptor_manager
             .allocate_buffer_handle(&self.device, resource, size)
+    }
+
+    pub(crate) fn retire_handle(&self, handle: ResourceHandle) {
+        self.descriptor_manager.retire_handle(handle);
     }
 
     pub(crate) fn upload_buffer(

@@ -102,6 +102,10 @@ impl GraphicsDeviceShared {
         self.descriptor_manager.allocate_buffer_handle(self, buffer)
     }
 
+    pub(crate) fn retire_handle(&self, handle: ResourceHandle) {
+        self.descriptor_manager.retire_handle(handle);
+    }
+
     pub(crate) fn upload_buffer(
         self: &Arc<GraphicsDeviceShared>,
         source: &[u8],

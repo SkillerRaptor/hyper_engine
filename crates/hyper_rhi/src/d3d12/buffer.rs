@@ -194,7 +194,16 @@ impl Buffer {
 
 impl Drop for Buffer {
     fn drop(&mut self) {
-        // TODO: Drop resources
+        self.graphics_device
+            .retire_handle(self.resource_handle_pair.srv());
+        self.graphics_device
+            .retire_handle(self.resource_handle_pair.uav());
+        self.graphics_device
+            .allocator()
+            .lock()
+            .unwrap()
+            .free_resource(self.resource.take().unwrap())
+            .unwrap();
     }
 }
 

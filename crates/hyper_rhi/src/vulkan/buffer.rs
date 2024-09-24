@@ -165,16 +165,15 @@ impl Buffer {
 
 impl Drop for Buffer {
     fn drop(&mut self) {
+        self.graphics_device.retire_handle(self.resource_handle);
+        self.graphics_device
+            .allocator()
+            .lock()
+            .unwrap()
+            .free(self.allocation.take().unwrap())
+            .unwrap();
+
         unsafe {
-            self.graphics_device
-                .descriptor_manager()
-                .retire_handle(self.resource_handle);
-            self.graphics_device
-                .allocator()
-                .lock()
-                .unwrap()
-                .free(self.allocation.take().unwrap())
-                .unwrap();
             self.graphics_device.device().destroy_buffer(self.raw, None);
         }
     }
