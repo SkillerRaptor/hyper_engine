@@ -46,7 +46,7 @@ use crate::{
 };
 
 pub(crate) struct RenderPass {
-    depth_stencil_attachment: Option<Arc<dyn crate::texture::Texture>>,
+    _depth_stencil_attachment: Option<Arc<dyn crate::texture::Texture>>,
     color_attachment: Arc<dyn crate::texture::Texture>,
 
     graphics_device: Arc<GraphicsDeviceShared>,
@@ -113,7 +113,7 @@ impl RenderPass {
         };
 
         Self {
-            depth_stencil_attachment: depth_stencil_attachment,
+            _depth_stencil_attachment: depth_stencil_attachment,
             color_attachment: Arc::clone(descriptor.color_attachment),
 
             graphics_device: Arc::clone(graphics_device),
@@ -138,8 +138,8 @@ impl crate::render_pass::RenderPass for RenderPass {
                     .descriptor_heap()
                     .clone(),
             )]);
-            command_list.SetGraphicsRootSignature(layout.root_signature());
-            command_list.SetPipelineState(pipeline.pipeline_state());
+            command_list.SetGraphicsRootSignature(layout.raw());
+            command_list.SetPipelineState(pipeline.raw());
 
             command_list.IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 

@@ -20,7 +20,7 @@ pub(crate) struct ShaderModule {
     stage: ShaderStage,
     code: Vec<u8>,
 
-    graphics_device: Arc<GraphicsDeviceShared>,
+    _graphics_device: Arc<GraphicsDeviceShared>,
 }
 
 impl ShaderModule {
@@ -42,7 +42,7 @@ impl ShaderModule {
             stage: descriptor.stage,
             code,
 
-            graphics_device: Arc::clone(graphics_device),
+            _graphics_device: Arc::clone(graphics_device),
         }
     }
 

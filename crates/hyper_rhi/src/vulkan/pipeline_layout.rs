@@ -64,11 +64,9 @@ impl PipelineLayout {
 
 impl Drop for PipelineLayout {
     fn drop(&mut self) {
-        unsafe {
-            self.graphics_device
-                .device()
-                .destroy_pipeline_layout(self.raw, None);
-        }
+        self.graphics_device
+            .resource_queue()
+            .push_pipeline_layout(self.raw);
     }
 }
 

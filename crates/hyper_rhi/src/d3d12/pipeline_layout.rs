@@ -6,6 +6,7 @@
 
 use std::{
     fmt::{self, Debug, Formatter},
+    mem::ManuallyDrop,
     slice,
     sync::Arc,
 };
@@ -29,7 +30,7 @@ use crate::{
 };
 pub(crate) struct PipelineLayout {
     push_constants_size: usize,
-    root_signature: ID3D12RootSignature,
+    raw: ManuallyDrop<ID3D12RootSignature>,
 
     graphics_device: Arc<GraphicsDeviceShared>,
 }
@@ -88,14 +89,22 @@ impl PipelineLayout {
 
         Self {
             push_constants_size: descriptor.push_constants_size,
-            root_signature,
+            raw: ManuallyDrop::new(root_signature),
 
             graphics_device: Arc::clone(graphics_device),
         }
     }
 
-    pub(crate) fn root_signature(&self) -> &ID3D12RootSignature {
-        &self.root_signature
+    pub(crate) fn raw(&self) -> &ID3D12RootSignature {
+        &self.raw
+    }
+}
+
+impl Drop for PipelineLayout {
+    fn drop(&mut self) {
+        self.graphics_device
+            .resource_queue()
+            .push_pipeline_layout(unsafe { ManuallyDrop::take(&mut self.raw) });
     }
 }
 
@@ -103,7 +112,7 @@ impl Debug for PipelineLayout {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_struct("PipelineLayout")
             .field("push_constants_size", &self.push_constants_size)
-            .field("root_signature", &self.root_signature)
+            .field("raw", &self.raw)
             .finish()
     }
 }

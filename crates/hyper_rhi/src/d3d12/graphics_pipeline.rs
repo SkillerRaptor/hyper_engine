@@ -7,7 +7,7 @@
 use std::{
     ffi::c_void,
     fmt::{self, Debug, Formatter},
-    mem,
+    mem::{self, ManuallyDrop},
     sync::Arc,
 };
 
@@ -42,7 +42,7 @@ use crate::{
 };
 
 pub struct GraphicsPipeline {
-    pipeline_state: ID3D12PipelineState,
+    raw: ManuallyDrop<ID3D12PipelineState>,
 
     layout: Arc<dyn crate::pipeline_layout::PipelineLayout>,
 
@@ -68,7 +68,7 @@ impl GraphicsPipeline {
             .unwrap()
             .code();
         let mut state_descriptor = D3D12_GRAPHICS_PIPELINE_STATE_DESC {
-            pRootSignature: unsafe { mem::transmute_copy(layout.root_signature()) },
+            pRootSignature: unsafe { mem::transmute_copy(layout.raw()) },
             VS: D3D12_SHADER_BYTECODE {
                 pShaderBytecode: vertex_shader_code.as_ptr() as *const c_void,
                 BytecodeLength: vertex_shader_code.len(),
@@ -131,7 +131,7 @@ impl GraphicsPipeline {
         }
 
         Self {
-            pipeline_state,
+            raw: ManuallyDrop::new(pipeline_state),
 
             layout: Arc::clone(descriptor.layout),
 
@@ -143,15 +143,23 @@ impl GraphicsPipeline {
         &self.layout
     }
 
-    pub(crate) fn pipeline_state(&self) -> &ID3D12PipelineState {
-        &self.pipeline_state
+    pub(crate) fn raw(&self) -> &ID3D12PipelineState {
+        &self.raw
+    }
+}
+
+impl Drop for GraphicsPipeline {
+    fn drop(&mut self) {
+        self.graphics_device
+            .resource_queue()
+            .push_graphics_pipeline(unsafe { ManuallyDrop::take(&mut self.raw) });
     }
 }
 
 impl Debug for GraphicsPipeline {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_struct("GraphicsPipeline")
-            .field("pipeline_state", &self.pipeline_state)
+            .field("raw", &self.raw)
             .field("layout", &self.layout)
             .finish()
     }

@@ -6,6 +6,7 @@
 
 use std::{
     fmt::{self, Debug, Formatter},
+    mem::ManuallyDrop,
     sync::Arc,
 };
 
@@ -27,7 +28,7 @@ pub(crate) struct Buffer {
 
     size: usize,
 
-    allocation: Option<Allocation>,
+    allocation: ManuallyDrop<Allocation>,
     raw: vk::Buffer,
 
     graphics_device: Arc<GraphicsDeviceShared>,
@@ -66,7 +67,7 @@ impl Buffer {
 
             size: descriptor.data.len(),
 
-            allocation: Some(allocation),
+            allocation: ManuallyDrop::new(allocation),
             raw: buffer,
 
             graphics_device: Arc::clone(graphics_device),
@@ -95,7 +96,7 @@ impl Buffer {
 
             size: descriptor.data.len(),
 
-            allocation: Some(allocation),
+            allocation: ManuallyDrop::new(allocation),
             raw: buffer,
 
             graphics_device: Arc::clone(graphics_device),
@@ -165,17 +166,11 @@ impl Buffer {
 
 impl Drop for Buffer {
     fn drop(&mut self) {
-        self.graphics_device.retire_handle(self.resource_handle);
-        self.graphics_device
-            .allocator()
-            .lock()
-            .unwrap()
-            .free(self.allocation.take().unwrap())
-            .unwrap();
-
-        unsafe {
-            self.graphics_device.device().destroy_buffer(self.raw, None);
-        }
+        self.graphics_device.resource_queue().push_buffer(
+            self.raw,
+            unsafe { ManuallyDrop::take(&mut self.allocation) },
+            self.resource_handle,
+        );
     }
 }
 

@@ -6,6 +6,7 @@
 
 use std::{
     fmt::{self, Debug, Formatter},
+    mem::ManuallyDrop,
     sync::Arc,
 };
 
@@ -45,7 +46,7 @@ pub(crate) struct Buffer {
     resource_handle_pair: ResourceHandlePair,
 
     size: usize,
-    resource: Option<gpu_allocator::d3d12::Resource>,
+    resource: ManuallyDrop<gpu_allocator::d3d12::Resource>,
 
     graphics_device: Arc<GraphicsDeviceShared>,
 }
@@ -81,7 +82,7 @@ impl Buffer {
             resource_handle_pair,
 
             size: size as usize,
-            resource: Some(resource),
+            resource: ManuallyDrop::new(resource),
 
             graphics_device: Arc::clone(graphics_device),
         }
@@ -112,7 +113,7 @@ impl Buffer {
             resource_handle_pair: ResourceHandlePair::default(),
 
             size: size as usize,
-            resource: Some(resource),
+            resource: ManuallyDrop::new(resource),
 
             graphics_device: Arc::clone(graphics_device),
         }
@@ -178,32 +179,20 @@ impl Buffer {
     }
 
     pub(crate) fn gpu_address(&self) -> u64 {
-        unsafe {
-            self.resource
-                .as_ref()
-                .unwrap()
-                .resource()
-                .GetGPUVirtualAddress()
-        }
+        unsafe { self.resource.resource().GetGPUVirtualAddress() }
     }
 
     pub(crate) fn resource(&self) -> &gpu_allocator::d3d12::Resource {
-        self.resource.as_ref().unwrap()
+        &self.resource
     }
 }
 
 impl Drop for Buffer {
     fn drop(&mut self) {
-        self.graphics_device
-            .retire_handle(self.resource_handle_pair.srv());
-        self.graphics_device
-            .retire_handle(self.resource_handle_pair.uav());
-        self.graphics_device
-            .allocator()
-            .lock()
-            .unwrap()
-            .free_resource(self.resource.take().unwrap())
-            .unwrap();
+        self.graphics_device.resource_queue().push_buffer(
+            unsafe { ManuallyDrop::take(&mut self.resource) },
+            self.resource_handle_pair,
+        );
     }
 }
 

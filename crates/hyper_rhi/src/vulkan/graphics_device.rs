@@ -7,12 +7,13 @@
 use std::{
     collections::HashSet,
     ffi::{c_void, CStr, CString},
+    mem::{self, ManuallyDrop},
     sync::{Arc, Mutex},
 };
 
 use ash::{ext::debug_utils, khr::swapchain, vk, Device, Entry, Instance};
 use gpu_allocator::{
-    vulkan::{Allocator, AllocatorCreateDesc},
+    vulkan::{Allocation, Allocator, AllocatorCreateDesc},
     AllocationSizes,
     AllocatorDebugSettings,
 };
@@ -40,6 +41,55 @@ use crate::{
     },
 };
 
+pub(crate) struct ResourceQueue {
+    buffers: Mutex<Vec<(vk::Buffer, ManuallyDrop<Allocation>, ResourceHandle)>>,
+    graphics_pipelines: Mutex<Vec<vk::Pipeline>>,
+    pipeline_layouts: Mutex<Vec<vk::PipelineLayout>>,
+    shader_modules: Mutex<Vec<vk::ShaderModule>>,
+    textures: Mutex<Vec<(vk::Image, vk::ImageView, Option<Allocation>)>>,
+}
+
+impl ResourceQueue {
+    pub(crate) fn push_buffer(
+        &self,
+        buffer: vk::Buffer,
+        allocation: Allocation,
+        resource_handle: ResourceHandle,
+    ) {
+        self.buffers
+            .lock()
+            .unwrap()
+            .push((buffer, ManuallyDrop::new(allocation), resource_handle));
+    }
+
+    pub(crate) fn push_graphics_pipeline(&self, graphics_pipeline: vk::Pipeline) {
+        self.graphics_pipelines
+            .lock()
+            .unwrap()
+            .push(graphics_pipeline);
+    }
+
+    pub(crate) fn push_pipeline_layout(&self, pipeline_layout: vk::PipelineLayout) {
+        self.pipeline_layouts.lock().unwrap().push(pipeline_layout);
+    }
+
+    pub(crate) fn push_shader_module(&self, shader_module: vk::ShaderModule) {
+        self.shader_modules.lock().unwrap().push(shader_module);
+    }
+
+    pub(crate) fn push_texture(
+        &self,
+        texture: vk::Image,
+        texture_view: vk::ImageView,
+        allocation: Option<Allocation>,
+    ) {
+        self.textures
+            .lock()
+            .unwrap()
+            .push((texture, texture_view, allocation));
+    }
+}
+
 pub(crate) struct FrameData {
     pub(crate) present_semaphore: vk::Semaphore,
     pub(crate) render_semaphore: vk::Semaphore,
@@ -60,6 +110,8 @@ pub(crate) struct GraphicsDeviceShared {
     frames: Vec<FrameData>,
     submit_semaphore: vk::Semaphore,
 
+    resource_queue: ResourceQueue,
+
     upload_manager: UploadManager,
     descriptor_manager: DescriptorManager,
 
@@ -74,6 +126,61 @@ pub(crate) struct GraphicsDeviceShared {
 }
 
 impl GraphicsDeviceShared {
+    pub(crate) fn free_resources(&self) {
+        let buffers = mem::take(&mut *self.resource_queue.buffers.lock().unwrap());
+        for (buffer, mut allocation, resource_handle) in buffers {
+            self.descriptor_manager.retire_handle(resource_handle);
+
+            self.allocator
+                .lock()
+                .unwrap()
+                .free(unsafe { ManuallyDrop::take(&mut allocation) })
+                .unwrap();
+
+            unsafe {
+                self.device.destroy_buffer(buffer, None);
+            }
+        }
+
+        let graphics_pipelines =
+            mem::take(&mut *self.resource_queue.graphics_pipelines.lock().unwrap());
+        for graphic_pipeline in graphics_pipelines {
+            unsafe {
+                self.device.destroy_pipeline(graphic_pipeline, None);
+            }
+        }
+
+        let pipeline_layouts =
+            mem::take(&mut *self.resource_queue.pipeline_layouts.lock().unwrap());
+        for pipeline_layout in pipeline_layouts {
+            unsafe {
+                self.device.destroy_pipeline_layout(pipeline_layout, None);
+            }
+        }
+
+        let shader_modules = mem::take(&mut *self.resource_queue.shader_modules.lock().unwrap());
+        for shader_module in shader_modules {
+            unsafe {
+                self.device.destroy_shader_module(shader_module, None);
+            }
+        }
+
+        let textures = mem::take(&mut *self.resource_queue.textures.lock().unwrap());
+        for (texture, texture_view, mut allocation) in textures {
+            unsafe {
+                self.device.destroy_image_view(texture_view, None);
+            }
+
+            if let Some(allocation) = allocation.take() {
+                self.allocator.lock().unwrap().free(allocation).unwrap();
+
+                unsafe {
+                    self.device.destroy_image(texture, None);
+                }
+            }
+        }
+    }
+
     pub(crate) fn set_debug_name<T>(&self, object: T, label: &str)
     where
         T: vk::Handle,
@@ -100,10 +207,6 @@ impl GraphicsDeviceShared {
 
     pub(crate) fn allocate_buffer_handle(&self, buffer: vk::Buffer) -> ResourceHandle {
         self.descriptor_manager.allocate_buffer_handle(self, buffer)
-    }
-
-    pub(crate) fn retire_handle(&self, handle: ResourceHandle) {
-        self.descriptor_manager.retire_handle(handle);
     }
 
     pub(crate) fn upload_buffer(
@@ -147,6 +250,11 @@ impl GraphicsDeviceShared {
     pub(crate) fn descriptor_manager(&self) -> &DescriptorManager {
         &self.descriptor_manager
     }
+
+    pub(crate) fn resource_queue(&self) -> &ResourceQueue {
+        &self.resource_queue
+    }
+
     pub(crate) fn current_frame(&self) -> &FrameData {
         let index = *self.current_frame_index.lock().unwrap() % crate::graphics_device::FRAME_COUNT;
         &self.frames[index as usize]
@@ -156,6 +264,8 @@ impl GraphicsDeviceShared {
 impl Drop for GraphicsDeviceShared {
     fn drop(&mut self) {
         unsafe {
+            self.free_resources();
+
             self.frames.iter().for_each(|frame| {
                 self.device.destroy_semaphore(frame.render_semaphore, None);
                 self.device.destroy_semaphore(frame.present_semaphore, None);
@@ -264,6 +374,14 @@ impl GraphicsDevice {
 
                 frames,
                 submit_semaphore,
+
+                resource_queue: ResourceQueue {
+                    buffers: Mutex::new(Vec::new()),
+                    graphics_pipelines: Mutex::new(Vec::new()),
+                    pipeline_layouts: Mutex::new(Vec::new()),
+                    shader_modules: Mutex::new(Vec::new()),
+                    textures: Mutex::new(Vec::new()),
+                },
 
                 upload_manager,
                 descriptor_manager,
@@ -677,7 +795,7 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
                 .unwrap();
         }
 
-        // TODO: Clean resources
+        self.shared.free_resources();
 
         // Rebuild swapchain
         if surface.resized() {

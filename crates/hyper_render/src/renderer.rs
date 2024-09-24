@@ -25,12 +25,12 @@ pub struct Renderer {
 
     indices: Arc<dyn Buffer>,
     mesh: Arc<dyn Buffer>,
-    normals: Arc<dyn Buffer>,
-    positions: Arc<dyn Buffer>,
+    _normals: Arc<dyn Buffer>,
+    _positions: Arc<dyn Buffer>,
     material: Arc<dyn Buffer>,
 
     pipeline: Arc<dyn GraphicsPipeline>,
-    pipeline_layout: Arc<dyn PipelineLayout>,
+    _pipeline_layout: Arc<dyn PipelineLayout>,
 
     command_list: Arc<dyn CommandList>,
 
@@ -113,12 +113,12 @@ impl Renderer {
 
             indices,
             mesh,
-            normals,
-            positions,
+            _normals: normals,
+            _positions: positions,
             material,
 
             pipeline,
-            pipeline_layout,
+            _pipeline_layout: pipeline_layout,
 
             command_list,
 
@@ -126,7 +126,7 @@ impl Renderer {
         }
     }
 
-    pub fn render(&mut self, mut surface: &mut Box<dyn Surface>, scene: &Scene) {
+    pub fn render(&mut self, mut surface: &mut Box<dyn Surface>, _scene: &Scene) {
         self.graphics_device
             .begin_frame(&mut surface, self.frame_index);
 

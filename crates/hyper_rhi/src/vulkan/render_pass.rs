@@ -23,7 +23,7 @@ use crate::{
 pub(crate) struct RenderPass {
     pipeline: Mutex<Option<Arc<dyn crate::graphics_pipeline::GraphicsPipeline>>>,
 
-    depth_stencil_attachment: Option<Arc<dyn crate::texture::Texture>>,
+    _depth_stencil_attachment: Option<Arc<dyn crate::texture::Texture>>,
     color_attachment: Arc<dyn crate::texture::Texture>,
 
     graphics_device: Arc<GraphicsDeviceShared>,
@@ -142,7 +142,7 @@ impl RenderPass {
         Self {
             pipeline: Mutex::new(None),
 
-            depth_stencil_attachment: depth_stencil_attachment,
+            _depth_stencil_attachment: depth_stencil_attachment,
             color_attachment: Arc::clone(descriptor.color_attachment),
 
             graphics_device: Arc::clone(graphics_device),

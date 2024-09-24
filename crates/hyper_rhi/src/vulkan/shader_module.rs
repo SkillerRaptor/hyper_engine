@@ -70,11 +70,9 @@ impl ShaderModule {
 
 impl Drop for ShaderModule {
     fn drop(&mut self) {
-        unsafe {
-            self.graphics_device
-                .device()
-                .destroy_shader_module(self.raw, None);
-        }
+        self.graphics_device
+            .resource_queue()
+            .push_shader_module(self.raw);
     }
 }
 

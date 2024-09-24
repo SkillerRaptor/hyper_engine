@@ -5,6 +5,7 @@
 //
 
 use std::{
+    mem::{self, ManuallyDrop},
     ptr,
     sync::{Arc, Mutex},
 };
@@ -30,7 +31,9 @@ use windows::{
                 ID3D12Fence,
                 ID3D12GraphicsCommandList,
                 ID3D12Object,
+                ID3D12PipelineState,
                 ID3D12Resource,
+                ID3D12RootSignature,
                 D3D12_COMMAND_LIST_TYPE_DIRECT,
                 D3D12_COMMAND_QUEUE_DESC,
                 D3D12_COMMAND_QUEUE_FLAG_NONE,
@@ -71,11 +74,53 @@ use crate::{
     graphics_device::GraphicsDeviceDescriptor,
     graphics_pipeline::GraphicsPipelineDescriptor,
     pipeline_layout::PipelineLayoutDescriptor,
-    resource::ResourceHandle,
     shader_module::ShaderModuleDescriptor,
     surface::SurfaceDescriptor,
     texture::TextureDescriptor,
 };
+
+pub(crate) struct ResourceQueue {
+    buffers: Mutex<
+        Vec<(
+            ManuallyDrop<gpu_allocator::d3d12::Resource>,
+            ResourceHandlePair,
+        )>,
+    >,
+    graphics_pipelines: Mutex<Vec<ID3D12PipelineState>>,
+    pipeline_layouts: Mutex<Vec<ID3D12RootSignature>>,
+    textures: Mutex<Vec<ManuallyDrop<gpu_allocator::d3d12::Resource>>>,
+}
+
+impl ResourceQueue {
+    pub(crate) fn push_buffer(
+        &self,
+        resource: gpu_allocator::d3d12::Resource,
+        resource_handle_pair: ResourceHandlePair,
+    ) {
+        self.buffers
+            .lock()
+            .unwrap()
+            .push((ManuallyDrop::new(resource), resource_handle_pair));
+    }
+
+    pub(crate) fn push_graphics_pipeline(&self, graphics_pipeline: ID3D12PipelineState) {
+        self.graphics_pipelines
+            .lock()
+            .unwrap()
+            .push(graphics_pipeline);
+    }
+
+    pub(crate) fn push_pipeline_layout(&self, pipeline_layout: ID3D12RootSignature) {
+        self.pipeline_layouts.lock().unwrap().push(pipeline_layout);
+    }
+
+    pub(crate) fn push_texture(&self, resource: gpu_allocator::d3d12::Resource) {
+        self.textures
+            .lock()
+            .unwrap()
+            .push(ManuallyDrop::new(resource));
+    }
+}
 
 #[derive(Debug)]
 pub(crate) struct FrameData {
@@ -89,6 +134,8 @@ pub(crate) struct GraphicsDeviceShared {
     frames: Vec<FrameData>,
     fence_event: HANDLE,
     fence: ID3D12Fence,
+
+    resource_queue: ResourceQueue,
 
     upload_manager: UploadManager,
     descriptor_manager: DescriptorManager,
@@ -105,6 +152,35 @@ pub(crate) struct GraphicsDeviceShared {
 }
 
 impl GraphicsDeviceShared {
+    pub(crate) fn free_resources(&self) {
+        let buffers = mem::take(&mut *self.resource_queue.buffers.lock().unwrap());
+        for (mut resource, resource_handle_pair) in buffers {
+            self.descriptor_manager
+                .retire_handle(resource_handle_pair.srv());
+            self.descriptor_manager
+                .retire_handle(resource_handle_pair.uav());
+            self.allocator()
+                .lock()
+                .unwrap()
+                .free_resource(unsafe { ManuallyDrop::take(&mut resource) })
+                .unwrap();
+        }
+
+        let _graphics_pipelines =
+            mem::take(&mut *self.resource_queue.graphics_pipelines.lock().unwrap());
+        let _pipeline_layouts =
+            mem::take(&mut *self.resource_queue.pipeline_layouts.lock().unwrap());
+
+        let textures = mem::take(&mut *self.resource_queue.textures.lock().unwrap());
+        for mut resource in textures {
+            self.allocator()
+                .lock()
+                .unwrap()
+                .free_resource(unsafe { ManuallyDrop::take(&mut resource) })
+                .unwrap();
+        }
+    }
+
     pub(crate) fn set_debug_name(&self, object: &ID3D12Object, label: &str) {
         unsafe {
             object.SetName(&HSTRING::from(label)).unwrap();
@@ -118,10 +194,6 @@ impl GraphicsDeviceShared {
     ) -> ResourceHandlePair {
         self.descriptor_manager
             .allocate_buffer_handle(&self.device, resource, size)
-    }
-
-    pub(crate) fn retire_handle(&self, handle: ResourceHandle) {
-        self.descriptor_manager.retire_handle(handle);
     }
 
     pub(crate) fn upload_buffer(
@@ -156,6 +228,10 @@ impl GraphicsDeviceShared {
         &self.rtv_heap
     }
 
+    pub(crate) fn resource_queue(&self) -> &ResourceQueue {
+        &self.resource_queue
+    }
+
     pub(crate) fn current_frame(&self) -> &FrameData {
         let index = *self.current_frame_index.lock().unwrap() % crate::graphics_device::FRAME_COUNT;
         &self.frames[index as usize]
@@ -164,6 +240,8 @@ impl GraphicsDeviceShared {
 
 impl Drop for GraphicsDeviceShared {
     fn drop(&mut self) {
+        self.free_resources();
+
         unsafe {
             CloseHandle(self.fence_event).unwrap();
         }
@@ -234,6 +312,13 @@ impl GraphicsDevice {
                 frames,
                 fence_event,
                 fence,
+
+                resource_queue: ResourceQueue {
+                    buffers: Mutex::new(Vec::new()),
+                    graphics_pipelines: Mutex::new(Vec::new()),
+                    pipeline_layouts: Mutex::new(Vec::new()),
+                    textures: Mutex::new(Vec::new()),
+                },
 
                 upload_manager,
                 descriptor_manager,
@@ -415,6 +500,8 @@ impl crate::graphics_device::GraphicsDevice for GraphicsDevice {
                 WaitForSingleObject(self.shared.fence_event, INFINITE);
             }
         }
+
+        // self.shared.free_resources();
 
         if surface.resized() {
             surface.rebuild();

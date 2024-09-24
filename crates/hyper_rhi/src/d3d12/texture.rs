@@ -6,6 +6,7 @@
 
 use std::{
     fmt::{self, Debug, Formatter},
+    mem::ManuallyDrop,
     sync::Arc,
 };
 
@@ -17,13 +18,19 @@ use crate::{
     texture::TextureDescriptor,
 };
 
+#[derive(Debug)]
+pub(crate) enum OwnedResource {
+    GpuAllocator(ManuallyDrop<gpu_allocator::d3d12::Resource>),
+    External(ID3D12Resource),
+}
+
 pub(crate) struct Texture {
     height: u32,
     width: u32,
 
     // NOTE: This is an index into the Heap, may change later
     index: u32,
-    resource: ID3D12Resource,
+    resource: OwnedResource,
 
     graphics_device: Arc<GraphicsDeviceShared>,
 }
@@ -59,18 +66,31 @@ impl Texture {
             width,
 
             index,
-            resource,
+            resource: OwnedResource::External(resource),
 
             graphics_device: Arc::clone(graphics_device),
         }
     }
 
     pub(crate) fn resource(&self) -> &ID3D12Resource {
-        &self.resource
+        match &self.resource {
+            OwnedResource::GpuAllocator(resource) => resource.resource(),
+            OwnedResource::External(resource) => resource,
+        }
     }
 
     pub(crate) fn index(&self) -> u32 {
         self.index
+    }
+}
+
+impl Drop for Texture {
+    fn drop(&mut self) {
+        if let OwnedResource::GpuAllocator(ref mut resource) = &mut self.resource {
+            self.graphics_device
+                .resource_queue()
+                .push_texture(unsafe { ManuallyDrop::take(resource) });
+        }
     }
 }
 

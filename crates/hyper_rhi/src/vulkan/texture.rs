@@ -6,10 +6,12 @@
 
 use std::{
     fmt::{self, Debug, Formatter},
+    mem,
     sync::Arc,
 };
 
 use ash::vk;
+use gpu_allocator::vulkan::Allocation;
 
 use crate::{
     resource::{Resource, ResourceHandle},
@@ -21,6 +23,7 @@ pub(crate) struct Texture {
     height: u32,
     width: u32,
 
+    allocation: Option<Allocation>,
     view: vk::ImageView,
     raw: vk::Image,
 
@@ -74,6 +77,7 @@ impl Texture {
             height,
             width,
 
+            allocation: None,
             view,
             raw: image,
 
@@ -92,13 +96,11 @@ impl Texture {
 
 impl Drop for Texture {
     fn drop(&mut self) {
-        // TODO: Destroy texture allocation too if present
-
-        unsafe {
-            self.graphics_device
-                .device()
-                .destroy_image_view(self.view, None);
-        }
+        self.graphics_device.resource_queue().push_texture(
+            self.raw,
+            self.view,
+            mem::take(&mut self.allocation),
+        );
     }
 }
 

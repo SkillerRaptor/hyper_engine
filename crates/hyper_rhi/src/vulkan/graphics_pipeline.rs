@@ -189,11 +189,9 @@ impl GraphicsPipeline {
 
 impl Drop for GraphicsPipeline {
     fn drop(&mut self) {
-        unsafe {
-            self.graphics_device
-                .device()
-                .destroy_pipeline(self.raw, None);
-        }
+        self.graphics_device
+            .resource_queue()
+            .push_graphics_pipeline(self.raw);
     }
 }
 

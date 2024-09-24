@@ -7,13 +7,13 @@
 use hyper_ecs::Registry;
 
 pub struct Scene {
-    registry: Registry,
+    _registry: Registry,
 }
 
 impl Scene {
     pub fn new() -> Self {
         Self {
-            registry: Registry::new(),
+            _registry: Registry::new(),
         }
     }
 }
