@@ -15,7 +15,8 @@ use gpu_allocator::{
     vulkan::{Allocation, AllocationCreateDesc, AllocationScheme},
     MemoryLocation,
 };
-use hyper_core::alignment::Alignment;
+
+use hyper_core::Alignment;
 
 use crate::{
     buffer::{self, BufferDescriptor, BufferUsage},

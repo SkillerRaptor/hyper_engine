@@ -4,4 +4,6 @@
 // SPDX-License-Identifier: MIT
 //
 
-pub mod alignment;
+mod alignment;
+
+pub use alignment::*;

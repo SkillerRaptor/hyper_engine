@@ -14,7 +14,6 @@ use gpu_allocator::{
     d3d12::{ResourceCategory, ResourceCreateDesc, ResourceStateOrBarrierLayout, ResourceType},
     MemoryLocation,
 };
-use hyper_core::alignment::Alignment;
 use windows::Win32::Graphics::{
     Direct3D12::{
         D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
@@ -35,6 +34,8 @@ use windows::Win32::Graphics::{
     },
     Dxgi::Common::{DXGI_FORMAT_UNKNOWN, DXGI_SAMPLE_DESC},
 };
+
+use hyper_core::Alignment;
 
 use crate::{
     buffer::{self, BufferDescriptor, BufferUsage},
