@@ -18,30 +18,27 @@ pub struct Input {
 }
 
 impl Input {
-    #[allow(unused)]
+    pub fn set_key_state(&mut self, key_code: KeyCode, pressed: bool) {
+        *self.key_codes.entry(key_code).or_default() = pressed;
+    }
+
     pub fn is_key_pressed(&self, key_code: KeyCode) -> bool {
         *self.key_codes.get(&key_code).unwrap_or(&false)
     }
 
-    #[allow(unused)]
+    pub fn set_mouse_state(&mut self, mouse_code: MouseCode, pressed: bool) {
+        *self.mouse_codes.entry(mouse_code).or_default() = pressed;
+    }
+
     pub fn is_mouse_button_pressed(&self, mouse_code: MouseCode) -> bool {
         *self.mouse_codes.get(&mouse_code).unwrap_or(&false)
     }
 
-    #[allow(unused)]
+    pub fn set_cursor_position(&mut self, cursor_position: Vec2) {
+        self.cursor_position = cursor_position;
+    }
+
     pub fn cursor_position(&self) -> Vec2 {
         self.cursor_position
-    }
-
-    pub(crate) fn set_key_state(&mut self, key_code: KeyCode, pressed: bool) {
-        *self.key_codes.entry(key_code).or_default() = pressed;
-    }
-
-    pub(crate) fn set_mouse_state(&mut self, mouse_code: MouseCode, pressed: bool) {
-        *self.mouse_codes.entry(mouse_code).or_default() = pressed;
-    }
-
-    pub(crate) fn set_cursor_position(&mut self, cursor_position: Vec2) {
-        self.cursor_position = cursor_position;
     }
 }

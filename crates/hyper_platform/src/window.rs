@@ -17,16 +17,16 @@ use thiserror::Error;
 use winit::{
     dpi::LogicalSize,
     error::{EventLoopError, OsError},
-    event::{ElementState, Event, WindowEvent},
+    event::{DeviceEvent, ElementState, MouseScrollDelta, WindowEvent},
     event_loop::EventLoop,
     keyboard::PhysicalKey,
     platform::pump_events::EventLoopExtPumpEvents,
     window::{self, WindowAttributes},
 };
 
-use hyper_math::{UVec2, Vec2};
+use hyper_math::UVec2;
 
-use crate::{input::Input, key_code::KeyCode, mouse_code::MouseCode};
+use crate::{key_code::KeyCode, mouse_code::MouseCode, Event, EventBus};
 
 pub struct WindowDescriptor<'a> {
     pub title: &'a str,
@@ -44,9 +44,6 @@ pub enum Error {
 }
 
 pub struct Window {
-    resized: bool,
-    input: Input,
-    close_requested: bool,
     // NOTE: Multiple windows are not allowed
     event_loop: EventLoop<()>,
     raw: window::Window,
@@ -73,78 +70,121 @@ impl Window {
             "Window created",
         );
 
-        let input = Input::default();
-
         Ok(Self {
-            resized: false,
-            input,
-            close_requested: false,
             event_loop,
             raw: window,
         })
     }
 
-    pub fn process_events(&mut self) {
-        // NOTE: This is hack till event system is implemented
-        if self.resized {
-            self.resized = false;
-        }
-
+    pub fn process_events(&mut self, event_bus: &mut EventBus) {
         #[allow(deprecated)]
         let _ = self
             .event_loop
             .pump_events(Some(Duration::ZERO), |event, _| {
-                let Event::WindowEvent { event, .. } = &event else {
-                    return;
-                };
+                use winit::event::Event as WinitEvent;
 
                 match event {
-                    WindowEvent::CloseRequested => {
-                        self.close_requested = true;
-                    }
-                    WindowEvent::Resized(_) => {
-                        self.resized = true;
-                    }
-                    WindowEvent::CursorMoved { position, .. } => {
-                        self.input
-                            .set_cursor_position(Vec2::new(position.x as f32, position.y as f32));
-                    }
-                    WindowEvent::MouseInput { state, button, .. } => {
-                        let pressed = match state {
-                            ElementState::Pressed => true,
-                            ElementState::Released => false,
-                        };
+                    WinitEvent::DeviceEvent { event, .. } => match event {
+                        DeviceEvent::MouseMotion { delta } => {
+                            event_bus.dispatch(Event::MouseMotion {
+                                delta_x: delta.0,
+                                delta_y: delta.1,
+                            });
+                        }
+                        _ => {}
+                    },
+                    WinitEvent::WindowEvent { event, .. } => {
+                        match event {
+                            WindowEvent::CloseRequested => {
+                                event_bus.dispatch(Event::WindowClose);
+                            }
+                            WindowEvent::CursorEntered { .. } => {
+                                // TODO: Add Cursor Entered Event
+                            }
+                            WindowEvent::CursorLeft { .. } => {
+                                // TODO: Add Cursor Left Event
+                            }
+                            WindowEvent::CursorMoved { position, .. } => {
+                                event_bus.dispatch(Event::MouseMoved {
+                                    x: position.x,
+                                    y: position.y,
+                                });
+                            }
+                            WindowEvent::DroppedFile(..) => {
+                                // TODO: Add Dropped File Event
+                            }
+                            WindowEvent::Focused(_) => {
+                                // TODO: Add Focused Event
+                            }
+                            WindowEvent::HoveredFile(..) => {
+                                // TODO: Add Hovered File Event
+                            }
+                            WindowEvent::HoveredFileCancelled => {
+                                // TODO: Add Hovered File Cancelled Event
+                            }
+                            WindowEvent::Ime(..) => {
+                                // TODO: Add Ime Event
+                            }
+                            WindowEvent::KeyboardInput { event, .. } => {
+                                let PhysicalKey::Code(key_code) = event.physical_key else {
+                                    return;
+                                };
 
-                        let mouse_code = MouseCode::from(*button);
-                        self.input.set_mouse_state(mouse_code, pressed);
-                    }
-                    WindowEvent::KeyboardInput { event, .. } => {
-                        let pressed = match event.state {
-                            ElementState::Pressed => true,
-                            ElementState::Released => false,
-                        };
-
-                        // Don't support any non native key codes
-                        let PhysicalKey::Code(key_code) = event.physical_key else {
-                            return;
-                        };
-
-                        let key_code = KeyCode::from(key_code);
-                        self.input.set_key_state(key_code, pressed);
+                                let key_code = KeyCode::from(key_code);
+                                match event.state {
+                                    ElementState::Pressed => {
+                                        event_bus.dispatch(Event::KeyPressed { key_code });
+                                    }
+                                    ElementState::Released => {
+                                        event_bus.dispatch(Event::KeyReleased { key_code });
+                                    }
+                                };
+                            }
+                            WindowEvent::ModifiersChanged(..) => {
+                                // TODO: Add Modifiers Changed Event
+                            }
+                            WindowEvent::MouseInput { state, button, .. } => {
+                                let mouse_code = MouseCode::from(button);
+                                match state {
+                                    ElementState::Pressed => {
+                                        event_bus
+                                            .dispatch(Event::MouseButtonPressed { mouse_code });
+                                    }
+                                    ElementState::Released => {
+                                        event_bus
+                                            .dispatch(Event::MouseButtonReleased { mouse_code });
+                                    }
+                                };
+                            }
+                            WindowEvent::MouseWheel { delta, .. } => {
+                                if let MouseScrollDelta::LineDelta(delta_x, delta_y) = delta {
+                                    event_bus.dispatch(Event::MouseScrolled { delta_x, delta_y });
+                                }
+                            }
+                            WindowEvent::Moved(physical_position) => {
+                                event_bus.dispatch(Event::WindowMoved {
+                                    x: physical_position.x,
+                                    y: physical_position.y,
+                                });
+                            }
+                            WindowEvent::Occluded(_) => {
+                                // TODO: Add Occluded Event
+                            }
+                            WindowEvent::Resized(physical_size) => {
+                                event_bus.dispatch(Event::WindowResize {
+                                    width: physical_size.width,
+                                    height: physical_size.height,
+                                });
+                            }
+                            WindowEvent::ScaleFactorChanged { .. } => {
+                                // TODO: Add Scale Factor Changed Event
+                            }
+                            _ => {}
+                        }
                     }
                     _ => {}
                 }
-
-                // TODO: Handle events, by adding event system and processing them
             });
-    }
-
-    pub fn close_requested(&self) -> bool {
-        self.close_requested
-    }
-
-    pub fn resized(&self) -> bool {
-        self.resized
     }
 
     pub fn inner_size(&self) -> UVec2 {

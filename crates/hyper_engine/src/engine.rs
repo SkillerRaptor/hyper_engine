@@ -6,7 +6,8 @@
 
 use std::{sync::Arc, time::Instant};
 
-use hyper_platform::{Window, WindowDescriptor};
+use hyper_math::Vec2;
+use hyper_platform::{Event, EventBus, Input, Window, WindowDescriptor};
 use hyper_render::{
     graphics_device::{GraphicsApi, GraphicsDevice, GraphicsDeviceDescriptor},
     renderer::Renderer,
@@ -32,11 +33,17 @@ pub struct Engine {
     graphics_device: Arc<dyn GraphicsDevice>,
 
     window: Window,
+
+    input: Input,
+    event_bus: EventBus,
 }
 
 impl Engine {
     pub fn new(descriptor: &EngineDescriptor) -> Self {
         let start_time = Instant::now();
+
+        let event_bus = EventBus::default();
+        let input = Input::default();
 
         // Assuming that the engine will run in editor-mode
         // FIXME: When adding game mode change the title to the game
@@ -84,6 +91,9 @@ impl Engine {
             graphics_device,
 
             window,
+
+            input,
+            event_bus,
         }
     }
 
@@ -95,20 +105,36 @@ impl Engine {
         let mut current_time = Instant::now();
         let mut accumulator = 0.0;
 
-        while !self.window.close_requested() {
+        'running: loop {
             let new_time = Instant::now();
             let frame_time = (new_time - current_time).as_secs_f32();
             current_time = new_time;
 
             accumulator += frame_time;
 
-            self.window.process_events();
+            self.window.process_events(&mut self.event_bus);
 
-            if self.window.resized() {
-                let size = self.window.inner_size();
-                let width = size.x.max(1);
-                let height = size.y.max(1);
-                self.surface.resize(width, height);
+            while let Some(event) = self.event_bus.pop_event() {
+                match event {
+                    Event::MouseButtonPressed { mouse_code } => {
+                        self.input.set_mouse_state(mouse_code, true)
+                    }
+                    Event::MouseButtonReleased { mouse_code } => {
+                        self.input.set_mouse_state(mouse_code, false)
+                    }
+                    Event::MouseMoved { x, y } => self
+                        .input
+                        .set_cursor_position(Vec2::new(x as f32, y as f32)),
+                    Event::KeyPressed { key_code } => self.input.set_key_state(key_code, true),
+                    Event::KeyReleased { key_code } => self.input.set_key_state(key_code, false),
+                    Event::WindowClose => break 'running,
+                    Event::WindowResize { width, height } => {
+                        let width = width.max(1);
+                        let height = height.max(1);
+                        self.surface.resize(width, height);
+                    }
+                    _ => {}
+                }
             }
 
             while accumulator >= delta_time {

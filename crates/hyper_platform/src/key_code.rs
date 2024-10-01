@@ -6,7 +6,7 @@
 
 use winit::keyboard;
 
-#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum KeyCode {
     Backquote,
     Backslash,
