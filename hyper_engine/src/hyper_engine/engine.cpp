@@ -32,7 +32,7 @@ namespace hyper_engine
 
     void Engine::run()
     {
-        float time = 0.0;
+        // float time = 0.0;
         const float delta_time = static_cast<float>(1.0 / 60.0);
 
         std::chrono::time_point current_time = std::chrono::steady_clock::now();
@@ -53,7 +53,7 @@ namespace hyper_engine
                 // Fixed Update
 
                 accumulator -= delta_time;
-                time += delta_time;
+                // time += delta_time;
             }
 
             // Update
@@ -62,7 +62,7 @@ namespace hyper_engine
         }
     }
 
-    void Engine::on_close(const hyper_platform::WindowCloseEvent &event)
+    void Engine::on_close(const hyper_platform::WindowCloseEvent &)
     {
         m_running = false;
     }
