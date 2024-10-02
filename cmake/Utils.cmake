@@ -15,7 +15,7 @@ endmacro()
 
 macro(hyperengine_define_executable target)
     hyperengine_group_source(${SOURCES})
-    if(${HEADERS})
+    if(HEADERS)
         hyperengine_group_source(${HEADERS})
     endif()
 
@@ -26,7 +26,7 @@ endmacro()
 
 macro(hyperengine_define_library target)
     hyperengine_group_source(${SOURCES})
-    if(${HEADERS})
+    if(HEADERS)
         hyperengine_group_source(${HEADERS})
     endif()
 
