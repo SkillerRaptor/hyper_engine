@@ -4,11 +4,14 @@
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-    src/main.cpp)
+    src/hyper_platform/window.cpp)
 
-hyperengine_define_executable(hyper_engine)
+set(HEADERS
+    include/hyper_platform/window.hpp)
+
+hyperengine_define_library(hyper_platform)
 target_link_libraries(
-    hyper_engine
-    PRIVATE
+    hyper_platform
+    PUBLIC
     hyper_core
-    hyper_platform)
+    glfw)

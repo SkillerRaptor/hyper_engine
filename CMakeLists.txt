@@ -44,4 +44,6 @@ add_subdirectory(third_party)
 
 add_subdirectory(hyper_core)
 
+add_subdirectory(hyper_platform)
+
 add_subdirectory(hyper_engine)
