@@ -43,7 +43,7 @@ include(cmake/Utils.cmake)
 add_subdirectory(third_party)
 
 add_subdirectory(hyper_core)
-
+add_subdirectory(hyper_event)
 add_subdirectory(hyper_platform)
 
 add_subdirectory(hyper_engine)

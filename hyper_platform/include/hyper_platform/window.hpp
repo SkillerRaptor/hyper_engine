@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "hyper_event/event_bus.hpp"
 #include <string_view>
 
 struct GLFWwindow;
@@ -17,6 +18,7 @@ namespace hyper_platform
         std::string_view title;
         uint32_t width;
         uint32_t height;
+        hyper_event::EventBus &event_bus;
     };
 
     class Window
@@ -24,6 +26,8 @@ namespace hyper_platform
     public:
         Window(const WindowDescriptor &descriptor);
         ~Window();
+
+        void poll_events();
 
     private:
         GLFWwindow *m_window;

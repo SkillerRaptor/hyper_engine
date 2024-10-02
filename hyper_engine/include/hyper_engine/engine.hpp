@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <hyper_event/event_bus.hpp>
+#include <hyper_platform/window_events.hpp>
 #include <hyper_platform/window.hpp>
 
 namespace hyper_engine
@@ -32,6 +34,10 @@ namespace hyper_engine
         void run();
 
     private:
+        void on_resize(const hyper_platform::WindowResizeEvent &event);
+
+    private:
+        hyper_event::EventBus m_event_bus;
         hyper_platform::Window m_window;
     };
 } // namespace hyper_engine
