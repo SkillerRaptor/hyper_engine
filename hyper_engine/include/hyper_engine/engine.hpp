@@ -34,9 +34,11 @@ namespace hyper_engine
         void run();
 
     private:
+        void on_close(const hyper_platform::WindowCloseEvent &event);
         void on_resize(const hyper_platform::WindowResizeEvent &event);
 
     private:
+        bool m_running;
         hyper_event::EventBus m_event_bus;
         hyper_platform::Window m_window;
     };
