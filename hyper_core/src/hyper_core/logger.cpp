@@ -57,23 +57,12 @@ namespace hyper_core
 
         const std::chrono::time_zone *time_zone = std::chrono::current_zone();
         const std::chrono::system_clock::time_point time_point = std::chrono::system_clock::now();
-        const std::chrono::local_time local_time = time_zone->to_local(time_point);
+        const auto local_time = time_zone->to_local(time_point);
 
-        const std::string time = fmt::format(
-            fg(fmt::color::gray),
-            "{:%FT%TZ}",
-            local_time);
+        const std::string time = fmt::format(fg(fmt::color::gray), "{:%FT%TZ}", local_time);
 
-        const std::string level_string = fmt::format(
-            fg(level_color),
-            "{}",
-            level_name);
+        const std::string level_string = fmt::format(fg(level_color), "{}", level_name);
 
-        fmt::print(
-            fg(fmt::color::light_gray),
-            "{} {}: {}\n",
-            time,
-            level_string,
-            string);
+        fmt::print(fg(fmt::color::light_gray), "{} {}: {}\n", time, level_string, string);
     }
 } // namespace hyper_core

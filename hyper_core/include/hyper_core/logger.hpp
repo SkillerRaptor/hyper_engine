@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "fmt/base.h"
 #include <string_view>
 
 #include <fmt/format.h>
@@ -27,51 +28,45 @@ namespace hyper_core
 
     public:
         template <typename... Args>
-        static void info(std::string_view format, Args &&...args)
+        static void info(fmt::format_string<Args...> format, Args &&...args)
         {
             Logger::log(Level::Info, format, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
-        static void warn(std::string_view format, Args &&...args)
+        static void warn(fmt::format_string<Args...> format, Args &&...args)
         {
             Logger::log(Level::Warning, format, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
-        static void error(std::string_view format, Args &&...args)
+        static void error(fmt::format_string<Args...> format, Args &&...args)
         {
             Logger::log(Level::Error, format, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
-        static void fatal(std::string_view format, Args &&...args)
+        static void fatal(fmt::format_string<Args...> format, Args &&...args)
         {
             Logger::log(Level::Fatal, format, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
-        static void debug(std::string_view format, Args &&...args)
+        static void debug(fmt::format_string<Args...> format, Args &&...args)
         {
             Logger::log(Level::Debug, format, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
-        static void trace(std::string_view format, Args &&...args)
+        static void trace(fmt::format_string<Args...> format, Args &&...args)
         {
             Logger::log(Level::Trace, format, std::forward<Args>(args)...);
         }
 
     private:
         template <typename... Args>
-        static void log(Level level, std::string_view format, Args &&...args)
+        static void log(Level level, fmt::format_string<Args...> format, Args &&...args)
         {
-            if (format.empty())
-            {
-                Logger::internal_log(level, format);
-                return;
-            }
-
             constexpr size_t args_count = sizeof...(Args);
             if constexpr (args_count == 0)
             {
