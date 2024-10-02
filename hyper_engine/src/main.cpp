@@ -11,7 +11,9 @@
 #include <hyper_core/logger.hpp>
 #include <hyper_platform/window.hpp>
 
-int main(int argc, char** argv)
+#include "hyper_engine/engine.hpp"
+
+int main(int argc, char **argv)
 {
     argparse::ArgumentParser program("HyperEngine");
 
@@ -31,17 +33,21 @@ int main(int argc, char** argv)
     {
         program.parse_args(argc, argv);
     }
-    catch (const std::exception& error)
+    catch (const std::exception &error)
     {
         HE_ERROR("{}", error.what());
         return 1;
     }
 
-    hyper_platform::Window window = hyper_platform::Window({
-        .title = "HyperEngine",
+    const hyper_engine::GraphicsApi graphics_api = renderer == "d3d12" ? hyper_engine::GraphicsApi::D3D12 : hyper_engine::GraphicsApi::Vulkan;
+
+    hyper_engine::Engine engine = hyper_engine::Engine({
         .width = width,
         .height = height,
+        .graphics_api = graphics_api,
+        .debug = debug,
     });
+    engine.run();
 
     return 0;
 }

@@ -4,7 +4,11 @@
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-    src/main.cpp)
+    src/main.cpp
+    src/hyper_engine/engine.cpp)
+
+set(HEADERS
+    include/hyper_engine/engine.hpp)
 
 hyperengine_define_executable(hyper_engine)
 target_link_libraries(
