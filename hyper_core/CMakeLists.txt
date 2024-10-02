@@ -4,10 +4,13 @@
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-    src/main.cpp)
+    src/hyper_core/logger.cpp)
 
-hyperengine_define_executable(hyper_engine)
+set(HEADERS
+    include/hyper_core/logger.hpp)
+
+hyperengine_define_library(hyper_core)
 target_link_libraries(
-    hyper_engine
-    PRIVATE
-    hyper_core)
+    hyper_core
+    PUBLIC
+    fmt)
