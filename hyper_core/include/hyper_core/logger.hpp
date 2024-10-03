@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include "fmt/base.h"
 #include <string_view>
 
+#include <fmt/base.h>
 #include <fmt/format.h>
 
 namespace hyper_core
@@ -67,15 +67,7 @@ namespace hyper_core
         template <typename... Args>
         static void log(Level level, fmt::format_string<Args...> format, Args &&...args)
         {
-            constexpr size_t args_count = sizeof...(Args);
-            if constexpr (args_count == 0)
-            {
-                Logger::internal_log(level, format);
-            }
-            else
-            {
-                Logger::internal_log(level, fmt::format(format, std::forward<Args>(args)...));
-            }
+            Logger::internal_log(level, fmt::format(format, std::forward<Args>(args)...));
         }
 
         static void internal_log(Level level, std::string_view string);
