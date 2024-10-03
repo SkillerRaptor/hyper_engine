@@ -5,11 +5,12 @@
  */
 
 #include <exception>
+#include <string>
 
 #include <argparse/argparse.hpp>
 
 #include <hyper_core/logger.hpp>
-#include <hyper_platform/window.hpp>
+#include <hyper_rhi/graphics_device.hpp>
 
 #include "hyper_engine/engine.hpp"
 
@@ -39,7 +40,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    const hyper_engine::GraphicsApi graphics_api = renderer == "d3d12" ? hyper_engine::GraphicsApi::D3D12 : hyper_engine::GraphicsApi::Vulkan;
+    const hyper_rhi::GraphicsApi graphics_api = renderer == "d3d12" ? hyper_rhi::GraphicsApi::D3D12 : hyper_rhi::GraphicsApi::Vulkan;
 
     hyper_engine::Engine engine = hyper_engine::Engine({
         .width = width,

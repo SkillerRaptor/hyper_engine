@@ -16,4 +16,5 @@ target_link_libraries(
     PRIVATE
     hyper_core
     hyper_platform
+    hyper_rhi
     argparse)

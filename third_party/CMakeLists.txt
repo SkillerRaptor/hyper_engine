@@ -66,6 +66,10 @@ set(GLFW_INSTALL OFF CACHE INTERNAL "")
 FetchContent_MakeAvailable(glfw)
 
 set_target_properties(
+    update_mappings
+    PROPERTIES
+    FOLDER "third_party")
+set_target_properties(
     glfw
     PROPERTIES
     FOLDER "third_party")
@@ -83,6 +87,29 @@ FetchContent_MakeAvailable(libassert)
 target_compile_definitions(libassert-lib PUBLIC LIBASSERT_PREFIX_ASSERTIONS)
 
 set_target_properties(
+    cpptrace-lib
+    PROPERTIES
+    FOLDER "third_party")
+set_target_properties(
     libassert-lib
+    PROPERTIES
+    FOLDER "third_party")
+
+#-------------------------------------------------------------------------------------------
+# volk
+#-------------------------------------------------------------------------------------------
+FetchContent_Declare(
+    volk
+    GIT_REPOSITORY https://github.com/zeux/volk.git
+    GIT_TAG 1.3.295)
+
+set(VOLK_PULL_IN_VULKAN ON CACHE INTERNAL "")
+set(VOLK_INSTALL OFF CACHE INTERNAL "")
+set(VOLK_HEADERS_ONLY OFF CACHE INTERNAL "")
+
+FetchContent_MakeAvailable(volk)
+
+set_target_properties(
+    volk
     PROPERTIES
     FOLDER "third_party")

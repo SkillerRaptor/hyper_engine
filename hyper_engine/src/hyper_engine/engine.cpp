@@ -5,12 +5,12 @@
  */
 
 #include "hyper_engine/engine.hpp"
-#include "hyper_platform/window_events.hpp"
 
 #include <chrono>
+
+#include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
 #include <hyper_core/prerequisites.hpp>
-#include <hyper_platform/window.hpp>
 
 namespace hyper_engine
 {
@@ -23,7 +23,13 @@ namespace hyper_engine
               .height = descriptor.height,
               .event_bus = m_event_bus,
           })
+        , m_graphics_device(hyper_rhi::GraphicsDevice::create({
+              .graphics_api = descriptor.graphics_api,
+              .debug_mode = descriptor.debug,
+          }))
     {
+        HE_ASSERT(m_graphics_device);
+
         m_event_bus.subscribe<hyper_platform::WindowCloseEvent>(HE_BIND_FUNCTION(Engine::on_close));
         m_event_bus.subscribe<hyper_platform::WindowResizeEvent>(HE_BIND_FUNCTION(Engine::on_resize));
 
