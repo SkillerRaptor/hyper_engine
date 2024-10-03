@@ -10,7 +10,6 @@
 
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
-#include <hyper_event/event_bus.hpp>
 
 #include "hyper_platform/key_events.hpp"
 #include "hyper_platform/mouse_events.hpp"

@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include "hyper_event/event_bus.hpp"
 #include <string_view>
+
+#include <hyper_event/event_bus.hpp>
 
 struct GLFWwindow;
 
