@@ -65,7 +65,7 @@ namespace hyper_core
 
     private:
         template <typename... Args>
-        static void log(Level level, fmt::format_string<Args...> format, Args &&...args)
+        static void log(const Level level, fmt::format_string<Args...> format, Args &&...args)
         {
             Logger::internal_log(level, fmt::format(format, std::forward<Args>(args)...));
         }

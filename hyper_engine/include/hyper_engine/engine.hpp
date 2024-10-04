@@ -26,7 +26,7 @@ namespace hyper_engine
     class Engine
     {
     public:
-        Engine(const EngineDescriptor &descriptor);
+        explicit Engine(const EngineDescriptor &descriptor);
 
         void run();
 

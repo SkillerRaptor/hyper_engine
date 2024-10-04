@@ -31,7 +31,7 @@ namespace hyper_platform
 
         glfwSetWindowSizeCallback(
             m_window,
-            [](GLFWwindow *window, int width, int height)
+            [](GLFWwindow *window, const int width, const int height)
             {
                 hyper_event::EventBus &event_bus = *static_cast<hyper_event::EventBus *>(glfwGetWindowUserPointer(window));
                 event_bus.dispatch(hyper_platform::WindowResizeEvent(static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
@@ -39,7 +39,7 @@ namespace hyper_platform
 
         glfwSetFramebufferSizeCallback(
             m_window,
-            [](GLFWwindow *window, int width, int height)
+            [](GLFWwindow *window, const int width, const int height)
             {
                 hyper_event::EventBus &event_bus = *static_cast<hyper_event::EventBus *>(glfwGetWindowUserPointer(window));
                 event_bus.dispatch(hyper_platform::WindowFramebufferResizeEvent(static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
@@ -55,7 +55,7 @@ namespace hyper_platform
 
         glfwSetKeyCallback(
             m_window,
-            [](GLFWwindow *window, int key, int, int action, int)
+            [](GLFWwindow *window, const int key, const int, const int action, const int)
             {
                 hyper_event::EventBus &event_bus = *static_cast<hyper_event::EventBus *>(glfwGetWindowUserPointer(window));
 
@@ -74,7 +74,7 @@ namespace hyper_platform
 
         glfwSetMouseButtonCallback(
             m_window,
-            [](GLFWwindow *window, int button, int action, int)
+            [](GLFWwindow *window, const int button, const int action, const int)
             {
                 hyper_event::EventBus &event_bus = *static_cast<hyper_event::EventBus *>(glfwGetWindowUserPointer(window));
 
@@ -93,7 +93,7 @@ namespace hyper_platform
 
         glfwSetScrollCallback(
             m_window,
-            [](GLFWwindow *window, double delta_x, double delta_y)
+            [](GLFWwindow *window, const double delta_x, const double delta_y)
             {
                 hyper_event::EventBus &event_bus = *static_cast<hyper_event::EventBus *>(glfwGetWindowUserPointer(window));
                 event_bus.dispatch(hyper_platform::MouseScrolledEvent(static_cast<float>(delta_x), static_cast<float>(delta_y)));
@@ -101,7 +101,7 @@ namespace hyper_platform
 
         glfwSetCursorPosCallback(
             m_window,
-            [](GLFWwindow *window, double x, double y)
+            [](GLFWwindow *window, const double x, const double y)
             {
                 hyper_event::EventBus &event_bus = *static_cast<hyper_event::EventBus *>(glfwGetWindowUserPointer(window));
                 event_bus.dispatch(hyper_platform::MouseMovedEvent(static_cast<float>(x), static_cast<float>(y)));

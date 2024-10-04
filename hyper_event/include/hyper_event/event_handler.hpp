@@ -18,7 +18,7 @@ namespace hyper_event
     };
 
     template <typename T>
-    class EventHandlerImpl : public EventHandler
+    class EventHandlerImpl final : public EventHandler
     {
     public:
         void subscribe(const std::function<void(const T &)> &callback)

@@ -15,12 +15,9 @@
 
 namespace hyper_event
 {
-
     class EventBus
     {
     public:
-        EventBus();
-
         template <typename T>
         void subscribe(const std::function<void(const T &)> &callback)
         {
@@ -31,7 +28,7 @@ namespace hyper_event
             }
 
             const std::unique_ptr<EventHandler> &handler = m_handlers[event_id];
-            EventHandlerImpl<T> *event_handler = static_cast<EventHandlerImpl<T> *>(handler.get());
+            auto *event_handler = static_cast<EventHandlerImpl<T> *>(handler.get());
             event_handler->subscribe(callback);
         }
 
@@ -45,7 +42,7 @@ namespace hyper_event
             }
 
             const std::unique_ptr<EventHandler> &handler = m_handlers[event_id];
-            EventHandlerImpl<T> *event_handler = static_cast<EventHandlerImpl<T> *>(handler.get());
+            auto *event_handler = static_cast<EventHandlerImpl<T> *>(handler.get());
             event_handler->dispatch(event);
         }
 

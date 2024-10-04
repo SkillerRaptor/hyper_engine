@@ -8,7 +8,7 @@
 
 namespace hyper_platform
 {
-    WindowResizeEvent::WindowResizeEvent(uint32_t width, uint32_t height)
+    WindowResizeEvent::WindowResizeEvent(const uint32_t width, const uint32_t height)
         : m_width(width)
         , m_height((height))
     {
@@ -24,7 +24,7 @@ namespace hyper_platform
         return m_height;
     }
 
-    WindowFramebufferResizeEvent::WindowFramebufferResizeEvent(uint32_t width, uint32_t height)
+    WindowFramebufferResizeEvent::WindowFramebufferResizeEvent(const uint32_t width, const uint32_t height)
         : m_width(width)
         , m_height((height))
     {

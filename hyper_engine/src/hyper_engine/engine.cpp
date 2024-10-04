@@ -16,7 +16,6 @@ namespace hyper_engine
 {
     Engine::Engine(const EngineDescriptor &descriptor)
         : m_running(false)
-        , m_event_bus()
         , m_window({
               .title = "HyperEngine",
               .width = descriptor.width,
@@ -39,7 +38,7 @@ namespace hyper_engine
     void Engine::run()
     {
         // float time = 0.0;
-        const float delta_time = static_cast<float>(1.0 / 60.0);
+        constexpr auto delta_time = static_cast<float>(1.0 / 60.0);
 
         std::chrono::time_point current_time = std::chrono::steady_clock::now();
         float accumulator = 0.0;
@@ -52,7 +51,7 @@ namespace hyper_engine
 
             accumulator += frame_time;
 
-            m_window.poll_events();
+            hyper_platform::Window::poll_events();
 
             while (accumulator >= delta_time)
             {

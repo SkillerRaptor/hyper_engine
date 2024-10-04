@@ -5,7 +5,6 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/hyper_rhi/graphics_device.cpp
-        src/hyper_rhi/vulkan/common.cpp
         src/hyper_rhi/vulkan/graphics_device.cpp)
 
 set(HEADERS
@@ -20,6 +19,7 @@ if (WIN32)
 
     set(HEADERS
             ${HEADERS}
+            include/hyper_rhi/d3d12/common.hpp
             include/hyper_rhi/d3d12/graphics_device.hpp)
 endif ()
 

@@ -25,10 +25,10 @@ namespace hyper_platform
     class Window
     {
     public:
-        Window(const WindowDescriptor &descriptor);
+        explicit Window(const WindowDescriptor &descriptor);
         ~Window();
 
-        void poll_events();
+        static void poll_events();
 
     private:
         GLFWwindow *m_window;

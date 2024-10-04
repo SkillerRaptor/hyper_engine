@@ -19,8 +19,8 @@ namespace hyper_platform
         float y() const;
 
     private:
-        float m_x = 0.0;
-        float m_y = 0.0;
+        float m_x;
+        float m_y;
     };
 
     class MouseScrolledEvent
@@ -32,29 +32,29 @@ namespace hyper_platform
         float delta_y() const;
 
     private:
-        float m_delta_x = 0.0;
-        float m_delta_y = 0.0;
+        float m_delta_x;
+        float m_delta_y;
     };
 
     class MouseButtonPressedEvent
     {
     public:
-        MouseButtonPressedEvent(MouseCode mouse_code);
+        explicit MouseButtonPressedEvent(MouseCode mouse_code);
 
         MouseCode mouse_code() const;
 
     private:
-        MouseCode m_mouse_code = {};
+        MouseCode m_mouse_code;
     };
 
     class MouseButtonReleasedEvent
     {
     public:
-        MouseButtonReleasedEvent(MouseCode mouse_code);
+        explicit MouseButtonReleasedEvent(MouseCode mouse_code);
 
         MouseCode mouse_code() const;
 
     private:
-        MouseCode m_mouse_code = {};
+        MouseCode m_mouse_code;
     };
 } // namespace hyper_platform

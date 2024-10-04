@@ -25,8 +25,8 @@ namespace hyper_platform
         uint32_t height() const;
 
     private:
-        uint32_t m_width = 0;
-        uint32_t m_height = 0;
+        uint32_t m_width;
+        uint32_t m_height;
     };
 
     class WindowFramebufferResizeEvent
@@ -38,7 +38,7 @@ namespace hyper_platform
         uint32_t height() const;
 
     private:
-        uint32_t m_width = 0;
-        uint32_t m_height = 0;
+        uint32_t m_width;
+        uint32_t m_height;
     };
 } // namespace hyper_platform

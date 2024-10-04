@@ -8,7 +8,7 @@
 
 namespace hyper_platform
 {
-    MouseMovedEvent::MouseMovedEvent(float x, float y)
+    MouseMovedEvent::MouseMovedEvent(const float x, const float y)
         : m_x(x)
         , m_y(y)
     {
@@ -24,7 +24,7 @@ namespace hyper_platform
         return m_y;
     }
 
-    MouseScrolledEvent::MouseScrolledEvent(float delta_x, float delta_y)
+    MouseScrolledEvent::MouseScrolledEvent(const float delta_x, const float delta_y)
         : m_delta_x(delta_x)
         , m_delta_y(delta_y)
     {
@@ -40,7 +40,7 @@ namespace hyper_platform
         return m_delta_y;
     }
 
-    MouseButtonPressedEvent::MouseButtonPressedEvent(MouseCode mouse_code)
+    MouseButtonPressedEvent::MouseButtonPressedEvent(const MouseCode mouse_code)
         : m_mouse_code(mouse_code)
     {
     }
@@ -50,7 +50,7 @@ namespace hyper_platform
         return m_mouse_code;
     }
 
-    MouseButtonReleasedEvent::MouseButtonReleasedEvent(MouseCode mouse_code)
+    MouseButtonReleasedEvent::MouseButtonReleasedEvent(const MouseCode mouse_code)
         : m_mouse_code(mouse_code)
     {
     }

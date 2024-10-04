@@ -13,22 +13,22 @@ namespace hyper_platform
     class KeyPressedEvent
     {
     public:
-        KeyPressedEvent(KeyCode key_code);
+        explicit KeyPressedEvent(KeyCode key_code);
 
         KeyCode key_code() const;
 
     private:
-        KeyCode m_key_code = {};
+        KeyCode m_key_code;
     };
 
     class KeyReleasedEvent
     {
     public:
-        KeyReleasedEvent(KeyCode key_code);
+        explicit KeyReleasedEvent(KeyCode key_code);
 
         KeyCode key_code() const;
 
     private:
-        KeyCode m_key_code = {};
+        KeyCode m_key_code;
     };
 } // namespace hyper_platform

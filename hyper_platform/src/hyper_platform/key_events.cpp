@@ -8,7 +8,7 @@
 
 namespace hyper_platform
 {
-    KeyPressedEvent::KeyPressedEvent(KeyCode key_code)
+    KeyPressedEvent::KeyPressedEvent(const KeyCode key_code)
         : m_key_code(key_code)
     {
     }
@@ -18,7 +18,7 @@ namespace hyper_platform
         return m_key_code;
     }
 
-    KeyReleasedEvent::KeyReleasedEvent(KeyCode key_code)
+    KeyReleasedEvent::KeyReleasedEvent(const KeyCode key_code)
         : m_key_code(key_code)
     {
     }

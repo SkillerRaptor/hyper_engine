@@ -8,7 +8,4 @@
 
 namespace hyper_event
 {
-    EventBus::EventBus()
-    {
-    }
 } // namespace hyper_event

@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 
     const hyper_rhi::GraphicsApi graphics_api = renderer == "d3d12" ? hyper_rhi::GraphicsApi::D3D12 : hyper_rhi::GraphicsApi::Vulkan;
 
-    hyper_engine::Engine engine = hyper_engine::Engine({
+    auto engine = hyper_engine::Engine({
         .width = width,
         .height = height,
         .graphics_api = graphics_api,
