@@ -11,18 +11,23 @@
 
 namespace hyper_rhi
 {
-    class D3D12GraphicsDevice : public GraphicsDevice
+    class D3D12GraphicsDevice final : public GraphicsDevice
     {
     public:
-        D3D12GraphicsDevice(const GraphicsDeviceDescriptor &descriptor);
+        explicit D3D12GraphicsDevice(const GraphicsDeviceDescriptor &descriptor);
 
     private:
         void enable_debug_layers();
         void create_factory();
-        void create_adapter();
+        void choose_adapter();
+        void create_device();
+        void create_command_queue();
 
     private:
         bool m_debug_layers_enabled;
         ComPtr<IDXGIFactory7> m_factory;
+        ComPtr<IDXGIAdapter4> m_adapter;
+        ComPtr<ID3D12Device> m_device;
+        ComPtr<ID3D12CommandQueue> m_command_queue;
     };
 } // namespace hyper_rhi
