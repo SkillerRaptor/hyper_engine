@@ -5,21 +5,24 @@
  */
 
 #include "hyper_rhi/vulkan/graphics_device.hpp"
-#include "vulkan/vulkan_core.h"
 
 #include <array>
 #include <map>
+#include <set>
 #include <vector>
 
 #include <GLFW/glfw3.h>
 
-#include <hyper_core/assertion.hpp>
-#include <hyper_core/logger.hpp>
+#include "hyper_rhi/vulkan/surface.hpp"
 
 namespace hyper_rhi
 {
     static constexpr std::array<const char *, 1> g_validation_layers = {
         "VK_LAYER_KHRONOS_validation",
+    };
+
+    static constexpr std::array<const char *, 1> g_device_extensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     };
 
     VulkanGraphicsDevice::VulkanGraphicsDevice(const GraphicsDeviceDescriptor &descriptor)
@@ -63,13 +66,33 @@ namespace hyper_rhi
         vkDestroyInstance(m_instance, nullptr);
     }
 
+    VkInstance VulkanGraphicsDevice::instance() const
+    {
+        return m_instance;
+    }
+
+    VkPhysicalDevice VulkanGraphicsDevice::physical_device() const
+    {
+        return m_physical_device;
+    }
+
+    VkDevice VulkanGraphicsDevice::device() const
+    {
+        return m_device;
+    }
+
+    std::unique_ptr<Surface> VulkanGraphicsDevice::create_surface(const SurfaceDescriptor &descriptor)
+    {
+        return std::make_unique<VulkanSurface>(*this, descriptor);
+    }
+
     bool VulkanGraphicsDevice::check_validation_layer_support()
     {
         uint32_t layer_count = 0;
-        vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
+        HE_VK_CHECK(vkEnumerateInstanceLayerProperties(&layer_count, nullptr));
 
         std::vector<VkLayerProperties> layer_properties(layer_count);
-        vkEnumerateInstanceLayerProperties(&layer_count, layer_properties.data());
+        HE_VK_CHECK(vkEnumerateInstanceLayerProperties(&layer_count, layer_properties.data()));
 
         for (const char *layer_name : g_validation_layers)
         {
@@ -142,7 +165,7 @@ namespace hyper_rhi
         };
 
         HE_VK_CHECK(vkCreateInstance(&create_info, nullptr, &m_instance));
-        HE_ASSERT(m_instance);
+        HE_ASSERT(m_instance != VK_NULL_HANDLE);
 
         volkLoadInstance(m_instance);
     }
@@ -166,16 +189,16 @@ namespace hyper_rhi
         };
 
         HE_VK_CHECK(vkCreateDebugUtilsMessengerEXT(m_instance, &create_info, nullptr, &m_debug_messenger));
-        HE_ASSERT(m_debug_messenger);
+        HE_ASSERT(m_debug_messenger != VK_NULL_HANDLE);
     }
 
     void VulkanGraphicsDevice::choose_physical_device()
     {
         uint32_t device_count = 0;
-        vkEnumeratePhysicalDevices(m_instance, &device_count, nullptr);
+        HE_VK_CHECK(vkEnumeratePhysicalDevices(m_instance, &device_count, nullptr));
 
         std::vector<VkPhysicalDevice> physical_devices(device_count);
-        vkEnumeratePhysicalDevices(m_instance, &device_count, physical_devices.data());
+        HE_VK_CHECK(vkEnumeratePhysicalDevices(m_instance, &device_count, physical_devices.data()));
 
         std::multimap<uint32_t, VkPhysicalDevice> possible_physical_devices = {};
         for (const VkPhysicalDevice &physical_device : physical_devices)
@@ -189,12 +212,18 @@ namespace hyper_rhi
         m_physical_device = possible_physical_devices.rbegin()->second;
     }
 
-    uint32_t VulkanGraphicsDevice::rate_physical_device(const VkPhysicalDevice &physical_device)
+    uint32_t VulkanGraphicsDevice::rate_physical_device(const VkPhysicalDevice &physical_device) const
     {
         uint32_t score = 0;
 
-        const std::optional<uint32_t> queue_family = VulkanGraphicsDevice::find_queue_family(physical_device);
+        const std::optional<uint32_t> queue_family = this->find_queue_family(physical_device);
         if (!queue_family.has_value())
+        {
+            return 0;
+        }
+
+        const bool extensions_supported = VulkanGraphicsDevice::check_extension_support(physical_device);
+        if (!extensions_supported)
         {
             return 0;
         }
@@ -232,7 +261,7 @@ namespace hyper_rhi
         return score;
     }
 
-    std::optional<uint32_t> VulkanGraphicsDevice::find_queue_family(const VkPhysicalDevice &physical_device)
+    std::optional<uint32_t> VulkanGraphicsDevice::find_queue_family(const VkPhysicalDevice &physical_device) const
     {
         uint32_t queue_family_count = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, nullptr);
@@ -244,8 +273,9 @@ namespace hyper_rhi
         for (const VkQueueFamilyProperties &queue_family : queue_families)
         {
             const bool graphics_supported = queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT;
+            const bool present_supported = glfwGetPhysicalDevicePresentationSupport(m_instance, physical_device, index);
 
-            if (graphics_supported)
+            if (graphics_supported && present_supported)
             {
                 return index;
             }
@@ -254,6 +284,23 @@ namespace hyper_rhi
         }
 
         return std::nullopt;
+    }
+
+    bool VulkanGraphicsDevice::check_extension_support(const VkPhysicalDevice &physical_device)
+    {
+        uint32_t extension_count = 0;
+        HE_VK_CHECK(vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, nullptr));
+
+        std::vector<VkExtensionProperties> extensions(extension_count);
+        HE_VK_CHECK(vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, extensions.data()));
+
+        std::set<std::string> required_extensions(g_device_extensions.begin(), g_device_extensions.end());
+        for (const VkExtensionProperties &extension : extensions)
+        {
+            required_extensions.erase(extension.extensionName);
+        }
+
+        return required_extensions.empty();
     }
 
     bool VulkanGraphicsDevice::check_feature_support(const VkPhysicalDevice &physical_device)
@@ -400,13 +447,13 @@ namespace hyper_rhi
             .pQueueCreateInfos = &queue_create_info,
             .enabledLayerCount = layer_count,
             .ppEnabledLayerNames = layers,
-            .enabledExtensionCount = 0,
-            .ppEnabledExtensionNames = nullptr,
+            .enabledExtensionCount = static_cast<uint32_t>(g_device_extensions.size()),
+            .ppEnabledExtensionNames = g_device_extensions.data(),
             .pEnabledFeatures = nullptr,
         };
 
         HE_VK_CHECK(vkCreateDevice(m_physical_device, &create_info, nullptr, &m_device));
-        HE_ASSERT(m_device);
+        HE_ASSERT(m_device != VK_NULL_HANDLE);
 
         vkGetDeviceQueue(m_device, queue_family.value(), 0, &m_queue);
     }

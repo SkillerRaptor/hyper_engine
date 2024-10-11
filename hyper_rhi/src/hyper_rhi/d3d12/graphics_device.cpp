@@ -23,6 +23,21 @@ namespace hyper_rhi
         this->create_command_queue();
     }
 
+    ComPtr<IDXGIFactory7> D3D12GraphicsDevice::factory() const
+    {
+        return m_factory;
+    }
+
+    ComPtr<ID3D12CommandQueue> D3D12GraphicsDevice::command_queue() const
+    {
+        return m_command_queue;
+    }
+
+    std::unique_ptr<Surface> D3D12GraphicsDevice::create_surface(const SurfaceDescriptor &descriptor)
+    {
+        return nullptr;
+    }
+
     void D3D12GraphicsDevice::enable_debug_layers()
     {
         ComPtr<ID3D12Debug> debug_controller = nullptr;

@@ -19,14 +19,22 @@ namespace hyper_rhi
         explicit VulkanGraphicsDevice(const GraphicsDeviceDescriptor &descriptor);
         ~VulkanGraphicsDevice() override;
 
+        VkInstance instance() const;
+        VkPhysicalDevice physical_device() const;
+        VkDevice device() const;
+
+    protected:
+        std::unique_ptr<Surface> create_surface(const SurfaceDescriptor &descriptor) override;
+
     private:
         static bool check_validation_layer_support();
         void create_instance();
         void create_debug_messenger();
 
         void choose_physical_device();
-        static uint32_t rate_physical_device(const VkPhysicalDevice &physical_device);
-        static std::optional<uint32_t> find_queue_family(const VkPhysicalDevice &physical_device);
+        uint32_t rate_physical_device(const VkPhysicalDevice &physical_device) const;
+        std::optional<uint32_t> find_queue_family(const VkPhysicalDevice &physical_device) const;
+        static bool check_extension_support(const VkPhysicalDevice &physical_device);
         static bool check_feature_support(const VkPhysicalDevice &physical_device);
 
         void create_device();

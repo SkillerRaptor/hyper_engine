@@ -26,6 +26,9 @@ namespace hyper_engine
               .graphics_api = descriptor.graphics_api,
               .debug_mode = descriptor.debug,
           }))
+        , m_surface(m_graphics_device->create_surface({
+              .window = m_window,
+          }))
     {
         HE_ASSERT(m_graphics_device);
 

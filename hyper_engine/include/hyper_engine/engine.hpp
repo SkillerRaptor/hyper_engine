@@ -39,5 +39,6 @@ namespace hyper_engine
         hyper_event::EventBus m_event_bus;
         hyper_platform::Window m_window;
         std::unique_ptr<hyper_rhi::GraphicsDevice> m_graphics_device;
+        std::unique_ptr<hyper_rhi::Surface> m_surface;
     };
 } // namespace hyper_engine

@@ -28,9 +28,13 @@ namespace hyper_platform
         explicit Window(const WindowDescriptor &descriptor);
         ~Window();
 
+        uint32_t width() const;
+        uint32_t height() const;
+        GLFWwindow *native_window() const;
+
         static void poll_events();
 
     private:
-        GLFWwindow *m_window;
+        GLFWwindow *m_native_window;
     };
 } // namespace hyper_platform
