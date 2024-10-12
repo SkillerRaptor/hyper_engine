@@ -39,12 +39,12 @@ namespace hyper_rhi
             .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
             .BufferCount = 2,
             .Scaling = DXGI_SCALING_NONE,
-            .SwapEffect = DXGI_SWAP_EFFECT_DISCARD,
+            .SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD,
             .AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED,
             .Flags = 0,
         };
 
-        ComPtr<IDXGISwapChain1> swapchain;
+        ComPtr<IDXGISwapChain1> swapchain = nullptr;
         HE_DX_CHECK(m_graphics_device.factory()->CreateSwapChainForHwnd(
             m_graphics_device.command_queue().Get(), window_handle, &descriptor, nullptr, nullptr, &swapchain));
         HE_ASSERT(swapchain);

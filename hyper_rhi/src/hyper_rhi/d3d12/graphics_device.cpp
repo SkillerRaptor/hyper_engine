@@ -6,6 +6,8 @@
 
 #include "hyper_rhi/d3d12/graphics_device.hpp"
 
+#include "hyper_rhi/d3d12/surface.hpp"
+
 namespace hyper_rhi
 {
     D3D12GraphicsDevice::D3D12GraphicsDevice(const GraphicsDeviceDescriptor &descriptor)
@@ -35,7 +37,7 @@ namespace hyper_rhi
 
     std::unique_ptr<Surface> D3D12GraphicsDevice::create_surface(const SurfaceDescriptor &descriptor)
     {
-        return nullptr;
+        return std::make_unique<D3D12Surface>(*this, descriptor);
     }
 
     void D3D12GraphicsDevice::enable_debug_layers()
