@@ -46,3 +46,25 @@ macro(hyperengine_define_library target)
         target_compile_definitions(${target} PUBLIC HE_LINUX=1)
     endif ()
 endmacro()
+
+function(hyperengine_download_and_extract URL DESTINATION FOLDER_NAME)
+    if (NOT EXISTS ${CMAKE_BINARY_DIR}/download/${FOLDER_NAME}.zip)
+        message(STATUS "Downloading ${URL} and unpacking to ${DESTINATION}/${FOLDER_NAME}.")
+        file(
+                DOWNLOAD
+                ${URL}
+                ${CMAKE_BINARY_DIR}/download/${FOLDER_NAME}.zip)
+    else ()
+        message(STATUS "${CMAKE_BINARY_DIR}/download/${FOLDER_NAME}.zip already exists. No download required.")
+    endif ()
+
+    if (NOT EXISTS ${DESTINATION}/${FOLDER_NAME})
+        message(STATUS "Extracting ${CMAKE_BINARY_DIR}/download/${FOLDER_NAME}.zip to ${DESTINATION}/${FOLDER_NAME}.")
+        file(
+                ARCHIVE_EXTRACT
+                INPUT ${CMAKE_BINARY_DIR}/download/${FOLDER_NAME}.zip
+                DESTINATION ${DESTINATION}/${FOLDER_NAME})
+    else ()
+        message(STATUS "${CMAKE_BINARY_DIR}/download/${FOLDER_NAME}.zip is already extracted to ${DESTINATION}/${FOLDER_NAME}.")
+    endif ()
+endfunction()

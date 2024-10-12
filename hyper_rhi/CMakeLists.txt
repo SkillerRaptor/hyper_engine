@@ -35,8 +35,12 @@ target_link_libraries(
         PUBLIC
         hyper_core
         hyper_platform
+        DirectXShaderCompiler
         glfw
-        volk)
+        glm
+        meshoptimizer
+        volk
+        VulkanMemoryAllocator)
 
 if (WIN32)
     target_link_libraries(
