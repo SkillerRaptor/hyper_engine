@@ -5,13 +5,20 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/hyper_rhi/graphics_device.cpp
-        src/hyper_rhi/surface.cpp
         src/hyper_rhi/vulkan/graphics_device.cpp
         src/hyper_rhi/vulkan/surface.cpp)
 
 set(HEADERS
+        include/hyper_rhi/buffer.hpp
+        include/hyper_rhi/command_list.hpp
+        include/hyper_rhi/compute_pipeline.hpp
         include/hyper_rhi/graphics_device.hpp
+        include/hyper_rhi/graphics_pipeline.hpp
+        include/hyper_rhi/pipeline_layout.hpp
+        include/hyper_rhi/render_pass.hpp
+        include/hyper_rhi/shader_module.hpp
         include/hyper_rhi/surface.hpp
+        include/hyper_rhi/texture.hpp
         include/hyper_rhi/vulkan/common.hpp
         include/hyper_rhi/vulkan/graphics_device.hpp
         include/hyper_rhi/vulkan/surface.hpp)
@@ -37,8 +44,6 @@ target_link_libraries(
         hyper_platform
         DirectXShaderCompiler
         glfw
-        glm
-        meshoptimizer
         volk
         VulkanMemoryAllocator)
 
@@ -47,7 +52,8 @@ if (WIN32)
             hyper_rhi
             PUBLIC
             d3d12.lib
-            dxgi.lib)
+            dxgi.lib
+            D3D12MemoryAllocator)
     target_compile_definitions(
             hyper_rhi
             PUBLIC

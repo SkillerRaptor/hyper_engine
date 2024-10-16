@@ -86,6 +86,41 @@ namespace hyper_rhi
         return std::make_unique<VulkanSurface>(*this, descriptor);
     }
 
+    std::shared_ptr<Buffer> VulkanGraphicsDevice::create_buffer(const BufferDescriptor &descriptor)
+    {
+        HE_UNREACHABLE();
+    }
+
+    std::shared_ptr<CommandList> VulkanGraphicsDevice::create_command_list()
+    {
+        HE_UNREACHABLE();
+    }
+
+    std::shared_ptr<ComputePipeline> VulkanGraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
+    {
+        HE_UNREACHABLE();
+    }
+
+    std::shared_ptr<GraphicsPipeline> VulkanGraphicsDevice::create_graphics_pipeline(const GraphicsPipelineDescriptor &descriptor)
+    {
+        HE_UNREACHABLE();
+    }
+
+    std::shared_ptr<PipelineLayout> VulkanGraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
+    {
+        HE_UNREACHABLE();
+    }
+
+    std::shared_ptr<ShaderModule> VulkanGraphicsDevice::create_shader_module(const ShaderModuleDescriptor &descriptor)
+    {
+        HE_UNREACHABLE();
+    }
+
+    std::shared_ptr<Texture> VulkanGraphicsDevice::create_texture(const TextureDescriptor &descriptor)
+    {
+        HE_UNREACHABLE();
+    }
+
     bool VulkanGraphicsDevice::check_validation_layer_support()
     {
         uint32_t layer_count = 0;
