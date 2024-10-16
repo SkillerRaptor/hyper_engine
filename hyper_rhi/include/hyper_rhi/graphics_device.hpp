@@ -34,10 +34,10 @@ namespace hyper_rhi
     class GraphicsDevice
     {
     public:
-        static std::unique_ptr<GraphicsDevice> create(const GraphicsDeviceDescriptor &descriptor);
+        static std::shared_ptr<GraphicsDevice> create(const GraphicsDeviceDescriptor &descriptor);
         virtual ~GraphicsDevice() = default;
 
-        virtual std::unique_ptr<Surface> create_surface(const SurfaceDescriptor &descriptor) = 0;
+        virtual std::shared_ptr<Surface> create_surface(const SurfaceDescriptor &descriptor) = 0;
 
         virtual std::shared_ptr<Buffer> create_buffer(const BufferDescriptor &descriptor) = 0;
         virtual std::shared_ptr<CommandList> create_command_list() = 0;

@@ -4,19 +4,17 @@
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 set(SOURCES
-        src/main.cpp
-        src/hyper_engine/engine.cpp)
+        src/hyper_render/renderer.cpp)
 
 set(HEADERS
-        include/hyper_engine/engine.hpp)
+        include/hyper_render/renderer.hpp)
 
-hyperengine_define_executable(hyper_engine)
+hyperengine_define_library(hyper_render)
 target_link_libraries(
-        hyper_engine
-        PRIVATE
-        hyper_core
-        hyper_platform
-        hyper_rhi
         hyper_render
-        argparse)
+        PUBLIC
+        hyper_core
+        hyper_rhi
+        glm
+        meshoptimizer)
 

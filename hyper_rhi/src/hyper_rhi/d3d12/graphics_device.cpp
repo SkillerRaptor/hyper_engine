@@ -35,9 +35,9 @@ namespace hyper_rhi
         return m_command_queue;
     }
 
-    std::unique_ptr<Surface> D3D12GraphicsDevice::create_surface(const SurfaceDescriptor &descriptor)
+    std::shared_ptr<Surface> D3D12GraphicsDevice::create_surface(const SurfaceDescriptor &descriptor)
     {
-        return std::make_unique<D3D12Surface>(*this, descriptor);
+        return std::make_shared<D3D12Surface>(*this, descriptor);
     }
 
     std::shared_ptr<Buffer> D3D12GraphicsDevice::create_buffer(const BufferDescriptor &descriptor)

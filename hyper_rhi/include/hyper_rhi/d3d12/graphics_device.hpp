@@ -20,7 +20,7 @@ namespace hyper_rhi
         ComPtr<ID3D12CommandQueue> command_queue() const;
 
     protected:
-        std::unique_ptr<Surface> create_surface(const SurfaceDescriptor &descriptor) override;
+        std::shared_ptr<Surface> create_surface(const SurfaceDescriptor &descriptor) override;
 
         std::shared_ptr<Buffer> create_buffer(const BufferDescriptor &descriptor) override;
         std::shared_ptr<CommandList> create_command_list() override;

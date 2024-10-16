@@ -81,9 +81,9 @@ namespace hyper_rhi
         return m_device;
     }
 
-    std::unique_ptr<Surface> VulkanGraphicsDevice::create_surface(const SurfaceDescriptor &descriptor)
+    std::shared_ptr<Surface> VulkanGraphicsDevice::create_surface(const SurfaceDescriptor &descriptor)
     {
-        return std::make_unique<VulkanSurface>(*this, descriptor);
+        return std::make_shared<VulkanSurface>(*this, descriptor);
     }
 
     std::shared_ptr<Buffer> VulkanGraphicsDevice::create_buffer(const BufferDescriptor &descriptor)

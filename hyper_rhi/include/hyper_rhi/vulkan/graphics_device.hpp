@@ -24,7 +24,7 @@ namespace hyper_rhi
         VkDevice device() const;
 
     protected:
-        std::unique_ptr<Surface> create_surface(const SurfaceDescriptor &descriptor) override;
+        std::shared_ptr<Surface> create_surface(const SurfaceDescriptor &descriptor) override;
 
         std::shared_ptr<Buffer> create_buffer(const BufferDescriptor &descriptor) override;
         std::shared_ptr<CommandList> create_command_list() override;

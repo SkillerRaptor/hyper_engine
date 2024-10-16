@@ -12,6 +12,7 @@
 #include <hyper_platform/window_events.hpp>
 #include <hyper_platform/window.hpp>
 #include <hyper_rhi/graphics_device.hpp>
+#include <hyper_render/renderer.hpp>
 
 namespace hyper_engine
 {
@@ -38,7 +39,8 @@ namespace hyper_engine
         bool m_running;
         hyper_event::EventBus m_event_bus;
         hyper_platform::Window m_window;
-        std::unique_ptr<hyper_rhi::GraphicsDevice> m_graphics_device;
-        std::unique_ptr<hyper_rhi::Surface> m_surface;
+        std::shared_ptr<hyper_rhi::GraphicsDevice> m_graphics_device;
+        std::shared_ptr<hyper_rhi::Surface> m_surface;
+        hyper_render::Renderer m_renderer;
     };
 } // namespace hyper_engine

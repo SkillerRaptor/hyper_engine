@@ -29,6 +29,10 @@ namespace hyper_engine
         , m_surface(m_graphics_device->create_surface({
               .window = m_window,
           }))
+        , m_renderer({
+              .graphics_device = m_graphics_device,
+              .surface = m_surface,
+          })
     {
         HE_ASSERT(m_graphics_device);
 
