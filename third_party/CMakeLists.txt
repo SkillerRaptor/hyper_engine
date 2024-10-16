@@ -26,6 +26,23 @@ set_target_properties(
         FOLDER "third_party")
 
 #-------------------------------------------------------------------------------------------
+# D3D12MemoryAllocator
+#-------------------------------------------------------------------------------------------
+FetchContent_Declare(
+        D3D12MemoryAllocator
+        GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator.git
+        GIT_TAG master)
+
+set(D3D12MA_BUILD_SAMPLE OFF CACHE INTERNAL "")
+
+FetchContent_MakeAvailable(D3D12MemoryAllocator)
+
+set_target_properties(
+        D3D12MemoryAllocator
+        PROPERTIES
+        FOLDER "third_party")
+
+#-------------------------------------------------------------------------------------------
 # DirectXShaderCompiler
 #-------------------------------------------------------------------------------------------
 hyperengine_download_and_extract(
