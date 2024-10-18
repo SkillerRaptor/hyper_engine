@@ -37,14 +37,16 @@ namespace hyper_rhi
         static std::shared_ptr<GraphicsDevice> create(const GraphicsDeviceDescriptor &descriptor);
         virtual ~GraphicsDevice() = default;
 
-        virtual std::shared_ptr<Surface> create_surface(const SurfaceDescriptor &descriptor) = 0;
+        virtual SurfaceHandle create_surface(const SurfaceDescriptor &descriptor) = 0;
 
-        virtual std::shared_ptr<Buffer> create_buffer(const BufferDescriptor &descriptor) = 0;
-        virtual std::shared_ptr<CommandList> create_command_list() = 0;
-        virtual std::shared_ptr<ComputePipeline> create_compute_pipeline(const ComputePipelineDescriptor &descriptor) = 0;
-        virtual std::shared_ptr<GraphicsPipeline> create_graphics_pipeline(const GraphicsPipelineDescriptor &descriptor) = 0;
-        virtual std::shared_ptr<PipelineLayout> create_pipeline_layout(const PipelineLayoutDescriptor &descriptor) = 0;
-        virtual std::shared_ptr<ShaderModule> create_shader_module(const ShaderModuleDescriptor &descriptor) = 0;
-        virtual std::shared_ptr<Texture> create_texture(const TextureDescriptor &descriptor) = 0;
+        virtual BufferHandle create_buffer(const BufferDescriptor &descriptor) = 0;
+        virtual CommandListHandle create_command_list() = 0;
+        virtual ComputePipelineHandle create_compute_pipeline(const ComputePipelineDescriptor &descriptor) = 0;
+        virtual GraphicsPipelineHandle create_graphics_pipeline(const GraphicsPipelineDescriptor &descriptor) = 0;
+        virtual PipelineLayoutHandle create_pipeline_layout(const PipelineLayoutDescriptor &descriptor) = 0;
+        virtual ShaderModuleHandle create_shader_module(const ShaderModuleDescriptor &descriptor) = 0;
+        virtual TextureHandle create_texture(const TextureDescriptor &descriptor) = 0;
     };
+
+    using GraphicsDeviceHandle = std::shared_ptr<GraphicsDevice>;
 } // namespace hyper_rhi

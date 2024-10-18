@@ -18,8 +18,8 @@ namespace hyper_rhi
     {
         std::string label;
 
-        std::shared_ptr<PipelineLayout> layout = nullptr;
-        std::shared_ptr<ShaderModule> shader = nullptr;
+        PipelineLayoutHandle layout = nullptr;
+        ShaderModuleHandle shader = nullptr;
     };
 
     class ComputePipeline
@@ -27,4 +27,6 @@ namespace hyper_rhi
     public:
         virtual ~ComputePipeline() = default;
     };
+
+    using ComputePipelineHandle = std::shared_ptr<ComputePipeline>;
 } // namespace hyper_rhi

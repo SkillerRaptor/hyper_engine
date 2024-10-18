@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 namespace hyper_rhi
@@ -22,4 +23,6 @@ namespace hyper_rhi
     public:
         virtual ~PipelineLayout() = default;
     };
+
+    using PipelineLayoutHandle = std::shared_ptr<PipelineLayout>;
 } // namespace hyper_rhi

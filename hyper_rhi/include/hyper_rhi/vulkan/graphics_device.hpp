@@ -24,15 +24,15 @@ namespace hyper_rhi
         VkDevice device() const;
 
     protected:
-        std::shared_ptr<Surface> create_surface(const SurfaceDescriptor &descriptor) override;
+        SurfaceHandle create_surface(const SurfaceDescriptor &descriptor) override;
 
-        std::shared_ptr<Buffer> create_buffer(const BufferDescriptor &descriptor) override;
-        std::shared_ptr<CommandList> create_command_list() override;
-        std::shared_ptr<ComputePipeline> create_compute_pipeline(const ComputePipelineDescriptor &descriptor) override;
-        std::shared_ptr<GraphicsPipeline> create_graphics_pipeline(const GraphicsPipelineDescriptor &descriptor) override;
-        std::shared_ptr<PipelineLayout> create_pipeline_layout(const PipelineLayoutDescriptor &descriptor) override;
-        std::shared_ptr<ShaderModule> create_shader_module(const ShaderModuleDescriptor &descriptor) override;
-        std::shared_ptr<Texture> create_texture(const TextureDescriptor &descriptor) override;
+        BufferHandle create_buffer(const BufferDescriptor &descriptor) override;
+        CommandListHandle create_command_list() override;
+        ComputePipelineHandle create_compute_pipeline(const ComputePipelineDescriptor &descriptor) override;
+        GraphicsPipelineHandle create_graphics_pipeline(const GraphicsPipelineDescriptor &descriptor) override;
+        PipelineLayoutHandle create_pipeline_layout(const PipelineLayoutDescriptor &descriptor) override;
+        ShaderModuleHandle create_shader_module(const ShaderModuleDescriptor &descriptor) override;
+        TextureHandle create_texture(const TextureDescriptor &descriptor) override;
 
     private:
         static bool check_validation_layer_support();

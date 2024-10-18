@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <hyper_platform/window.hpp>
 
 namespace hyper_rhi
@@ -20,4 +22,6 @@ namespace hyper_rhi
     public:
         virtual ~Surface() = default;
     };
+
+    using SurfaceHandle = std::shared_ptr<Surface>;
 } // namespace hyper_rhi

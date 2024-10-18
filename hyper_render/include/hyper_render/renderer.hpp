@@ -13,8 +13,8 @@ namespace hyper_render
 {
     struct RendererDescriptor
     {
-        std::shared_ptr<hyper_rhi::GraphicsDevice> graphics_device;
-        std::shared_ptr<hyper_rhi::Surface> surface;
+        hyper_rhi::GraphicsDeviceHandle graphics_device;
+        hyper_rhi::SurfaceHandle surface;
     };
 
     class Renderer
@@ -23,7 +23,7 @@ namespace hyper_render
         explicit Renderer(const RendererDescriptor &descriptor);
 
     private:
-        std::shared_ptr<hyper_rhi::GraphicsDevice> m_graphics_device;
-        std::shared_ptr<hyper_rhi::Surface> m_surface;
+        hyper_rhi::GraphicsDeviceHandle m_graphics_device;
+        hyper_rhi::SurfaceHandle m_surface;
     };
 } // namespace hyper_render

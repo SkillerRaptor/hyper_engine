@@ -18,9 +18,9 @@ namespace hyper_rhi
     {
         std::string label;
 
-        std::shared_ptr<PipelineLayout> layout = nullptr;
-        std::shared_ptr<ShaderModule> vertex_shader = nullptr;
-        std::shared_ptr<ShaderModule> fragment_shader = nullptr;
+        PipelineLayoutHandle layout = nullptr;
+        ShaderModuleHandle vertex_shader = nullptr;
+        ShaderModuleHandle fragment_shader = nullptr;
     };
 
     class GraphicsPipeline
@@ -28,4 +28,6 @@ namespace hyper_rhi
     public:
         virtual ~GraphicsPipeline() = default;
     };
+
+    using GraphicsPipelineHandle = std::shared_ptr<GraphicsPipeline>;
 } // namespace hyper_rhi

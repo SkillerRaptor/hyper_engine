@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -33,4 +34,6 @@ namespace hyper_rhi
     public:
         virtual ~ShaderModule() = default;
     };
+
+    using ShaderModuleHandle = std::shared_ptr<ShaderModule>;
 } // namespace hyper_rhi

@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 namespace hyper_rhi
@@ -46,4 +47,6 @@ namespace hyper_rhi
     public:
         virtual ~Texture() = default;
     };
+
+    using TextureHandle = std::shared_ptr<Texture>;
 } // namespace hyper_rhi

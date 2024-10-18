@@ -35,42 +35,42 @@ namespace hyper_rhi
         return m_command_queue;
     }
 
-    std::shared_ptr<Surface> D3D12GraphicsDevice::create_surface(const SurfaceDescriptor &descriptor)
+    SurfaceHandle D3D12GraphicsDevice::create_surface(const SurfaceDescriptor &descriptor)
     {
         return std::make_shared<D3D12Surface>(*this, descriptor);
     }
 
-    std::shared_ptr<Buffer> D3D12GraphicsDevice::create_buffer(const BufferDescriptor &descriptor)
+    BufferHandle D3D12GraphicsDevice::create_buffer(const BufferDescriptor &descriptor)
     {
         HE_UNREACHABLE();
     }
 
-    std::shared_ptr<CommandList> D3D12GraphicsDevice::create_command_list()
+    CommandListHandle D3D12GraphicsDevice::create_command_list()
     {
         HE_UNREACHABLE();
     }
 
-    std::shared_ptr<ComputePipeline> D3D12GraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
+    ComputePipelineHandle D3D12GraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
     {
         HE_UNREACHABLE();
     }
 
-    std::shared_ptr<GraphicsPipeline> D3D12GraphicsDevice::create_graphics_pipeline(const GraphicsPipelineDescriptor &descriptor)
+    GraphicsPipelineHandle D3D12GraphicsDevice::create_graphics_pipeline(const GraphicsPipelineDescriptor &descriptor)
     {
         HE_UNREACHABLE();
     }
 
-    std::shared_ptr<PipelineLayout> D3D12GraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
+    PipelineLayoutHandle D3D12GraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
     {
         HE_UNREACHABLE();
     }
 
-    std::shared_ptr<ShaderModule> D3D12GraphicsDevice::create_shader_module(const ShaderModuleDescriptor &descriptor)
+    ShaderModuleHandle D3D12GraphicsDevice::create_shader_module(const ShaderModuleDescriptor &descriptor)
     {
         HE_UNREACHABLE();
     }
 
-    std::shared_ptr<Texture> D3D12GraphicsDevice::create_texture(const TextureDescriptor &descriptor)
+    TextureHandle D3D12GraphicsDevice::create_texture(const TextureDescriptor &descriptor)
     {
         HE_UNREACHABLE();
     }

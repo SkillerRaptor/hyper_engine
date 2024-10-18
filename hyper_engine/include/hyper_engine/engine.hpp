@@ -39,8 +39,8 @@ namespace hyper_engine
         bool m_running;
         hyper_event::EventBus m_event_bus;
         hyper_platform::Window m_window;
-        std::shared_ptr<hyper_rhi::GraphicsDevice> m_graphics_device;
-        std::shared_ptr<hyper_rhi::Surface> m_surface;
+        hyper_rhi::GraphicsDeviceHandle m_graphics_device;
+        hyper_rhi::SurfaceHandle m_surface;
         hyper_render::Renderer m_renderer;
     };
 } // namespace hyper_engine

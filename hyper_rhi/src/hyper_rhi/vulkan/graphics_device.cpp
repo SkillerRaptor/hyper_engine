@@ -81,42 +81,42 @@ namespace hyper_rhi
         return m_device;
     }
 
-    std::shared_ptr<Surface> VulkanGraphicsDevice::create_surface(const SurfaceDescriptor &descriptor)
+    SurfaceHandle VulkanGraphicsDevice::create_surface(const SurfaceDescriptor &descriptor)
     {
         return std::make_shared<VulkanSurface>(*this, descriptor);
     }
 
-    std::shared_ptr<Buffer> VulkanGraphicsDevice::create_buffer(const BufferDescriptor &descriptor)
+    BufferHandle VulkanGraphicsDevice::create_buffer(const BufferDescriptor &descriptor)
     {
         HE_UNREACHABLE();
     }
 
-    std::shared_ptr<CommandList> VulkanGraphicsDevice::create_command_list()
+    CommandListHandle VulkanGraphicsDevice::create_command_list()
     {
         HE_UNREACHABLE();
     }
 
-    std::shared_ptr<ComputePipeline> VulkanGraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
+    ComputePipelineHandle VulkanGraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
     {
         HE_UNREACHABLE();
     }
 
-    std::shared_ptr<GraphicsPipeline> VulkanGraphicsDevice::create_graphics_pipeline(const GraphicsPipelineDescriptor &descriptor)
+    GraphicsPipelineHandle VulkanGraphicsDevice::create_graphics_pipeline(const GraphicsPipelineDescriptor &descriptor)
     {
         HE_UNREACHABLE();
     }
 
-    std::shared_ptr<PipelineLayout> VulkanGraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
+    PipelineLayoutHandle VulkanGraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
     {
         HE_UNREACHABLE();
     }
 
-    std::shared_ptr<ShaderModule> VulkanGraphicsDevice::create_shader_module(const ShaderModuleDescriptor &descriptor)
+    ShaderModuleHandle VulkanGraphicsDevice::create_shader_module(const ShaderModuleDescriptor &descriptor)
     {
         HE_UNREACHABLE();
     }
 
-    std::shared_ptr<Texture> VulkanGraphicsDevice::create_texture(const TextureDescriptor &descriptor)
+    TextureHandle VulkanGraphicsDevice::create_texture(const TextureDescriptor &descriptor)
     {
         HE_UNREACHABLE();
     }

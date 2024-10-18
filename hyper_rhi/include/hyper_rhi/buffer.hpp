@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 namespace hyper_rhi
@@ -24,4 +25,6 @@ namespace hyper_rhi
     public:
         virtual ~Buffer() = default;
     };
+
+    using BufferHandle = std::shared_ptr<Buffer>;
 } // namespace hyper_rhi
