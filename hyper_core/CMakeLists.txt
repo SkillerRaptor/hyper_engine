@@ -4,10 +4,12 @@
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 set(SOURCES
+        src/hyper_core/filesystem.cpp
         src/hyper_core/logger.cpp)
 
 set(HEADERS
         include/hyper_core/assertion.hpp
+        include/hyper_core/filesystem.hpp
         include/hyper_core/logger.hpp
         include/hyper_core/prerequisites.hpp)
 

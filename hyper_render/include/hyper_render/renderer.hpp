@@ -25,5 +25,15 @@ namespace hyper_render
     private:
         hyper_rhi::GraphicsDeviceHandle m_graphics_device;
         hyper_rhi::SurfaceHandle m_surface;
+        hyper_rhi::CommandListHandle m_command_list;
+        hyper_rhi::PipelineLayoutHandle m_pipeline_layout;
+        hyper_rhi::ShaderModuleHandle m_vertex_shader;
+        hyper_rhi::ShaderModuleHandle m_fragment_shader;
+        hyper_rhi::GraphicsPipelineHandle m_pipeline;
+        hyper_rhi::BufferHandle m_material_buffer;
+        hyper_rhi::BufferHandle m_positions_buffer;
+        hyper_rhi::BufferHandle m_normals_buffer;
+        hyper_rhi::BufferHandle m_mesh_buffer;
+        hyper_rhi::BufferHandle m_indices_buffer;
     };
 } // namespace hyper_render
