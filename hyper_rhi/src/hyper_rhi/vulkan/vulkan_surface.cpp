@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "hyper_rhi/vulkan/surface.hpp"
+#include "hyper_rhi/vulkan/vulkan_surface.hpp"
 
 #include <algorithm>
 

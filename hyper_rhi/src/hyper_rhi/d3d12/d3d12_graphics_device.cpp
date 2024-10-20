@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "hyper_rhi/d3d12/graphics_device.hpp"
+#include "hyper_rhi/d3d12/d3d12_graphics_device.hpp"
 
-#include "hyper_rhi/d3d12/surface.hpp"
+#include "hyper_rhi/d3d12/d3d12_surface.hpp"
 
 namespace hyper_rhi
 {

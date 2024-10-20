@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "hyper_rhi/vulkan/graphics_device.hpp"
+#include "hyper_rhi/vulkan/vulkan_graphics_device.hpp"
 
 #include <array>
 #include <map>
@@ -13,7 +13,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "hyper_rhi/vulkan/surface.hpp"
+#include "hyper_rhi/vulkan/vulkan_surface.hpp"
 
 namespace hyper_rhi
 {

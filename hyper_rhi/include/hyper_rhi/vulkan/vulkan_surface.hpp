@@ -7,8 +7,8 @@
 #pragma once
 
 #include "hyper_rhi/surface.hpp"
-#include "hyper_rhi/vulkan/common.hpp"
-#include "hyper_rhi/vulkan/graphics_device.hpp"
+#include "hyper_rhi/vulkan/vulkan_common.hpp"
+#include "hyper_rhi/vulkan/vulkan_graphics_device.hpp"
 
 namespace hyper_rhi
 {

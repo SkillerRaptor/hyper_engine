@@ -9,10 +9,10 @@
 #include <hyper_core/assertion.hpp>
 
 #if HE_WINDOWS
-#    include "hyper_rhi/d3d12/graphics_device.hpp"
+#    include "hyper_rhi/d3d12/d3d12_graphics_device.hpp"
 #endif
 
-#include "hyper_rhi/vulkan/graphics_device.hpp"
+#include "hyper_rhi/vulkan/vulkan_graphics_device.hpp"
 
 namespace hyper_rhi
 {

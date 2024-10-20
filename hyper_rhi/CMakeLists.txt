@@ -5,8 +5,8 @@
 #-------------------------------------------------------------------------------------------
 set(SOURCES
         src/hyper_rhi/graphics_device.cpp
-        src/hyper_rhi/vulkan/graphics_device.cpp
-        src/hyper_rhi/vulkan/surface.cpp)
+        src/hyper_rhi/vulkan/vulkan_graphics_device.cpp
+        src/hyper_rhi/vulkan/vulkan_surface.cpp)
 
 set(HEADERS
         include/hyper_rhi/buffer.hpp
@@ -19,21 +19,21 @@ set(HEADERS
         include/hyper_rhi/shader_module.hpp
         include/hyper_rhi/surface.hpp
         include/hyper_rhi/texture.hpp
-        include/hyper_rhi/vulkan/common.hpp
-        include/hyper_rhi/vulkan/graphics_device.hpp
-        include/hyper_rhi/vulkan/surface.hpp)
+        include/hyper_rhi/vulkan/vulkan_common.hpp
+        include/hyper_rhi/vulkan/vulkan_graphics_device.hpp
+        include/hyper_rhi/vulkan/vulkan_surface.hpp)
 
 if (WIN32)
     set(SOURCES
             ${SOURCES}
-            src/hyper_rhi/d3d12/graphics_device.cpp
-            src/hyper_rhi/d3d12/surface.cpp)
+            src/hyper_rhi/d3d12/d3d12_graphics_device.cpp
+            src/hyper_rhi/d3d12/d3d12_surface.cpp)
 
     set(HEADERS
             ${HEADERS}
-            include/hyper_rhi/d3d12/common.hpp
-            include/hyper_rhi/d3d12/graphics_device.hpp
-            include/hyper_rhi/d3d12/surface.hpp)
+            include/hyper_rhi/d3d12/d3d12_common.hpp
+            include/hyper_rhi/d3d12/d3d12_graphics_device.hpp
+            include/hyper_rhi/d3d12/d3d12_surface.hpp)
 endif ()
 
 hyperengine_define_library(hyper_rhi)

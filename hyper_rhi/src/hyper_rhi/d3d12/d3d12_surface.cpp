@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "hyper_rhi/d3d12/surface.hpp"
+#include "hyper_rhi/d3d12/d3d12_surface.hpp"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define GLFW_NATIVE_INCLUDE_NONE

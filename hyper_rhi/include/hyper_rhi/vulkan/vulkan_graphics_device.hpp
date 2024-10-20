@@ -9,7 +9,7 @@
 #include <optional>
 
 #include "hyper_rhi/graphics_device.hpp"
-#include "hyper_rhi/vulkan/common.hpp"
+#include "hyper_rhi/vulkan/vulkan_common.hpp"
 
 namespace hyper_rhi
 {

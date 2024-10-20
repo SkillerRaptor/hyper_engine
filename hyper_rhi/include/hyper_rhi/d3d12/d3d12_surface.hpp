@@ -7,8 +7,8 @@
 #pragma once
 
 #include "hyper_rhi/surface.hpp"
-#include "hyper_rhi/d3d12/common.hpp"
-#include "hyper_rhi/d3d12/graphics_device.hpp"
+#include "hyper_rhi/d3d12/d3d12_common.hpp"
+#include "hyper_rhi/d3d12/d3d12_graphics_device.hpp"
 
 namespace hyper_rhi
 {
