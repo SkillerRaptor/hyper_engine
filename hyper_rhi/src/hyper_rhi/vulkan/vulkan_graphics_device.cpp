@@ -12,6 +12,8 @@
 #include <vector>
 
 #include <GLFW/glfw3.h>
+#define VMA_IMPLEMENTATION
+#include <vk_mem_alloc.h>
 
 #include "hyper_rhi/vulkan/vulkan_surface.hpp"
 
@@ -32,6 +34,7 @@ namespace hyper_rhi
         , m_physical_device(VK_NULL_HANDLE)
         , m_device(VK_NULL_HANDLE)
         , m_queue(VK_NULL_HANDLE)
+        , m_allocator(VK_NULL_HANDLE)
     {
         volkInitialize();
 
@@ -52,6 +55,7 @@ namespace hyper_rhi
         this->create_debug_messenger();
         this->choose_physical_device();
         this->create_device();
+        this->create_allocator();
     }
 
     VulkanGraphicsDevice::~VulkanGraphicsDevice()
@@ -491,6 +495,55 @@ namespace hyper_rhi
         HE_ASSERT(m_device != VK_NULL_HANDLE);
 
         vkGetDeviceQueue(m_device, queue_family.value(), 0, &m_queue);
+    }
+
+    void VulkanGraphicsDevice::create_allocator()
+    {
+        const VmaVulkanFunctions functions = {
+            .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
+            .vkGetDeviceProcAddr = vkGetDeviceProcAddr,
+            .vkGetPhysicalDeviceProperties = vkGetPhysicalDeviceProperties,
+            .vkGetPhysicalDeviceMemoryProperties = vkGetPhysicalDeviceMemoryProperties,
+            .vkAllocateMemory = vkAllocateMemory,
+            .vkFreeMemory = vkFreeMemory,
+            .vkMapMemory = vkMapMemory,
+            .vkUnmapMemory = vkUnmapMemory,
+            .vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges,
+            .vkInvalidateMappedMemoryRanges = vkInvalidateMappedMemoryRanges,
+            .vkBindBufferMemory = vkBindBufferMemory,
+            .vkBindImageMemory = vkBindImageMemory,
+            .vkGetBufferMemoryRequirements = vkGetBufferMemoryRequirements,
+            .vkGetImageMemoryRequirements = vkGetImageMemoryRequirements,
+            .vkCreateBuffer = vkCreateBuffer,
+            .vkDestroyBuffer = vkDestroyBuffer,
+            .vkCreateImage = vkCreateImage,
+            .vkDestroyImage = vkDestroyImage,
+            .vkCmdCopyBuffer = vkCmdCopyBuffer,
+            .vkGetBufferMemoryRequirements2KHR = vkGetBufferMemoryRequirements2KHR,
+            .vkGetImageMemoryRequirements2KHR = vkGetImageMemoryRequirements2KHR,
+            .vkBindBufferMemory2KHR = vkBindBufferMemory2KHR,
+            .vkBindImageMemory2KHR = vkBindImageMemory2KHR,
+            .vkGetPhysicalDeviceMemoryProperties2KHR = vkGetPhysicalDeviceMemoryProperties2KHR,
+            .vkGetDeviceBufferMemoryRequirements = vkGetDeviceBufferMemoryRequirements,
+            .vkGetDeviceImageMemoryRequirements = vkGetDeviceImageMemoryRequirements,
+        };
+
+        const VmaAllocatorCreateInfo create_info = {
+            .flags = 0,
+            .physicalDevice = m_physical_device,
+            .device = m_device,
+            .preferredLargeHeapBlockSize = 0,
+            .pAllocationCallbacks = nullptr,
+            .pDeviceMemoryCallbacks = nullptr,
+            .pHeapSizeLimit = nullptr,
+            .pVulkanFunctions = &functions,
+            .instance = m_instance,
+            .vulkanApiVersion = VK_API_VERSION_1_3,
+            .pTypeExternalMemoryHandleTypes = nullptr,
+        };
+
+        HE_VK_CHECK(vmaCreateAllocator(&create_info, &m_allocator));
+        HE_ASSERT(m_allocator != VK_NULL_HANDLE);
     }
 
     VKAPI_ATTR VkBool32 VKAPI_CALL VulkanGraphicsDevice::debug_callback(

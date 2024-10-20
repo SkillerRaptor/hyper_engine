@@ -13,6 +13,10 @@ namespace hyper_rhi
     D3D12GraphicsDevice::D3D12GraphicsDevice(const GraphicsDeviceDescriptor &descriptor)
         : m_debug_layers_enabled(false)
         , m_factory(nullptr)
+        , m_adapter(nullptr)
+        , m_device(nullptr)
+        , m_command_queue(nullptr)
+        , m_allocator(nullptr)
     {
         if (descriptor.debug_mode)
         {
@@ -23,6 +27,7 @@ namespace hyper_rhi
         this->choose_adapter();
         this->create_device();
         this->create_command_queue();
+        this->create_allocator();
     }
 
     ComPtr<IDXGIFactory7> D3D12GraphicsDevice::factory() const
@@ -89,7 +94,7 @@ namespace hyper_rhi
     {
         const UINT factory_flags = m_debug_layers_enabled ? DXGI_CREATE_FACTORY_DEBUG : 0;
         HE_DX_CHECK(CreateDXGIFactory2(factory_flags, IID_PPV_ARGS(&m_factory)));
-        HE_ASSERT(m_factory);
+        HE_ASSERT(m_factory != nullptr);
     }
 
     void D3D12GraphicsDevice::choose_adapter()
@@ -119,7 +124,7 @@ namespace hyper_rhi
     void D3D12GraphicsDevice::create_device()
     {
         HE_DX_CHECK(D3D12CreateDevice(m_adapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&m_device)));
-        HE_ASSERT(m_device);
+        HE_ASSERT(m_device != nullptr);
     }
 
     void D3D12GraphicsDevice::create_command_queue()
@@ -132,6 +137,20 @@ namespace hyper_rhi
         };
 
         HE_DX_CHECK(m_device->CreateCommandQueue(&descriptor, IID_PPV_ARGS(&m_command_queue)));
-        HE_ASSERT(m_command_queue);
+        HE_ASSERT(m_command_queue != nullptr);
+    }
+
+    void D3D12GraphicsDevice::create_allocator()
+    {
+        const D3D12MA::ALLOCATOR_DESC descriptor = {
+            .Flags = D3D12MA::ALLOCATOR_FLAG_ALWAYS_COMMITTED | D3D12MA::ALLOCATOR_FLAG_DEFAULT_POOLS_NOT_ZEROED,
+            .pDevice = m_device.Get(),
+            .PreferredBlockSize = 0,
+            .pAllocationCallbacks = nullptr,
+            .pAdapter = m_adapter.Get(),
+        };
+
+        HE_DX_CHECK(D3D12MA::CreateAllocator(&descriptor, &m_allocator));
+        HE_ASSERT(m_allocator != nullptr);
     }
 } // namespace hyper_rhi

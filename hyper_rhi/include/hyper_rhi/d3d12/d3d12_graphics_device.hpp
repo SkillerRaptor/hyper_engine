@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <D3D12MemAlloc.h>
+
 #include "hyper_rhi/graphics_device.hpp"
 #include "hyper_rhi/d3d12/d3d12_common.hpp"
 
@@ -36,6 +38,7 @@ namespace hyper_rhi
         void choose_adapter();
         void create_device();
         void create_command_queue();
+        void create_allocator();
 
     private:
         bool m_debug_layers_enabled;
@@ -43,5 +46,6 @@ namespace hyper_rhi
         ComPtr<IDXGIAdapter4> m_adapter;
         ComPtr<ID3D12Device> m_device;
         ComPtr<ID3D12CommandQueue> m_command_queue;
+        ComPtr<D3D12MA::Allocator> m_allocator;
     };
 } // namespace hyper_rhi

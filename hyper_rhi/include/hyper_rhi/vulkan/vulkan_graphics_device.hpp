@@ -11,6 +11,8 @@
 #include "hyper_rhi/graphics_device.hpp"
 #include "hyper_rhi/vulkan/vulkan_common.hpp"
 
+#include <vk_mem_alloc.h>
+
 namespace hyper_rhi
 {
     class VulkanGraphicsDevice final : public GraphicsDevice
@@ -46,6 +48,7 @@ namespace hyper_rhi
         static bool check_feature_support(const VkPhysicalDevice &physical_device);
 
         void create_device();
+        void create_allocator();
 
         static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
             VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
@@ -60,5 +63,6 @@ namespace hyper_rhi
         VkPhysicalDevice m_physical_device;
         VkDevice m_device;
         VkQueue m_queue;
+        VmaAllocator m_allocator;
     };
 } // namespace hyper_rhi
