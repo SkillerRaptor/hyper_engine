@@ -22,6 +22,8 @@ namespace hyper_render
     public:
         explicit Renderer(const RendererDescriptor &descriptor);
 
+        void render();
+
     private:
         hyper_rhi::GraphicsDeviceHandle m_graphics_device;
         hyper_rhi::SurfaceHandle m_surface;
@@ -35,5 +37,7 @@ namespace hyper_render
         hyper_rhi::BufferHandle m_normals_buffer;
         hyper_rhi::BufferHandle m_mesh_buffer;
         hyper_rhi::BufferHandle m_indices_buffer;
+
+        uint32_t m_frame_index;
     };
 } // namespace hyper_render

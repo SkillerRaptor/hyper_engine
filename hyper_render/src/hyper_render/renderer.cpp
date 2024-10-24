@@ -116,7 +116,26 @@ namespace hyper_render
               .is_index_buffer = true,
               .is_constant_buffer = false,
           }))
+        , m_frame_index(1)
     {
+        m_graphics_device->wait_for_idle();
+
         HE_DEBUG("Created Renderer");
+    }
+
+    void Renderer::render()
+    {
+        m_graphics_device->begin_frame(m_surface, m_frame_index);
+
+        m_command_list->begin();
+
+        m_command_list->end();
+
+        m_graphics_device->end_frame();
+
+        m_graphics_device->execute();
+        m_graphics_device->present(m_surface);
+
+        m_frame_index += 1;
     }
 } // namespace hyper_render

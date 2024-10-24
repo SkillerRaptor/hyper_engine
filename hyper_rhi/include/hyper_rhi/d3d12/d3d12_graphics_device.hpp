@@ -32,6 +32,13 @@ namespace hyper_rhi
         ShaderModuleHandle create_shader_module(const ShaderModuleDescriptor &descriptor) override;
         TextureHandle create_texture(const TextureDescriptor &descriptor) override;
 
+        void begin_frame(SurfaceHandle surface_handle, uint32_t frame_index) override;
+        void end_frame() const override;
+        void execute() const override;
+        void present(SurfaceHandle surface_handle) const override;
+
+        void wait_for_idle() const override;
+
     private:
         void enable_debug_layers();
         void create_factory();

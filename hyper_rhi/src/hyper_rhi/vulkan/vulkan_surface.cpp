@@ -16,17 +16,65 @@ namespace hyper_rhi
         : m_graphics_device(graphics_device)
         , m_surface(VK_NULL_HANDLE)
         , m_swapchain(VK_NULL_HANDLE)
+        , m_current_texture_index(0)
+        , m_resized(false)
+        , m_width(descriptor.window.width())
+        , m_height(descriptor.window.height())
     {
         this->create_surface(descriptor.window);
-        this->create_swapchain(descriptor.window);
+        this->create_swapchain();
 
         // TODO: Retrieve swapchain images
     }
 
     VulkanSurface::~VulkanSurface()
     {
-        vkDestroySwapchainKHR(m_graphics_device.device(), m_swapchain, nullptr);
+        this->destroy();
+
         vkDestroySurfaceKHR(m_graphics_device.instance(), m_surface, nullptr);
+    }
+
+    void VulkanSurface::rebuild()
+    {
+        this->destroy();
+
+        this->create_swapchain();
+
+        // TODO: Retrieve swapchain images
+
+        m_resized = false;
+    }
+
+    VkSwapchainKHR VulkanSurface::swapchain() const
+    {
+        return m_swapchain;
+    }
+
+    void VulkanSurface::set_current_texture_index(const uint32_t current_texture_index)
+    {
+        m_current_texture_index = current_texture_index;
+    }
+
+    uint32_t VulkanSurface::current_texture_index() const
+    {
+        return m_current_texture_index;
+    }
+
+    bool VulkanSurface::resized() const
+    {
+        return m_resized;
+    }
+
+    void VulkanSurface::resize(const uint32_t width, const uint32_t height)
+    {
+        m_resized = true;
+        m_width = width;
+        m_height = height;
+    }
+
+    TextureHandle VulkanSurface::current_texture() const
+    {
+        HE_UNREACHABLE();
     }
 
     void VulkanSurface::create_surface(const hyper_platform::Window &window)
@@ -35,12 +83,12 @@ namespace hyper_rhi
         HE_ASSERT(m_surface != VK_NULL_HANDLE);
     }
 
-    void VulkanSurface::create_swapchain(const hyper_platform::Window &window)
+    void VulkanSurface::create_swapchain()
     {
         VkSurfaceCapabilitiesKHR surface_capabilities = {};
         HE_VK_CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_graphics_device.physical_device(), m_surface, &surface_capabilities));
 
-        const VkExtent2D surface_extent = VulkanSurface::choose_extent(window.width(), window.height(), surface_capabilities);
+        const VkExtent2D surface_extent = VulkanSurface::choose_extent(m_width, m_height, surface_capabilities);
 
         uint32_t format_count = 0;
         HE_VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(m_graphics_device.physical_device(), m_surface, &format_count, nullptr));
@@ -110,7 +158,7 @@ namespace hyper_rhi
     {
         for (const VkSurfaceFormatKHR &format : formats)
         {
-            if (format.format == VK_FORMAT_B8G8R8A8_UNORM && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
             {
                 return format;
             }
@@ -130,5 +178,10 @@ namespace hyper_rhi
         }
 
         return VK_PRESENT_MODE_FIFO_KHR;
+    }
+
+    void VulkanSurface::destroy()
+    {
+        vkDestroySwapchainKHR(m_graphics_device.device(), m_swapchain, nullptr);
     }
 } // namespace hyper_rhi

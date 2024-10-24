@@ -82,6 +82,31 @@ namespace hyper_rhi
         HE_UNREACHABLE();
     }
 
+    void D3D12GraphicsDevice::begin_frame(SurfaceHandle surface_handle, uint32_t frame_index)
+    {
+        HE_UNREACHABLE();
+    }
+
+    void D3D12GraphicsDevice::end_frame() const
+    {
+        HE_UNREACHABLE();
+    }
+
+    void D3D12GraphicsDevice::execute() const
+    {
+        HE_UNREACHABLE();
+    }
+
+    void D3D12GraphicsDevice::present(SurfaceHandle surface_handle) const
+    {
+        HE_UNREACHABLE();
+    }
+
+    void D3D12GraphicsDevice::wait_for_idle() const
+    {
+        HE_UNREACHABLE();
+    }
+
     void D3D12GraphicsDevice::enable_debug_layers()
     {
         ComPtr<ID3D12Debug> debug_controller = nullptr;

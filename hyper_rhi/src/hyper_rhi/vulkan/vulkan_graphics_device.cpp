@@ -13,8 +13,10 @@
 
 #include <GLFW/glfw3.h>
 #define VMA_IMPLEMENTATION
+
 #include <vk_mem_alloc.h>
 
+#include "hyper_rhi/vulkan/vulkan_command_list.hpp"
 #include "hyper_rhi/vulkan/vulkan_surface.hpp"
 
 namespace hyper_rhi
@@ -38,6 +40,7 @@ namespace hyper_rhi
         , m_descriptor_manager(nullptr)
         , m_submit_semaphore(VK_NULL_HANDLE)
         , m_frames({})
+        , m_current_frame_index(0)
     {
         volkInitialize();
 
@@ -105,6 +108,11 @@ namespace hyper_rhi
         return m_device;
     }
 
+    const VulkanGraphicsDevice::FrameData &VulkanGraphicsDevice::current_frame() const
+    {
+        return m_frames[m_current_frame_index % GraphicsDevice::s_frame_count];
+    }
+
     SurfaceHandle VulkanGraphicsDevice::create_surface(const SurfaceDescriptor &descriptor)
     {
         return std::make_shared<VulkanSurface>(*this, descriptor);
@@ -117,7 +125,7 @@ namespace hyper_rhi
 
     CommandListHandle VulkanGraphicsDevice::create_command_list()
     {
-        HE_UNREACHABLE();
+        return std::make_shared<VulkanCommandList>(*this);
     }
 
     ComputePipelineHandle VulkanGraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
@@ -143,6 +151,129 @@ namespace hyper_rhi
     TextureHandle VulkanGraphicsDevice::create_texture(const TextureDescriptor &descriptor)
     {
         HE_UNREACHABLE();
+    }
+
+    void VulkanGraphicsDevice::begin_frame(const SurfaceHandle surface_handle, const uint32_t frame_index)
+    {
+        const std::shared_ptr<VulkanSurface> surface = std::dynamic_pointer_cast<VulkanSurface>(surface_handle);
+
+        m_current_frame_index = frame_index;
+
+        const uint64_t wait_frame_index = static_cast<uint64_t>(m_current_frame_index) - 1;
+        const VkSemaphoreWaitInfo semaphore_wait_info = {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .semaphoreCount = 1,
+            .pSemaphores = &m_submit_semaphore,
+            .pValues = &wait_frame_index,
+        };
+        HE_VK_CHECK(vkWaitSemaphores(m_device, &semaphore_wait_info, std::numeric_limits<uint64_t>::max()));
+
+        // TODO: Add resource cleanup
+
+        if (surface->resized())
+        {
+            surface->rebuild();
+        }
+
+        uint32_t image_index = 0;
+        HE_VK_CHECK(vkAcquireNextImageKHR(
+            m_device,
+            surface->swapchain(),
+            std::numeric_limits<uint64_t>::max(),
+            this->current_frame().present_semaphore,
+            VK_NULL_HANDLE,
+            &image_index));
+
+        surface->set_current_texture_index(image_index);
+    }
+
+    void VulkanGraphicsDevice::end_frame() const
+    {
+        // NOTE: Do nothing for now
+    }
+
+    void VulkanGraphicsDevice::execute() const
+    {
+        const VkSemaphoreSubmitInfo semaphore_submit_info = {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+            .pNext = nullptr,
+            .semaphore = this->current_frame().present_semaphore,
+            .value = 0,
+            .stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .deviceIndex = 0,
+        };
+
+        const VkCommandBufferSubmitInfo command_buffer_submit_info = {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
+            .pNext = nullptr,
+            .commandBuffer = this->current_frame().command_buffer,
+            .deviceMask = 0,
+        };
+
+        const VkSemaphoreSubmitInfo submit_semaphore_submit_info = {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+            .pNext = nullptr,
+            .semaphore = m_submit_semaphore,
+            .value = m_current_frame_index,
+            .stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .deviceIndex = 0,
+        };
+
+        const VkSemaphoreSubmitInfo render_semaphore_submit_info = {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+            .pNext = nullptr,
+            .semaphore = this->current_frame().render_semaphore,
+            .value = 0,
+            .stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .deviceIndex = 0,
+        };
+
+        const std::array<VkSemaphoreSubmitInfo, 2> signal_semaphore_submit_infos = {
+            submit_semaphore_submit_info,
+            render_semaphore_submit_info,
+        };
+
+        const VkSubmitInfo2 submit_info = {
+            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
+            .pNext = nullptr,
+            .flags = 0,
+            .waitSemaphoreInfoCount = 1,
+            .pWaitSemaphoreInfos = &semaphore_submit_info,
+            .commandBufferInfoCount = 1,
+            .pCommandBufferInfos = &command_buffer_submit_info,
+            .signalSemaphoreInfoCount = static_cast<uint32_t>(signal_semaphore_submit_infos.size()),
+            .pSignalSemaphoreInfos = signal_semaphore_submit_infos.data(),
+        };
+
+        HE_VK_CHECK(vkQueueSubmit2(m_queue, 1, &submit_info, VK_NULL_HANDLE));
+    }
+
+    void VulkanGraphicsDevice::present(const SurfaceHandle surface_handle) const
+    {
+        const std::shared_ptr<VulkanSurface> surface = std::dynamic_pointer_cast<VulkanSurface>(surface_handle);
+
+        const VkSwapchainKHR swapchain = surface->swapchain();
+        const uint32_t current_texture_index = surface->current_texture_index();
+
+        const VkPresentInfoKHR present_info = {
+            .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+            .pNext = nullptr,
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &this->current_frame().render_semaphore,
+            .swapchainCount = 1,
+            .pSwapchains = &swapchain,
+            .pImageIndices = &current_texture_index,
+            .pResults = nullptr,
+        };
+
+        HE_VK_CHECK(vkQueuePresentKHR(m_queue, &present_info));
+    }
+
+    void VulkanGraphicsDevice::wait_for_idle() const
+    {
+        HE_VK_CHECK(vkDeviceWaitIdle(m_device));
     }
 
     bool VulkanGraphicsDevice::check_validation_layer_support()
@@ -622,7 +753,7 @@ namespace hyper_rhi
             const VkCommandPoolCreateInfo command_pool_create_info = {
                 .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
                 .pNext = nullptr,
-                .flags = 0,
+                .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
                 .queueFamilyIndex = queue_family.value(),
             };
 
@@ -652,7 +783,7 @@ namespace hyper_rhi
             HE_VK_CHECK(vkCreateSemaphore(m_device, &semaphore_create_info, nullptr, &m_frames[index].present_semaphore));
             HE_ASSERT(m_frames[index].present_semaphore != VK_NULL_HANDLE);
         }
-    } // namespace hyper_rhi
+    }
 
     VKAPI_ATTR VkBool32 VKAPI_CALL VulkanGraphicsDevice::debug_callback(
         const VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,

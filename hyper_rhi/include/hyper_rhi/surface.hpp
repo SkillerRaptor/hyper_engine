@@ -10,6 +10,8 @@
 
 #include <hyper_platform/window.hpp>
 
+#include "hyper_rhi/texture.hpp"
+
 namespace hyper_rhi
 {
     struct SurfaceDescriptor
@@ -21,6 +23,10 @@ namespace hyper_rhi
     {
     public:
         virtual ~Surface() = default;
+
+        virtual void resize(uint32_t width, uint32_t height) = 0;
+
+        [[nodiscard]] virtual TextureHandle current_texture() const = 0;
     };
 
     using SurfaceHandle = std::shared_ptr<Surface>;

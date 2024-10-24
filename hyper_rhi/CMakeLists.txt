@@ -6,6 +6,7 @@
 set(SOURCES
         src/hyper_rhi/graphics_device.cpp
         src/hyper_rhi/resource_handle.cpp
+        src/hyper_rhi/vulkan/vulkan_command_list.cpp
         src/hyper_rhi/vulkan/vulkan_descriptor_manager.cpp
         src/hyper_rhi/vulkan/vulkan_graphics_device.cpp
         src/hyper_rhi/vulkan/vulkan_surface.cpp)
@@ -22,6 +23,7 @@ set(HEADERS
         include/hyper_rhi/shader_module.hpp
         include/hyper_rhi/surface.hpp
         include/hyper_rhi/texture.hpp
+        include/hyper_rhi/vulkan/vulkan_command_list.hpp
         include/hyper_rhi/vulkan/vulkan_common.hpp
         include/hyper_rhi/vulkan/vulkan_descriptor_manager.hpp
         include/hyper_rhi/vulkan/vulkan_graphics_device.hpp

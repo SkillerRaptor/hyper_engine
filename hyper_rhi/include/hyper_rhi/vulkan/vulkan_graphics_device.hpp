@@ -20,7 +20,7 @@ namespace hyper_rhi
 {
     class VulkanGraphicsDevice final : public GraphicsDevice
     {
-    private:
+    public:
         struct FrameData
         {
             VkCommandPool command_pool;
@@ -38,6 +38,8 @@ namespace hyper_rhi
         [[nodiscard]] VkPhysicalDevice physical_device() const;
         [[nodiscard]] VkDevice device() const;
 
+        const FrameData &current_frame() const;
+
     protected:
         SurfaceHandle create_surface(const SurfaceDescriptor &descriptor) override;
 
@@ -48,6 +50,12 @@ namespace hyper_rhi
         PipelineLayoutHandle create_pipeline_layout(const PipelineLayoutDescriptor &descriptor) override;
         ShaderModuleHandle create_shader_module(const ShaderModuleDescriptor &descriptor) override;
         TextureHandle create_texture(const TextureDescriptor &descriptor) override;
+
+        void begin_frame(SurfaceHandle surface_handle, uint32_t frame_index) override;
+        void end_frame() const override;
+        void execute() const override;
+        void present(SurfaceHandle surface_handle) const override;
+        void wait_for_idle() const override;
 
     private:
         static bool check_validation_layer_support();
@@ -85,5 +93,7 @@ namespace hyper_rhi
 
         VkSemaphore m_submit_semaphore;
         std::array<FrameData, GraphicsDevice::s_frame_count> m_frames;
+
+        uint32_t m_current_frame_index;
     };
 } // namespace hyper_rhi

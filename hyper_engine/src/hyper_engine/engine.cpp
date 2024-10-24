@@ -77,6 +77,7 @@ namespace hyper_engine
             // Update
 
             // Render
+            m_renderer.render();
         }
     }
 

@@ -21,6 +21,16 @@ namespace hyper_rhi
         // TODO: Add RTV handles
     }
 
+    void D3D12Surface::resize(uint32_t width, uint32_t height)
+    {
+        HE_UNREACHABLE();
+    }
+
+    TextureHandle D3D12Surface::current_texture() const
+    {
+        HE_UNREACHABLE();
+    }
+
     void D3D12Surface::create_swapchain(const hyper_platform::Window &window)
     {
         const HWND window_handle = glfwGetWin32Window(window.native_window());

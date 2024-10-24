@@ -14,6 +14,9 @@ namespace hyper_rhi
     {
     public:
         virtual ~CommandList() = default;
+
+        virtual void begin() const = 0;
+        virtual void end() const = 0;
     };
 
     using CommandListHandle = std::shared_ptr<CommandList>;
