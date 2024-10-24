@@ -6,10 +6,13 @@
 
 #pragma once
 
+#include <array>
+#include <memory>
 #include <optional>
 
 #include "hyper_rhi/graphics_device.hpp"
 #include "hyper_rhi/vulkan/vulkan_common.hpp"
+#include "hyper_rhi/vulkan/vulkan_descriptor_manager.hpp"
 
 #include <vk_mem_alloc.h>
 
@@ -17,6 +20,16 @@ namespace hyper_rhi
 {
     class VulkanGraphicsDevice final : public GraphicsDevice
     {
+    private:
+        struct FrameData
+        {
+            VkCommandPool command_pool;
+            VkCommandBuffer command_buffer;
+
+            VkSemaphore render_semaphore;
+            VkSemaphore present_semaphore;
+        };
+
     public:
         explicit VulkanGraphicsDevice(const GraphicsDeviceDescriptor &descriptor);
         ~VulkanGraphicsDevice() override;
@@ -50,6 +63,8 @@ namespace hyper_rhi
         void create_device();
         void create_allocator();
 
+        void create_frames();
+
         static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
             VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
             VkDebugUtilsMessageTypeFlagsEXT message_type,
@@ -64,5 +79,10 @@ namespace hyper_rhi
         VkDevice m_device;
         VkQueue m_queue;
         VmaAllocator m_allocator;
+
+        std::unique_ptr<VulkanDescriptorManager> m_descriptor_manager;
+
+        VkSemaphore m_submit_semaphore;
+        std::array<FrameData, GraphicsDevice::s_frame_count> m_frames;
     };
 } // namespace hyper_rhi

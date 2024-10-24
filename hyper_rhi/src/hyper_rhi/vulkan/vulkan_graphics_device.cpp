@@ -35,6 +35,9 @@ namespace hyper_rhi
         , m_device(VK_NULL_HANDLE)
         , m_queue(VK_NULL_HANDLE)
         , m_allocator(VK_NULL_HANDLE)
+        , m_descriptor_manager(nullptr)
+        , m_submit_semaphore(VK_NULL_HANDLE)
+        , m_frames({})
     {
         volkInitialize();
 
@@ -56,10 +59,23 @@ namespace hyper_rhi
         this->choose_physical_device();
         this->create_device();
         this->create_allocator();
+
+        m_descriptor_manager = std::make_unique<VulkanDescriptorManager>(*this);
+
+        this->create_frames();
     }
 
     VulkanGraphicsDevice::~VulkanGraphicsDevice()
     {
+        for (const FrameData &frame : m_frames)
+        {
+            vkDestroySemaphore(m_device, frame.present_semaphore, nullptr);
+            vkDestroySemaphore(m_device, frame.render_semaphore, nullptr);
+            vkDestroyCommandPool(m_device, frame.command_pool, nullptr);
+        }
+
+        vkDestroySemaphore(m_device, m_submit_semaphore, nullptr);
+
         vkDestroyDevice(m_device, nullptr);
 
         if (m_validation_layers_enabled)
@@ -545,6 +561,63 @@ namespace hyper_rhi
         HE_VK_CHECK(vmaCreateAllocator(&allocator_create_info, &m_allocator));
         HE_ASSERT(m_allocator != VK_NULL_HANDLE);
     }
+
+    void VulkanGraphicsDevice::create_frames()
+    {
+        VkSemaphoreTypeCreateInfo submit_semaphore_type_create_info = {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
+            .pNext = nullptr,
+            .semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE,
+            .initialValue = 0,
+        };
+
+        const VkSemaphoreCreateInfo submit_semaphore_create_info = {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+            .pNext = &submit_semaphore_type_create_info,
+            .flags = 0,
+        };
+
+        HE_VK_CHECK(vkCreateSemaphore(m_device, &submit_semaphore_create_info, nullptr, &m_submit_semaphore));
+        HE_ASSERT(m_submit_semaphore != VK_NULL_HANDLE);
+
+        const std::optional<uint32_t> queue_family = VulkanGraphicsDevice::find_queue_family(m_physical_device);
+
+        for (size_t index = 0; index < GraphicsDevice::s_frame_count; ++index)
+        {
+            const VkCommandPoolCreateInfo command_pool_create_info = {
+                .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+                .pNext = nullptr,
+                .flags = 0,
+                .queueFamilyIndex = queue_family.value(),
+            };
+
+            HE_VK_CHECK(vkCreateCommandPool(m_device, &command_pool_create_info, nullptr, &m_frames[index].command_pool));
+            HE_ASSERT(m_submit_semaphore != VK_NULL_HANDLE);
+
+            const VkCommandBufferAllocateInfo command_buffer_allocate_info = {
+                .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+                .pNext = nullptr,
+                .commandPool = m_frames[index].command_pool,
+                .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+                .commandBufferCount = 1,
+            };
+
+            HE_VK_CHECK(vkAllocateCommandBuffers(m_device, &command_buffer_allocate_info, &m_frames[index].command_buffer));
+            HE_ASSERT(m_frames[index].command_buffer != VK_NULL_HANDLE);
+
+            constexpr VkSemaphoreCreateInfo semaphore_create_info = {
+                .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+                .pNext = nullptr,
+                .flags = 0,
+            };
+
+            HE_VK_CHECK(vkCreateSemaphore(m_device, &semaphore_create_info, nullptr, &m_frames[index].render_semaphore));
+            HE_ASSERT(m_frames[index].render_semaphore != VK_NULL_HANDLE);
+
+            HE_VK_CHECK(vkCreateSemaphore(m_device, &semaphore_create_info, nullptr, &m_frames[index].present_semaphore));
+            HE_ASSERT(m_frames[index].present_semaphore != VK_NULL_HANDLE);
+        }
+    } // namespace hyper_rhi
 
     VKAPI_ATTR VkBool32 VKAPI_CALL VulkanGraphicsDevice::debug_callback(
         const VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,

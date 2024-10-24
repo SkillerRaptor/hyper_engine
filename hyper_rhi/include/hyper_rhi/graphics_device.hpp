@@ -34,6 +34,10 @@ namespace hyper_rhi
     class GraphicsDevice
     {
     public:
+        static constexpr size_t s_frame_count = 2;
+        static constexpr size_t s_descriptor_limit = 1000 * 1000;
+
+    public:
         static std::shared_ptr<GraphicsDevice> create(const GraphicsDeviceDescriptor &descriptor);
         virtual ~GraphicsDevice() = default;
 
