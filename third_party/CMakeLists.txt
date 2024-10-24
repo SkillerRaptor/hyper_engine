@@ -11,6 +11,7 @@ include(FetchContent)
 #-------------------------------------------------------------------------------------------
 FetchContent_Declare(
         argparse
+        SYSTEM
         GIT_REPOSITORY https://github.com/p-ranav/argparse.git
         GIT_TAG v3.1)
 
@@ -30,6 +31,7 @@ set_target_properties(
 #-------------------------------------------------------------------------------------------
 FetchContent_Declare(
         D3D12MemoryAllocator
+        SYSTEM
         GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator.git
         GIT_TAG master)
 
@@ -57,6 +59,7 @@ target_link_libraries(
         ${CMAKE_SOURCE_DIR}/third_party/DirectXShaderCompiler/lib/x64/dxcompiler.lib)
 target_include_directories(
         DirectXShaderCompiler
+        SYSTEM
         INTERFACE
         ${CMAKE_SOURCE_DIR}/third_party/DirectXShaderCompiler/inc)
 
@@ -70,6 +73,7 @@ set_target_properties(
 #-------------------------------------------------------------------------------------------
 FetchContent_Declare(
         fmt
+        SYSTEM
         GIT_REPOSITORY https://github.com/fmtlib/fmt.git
         GIT_TAG 11.0.2)
 
@@ -95,6 +99,7 @@ set_target_properties(
 #-------------------------------------------------------------------------------------------
 FetchContent_Declare(
         glfw
+        SYSTEM
         GIT_REPOSITORY https://github.com/glfw/glfw.git
         GIT_TAG 3.4)
 
@@ -119,6 +124,7 @@ set_target_properties(
 #-------------------------------------------------------------------------------------------
 FetchContent_Declare(
         glm
+        SYSTEM
         GIT_REPOSITORY https://github.com/g-truc/glm.git
         GIT_TAG 1.0.1)
 
@@ -138,6 +144,7 @@ set_target_properties(
 #-------------------------------------------------------------------------------------------
 FetchContent_Declare(
         libassert
+        SYSTEM
         GIT_REPOSITORY https://github.com/jeremy-rifkin/libassert.git
         GIT_TAG v2.1.1)
 
@@ -159,6 +166,7 @@ set_target_properties(
 #-------------------------------------------------------------------------------------------
 FetchContent_Declare(
         meshoptimizer
+        SYSTEM
         GIT_REPOSITORY https://github.com/zeux/meshoptimizer.git
         GIT_TAG v0.21)
 
@@ -179,6 +187,7 @@ set_target_properties(
 #-------------------------------------------------------------------------------------------
 FetchContent_Declare(
         volk
+        SYSTEM
         GIT_REPOSITORY https://github.com/zeux/volk.git
         GIT_TAG 1.3.295)
 
@@ -198,6 +207,7 @@ set_target_properties(
 #-------------------------------------------------------------------------------------------
 FetchContent_Declare(
         VulkanMemoryAllocator
+        SYSTEM
         GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
         GIT_TAG v3.1.0)
 
