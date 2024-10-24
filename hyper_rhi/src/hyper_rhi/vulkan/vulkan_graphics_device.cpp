@@ -16,6 +16,8 @@
 
 #include <vk_mem_alloc.h>
 
+#include <hyper_core/prerequisites.hpp>
+
 #include "hyper_rhi/vulkan/vulkan_command_list.hpp"
 #include "hyper_rhi/vulkan/vulkan_surface.hpp"
 
@@ -120,6 +122,8 @@ namespace hyper_rhi
 
     BufferHandle VulkanGraphicsDevice::create_buffer(const BufferDescriptor &descriptor)
     {
+        HE_UNUSED(descriptor);
+
         HE_UNREACHABLE();
     }
 
@@ -130,26 +134,36 @@ namespace hyper_rhi
 
     ComputePipelineHandle VulkanGraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
     {
+        HE_UNUSED(descriptor);
+
         HE_UNREACHABLE();
     }
 
     GraphicsPipelineHandle VulkanGraphicsDevice::create_graphics_pipeline(const GraphicsPipelineDescriptor &descriptor)
     {
+        HE_UNUSED(descriptor);
+
         HE_UNREACHABLE();
     }
 
     PipelineLayoutHandle VulkanGraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
     {
+        HE_UNUSED(descriptor);
+
         HE_UNREACHABLE();
     }
 
     ShaderModuleHandle VulkanGraphicsDevice::create_shader_module(const ShaderModuleDescriptor &descriptor)
     {
+        HE_UNUSED(descriptor);
+
         HE_UNREACHABLE();
     }
 
     TextureHandle VulkanGraphicsDevice::create_texture(const TextureDescriptor &descriptor)
     {
+        HE_UNUSED(descriptor);
+
         HE_UNREACHABLE();
     }
 

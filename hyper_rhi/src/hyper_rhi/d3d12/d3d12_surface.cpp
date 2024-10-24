@@ -11,6 +11,8 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
+#include <hyper_core/prerequisites.hpp>
+
 namespace hyper_rhi
 {
     D3D12Surface::D3D12Surface(D3D12GraphicsDevice &graphics_device, const SurfaceDescriptor &descriptor)
@@ -21,8 +23,11 @@ namespace hyper_rhi
         // TODO: Add RTV handles
     }
 
-    void D3D12Surface::resize(uint32_t width, uint32_t height)
+    void D3D12Surface::resize(const uint32_t width,const uint32_t height)
     {
+        HE_UNUSED(width);
+        HE_UNUSED(height);
+
         HE_UNREACHABLE();
     }
 

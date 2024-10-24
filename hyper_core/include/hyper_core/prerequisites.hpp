@@ -6,6 +6,8 @@
 
 #pragma once
 
+#define HE_UNUSED(x) ((void) (x))
+
 #define HE_STRINGIFY_HELPER(x) #x
 #define HE_STRINGIFY(x) HE_STRINGIFY_HELPER(x)
 #define HE_EXPAND_MACRO(x) x

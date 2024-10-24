@@ -6,6 +6,8 @@
 
 #include "hyper_rhi/d3d12/d3d12_graphics_device.hpp"
 
+#include <hyper_core/prerequisites.hpp>
+
 #include "hyper_rhi/d3d12/d3d12_surface.hpp"
 
 namespace hyper_rhi
@@ -49,6 +51,8 @@ namespace hyper_rhi
 
     BufferHandle D3D12GraphicsDevice::create_buffer(const BufferDescriptor &descriptor)
     {
+        HE_UNUSED(descriptor);
+
         HE_UNREACHABLE();
     }
 
@@ -59,31 +63,44 @@ namespace hyper_rhi
 
     ComputePipelineHandle D3D12GraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
     {
+        HE_UNUSED(descriptor);
+
         HE_UNREACHABLE();
     }
 
     GraphicsPipelineHandle D3D12GraphicsDevice::create_graphics_pipeline(const GraphicsPipelineDescriptor &descriptor)
     {
+        HE_UNUSED(descriptor);
+
         HE_UNREACHABLE();
     }
 
     PipelineLayoutHandle D3D12GraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
     {
+        HE_UNUSED(descriptor);
+
         HE_UNREACHABLE();
     }
 
     ShaderModuleHandle D3D12GraphicsDevice::create_shader_module(const ShaderModuleDescriptor &descriptor)
     {
+        HE_UNUSED(descriptor);
+
         HE_UNREACHABLE();
     }
 
     TextureHandle D3D12GraphicsDevice::create_texture(const TextureDescriptor &descriptor)
     {
+        HE_UNUSED(descriptor);
+
         HE_UNREACHABLE();
     }
 
     void D3D12GraphicsDevice::begin_frame(SurfaceHandle surface_handle, uint32_t frame_index)
     {
+        HE_UNUSED(surface_handle);
+        HE_UNUSED(frame_index);
+
         HE_UNREACHABLE();
     }
 
@@ -99,6 +116,8 @@ namespace hyper_rhi
 
     void D3D12GraphicsDevice::present(SurfaceHandle surface_handle) const
     {
+        HE_UNUSED(surface_handle);
+
         HE_UNREACHABLE();
     }
 
