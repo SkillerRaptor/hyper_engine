@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 
 #include <hyper_core/filesystem.hpp>
+#include <hyper_core/logger.hpp>
 
 struct Material
 {
@@ -116,5 +117,6 @@ namespace hyper_render
               .is_constant_buffer = false,
           }))
     {
+        HE_DEBUG("Created Renderer");
     }
 } // namespace hyper_render

@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <memory>
 
 #include <hyper_event/event_bus.hpp>
@@ -36,6 +37,8 @@ namespace hyper_engine
         void on_resize(const hyper_platform::WindowResizeEvent &event);
 
     private:
+        std::chrono::steady_clock::time_point m_start_time;
+
         bool m_running;
         hyper_event::EventBus m_event_bus;
         hyper_platform::Window m_window;

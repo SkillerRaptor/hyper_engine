@@ -28,6 +28,8 @@ namespace hyper_rhi
         this->create_device();
         this->create_command_queue();
         this->create_allocator();
+
+        HE_TRACE("Created D3D12 Graphics Device with debug layers {}", m_debug_layers_enabled ? "enabled" : "disabled");
     }
 
     ComPtr<IDXGIFactory7> D3D12GraphicsDevice::factory() const

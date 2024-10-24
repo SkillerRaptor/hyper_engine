@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <source_location>
 #include <string_view>
 
 #include <fmt/base.h>
@@ -28,55 +29,55 @@ namespace hyper_core
 
     public:
         template <typename... Args>
-        static void info(fmt::format_string<Args...> format, Args &&...args)
+        static void info(const std::source_location &source_location, fmt::format_string<Args...> format, Args &&...args)
         {
-            Logger::log(Level::Info, format, std::forward<Args>(args)...);
+            Logger::log(Level::Info, source_location, format, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
-        static void warn(fmt::format_string<Args...> format, Args &&...args)
+        static void warn(const std::source_location &source_location, fmt::format_string<Args...> format, Args &&...args)
         {
-            Logger::log(Level::Warning, format, std::forward<Args>(args)...);
+            Logger::log(Level::Warning, source_location, format, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
-        static void error(fmt::format_string<Args...> format, Args &&...args)
+        static void error(const std::source_location &source_location, fmt::format_string<Args...> format, Args &&...args)
         {
-            Logger::log(Level::Error, format, std::forward<Args>(args)...);
+            Logger::log(Level::Error, source_location, format, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
-        static void fatal(fmt::format_string<Args...> format, Args &&...args)
+        static void fatal(const std::source_location &source_location, fmt::format_string<Args...> format, Args &&...args)
         {
-            Logger::log(Level::Fatal, format, std::forward<Args>(args)...);
+            Logger::log(Level::Fatal, source_location, format, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
-        static void debug(fmt::format_string<Args...> format, Args &&...args)
+        static void debug(const std::source_location &source_location, fmt::format_string<Args...> format, Args &&...args)
         {
-            Logger::log(Level::Debug, format, std::forward<Args>(args)...);
+            Logger::log(Level::Debug, source_location, format, std::forward<Args>(args)...);
         }
 
         template <typename... Args>
-        static void trace(fmt::format_string<Args...> format, Args &&...args)
+        static void trace(const std::source_location &source_location, fmt::format_string<Args...> format, Args &&...args)
         {
-            Logger::log(Level::Trace, format, std::forward<Args>(args)...);
+            Logger::log(Level::Trace, source_location, format, std::forward<Args>(args)...);
         }
 
     private:
         template <typename... Args>
-        static void log(const Level level, fmt::format_string<Args...> format, Args &&...args)
+        static void log(const Level level, const std::source_location &source_location, fmt::format_string<Args...> format, Args &&...args)
         {
-            Logger::internal_log(level, fmt::format(format, std::forward<Args>(args)...));
+            Logger::internal_log(level, source_location, fmt::format(format, std::forward<Args>(args)...));
         }
 
-        static void internal_log(Level level, std::string_view string);
+        static void internal_log(Level level, const std::source_location &source_location, std::string_view string);
     };
 } // namespace hyper_core
 
-#define HE_INFO(...) ::hyper_core::Logger::info(__VA_ARGS__)
-#define HE_WARN(...) ::hyper_core::Logger::warn(__VA_ARGS__)
-#define HE_ERROR(...) ::hyper_core::Logger::error(__VA_ARGS__)
-#define HE_FATAL(...) ::hyper_core::Logger::fatal(__VA_ARGS__)
-#define HE_DEBUG(...) ::hyper_core::Logger::debug(__VA_ARGS__)
-#define HE_TRACE(...) ::hyper_core::Logger::trace(__VA_ARGS__)
+#define HE_INFO(format, ...) ::hyper_core::Logger::info(::std::source_location::current(), format, __VA_ARGS__)
+#define HE_WARN(format, ...) ::hyper_core::Logger::warn(::std::source_location::current(), format, __VA_ARGS__)
+#define HE_ERROR(format, ...) ::hyper_core::Logger::error(::std::source_location::current(), format, __VA_ARGS__)
+#define HE_FATAL(format, ...) ::hyper_core::Logger::fatal(::std::source_location::current(), format, __VA_ARGS__)
+#define HE_DEBUG(format, ...) ::hyper_core::Logger::debug(::std::source_location::current(), format, __VA_ARGS__)
+#define HE_TRACE(format, ...) ::hyper_core::Logger::trace(::std::source_location::current(), format, __VA_ARGS__)

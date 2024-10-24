@@ -15,7 +15,8 @@
 namespace hyper_engine
 {
     Engine::Engine(const EngineDescriptor &descriptor)
-        : m_running(false)
+        : m_start_time(std::chrono::steady_clock::now())
+        , m_running(false)
         , m_window({
               .title = "HyperEngine",
               .width = descriptor.width,
@@ -40,6 +41,11 @@ namespace hyper_engine
         m_event_bus.subscribe<hyper_platform::WindowResizeEvent>(HE_BIND_FUNCTION(Engine::on_resize));
 
         m_running = true;
+
+        const std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+        const std::chrono::duration<double> elapsed_seconds = end_time - m_start_time;
+
+        HE_INFO("Engine initialized in {:.2}s", elapsed_seconds.count());
     }
 
     void Engine::run()

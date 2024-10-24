@@ -63,6 +63,8 @@ namespace hyper_rhi
         m_descriptor_manager = new VulkanDescriptorManager(*this);
 
         this->create_frames();
+
+        HE_DEBUG("Created Vulkan Graphics Device with validations layers {}", m_validation_layers_enabled ? "enabled" : "disabled");
     }
 
     VulkanGraphicsDevice::~VulkanGraphicsDevice()
@@ -267,6 +269,37 @@ namespace hyper_rhi
         HE_ASSERT(possible_physical_devices.rbegin()->first != 0);
 
         m_physical_device = possible_physical_devices.rbegin()->second;
+
+        VkPhysicalDeviceProperties properties = {};
+        vkGetPhysicalDeviceProperties(m_physical_device, &properties);
+
+        const std::string_view device_type = [&properties]()
+        {
+            switch (properties.deviceType)
+            {
+            case VK_PHYSICAL_DEVICE_TYPE_OTHER:
+                return "Other";
+            case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+                return "Integrated GPU";
+            case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+                return "Discrete GPU";
+            case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+                return "Virtual GPU";
+            case VK_PHYSICAL_DEVICE_TYPE_CPU:
+                return "CPU";
+            default:
+                HE_UNREACHABLE();
+            }
+        }();
+
+        HE_INFO("Device Info:");
+        HE_INFO("\tName: {}", properties.deviceName);
+        HE_INFO(
+            "\tAPI Version: {}.{}.{}",
+            VK_VERSION_MAJOR(properties.apiVersion),
+            VK_VERSION_MINOR(properties.apiVersion),
+            VK_VERSION_PATCH(properties.apiVersion));
+        HE_INFO("\tType: {}", device_type);
     }
 
     uint32_t VulkanGraphicsDevice::rate_physical_device(const VkPhysicalDevice &physical_device) const

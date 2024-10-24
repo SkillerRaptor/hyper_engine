@@ -107,7 +107,7 @@ namespace hyper_platform
                 event_bus.dispatch(hyper_platform::MouseMovedEvent(static_cast<float>(x), static_cast<float>(y)));
             });
 
-        HE_DEBUG("Window created | title=\"{}\" width={} height={}", descriptor.title, descriptor.width, descriptor.height);
+        HE_DEBUG("Created Window with title '{}' and size {}x{}", descriptor.title, descriptor.width, descriptor.height);
     }
 
     Window::~Window()
