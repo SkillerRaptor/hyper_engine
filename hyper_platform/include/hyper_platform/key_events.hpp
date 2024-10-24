@@ -15,7 +15,7 @@ namespace hyper_platform
     public:
         explicit KeyPressedEvent(KeyCode key_code);
 
-        KeyCode key_code() const;
+        [[nodiscard]] KeyCode key_code() const;
 
     private:
         KeyCode m_key_code;
@@ -26,7 +26,7 @@ namespace hyper_platform
     public:
         explicit KeyReleasedEvent(KeyCode key_code);
 
-        KeyCode key_code() const;
+        [[nodiscard]] KeyCode key_code() const;
 
     private:
         KeyCode m_key_code;

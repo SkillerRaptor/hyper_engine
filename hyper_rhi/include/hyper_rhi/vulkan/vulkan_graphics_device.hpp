@@ -21,9 +21,9 @@ namespace hyper_rhi
         explicit VulkanGraphicsDevice(const GraphicsDeviceDescriptor &descriptor);
         ~VulkanGraphicsDevice() override;
 
-        VkInstance instance() const;
-        VkPhysicalDevice physical_device() const;
-        VkDevice device() const;
+        [[nodiscard]] VkInstance instance() const;
+        [[nodiscard]] VkPhysicalDevice physical_device() const;
+        [[nodiscard]] VkDevice device() const;
 
     protected:
         SurfaceHandle create_surface(const SurfaceDescriptor &descriptor) override;

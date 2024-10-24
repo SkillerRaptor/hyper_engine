@@ -11,5 +11,5 @@
 
 namespace hyper_core::filesystem
 {
-    std::vector<uint8_t> read_file(const std::string &file_path);
+    [[nodiscard]] std::vector<uint8_t> read_file(const std::string &file_path);
 } // namespace hyper_core::filesystem

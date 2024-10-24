@@ -15,8 +15,8 @@ namespace hyper_platform
     public:
         MouseMovedEvent(float x, float y);
 
-        float x() const;
-        float y() const;
+        [[nodiscard]] float x() const;
+        [[nodiscard]] float y() const;
 
     private:
         float m_x;
@@ -28,8 +28,8 @@ namespace hyper_platform
     public:
         MouseScrolledEvent(float delta_x, float delta_y);
 
-        float delta_x() const;
-        float delta_y() const;
+        [[nodiscard]] float delta_x() const;
+        [[nodiscard]] float delta_y() const;
 
     private:
         float m_delta_x;
@@ -41,7 +41,7 @@ namespace hyper_platform
     public:
         explicit MouseButtonPressedEvent(MouseCode mouse_code);
 
-        MouseCode mouse_code() const;
+        [[nodiscard]] MouseCode mouse_code() const;
 
     private:
         MouseCode m_mouse_code;
@@ -52,7 +52,7 @@ namespace hyper_platform
     public:
         explicit MouseButtonReleasedEvent(MouseCode mouse_code);
 
-        MouseCode mouse_code() const;
+        [[nodiscard]] MouseCode mouse_code() const;
 
     private:
         MouseCode m_mouse_code;

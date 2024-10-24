@@ -18,8 +18,8 @@ namespace hyper_rhi
     public:
         explicit D3D12GraphicsDevice(const GraphicsDeviceDescriptor &descriptor);
 
-        ComPtr<IDXGIFactory7> factory() const;
-        ComPtr<ID3D12CommandQueue> command_queue() const;
+        [[nodiscard]] ComPtr<IDXGIFactory7> factory() const;
+        [[nodiscard]] ComPtr<ID3D12CommandQueue> command_queue() const;
 
     protected:
         SurfaceHandle create_surface(const SurfaceDescriptor &descriptor) override;

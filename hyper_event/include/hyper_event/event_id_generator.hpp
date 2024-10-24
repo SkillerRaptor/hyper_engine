@@ -12,7 +12,7 @@ namespace hyper_event
     {
     public:
         template <typename>
-        static size_t type()
+        [[nodiscard]] static size_t type()
         {
             static const size_t value = EventIdGenerator::identifier();
             return value;

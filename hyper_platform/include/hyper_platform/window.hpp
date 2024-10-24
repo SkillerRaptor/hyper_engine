@@ -28,9 +28,9 @@ namespace hyper_platform
         explicit Window(const WindowDescriptor &descriptor);
         ~Window();
 
-        uint32_t width() const;
-        uint32_t height() const;
-        GLFWwindow *native_window() const;
+        [[nodiscard]] uint32_t width() const;
+        [[nodiscard]] uint32_t height() const;
+        [[nodiscard]] GLFWwindow *native_window() const;
 
         static void poll_events();
 

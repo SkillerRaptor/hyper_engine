@@ -21,8 +21,8 @@ namespace hyper_platform
     public:
         WindowResizeEvent(uint32_t width, uint32_t height);
 
-        uint32_t width() const;
-        uint32_t height() const;
+        [[nodiscard]] uint32_t width() const;
+        [[nodiscard]] uint32_t height() const;
 
     private:
         uint32_t m_width;
