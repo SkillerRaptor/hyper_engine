@@ -129,20 +129,20 @@ namespace hyper_rhi
 
     void D3D12GraphicsDevice::create_command_queue()
     {
-        constexpr D3D12_COMMAND_QUEUE_DESC descriptor = {
+        constexpr D3D12_COMMAND_QUEUE_DESC command_queue_descriptor = {
             .Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
             .Priority = 0,
             .Flags = D3D12_COMMAND_QUEUE_FLAG_NONE,
             .NodeMask = 0,
         };
 
-        HE_DX_CHECK(m_device->CreateCommandQueue(&descriptor, IID_PPV_ARGS(&m_command_queue)));
+        HE_DX_CHECK(m_device->CreateCommandQueue(&command_queue_descriptor, IID_PPV_ARGS(&m_command_queue)));
         HE_ASSERT(m_command_queue != nullptr);
     }
 
     void D3D12GraphicsDevice::create_allocator()
     {
-        const D3D12MA::ALLOCATOR_DESC descriptor = {
+        const D3D12MA::ALLOCATOR_DESC allocator_descriptor = {
             .Flags = D3D12MA::ALLOCATOR_FLAG_ALWAYS_COMMITTED | D3D12MA::ALLOCATOR_FLAG_DEFAULT_POOLS_NOT_ZEROED,
             .pDevice = m_device.Get(),
             .PreferredBlockSize = 0,
@@ -150,7 +150,7 @@ namespace hyper_rhi
             .pAdapter = m_adapter.Get(),
         };
 
-        HE_DX_CHECK(D3D12MA::CreateAllocator(&descriptor, &m_allocator));
+        HE_DX_CHECK(D3D12MA::CreateAllocator(&allocator_descriptor, &m_allocator));
         HE_ASSERT(m_allocator != nullptr);
     }
 } // namespace hyper_rhi

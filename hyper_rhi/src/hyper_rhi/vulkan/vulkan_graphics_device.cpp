@@ -192,7 +192,7 @@ namespace hyper_rhi
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
 
-        const VkInstanceCreateInfo create_info = {
+        const VkInstanceCreateInfo instance_create_info = {
             .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
             .pNext = next,
             .flags = 0,
@@ -203,7 +203,7 @@ namespace hyper_rhi
             .ppEnabledExtensionNames = extensions.data(),
         };
 
-        HE_VK_CHECK(vkCreateInstance(&create_info, nullptr, &m_instance));
+        HE_VK_CHECK(vkCreateInstance(&instance_create_info, nullptr, &m_instance));
         HE_ASSERT(m_instance != VK_NULL_HANDLE);
 
         volkLoadInstance(m_instance);
@@ -216,7 +216,7 @@ namespace hyper_rhi
             return;
         }
 
-        constexpr VkDebugUtilsMessengerCreateInfoEXT create_info = {
+        constexpr VkDebugUtilsMessengerCreateInfoEXT debug_create_info = {
             .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
             .pNext = nullptr,
             .flags = 0,
@@ -227,7 +227,7 @@ namespace hyper_rhi
             .pUserData = nullptr,
         };
 
-        HE_VK_CHECK(vkCreateDebugUtilsMessengerEXT(m_instance, &create_info, nullptr, &m_debug_messenger));
+        HE_VK_CHECK(vkCreateDebugUtilsMessengerEXT(m_instance, &debug_create_info, nullptr, &m_debug_messenger));
         HE_ASSERT(m_debug_messenger != VK_NULL_HANDLE);
     }
 
@@ -478,7 +478,7 @@ namespace hyper_rhi
         const uint32_t layer_count = m_validation_layers_enabled ? static_cast<uint32_t>(g_validation_layers.size()) : 0;
         const char *const *layers = m_validation_layers_enabled ? g_validation_layers.data() : nullptr;
 
-        const VkDeviceCreateInfo create_info = {
+        const VkDeviceCreateInfo device_create_info = {
             .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
             .pNext = &device_features,
             .flags = 0,
@@ -491,7 +491,7 @@ namespace hyper_rhi
             .pEnabledFeatures = nullptr,
         };
 
-        HE_VK_CHECK(vkCreateDevice(m_physical_device, &create_info, nullptr, &m_device));
+        HE_VK_CHECK(vkCreateDevice(m_physical_device, &device_create_info, nullptr, &m_device));
         HE_ASSERT(m_device != VK_NULL_HANDLE);
 
         vkGetDeviceQueue(m_device, queue_family.value(), 0, &m_queue);
@@ -528,7 +528,7 @@ namespace hyper_rhi
             .vkGetDeviceImageMemoryRequirements = vkGetDeviceImageMemoryRequirements,
         };
 
-        const VmaAllocatorCreateInfo create_info = {
+        const VmaAllocatorCreateInfo allocator_create_info = {
             .flags = 0,
             .physicalDevice = m_physical_device,
             .device = m_device,
@@ -542,7 +542,7 @@ namespace hyper_rhi
             .pTypeExternalMemoryHandleTypes = nullptr,
         };
 
-        HE_VK_CHECK(vmaCreateAllocator(&create_info, &m_allocator));
+        HE_VK_CHECK(vmaCreateAllocator(&allocator_create_info, &m_allocator));
         HE_ASSERT(m_allocator != VK_NULL_HANDLE);
     }
 

@@ -65,7 +65,7 @@ namespace hyper_rhi
             image_count = surface_capabilities.maxImageCount;
         }
 
-        const VkSwapchainCreateInfoKHR create_info = {
+        const VkSwapchainCreateInfoKHR swapchain_create_info = {
             .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
             .pNext = nullptr,
             .flags = 0,
@@ -86,7 +86,7 @@ namespace hyper_rhi
             .oldSwapchain = VK_NULL_HANDLE,
         };
 
-        HE_VK_CHECK(vkCreateSwapchainKHR(m_graphics_device.device(), &create_info, nullptr, &m_swapchain));
+        HE_VK_CHECK(vkCreateSwapchainKHR(m_graphics_device.device(), &swapchain_create_info, nullptr, &m_swapchain));
         HE_ASSERT(m_swapchain != VK_NULL_HANDLE);
     }
 

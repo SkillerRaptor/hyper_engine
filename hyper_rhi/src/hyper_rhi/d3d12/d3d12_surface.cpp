@@ -30,7 +30,7 @@ namespace hyper_rhi
             .Quality = 0,
         };
 
-        const DXGI_SWAP_CHAIN_DESC1 descriptor = {
+        const DXGI_SWAP_CHAIN_DESC1 swapchain_descriptor = {
             .Width = window.width(),
             .Height = window.height(),
             .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -46,7 +46,7 @@ namespace hyper_rhi
 
         ComPtr<IDXGISwapChain1> swapchain = nullptr;
         HE_DX_CHECK(m_graphics_device.factory()->CreateSwapChainForHwnd(
-            m_graphics_device.command_queue().Get(), window_handle, &descriptor, nullptr, nullptr, &swapchain));
+            m_graphics_device.command_queue().Get(), window_handle, &swapchain_descriptor, nullptr, nullptr, &swapchain));
         HE_ASSERT(swapchain);
 
         HE_DX_CHECK(m_graphics_device.factory()->MakeWindowAssociation(window_handle, DXGI_MWA_NO_ALT_ENTER));
