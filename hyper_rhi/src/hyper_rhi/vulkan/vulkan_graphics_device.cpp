@@ -60,7 +60,7 @@ namespace hyper_rhi
         this->create_device();
         this->create_allocator();
 
-        m_descriptor_manager = std::make_unique<VulkanDescriptorManager>(*this);
+        m_descriptor_manager = new VulkanDescriptorManager(*this);
 
         this->create_frames();
     }
@@ -75,6 +75,8 @@ namespace hyper_rhi
         }
 
         vkDestroySemaphore(m_device, m_submit_semaphore, nullptr);
+
+        delete m_descriptor_manager;
 
         vkDestroyDevice(m_device, nullptr);
 

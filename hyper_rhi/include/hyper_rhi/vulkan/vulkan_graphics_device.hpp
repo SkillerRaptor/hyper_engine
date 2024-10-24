@@ -80,7 +80,8 @@ namespace hyper_rhi
         VkQueue m_queue;
         VmaAllocator m_allocator;
 
-        std::unique_ptr<VulkanDescriptorManager> m_descriptor_manager;
+        // NOTE: Using raw pointer to guarantee order of destruction
+        VulkanDescriptorManager *m_descriptor_manager;
 
         VkSemaphore m_submit_semaphore;
         std::array<FrameData, GraphicsDevice::s_frame_count> m_frames;
