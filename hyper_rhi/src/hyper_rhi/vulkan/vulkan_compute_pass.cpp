@@ -15,18 +15,20 @@
 
 namespace hyper_engine
 {
-    VulkanComputePass::VulkanComputePass(const ComputePassDescriptor &descriptor, const VkCommandBuffer command_buffer)
+    VulkanComputePass::VulkanComputePass(
+        const ComputePassDescriptor &descriptor,
+        VulkanGraphicsDevice &graphics_device,
+        const VkCommandBuffer command_buffer)
         : ComputePass(descriptor)
+        , m_graphics_device(graphics_device)
         , m_command_buffer(command_buffer)
     {
-        const VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        graphics_device->begin_marker(m_command_buffer, MarkerType::ComputePass, m_label, m_label_color);
+        m_graphics_device.begin_marker(m_command_buffer, MarkerType::ComputePass, m_label, m_label_color);
     }
 
     VulkanComputePass::~VulkanComputePass()
     {
-        const VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        graphics_device->end_marker(m_command_buffer);
+        m_graphics_device.end_marker(m_command_buffer);
     }
 
     void VulkanComputePass::set_pipeline(const RefPtr<ComputePipeline> &pipeline)
@@ -36,8 +38,7 @@ namespace hyper_engine
         const VulkanComputePipeline &vulkan_pipeline = static_cast<const VulkanComputePipeline &>(*m_pipeline);
         const VulkanPipelineLayout &layout = static_cast<const VulkanPipelineLayout &>(*m_pipeline->layout());
 
-        VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        const VulkanDescriptorManager &descriptor_manager = static_cast<VulkanDescriptorManager &>(graphics_device->descriptor_manager());
+        const VulkanDescriptorManager &descriptor_manager = static_cast<VulkanDescriptorManager &>(m_graphics_device.descriptor_manager());
         const auto &descriptor_sets = descriptor_manager.descriptor_sets();
 
         vkCmdBindDescriptorSets(

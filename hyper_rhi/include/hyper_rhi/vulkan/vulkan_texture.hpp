@@ -13,10 +13,13 @@
 
 namespace hyper_engine
 {
+    class VulkanGraphicsDevice;
+
     class VulkanTexture final : public Texture
     {
     public:
-        VulkanTexture(const TextureDescriptor &descriptor, VkImage image, VmaAllocation allocation);
+        VulkanTexture(const TextureDescriptor &descriptor,
+            VulkanGraphicsDevice &graphics_device, VkImage image, VmaAllocation allocation);
         ~VulkanTexture() override;
 
         VkImage image() const;
@@ -28,6 +31,8 @@ namespace hyper_engine
         static VkImageUsageFlags get_image_usage_flags(BitFlags<TextureUsage> texture_usage_flags, Format format);
 
     private:
+        VulkanGraphicsDevice &m_graphics_device;
+
         VkImage m_image = VK_NULL_HANDLE;
         VmaAllocation m_allocation = VK_NULL_HANDLE;
     };

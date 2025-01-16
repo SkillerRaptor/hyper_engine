@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hyper_core/math.hpp>
+#include <glm/glm.hpp>
 
 namespace hyper_engine
 {

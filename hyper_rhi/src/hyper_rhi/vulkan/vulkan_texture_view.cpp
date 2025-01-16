@@ -16,7 +16,7 @@
 
 namespace hyper_engine
 {
-    RefPtr<TextureView> VulkanGraphicsDevice::create_texture_view_platform(const TextureViewDescriptor &descriptor, ResourceHandle handle) const
+    RefPtr<TextureView> VulkanGraphicsDevice::create_texture_view_platform(const TextureViewDescriptor &descriptor, ResourceHandle handle)
     {
         const VulkanTexture &texture = static_cast<const VulkanTexture &>(*descriptor.texture);
 
@@ -62,19 +62,23 @@ namespace hyper_engine
 
         set_object_name(image_view, ObjectType::ImageView, descriptor.label);
 
-        return make_ref<VulkanTextureView>(descriptor, handle, image_view);
+        return make_ref<VulkanTextureView>(descriptor, handle, *this, image_view);
     }
 
-    VulkanTextureView::VulkanTextureView(const TextureViewDescriptor &descriptor, const ResourceHandle handle, const VkImageView image_view)
+    VulkanTextureView::VulkanTextureView(
+        const TextureViewDescriptor &descriptor,
+        const ResourceHandle handle,
+        VulkanGraphicsDevice &graphics_device,
+        const VkImageView image_view)
         : TextureView(descriptor, handle)
+        , m_graphics_device(graphics_device)
         , m_image_view(image_view)
     {
     }
 
     VulkanTextureView::~VulkanTextureView()
     {
-        VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        graphics_device->resource_queue().texture_views.emplace_back(m_image_view, m_handle);
+        m_graphics_device.resource_queue().texture_views.emplace_back(m_image_view, m_handle);
     }
 
     VkImageViewType VulkanTextureView::get_image_view_type(const Dimension dimension)

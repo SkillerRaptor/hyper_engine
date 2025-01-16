@@ -7,22 +7,15 @@
 #include "hyper_engine/editor_engine.hpp"
 
 #include <hyper_core/prerequisites.hpp>
-#include <hyper_ecs/model_component.hpp>
-#include <hyper_ecs/transform_component.hpp>
-#include <hyper_event/event_bus.hpp>
-#include <hyper_platform/input.hpp>
-#include <hyper_platform/mouse_events.hpp>
-#include <hyper_platform/window_events.hpp>
+#include <hyper_windowing/mouse_events.hpp>
+#include <hyper_windowing/window_events.hpp>
 
 namespace hyper_engine
 {
     bool EditorEngine::initialize()
     {
-        EventBus::get()->subscribe<WindowResizeEvent>(HE_BIND_FUNCTION(EditorEngine::on_resize));
-        EventBus::get()->subscribe<MouseMoveEvent>(HE_BIND_FUNCTION(EditorEngine::on_mouse_move));
-        EventBus::get()->subscribe<MouseScrollEvent>(HE_BIND_FUNCTION(EditorEngine::on_mouse_scroll));
-
         // FIXME: The editor shouldn't create entities on its own. Replace this after implementing project files
+        /*
         entt::registry &registry = m_scene.registry();
         for (int32_t z = -10; z != 10; ++z)
         {
@@ -38,6 +31,7 @@ namespace hyper_engine
                 registry.emplace<ModelComponent>(entity, nullptr);
             }
         }
+        */
 
         // FIXME: Enable grid and gui
 
@@ -60,6 +54,7 @@ namespace hyper_engine
         (void) total_time;
 
         // FIXME: Add editor camera
+        /*
         if (Input::get()->is_key_pressed(KeyCode::W))
         {
             m_camera.process_keyboard(Camera::Movement::Forward, delta_time);
@@ -79,6 +74,7 @@ namespace hyper_engine
         {
             m_camera.process_keyboard(Camera::Movement::Right, delta_time);
         }
+        */
     }
 
     void EditorEngine::render()
@@ -91,6 +87,7 @@ namespace hyper_engine
         return m_camera;
     }
 
+    /*
     void EditorEngine::on_resize(const WindowResizeEvent &event)
     {
         m_camera.set_aspect_ratio(static_cast<float>(event.width()) / static_cast<float>(event.height()));
@@ -105,4 +102,5 @@ namespace hyper_engine
     {
         m_camera.process_mouse_scroll(event.delta_y());
     }
+    */
 } // namespace hyper_engine

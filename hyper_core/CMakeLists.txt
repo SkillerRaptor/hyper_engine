@@ -14,9 +14,9 @@ set(HEADERS
         include/hyper_core/bit_flags.hpp
         include/hyper_core/bits.hpp
         include/hyper_core/filesystem.hpp
+        include/hyper_core/forward.hpp
         include/hyper_core/job_system.hpp
         include/hyper_core/logger.hpp
-        include/hyper_core/math.hpp
         include/hyper_core/own_ptr.hpp
         include/hyper_core/prerequisites.hpp
         include/hyper_core/ref_ptr.hpp
@@ -31,3 +31,8 @@ target_link_libraries(
         glm
         libassert::assert
         spdlog)
+target_compile_definitions(
+        hyper_core
+        PUBLIC
+        -DGLM_FORCE_RADIANS
+        -DGLM_FORCE_DEPTH_ZERO_TO_ONE)

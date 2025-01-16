@@ -18,11 +18,14 @@
 
 namespace hyper_engine
 {
+    VulkanCommandList::VulkanCommandList(VulkanGraphicsDevice &graphics_device)
+        : m_graphics_device(graphics_device)
+    {
+    }
+
     void VulkanCommandList::begin()
     {
-        const VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-
-        m_command_buffer = graphics_device->current_frame().command_buffer;
+        m_command_buffer = m_graphics_device.current_frame().command_buffer;
 
         HE_VK_CHECK(vkResetCommandBuffer(m_command_buffer, 0));
 
@@ -498,8 +501,6 @@ namespace hyper_engine
 
     void VulkanCommandList::write_buffer(const RefPtr<Buffer> &buffer, const void *data, const size_t size, const uint64_t offset)
     {
-        const VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-
         const VulkanBuffer &vulkan_buffer = static_cast<const VulkanBuffer &>(*buffer);
 
         if (vulkan_buffer.byte_size() <= 65535)
@@ -508,7 +509,7 @@ namespace hyper_engine
         }
         else
         {
-            const RefPtr<Buffer> staging_buffer = graphics_device->create_buffer_internal(
+            const RefPtr<Buffer> staging_buffer = m_graphics_device.create_buffer_internal(
                 {
                     .label = fmt::format("{} Staging", vulkan_buffer.label()),
                     .byte_size = static_cast<uint64_t>(size),
@@ -520,9 +521,9 @@ namespace hyper_engine
             const VulkanBuffer &vulkan_staging_buffer = static_cast<const VulkanBuffer &>(*staging_buffer);
 
             void *mapped_ptr = nullptr;
-            vmaMapMemory(graphics_device->allocator(), vulkan_staging_buffer.allocation(), &mapped_ptr);
+            vmaMapMemory(m_graphics_device.allocator(), vulkan_staging_buffer.allocation(), &mapped_ptr);
             memcpy(mapped_ptr, data, size);
-            vmaUnmapMemory(graphics_device->allocator(), vulkan_staging_buffer.allocation());
+            vmaUnmapMemory(m_graphics_device.allocator(), vulkan_staging_buffer.allocation());
 
             const VkBufferCopy2 region = {
                 .sType = VK_STRUCTURE_TYPE_BUFFER_COPY_2,
@@ -555,11 +556,9 @@ namespace hyper_engine
         const size_t data_size,
         const uint64_t data_offset)
     {
-        const VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-
         const VulkanTexture &vulkan_texture = static_cast<const VulkanTexture &>(*texture);
 
-        const RefPtr<Buffer> staging_buffer = graphics_device->create_buffer_internal(
+        const RefPtr<Buffer> staging_buffer = m_graphics_device.create_buffer_internal(
             {
                 .label = fmt::format("{} Staging", vulkan_texture.label()),
                 .byte_size = static_cast<uint64_t>(data_size),
@@ -571,9 +570,9 @@ namespace hyper_engine
         const VulkanBuffer &vulkan_staging_buffer = static_cast<const VulkanBuffer &>(*staging_buffer);
 
         void *mapped_ptr = nullptr;
-        vmaMapMemory(graphics_device->allocator(), vulkan_staging_buffer.allocation(), &mapped_ptr);
+        vmaMapMemory(m_graphics_device.allocator(), vulkan_staging_buffer.allocation(), &mapped_ptr);
         memcpy(mapped_ptr, data, data_size);
-        vmaUnmapMemory(graphics_device->allocator(), vulkan_staging_buffer.allocation());
+        vmaUnmapMemory(m_graphics_device.allocator(), vulkan_staging_buffer.allocation());
 
         const VkImageSubresourceLayers subresource_layers = {
             .aspectMask = VulkanTextureView::get_image_aspect_flags(vulkan_texture.format()),
@@ -618,12 +617,12 @@ namespace hyper_engine
 
     RefPtr<ComputePass> VulkanCommandList::begin_compute_pass_platform(const ComputePassDescriptor &descriptor) const
     {
-        return make_ref<VulkanComputePass>(descriptor, m_command_buffer);
+        return make_ref<VulkanComputePass>(descriptor, m_graphics_device, m_command_buffer);
     }
 
     RefPtr<RenderPass> VulkanCommandList::begin_render_pass_platform(const RenderPassDescriptor &descriptor) const
     {
-        return make_ref<VulkanRenderPass>(descriptor, m_command_buffer);
+        return make_ref<VulkanRenderPass>(descriptor, m_graphics_device, m_command_buffer);
     }
 
     VkCommandBuffer VulkanCommandList::command_buffer() const

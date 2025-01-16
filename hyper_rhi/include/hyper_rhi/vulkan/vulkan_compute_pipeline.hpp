@@ -16,12 +16,14 @@ namespace hyper_engine
     class VulkanComputePipeline final : public ComputePipeline
     {
     public:
-        VulkanComputePipeline(const ComputePipelineDescriptor &descriptor, VkPipeline pipeline);
+        VulkanComputePipeline(const ComputePipelineDescriptor &descriptor, VulkanGraphicsDevice &graphics_device, VkPipeline pipeline);
         ~VulkanComputePipeline() override;
 
         VkPipeline pipeline() const;
 
     private:
+        VulkanGraphicsDevice &m_graphics_device;
+
         VkPipeline m_pipeline = VK_NULL_HANDLE;
     };
 

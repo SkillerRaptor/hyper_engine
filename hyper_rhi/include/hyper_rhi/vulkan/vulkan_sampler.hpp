@@ -11,10 +11,12 @@
 
 namespace hyper_engine
 {
+    class VulkanGraphicsDevice;
+
     class VulkanSampler final : public Sampler
     {
     public:
-        VulkanSampler(const SamplerDescriptor &descriptor, ResourceHandle handle, VkSampler sampler);
+        VulkanSampler(const SamplerDescriptor &descriptor, ResourceHandle handle, VulkanGraphicsDevice &graphics_device, VkSampler sampler);
         ~VulkanSampler() override;
 
         VkSampler sampler() const;
@@ -25,6 +27,8 @@ namespace hyper_engine
         static VkBorderColor get_border_color(BorderColor border_color);
 
     private:
+        VulkanGraphicsDevice &m_graphics_device;
+
         VkSampler m_sampler = VK_NULL_HANDLE;
     };
 } // namespace hyper_engine

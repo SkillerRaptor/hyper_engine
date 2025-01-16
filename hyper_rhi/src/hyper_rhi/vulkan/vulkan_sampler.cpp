@@ -15,7 +15,7 @@
 
 namespace hyper_engine
 {
-    RefPtr<Sampler> VulkanGraphicsDevice::create_sampler_platform(const SamplerDescriptor &descriptor, ResourceHandle handle) const
+    RefPtr<Sampler> VulkanGraphicsDevice::create_sampler_platform(const SamplerDescriptor &descriptor, ResourceHandle handle)
     {
         const VkFilter mag_filter = VulkanSampler::get_filter(descriptor.mag_filter);
         const VkFilter min_filter = VulkanSampler::get_filter(descriptor.min_filter);
@@ -53,19 +53,23 @@ namespace hyper_engine
 
         set_object_name(sampler, ObjectType::Sampler, descriptor.label);
 
-        return make_ref<VulkanSampler>(descriptor, handle, sampler);
+        return make_ref<VulkanSampler>(descriptor, handle, *this, sampler);
     }
 
-    VulkanSampler::VulkanSampler(const SamplerDescriptor &descriptor, const ResourceHandle handle, const VkSampler sampler)
+    VulkanSampler::VulkanSampler(
+        const SamplerDescriptor &descriptor,
+        const ResourceHandle handle,
+        VulkanGraphicsDevice &graphics_device,
+        const VkSampler sampler)
         : Sampler(descriptor, handle)
+        , m_graphics_device(graphics_device)
         , m_sampler(sampler)
     {
     }
 
     VulkanSampler::~VulkanSampler()
     {
-        VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        graphics_device->resource_queue().samplers.emplace_back(m_sampler);
+        m_graphics_device.resource_queue().samplers.emplace_back(m_sampler);
     }
 
     VkSampler VulkanSampler::sampler() const

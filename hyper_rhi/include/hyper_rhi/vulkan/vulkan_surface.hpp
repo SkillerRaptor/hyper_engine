@@ -11,15 +11,16 @@
 #include "hyper_rhi/surface.hpp"
 #include "hyper_rhi/vulkan/vulkan_common.hpp"
 
+struct SDL_Window;
+
 namespace hyper_engine
 {
     class VulkanGraphicsDevice;
-    class Window;
 
     class VulkanSurface final : public Surface
     {
     public:
-        VulkanSurface();
+        VulkanSurface(VulkanGraphicsDevice &graphics_device, SDL_Window *window);
         ~VulkanSurface() override;
 
         uint32_t min_image_count() const override;
@@ -37,7 +38,7 @@ namespace hyper_engine
         uint32_t texture_index() const;
 
     private:
-        void create_surface();
+        void create_surface(SDL_Window *window);
         void create_swapchain();
         void create_textures();
         void destroy();
@@ -47,6 +48,8 @@ namespace hyper_engine
         static VkPresentModeKHR choose_present_mode(const std::vector<VkPresentModeKHR> &present_modes);
 
     private:
+        VulkanGraphicsDevice &m_graphics_device;
+
         VkSurfaceKHR m_surface = VK_NULL_HANDLE;
         VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
         uint32_t m_min_image_count = 0;

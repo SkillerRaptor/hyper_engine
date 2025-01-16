@@ -11,10 +11,12 @@
 
 namespace hyper_engine
 {
+    class VulkanGraphicsDevice;
+
     class VulkanRenderPipeline final : public RenderPipeline
     {
     public:
-        VulkanRenderPipeline(const RenderPipelineDescriptor &descriptor, VkPipeline pipeline);
+        VulkanRenderPipeline(const RenderPipelineDescriptor &descriptor, VulkanGraphicsDevice &graphics_device, VkPipeline pipeline);
         ~VulkanRenderPipeline() override;
 
         VkPipeline pipeline() const;
@@ -29,6 +31,8 @@ namespace hyper_engine
         static VkColorComponentFlags get_color_component_flags(BitFlags<ColorWrites> color_writes);
 
     private:
+        VulkanGraphicsDevice &m_graphics_device;
+
         VkPipeline m_pipeline = VK_NULL_HANDLE;
     };
 } // namespace hyper_engine

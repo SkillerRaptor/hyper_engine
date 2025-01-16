@@ -11,10 +11,11 @@
 #include "hyper_rhi/descriptor_manager.hpp"
 #include "hyper_rhi/resource_handle.hpp"
 #include "hyper_rhi/vulkan/vulkan_common.hpp"
-#include "hyper_rhi/vulkan/vulkan_graphics_device.hpp"
 
 namespace hyper_engine
 {
+    class VulkanGraphicsDevice;
+
     class VulkanDescriptorManager final : public DescriptorManager
     {
     private:

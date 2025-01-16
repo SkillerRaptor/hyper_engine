@@ -6,9 +6,12 @@
 
 #include "hyper_engine/camera.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <hyper_core/assertion.hpp>
-#include <hyper_platform/input.hpp>
-#include <hyper_platform/mouse_codes.hpp>
+#include <hyper_windowing/mouse_codes.hpp>
+
+#include "hyper_engine/input.hpp"
 
 namespace hyper_engine
 {
@@ -57,10 +60,12 @@ namespace hyper_engine
         m_last_x = x_position;
         m_last_y = y_position;
 
+        /*
         if (!Input::get()->is_mouse_button_pressed(MouseCode::ButtonMiddle))
         {
             return;
         }
+        */
 
         m_yaw += x_offset;
         m_pitch += y_offset;

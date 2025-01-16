@@ -18,7 +18,7 @@ namespace hyper_engine
     class VulkanComputePass final : public ComputePass
     {
     public:
-        VulkanComputePass(const ComputePassDescriptor &descriptor, VkCommandBuffer command_buffer);
+        VulkanComputePass(const ComputePassDescriptor &descriptor, VulkanGraphicsDevice &graphics_device, VkCommandBuffer command_buffer);
         ~VulkanComputePass() override;
 
         void set_pipeline(const RefPtr<ComputePipeline> &pipeline) override;
@@ -29,6 +29,8 @@ namespace hyper_engine
         VkCommandBuffer command_buffer() const;
 
     private:
+        VulkanGraphicsDevice &m_graphics_device;
+
         VkCommandBuffer m_command_buffer = VK_NULL_HANDLE;
 
         RefPtr<ComputePipeline> m_pipeline;

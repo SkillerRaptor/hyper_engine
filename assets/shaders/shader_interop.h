@@ -8,7 +8,8 @@
 #define HE_SHADER_INTEROP_HPP
 
 #ifdef __cplusplus
-#    include <hyper_core/math.hpp>
+#    include <glm/glm.hpp>
+#
 #    include <hyper_rhi/resource_handle.hpp>
 
 #    define float2 ::glm::vec2

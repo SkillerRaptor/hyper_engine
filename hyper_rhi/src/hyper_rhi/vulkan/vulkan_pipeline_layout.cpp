@@ -14,7 +14,7 @@
 
 namespace hyper_engine
 {
-    RefPtr<PipelineLayout> VulkanGraphicsDevice::create_pipeline_layout_platform(const PipelineLayoutDescriptor &descriptor) const
+    RefPtr<PipelineLayout> VulkanGraphicsDevice::create_pipeline_layout_platform(const PipelineLayoutDescriptor &descriptor)
     {
         const auto &descriptor_set_layouts = m_descriptor_manager->descriptor_set_layouts();
 
@@ -41,19 +41,22 @@ namespace hyper_engine
 
         set_object_name(pipeline_layout, ObjectType::PipelineLayout, descriptor.label);
 
-        return make_ref<VulkanPipelineLayout>(descriptor, pipeline_layout);
+        return make_ref<VulkanPipelineLayout>(descriptor, *this, pipeline_layout);
     }
 
-    VulkanPipelineLayout::VulkanPipelineLayout(const PipelineLayoutDescriptor &descriptor, const VkPipelineLayout pipeline_layout)
+    VulkanPipelineLayout::VulkanPipelineLayout(
+        const PipelineLayoutDescriptor &descriptor,
+        VulkanGraphicsDevice &graphics_device,
+        const VkPipelineLayout pipeline_layout)
         : PipelineLayout(descriptor)
+        , m_graphics_device(graphics_device)
         , m_pipeline_layout(pipeline_layout)
     {
     }
 
     VulkanPipelineLayout::~VulkanPipelineLayout()
     {
-        VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        graphics_device->resource_queue().pipeline_layouts.emplace_back(m_pipeline_layout);
+        m_graphics_device.resource_queue().pipeline_layouts.emplace_back(m_pipeline_layout);
     }
 
     VkPipelineLayout VulkanPipelineLayout::pipeline_layout() const

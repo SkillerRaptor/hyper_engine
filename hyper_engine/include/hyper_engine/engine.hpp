@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hyper_render/scene.hpp>
+#include <hyper_rendering/scene.hpp>
 
 namespace hyper_engine
 {

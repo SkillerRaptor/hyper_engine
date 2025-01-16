@@ -17,7 +17,7 @@
 
 namespace hyper_engine
 {
-    RefPtr<RenderPipeline> VulkanGraphicsDevice::create_render_pipeline_platform(const RenderPipelineDescriptor &descriptor) const
+    RefPtr<RenderPipeline> VulkanGraphicsDevice::create_render_pipeline_platform(const RenderPipelineDescriptor &descriptor)
     {
         const VulkanShaderModule &vertex_shader_module = static_cast<const VulkanShaderModule &>(*descriptor.vertex_shader);
 
@@ -239,19 +239,22 @@ namespace hyper_engine
 
         set_object_name(pipeline, ObjectType::Pipeline, descriptor.label);
 
-        return make_ref<VulkanRenderPipeline>(descriptor, pipeline);
+        return make_ref<VulkanRenderPipeline>(descriptor, *this, pipeline);
     }
 
-    VulkanRenderPipeline::VulkanRenderPipeline(const RenderPipelineDescriptor &descriptor, const VkPipeline pipeline)
+    VulkanRenderPipeline::VulkanRenderPipeline(
+        const RenderPipelineDescriptor &descriptor,
+        VulkanGraphicsDevice &graphics_device,
+        const VkPipeline pipeline)
         : RenderPipeline(descriptor)
+        , m_graphics_device(graphics_device)
         , m_pipeline(pipeline)
     {
     }
 
     VulkanRenderPipeline::~VulkanRenderPipeline()
     {
-        VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        graphics_device->resource_queue().graphics_pipelines.emplace_back(m_pipeline);
+        m_graphics_device.resource_queue().graphics_pipelines.emplace_back(m_pipeline);
     }
 
     VkPipeline VulkanRenderPipeline::pipeline() const

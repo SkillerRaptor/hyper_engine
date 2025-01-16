@@ -20,12 +20,15 @@
 
 namespace hyper_engine
 {
-    VulkanRenderPass::VulkanRenderPass(const RenderPassDescriptor &descriptor, const VkCommandBuffer command_buffer)
+    VulkanRenderPass::VulkanRenderPass(
+        const RenderPassDescriptor &descriptor,
+        VulkanGraphicsDevice &graphics_device,
+        const VkCommandBuffer command_buffer)
         : RenderPass(descriptor)
+        , m_graphics_device(graphics_device)
         , m_command_buffer(command_buffer)
     {
-        VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        graphics_device->begin_marker(m_command_buffer, MarkerType::RenderPass, m_label, m_label_color);
+        m_graphics_device.begin_marker(m_command_buffer, MarkerType::RenderPass, m_label, m_label_color);
 
         // FIXME: Should this always use the first image?
         const VkExtent2D render_area_extent = {
@@ -143,8 +146,7 @@ namespace hyper_engine
     {
         vkCmdEndRendering(m_command_buffer);
 
-        VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        graphics_device->end_marker(m_command_buffer);
+        m_graphics_device.end_marker(m_command_buffer);
     }
 
     void VulkanRenderPass::set_pipeline(const RefPtr<RenderPipeline> &pipeline)
@@ -154,8 +156,7 @@ namespace hyper_engine
         const VulkanRenderPipeline &vulkan_pipeline = static_cast<const VulkanRenderPipeline &>(*m_pipeline);
         const VulkanPipelineLayout &layout = static_cast<const VulkanPipelineLayout &>(*m_pipeline->layout());
 
-        VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        const VulkanDescriptorManager &descriptor_manager = static_cast<VulkanDescriptorManager &>(graphics_device->descriptor_manager());
+        const VulkanDescriptorManager &descriptor_manager = static_cast<VulkanDescriptorManager &>(m_graphics_device.descriptor_manager());
         const auto &descriptor_sets = descriptor_manager.descriptor_sets();
 
         vkCmdBindDescriptorSets(

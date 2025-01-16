@@ -13,7 +13,7 @@
 
 namespace hyper_engine
 {
-    RefPtr<ShaderModule> VulkanGraphicsDevice::create_shader_module_platform(const ShaderModuleDescriptor &descriptor) const
+    RefPtr<ShaderModule> VulkanGraphicsDevice::create_shader_module_platform(const ShaderModuleDescriptor &descriptor)
     {
         const VkShaderModuleCreateInfo shader_module_create_info = {
             .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
@@ -30,19 +30,22 @@ namespace hyper_engine
 
         set_object_name(shader_module, ObjectType::ShaderModule, descriptor.label);
 
-        return make_ref<VulkanShaderModule>(descriptor, shader_module);
+        return make_ref<VulkanShaderModule>(descriptor, *this, shader_module);
     }
 
-    VulkanShaderModule::VulkanShaderModule(const ShaderModuleDescriptor &descriptor, const VkShaderModule shader_module)
+    VulkanShaderModule::VulkanShaderModule(
+        const ShaderModuleDescriptor &descriptor,
+        VulkanGraphicsDevice &graphics_device,
+        const VkShaderModule shader_module)
         : ShaderModule(descriptor)
+        , m_graphics_device(graphics_device)
         , m_shader_module(shader_module)
     {
     }
 
     VulkanShaderModule::~VulkanShaderModule()
     {
-        VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        graphics_device->resource_queue().shader_modules.emplace_back(m_shader_module);
+        m_graphics_device.resource_queue().shader_modules.emplace_back(m_shader_module);
     }
 
     VkShaderModule VulkanShaderModule::shader_module() const

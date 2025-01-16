@@ -16,13 +16,12 @@
 
 using Microsoft::WRL::ComPtr;
 
-#define HE_DX_CHECK(x)                                                                  \
-    do                                                                                  \
-    {                                                                                   \
-        const HRESULT result = x;                                                       \
-        if (FAILED(result))                                                             \
-        {                                                                               \
-            HE_CRITICAL("DirectX operation failed: {}", static_cast<uint32_t>(result)); \
-            HE_UNREACHABLE();                                                           \
-        }                                                                               \
+#define HE_DX_CHECK(x)                                                               \
+    do                                                                               \
+    {                                                                                \
+        const HRESULT result = x;                                                    \
+        if (FAILED(result))                                                          \
+        {                                                                            \
+            HE_PANIC("DirectX operation failed: {}", static_cast<uint32_t>(result)); \
+        }                                                                            \
     } while (0)

@@ -25,19 +25,18 @@
 
 namespace hyper_engine
 {
-    GraphicsDevice *GraphicsDevice::create(const GraphicsDeviceDescriptor &descriptor)
+    OwnPtr<GraphicsDevice> GraphicsDevice::create(const GraphicsDeviceDescriptor &descriptor)
     {
         switch (descriptor.graphics_api)
         {
         case GraphicsApi::D3D12:
 #if HE_WINDOWS
-            // return new D3D12GraphicsDevice(descriptor);
             HE_PANIC();
 #else
             return nullptr;
 #endif
         case GraphicsApi::Vulkan:
-            return new VulkanGraphicsDevice(descriptor);
+            return make_own<VulkanGraphicsDevice>(descriptor);
         default:
             HE_UNREACHABLE();
         }
@@ -80,7 +79,7 @@ namespace hyper_engine
         return buffer;
     }
 
-    RefPtr<ComputePipeline> GraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &descriptor) const
+    RefPtr<ComputePipeline> GraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
     {
         HE_ASSERT(descriptor.layout);
         HE_ASSERT(descriptor.shader);
@@ -88,7 +87,7 @@ namespace hyper_engine
         return create_compute_pipeline_platform(descriptor);
     }
 
-    RefPtr<RenderPipeline> GraphicsDevice::create_render_pipeline(const RenderPipelineDescriptor &descriptor) const
+    RefPtr<RenderPipeline> GraphicsDevice::create_render_pipeline(const RenderPipelineDescriptor &descriptor)
     {
         HE_ASSERT(descriptor.layout);
         HE_ASSERT(descriptor.vertex_shader);
@@ -108,14 +107,14 @@ namespace hyper_engine
         return create_render_pipeline_platform(descriptor);
     }
 
-    RefPtr<PipelineLayout> GraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor) const
+    RefPtr<PipelineLayout> GraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
     {
         HE_ASSERT((descriptor.push_constant_size % 4) == 0);
 
         return create_pipeline_layout_platform(descriptor);
     }
 
-    RefPtr<ShaderModule> GraphicsDevice::create_shader_module(const ShaderModuleDescriptor &descriptor) const
+    RefPtr<ShaderModule> GraphicsDevice::create_shader_module(const ShaderModuleDescriptor &descriptor)
     {
         HE_ASSERT(descriptor.type != ShaderType::None);
         HE_ASSERT(!descriptor.entry_name.empty());
@@ -143,7 +142,7 @@ namespace hyper_engine
         return sampler;
     }
 
-    RefPtr<Texture> GraphicsDevice::create_texture(const TextureDescriptor &descriptor) const
+    RefPtr<Texture> GraphicsDevice::create_texture(const TextureDescriptor &descriptor)
     {
         HE_ASSERT(descriptor.width > 0);
         HE_ASSERT(descriptor.height > 0);
@@ -192,11 +191,5 @@ namespace hyper_engine
         }
 
         return texture_view;
-    }
-
-    GraphicsDevice *&GraphicsDevice::get()
-    {
-        static GraphicsDevice *graphics_device = nullptr;
-        return graphics_device;
     }
 } // namespace hyper_engine

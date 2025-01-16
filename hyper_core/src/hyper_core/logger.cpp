@@ -47,10 +47,4 @@ namespace hyper_engine
     {
         return m_internal_logger;
     }
-
-    Logger *&Logger::get()
-    {
-        static Logger *logger = nullptr;
-        return logger;
-    }
 } // namespace hyper_engine

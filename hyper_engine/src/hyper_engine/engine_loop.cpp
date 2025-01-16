@@ -9,22 +9,18 @@
 #include <chrono>
 #include <exception>
 #include <ranges>
-#include <string>
-#include <vector>
 
 #include <argparse/argparse.hpp>
 
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/job_system.hpp>
 #include <hyper_core/logger.hpp>
-#include <hyper_core/prerequisites.hpp>
-#include <hyper_event/event_bus.hpp>
-#include <hyper_platform/input.hpp>
-#include <hyper_platform/window_events.hpp>
-#include <hyper_platform/window.hpp>
-#include <hyper_render/renderer.hpp>
+#include <hyper_windowing/event.hpp>
+#include <hyper_windowing/window.hpp>
+#include <hyper_rendering/renderer.hpp>
 #include <hyper_rhi/graphics_device.hpp>
 
+#include "hyper_engine/input.hpp"
 #include "hyper_engine/editor_engine.hpp"
 #include "hyper_engine/game_engine.hpp"
 
@@ -36,21 +32,14 @@ namespace hyper_engine
 
     EngineLoop::~EngineLoop()
     {
-        delete Renderer::get();
-        delete GraphicsDevice::get();
-        delete Window::get();
-        delete Input::get();
-        delete EventBus::get();
-        delete JobSystem::get();
-        delete Logger::get();
     }
 
     bool EngineLoop::pre_initialize(const int32_t argc, const char **argv)
     {
         const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
-        Logger::get() = new Logger();
-        JobSystem::get() = new JobSystem();
+        m_logger = make_own<Logger>();
+        m_job_system = make_own<JobSystem>();
 
         const std::vector<std::string> arguments(argv, argv + argc);
 
@@ -82,7 +71,7 @@ namespace hyper_engine
         }
         catch (const std::exception &error)
         {
-            HE_CRITICAL("Failed to parse arguments: {}", error.what());
+            HE_CRITICAL(*m_logger, "Failed to parse arguments: {}", error.what());
             return false;
         }
 
@@ -121,15 +110,16 @@ namespace hyper_engine
             HE_UNREACHABLE();
         }();
 
-        Logger::get()->set_level(level);
+        m_logger->set_level(level);
 
-        EventBus::get() = new EventBus();
-        Input::get() = new Input();
-        Window::get() = new Window({
-            .title = "HyperEngine",
-            .width = 1280,
-            .height = 720,
-        });
+        m_input = make_own<Input>();
+        m_window = make_own<Window>(
+            *m_logger,
+            WindowDescriptor{
+                .title = "HyperEngine",
+                .width = 1280,
+                .height = 720,
+            });
 
         const GraphicsApi graphics_api = [renderer]()
         {
@@ -146,20 +136,18 @@ namespace hyper_engine
             HE_UNREACHABLE();
         }();
 
-        GraphicsDevice::get() = GraphicsDevice::create({
+        m_graphics_device = GraphicsDevice::create({
             .graphics_api = graphics_api,
             .debug_validation = debug_validation_enabled,
             .debug_label = debug_label_enabled,
             .debug_marker = debug_marker_enabled,
         });
 
-        Renderer::get() = new Renderer();
-
-        EventBus::get()->subscribe<WindowCloseEvent>(HE_BIND_FUNCTION(EngineLoop::on_close));
+        m_renderer = make_own<Renderer>(*m_graphics_device, m_window->native_window());
 
         const std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
         const std::chrono::duration<double> elapsed_seconds = end_time - start_time;
-        HE_INFO("Engine pre-initialized in {:.2}s", elapsed_seconds.count());
+        HE_INFO(*m_logger, "Engine pre-initialized in {:.2}s", elapsed_seconds.count());
 
         return true;
     }
@@ -179,13 +167,13 @@ namespace hyper_engine
 
         if (!m_engine->initialize())
         {
-            HE_CRITICAL("Failed to initialize the engine!");
+            HE_CRITICAL(*m_logger, "Failed to initialize the engine!");
             return false;
         }
 
         const std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
         const std::chrono::duration<double> elapsed_seconds = end_time - start_time;
-        HE_INFO("Engine initialized in {:.2}s", elapsed_seconds.count());
+        HE_INFO(*m_logger, "Engine initialized in {:.2}s", elapsed_seconds.count());
 
         return true;
     }
@@ -207,8 +195,20 @@ namespace hyper_engine
             accumulator += frame_time;
 
             // Handle Events
-            Window::get()->process_events();
-            while (Window::get()->width() == 0 || Window::get()->height() == 0)
+            m_window->poll_events(
+                [&](const Event &event)
+                {
+                    switch (event.type)
+                    {
+                    case EventType::WindowClose:
+                        m_exit_requested = true;
+                        break;
+                    default:
+                        break;
+                    }
+                });
+
+            while (m_window->width() == 0 || m_window->height() == 0)
             {
                 Window::wait_events();
             }
@@ -227,7 +227,8 @@ namespace hyper_engine
 
             // Render
             const Camera &camera = m_engine->camera();
-            Renderer::get()->begin_frame({
+            /*
+            m_renderer->begin_frame({
                 .position = camera.position(),
                 .view = camera.view_matrix(),
                 .projection = camera.projection_matrix(),
@@ -235,16 +236,13 @@ namespace hyper_engine
                 .far_plane = camera.far_plane(),
             });
 
-            Renderer::get()->render_scene(m_engine->scene());
+            m_renderer->render_scene(m_engine->scene());
             m_engine->render();
 
-            Renderer::get()->end_frame();
-            Renderer::get()->present();
+            m_renderer->end_frame();
+            m_renderer->present();
+            */
         }
     }
 
-    void EngineLoop::on_close(const WindowCloseEvent &)
-    {
-        m_exit_requested = true;
-    }
 } // namespace hyper_engine

@@ -13,13 +13,13 @@
 
 namespace hyper_engine
 {
-    RefPtr<Buffer> VulkanGraphicsDevice::create_buffer_platform(const BufferDescriptor &descriptor, const ResourceHandle handle) const
+    RefPtr<Buffer> VulkanGraphicsDevice::create_buffer_platform(const BufferDescriptor &descriptor, const ResourceHandle handle)
     {
         return create_buffer_internal(descriptor, handle, false);
     }
 
     RefPtr<Buffer>
-        VulkanGraphicsDevice::create_buffer_internal(const BufferDescriptor &descriptor, const ResourceHandle handle, const bool staging) const
+        VulkanGraphicsDevice::create_buffer_internal(const BufferDescriptor &descriptor, const ResourceHandle handle, const bool staging)
     {
         const VkBufferUsageFlags usage_flags = VulkanBuffer::get_buffer_usage_flags(descriptor.usage);
 
@@ -69,15 +69,17 @@ namespace hyper_engine
 
         set_object_name(buffer, ObjectType::Buffer, descriptor.label);
 
-        return make_ref<VulkanBuffer>(descriptor, handle, buffer, allocation);
+        return make_ref<VulkanBuffer>(descriptor, handle, *this, buffer, allocation);
     }
 
     VulkanBuffer::VulkanBuffer(
         const BufferDescriptor &descriptor,
         const ResourceHandle handle,
+        VulkanGraphicsDevice &graphics_device,
         const VkBuffer buffer,
         const VmaAllocation allocation)
         : Buffer(descriptor, handle)
+        , m_graphics_device(graphics_device)
         , m_buffer(buffer)
         , m_allocation(allocation)
     {
@@ -85,8 +87,7 @@ namespace hyper_engine
 
     VulkanBuffer::~VulkanBuffer()
     {
-        VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        graphics_device->resource_queue().buffers.emplace_back(m_buffer, m_allocation, m_handle);
+        m_graphics_device.resource_queue().buffers.emplace_back(m_buffer, m_allocation, m_handle);
     }
 
     VkBuffer VulkanBuffer::buffer() const

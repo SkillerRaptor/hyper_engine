@@ -34,8 +34,6 @@ namespace hyper_engine
 
         void wait_for_idle();
 
-        static JobSystem *&get();
-
     private:
         uint32_t m_thread_count = 0;
         ThreadSafeRingBuffer<std::function<void()>, 256> m_job_pool;

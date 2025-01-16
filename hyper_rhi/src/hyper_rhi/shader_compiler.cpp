@@ -87,21 +87,22 @@ namespace hyper_engine
         dxil_result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&dxil_errors), nullptr);
 
         // FIXME: Add more informational logging
+        // FIXME: Uncomment logging
 
         if (dxil_errors != nullptr && dxil_errors->GetStringLength() != 0)
         {
             if (SUCCEEDED(dxil_compile_status))
             {
-                HE_ERROR("Failed to compile DXIL shader: {}", dxil_errors->GetStringPointer());
+                // HE_ERROR("Failed to compile DXIL shader: {}", dxil_errors->GetStringPointer());
             }
             else
             {
-                HE_WARN("Compiled DXIL shader with warnings: {}", dxil_errors->GetStringPointer());
+                // HE_WARN("Compiled DXIL shader with warnings: {}", dxil_errors->GetStringPointer());
             }
         }
         else
         {
-            HE_INFO("Compiled DXIL shader without warnings");
+            // HE_INFO("Compiled DXIL shader without warnings");
         }
 
         for (const wchar_t *argument : s_spirv_args)
@@ -129,21 +130,22 @@ namespace hyper_engine
         spirv_result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&spirv_errors), nullptr);
 
         // FIXME: Add more informational logging
+        // FIXME: Uncomment logging
 
         if (spirv_errors != nullptr && spirv_errors->GetStringLength() != 0)
         {
             if (SUCCEEDED(dxil_compile_status))
             {
-                HE_ERROR("Failed to compile SPIRV shader: {}", spirv_errors->GetStringPointer());
+                // HE_ERROR("Failed to compile SPIRV shader: {}", spirv_errors->GetStringPointer());
             }
             else
             {
-                HE_WARN("Compiled SPIRV shader with warnings: {}", spirv_errors->GetStringPointer());
+                // HE_WARN("Compiled SPIRV shader with warnings: {}", spirv_errors->GetStringPointer());
             }
         }
         else
         {
-            HE_INFO("Compiled SPIRV shader without warnings");
+            // HE_INFO("Compiled SPIRV shader without warnings");
         }
 
         ComPtr<IDxcBlob> dxil_blob = {};

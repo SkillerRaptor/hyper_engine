@@ -13,10 +13,16 @@
 
 namespace hyper_engine
 {
+    class VulkanGraphicsDevice;
+
     class VulkanTextureView final : public TextureView
     {
     public:
-        VulkanTextureView(const TextureViewDescriptor &descriptor, ResourceHandle handle, VkImageView image_view);
+        VulkanTextureView(
+            const TextureViewDescriptor &descriptor,
+            ResourceHandle handle,
+            VulkanGraphicsDevice &graphics_device,
+            VkImageView image_view);
         ~VulkanTextureView() override;
 
         VkImageView image_view() const;
@@ -26,6 +32,8 @@ namespace hyper_engine
         static VkImageViewType get_image_view_type(Dimension dimension);
 
     private:
+        VulkanGraphicsDevice &m_graphics_device;
+
         VkImageView m_image_view = VK_NULL_HANDLE;
     };
 } // namespace hyper_engine

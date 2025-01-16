@@ -11,15 +11,22 @@
 
 namespace hyper_engine
 {
+    class VulkanGraphicsDevice;
+
     class VulkanPipelineLayout final : public PipelineLayout
     {
     public:
-        VulkanPipelineLayout(const PipelineLayoutDescriptor &descriptor, VkPipelineLayout pipeline_layout);
+        VulkanPipelineLayout(
+            const PipelineLayoutDescriptor &descriptor,
+            VulkanGraphicsDevice &graphics_device,
+            VkPipelineLayout pipeline_layout);
         ~VulkanPipelineLayout() override;
 
         VkPipelineLayout pipeline_layout() const;
 
     private:
+        VulkanGraphicsDevice &m_graphics_device;
+
         VkPipelineLayout m_pipeline_layout = VK_NULL_HANDLE;
     };
 } // namespace hyper_engine

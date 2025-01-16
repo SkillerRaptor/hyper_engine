@@ -88,10 +88,7 @@ target_link_libraries(
         hyper_rhi
         PUBLIC
         hyper_core
-        hyper_platform
         DirectXShaderCompiler
-        fmt
-        imgui
         SDL3::SDL3
         volk
         VulkanMemoryAllocator)

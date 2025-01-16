@@ -41,17 +41,6 @@ namespace hyper_engine
         , m_debug_validation(descriptor.debug_validation)
         , m_debug_label(descriptor.debug_label)
         , m_debug_marker(descriptor.debug_marker)
-        , m_instance(VK_NULL_HANDLE)
-        , m_debug_messenger(VK_NULL_HANDLE)
-        , m_physical_device(VK_NULL_HANDLE)
-        , m_device(VK_NULL_HANDLE)
-        , m_queue_family(0)
-        , m_queue(VK_NULL_HANDLE)
-        , m_allocator(VK_NULL_HANDLE)
-        , m_descriptor_manager(nullptr)
-        , m_current_frame_index(0)
-        , m_frames({})
-        , m_resource_queue()
     {
         volkInitialize();
 
@@ -63,7 +52,7 @@ namespace hyper_engine
             }
             else
             {
-                HE_WARN("Failed to enable requested Validation Layers");
+                // HE_WARN("Failed to enable requested Validation Layers");
             }
         }
 
@@ -83,7 +72,7 @@ namespace hyper_engine
 
         create_frames();
 
-        HE_INFO("Created Vulkan Graphics Device");
+        // HE_INFO("Created Vulkan Graphics Device");
     }
 
     VulkanGraphicsDevice::~VulkanGraphicsDevice()
@@ -116,14 +105,14 @@ namespace hyper_engine
         vkDestroyInstance(m_instance, nullptr);
     }
 
-    RefPtr<Surface> VulkanGraphicsDevice::create_surface()
+    RefPtr<Surface> VulkanGraphicsDevice::create_surface(SDL_Window *window)
     {
-        return make_ref<VulkanSurface>();
+        return make_ref<VulkanSurface>(*this, window);
     }
 
     RefPtr<CommandList> VulkanGraphicsDevice::create_command_list()
     {
-        return make_ref<VulkanCommandList>();
+        return make_ref<VulkanCommandList>(*this);
     }
 
     void VulkanGraphicsDevice::begin_marker(
@@ -593,14 +582,14 @@ namespace hyper_engine
         // FIXME: Log queues, extensions and features
         // FIXME: Log missing criteria if no device was found
 
-        HE_INFO("Physical Device Info:");
-        HE_INFO("  Name: {}", properties.deviceName);
-        HE_INFO(
-            "  API Version: {}.{}.{}",
-            VK_VERSION_MAJOR(properties.apiVersion),
-            VK_VERSION_MINOR(properties.apiVersion),
-            VK_VERSION_PATCH(properties.apiVersion));
-        HE_INFO("  Type: {}", device_type);
+        // HE_INFO("Physical Device Info:");
+        // HE_INFO("  Name: {}", properties.deviceName);
+        // HE_INFO(
+        //     "  API Version: {}.{}.{}",
+        //     VK_VERSION_MAJOR(properties.apiVersion),
+        //     VK_VERSION_MINOR(properties.apiVersion),
+        //     VK_VERSION_PATCH(properties.apiVersion));
+        // HE_INFO("  Type: {}", device_type);
     }
 
     uint32_t VulkanGraphicsDevice::rate_physical_device(const VkPhysicalDevice &physical_device) const
@@ -1009,6 +998,7 @@ namespace hyper_engine
         const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
         void *)
     {
+        /*
         switch (message_severity)
         {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
@@ -1026,6 +1016,7 @@ namespace hyper_engine
         default:
             break;
         }
+        */
 
         return VK_FALSE;
     }

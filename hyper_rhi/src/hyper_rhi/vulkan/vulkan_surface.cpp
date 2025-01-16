@@ -12,7 +12,6 @@
 
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
-#include <hyper_platform/window.hpp>
 
 #include "hyper_rhi/vulkan/vulkan_graphics_device.hpp"
 #include "hyper_rhi/vulkan/vulkan_texture.hpp"
@@ -20,9 +19,10 @@
 
 namespace hyper_engine
 {
-    VulkanSurface::VulkanSurface()
+    VulkanSurface::VulkanSurface(VulkanGraphicsDevice &graphics_device, SDL_Window *window)
+        : m_graphics_device(graphics_device)
     {
-        create_surface();
+        create_surface(window);
         create_swapchain();
         create_textures();
     }
@@ -31,8 +31,7 @@ namespace hyper_engine
     {
         destroy();
 
-        const VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        vkDestroySurfaceKHR(graphics_device->instance(), m_surface, nullptr);
+        vkDestroySurfaceKHR(m_graphics_device.instance(), m_surface, nullptr);
     }
 
     void VulkanSurface::rebuild()
@@ -85,40 +84,36 @@ namespace hyper_engine
         return m_texture_index;
     }
 
-    void VulkanSurface::create_surface()
+    void VulkanSurface::create_surface(SDL_Window *window)
     {
-        const VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-
-        HE_ASSERT(SDL_Vulkan_CreateSurface(Window::get()->native_window(), graphics_device->instance(), nullptr, &m_surface));
+        HE_ASSERT(SDL_Vulkan_CreateSurface(window, m_graphics_device.instance(), nullptr, &m_surface));
         HE_ASSERT(m_surface != VK_NULL_HANDLE);
     }
 
     void VulkanSurface::create_swapchain()
     {
-        const VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-
         VkSurfaceCapabilitiesKHR surface_capabilities = {};
-        HE_VK_CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(graphics_device->physical_device(), m_surface, &surface_capabilities));
+        HE_VK_CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_graphics_device.physical_device(), m_surface, &surface_capabilities));
 
         const VkExtent2D surface_extent = VulkanSurface::choose_extent(m_width, m_height, surface_capabilities);
         m_width = surface_extent.width;
         m_height = surface_extent.height;
 
         uint32_t format_count = 0;
-        HE_VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(graphics_device->physical_device(), m_surface, &format_count, nullptr));
+        HE_VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(m_graphics_device.physical_device(), m_surface, &format_count, nullptr));
 
         std::vector<VkSurfaceFormatKHR> formats(format_count);
-        HE_VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(graphics_device->physical_device(), m_surface, &format_count, formats.data()));
+        HE_VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(m_graphics_device.physical_device(), m_surface, &format_count, formats.data()));
 
         const VkSurfaceFormatKHR surface_format = VulkanSurface::choose_format(formats);
         m_format = surface_format.format;
 
         uint32_t present_mode_count = 0;
-        HE_VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(graphics_device->physical_device(), m_surface, &present_mode_count, nullptr));
+        HE_VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(m_graphics_device.physical_device(), m_surface, &present_mode_count, nullptr));
 
         std::vector<VkPresentModeKHR> present_modes(present_mode_count);
-        HE_VK_CHECK(
-            vkGetPhysicalDeviceSurfacePresentModesKHR(graphics_device->physical_device(), m_surface, &present_mode_count, present_modes.data()));
+        HE_VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(
+            m_graphics_device.physical_device(), m_surface, &present_mode_count, present_modes.data()));
 
         const VkPresentModeKHR surface_present_mode = VulkanSurface::choose_present_mode(present_modes);
 
@@ -150,25 +145,23 @@ namespace hyper_engine
             .oldSwapchain = VK_NULL_HANDLE,
         };
 
-        HE_VK_CHECK(vkCreateSwapchainKHR(graphics_device->device(), &swapchain_create_info, nullptr, &m_swapchain));
+        HE_VK_CHECK(vkCreateSwapchainKHR(m_graphics_device.device(), &swapchain_create_info, nullptr, &m_swapchain));
 
         HE_ASSERT(m_swapchain != VK_NULL_HANDLE);
     }
 
     void VulkanSurface::create_textures()
     {
-        VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-
         uint32_t image_count = 0;
-        vkGetSwapchainImagesKHR(graphics_device->device(), m_swapchain, &image_count, nullptr);
+        vkGetSwapchainImagesKHR(m_graphics_device.device(), m_swapchain, &image_count, nullptr);
 
         std::vector<VkImage> images(image_count);
-        vkGetSwapchainImagesKHR(graphics_device->device(), m_swapchain, &image_count, images.data());
+        vkGetSwapchainImagesKHR(m_graphics_device.device(), m_swapchain, &image_count, images.data());
 
         uint32_t index = 0;
         for (const VkImage &image : images)
         {
-            m_textures.push_back(graphics_device->create_texture_internal(
+            m_textures.push_back(m_graphics_device.create_texture_internal(
                 {
                     .label = fmt::format("Swapchain #{}", index),
                     .width = m_width,
@@ -182,7 +175,7 @@ namespace hyper_engine
                 },
                 image));
 
-            m_texture_views.push_back(graphics_device->create_texture_view({
+            m_texture_views.push_back(m_graphics_device.create_texture_view({
                 .label = fmt::format("Swapchain #{}", index),
                 .texture = m_textures[index],
                 .subresource_range =
@@ -207,11 +200,9 @@ namespace hyper_engine
 
     void VulkanSurface::destroy()
     {
-        const VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-
         m_texture_views.clear();
         m_textures.clear();
-        vkDestroySwapchainKHR(graphics_device->device(), m_swapchain, nullptr);
+        vkDestroySwapchainKHR(m_graphics_device.device(), m_swapchain, nullptr);
     }
 
     VkExtent2D VulkanSurface::choose_extent(const uint32_t width, const uint32_t height, const VkSurfaceCapabilitiesKHR &capabilities)

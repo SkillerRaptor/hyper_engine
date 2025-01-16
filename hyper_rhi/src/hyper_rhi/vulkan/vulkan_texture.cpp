@@ -14,18 +14,18 @@
 
 namespace hyper_engine
 {
-    RefPtr<Texture> VulkanGraphicsDevice::create_texture_platform(const TextureDescriptor &descriptor) const
+    RefPtr<Texture> VulkanGraphicsDevice::create_texture_platform(const TextureDescriptor &descriptor)
     {
         return create_texture_internal(descriptor, VK_NULL_HANDLE);
     }
 
-    RefPtr<Texture> VulkanGraphicsDevice::create_texture_internal(const TextureDescriptor &descriptor, const VkImage image) const
+    RefPtr<Texture> VulkanGraphicsDevice::create_texture_internal(const TextureDescriptor &descriptor, const VkImage image)
     {
         if (image != VK_NULL_HANDLE)
         {
             set_object_name(image, ObjectType::Image, descriptor.label);
 
-            return make_ref<VulkanTexture>(descriptor, image, VK_NULL_HANDLE);
+            return make_ref<VulkanTexture>(descriptor, *this, image, VK_NULL_HANDLE);
         }
 
         const VkImageType image_type = VulkanTexture::get_image_type(descriptor.dimension);
@@ -74,11 +74,16 @@ namespace hyper_engine
 
         set_object_name(vk_image, ObjectType::Image, descriptor.label);
 
-        return make_ref<VulkanTexture>(descriptor, vk_image, allocation);
+        return make_ref<VulkanTexture>(descriptor, *this, vk_image, allocation);
     }
 
-    VulkanTexture::VulkanTexture(const TextureDescriptor &descriptor, const VkImage image, const VmaAllocation allocation)
+    VulkanTexture::VulkanTexture(
+        const TextureDescriptor &descriptor,
+        VulkanGraphicsDevice &graphics_device,
+        const VkImage image,
+        const VmaAllocation allocation)
         : Texture(descriptor)
+        , m_graphics_device(graphics_device)
         , m_image(image)
         , m_allocation(allocation)
     {
@@ -86,8 +91,7 @@ namespace hyper_engine
 
     VulkanTexture::~VulkanTexture()
     {
-        VulkanGraphicsDevice *graphics_device = static_cast<VulkanGraphicsDevice *>(GraphicsDevice::get());
-        graphics_device->resource_queue().textures.emplace_back(m_image, m_allocation);
+        m_graphics_device.resource_queue().textures.emplace_back(m_image, m_allocation);
     }
 
     VkImage VulkanTexture::image() const

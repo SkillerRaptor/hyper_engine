@@ -13,10 +13,17 @@
 
 namespace hyper_engine
 {
+    class VulkanGraphicsDevice;
+
     class VulkanBuffer final : public Buffer
     {
     public:
-        VulkanBuffer(const BufferDescriptor &descriptor, ResourceHandle handle, VkBuffer buffer, VmaAllocation allocation);
+        VulkanBuffer(
+            const BufferDescriptor &descriptor,
+            ResourceHandle handle,
+            VulkanGraphicsDevice &graphics_device,
+            VkBuffer buffer,
+            VmaAllocation allocation);
         ~VulkanBuffer() override;
 
         VkBuffer buffer() const;
@@ -25,6 +32,8 @@ namespace hyper_engine
         static VkBufferUsageFlags get_buffer_usage_flags(BitFlags<BufferUsage> buffer_usage_flags);
 
     private:
+        VulkanGraphicsDevice &m_graphics_device;
+
         VkBuffer m_buffer = VK_NULL_HANDLE;
         VmaAllocation m_allocation = VK_NULL_HANDLE;
     };

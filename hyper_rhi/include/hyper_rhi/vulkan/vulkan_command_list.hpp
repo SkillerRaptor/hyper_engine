@@ -16,6 +16,8 @@ namespace hyper_engine
     class VulkanCommandList final : public CommandList
     {
     public:
+        explicit VulkanCommandList(VulkanGraphicsDevice &graphics_device);
+
         void begin() override;
         void end() override;
 
@@ -74,6 +76,8 @@ namespace hyper_engine
         static VkImageLayout get_image_layout(BarrierTextureLayout texture_layout);
 
     private:
+        VulkanGraphicsDevice &m_graphics_device;
+
         VkCommandBuffer m_command_buffer = VK_NULL_HANDLE;
     };
 } // namespace hyper_engine

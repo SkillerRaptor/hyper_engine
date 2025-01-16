@@ -18,7 +18,7 @@ namespace hyper_engine
     class VulkanRenderPass final : public RenderPass
     {
     public:
-        VulkanRenderPass(const RenderPassDescriptor &descriptor, VkCommandBuffer command_buffer);
+        VulkanRenderPass(const RenderPassDescriptor &descriptor, VulkanGraphicsDevice &graphics_device, VkCommandBuffer command_buffer);
         ~VulkanRenderPass() override;
 
         void set_pipeline(const RefPtr<RenderPipeline> &pipeline) override;
@@ -39,6 +39,8 @@ namespace hyper_engine
         static VkAttachmentStoreOp get_attachment_store_operation(StoreOperation store_operation);
 
     private:
+        VulkanGraphicsDevice &m_graphics_device;
+
         VkCommandBuffer m_command_buffer = VK_NULL_HANDLE;
 
         RefPtr<RenderPipeline> m_pipeline;
