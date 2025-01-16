@@ -25,7 +25,7 @@
 
 namespace hyper_engine
 {
-    OwnPtr<GraphicsDevice> GraphicsDevice::create(const GraphicsDeviceDescriptor &descriptor)
+    std::unique_ptr<GraphicsDevice> GraphicsDevice::create(const GraphicsDeviceDescriptor &descriptor)
     {
         switch (descriptor.graphics_api)
         {
@@ -36,13 +36,13 @@ namespace hyper_engine
             return nullptr;
 #endif
         case GraphicsApi::Vulkan:
-            return make_own<VulkanGraphicsDevice>(descriptor);
+            return std::make_unique<VulkanGraphicsDevice>(descriptor);
         default:
             HE_UNREACHABLE();
         }
     }
 
-    RefPtr<Buffer> GraphicsDevice::create_buffer(const BufferDescriptor &descriptor)
+    std::shared_ptr<Buffer> GraphicsDevice::create_buffer(const BufferDescriptor &descriptor)
     {
         ResourceHandle handle;
         if (descriptor.usage & BufferUsage::ShaderResource)
@@ -53,7 +53,7 @@ namespace hyper_engine
         return create_buffer(descriptor, handle);
     }
 
-    RefPtr<Buffer> GraphicsDevice::create_buffer(const BufferDescriptor &descriptor, const ResourceHandle handle)
+    std::shared_ptr<Buffer> GraphicsDevice::create_buffer(const BufferDescriptor &descriptor, const ResourceHandle handle)
     {
         HE_ASSERT(descriptor.byte_size > 0);
         HE_ASSERT(descriptor.usage != BufferUsage::None);
@@ -68,7 +68,7 @@ namespace hyper_engine
             HE_ASSERT(descriptor.usage & BufferUsage::Storage);
         }
 
-        const RefPtr<Buffer> buffer = create_buffer_platform(descriptor, handle);
+        const std::shared_ptr<Buffer> buffer = create_buffer_platform(descriptor, handle);
 
         // FIXME: Could this be written cleaner?
         if (descriptor.usage & BufferUsage::ShaderResource)
@@ -79,7 +79,7 @@ namespace hyper_engine
         return buffer;
     }
 
-    RefPtr<ComputePipeline> GraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
+    std::shared_ptr<ComputePipeline> GraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
     {
         HE_ASSERT(descriptor.layout);
         HE_ASSERT(descriptor.shader);
@@ -87,7 +87,7 @@ namespace hyper_engine
         return create_compute_pipeline_platform(descriptor);
     }
 
-    RefPtr<RenderPipeline> GraphicsDevice::create_render_pipeline(const RenderPipelineDescriptor &descriptor)
+    std::shared_ptr<RenderPipeline> GraphicsDevice::create_render_pipeline(const RenderPipelineDescriptor &descriptor)
     {
         HE_ASSERT(descriptor.layout);
         HE_ASSERT(descriptor.vertex_shader);
@@ -107,14 +107,14 @@ namespace hyper_engine
         return create_render_pipeline_platform(descriptor);
     }
 
-    RefPtr<PipelineLayout> GraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
+    std::shared_ptr<PipelineLayout> GraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
     {
         HE_ASSERT((descriptor.push_constant_size % 4) == 0);
 
         return create_pipeline_layout_platform(descriptor);
     }
 
-    RefPtr<ShaderModule> GraphicsDevice::create_shader_module(const ShaderModuleDescriptor &descriptor)
+    std::shared_ptr<ShaderModule> GraphicsDevice::create_shader_module(const ShaderModuleDescriptor &descriptor)
     {
         HE_ASSERT(descriptor.type != ShaderType::None);
         HE_ASSERT(!descriptor.entry_name.empty());
@@ -123,18 +123,18 @@ namespace hyper_engine
         return create_shader_module_platform(descriptor);
     }
 
-    RefPtr<Sampler> GraphicsDevice::create_sampler(const SamplerDescriptor &descriptor)
+    std::shared_ptr<Sampler> GraphicsDevice::create_sampler(const SamplerDescriptor &descriptor)
     {
         const ResourceHandle handle = descriptor_manager().allocate_handle();
 
         return create_sampler(descriptor, handle);
     }
 
-    RefPtr<Sampler> GraphicsDevice::create_sampler(const SamplerDescriptor &descriptor, const ResourceHandle handle)
+    std::shared_ptr<Sampler> GraphicsDevice::create_sampler(const SamplerDescriptor &descriptor, const ResourceHandle handle)
     {
         // FIXME: Add assertions
 
-        const RefPtr<Sampler> sampler = create_sampler_platform(descriptor, handle);
+        const std::shared_ptr<Sampler> sampler = create_sampler_platform(descriptor, handle);
 
         // FIXME: Could this be written cleaner?
         descriptor_manager().set_sampler(sampler, handle);
@@ -142,7 +142,7 @@ namespace hyper_engine
         return sampler;
     }
 
-    RefPtr<Texture> GraphicsDevice::create_texture(const TextureDescriptor &descriptor)
+    std::shared_ptr<Texture> GraphicsDevice::create_texture(const TextureDescriptor &descriptor)
     {
         HE_ASSERT(descriptor.width > 0);
         HE_ASSERT(descriptor.height > 0);
@@ -158,7 +158,7 @@ namespace hyper_engine
         return create_texture_platform(descriptor);
     }
 
-    RefPtr<TextureView> GraphicsDevice::create_texture_view(const TextureViewDescriptor &descriptor)
+    std::shared_ptr<TextureView> GraphicsDevice::create_texture_view(const TextureViewDescriptor &descriptor)
     {
         ResourceHandle handle;
         if (descriptor.texture->usage() & TextureUsage::ShaderResource)
@@ -169,13 +169,13 @@ namespace hyper_engine
         return create_texture_view(descriptor, handle);
     }
 
-    RefPtr<TextureView> GraphicsDevice::create_texture_view(const TextureViewDescriptor &descriptor, const ResourceHandle handle)
+    std::shared_ptr<TextureView> GraphicsDevice::create_texture_view(const TextureViewDescriptor &descriptor, const ResourceHandle handle)
     {
         HE_ASSERT(descriptor.texture);
         HE_ASSERT(descriptor.subresource_range.mip_level_count > 0);
         HE_ASSERT(descriptor.subresource_range.array_layer_count > 0);
 
-        const RefPtr<TextureView> texture_view = create_texture_view_platform(descriptor, handle);
+        const std::shared_ptr<TextureView> texture_view = create_texture_view_platform(descriptor, handle);
 
         // FIXME: Could this be written cleaner?
         if (descriptor.texture->usage() & TextureUsage::ShaderResource)

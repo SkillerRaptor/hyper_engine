@@ -156,14 +156,14 @@ namespace hyper_engine
         vkCmdPipelineBarrier2(m_command_buffer, &dependency_info);
     }
 
-    void VulkanCommandList::clear_buffer(const RefPtr<Buffer> &buffer, const size_t size, const uint64_t offset)
+    void VulkanCommandList::clear_buffer(const std::shared_ptr<Buffer> &buffer, const size_t size, const uint64_t offset)
     {
         const VulkanBuffer &vulkan_buffer = static_cast<const VulkanBuffer &>(*buffer);
 
         vkCmdFillBuffer(m_command_buffer, vulkan_buffer.buffer(), offset, size, 0);
     }
 
-    void VulkanCommandList::clear_texture(const RefPtr<Texture> &texture, const SubresourceRange subresource_range)
+    void VulkanCommandList::clear_texture(const std::shared_ptr<Texture> &texture, const SubresourceRange subresource_range)
     {
         const VulkanTexture &vulkan_texture = static_cast<const VulkanTexture &>(*texture);
 
@@ -299,9 +299,9 @@ namespace hyper_engine
     }
 
     void VulkanCommandList::copy_buffer_to_buffer(
-        const RefPtr<Buffer> &src,
+        const std::shared_ptr<Buffer> &src,
         const uint64_t src_offset,
-        const RefPtr<Buffer> &dst,
+        const std::shared_ptr<Buffer> &dst,
         const uint64_t dst_offset,
         const size_t size)
     {
@@ -329,9 +329,9 @@ namespace hyper_engine
     }
 
     void VulkanCommandList::copy_buffer_to_texture(
-        const RefPtr<Buffer> &src,
+        const std::shared_ptr<Buffer> &src,
         const uint64_t src_offset,
-        const RefPtr<Texture> &dst,
+        const std::shared_ptr<Texture> &dst,
         const Offset3d dst_offset,
         const Extent3d dst_extent,
         const uint32_t dst_mip_level,
@@ -382,12 +382,12 @@ namespace hyper_engine
     }
 
     void VulkanCommandList::copy_texture_to_buffer(
-        const RefPtr<Texture> &src,
+        const std::shared_ptr<Texture> &src,
         const Offset3d src_offset,
         const Extent3d src_extent,
         const uint32_t src_mip_level,
         const uint32_t src_array_index,
-        const RefPtr<Buffer> &dst,
+        const std::shared_ptr<Buffer> &dst,
         const uint64_t dst_offset)
     {
         const VulkanTexture &vulkan_src = static_cast<const VulkanTexture &>(*src);
@@ -435,11 +435,11 @@ namespace hyper_engine
     }
 
     void VulkanCommandList::copy_texture_to_texture(
-        const RefPtr<Texture> &src,
+        const std::shared_ptr<Texture> &src,
         const Offset3d src_offset,
         const uint32_t src_mip_level,
         const uint32_t src_array_index,
-        const RefPtr<Texture> &dst,
+        const std::shared_ptr<Texture> &dst,
         const Offset3d dst_offset,
         const uint32_t dst_mip_level,
         const uint32_t dst_array_index,
@@ -499,7 +499,7 @@ namespace hyper_engine
         vkCmdCopyImage2(m_command_buffer, &copy_image_info);
     }
 
-    void VulkanCommandList::write_buffer(const RefPtr<Buffer> &buffer, const void *data, const size_t size, const uint64_t offset)
+    void VulkanCommandList::write_buffer(const std::shared_ptr<Buffer> &buffer, const void *data, const size_t size, const uint64_t offset)
     {
         const VulkanBuffer &vulkan_buffer = static_cast<const VulkanBuffer &>(*buffer);
 
@@ -509,7 +509,7 @@ namespace hyper_engine
         }
         else
         {
-            const RefPtr<Buffer> staging_buffer = m_graphics_device.create_buffer_internal(
+            const std::shared_ptr<Buffer> staging_buffer = m_graphics_device.create_buffer_internal(
                 {
                     .label = fmt::format("{} Staging", vulkan_buffer.label()),
                     .byte_size = static_cast<uint64_t>(size),
@@ -547,7 +547,7 @@ namespace hyper_engine
     }
 
     void VulkanCommandList::write_texture(
-        const RefPtr<Texture> &texture,
+        const std::shared_ptr<Texture> &texture,
         const Offset3d offset,
         const Extent3d extent,
         const uint32_t mip_level,
@@ -558,7 +558,7 @@ namespace hyper_engine
     {
         const VulkanTexture &vulkan_texture = static_cast<const VulkanTexture &>(*texture);
 
-        const RefPtr<Buffer> staging_buffer = m_graphics_device.create_buffer_internal(
+        const std::shared_ptr<Buffer> staging_buffer = m_graphics_device.create_buffer_internal(
             {
                 .label = fmt::format("{} Staging", vulkan_texture.label()),
                 .byte_size = static_cast<uint64_t>(data_size),
@@ -615,14 +615,14 @@ namespace hyper_engine
         vkCmdCopyBufferToImage2(m_command_buffer, &copy_buffer_to_image_info);
     }
 
-    RefPtr<ComputePass> VulkanCommandList::begin_compute_pass_platform(const ComputePassDescriptor &descriptor) const
+    std::shared_ptr<ComputePass> VulkanCommandList::begin_compute_pass_platform(const ComputePassDescriptor &descriptor) const
     {
-        return make_ref<VulkanComputePass>(descriptor, m_graphics_device, m_command_buffer);
+        return std::make_shared<VulkanComputePass>(descriptor, m_graphics_device, m_command_buffer);
     }
 
-    RefPtr<RenderPass> VulkanCommandList::begin_render_pass_platform(const RenderPassDescriptor &descriptor) const
+    std::shared_ptr<RenderPass> VulkanCommandList::begin_render_pass_platform(const RenderPassDescriptor &descriptor) const
     {
-        return make_ref<VulkanRenderPass>(descriptor, m_graphics_device, m_command_buffer);
+        return std::make_shared<VulkanRenderPass>(descriptor, m_graphics_device, m_command_buffer);
     }
 
     VkCommandBuffer VulkanCommandList::command_buffer() const

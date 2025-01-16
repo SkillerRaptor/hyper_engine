@@ -13,7 +13,7 @@
 
 namespace hyper_engine
 {
-    RefPtr<ShaderModule> VulkanGraphicsDevice::create_shader_module_platform(const ShaderModuleDescriptor &descriptor)
+    std::shared_ptr<ShaderModule> VulkanGraphicsDevice::create_shader_module_platform(const ShaderModuleDescriptor &descriptor)
     {
         const VkShaderModuleCreateInfo shader_module_create_info = {
             .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
@@ -30,7 +30,7 @@ namespace hyper_engine
 
         set_object_name(shader_module, ObjectType::ShaderModule, descriptor.label);
 
-        return make_ref<VulkanShaderModule>(descriptor, *this, shader_module);
+        return std::make_shared<VulkanShaderModule>(descriptor, *this, shader_module);
     }
 
     VulkanShaderModule::VulkanShaderModule(

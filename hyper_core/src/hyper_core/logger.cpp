@@ -28,7 +28,7 @@ namespace hyper_engine
         const auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("latest.log", true);
         file_sink->set_pattern("%Y-%m-%d%H:%M:%S.%f %l %s:%#: %v");
 
-        m_internal_logger = make_own<spdlog::logger>(
+        m_internal_logger = std::make_unique<spdlog::logger>(
             "HyperEngine",
             spdlog::sinks_init_list{
                 stdout_sink,
@@ -43,7 +43,7 @@ namespace hyper_engine
         m_internal_logger->set_level(level);
     }
 
-    const OwnPtr<spdlog::logger> &Logger::internal_logger() const
+    const std::unique_ptr<spdlog::logger> &Logger::internal_logger() const
     {
         return m_internal_logger;
     }

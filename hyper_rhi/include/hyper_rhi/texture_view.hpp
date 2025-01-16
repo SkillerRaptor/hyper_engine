@@ -6,9 +6,8 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
-
-#include <hyper_core/ref_ptr.hpp>
 
 #include "hyper_rhi/forward.hpp"
 #include "hyper_rhi/resource_handle.hpp"
@@ -38,7 +37,7 @@ namespace hyper_engine
     struct TextureViewDescriptor
     {
         std::string label;
-        RefPtr<Texture> texture;
+        std::shared_ptr<Texture> texture;
         SubresourceRange subresource_range;
         ComponentMapping component_mapping;
     };
@@ -49,7 +48,7 @@ namespace hyper_engine
         virtual ~TextureView() = default;
 
         std::string_view label() const;
-        RefPtr<Texture> texture() const;
+        std::shared_ptr<Texture> texture() const;
         SubresourceRange subresource_range() const;
         ComponentMapping component_mapping() const;
         ResourceHandle handle() const;
@@ -59,7 +58,7 @@ namespace hyper_engine
 
     protected:
         std::string m_label;
-        RefPtr<Texture> m_texture;
+        std::shared_ptr<Texture> m_texture;
         SubresourceRange m_subresource_range;
         ComponentMapping m_component_mapping;
         ResourceHandle m_handle;

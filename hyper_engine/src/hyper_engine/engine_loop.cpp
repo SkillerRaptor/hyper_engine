@@ -38,8 +38,8 @@ namespace hyper_engine
     {
         const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
-        m_logger = make_own<Logger>();
-        m_job_system = make_own<JobSystem>();
+        m_logger = std::make_unique<Logger>();
+        m_job_system = std::make_unique<JobSystem>();
 
         const std::vector<std::string> arguments(argv, argv + argc);
 
@@ -112,8 +112,8 @@ namespace hyper_engine
 
         m_logger->set_level(level);
 
-        m_input = make_own<Input>();
-        m_window = make_own<Window>(
+        m_input = std::make_unique<Input>();
+        m_window = std::make_unique<Window>(
             *m_logger,
             WindowDescriptor{
                 .title = "HyperEngine",
@@ -143,7 +143,7 @@ namespace hyper_engine
             .debug_marker = debug_marker_enabled,
         });
 
-        m_renderer = make_own<Renderer>(*m_graphics_device, m_window->native_window());
+        m_renderer = std::make_unique<Renderer>(*m_graphics_device, m_window->native_window());
 
         const std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
         const std::chrono::duration<double> elapsed_seconds = end_time - start_time;
@@ -158,11 +158,11 @@ namespace hyper_engine
 
         if (m_editor_enabled)
         {
-            m_engine = make_own<EditorEngine>();
+            m_engine = std::make_unique<EditorEngine>();
         }
         else
         {
-            m_engine = make_own<GameEngine>();
+            m_engine = std::make_unique<GameEngine>();
         }
 
         if (!m_engine->initialize())

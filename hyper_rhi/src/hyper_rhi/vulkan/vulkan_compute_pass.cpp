@@ -31,7 +31,7 @@ namespace hyper_engine
         m_graphics_device.end_marker(m_command_buffer);
     }
 
-    void VulkanComputePass::set_pipeline(const RefPtr<ComputePipeline> &pipeline)
+    void VulkanComputePass::set_pipeline(const std::shared_ptr<ComputePipeline> &pipeline)
     {
         m_pipeline = pipeline;
 

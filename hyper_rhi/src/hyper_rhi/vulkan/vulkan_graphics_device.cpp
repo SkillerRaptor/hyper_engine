@@ -105,14 +105,14 @@ namespace hyper_engine
         vkDestroyInstance(m_instance, nullptr);
     }
 
-    RefPtr<Surface> VulkanGraphicsDevice::create_surface(SDL_Window *window)
+    std::shared_ptr<Surface> VulkanGraphicsDevice::create_surface(SDL_Window *window)
     {
-        return make_ref<VulkanSurface>(*this, window);
+        return std::make_shared<VulkanSurface>(*this, window);
     }
 
-    RefPtr<CommandList> VulkanGraphicsDevice::create_command_list()
+    std::shared_ptr<CommandList> VulkanGraphicsDevice::create_command_list()
     {
-        return make_ref<VulkanCommandList>(*this);
+        return std::make_shared<VulkanCommandList>(*this);
     }
 
     void VulkanGraphicsDevice::begin_marker(
@@ -277,7 +277,7 @@ namespace hyper_engine
         m_resource_queue.texture_views.clear();
     }
 
-    void VulkanGraphicsDevice::begin_frame(RefPtr<Surface> &surface, const uint32_t frame_index)
+    void VulkanGraphicsDevice::begin_frame(std::shared_ptr<Surface> &surface, const uint32_t frame_index)
     {
         VulkanSurface &vulkan_surface = static_cast<VulkanSurface &>(*surface);
 
@@ -319,7 +319,7 @@ namespace hyper_engine
         HE_VK_CHECK(vkResetFences(m_device, 1, &current_frame().render_fence));
     }
 
-    void VulkanGraphicsDevice::execute(const RefPtr<CommandList> &command_list)
+    void VulkanGraphicsDevice::execute(const std::shared_ptr<CommandList> &command_list)
     {
         m_frames[m_current_frame_index % GraphicsDevice::s_frame_count].semaphore_counter += 1;
 
@@ -356,7 +356,7 @@ namespace hyper_engine
         HE_VK_CHECK(vkQueueSubmit2(m_queue, 1, &submit_info, VK_NULL_HANDLE));
     }
 
-    void VulkanGraphicsDevice::present(const RefPtr<Surface> &surface) const
+    void VulkanGraphicsDevice::present(const std::shared_ptr<Surface> &surface) const
     {
         const VulkanSurface &vulkan_surface = static_cast<const VulkanSurface &>(*surface);
 

@@ -27,17 +27,17 @@ namespace hyper_engine
         return m_label;
     }
 
-    RefPtr<PipelineLayout> RenderPipeline::layout() const
+    std::shared_ptr<PipelineLayout> RenderPipeline::layout() const
     {
         return m_layout;
     }
 
-    RefPtr<ShaderModule> RenderPipeline::vertex_shader() const
+    std::shared_ptr<ShaderModule> RenderPipeline::vertex_shader() const
     {
         return m_vertex_shader;
     }
 
-    RefPtr<ShaderModule> RenderPipeline::fragment_shader() const
+    std::shared_ptr<ShaderModule> RenderPipeline::fragment_shader() const
     {
         return m_fragment_shader;
     }

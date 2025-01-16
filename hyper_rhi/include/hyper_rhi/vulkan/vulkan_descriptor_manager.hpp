@@ -30,10 +30,10 @@ namespace hyper_engine
         explicit VulkanDescriptorManager(VulkanGraphicsDevice &graphics_device);
         ~VulkanDescriptorManager() override;
 
-        void set_buffer(const RefPtr<Buffer> &buffer, ResourceHandle handle) const override;
-        void set_storage_image(const RefPtr<TextureView> &texture_view, ResourceHandle handle) const override;
-        void set_sampled_image(const RefPtr<TextureView> &texture_view, ResourceHandle handle) const override;
-        void set_sampler(const RefPtr<Sampler> &sampler, ResourceHandle handle) const override;
+        void set_buffer(const std::shared_ptr<Buffer> &buffer, ResourceHandle handle) const override;
+        void set_storage_image(const std::shared_ptr<TextureView> &texture_view, ResourceHandle handle) const override;
+        void set_sampled_image(const std::shared_ptr<TextureView> &texture_view, ResourceHandle handle) const override;
+        void set_sampler(const std::shared_ptr<Sampler> &sampler, ResourceHandle handle) const override;
 
         const std::array<uint32_t, s_descriptor_types.size()> &descriptor_counts() const;
         VkDescriptorPool descriptor_pool() const;

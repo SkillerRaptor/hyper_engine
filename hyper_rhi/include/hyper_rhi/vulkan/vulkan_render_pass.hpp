@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hyper_core/ref_ptr.hpp>
+#include <memory>
 
 #include "hyper_rhi/render_pass.hpp"
 #include "hyper_rhi/vulkan/vulkan_common.hpp"
@@ -21,10 +21,10 @@ namespace hyper_engine
         VulkanRenderPass(const RenderPassDescriptor &descriptor, VulkanGraphicsDevice &graphics_device, VkCommandBuffer command_buffer);
         ~VulkanRenderPass() override;
 
-        void set_pipeline(const RefPtr<RenderPipeline> &pipeline) override;
+        void set_pipeline(const std::shared_ptr<RenderPipeline> &pipeline) override;
         void set_push_constants(const void *data, size_t data_size) const override;
 
-        void set_index_buffer(const RefPtr<Buffer> &buffer) const override;
+        void set_index_buffer(const std::shared_ptr<Buffer> &buffer) const override;
 
         void set_scissor(int32_t x, int32_t y, uint32_t width, uint32_t height) const override;
         void set_viewport(float x, float y, float width, float height, float min_depth, float max_depth) const override;
@@ -43,6 +43,6 @@ namespace hyper_engine
 
         VkCommandBuffer m_command_buffer = VK_NULL_HANDLE;
 
-        RefPtr<RenderPipeline> m_pipeline;
+        std::shared_ptr<RenderPipeline> m_pipeline;
     };
 } // namespace hyper_engine

@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <spdlog/spdlog.h>
+#include <memory>
 
-#include "hyper_core/own_ptr.hpp"
+#include <spdlog/spdlog.h>
 
 namespace hyper_engine
 {
@@ -19,11 +19,11 @@ namespace hyper_engine
 
         void set_level(spdlog::level::level_enum level) const;
 
-        // FIXME: Return a reference to the logger instead of returning a OwnPtr
-        const OwnPtr<spdlog::logger> &internal_logger() const;
+        // FIXME: Return a reference to the logger instead of returning a std::unique_ptr
+        const std::unique_ptr<spdlog::logger> &internal_logger() const;
 
     private:
-        OwnPtr<spdlog::logger> m_internal_logger;
+        std::unique_ptr<spdlog::logger> m_internal_logger;
     };
 } // namespace hyper_engine
 

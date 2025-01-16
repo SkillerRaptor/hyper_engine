@@ -8,7 +8,6 @@
 
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
-#include <hyper_core/ref_ptr.hpp>
 
 #include "hyper_rhi/vulkan/vulkan_graphics_device.hpp"
 #include "hyper_rhi/vulkan/vulkan_pipeline_layout.hpp"
@@ -17,7 +16,7 @@
 
 namespace hyper_engine
 {
-    RefPtr<RenderPipeline> VulkanGraphicsDevice::create_render_pipeline_platform(const RenderPipelineDescriptor &descriptor)
+    std::shared_ptr<RenderPipeline> VulkanGraphicsDevice::create_render_pipeline_platform(const RenderPipelineDescriptor &descriptor)
     {
         const VulkanShaderModule &vertex_shader_module = static_cast<const VulkanShaderModule &>(*descriptor.vertex_shader);
 
@@ -239,7 +238,7 @@ namespace hyper_engine
 
         set_object_name(pipeline, ObjectType::Pipeline, descriptor.label);
 
-        return make_ref<VulkanRenderPipeline>(descriptor, *this, pipeline);
+        return std::make_shared<VulkanRenderPipeline>(descriptor, *this, pipeline);
     }
 
     VulkanRenderPipeline::VulkanRenderPipeline(

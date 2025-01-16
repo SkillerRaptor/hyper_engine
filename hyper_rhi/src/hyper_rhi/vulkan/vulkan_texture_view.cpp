@@ -8,7 +8,6 @@
 
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
-#include <hyper_core/ref_ptr.hpp>
 
 #include "hyper_rhi/vulkan/vulkan_descriptor_manager.hpp"
 #include "hyper_rhi/vulkan/vulkan_graphics_device.hpp"
@@ -16,7 +15,8 @@
 
 namespace hyper_engine
 {
-    RefPtr<TextureView> VulkanGraphicsDevice::create_texture_view_platform(const TextureViewDescriptor &descriptor, ResourceHandle handle)
+    std::shared_ptr<TextureView>
+        VulkanGraphicsDevice::create_texture_view_platform(const TextureViewDescriptor &descriptor, ResourceHandle handle)
     {
         const VulkanTexture &texture = static_cast<const VulkanTexture &>(*descriptor.texture);
 
@@ -62,7 +62,7 @@ namespace hyper_engine
 
         set_object_name(image_view, ObjectType::ImageView, descriptor.label);
 
-        return make_ref<VulkanTextureView>(descriptor, handle, *this, image_view);
+        return std::make_shared<VulkanTextureView>(descriptor, handle, *this, image_view);
     }
 
     VulkanTextureView::VulkanTextureView(

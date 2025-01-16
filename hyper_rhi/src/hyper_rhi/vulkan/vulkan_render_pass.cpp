@@ -8,7 +8,6 @@
 
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
-#include <hyper_core/ref_ptr.hpp>
 
 #include "hyper_rhi/vulkan/vulkan_buffer.hpp"
 #include "hyper_rhi/vulkan/vulkan_descriptor_manager.hpp"
@@ -149,7 +148,7 @@ namespace hyper_engine
         m_graphics_device.end_marker(m_command_buffer);
     }
 
-    void VulkanRenderPass::set_pipeline(const RefPtr<RenderPipeline> &pipeline)
+    void VulkanRenderPass::set_pipeline(const std::shared_ptr<RenderPipeline> &pipeline)
     {
         m_pipeline = pipeline;
 
@@ -172,7 +171,7 @@ namespace hyper_engine
         vkCmdBindPipeline(m_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_pipeline.pipeline());
     }
 
-    void VulkanRenderPass::set_index_buffer(const RefPtr<Buffer> &buffer) const
+    void VulkanRenderPass::set_index_buffer(const std::shared_ptr<Buffer> &buffer) const
     {
         const VulkanBuffer &vulkan_buffer = static_cast<const VulkanBuffer &>(*buffer);
 

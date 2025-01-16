@@ -14,18 +14,18 @@
 
 namespace hyper_engine
 {
-    RefPtr<Texture> VulkanGraphicsDevice::create_texture_platform(const TextureDescriptor &descriptor)
+    std::shared_ptr<Texture> VulkanGraphicsDevice::create_texture_platform(const TextureDescriptor &descriptor)
     {
         return create_texture_internal(descriptor, VK_NULL_HANDLE);
     }
 
-    RefPtr<Texture> VulkanGraphicsDevice::create_texture_internal(const TextureDescriptor &descriptor, const VkImage image)
+    std::shared_ptr<Texture> VulkanGraphicsDevice::create_texture_internal(const TextureDescriptor &descriptor, const VkImage image)
     {
         if (image != VK_NULL_HANDLE)
         {
             set_object_name(image, ObjectType::Image, descriptor.label);
 
-            return make_ref<VulkanTexture>(descriptor, *this, image, VK_NULL_HANDLE);
+            return std::make_shared<VulkanTexture>(descriptor, *this, image, VK_NULL_HANDLE);
         }
 
         const VkImageType image_type = VulkanTexture::get_image_type(descriptor.dimension);
@@ -74,7 +74,7 @@ namespace hyper_engine
 
         set_object_name(vk_image, ObjectType::Image, descriptor.label);
 
-        return make_ref<VulkanTexture>(descriptor, *this, vk_image, allocation);
+        return std::make_shared<VulkanTexture>(descriptor, *this, vk_image, allocation);
     }
 
     VulkanTexture::VulkanTexture(

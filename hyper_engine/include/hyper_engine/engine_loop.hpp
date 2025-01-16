@@ -6,7 +6,8 @@
 
 #pragma once
 
-#include <hyper_core/own_ptr.hpp>
+#include <memory>
+
 #include <hyper_windowing/forward.hpp>
 
 namespace hyper_engine
@@ -30,14 +31,14 @@ namespace hyper_engine
 
     private:
         bool m_editor_enabled = false;
-        OwnPtr<Engine> m_engine;
+        std::unique_ptr<Engine> m_engine;
         bool m_exit_requested = false;
 
-        OwnPtr<Logger> m_logger;
-        OwnPtr<JobSystem> m_job_system;
-        OwnPtr<Input> m_input;
-        OwnPtr<Window> m_window;
-        OwnPtr<GraphicsDevice> m_graphics_device;
-        OwnPtr<Renderer> m_renderer;
+        std::unique_ptr<Logger> m_logger;
+        std::unique_ptr<JobSystem> m_job_system;
+        std::unique_ptr<Input> m_input;
+        std::unique_ptr<Window> m_window;
+        std::unique_ptr<GraphicsDevice> m_graphics_device;
+        std::unique_ptr<Renderer> m_renderer;
     };
 } // namespace hyper_engine

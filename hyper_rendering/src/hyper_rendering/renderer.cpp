@@ -298,7 +298,7 @@ namespace hyper_engine
         MaterialInstance default_data =
             m_metallic_roughness_material.write_material(m_command_list, MaterialPassType::MainColor, material_resources);
 
-        const RefPtr<LoadedGltf> scene = load_gltf(
+        const std::shared_ptr<LoadedGltf> scene = load_gltf(
             m_command_list,
             m_white_texture_view,
             m_error_texture,
@@ -323,9 +323,9 @@ namespace hyper_engine
         m_graphics_device.execute(m_command_list);
         m_graphics_device.wait_for_idle();
 
-        m_opaque_pass = make_own<OpaquePass>(m_render_texture_view, m_depth_texture_view, m_scene_buffer);
+        m_opaque_pass = std::make_unique<OpaquePass>(m_render_texture_view, m_depth_texture_view, m_scene_buffer);
 
-        m_grid_pass = make_own<GridPass>(
+        m_grid_pass = std::make_unique<GridPass>(
             m_graphics_device, m_shader_compiler, m_render_texture, m_render_texture_view, m_depth_texture, m_depth_texture_view);
 
         // m_imgui_pass = make<ImGuiPass>(m_surface);
@@ -486,8 +486,8 @@ namespace hyper_engine
         m_grid_pass->render(m_command_list);
 
         // FIXME: Add error if current texture is asked before the frame began
-        const RefPtr<Texture> swapchain_texture = m_surface->current_texture();
-        const RefPtr<TextureView> swapchain_texture_view = m_surface->current_texture_view();
+        const std::shared_ptr<Texture> swapchain_texture = m_surface->current_texture();
+        const std::shared_ptr<TextureView> swapchain_texture_view = m_surface->current_texture_view();
 
         // NOTE: Transitioning the render and swapchain image for transfer
         m_command_list->insert_barriers({

@@ -24,7 +24,7 @@ namespace hyper_engine
         return m_label;
     }
 
-    RefPtr<Texture> TextureView::texture() const
+    std::shared_ptr<Texture> TextureView::texture() const
     {
         return m_texture;
     }

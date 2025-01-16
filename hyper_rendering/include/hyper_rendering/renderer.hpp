@@ -6,9 +6,9 @@
 
 #pragma once
 
+#include <memory>
 #include <unordered_map>
 
-#include <hyper_core/own_ptr.hpp>
 #include <hyper_rhi/forward.hpp>
 #include <hyper_rhi/graphics_device.hpp>
 #include <hyper_rhi/shader_compiler.hpp>
@@ -40,33 +40,33 @@ namespace hyper_engine
     private:
         GraphicsDevice &m_graphics_device;
 
-        RefPtr<Surface> m_surface;
+        std::shared_ptr<Surface> m_surface;
         ShaderCompiler m_shader_compiler;
-        RefPtr<CommandList> m_command_list;
+        std::shared_ptr<CommandList> m_command_list;
 
-        RefPtr<Texture> m_render_texture;
-        RefPtr<TextureView> m_render_texture_view;
-        RefPtr<Texture> m_depth_texture;
-        RefPtr<TextureView> m_depth_texture_view;
+        std::shared_ptr<Texture> m_render_texture;
+        std::shared_ptr<TextureView> m_render_texture_view;
+        std::shared_ptr<Texture> m_depth_texture;
+        std::shared_ptr<TextureView> m_depth_texture_view;
 
-        RefPtr<Buffer> m_camera_buffer;
+        std::shared_ptr<Buffer> m_camera_buffer;
 
-        RefPtr<Buffer> m_scene_buffer;
+        std::shared_ptr<Buffer> m_scene_buffer;
 
-        RefPtr<Texture> m_white_texture;
-        RefPtr<TextureView> m_white_texture_view;
-        RefPtr<Texture> m_error_texture;
-        RefPtr<TextureView> m_error_texture_view;
-        RefPtr<Sampler> m_default_sampler_nearest;
-        RefPtr<Sampler> m_default_sampler_linear;
+        std::shared_ptr<Texture> m_white_texture;
+        std::shared_ptr<TextureView> m_white_texture_view;
+        std::shared_ptr<Texture> m_error_texture;
+        std::shared_ptr<TextureView> m_error_texture_view;
+        std::shared_ptr<Sampler> m_default_sampler_nearest;
+        std::shared_ptr<Sampler> m_default_sampler_linear;
 
         GltfMetallicRoughness m_metallic_roughness_material;
 
         DrawContext m_draw_context;
-        std::unordered_map<std::string, RefPtr<LoadedGltf>> m_scenes;
+        std::unordered_map<std::string, std::shared_ptr<LoadedGltf>> m_scenes;
 
-        OwnPtr<OpaquePass> m_opaque_pass;
-        OwnPtr<GridPass> m_grid_pass;
+        std::unique_ptr<OpaquePass> m_opaque_pass;
+        std::unique_ptr<GridPass> m_grid_pass;
 
         uint32_t m_frame_index = 1;
     };

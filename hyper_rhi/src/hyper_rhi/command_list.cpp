@@ -13,12 +13,12 @@
 
 namespace hyper_engine
 {
-    RefPtr<ComputePass> CommandList::begin_compute_pass(const ComputePassDescriptor &descriptor) const
+    std::shared_ptr<ComputePass> CommandList::begin_compute_pass(const ComputePassDescriptor &descriptor) const
     {
         return begin_compute_pass_platform(descriptor);
     }
 
-    RefPtr<RenderPass> CommandList::begin_render_pass(const RenderPassDescriptor &descriptor) const
+    std::shared_ptr<RenderPass> CommandList::begin_render_pass(const RenderPassDescriptor &descriptor) const
     {
         HE_ASSERT(!descriptor.color_attachments.empty());
 

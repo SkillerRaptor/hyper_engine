@@ -6,10 +6,9 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
-
-#include <hyper_core/ref_ptr.hpp>
 
 #include "hyper_rhi/label_color.hpp"
 #include "hyper_rhi/forward.hpp"
@@ -37,13 +36,13 @@ namespace hyper_engine
 
     struct ColorAttachment
     {
-        RefPtr<TextureView> view;
+        std::shared_ptr<TextureView> view;
         Operations operation;
     };
 
     struct DepthStencilAttachment
     {
-        RefPtr<TextureView> view;
+        std::shared_ptr<TextureView> view;
         Operations depth_operation;
         // FIXME: Add stencil operation
     };
@@ -61,11 +60,11 @@ namespace hyper_engine
     public:
         virtual ~RenderPass() = default;
 
-        // FIXME: This should be RefPtr
-        virtual void set_pipeline(const RefPtr<RenderPipeline> &pipeline) = 0;
+        // FIXME: This should be std::shared_ptr
+        virtual void set_pipeline(const std::shared_ptr<RenderPipeline> &pipeline) = 0;
         virtual void set_push_constants(const void *data, size_t data_size) const = 0;
 
-        virtual void set_index_buffer(const RefPtr<Buffer> &buffer) const = 0;
+        virtual void set_index_buffer(const std::shared_ptr<Buffer> &buffer) const = 0;
 
         virtual void set_scissor(int32_t x, int32_t y, uint32_t width, uint32_t height) const = 0;
         virtual void set_viewport(float x, float y, float width, float height, float min_depth, float max_depth) const = 0;

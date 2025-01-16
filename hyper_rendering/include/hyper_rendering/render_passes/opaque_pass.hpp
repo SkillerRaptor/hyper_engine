@@ -6,7 +6,8 @@
 
 #pragma once
 
-#include <hyper_core/ref_ptr.hpp>
+#include <memory>
+
 #include <hyper_rhi/forward.hpp>
 
 namespace hyper_engine
@@ -17,15 +18,15 @@ namespace hyper_engine
     {
     public:
         OpaquePass(
-            const RefPtr<TextureView> &render_texture_view,
-            const RefPtr<TextureView> &depth_texture_view,
-            const RefPtr<Buffer> &scene_buffer);
+            const std::shared_ptr<TextureView> &render_texture_view,
+            const std::shared_ptr<TextureView> &depth_texture_view,
+            const std::shared_ptr<Buffer> &scene_buffer);
 
-        void render(const RefPtr<CommandList> &command_list, const DrawContext &draw_context) const;
+        void render(const std::shared_ptr<CommandList> &command_list, const DrawContext &draw_context) const;
 
     private:
-        const RefPtr<TextureView> &m_render_texture_view;
-        const RefPtr<TextureView> &m_depth_texture_view;
-        const RefPtr<Buffer> &m_scene_buffer;
+        const std::shared_ptr<TextureView> &m_render_texture_view;
+        const std::shared_ptr<TextureView> &m_depth_texture_view;
+        const std::shared_ptr<Buffer> &m_scene_buffer;
     };
 } // namespace hyper_engine

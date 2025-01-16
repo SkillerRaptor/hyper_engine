@@ -6,9 +6,8 @@
 
 #pragma once
 
-#include "hyper_rhi/graphics_device.hpp"
+#include <memory>
 
-#include <hyper_core/ref_ptr.hpp>
 #include <hyper_rhi/forward.hpp>
 #include <hyper_rhi/shader_module.hpp>
 #include <hyper_rhi/render_pipeline.hpp>
@@ -22,23 +21,23 @@ namespace hyper_engine
         GridPass(
             GraphicsDevice &graphics_device,
             const ShaderCompiler &shader_compiler,
-            const RefPtr<Texture> &render_texture,
-            const RefPtr<TextureView> &render_texture_view,
-            const RefPtr<Texture> &depth_texture,
-            const RefPtr<TextureView> &depth_texture_view);
+            const std::shared_ptr<Texture> &render_texture,
+            const std::shared_ptr<TextureView> &render_texture_view,
+            const std::shared_ptr<Texture> &depth_texture,
+            const std::shared_ptr<TextureView> &depth_texture_view);
 
-        void render(const RefPtr<CommandList> &command_list) const;
+        void render(const std::shared_ptr<CommandList> &command_list) const;
 
     private:
-        const RefPtr<Texture> &m_render_texture;
-        const RefPtr<TextureView> &m_render_texture_view;
-        const RefPtr<Texture> &m_depth_texture;
-        const RefPtr<TextureView> &m_depth_texture_view;
+        const std::shared_ptr<Texture> &m_render_texture;
+        const std::shared_ptr<TextureView> &m_render_texture_view;
+        const std::shared_ptr<Texture> &m_depth_texture;
+        const std::shared_ptr<TextureView> &m_depth_texture_view;
 
-        RefPtr<PipelineLayout> m_pipeline_layout;
-        RefPtr<ShaderModule> m_vertex_shader;
-        RefPtr<ShaderModule> m_fragment_shader;
-        // FIXME: This should be a RefPtr
-        RefPtr<RenderPipeline> m_pipeline;
+        std::shared_ptr<PipelineLayout> m_pipeline_layout;
+        std::shared_ptr<ShaderModule> m_vertex_shader;
+        std::shared_ptr<ShaderModule> m_fragment_shader;
+        // FIXME: This should be a std::shared_ptr
+        std::shared_ptr<RenderPipeline> m_pipeline;
     };
 } // namespace hyper_engine

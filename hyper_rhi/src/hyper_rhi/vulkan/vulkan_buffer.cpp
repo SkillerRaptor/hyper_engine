@@ -13,12 +13,12 @@
 
 namespace hyper_engine
 {
-    RefPtr<Buffer> VulkanGraphicsDevice::create_buffer_platform(const BufferDescriptor &descriptor, const ResourceHandle handle)
+    std::shared_ptr<Buffer> VulkanGraphicsDevice::create_buffer_platform(const BufferDescriptor &descriptor, const ResourceHandle handle)
     {
         return create_buffer_internal(descriptor, handle, false);
     }
 
-    RefPtr<Buffer>
+    std::shared_ptr<Buffer>
         VulkanGraphicsDevice::create_buffer_internal(const BufferDescriptor &descriptor, const ResourceHandle handle, const bool staging)
     {
         const VkBufferUsageFlags usage_flags = VulkanBuffer::get_buffer_usage_flags(descriptor.usage);
@@ -69,7 +69,7 @@ namespace hyper_engine
 
         set_object_name(buffer, ObjectType::Buffer, descriptor.label);
 
-        return make_ref<VulkanBuffer>(descriptor, handle, *this, buffer, allocation);
+        return std::make_shared<VulkanBuffer>(descriptor, handle, *this, buffer, allocation);
     }
 
     VulkanBuffer::VulkanBuffer(

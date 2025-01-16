@@ -17,9 +17,7 @@ set(HEADERS
         include/hyper_core/forward.hpp
         include/hyper_core/job_system.hpp
         include/hyper_core/logger.hpp
-        include/hyper_core/own_ptr.hpp
         include/hyper_core/prerequisites.hpp
-        include/hyper_core/ref_ptr.hpp
         include/hyper_core/string.hpp
         include/hyper_core/thread_safe_ring_buffer.hpp)
 

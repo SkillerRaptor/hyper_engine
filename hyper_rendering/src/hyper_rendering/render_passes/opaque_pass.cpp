@@ -18,18 +18,18 @@
 namespace hyper_engine
 {
     OpaquePass::OpaquePass(
-        const RefPtr<TextureView> &render_texture_view,
-        const RefPtr<TextureView> &depth_texture_view,
-        const RefPtr<Buffer> &scene_buffer)
+        const std::shared_ptr<TextureView> &render_texture_view,
+        const std::shared_ptr<TextureView> &depth_texture_view,
+        const std::shared_ptr<Buffer> &scene_buffer)
         : m_render_texture_view(render_texture_view)
         , m_depth_texture_view(depth_texture_view)
         , m_scene_buffer(scene_buffer)
     {
     }
 
-    void OpaquePass::render(const RefPtr<CommandList> &command_list, const DrawContext &draw_context) const
+    void OpaquePass::render(const std::shared_ptr<CommandList> &command_list, const DrawContext &draw_context) const
     {
-        const RefPtr<RenderPass> render_pass = command_list->begin_render_pass({
+        const std::shared_ptr<RenderPass> render_pass = command_list->begin_render_pass({
             .label = "Opaque",
             .label_color =
                 {

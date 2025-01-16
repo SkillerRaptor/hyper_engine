@@ -6,11 +6,11 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include <hyper_core/bit_flags.hpp>
-#include <hyper_core/ref_ptr.hpp>
 
 #include "hyper_rhi/compare_operation.hpp"
 #include "hyper_rhi/format.hpp"
@@ -136,9 +136,9 @@ namespace hyper_engine
     struct RenderPipelineDescriptor
     {
         std::string label;
-        RefPtr<PipelineLayout> layout;
-        RefPtr<ShaderModule> vertex_shader;
-        RefPtr<ShaderModule> fragment_shader;
+        std::shared_ptr<PipelineLayout> layout;
+        std::shared_ptr<ShaderModule> vertex_shader;
+        std::shared_ptr<ShaderModule> fragment_shader;
         std::vector<ColorAttachmentState> color_attachment_states;
         PrimitiveState primitive_state;
         DepthStencilState depth_stencil_state;
@@ -150,9 +150,9 @@ namespace hyper_engine
         virtual ~RenderPipeline() = default;
 
         std::string_view label() const;
-        RefPtr<PipelineLayout> layout() const;
-        RefPtr<ShaderModule> vertex_shader() const;
-        RefPtr<ShaderModule> fragment_shader() const;
+        std::shared_ptr<PipelineLayout> layout() const;
+        std::shared_ptr<ShaderModule> vertex_shader() const;
+        std::shared_ptr<ShaderModule> fragment_shader() const;
         const std::vector<ColorAttachmentState> &color_attachment_states() const;
         PrimitiveState primitive_state() const;
         DepthStencilState depth_stencil_state() const;
@@ -162,9 +162,9 @@ namespace hyper_engine
 
     protected:
         std::string m_label;
-        RefPtr<PipelineLayout> m_layout;
-        RefPtr<ShaderModule> m_vertex_shader;
-        RefPtr<ShaderModule> m_fragment_shader;
+        std::shared_ptr<PipelineLayout> m_layout;
+        std::shared_ptr<ShaderModule> m_vertex_shader;
+        std::shared_ptr<ShaderModule> m_fragment_shader;
         std::vector<ColorAttachmentState> m_color_attachment_states;
         PrimitiveState m_primitive_state;
         DepthStencilState m_depth_stencil_state;

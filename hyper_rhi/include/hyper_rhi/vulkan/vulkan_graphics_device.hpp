@@ -89,21 +89,21 @@ namespace hyper_engine
         explicit VulkanGraphicsDevice(const GraphicsDeviceDescriptor &descriptor);
         ~VulkanGraphicsDevice() override;
 
-        RefPtr<Surface> create_surface(SDL_Window *window) override;
-        RefPtr<CommandList> create_command_list() override;
+        std::shared_ptr<Surface> create_surface(SDL_Window *window) override;
+        std::shared_ptr<CommandList> create_command_list() override;
 
-        RefPtr<Buffer> create_buffer_platform(const BufferDescriptor &descriptor, ResourceHandle handle) override;
-        RefPtr<Buffer> create_buffer_internal(const BufferDescriptor &descriptor, ResourceHandle handle, bool staging);
+        std::shared_ptr<Buffer> create_buffer_platform(const BufferDescriptor &descriptor, ResourceHandle handle) override;
+        std::shared_ptr<Buffer> create_buffer_internal(const BufferDescriptor &descriptor, ResourceHandle handle, bool staging);
 
-        RefPtr<ComputePipeline> create_compute_pipeline_platform(const ComputePipelineDescriptor &descriptor) override;
-        RefPtr<RenderPipeline> create_render_pipeline_platform(const RenderPipelineDescriptor &descriptor) override;
-        RefPtr<PipelineLayout> create_pipeline_layout_platform(const PipelineLayoutDescriptor &descriptor) override;
-        RefPtr<ShaderModule> create_shader_module_platform(const ShaderModuleDescriptor &descriptor) override;
+        std::shared_ptr<ComputePipeline> create_compute_pipeline_platform(const ComputePipelineDescriptor &descriptor) override;
+        std::shared_ptr<RenderPipeline> create_render_pipeline_platform(const RenderPipelineDescriptor &descriptor) override;
+        std::shared_ptr<PipelineLayout> create_pipeline_layout_platform(const PipelineLayoutDescriptor &descriptor) override;
+        std::shared_ptr<ShaderModule> create_shader_module_platform(const ShaderModuleDescriptor &descriptor) override;
 
-        RefPtr<Sampler> create_sampler_platform(const SamplerDescriptor &descriptor, ResourceHandle handle) override;
-        RefPtr<Texture> create_texture_platform(const TextureDescriptor &descriptor) override;
-        RefPtr<Texture> create_texture_internal(const TextureDescriptor &descriptor, VkImage image);
-        RefPtr<TextureView> create_texture_view_platform(const TextureViewDescriptor &descriptor, ResourceHandle handle) override;
+        std::shared_ptr<Sampler> create_sampler_platform(const SamplerDescriptor &descriptor, ResourceHandle handle) override;
+        std::shared_ptr<Texture> create_texture_platform(const TextureDescriptor &descriptor) override;
+        std::shared_ptr<Texture> create_texture_internal(const TextureDescriptor &descriptor, VkImage image);
+        std::shared_ptr<TextureView> create_texture_view_platform(const TextureViewDescriptor &descriptor, ResourceHandle handle) override;
 
         void begin_marker(VkCommandBuffer command_buffer, MarkerType type, std::string_view name, LabelColor color) const;
         void end_marker(VkCommandBuffer command_buffer) const;
@@ -111,10 +111,10 @@ namespace hyper_engine
         void set_object_name(const void *handle, ObjectType type, std::string_view name) const;
         void destroy_resources();
 
-        void begin_frame(RefPtr<Surface> &surface, uint32_t frame_index) override;
+        void begin_frame(std::shared_ptr<Surface> &surface, uint32_t frame_index) override;
         void end_frame() const override;
-        void execute(const RefPtr<CommandList> &command_list) override;
-        void present(const RefPtr<Surface> &surface) const override;
+        void execute(const std::shared_ptr<CommandList> &command_list) override;
+        void present(const std::shared_ptr<Surface> &surface) const override;
 
         void wait_for_idle() const override;
 

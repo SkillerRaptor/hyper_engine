@@ -14,6 +14,6 @@ namespace hyper_engine
 
     struct ModelComponent
     {
-        RefPtr<Model> model;
+        std::shared_ptr<Model> model;
     };
 } // namespace hyper_engine

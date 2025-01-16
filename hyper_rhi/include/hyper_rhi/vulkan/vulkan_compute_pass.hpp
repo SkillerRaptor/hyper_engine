@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hyper_core/ref_ptr.hpp>
+#include <memory>
 
 #include "hyper_rhi/compute_pass.hpp"
 #include "hyper_rhi/vulkan/vulkan_common.hpp"
@@ -21,7 +21,7 @@ namespace hyper_engine
         VulkanComputePass(const ComputePassDescriptor &descriptor, VulkanGraphicsDevice &graphics_device, VkCommandBuffer command_buffer);
         ~VulkanComputePass() override;
 
-        void set_pipeline(const RefPtr<ComputePipeline> &pipeline) override;
+        void set_pipeline(const std::shared_ptr<ComputePipeline> &pipeline) override;
         void set_push_constants(const void *data, size_t data_size) const override;
 
         void dispatch(uint32_t x, uint32_t y, uint32_t z) const override;
@@ -33,6 +33,6 @@ namespace hyper_engine
 
         VkCommandBuffer m_command_buffer = VK_NULL_HANDLE;
 
-        RefPtr<ComputePipeline> m_pipeline;
+        std::shared_ptr<ComputePipeline> m_pipeline;
     };
 } // namespace hyper_engine

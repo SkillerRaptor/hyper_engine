@@ -6,9 +6,8 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
-
-#include <hyper_core/ref_ptr.hpp>
 
 #include "hyper_rhi/forward.hpp"
 #include "hyper_rhi/label_color.hpp"
@@ -26,8 +25,8 @@ namespace hyper_engine
     public:
         virtual ~ComputePass() = default;
 
-        // FIXME: This should be RefPtr
-        virtual void set_pipeline(const RefPtr<ComputePipeline> &pipeline) = 0;
+        // FIXME: This should be std::shared_ptr
+        virtual void set_pipeline(const std::shared_ptr<ComputePipeline> &pipeline) = 0;
         virtual void set_push_constants(const void *data, size_t data_size) const = 0;
 
         virtual void dispatch(uint32_t x, uint32_t y, uint32_t z) const = 0;

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <hyper_core/ref_ptr.hpp>
+#include <memory>
 
 #include "hyper_rhi/format.hpp"
 #include "hyper_rhi/forward.hpp"
@@ -29,8 +29,8 @@ namespace hyper_engine
 
         virtual Format format() const = 0;
 
-        virtual RefPtr<Texture> current_texture() const = 0;
-        virtual RefPtr<TextureView> current_texture_view() const = 0;
+        virtual std::shared_ptr<Texture> current_texture() const = 0;
+        virtual std::shared_ptr<TextureView> current_texture_view() const = 0;
 
     protected:
         bool m_resized = false;

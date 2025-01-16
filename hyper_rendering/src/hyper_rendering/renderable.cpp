@@ -32,7 +32,7 @@ namespace hyper_engine
     {
         world_transform = parent_matrix * local_transform;
 
-        for (const RefPtr<Node> &child : children)
+        for (const std::shared_ptr<Node> &child : children)
         {
             child->refresh_transform(world_transform);
         }
@@ -40,13 +40,13 @@ namespace hyper_engine
 
     void Node::draw(const glm::mat4 &top_matrix, DrawContext &context) const
     {
-        for (const RefPtr<Node> &child : children)
+        for (const std::shared_ptr<Node> &child : children)
         {
             child->draw(top_matrix, context);
         }
     }
 
-    MeshNode::MeshNode(const RefPtr<Mesh> &mesh)
+    MeshNode::MeshNode(const std::shared_ptr<Mesh> &mesh)
         : mesh(mesh)
     {
     }
@@ -80,13 +80,13 @@ namespace hyper_engine
     }
 
     LoadedGltf::LoadedGltf(
-        std::vector<RefPtr<Mesh>> meshes,
-        std::vector<RefPtr<Node>> nodes,
-        std::vector<RefPtr<Texture>> textures,
-        std::vector<RefPtr<TextureView>> texture_views,
-        std::vector<RefPtr<GltfMaterial>> materials,
-        std::vector<RefPtr<Node>> top_nodes,
-        std::vector<RefPtr<Sampler>> samplers)
+        std::vector<std::shared_ptr<Mesh>> meshes,
+        std::vector<std::shared_ptr<Node>> nodes,
+        std::vector<std::shared_ptr<Texture>> textures,
+        std::vector<std::shared_ptr<TextureView>> texture_views,
+        std::vector<std::shared_ptr<GltfMaterial>> materials,
+        std::vector<std::shared_ptr<Node>> top_nodes,
+        std::vector<std::shared_ptr<Sampler>> samplers)
         : m_meshes(std::move(meshes))
         , m_nodes(std::move(nodes))
         , m_textures(std::move(textures))
@@ -99,18 +99,18 @@ namespace hyper_engine
 
     void LoadedGltf::draw(const glm::mat4 &top_matrix, DrawContext &draw_context) const
     {
-        for (const RefPtr<Node> &node : m_top_nodes)
+        for (const std::shared_ptr<Node> &node : m_top_nodes)
         {
             node->draw(top_matrix, draw_context);
         }
     }
 
-    RefPtr<LoadedGltf> load_gltf(
-        const RefPtr<CommandList> &command_list,
-        const RefPtr<TextureView> &white_texture_view,
-        const RefPtr<Texture> &error_texture,
-        const RefPtr<TextureView> &error_texture_view,
-        const RefPtr<Sampler> &default_sampler_linear,
+    std::shared_ptr<LoadedGltf> load_gltf(
+        const std::shared_ptr<CommandList> &command_list,
+        const std::shared_ptr<TextureView> &white_texture_view,
+        const std::shared_ptr<Texture> &error_texture,
+        const std::shared_ptr<TextureView> &error_texture_view,
+        const std::shared_ptr<Sampler> &default_sampler_linear,
         const GltfMetallicRoughness &metallic_roughness_material,
         const std::string &path)
     {
@@ -131,7 +131,7 @@ namespace hyper_engine
         fastgltf::Expected<fastgltf::Asset> asset = parser.loadGltf(data.get(), file_path.parent_path(), options);
         HE_ASSERT(asset.error() == fastgltf::Error::None);
 
-        std::vector<RefPtr<Sampler>> samplers;
+        std::vector<std::shared_ptr<Sampler>> samplers;
         for (const fastgltf::Sampler &sampler : asset->samplers)
         {
             const auto extract_filter = [](const fastgltf::Filter filter) -> Filter
@@ -172,8 +172,8 @@ namespace hyper_engine
                 }));
         }
 
-        std::vector<RefPtr<Texture>> textures;
-        std::vector<RefPtr<TextureView>> texture_views;
+        std::vector<std::shared_ptr<Texture>> textures;
+        std::vector<std::shared_ptr<TextureView>> texture_views;
         for (const fastgltf::Image &image : asset->images)
         {
             int32_t width = 0;
@@ -234,7 +234,7 @@ namespace hyper_engine
 
             if (image_data)
             {
-                RefPtr<Texture> texture = GraphicsDevice::get()->create_texture({
+                std::shared_ptr<Texture> texture = GraphicsDevice::get()->create_texture({
                     .label = image.name.empty() ? file_name : std::string(image.name),
                     .width = static_cast<uint32_t>(width),
                     .height = static_cast<uint32_t>(height),
@@ -246,7 +246,7 @@ namespace hyper_engine
                     .usage = TextureUsage::ShaderResource,
                 });
 
-                RefPtr<TextureView> texture_view = GraphicsDevice::get()->create_texture_view({
+                std::shared_ptr<TextureView> texture_view = GraphicsDevice::get()->create_texture_view({
                     .label = image.name.empty() ? file_name : std::string(image.name),
                     .texture = texture,
                     .subresource_range =
@@ -319,10 +319,10 @@ namespace hyper_engine
             }
         }
 
-        std::vector<RefPtr<GltfMaterial>> materials;
+        std::vector<std::shared_ptr<GltfMaterial>> materials;
         for (const fastgltf::Material &material : asset->materials)
         {
-            RefPtr<GltfMaterial> new_material = make_ref<GltfMaterial>();
+            std::shared_ptr<GltfMaterial> new_material = std::make_shared<GltfMaterial>();
             materials.push_back(new_material);
 
             MaterialPassType pass_type = MaterialPassType::MainColor;
@@ -356,7 +356,7 @@ namespace hyper_engine
             new_material->data = metallic_roughness_material.write_material(command_list, pass_type, material_resources);
         }
 
-        std::vector<RefPtr<Mesh>> meshes;
+        std::vector<std::shared_ptr<Mesh>> meshes;
 
         std::vector<glm::vec4> positions;
         std::vector<glm::vec4> normals;
@@ -461,35 +461,35 @@ namespace hyper_engine
                 surfaces.push_back(surface);
             }
 
-            const RefPtr<Buffer> positions_buffer = GraphicsDevice::get()->create_buffer({
+            const std::shared_ptr<Buffer> positions_buffer = GraphicsDevice::get()->create_buffer({
                 .label = fmt::format("{} Positions", mesh.name),
                 .byte_size = positions.size() * sizeof(glm::vec4),
                 .usage = {BufferUsage::Storage, BufferUsage::ShaderResource},
             });
             command_list->write_buffer(positions_buffer, positions.data(), positions.size() * sizeof(glm::vec4), 0);
 
-            const RefPtr<Buffer> normals_buffer = GraphicsDevice::get()->create_buffer({
+            const std::shared_ptr<Buffer> normals_buffer = GraphicsDevice::get()->create_buffer({
                 .label = fmt::format("{} Normals", mesh.name),
                 .byte_size = normals.size() * sizeof(glm::vec4),
                 .usage = {BufferUsage::Storage, BufferUsage::ShaderResource},
             });
             command_list->write_buffer(normals_buffer, normals.data(), normals.size() * sizeof(glm::vec4), 0);
 
-            const RefPtr<Buffer> colors_buffer = GraphicsDevice::get()->create_buffer({
+            const std::shared_ptr<Buffer> colors_buffer = GraphicsDevice::get()->create_buffer({
                 .label = fmt::format("{} Colors", mesh.name),
                 .byte_size = colors.size() * sizeof(glm::vec4),
                 .usage = {BufferUsage::Storage, BufferUsage::ShaderResource},
             });
             command_list->write_buffer(colors_buffer, colors.data(), colors.size() * sizeof(glm::vec4), 0);
 
-            const RefPtr<Buffer> tex_coords_buffer = GraphicsDevice::get()->create_buffer({
+            const std::shared_ptr<Buffer> tex_coords_buffer = GraphicsDevice::get()->create_buffer({
                 .label = fmt::format("{} Tex Coords", mesh.name),
                 .byte_size = tex_coords.size() * sizeof(glm::vec4),
                 .usage = {BufferUsage::Storage, BufferUsage::ShaderResource},
             });
             command_list->write_buffer(tex_coords_buffer, tex_coords.data(), tex_coords.size() * sizeof(glm::vec4), 0);
 
-            const RefPtr<Buffer> mesh_buffer = GraphicsDevice::get()->create_buffer({
+            const std::shared_ptr<Buffer> mesh_buffer = GraphicsDevice::get()->create_buffer({
                 .label = fmt::format("{} Mesh Data", mesh.name),
                 .byte_size = sizeof(ShaderMesh),
                 .usage = {BufferUsage::Storage, BufferUsage::ShaderResource},
@@ -504,14 +504,14 @@ namespace hyper_engine
 
             command_list->write_buffer(mesh_buffer, &shader_mesh, sizeof(ShaderMesh), 0);
 
-            const RefPtr<Buffer> indices_buffer = GraphicsDevice::get()->create_buffer({
+            const std::shared_ptr<Buffer> indices_buffer = GraphicsDevice::get()->create_buffer({
                 .label = fmt::format("{} Indices", mesh.name),
                 .byte_size = indices.size() * sizeof(uint32_t),
                 .usage = BufferUsage::Index,
             });
             command_list->write_buffer(indices_buffer, indices.data(), indices.size() * sizeof(uint32_t), 0);
 
-            auto new_mesh = make_ref<Mesh>(
+            auto new_mesh = std::make_shared<Mesh>(
                 std::string(mesh.name),
                 surfaces,
                 positions_buffer,
@@ -523,18 +523,18 @@ namespace hyper_engine
             meshes.push_back(new_mesh);
         }
 
-        std::vector<RefPtr<Node>> nodes;
+        std::vector<std::shared_ptr<Node>> nodes;
         for (const fastgltf::Node &node : asset->nodes)
         {
-            RefPtr<Node> new_node;
+            std::shared_ptr<Node> new_node;
 
             if (node.meshIndex.has_value())
             {
-                new_node = make_ref<MeshNode>(meshes[node.meshIndex.value()]);
+                new_node = std::make_shared<MeshNode>(meshes[node.meshIndex.value()]);
             }
             else
             {
-                new_node = make_ref<Node>();
+                new_node = std::make_shared<Node>();
             }
 
             nodes.push_back(new_node);
@@ -564,7 +564,7 @@ namespace hyper_engine
         for (size_t index = 0; index < asset->nodes.size(); ++index)
         {
             fastgltf::Node &node = asset->nodes[index];
-            const RefPtr<Node> &scene_node = nodes[index];
+            const std::shared_ptr<Node> &scene_node = nodes[index];
 
             for (const size_t child : node.children)
             {
@@ -573,8 +573,8 @@ namespace hyper_engine
             }
         }
 
-        std::vector<RefPtr<Node>> top_nodes;
-        for (const RefPtr<Node> &node : nodes)
+        std::vector<std::shared_ptr<Node>> top_nodes;
+        for (const std::shared_ptr<Node> &node : nodes)
         {
             if (node->parent.lock() == nullptr)
             {
@@ -583,7 +583,7 @@ namespace hyper_engine
             }
         }
 
-        return make_ref<LoadedGltf>(meshes, nodes, textures, texture_views, materials, top_nodes, samplers);
+        return std::make_shared<LoadedGltf>(meshes, nodes, textures, texture_views, materials, top_nodes, samplers);
         */
         return nullptr;
     }
