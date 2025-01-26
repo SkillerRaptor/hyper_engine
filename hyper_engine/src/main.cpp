@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "hyper_engine/engine_loop.hpp"
+#include "../include/engine_loop.hpp"
 
 int main(const int argc, const char **argv)
 {

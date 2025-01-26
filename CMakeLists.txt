@@ -48,9 +48,4 @@ include(cmake/Utils.cmake)
 #-------------------------------------------------------------------------------------------
 add_subdirectory(third_party)
 
-add_subdirectory(hyper_core)
-add_subdirectory(hyper_windowing)
-add_subdirectory(hyper_rhi)
-add_subdirectory(hyper_rendering)
-
 add_subdirectory(hyper_engine)
