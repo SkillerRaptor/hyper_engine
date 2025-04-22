@@ -7,6 +7,7 @@
 #include <chrono>
 
 #include "core/logger.hpp"
+#include "systems/input_system.hpp"
 #include "systems/render_system.hpp"
 #include "systems/window/window_events.hpp"
 #include "systems/window_system.hpp"
@@ -28,6 +29,9 @@ int main()
         .height = 720,
     };
     const WindowSystem::WindowId window = window_system->create_window(window_descriptor);
+
+    std::unique_ptr<InputSystem> input_system = std::make_unique<InputSystem>();
+    input_system->initialize(*window_system);
 
     std::unique_ptr<RenderSystem> render_system = std::make_unique<RenderSystem>();
     render_system->initialize(*window_system, window);

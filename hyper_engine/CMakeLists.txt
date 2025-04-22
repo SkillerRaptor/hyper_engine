@@ -10,6 +10,7 @@ set(SOURCES
         src/core/resource_id.cpp
         src/core/string_utils.cpp
         src/drivers/vulkan/vulkan_render_driver.cpp
+        src/systems/input_system.cpp
         src/systems/render_system.cpp
         src/systems/window_system.cpp
         src/systems/render/render_driver.cpp
@@ -28,6 +29,7 @@ set(HEADERS
         include/core/resource_owner.hpp
         include/core/string_utils.hpp
         include/drivers/vulkan/vulkan_render_driver.hpp
+        include/systems/input_system.hpp
         include/systems/render_system.hpp
         include/systems/window_system.hpp
         include/systems/render/render_driver.hpp

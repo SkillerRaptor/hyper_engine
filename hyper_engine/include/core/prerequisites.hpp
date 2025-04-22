@@ -15,3 +15,9 @@
 #else
 #    define HE_RELEASE_BUILD 1
 #endif
+
+#define HE_BIND_FUNCTION(function)                                    \
+    [this](auto &&...args) -> decltype(auto)                          \
+    {                                                                 \
+        return this->function(std::forward<decltype(args)>(args)...); \
+    }
