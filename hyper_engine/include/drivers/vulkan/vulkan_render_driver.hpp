@@ -151,6 +151,9 @@ public:
     uint32_t acquire_swapchain_texture(RS::CommandBuffer *command_buffer) override;
     void present() override;
 
+    void begin_gpu_marker(RS::CommandBuffer *command_buffer, std::string_view name, RS::LabelColor label_color) const override;
+    void end_gpu_marker(RS::CommandBuffer *command_buffer) const override;
+
     // Compute Pass
     void begin_compute_pass(RS::CommandBuffer *command_buffer) override;
     void end_compute_pass(RS::CommandBuffer *command_buffer) override;

@@ -23,6 +23,17 @@ private:
     static constexpr uint8_t s_frames_in_flight = 3;
 
 public:
+    HE_DEFINE_ID(Buffer);
+    HE_DEFINE_ID(Shader);
+    HE_DEFINE_ID(Sampler);
+    HE_DEFINE_ID(Texture);
+    HE_DEFINE_ID(PipelineLayout);
+    HE_DEFINE_ID(ComputePipeline);
+    HE_DEFINE_ID(RenderPipeline);
+    HE_DEFINE_ID(CommandBuffer);
+    HE_DEFINE_ID(ComputePass);
+    HE_DEFINE_ID(RenderPass);
+
     // Buffer
     enum class BufferUsage : uint8_t
     {
@@ -32,8 +43,6 @@ public:
         Storage = 1 << 2,
         ShaderResource = 1 << 3,
     };
-
-    HE_DEFINE_ID(Buffer);
 
     struct BufferDescriptor
     {
@@ -63,8 +72,6 @@ public:
         std::string entry;
         std::string path;
     };
-
-    HE_DEFINE_ID(Shader);
 
     struct Shader
     {
@@ -105,8 +112,6 @@ public:
         OpaqueBlack,
         OpaqueWhite,
     };
-
-    HE_DEFINE_ID(Sampler);
 
     struct SamplerDescriptor
     {
@@ -252,8 +257,6 @@ public:
         ShaderResource = 1 << 2,
     };
 
-    HE_DEFINE_ID(Texture);
-
     struct TextureDescriptor
     {
         std::optional<std::string> label;
@@ -273,8 +276,6 @@ public:
     };
 
     // Pipeline Layout
-    HE_DEFINE_ID(PipelineLayout);
-
     struct PipelineLayoutDescriptor
     {
         std::optional<std::string> label;
@@ -287,8 +288,6 @@ public:
     };
 
     // Compute Pipeline
-    HE_DEFINE_ID(ComputePipeline);
-
     struct ComputePipelineDescriptor
     {
         std::optional<std::string> label;
@@ -417,8 +416,6 @@ public:
         DepthBiasState depth_bias_state;
     };
 
-    HE_DEFINE_ID(RenderPipeline);
-
     struct RenderPipelineDescriptor
     {
         std::optional<std::string> label;
@@ -435,15 +432,7 @@ public:
         RenderPipelineDescriptor descriptor = {};
     };
 
-    //
-
-    struct SubresourceRange
-    {
-        uint32_t base_mip_level = 0;
-        uint32_t mip_level_count = 1;
-        uint32_t base_array_level = 0;
-        uint32_t array_layer_count = 1;
-    };
+    // Commands
 
     struct Viewport
     {
@@ -463,9 +452,32 @@ public:
         uint32_t height = 0;
     };
 
-    // Commands
-    HE_DEFINE_ID(CommandBuffer);
+    struct LabelColor
+    {
+        uint8_t r = 255;
+        uint8_t g = 255;
+        uint8_t b = 255;
+    };
 
+    struct Label
+    {
+        std::string name;
+        LabelColor color;
+    };
+
+    struct ComputePassDescriptor
+    {
+        std::optional<Label> label;
+    };
+
+    struct RenderPassDescriptor
+    {
+        std::optional<Label> label;
+        TextureId texture;
+    };
+
+public:
+    // FIXME: This should be private
     struct CommandBuffer
     {
         uint32_t generation = 0;
@@ -473,19 +485,10 @@ public:
         bool submitted = false;
     };
 
-    HE_DEFINE_ID(ComputePass);
-
     struct ComputePass
     {
         CommandBufferId command_buffer;
         bool ended = false;
-    };
-
-    HE_DEFINE_ID(RenderPass);
-
-    struct RenderPassDescriptor
-    {
-        TextureId texture;
     };
 
     struct RenderPass

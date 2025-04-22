@@ -129,7 +129,18 @@ int main()
         const RenderSystem::TextureId swapchain_texture = render_system->acquire_swapchain_texture(command_buffer);
 
         const RenderSystem::RenderPassDescriptor render_pass_descriptor = {
+            .label =
+                RS::Label{
+                    .name = "Render Pass Test",
+                    .color =
+                        RS::LabelColor{
+                            .r = 255,
+                            .g = 0,
+                            .b = 0,
+                        },
+                },
             .texture = swapchain_texture,
+
         };
 
         const glm::uvec2 window_size = window_system->get_window_size(window);

@@ -85,6 +85,9 @@ public:
     virtual uint32_t acquire_swapchain_texture(RS::CommandBuffer *command_buffer) = 0;
     virtual void present() = 0;
 
+    virtual void begin_gpu_marker(RS::CommandBuffer *command_buffer, std::string_view name, RS::LabelColor label_color) const = 0;
+    virtual void end_gpu_marker(RS::CommandBuffer *command_buffer) const = 0;
+
     // Compute Pass
     virtual void begin_compute_pass(RS::CommandBuffer *command_buffer) = 0;
     virtual void end_compute_pass(RS::CommandBuffer *command_buffer) = 0;

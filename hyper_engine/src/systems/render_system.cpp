@@ -333,6 +333,14 @@ RenderSystem::RenderPassId RenderSystem::begin_render_pass(const CommandBufferId
     };
     m_render_passes.push_back(render_pass);
 
+    if (descriptor.label.has_value())
+    {
+        const Label label = descriptor.label.value();
+        m_render_driver->begin_gpu_marker(command_buffer, label.name, label.color);
+
+        // FIXME: Save if the render pass has a label
+    }
+
     Texture *texture = m_textures.get(descriptor.texture);
     m_render_driver->begin_render_pass(command_buffer, descriptor, texture);
 
@@ -345,6 +353,8 @@ void RenderSystem::end_render_pass(const RenderPassId id)
     CommandBuffer *command_buffer = resolve_command_buffer(render_pass.command_buffer);
 
     m_render_driver->end_render_pass(command_buffer);
+
+    m_render_driver->end_gpu_marker(command_buffer);
 }
 
 void RenderSystem::bind_render_pipeline(const RenderPassId id, const RenderPipelineId pipeline_id)

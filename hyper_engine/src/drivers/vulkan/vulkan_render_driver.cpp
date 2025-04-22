@@ -769,18 +769,44 @@ void VulkanRenderDriver::present()
     HE_VK_CHECK(vkQueuePresentKHR(m_queue, &present_info), vkQueuePresentKHR);
 }
 
-void VulkanRenderDriver::begin_compute_pass(RS::CommandBuffer *command_buffer)
+void VulkanRenderDriver::begin_gpu_marker(RS::CommandBuffer *command_buffer, const std::string_view name, const RS::LabelColor label_color) const
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
 
-    // FIXME: Add Marker
+    const float r = static_cast<float>(label_color.r) / 255.0f;
+    const float g = static_cast<float>(label_color.g) / 255.0f;
+    const float b = static_cast<float>(label_color.b) / 255.0f;
+    const VkDebugUtilsLabelEXT debug_label = {
+        .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT,
+        .pNext = nullptr,
+        .pLabelName = name.data(),
+        .color =
+            {
+                r,
+                g,
+                b,
+                1.0f,
+            },
+    };
+
+    vkCmdBeginDebugUtilsLabelEXT(vulkan_command_buffer->command_buffer, &debug_label);
+}
+
+void VulkanRenderDriver::end_gpu_marker(RS::CommandBuffer *command_buffer) const
+{
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
+
+    vkCmdEndDebugUtilsLabelEXT(vulkan_command_buffer->command_buffer);
+}
+
+void VulkanRenderDriver::begin_compute_pass(RS::CommandBuffer *command_buffer)
+{
+    (void) command_buffer;
 }
 
 void VulkanRenderDriver::end_compute_pass(RS::CommandBuffer *command_buffer)
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
-
-    // FIXME: Add Marker
+    (void) command_buffer;
 }
 
 void VulkanRenderDriver::bind_compute_pipeline(RS::CommandBuffer *command_buffer, RS::ComputePipeline *pipeline)
