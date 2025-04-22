@@ -116,13 +116,13 @@ int main()
 
     const std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
     const std::chrono::duration<double> elapsed_seconds = end_time - start_time;
-    HE_INFO("Engine pre-initialized in {:.2}s", elapsed_seconds.count());
+    HE_INFO("Engine initialized in {:.2}s", elapsed_seconds.count());
 
     while (running)
     {
         window_system->poll_events();
 
-        // FIXME: Poll Events and add Resizing
+        // FIXME: Add Resizing
 
         const RenderSystem::CommandBufferId command_buffer = render_system->acquire_command_buffer();
 
