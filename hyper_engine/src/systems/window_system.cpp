@@ -10,6 +10,9 @@
 
 #include "core/assertion.hpp"
 #include "core/logger.hpp"
+#include "systems/window/key_events.hpp"
+#include "systems/window/mouse_events.hpp"
+#include "systems/window/window_events.hpp"
 
 WindowSystem::~WindowSystem()
 {
@@ -25,6 +28,7 @@ void WindowSystem::initialize()
 
     HE_INFO("Successfully initialized WindowSystem");
 }
+
 void WindowSystem::poll_events()
 {
     SDL_Event event;
@@ -32,6 +36,36 @@ void WindowSystem::poll_events()
     {
         switch (event.type)
         {
+        // NOTE: Window Events
+        case SDL_EVENT_QUIT:
+            m_event_bus.dispatch<WindowCloseEvent>();
+            break;
+        case SDL_EVENT_WINDOW_MOVED:
+            m_event_bus.dispatch<WindowMoveEvent>(event.window.data1, event.window.data2);
+            break;
+        case SDL_EVENT_WINDOW_RESIZED:
+            m_event_bus.dispatch<WindowResizeEvent>(event.window.data1, event.window.data2);
+            break;
+        // NOTE: Key Events
+        case SDL_EVENT_KEY_DOWN:
+            m_event_bus.dispatch<KeyPressEvent>(static_cast<KeyCode>(event.key.key));
+            break;
+        case SDL_EVENT_KEY_UP:
+            m_event_bus.dispatch<KeyReleaseEvent>(static_cast<KeyCode>(event.key.key));
+            break;
+        // NOTE: Mouse Events
+        case SDL_EVENT_MOUSE_MOTION:
+            m_event_bus.dispatch<MouseMoveEvent>(event.motion.x, event.motion.y);
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            m_event_bus.dispatch<MouseButtonPressEvent>(static_cast<MouseCode>(event.button.button));
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+            m_event_bus.dispatch<MouseButtonReleaseEvent>(static_cast<MouseCode>(event.button.button));
+            break;
+        case SDL_EVENT_MOUSE_WHEEL:
+            m_event_bus.dispatch<MouseScrollEvent>(event.wheel.x, event.wheel.y);
+            break;
         default:
             break;
         }

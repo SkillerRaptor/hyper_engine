@@ -13,7 +13,10 @@ set(SOURCES
         src/systems/render_system.cpp
         src/systems/window_system.cpp
         src/systems/render/render_driver.cpp
-        src/systems/render/shader_compiler.cpp)
+        src/systems/render/shader_compiler.cpp
+        src/systems/window/key_events.cpp
+        src/systems/window/mouse_events.cpp
+        src/systems/window/window_events.cpp)
 
 set(HEADERS
         include/core/assertion.hpp
@@ -28,7 +31,14 @@ set(HEADERS
         include/systems/render_system.hpp
         include/systems/window_system.hpp
         include/systems/render/render_driver.hpp
-        include/systems/render/shader_compiler.hpp)
+        include/systems/render/shader_compiler.hpp
+        include/systems/window/event_bus.hpp
+        include/systems/window/event_handler.hpp
+        include/systems/window/key_codes.hpp
+        include/systems/window/key_events.hpp
+        include/systems/window/mouse_codes.hpp
+        include/systems/window/mouse_events.hpp
+        include/systems/window/window_events.hpp)
 
 hyperengine_define_executable(hyper_engine)
 target_link_libraries(

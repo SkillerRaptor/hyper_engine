@@ -9,6 +9,7 @@
 #include <glm/vec2.hpp>
 
 #include "core/resource_owner.hpp"
+#include "systems/window/event_bus.hpp"
 
 using WS = class WindowSystem;
 
@@ -39,6 +40,12 @@ public:
 
     void poll_events();
 
+    template <typename T>
+    void register_listener(const std::function<void(const T &)> &callback)
+    {
+        m_event_bus.subscribe<T>(callback);
+    }
+
     WindowId create_window(const WindowDescriptor &descriptor);
     void destroy_window(WindowId id);
 
@@ -58,4 +65,6 @@ public:
 
 private:
     ResourceOwner<WindowId, WindowData> m_windows;
+
+    EventBus m_event_bus;
 };
