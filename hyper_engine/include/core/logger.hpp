@@ -10,26 +10,20 @@
 
 #include <spdlog/spdlog.h>
 
-namespace hyper_engine
+class Logger
 {
-    class Logger
-    {
-    public:
-        Logger();
+public:
+    static void initialize();
 
-        void set_level(spdlog::level::level_enum level) const;
+    static std::shared_ptr<spdlog::logger> internal_logger();
 
-        // FIXME: Return a reference to the logger instead of returning a std::unique_ptr
-        const std::unique_ptr<spdlog::logger> &internal_logger() const;
+private:
+    static std::shared_ptr<spdlog::logger> s_internal_logger;
+};
 
-    private:
-        std::unique_ptr<spdlog::logger> m_internal_logger;
-    };
-} // namespace hyper_engine
-
-#define HE_INFO(logger, ...) SPDLOG_LOGGER_CALL((logger).internal_logger(), spdlog::level::info, __VA_ARGS__)
-#define HE_WARN(logger, ...) SPDLOG_LOGGER_CALL((logger).internal_logger(), spdlog::level::warn, __VA_ARGS__)
-#define HE_ERROR(logger, ...) SPDLOG_LOGGER_CALL((logger).internal_logger(), spdlog::level::err, __VA_ARGS__)
-#define HE_CRITICAL(logger, ...) SPDLOG_LOGGER_CALL((logger).internal_logger(), spdlog::level::critical, __VA_ARGS__)
-#define HE_DEBUG(logger, ...) SPDLOG_LOGGER_CALL((logger).internal_logger(), spdlog::level::debug, __VA_ARGS__)
-#define HE_TRACE(logger, ...) SPDLOG_LOGGER_CALL((logger).internal_logger(), spdlog::level::trace, __VA_ARGS__)
+#define HE_INFO(...) SPDLOG_LOGGER_CALL(::Logger::internal_logger(), spdlog::level::info, __VA_ARGS__)
+#define HE_WARN(...) SPDLOG_LOGGER_CALL(::Logger::internal_logger(), spdlog::level::warn, __VA_ARGS__)
+#define HE_ERROR(...) SPDLOG_LOGGER_CALL(::Logger::internal_logger(), spdlog::level::err, __VA_ARGS__)
+#define HE_CRITICAL(...) SPDLOG_LOGGER_CALL(::Logger::internal_logger(), spdlog::level::critical, __VA_ARGS__)
+#define HE_DEBUG(...) SPDLOG_LOGGER_CALL(::Logger::internal_logger(), spdlog::level::debug, __VA_ARGS__)
+#define HE_TRACE(...) SPDLOG_LOGGER_CALL(::Logger::internal_logger(), spdlog::level::trace, __VA_ARGS__)

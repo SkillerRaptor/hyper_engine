@@ -12,7 +12,5 @@
 #define HE_ASSERT_VALUE(expression, ...) LIBASSERT_ASSERT_VAL(expression, __VA_ARGS__)
 #define HE_DEBUG_ASSERT(expression, ...) LIBASSERT_DEBUG_ASSERT(expression, __VA_ARGS__)
 #define HE_DEBUG_ASSERT_VALUE(expression, ...) LIBASSERT_DEBUG_ASSERT_VAL(expression, __VA_ARGS__)
-#define HE_ASSUME(expression, ...) LIBASSERT_ASSUME(expression, __VA_ARGS__)
-#define HE_ASSUME_VALUE(expression, ...) LIBASSERT_ASSUME_VAL(expression, __VA_ARGS__)
 #define HE_PANIC(...) LIBASSERT_PANIC(__VA_ARGS__)
 #define HE_UNREACHABLE(...) LIBASSERT_UNREACHABLE(__VA_ARGS__)

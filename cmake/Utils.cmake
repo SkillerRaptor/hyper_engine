@@ -22,6 +22,7 @@ function(hyperengine_define_executable target)
     add_executable(${target} ${SOURCES} ${HEADERS})
     target_link_libraries(${target} PRIVATE ProjectOptions ProjectWarnings)
     target_include_directories(${target} PUBLIC include)
+    target_compile_options(${target} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:/Zc:preprocessor>")
 
     if (WIN32)
         target_compile_definitions(
@@ -33,60 +34,12 @@ function(hyperengine_define_executable target)
                 WIN32_LEAN_AND_MEAN)
     else ()
         target_compile_definitions(${target} PUBLIC HE_LINUX=1)
-    endif ()
-endfunction()
-
-function(hyperengine_define_library target)
-    if (NOT SOURCES)
-        hyperengine_define_interface_library(${target})
-        return()
-    endif ()
-
-    hyperengine_group_source(${SOURCES})
-    if (HEADERS)
-        hyperengine_group_source(${HEADERS})
-    endif ()
-
-    add_library(${target} STATIC ${SOURCES} ${HEADERS})
-    target_link_libraries(${target} PRIVATE ProjectOptions ProjectWarnings)
-    target_include_directories(${target} PUBLIC include)
-
-    if (WIN32)
-        target_compile_definitions(
-                ${target}
-                PUBLIC
-                HE_WINDOWS=1
-                _CRT_SECURE_NO_WARNINGS
-                NOMINMAX
-                WIN32_LEAN_AND_MEAN)
-    else ()
-        target_compile_definitions(${target} PUBLIC HE_LINUX=1)
-    endif ()
-endfunction()
-
-function(hyperengine_define_interface_library target)
-    hyperengine_group_source(${HEADERS})
-
-    add_library(${target} INTERFACE ${SOURCES} ${HEADERS})
-    target_link_libraries(${target} INTERFACE ProjectOptions ProjectWarnings)
-    target_include_directories(${target} INTERFACE include)
-
-    if (WIN32)
-        target_compile_definitions(
-                ${target}
-                INTERFACE
-                HE_WINDOWS=1
-                _CRT_SECURE_NO_WARNINGS
-                NOMINMAX
-                WIN32_LEAN_AND_MEAN)
-    else ()
-        target_compile_definitions(${target} INTERFACE HE_LINUX=1)
     endif ()
 endfunction()
 
 function(hyperengine_download_and_extract URL DESTINATION FOLDER_NAME)
     if (NOT EXISTS ${CMAKE_BINARY_DIR}/download/${FOLDER_NAME}.zip)
-        message(STATUS "Downloading ${URL} and unpacking to ${DESTINATION}/${FOLDER_NAME}.")
+        message(STATUS " Downloading ${URL} and unpacking to ${DESTINATION}/${FOLDER_NAME}.")
         file(
                 DOWNLOAD
                 ${URL}

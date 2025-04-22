@@ -7,26 +7,6 @@
 include(FetchContent)
 
 #-------------------------------------------------------------------------------------------
-# argparse
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        argparse
-        SYSTEM
-        GIT_REPOSITORY https://github.com/p-ranav/argparse.git
-        GIT_TAG 68fd0277eea5412aff9b91c0b70efc698359dae0)
-
-set(ARGPARSE_INSTALL OFF CACHE INTERNAL "")
-set(ARGPARSE_BUILD_TESTS OFF CACHE INTERNAL "")
-set(ARGPARSE_BUILD_SAMPLES OFF CACHE INTERNAL "")
-
-FetchContent_MakeAvailable(argparse)
-
-set_target_properties(
-        argparse
-        PROPERTIES
-        FOLDER "third_party")
-
-#-------------------------------------------------------------------------------------------
 # entt
 #-------------------------------------------------------------------------------------------
 FetchContent_Declare(
@@ -282,7 +262,7 @@ FetchContent_Declare(
         sdl
         SYSTEM
         GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-        GIT_TAG 95c1584386f6c564fa4e49643654c6e4679bfd02)
+        GIT_TAG f6864924f76e1a0b4abaefc76ae2ed22b1a8916e)
 
 set(SDL_SHARED OFF CACHE INTERNAL "")
 set(SDL_STATIC ON CACHE INTERNAL "")

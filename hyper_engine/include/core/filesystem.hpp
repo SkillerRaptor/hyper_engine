@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-present, SkillerRaptor
+ * Copyright (c) 2025-present, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
@@ -9,7 +9,7 @@
 #include <string_view>
 #include <vector>
 
-namespace hyper_engine::filesystem
+namespace filesystem
 {
     std::vector<uint8_t> read_file(std::string_view path);
-} // namespace hyper_engine::filesystem
+} // namespace filesystem

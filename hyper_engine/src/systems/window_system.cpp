@@ -1,0 +1,152 @@
+/*
+ * Copyright (c) 2025-present, SkillerRaptor
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include "systems/window_system.hpp"
+
+#include <SDL3/SDL.h>
+
+#include "core/assertion.hpp"
+#include "core/logger.hpp"
+
+WindowSystem::~WindowSystem()
+{
+    SDL_Quit();
+}
+
+void WindowSystem::initialize()
+{
+    if (!SDL_Init(SDL_INIT_VIDEO))
+    {
+        HE_PANIC("Failed to initialize SDL", SDL_GetError());
+    }
+
+    HE_INFO("Successfully initialized WindowSystem");
+}
+void WindowSystem::poll_events()
+{
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+        switch (event.type)
+        {
+        default:
+            break;
+        }
+    }
+}
+
+WindowSystem::WindowId WindowSystem::create_window(const WindowDescriptor &descriptor)
+{
+    HE_ASSERT(!descriptor.title.empty());
+    HE_ASSERT(descriptor.width != 0);
+    HE_ASSERT(descriptor.height != 0);
+
+    SDL_Window *native_window = SDL_CreateWindow(
+        descriptor.title.c_str(),
+        static_cast<int32_t>(descriptor.width),
+        static_cast<int32_t>(descriptor.height),
+        /*SDL_WINDOW_RESIZABLE |*/ SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_VULKAN);
+    if (native_window == nullptr)
+    {
+        HE_PANIC("Failed to create window", SDL_GetError());
+    }
+
+    WindowData window = {};
+    window.native_handle = native_window;
+
+    return m_windows.create(window);
+}
+
+void WindowSystem::destroy_window(const WindowId id)
+{
+    HE_ASSERT(m_windows.contains(id));
+
+    const WindowData &window = m_windows.get(id);
+    SDL_DestroyWindow(window.native_handle);
+    m_windows.destroy(id);
+}
+
+SDL_Window *WindowSystem::get_native_window(const WindowId id) const
+{
+    HE_ASSERT(m_windows.contains(id));
+
+    const WindowData &window = m_windows.get(id);
+    return window.native_handle;
+}
+
+void WindowSystem::set_window_title(const WindowId id, const std::string &title) const
+{
+    HE_ASSERT(!title.empty());
+    HE_ASSERT(m_windows.contains(id));
+
+    const WindowData &window = m_windows.get(id);
+    SDL_SetWindowTitle(window.native_handle, title.c_str());
+}
+
+std::string WindowSystem::get_window_title(const WindowId id) const
+{
+    HE_ASSERT(m_windows.contains(id));
+
+    const WindowData &window = m_windows.get(id);
+    std::string title = SDL_GetWindowTitle(window.native_handle);
+    return title;
+}
+
+void WindowSystem::set_window_size(const WindowId id, const uint32_t width, const uint32_t height) const
+{
+    HE_ASSERT(width > 0);
+    HE_ASSERT(height > 0);
+
+    HE_ASSERT(m_windows.contains(id));
+
+    const WindowData &window = m_windows.get(id);
+    SDL_SetWindowSize(window.native_handle, static_cast<int32_t>(width), static_cast<int32_t>(height));
+}
+
+glm::u32vec2 WindowSystem::get_window_size(const WindowId id) const
+{
+    HE_ASSERT(m_windows.contains(id));
+
+    const WindowData &window = m_windows.get(id);
+    int32_t width = 0;
+    int32_t height = 0;
+    SDL_GetWindowSize(window.native_handle, &width, &height);
+    return {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+}
+
+void WindowSystem::set_window_fullscreen(const WindowId id, const bool fullscreen) const
+{
+    HE_ASSERT(m_windows.contains(id));
+
+    const WindowData &window = m_windows.get(id);
+    SDL_SetWindowFullscreen(window.native_handle, fullscreen);
+}
+
+bool WindowSystem::is_window_fullscreen(const WindowId id) const
+{
+    HE_ASSERT(m_windows.contains(id));
+
+    const WindowData &window = m_windows.get(id);
+    const SDL_WindowFlags window_flags = SDL_GetWindowFlags(window.native_handle);
+    return (window_flags & SDL_WINDOW_FULLSCREEN) != 0;
+}
+
+void WindowSystem::set_window_resizable(const WindowId id, const bool resizable) const
+{
+    HE_ASSERT(m_windows.contains(id));
+
+    const WindowData &window = m_windows.get(id);
+    SDL_SetWindowResizable(window.native_handle, resizable);
+}
+
+bool WindowSystem::is_window_resizable(const WindowId id) const
+{
+    HE_ASSERT(m_windows.contains(id));
+
+    const WindowData &window = m_windows.get(id);
+    const SDL_WindowFlags window_flags = SDL_GetWindowFlags(window.native_handle);
+    return (window_flags & SDL_WINDOW_RESIZABLE) != 0;
+}
