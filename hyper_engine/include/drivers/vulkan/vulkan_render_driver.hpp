@@ -99,6 +99,9 @@ public:
     Buffer *create_buffer(const std::optional<std::string> &label, uint64_t byte_size, BitFlags<BufferUsage> usage, bool staging) const override;
     void destroy_buffer(const Buffer *buffer) const override;
 
+    void *map_buffer(const Buffer *buffer) const override;
+    void unmap_buffer(const Buffer *buffer) const override;
+
     // Shader
     Shader *
         create_shader(const std::optional<std::string> &label, ShaderType type, std::string_view entry, std::string_view path) const override;
@@ -165,7 +168,44 @@ public:
     void bind_texture(const Texture *texture, uint32_t slot) const override;
 
     void clear_buffer(const CommandBuffer *command_buffer, const Buffer *buffer, size_t size, uint64_t offset) const override;
-    void write_buffer(const CommandBuffer *command_buffer, const Buffer *buffer, const void *data, size_t size, uint64_t offset) const override;
+    void clear_texture(const CommandBuffer *command_buffer, const Texture *texture, SubresourceRange subresource_range) const override;
+
+    void copy_buffer_to_buffer(
+        const CommandBuffer *command_buffer,
+        const Buffer *src,
+        uint64_t src_offset,
+        const Buffer *dst,
+        uint64_t dst_offset,
+        size_t size) const override;
+    void copy_buffer_to_texture(
+        const CommandBuffer *command_buffer,
+        const Buffer *src,
+        uint64_t src_offset,
+        const Texture *dst,
+        Offset3d dst_offset,
+        Extent3d dst_extent,
+        uint32_t dst_mip_level,
+        uint32_t dst_array_index) const override;
+    void copy_texture_to_buffer(
+        const CommandBuffer *command_buffer,
+        const Texture *src,
+        Offset3d src_offset,
+        Extent3d src_extent,
+        uint32_t src_mip_level,
+        uint32_t src_array_index,
+        const Buffer *dst,
+        uint64_t dst_offset) const override;
+    void copy_texture_to_texture(
+        const CommandBuffer *command_buffer,
+        const Texture *src,
+        Offset3d src_offset,
+        uint32_t src_mip_level,
+        uint32_t src_array_index,
+        const Texture *dst,
+        Offset3d dst_offset,
+        uint32_t dst_mip_level,
+        uint32_t dst_array_index,
+        Extent3d extent) const override;
 
     void push_constants(const CommandBuffer *command_buffer, const PipelineLayout *pipeline_layout, const void *data, size_t data_size) override;
 

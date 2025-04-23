@@ -14,39 +14,39 @@ RenderSystem::~RenderSystem()
 {
     m_render_driver->wait_idle();
 
+    for (const Resource &resource : m_deletion_queue)
+    {
+        switch (resource.tag)
+        {
+        case ResourceTag::Buffer:
+            m_render_driver->destroy_buffer(static_cast<const Buffer *>(resource.inner_resource));
+            break;
+        case ResourceTag::Shader:
+            m_render_driver->destroy_shader(static_cast<const Shader *>(resource.inner_resource));
+            break;
+        case ResourceTag::Sampler:
+            m_render_driver->destroy_sampler(static_cast<const Sampler *>(resource.inner_resource));
+            break;
+        case ResourceTag::Texture:
+            m_render_driver->destroy_texture(static_cast<const Texture *>(resource.inner_resource));
+            break;
+        case ResourceTag::PipelineLayout:
+            m_render_driver->destroy_pipeline_layout(static_cast<const PipelineLayout *>(resource.inner_resource));
+            break;
+        case ResourceTag::ComputePipeline:
+            m_render_driver->destroy_compute_pipeline(static_cast<const ComputePipeline *>(resource.inner_resource));
+            break;
+        case ResourceTag::RenderPipeline:
+            m_render_driver->destroy_render_pipeline(static_cast<const RenderPipeline *>(resource.inner_resource));
+            break;
+        default:
+            break;
+        }
+    }
+
     for (uint8_t i = 0; i < s_frames_in_flight; ++i)
     {
-        const FrameData &frame_data = m_frames[i];
-        for (const Resource &resource : frame_data.deletion_queue)
-        {
-            switch (resource.tag)
-            {
-            case ResourceTag::Buffer:
-                m_render_driver->destroy_buffer(static_cast<const Buffer *>(resource.inner_resource));
-                break;
-            case ResourceTag::Shader:
-                m_render_driver->destroy_shader(static_cast<const Shader *>(resource.inner_resource));
-                break;
-            case ResourceTag::Sampler:
-                m_render_driver->destroy_sampler(static_cast<const Sampler *>(resource.inner_resource));
-                break;
-            case ResourceTag::Texture:
-                m_render_driver->destroy_texture(static_cast<const Texture *>(resource.inner_resource));
-                break;
-            case ResourceTag::PipelineLayout:
-                m_render_driver->destroy_pipeline_layout(static_cast<const PipelineLayout *>(resource.inner_resource));
-                break;
-            case ResourceTag::ComputePipeline:
-                m_render_driver->destroy_compute_pipeline(static_cast<const ComputePipeline *>(resource.inner_resource));
-                break;
-            case ResourceTag::RenderPipeline:
-                m_render_driver->destroy_render_pipeline(static_cast<const RenderPipeline *>(resource.inner_resource));
-                break;
-            default:
-                break;
-            }
-        }
-        m_render_driver->destroy_command_buffer(frame_data.command_buffer);
+        m_render_driver->destroy_command_buffer(m_command_buffers[i]);
     }
 
     m_render_driver->shutdown();
@@ -76,12 +76,7 @@ void RenderSystem::initialize(WindowSystem &window_system, const WindowId window
         command_buffer->render_pass_in_progress = false;
         command_buffer->swapchain_texture_acquired = false;
 
-        const FrameData frame_data = {
-            .command_buffer = command_buffer,
-            .deletion_queue = {},
-        };
-
-        m_frames[i] = frame_data;
+        m_command_buffers[i] = command_buffer;
     }
 
     HE_INFO("Successfully initialized RenderSystem");
@@ -105,7 +100,7 @@ void RenderSystem::destroy_buffer(const BufferId id)
     HE_ASSERT(m_buffers.contains(id));
 
     const Buffer *buffer = m_buffers.get(id);
-    current_frame().deletion_queue.push_back(
+    m_deletion_queue.push_back(
         Resource{
             .tag = ResourceTag::Buffer,
             .inner_resource = buffer,
@@ -133,7 +128,7 @@ void RenderSystem::destroy_shader(const ShaderId id)
     HE_ASSERT(m_shaders.contains(id));
 
     const Shader *shader = m_shaders.get(id);
-    current_frame().deletion_queue.push_back(
+    m_deletion_queue.push_back(
         Resource{
             .tag = ResourceTag::Shader,
             .inner_resource = shader,
@@ -179,7 +174,7 @@ void RenderSystem::destroy_sampler(const SamplerId id)
     HE_ASSERT(m_samplers.contains(id));
 
     const Sampler *sampler = m_samplers.get(id);
-    current_frame().deletion_queue.push_back(
+    m_deletion_queue.push_back(
         Resource{
             .tag = ResourceTag::Sampler,
             .inner_resource = sampler,
@@ -226,7 +221,7 @@ void RenderSystem::destroy_texture(const TextureId id)
     HE_ASSERT(m_textures.contains(id));
 
     const Texture *texture = m_textures.get(id);
-    current_frame().deletion_queue.push_back(
+    m_deletion_queue.push_back(
         Resource{
             .tag = ResourceTag::Texture,
             .inner_resource = texture,
@@ -250,7 +245,7 @@ void RenderSystem::destroy_pipeline_layout(const PipelineLayoutId id)
     HE_ASSERT(m_pipeline_layouts.contains(id));
 
     const PipelineLayout *pipeline_layout = m_pipeline_layouts.get(id);
-    current_frame().deletion_queue.push_back(
+    m_deletion_queue.push_back(
         Resource{
             .tag = ResourceTag::PipelineLayout,
             .inner_resource = pipeline_layout,
@@ -279,7 +274,7 @@ void RenderSystem::destroy_compute_pipeline(const ComputePipelineId id)
     HE_ASSERT(m_compute_pipelines.contains(id));
 
     const ComputePipeline *compute_pipeline = m_compute_pipelines.get(id);
-    current_frame().deletion_queue.push_back(
+    m_deletion_queue.push_back(
         Resource{
             .tag = ResourceTag::ComputePipeline,
             .inner_resource = compute_pipeline,
@@ -332,7 +327,7 @@ void RenderSystem::destroy_render_pipeline(const RenderPipelineId id)
     HE_ASSERT(m_render_pipelines.contains(id));
 
     const RenderPipeline *render_pipeline = m_render_pipelines.get(id);
-    current_frame().deletion_queue.push_back(
+    m_deletion_queue.push_back(
         Resource{
             .tag = ResourceTag::RenderPipeline,
             .inner_resource = render_pipeline,
@@ -342,49 +337,59 @@ void RenderSystem::destroy_render_pipeline(const RenderPipelineId id)
 
 CommandBufferId RenderSystem::acquire_command_buffer()
 {
-    const uint32_t frame_id = m_frame_index % static_cast<uint32_t>(m_frames.size());
+    const uint32_t frame_id = m_frame_index % static_cast<uint32_t>(m_command_buffers.size());
 
-    FrameData &frame_data = current_frame();
-    for (const Resource &resource : frame_data.deletion_queue)
+    CommandBuffer *command_buffer = m_command_buffers[frame_id];
+    command_buffer->generation += 1;
+    command_buffer->compute_pass_in_progress = false;
+    command_buffer->render_pass_in_progress = false;
+    command_buffer->swapchain_texture_acquired = false;
+
+    m_render_driver->acquire_command_buffer(command_buffer);
+
+    for (Resource &resource : m_deletion_queue)
     {
-        switch (resource.tag)
+        resource.generation += 1;
+
+        if (resource.generation == s_frames_in_flight)
         {
-        case ResourceTag::Buffer:
-            m_render_driver->destroy_buffer(static_cast<const Buffer *>(resource.inner_resource));
-            break;
-        case ResourceTag::Shader:
-            m_render_driver->destroy_shader(static_cast<const Shader *>(resource.inner_resource));
-            break;
-        case ResourceTag::Sampler:
-            m_render_driver->destroy_sampler(static_cast<const Sampler *>(resource.inner_resource));
-            break;
-        case ResourceTag::Texture:
-            m_render_driver->destroy_texture(static_cast<const Texture *>(resource.inner_resource));
-            break;
-        case ResourceTag::PipelineLayout:
-            m_render_driver->destroy_pipeline_layout(static_cast<const PipelineLayout *>(resource.inner_resource));
-            break;
-        case ResourceTag::ComputePipeline:
-            m_render_driver->destroy_compute_pipeline(static_cast<const ComputePipeline *>(resource.inner_resource));
-            break;
-        case ResourceTag::RenderPipeline:
-            m_render_driver->destroy_render_pipeline(static_cast<const RenderPipeline *>(resource.inner_resource));
-            break;
-        default:
-            break;
+            switch (resource.tag)
+            {
+            case ResourceTag::Buffer:
+                m_render_driver->destroy_buffer(static_cast<const Buffer *>(resource.inner_resource));
+                break;
+            case ResourceTag::Shader:
+                m_render_driver->destroy_shader(static_cast<const Shader *>(resource.inner_resource));
+                break;
+            case ResourceTag::Sampler:
+                m_render_driver->destroy_sampler(static_cast<const Sampler *>(resource.inner_resource));
+                break;
+            case ResourceTag::Texture:
+                m_render_driver->destroy_texture(static_cast<const Texture *>(resource.inner_resource));
+                break;
+            case ResourceTag::PipelineLayout:
+                m_render_driver->destroy_pipeline_layout(static_cast<const PipelineLayout *>(resource.inner_resource));
+                break;
+            case ResourceTag::ComputePipeline:
+                m_render_driver->destroy_compute_pipeline(static_cast<const ComputePipeline *>(resource.inner_resource));
+                break;
+            case ResourceTag::RenderPipeline:
+                m_render_driver->destroy_render_pipeline(static_cast<const RenderPipeline *>(resource.inner_resource));
+                break;
+            default:
+                break;
+            }
         }
     }
 
-    frame_data.deletion_queue.clear();
+    std::erase_if(
+        m_deletion_queue,
+        [](const Resource &resource)
+        {
+            return resource.generation == s_frames_in_flight;
+        });
 
-    frame_data.command_buffer->generation += 1;
-    frame_data.command_buffer->compute_pass_in_progress = false;
-    frame_data.command_buffer->render_pass_in_progress = false;
-    frame_data.command_buffer->swapchain_texture_acquired = false;
-
-    m_render_driver->acquire_command_buffer(frame_data.command_buffer);
-
-    return CommandBufferId(frame_id, frame_data.command_buffer->generation);
+    return CommandBufferId(frame_id, command_buffer->generation);
 }
 
 void RenderSystem::submit_command_buffer(const CommandBufferId id)
@@ -422,6 +427,11 @@ TextureId RenderSystem::acquire_swapchain_texture(const CommandBufferId id)
 
     if (swapchain_texture_index.second)
     {
+        for (const std::pair<uint32_t, TextureId> texture : m_swapchain_textures)
+        {
+            destroy_texture(texture.second);
+        }
+
         m_swapchain_textures.clear();
 
         const std::vector<Texture *> textures = m_render_driver->query_swapchain_textures();
@@ -521,6 +531,8 @@ void RenderSystem::bind_texture(const TextureId id, const uint32_t slot) const
 
 void RenderSystem::clear_buffer(const CommandBufferId id, const BufferId buffer, const size_t size, const uint64_t offset) const
 {
+    HE_ASSERT(m_buffers.contains(buffer));
+
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
 
     const Buffer *buffer_ptr = m_buffers.get(buffer);
@@ -528,12 +540,147 @@ void RenderSystem::clear_buffer(const CommandBufferId id, const BufferId buffer,
 }
 
 void RenderSystem::write_buffer(const CommandBufferId id, const BufferId buffer, const void *data, const size_t size, const uint64_t offset)
-    const
 {
+    HE_ASSERT(m_buffers.contains(buffer));
+
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
 
+    const Buffer *staging_buffer = m_render_driver->create_buffer(std::nullopt, size, BufferUsage::Storage, true);
+    void *mapped_ptr = m_render_driver->map_buffer(staging_buffer);
+    memcpy(mapped_ptr, data, size);
+    m_render_driver->unmap_buffer(staging_buffer);
+
     const Buffer *buffer_ptr = m_buffers.get(buffer);
-    m_render_driver->write_buffer(command_buffer, buffer_ptr, data, size, offset);
+    m_render_driver->copy_buffer_to_buffer(command_buffer, staging_buffer, 0, buffer_ptr, offset, size);
+
+    m_deletion_queue.push_back(
+        Resource{
+            .tag = ResourceTag::Buffer,
+            .inner_resource = staging_buffer,
+        });
+}
+
+void RenderSystem::clear_texture(const CommandBufferId id, const TextureId texture, const SubresourceRange subresource_range) const
+{
+    HE_ASSERT(m_textures.contains(texture));
+
+    const CommandBuffer *command_buffer = resolve_command_buffer(id);
+
+    const Texture *texture_ptr = m_textures.get(texture);
+    m_render_driver->clear_texture(command_buffer, texture_ptr, subresource_range);
+}
+
+void RenderSystem::write_texture(
+    const CommandBufferId id,
+    const TextureId texture,
+    const Offset3d offset,
+    const Extent3d extent,
+    const uint32_t mip_level,
+    const uint32_t array_index,
+    const void *data,
+    const size_t data_size,
+    const uint64_t data_offset)
+{
+    HE_ASSERT(m_textures.contains(texture));
+
+    const CommandBuffer *command_buffer = resolve_command_buffer(id);
+
+    const Buffer *staging_buffer = m_render_driver->create_buffer(std::nullopt, data_size, BufferUsage::Storage, true);
+    void *mapped_ptr = m_render_driver->map_buffer(staging_buffer);
+    memcpy(mapped_ptr, data, data_size);
+    m_render_driver->unmap_buffer(staging_buffer);
+
+    const Texture *texture_ptr = m_textures.get(texture);
+    m_render_driver->copy_buffer_to_texture(command_buffer, staging_buffer, data_offset, texture_ptr, offset, extent, mip_level, array_index);
+
+    m_deletion_queue.push_back(
+        Resource{
+            .tag = ResourceTag::Buffer,
+            .inner_resource = staging_buffer,
+        });
+}
+
+void RenderSystem::copy_buffer_to_buffer(
+    const CommandBufferId id,
+    const BufferId src,
+    const uint64_t src_offset,
+    const BufferId dst,
+    const uint64_t dst_offset,
+    const size_t size) const
+{
+    HE_ASSERT(m_buffers.contains(src));
+    HE_ASSERT(m_buffers.contains(dst));
+
+    const CommandBuffer *command_buffer = resolve_command_buffer(id);
+
+    const Buffer *src_ptr = m_buffers.get(src);
+    const Buffer *dst_ptr = m_buffers.get(dst);
+    m_render_driver->copy_buffer_to_buffer(command_buffer, src_ptr, src_offset, dst_ptr, dst_offset, size);
+}
+
+void RenderSystem::copy_buffer_to_texture(
+    const CommandBufferId id,
+    const BufferId src,
+    const uint64_t src_offset,
+    const TextureId dst,
+    const Offset3d dst_offset,
+    const Extent3d dst_extent,
+    const uint32_t dst_mip_level,
+    const uint32_t dst_array_index) const
+{
+    HE_ASSERT(m_buffers.contains(src));
+    HE_ASSERT(m_textures.contains(dst));
+
+    const CommandBuffer *command_buffer = resolve_command_buffer(id);
+
+    const Buffer *src_ptr = m_buffers.get(src);
+    const Texture *dst_ptr = m_textures.get(dst);
+    m_render_driver->copy_buffer_to_texture(
+        command_buffer, src_ptr, src_offset, dst_ptr, dst_offset, dst_extent, dst_mip_level, dst_array_index);
+}
+
+void RenderSystem::copy_texture_to_buffer(
+    const CommandBufferId id,
+    const TextureId src,
+    const Offset3d src_offset,
+    const Extent3d src_extent,
+    const uint32_t src_mip_level,
+    const uint32_t src_array_index,
+    const BufferId dst,
+    const uint64_t dst_offset) const
+{
+    HE_ASSERT(m_textures.contains(src));
+    HE_ASSERT(m_buffers.contains(dst));
+
+    const CommandBuffer *command_buffer = resolve_command_buffer(id);
+
+    const Texture *src_ptr = m_textures.get(src);
+    const Buffer *dst_ptr = m_buffers.get(dst);
+    m_render_driver->copy_texture_to_buffer(
+        command_buffer, src_ptr, src_offset, src_extent, src_mip_level, src_array_index, dst_ptr, dst_offset);
+}
+
+void RenderSystem::copy_texture_to_texture(
+    const CommandBufferId id,
+    const TextureId src,
+    const Offset3d src_offset,
+    const uint32_t src_mip_level,
+    const uint32_t src_array_index,
+    const TextureId dst,
+    const Offset3d dst_offset,
+    const uint32_t dst_mip_level,
+    const uint32_t dst_array_index,
+    const Extent3d extent) const
+{
+    HE_ASSERT(m_textures.contains(src));
+    HE_ASSERT(m_textures.contains(dst));
+
+    const CommandBuffer *command_buffer = resolve_command_buffer(id);
+
+    const Texture *src_ptr = m_textures.get(src);
+    const Texture *dst_ptr = m_textures.get(dst);
+    m_render_driver->copy_texture_to_texture(
+        command_buffer, src_ptr, src_offset, src_mip_level, src_array_index, dst_ptr, dst_offset, dst_mip_level, dst_array_index, extent);
 }
 
 RenderPassId RenderSystem::begin_render_pass(const CommandBufferId id, const RenderPassDescriptor &descriptor)
@@ -659,17 +806,11 @@ void RenderSystem::draw(
     m_render_driver->draw(render_pass->command_buffer, vertex_count, instance_count, first_vertex, first_instance);
 }
 
-RenderSystem::FrameData &RenderSystem::current_frame()
-{
-    return m_frames[static_cast<size_t>(m_frame_index) % m_frames.size()];
-}
-
 CommandBuffer *RenderSystem::resolve_command_buffer(const CommandBufferId id) const
 {
-    HE_ASSERT(id.id() < m_frames.size());
+    HE_ASSERT(id.id() < m_command_buffers.size());
 
-    const FrameData &frame_data = m_frames[id.id()];
-    CommandBuffer *command_buffer = frame_data.command_buffer;
+    CommandBuffer *command_buffer = m_command_buffers[id.id()];
     HE_ASSERT(id.version() == command_buffer->generation);
 
     return command_buffer;

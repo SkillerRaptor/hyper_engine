@@ -330,3 +330,25 @@ struct Operations
     LoadOperation load_operation = LoadOperation::Clear;
     StoreOperation store_operation = StoreOperation::Store;
 };
+
+struct SubresourceRange
+{
+    uint32_t base_mip_level = 0;
+    uint32_t mip_level_count = 1;
+    uint32_t base_array_level = 0;
+    uint32_t array_layer_count = 1;
+};
+
+struct Extent3d
+{
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t depth = 0;
+};
+
+struct Offset3d
+{
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t z = 0;
+};

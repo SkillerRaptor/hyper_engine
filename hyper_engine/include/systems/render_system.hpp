@@ -153,12 +153,7 @@ private:
     {
         ResourceTag tag = ResourceTag::None;
         const void *inner_resource = nullptr;
-    };
-
-    struct FrameData
-    {
-        CommandBuffer *command_buffer = nullptr;
-        std::vector<Resource> deletion_queue = {};
+        uint8_t generation = 0;
     };
 
 public:
@@ -204,13 +199,70 @@ public:
     void bind_texture(TextureId id, uint32_t slot) const;
 
     void clear_buffer(CommandBufferId id, BufferId buffer, size_t size, uint64_t offset) const;
-    void write_buffer(CommandBufferId id, BufferId buffer, const void *data, size_t size, uint64_t offset) const;
+    void write_buffer(CommandBufferId id, BufferId buffer, const void *data, size_t size, uint64_t offset);
 
     template <typename T>
-    void write_buffer(const CommandBufferId id, const BufferId buffer, const T &data, const uint64_t offset) const
+    void write_buffer(const CommandBufferId id, const BufferId buffer, const T &data, const uint64_t offset)
     {
         write_buffer(id, buffer, &data, sizeof(T), offset);
     }
+
+    void clear_texture(CommandBufferId id, TextureId texture, SubresourceRange subresource_range) const;
+    void write_texture(
+        CommandBufferId id,
+        TextureId texture,
+        Offset3d offset,
+        Extent3d extent,
+        uint32_t mip_level,
+        uint32_t array_index,
+        const void *data,
+        size_t data_size,
+        uint64_t data_offset);
+
+    template <typename T>
+    void write_texture(
+        const CommandBufferId id,
+        const TextureId texture,
+        const Offset3d offset,
+        const Extent3d extent,
+        const uint32_t mip_level,
+        const uint32_t array_index,
+        const T &data,
+        const uint64_t data_offset)
+    {
+        write_texture(id, texture, offset, extent, mip_level, array_index, &data, sizeof(T), data_offset);
+    }
+
+    void copy_buffer_to_buffer(CommandBufferId id, BufferId src, uint64_t src_offset, BufferId dst, uint64_t dst_offset, size_t size) const;
+    void copy_buffer_to_texture(
+        CommandBufferId id,
+        BufferId src,
+        uint64_t src_offset,
+        TextureId dst,
+        Offset3d dst_offset,
+        Extent3d dst_extent,
+        uint32_t dst_mip_level,
+        uint32_t dst_array_index) const;
+    void copy_texture_to_buffer(
+        CommandBufferId id,
+        TextureId src,
+        Offset3d src_offset,
+        Extent3d src_extent,
+        uint32_t src_mip_level,
+        uint32_t src_array_index,
+        BufferId dst,
+        uint64_t dst_offset) const;
+    void copy_texture_to_texture(
+        CommandBufferId id,
+        TextureId src,
+        Offset3d src_offset,
+        uint32_t src_mip_level,
+        uint32_t src_array_index,
+        TextureId dst,
+        Offset3d dst_offset,
+        uint32_t dst_mip_level,
+        uint32_t dst_array_index,
+        Extent3d extent) const;
 
     TextureId acquire_swapchain_texture(CommandBufferId id);
 
@@ -224,7 +276,7 @@ public:
     template <typename T>
     void push_constants(const ComputePassId id, const T &data) const
     {
-        push_constants(id, reinterpret_cast<const void *>(&data), sizeof(data));
+        push_constants(id, &data, sizeof(T));
     }
 
     // Render Pass
@@ -237,7 +289,7 @@ public:
     template <typename T>
     void push_constants(const RenderPassId id, const T &data) const
     {
-        push_constants(id, reinterpret_cast<const void *>(&data), sizeof(data));
+        push_constants(id, &data, sizeof(T));
     }
 
     void set_viewport(RenderPassId id, float x, float y, float width, float height, float min_depth, float max_depth) const;
@@ -245,9 +297,6 @@ public:
     void draw(RenderPassId id, uint32_t vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance) const;
 
 private:
-    // FIXME: Decouple frame from the current command buffer
-    FrameData &current_frame();
-
     CommandBuffer *resolve_command_buffer(CommandBufferId id) const;
     ComputePass *resolve_compute_pass(ComputePassId id) const;
     RenderPass *resolve_render_pass(RenderPassId id) const;
@@ -255,9 +304,10 @@ private:
 private:
     RenderDriver *m_render_driver = nullptr;
     std::unordered_map<uint32_t, TextureId> m_swapchain_textures = {};
-    std::array<FrameData, s_frames_in_flight> m_frames = {};
+    std::array<CommandBuffer *, s_frames_in_flight> m_command_buffers = {};
     std::vector<ComputePass *> m_compute_passes;
     std::vector<RenderPass *> m_render_passes;
+    std::vector<Resource> m_deletion_queue;
 
     uint32_t m_frame_index = 0;
 

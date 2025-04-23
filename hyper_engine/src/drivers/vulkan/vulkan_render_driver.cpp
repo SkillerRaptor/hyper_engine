@@ -119,12 +119,6 @@ Buffer *VulkanRenderDriver::create_buffer(
     const BitFlags<BufferUsage> usage,
     const bool staging) const
 {
-    uint64_t buffer_byte_size = byte_size;
-    if (buffer_byte_size < 65535)
-    {
-        buffer_byte_size = (buffer_byte_size + 3) & ~3ull;
-    }
-
     const VkBufferCreateInfo buffer_create_info = {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .pNext = nullptr,
@@ -172,6 +166,23 @@ void VulkanRenderDriver::destroy_buffer(const Buffer *buffer) const
 
     vmaDestroyBuffer(m_allocator, vulkan_buffer->buffer, vulkan_buffer->allocation);
     delete vulkan_buffer;
+}
+
+void *VulkanRenderDriver::map_buffer(const Buffer *buffer) const
+{
+    const VulkanBuffer *vulkan_buffer = reinterpret_cast<const VulkanBuffer *>(buffer);
+
+    void *mapped_ptr = nullptr;
+    vmaMapMemory(m_allocator, vulkan_buffer->allocation, &mapped_ptr);
+
+    return mapped_ptr;
+}
+
+void VulkanRenderDriver::unmap_buffer(const Buffer *buffer) const
+{
+    const VulkanBuffer *vulkan_buffer = reinterpret_cast<const VulkanBuffer *>(buffer);
+
+    vmaUnmapMemory(m_allocator, vulkan_buffer->allocation);
 }
 
 Shader *VulkanRenderDriver::create_shader(
@@ -910,51 +921,350 @@ void VulkanRenderDriver::clear_buffer(const CommandBuffer *command_buffer, const
     vkCmdFillBuffer(vulkan_command_buffer->command_buffer, vulkan_buffer->buffer, offset, size, 0);
 }
 
-void VulkanRenderDriver::write_buffer(
-    const CommandBuffer *command_buffer,
-    const Buffer *buffer,
-    const void *data,
-    const size_t size,
-    const uint64_t offset) const
+void VulkanRenderDriver::clear_texture(const CommandBuffer *command_buffer, const Texture *texture, const SubresourceRange subresource_range)
+    const
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
-    const VulkanBuffer *vulkan_buffer = reinterpret_cast<const VulkanBuffer *>(buffer);
+    const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(texture);
 
-    if (vulkan_buffer->size <= 65535)
+    const VkImageSubresourceRange vulkan_subresource_range = {
+        .aspectMask = get_image_aspect_flags(vulkan_texture->format),
+        .baseMipLevel = subresource_range.base_mip_level,
+        .levelCount = subresource_range.mip_level_count,
+        .baseArrayLayer = subresource_range.base_array_level,
+        .layerCount = subresource_range.array_layer_count,
+    };
+
+    switch (vulkan_texture->format)
     {
-        vkCmdUpdateBuffer(vulkan_command_buffer->command_buffer, vulkan_buffer->buffer, offset, size, data);
-    }
-    else
+    case Format::R8Unorm:
+    case Format::R8Snorm:
+    case Format::R8Uint:
+    case Format::R8Sint:
+    case Format::R8Srgb:
+    case Format::Rg8Unorm:
+    case Format::Rg8Snorm:
+    case Format::Rg8Uint:
+    case Format::Rg8Sint:
+    case Format::Rg8Srgb:
+    case Format::Rgb8Unorm:
+    case Format::Rgb8Snorm:
+    case Format::Rgb8Uint:
+    case Format::Rgb8Sint:
+    case Format::Rgb8Srgb:
+    case Format::Bgr8Unorm:
+    case Format::Bgr8Snorm:
+    case Format::Bgr8Uint:
+    case Format::Bgr8Sint:
+    case Format::Bgr8Srgb:
+    case Format::Rgba8Unorm:
+    case Format::Rgba8Snorm:
+    case Format::Rgba8Uint:
+    case Format::Rgba8Sint:
+    case Format::Rgba8Srgb:
+    case Format::Bgra8Unorm:
+    case Format::Bgra8Snorm:
+    case Format::Bgra8Uint:
+    case Format::Bgra8Sint:
+    case Format::Bgra8Srgb:
+    case Format::R16Unorm:
+    case Format::R16Snorm:
+    case Format::R16Uint:
+    case Format::R16Sint:
+    case Format::R16Sfloat:
+    case Format::Rg16Unorm:
+    case Format::Rg16Snorm:
+    case Format::Rg16Uint:
+    case Format::Rg16Sint:
+    case Format::Rg16Sfloat:
+    case Format::Rgb16Unorm:
+    case Format::Rgb16Snorm:
+    case Format::Rgb16Uint:
+    case Format::Rgb16Sint:
+    case Format::Rgb16Sfloat:
+    case Format::Rgba16Unorm:
+    case Format::Rgba16Snorm:
+    case Format::Rgba16Uint:
+    case Format::Rgba16Sint:
+    case Format::Rgba16Sfloat:
+    case Format::R32Uint:
+    case Format::R32Sint:
+    case Format::R32Sfloat:
+    case Format::Rg32Uint:
+    case Format::Rg32Sint:
+    case Format::Rg32Sfloat:
+    case Format::Rgb32Uint:
+    case Format::Rgb32Sint:
+    case Format::Rgb32Sfloat:
+    case Format::Rgba32Uint:
+    case Format::Rgba32Sint:
+    case Format::Rgba32Sfloat:
+    case Format::R64Uint:
+    case Format::R64Sint:
+    case Format::R64Sfloat:
+    case Format::Rg64Uint:
+    case Format::Rg64Sint:
+    case Format::Rg64Sfloat:
+    case Format::Rgb64Uint:
+    case Format::Rgb64Sint:
+    case Format::Rgb64Sfloat:
+    case Format::Rgba64Uint:
+    case Format::Rgba64Sint:
+    case Format::Rgba64Sfloat:
     {
-        const Buffer *staging_buffer = create_buffer(std::nullopt, size, BufferUsage::Storage, true);
-        const VulkanBuffer *vulkan_staging_buffer = reinterpret_cast<const VulkanBuffer *>(staging_buffer);
-
-        void *mapped_ptr = nullptr;
-        vmaMapMemory(m_allocator, vulkan_staging_buffer->allocation, &mapped_ptr);
-        memcpy(mapped_ptr, data, size);
-        vmaUnmapMemory(m_allocator, vulkan_staging_buffer->allocation);
-
-        const VkBufferCopy2 region = {
-            .sType = VK_STRUCTURE_TYPE_BUFFER_COPY_2,
-            .pNext = nullptr,
-            .srcOffset = 0,
-            .dstOffset = offset,
-            .size = static_cast<uint64_t>(size),
+        constexpr VkClearColorValue clear_color_value = {
+            .float32 =
+                {
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                },
         };
 
-        const VkCopyBufferInfo2 copy_buffer_info = {
-            .sType = VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2,
-            .pNext = nullptr,
-            .srcBuffer = vulkan_staging_buffer->buffer,
-            .dstBuffer = vulkan_buffer->buffer,
-            .regionCount = 1,
-            .pRegions = &region,
+        vkCmdClearColorImage(
+            vulkan_command_buffer->command_buffer,
+            vulkan_texture->image,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            &clear_color_value,
+            1,
+            &vulkan_subresource_range);
+        break;
+    }
+    case Format::D16Unorm:
+    case Format::D32Sfloat:
+    case Format::S8Uint:
+    case Format::D16UnormS8Uint:
+    case Format::D24UnormS8Uint:
+    case Format::D32SfloatS8Uint:
+    {
+        constexpr VkClearDepthStencilValue clear_depth_stencil_value = {
+            .depth = 1.0,
+            .stencil = 0,
         };
 
-        vkCmdCopyBuffer2(vulkan_command_buffer->command_buffer, &copy_buffer_info);
-
-        destroy_buffer(staging_buffer);
+        vkCmdClearDepthStencilImage(
+            vulkan_command_buffer->command_buffer,
+            vulkan_texture->image,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            &clear_depth_stencil_value,
+            1,
+            &vulkan_subresource_range);
+        break;
     }
+    case Format::Unknown:
+    default:
+        HE_UNREACHABLE();
+    }
+}
+
+void VulkanRenderDriver::copy_buffer_to_buffer(
+    const CommandBuffer *command_buffer,
+    const Buffer *src,
+    const uint64_t src_offset,
+    const Buffer *dst,
+    const uint64_t dst_offset,
+    const size_t size) const
+{
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    const VulkanBuffer *vulkan_src = reinterpret_cast<const VulkanBuffer *>(src);
+    const VulkanBuffer *vulkan_dst = reinterpret_cast<const VulkanBuffer *>(dst);
+
+    const VkBufferCopy2 region = {
+        .sType = VK_STRUCTURE_TYPE_BUFFER_COPY_2,
+        .pNext = nullptr,
+        .srcOffset = src_offset,
+        .dstOffset = dst_offset,
+        .size = size,
+    };
+
+    const VkCopyBufferInfo2 copy_buffer_info = {
+        .sType = VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2,
+        .pNext = nullptr,
+        .srcBuffer = vulkan_src->buffer,
+        .dstBuffer = vulkan_dst->buffer,
+        .regionCount = 1,
+        .pRegions = &region,
+    };
+
+    vkCmdCopyBuffer2(vulkan_command_buffer->command_buffer, &copy_buffer_info);
+}
+
+void VulkanRenderDriver::copy_buffer_to_texture(
+    const CommandBuffer *command_buffer,
+    const Buffer *src,
+    const uint64_t src_offset,
+    const Texture *dst,
+    const Offset3d dst_offset,
+    const Extent3d dst_extent,
+    const uint32_t dst_mip_level,
+    const uint32_t dst_array_index) const
+{
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    const VulkanBuffer *vulkan_src = reinterpret_cast<const VulkanBuffer *>(src);
+    const VulkanTexture *vulkan_dst = reinterpret_cast<const VulkanTexture *>(dst);
+
+    const VkImageSubresourceLayers subresource_layers = {
+        .aspectMask = get_image_aspect_flags(vulkan_dst->format),
+        .mipLevel = dst_mip_level,
+        .baseArrayLayer = dst_array_index,
+        .layerCount = 1,
+    };
+
+    const VkBufferImageCopy2 region = {
+        .sType = VK_STRUCTURE_TYPE_BUFFER_IMAGE_COPY_2,
+        .pNext = nullptr,
+        .bufferOffset = src_offset,
+        .bufferRowLength = 0,
+        .bufferImageHeight = 0,
+        .imageSubresource = subresource_layers,
+        .imageOffset =
+            {
+                .x = dst_offset.x,
+                .y = dst_offset.y,
+                .z = dst_offset.z,
+            },
+        .imageExtent =
+            {
+                .width = dst_extent.width,
+                .height = dst_extent.height,
+                .depth = dst_extent.depth,
+            },
+    };
+
+    const VkCopyBufferToImageInfo2 copy_buffer_to_image_info = {
+        .sType = VK_STRUCTURE_TYPE_COPY_BUFFER_TO_IMAGE_INFO_2,
+        .pNext = nullptr,
+        .srcBuffer = vulkan_src->buffer,
+        .dstImage = vulkan_dst->image,
+        .dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        .regionCount = 1,
+        .pRegions = &region,
+    };
+
+    vkCmdCopyBufferToImage2(vulkan_command_buffer->command_buffer, &copy_buffer_to_image_info);
+}
+
+void VulkanRenderDriver::copy_texture_to_buffer(
+    const CommandBuffer *command_buffer,
+    const Texture *src,
+    const Offset3d src_offset,
+    const Extent3d src_extent,
+    const uint32_t src_mip_level,
+    const uint32_t src_array_index,
+    const Buffer *dst,
+    const uint64_t dst_offset) const
+{
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    const VulkanTexture *vulkan_src = reinterpret_cast<const VulkanTexture *>(src);
+    const VulkanBuffer *vulkan_dst = reinterpret_cast<const VulkanBuffer *>(dst);
+
+    const VkImageSubresourceLayers subresource_layers = {
+        .aspectMask = get_image_aspect_flags(vulkan_src->format),
+        .mipLevel = src_mip_level,
+        .baseArrayLayer = src_array_index,
+        .layerCount = 1,
+    };
+
+    const VkBufferImageCopy2 region = {
+        .sType = VK_STRUCTURE_TYPE_BUFFER_IMAGE_COPY_2,
+        .pNext = nullptr,
+        .bufferOffset = dst_offset,
+        .bufferRowLength = 0,
+        .bufferImageHeight = 0,
+        .imageSubresource = subresource_layers,
+        .imageOffset =
+            {
+                .x = src_offset.x,
+                .y = src_offset.y,
+                .z = src_offset.z,
+            },
+        .imageExtent =
+            {
+                .width = src_extent.width,
+                .height = src_extent.height,
+                .depth = src_extent.depth,
+            },
+    };
+
+    const VkCopyImageToBufferInfo2 copy_image_to_buffer_info = {
+        .sType = VK_STRUCTURE_TYPE_COPY_IMAGE_TO_BUFFER_INFO_2,
+        .pNext = nullptr,
+        .srcImage = vulkan_src->image,
+        .srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        .dstBuffer = vulkan_dst->buffer,
+        .regionCount = 1,
+        .pRegions = &region,
+    };
+
+    vkCmdCopyImageToBuffer2(vulkan_command_buffer->command_buffer, &copy_image_to_buffer_info);
+}
+
+void VulkanRenderDriver::copy_texture_to_texture(
+    const CommandBuffer *command_buffer,
+    const Texture *src,
+    const Offset3d src_offset,
+    const uint32_t src_mip_level,
+    const uint32_t src_array_index,
+    const Texture *dst,
+    const Offset3d dst_offset,
+    const uint32_t dst_mip_level,
+    const uint32_t dst_array_index,
+    const Extent3d extent) const
+{
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    const VulkanTexture *vulkan_src = reinterpret_cast<const VulkanTexture *>(src);
+    const VulkanTexture *vulkan_dst = reinterpret_cast<const VulkanTexture *>(dst);
+
+    const VkImageCopy2 region = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_COPY_2,
+        .pNext = nullptr,
+        .srcSubresource =
+            {
+                .aspectMask = get_image_aspect_flags(vulkan_src->format),
+                .mipLevel = src_mip_level,
+                .baseArrayLayer = src_array_index,
+                .layerCount = 1,
+            },
+        .srcOffset =
+            {
+                .x = src_offset.x,
+                .y = src_offset.y,
+                .z = src_offset.z,
+            },
+        .dstSubresource =
+            {
+                .aspectMask = get_image_aspect_flags(vulkan_dst->format),
+                .mipLevel = dst_mip_level,
+                .baseArrayLayer = dst_array_index,
+                .layerCount = 1,
+            },
+        .dstOffset =
+            {
+                .x = dst_offset.x,
+                .y = dst_offset.y,
+                .z = dst_offset.z,
+            },
+        .extent =
+            {
+                .width = extent.width,
+                .height = extent.height,
+                .depth = extent.depth,
+            },
+    };
+
+    const VkCopyImageInfo2 copy_image_info = {
+        .sType = VK_STRUCTURE_TYPE_COPY_IMAGE_INFO_2,
+        .pNext = nullptr,
+        .srcImage = vulkan_src->image,
+        .srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        .dstImage = vulkan_dst->image,
+        .dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        .regionCount = 1,
+        .pRegions = &region,
+    };
+
+    vkCmdCopyImage2(vulkan_command_buffer->command_buffer, &copy_image_info);
 }
 
 void VulkanRenderDriver::push_constants(
@@ -1747,11 +2057,6 @@ void VulkanRenderDriver::recreate_swapchain()
 
 void VulkanRenderDriver::destroy_swapchain()
 {
-    for (const Texture *texture : m_swapchain_textures)
-    {
-        destroy_texture(texture);
-    }
-
     m_swapchain_textures.clear();
 
     vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
