@@ -22,7 +22,7 @@ RenderSystem::~RenderSystem()
     delete m_render_driver;
 }
 
-void RenderSystem::initialize(const WindowSystem &window_system, const WindowId window)
+void RenderSystem::initialize(WindowSystem &window_system, const WindowId window)
 {
     // FIXME: Add selection to change render driver
     m_render_driver = new VulkanRenderDriver();
@@ -321,8 +321,22 @@ TextureId RenderSystem::acquire_swapchain_texture(const CommandBufferId id)
     CommandBuffer *command_buffer = resolve_command_buffer(id);
     command_buffer->swapchain_texture_acquired = true;
 
-    const uint32_t swapchain_texture_index = m_render_driver->acquire_swapchain_texture(command_buffer);
-    return m_swapchain_textures[swapchain_texture_index];
+    const std::pair<uint32_t, bool> swapchain_texture_index = m_render_driver->acquire_swapchain_texture(command_buffer);
+
+    if (swapchain_texture_index.second)
+    {
+        m_swapchain_textures.clear();
+
+        const std::vector<Texture *> textures = m_render_driver->query_swapchain_textures();
+        for (size_t i = 0; i < textures.size(); ++i)
+        {
+            Texture *texture = textures[i];
+            const TextureId texture_id = m_textures.create(texture);
+            m_swapchain_textures.insert({static_cast<uint32_t>(i), texture_id});
+        }
+    }
+
+    return m_swapchain_textures[swapchain_texture_index.first];
 }
 
 ComputePassId RenderSystem::begin_compute_pass(const CommandBufferId id, const ComputePassDescriptor &descriptor)

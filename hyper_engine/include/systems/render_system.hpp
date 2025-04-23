@@ -125,7 +125,7 @@ private:
 public:
     ~RenderSystem();
 
-    void initialize(const WindowSystem &window_system, WindowId window);
+    void initialize(WindowSystem &window_system, WindowId window);
 
     // Buffer
     BufferId create_buffer(const BufferDescriptor &descriptor);

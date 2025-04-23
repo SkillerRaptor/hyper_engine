@@ -106,7 +106,7 @@ class RenderDriver
 public:
     virtual ~RenderDriver() = default;
 
-    virtual void initialize(const WindowSystem &window_system, WindowId window) = 0;
+    virtual void initialize(WindowSystem &window_system, WindowId window) = 0;
     virtual std::vector<Texture *> query_swapchain_textures() = 0;
 
     // Buffer
@@ -175,8 +175,8 @@ public:
     virtual void acquire_command_buffer(const CommandBuffer *command_buffer) const = 0;
     virtual void submit_command_buffer(CommandBuffer *command_buffer) const = 0;
 
-    virtual uint32_t acquire_swapchain_texture(const CommandBuffer *command_buffer) = 0;
-    virtual void present() const = 0;
+    virtual std::pair<uint32_t, bool> acquire_swapchain_texture(const CommandBuffer *command_buffer) = 0;
+    virtual void present() = 0;
 
     virtual void begin_gpu_marker(const CommandBuffer *command_buffer, Label label) const = 0;
     virtual void end_gpu_marker(const CommandBuffer *command_buffer) const = 0;

@@ -16,6 +16,7 @@
 #include "systems/render/render_driver.hpp"
 #include "systems/render/shader_compiler.hpp"
 #include "systems/render_system.hpp"
+#include "systems/window/window_events.hpp"
 
 class VulkanRenderDriver final : public RenderDriver
 {
@@ -79,7 +80,7 @@ private:
 public:
     ~VulkanRenderDriver() override;
 
-    void initialize(const WindowSystem &window_system, WindowId window) override;
+    void initialize(WindowSystem &window_system, WindowId window) override;
     std::vector<Texture *> query_swapchain_textures() override;
 
     // Buffer
@@ -147,8 +148,8 @@ public:
     void acquire_command_buffer(const CommandBuffer *command_buffer) const override;
     void submit_command_buffer(CommandBuffer *command_buffer) const override;
 
-    uint32_t acquire_swapchain_texture(const CommandBuffer *command_buffer) override;
-    void present() const override;
+    std::pair<uint32_t, bool> acquire_swapchain_texture(const CommandBuffer *command_buffer) override;
+    void present() override;
 
     void begin_gpu_marker(const CommandBuffer *command_buffer, Label label) const override;
     void end_gpu_marker(const CommandBuffer *command_buffer) const override;
@@ -182,7 +183,11 @@ private:
     void create_allocator();
 
     void create_surface(const WindowSystem &window_system, WindowId id);
-    void create_swapchain(const WindowSystem &window_system, WindowId id);
+    void create_swapchain(uint32_t width, uint32_t height);
+
+    void recreate_swapchain();
+
+    void on_resize(const WindowResizeEvent &event);
 
     static bool is_validation_layer_supported();
     static bool check_extension_support(const VkPhysicalDevice &physical_device);
@@ -237,6 +242,8 @@ private:
 
     VkSurfaceKHR m_surface = VK_NULL_HANDLE;
     VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
+    uint32_t m_swapchain_width = 0;
+    uint32_t m_swapchain_height = 0;
     uint32_t m_min_image_count = 0;
     uint32_t m_image_count = 0;
     VkFormat m_swapchain_format = VK_FORMAT_UNDEFINED;

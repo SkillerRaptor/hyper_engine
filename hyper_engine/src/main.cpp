@@ -122,10 +122,6 @@ int main()
     {
         window_system->poll_events();
 
-        // FIXME: Add Resizing
-
-        const glm::uvec2 window_size = window_system->get_window_size(window);
-
         const CommandBufferId command_buffer = render_system->acquire_command_buffer();
         const TextureId swapchain_texture = render_system->acquire_swapchain_texture(command_buffer);
 
@@ -142,10 +138,14 @@ int main()
                 },
             .texture = swapchain_texture,
         };
+
         const RenderPassId render_pass = render_system->begin_render_pass(command_buffer, render_pass_descriptor);
         render_system->bind_render_pipeline(render_pass, pipeline);
+
+        const glm::uvec2 window_size = window_system->get_window_size(window);
         render_system->set_viewport(render_pass, 0.0f, 0.0f, static_cast<float>(window_size.x), static_cast<float>(window_size.y), 0.0f, 1.0f);
         render_system->set_scissor(render_pass, 0, 0, window_size.x, window_size.y);
+
         render_system->draw(render_pass, 3, 1, 0, 0);
         render_system->end_render_pass(render_pass);
 

@@ -82,7 +82,7 @@ WindowId WindowSystem::create_window(const WindowDescriptor &descriptor)
         descriptor.title.c_str(),
         static_cast<int32_t>(descriptor.width),
         static_cast<int32_t>(descriptor.height),
-        /*SDL_WINDOW_RESIZABLE |*/ SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_VULKAN);
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_VULKAN);
     if (native_window == nullptr)
     {
         HE_PANIC("Failed to create window", SDL_GetError());

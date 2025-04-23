@@ -52,7 +52,7 @@ VulkanRenderDriver::~VulkanRenderDriver()
     vkDestroyInstance(m_instance, nullptr);
 }
 
-void VulkanRenderDriver::initialize(const WindowSystem &window_system, const WindowId window)
+void VulkanRenderDriver::initialize(WindowSystem &window_system, const WindowId window)
 {
     const VkResult result = volkInitialize();
     HE_VK_CHECK(result, volkInitialize);
@@ -81,9 +81,13 @@ void VulkanRenderDriver::initialize(const WindowSystem &window_system, const Win
     create_allocator();
 
     create_surface(window_system, window);
-    create_swapchain(window_system, window);
+
+    const glm::uvec2 size = window_system.get_window_size(window);
+    create_swapchain(size.x, size.y);
 
     // FIXME: Add descriptors
+
+    window_system.register_listener<WindowResizeEvent>(HE_BIND_FUNCTION(on_resize));
 
     HE_INFO("Successfully initialized VulkanRenderDriver");
 }
@@ -769,24 +773,40 @@ void VulkanRenderDriver::submit_command_buffer(CommandBuffer *command_buffer) co
     HE_VK_CHECK(vkQueueSubmit2(m_queue, 1, &submit_info, VK_NULL_HANDLE), vkQueueSubmit2);
 }
 
-uint32_t VulkanRenderDriver::acquire_swapchain_texture(const CommandBuffer *command_buffer)
+std::pair<uint32_t, bool> VulkanRenderDriver::acquire_swapchain_texture(const CommandBuffer *command_buffer)
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
-    // FIXME: Resize swapchain
+    bool recreated = false;
+    if (m_swapchain_out_of_date)
+    {
+        recreate_swapchain();
+        recreated = true;
+    }
 
-    uint32_t image_index = 0;
-    HE_VK_CHECK(
-        vkAcquireNextImageKHR(
-            m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), VK_NULL_HANDLE, vulkan_command_buffer->render_fence, &image_index),
-        vkAcquireNextImageKHR);
+    while (true)
+    {
+        const VkResult result = vkAcquireNextImageKHR(
+            m_device,
+            m_swapchain,
+            std::numeric_limits<uint64_t>::max(),
+            VK_NULL_HANDLE,
+            vulkan_command_buffer->render_fence,
+            &m_swapchain_texture_index);
 
-    m_swapchain_texture_index = image_index;
+        if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
+        {
+            break;
+        }
 
-    return m_swapchain_texture_index;
+        recreate_swapchain();
+        recreated = true;
+    }
+
+    return std::make_pair(m_swapchain_texture_index, recreated);
 }
 
-void VulkanRenderDriver::present() const
+void VulkanRenderDriver::present()
 {
     const VkPresentInfoKHR present_info = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
@@ -799,7 +819,15 @@ void VulkanRenderDriver::present() const
         .pResults = nullptr,
     };
 
-    HE_VK_CHECK(vkQueuePresentKHR(m_queue, &present_info), vkQueuePresentKHR);
+    const VkResult result = vkQueuePresentKHR(m_queue, &present_info);
+    if (result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR)
+    {
+        m_swapchain_out_of_date = true;
+    }
+    else
+    {
+        HE_VK_CHECK(result, vkQueuePresentKHR);
+    }
 }
 
 void VulkanRenderDriver::begin_gpu_marker(const CommandBuffer *command_buffer, const Label label) const
@@ -1353,16 +1381,16 @@ void VulkanRenderDriver::create_surface(const WindowSystem &window_system, const
     HE_ASSERT(m_surface != VK_NULL_HANDLE);
 }
 
-void VulkanRenderDriver::create_swapchain(const WindowSystem &window_system, const WindowId id)
+void VulkanRenderDriver::create_swapchain(const uint32_t width, const uint32_t height)
 {
-    const glm::uvec2 size = window_system.get_window_size(id);
-
     VkSurfaceCapabilitiesKHR surface_capabilities = {};
     HE_VK_CHECK(
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &surface_capabilities),
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR);
 
-    const VkExtent2D surface_extent = choose_extent(size.x, size.y, surface_capabilities);
+    const VkExtent2D surface_extent = choose_extent(width, height, surface_capabilities);
+    m_swapchain_width = surface_extent.width;
+    m_swapchain_height = surface_extent.height;
 
     uint32_t format_count = 0;
     HE_VK_CHECK(
@@ -1476,6 +1504,30 @@ void VulkanRenderDriver::create_swapchain(const WindowSystem &window_system, con
 
         m_swapchain_textures.push_back(texture);
     }
+}
+
+void VulkanRenderDriver::recreate_swapchain()
+{
+    // FIXME: Destroy old swapchain
+
+    for (const Texture *texture : m_swapchain_textures)
+    {
+        destroy_texture(texture);
+    }
+
+    m_swapchain_textures.clear();
+
+    create_swapchain(m_swapchain_width, m_swapchain_height);
+
+    m_swapchain_out_of_date = false;
+}
+
+// FIXME: Check if the window id matches and maybe save the width/height
+void VulkanRenderDriver::on_resize(const WindowResizeEvent &event)
+{
+    m_swapchain_width = event.width();
+    m_swapchain_height = event.height();
+    m_swapchain_out_of_date = true;
 }
 
 void VulkanRenderDriver::transition_texture_layout(const CommandBuffer *command_buffer, Texture *texture, const VkImageLayout new_layout)
