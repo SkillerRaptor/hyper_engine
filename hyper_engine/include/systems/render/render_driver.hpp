@@ -89,14 +89,16 @@ struct CommandBuffer
 
 struct ComputePass
 {
-    CommandBuffer *command_buffer;
+    CommandBuffer *command_buffer = nullptr;
+    ComputePipeline *compute_pipeline = nullptr;
     bool has_label = false;
     bool ended = false;
 };
 
 struct RenderPass
 {
-    CommandBuffer *command_buffer;
+    CommandBuffer *command_buffer = nullptr;
+    RenderPipeline *render_pipeline = nullptr;
     bool has_label = false;
     bool ended = false;
 };
@@ -179,11 +181,18 @@ public:
     virtual void acquire_command_buffer(const CommandBuffer *command_buffer) const = 0;
     virtual void submit_command_buffer(CommandBuffer *command_buffer) const = 0;
 
+    virtual void bind_buffer(const Buffer *buffer, uint32_t slot) const = 0;
+    virtual void bind_sampler(const Sampler *sampler, uint32_t slot) const = 0;
+    virtual void bind_texture(const Texture *texture, uint32_t slot) const = 0;
+
     virtual std::pair<uint32_t, bool> acquire_swapchain_texture(const CommandBuffer *command_buffer) = 0;
     virtual void present() = 0;
 
     virtual void begin_gpu_marker(const CommandBuffer *command_buffer, Label label) const = 0;
     virtual void end_gpu_marker(const CommandBuffer *command_buffer) const = 0;
+
+    virtual void
+        push_constants(const CommandBuffer *command_buffer, const PipelineLayout *pipeline_layout, const void *data, size_t data_size) = 0;
 
     // Compute Pass
     virtual void begin_compute_pass(const CommandBuffer *command_buffer) const = 0;

@@ -140,7 +140,7 @@ int main()
         };
 
         const RenderPassId render_pass = render_system->begin_render_pass(command_buffer, render_pass_descriptor);
-        render_system->bind_render_pipeline(render_pass, pipeline);
+        render_system->bind_pipeline(render_pass, pipeline);
 
         const glm::uvec2 window_size = window_system->get_window_size(window);
         render_system->set_viewport(render_pass, 0.0f, 0.0f, static_cast<float>(window_size.x), static_cast<float>(window_size.y), 0.0f, 1.0f);

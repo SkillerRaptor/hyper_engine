@@ -184,19 +184,38 @@ public:
     CommandBufferId acquire_command_buffer();
     void submit_command_buffer(CommandBufferId id);
 
+    // FIXME: Add an id system & add a system to prevent overriding in FiF, because memory changes are reflected immediately
+    void bind_buffer(BufferId id, uint32_t slot) const;
+    void bind_sampler(SamplerId id, uint32_t slot) const;
+    void bind_texture(TextureId id, uint32_t slot) const;
+
     TextureId acquire_swapchain_texture(CommandBufferId id);
 
     // Compute Pass
     ComputePassId begin_compute_pass(CommandBufferId id, const ComputePassDescriptor &descriptor);
     void end_compute_pass(ComputePassId id) const;
 
-    void bind_compute_pipeline(ComputePassId id, ComputePipelineId pipeline_id);
+    void bind_pipeline(ComputePassId id, ComputePipelineId pipeline_id) const;
+    void push_constants(ComputePassId id, const void *data, size_t data_size) const;
+
+    template <typename T>
+    void push_constants(const ComputePassId id, const T &data) const
+    {
+        push_constants(id, reinterpret_cast<const void *>(&data), sizeof(data));
+    }
 
     // Render Pass
     RenderPassId begin_render_pass(CommandBufferId id, const RenderPassDescriptor &descriptor);
     void end_render_pass(RenderPassId id) const;
 
-    void bind_render_pipeline(RenderPassId id, RenderPipelineId pipeline_id);
+    void bind_pipeline(RenderPassId id, RenderPipelineId pipeline_id) const;
+    void push_constants(RenderPassId id, const void *data, size_t data_size) const;
+
+    template <typename T>
+    void push_constants(const RenderPassId id, const T &data) const
+    {
+        push_constants(id, reinterpret_cast<const void *>(&data), sizeof(data));
+    }
 
     void set_viewport(RenderPassId id, float x, float y, float width, float height, float min_depth, float max_depth) const;
     void set_scissor(RenderPassId id, int32_t x, int32_t y, uint32_t width, uint32_t height) const;

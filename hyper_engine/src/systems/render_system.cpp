@@ -478,14 +478,47 @@ void RenderSystem::end_compute_pass(const ComputePassId id) const
     compute_pass->command_buffer->render_pass_in_progress = false;
 }
 
-void RenderSystem::bind_compute_pipeline(const ComputePassId id, const ComputePipelineId pipeline_id)
+void RenderSystem::bind_pipeline(const ComputePassId id, const ComputePipelineId pipeline_id) const
 {
     HE_ASSERT(m_compute_pipelines.contains(pipeline_id));
 
-    const ComputePass *compute_pass = resolve_compute_pass(id);
+    ComputePass *compute_pass = resolve_compute_pass(id);
+    ComputePipeline *compute_pipeline = m_compute_pipelines.get(pipeline_id);
+    compute_pass->compute_pipeline = compute_pipeline;
 
-    const ComputePipeline *compute_pipeline = m_compute_pipelines.get(pipeline_id);
     m_render_driver->bind_compute_pipeline(compute_pass->command_buffer, compute_pipeline);
+}
+
+void RenderSystem::push_constants(const ComputePassId id, const void *data, const size_t data_size) const
+{
+    const ComputePass *compute_pass = resolve_compute_pass(id);
+    HE_ASSERT(compute_pass->compute_pipeline != nullptr);
+
+    m_render_driver->push_constants(compute_pass->command_buffer, compute_pass->compute_pipeline->layout, data, data_size);
+}
+
+void RenderSystem::bind_buffer(const BufferId id, const uint32_t slot) const
+{
+    HE_ASSERT(m_buffers.contains(id));
+
+    const Buffer *buffer = m_buffers.get(id);
+    m_render_driver->bind_buffer(buffer, slot);
+}
+
+void RenderSystem::bind_sampler(const SamplerId id, const uint32_t slot) const
+{
+    HE_ASSERT(m_samplers.contains(id));
+
+    const Sampler *sampler = m_samplers.get(id);
+    m_render_driver->bind_sampler(sampler, slot);
+}
+
+void RenderSystem::bind_texture(const TextureId id, const uint32_t slot) const
+{
+    HE_ASSERT(m_textures.contains(id));
+
+    const Texture *texture = m_textures.get(id);
+    m_render_driver->bind_texture(texture, slot);
 }
 
 RenderPassId RenderSystem::begin_render_pass(const CommandBufferId id, const RenderPassDescriptor &descriptor)
@@ -531,14 +564,23 @@ void RenderSystem::end_render_pass(const RenderPassId id) const
     render_pass->command_buffer->render_pass_in_progress = false;
 }
 
-void RenderSystem::bind_render_pipeline(const RenderPassId id, const RenderPipelineId pipeline_id)
+void RenderSystem::bind_pipeline(const RenderPassId id, const RenderPipelineId pipeline_id) const
 {
     HE_ASSERT(m_render_pipelines.contains(pipeline_id));
 
-    const RenderPass *render_pass = resolve_render_pass(id);
+    RenderPass *render_pass = resolve_render_pass(id);
+    RenderPipeline *render_pipeline = m_render_pipelines.get(pipeline_id);
+    render_pass->render_pipeline = render_pipeline;
 
-    const RenderPipeline *render_pipeline = m_render_pipelines.get(pipeline_id);
     m_render_driver->bind_render_pipeline(render_pass->command_buffer, render_pipeline);
+}
+
+void RenderSystem::push_constants(const RenderPassId id, const void *data, const size_t data_size) const
+{
+    const RenderPass *render_pass = resolve_render_pass(id);
+    HE_ASSERT(render_pass->render_pipeline != nullptr);
+
+    m_render_driver->push_constants(render_pass->command_buffer, render_pass->render_pipeline->layout, data, data_size);
 }
 
 void RenderSystem::set_viewport(

@@ -68,15 +68,25 @@ void VulkanRenderDriver::initialize(WindowSystem &window_system, const WindowId 
     const glm::uvec2 size = window_system.get_window_size(window);
     create_swapchain(size.x, size.y);
 
-    // FIXME: Add descriptors
-
     window_system.register_listener<WindowResizeEvent>(HE_BIND_FUNCTION(on_resize));
+
+    find_descriptor_counts();
+    create_descriptor_pool();
+    create_descriptor_set_layouts();
+    create_descriptor_sets();
 
     HE_INFO("Successfully initialized VulkanRenderDriver");
 }
 
 void VulkanRenderDriver::shutdown()
 {
+    for (const VkDescriptorSetLayout &descriptor_set_layout : m_descriptor_set_layouts)
+    {
+        vkDestroyDescriptorSetLayout(m_device, descriptor_set_layout, nullptr);
+    }
+
+    vkDestroyDescriptorPool(m_device, m_descriptor_pool, nullptr);
+
     destroy_swapchain();
     vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 
@@ -783,6 +793,67 @@ void VulkanRenderDriver::submit_command_buffer(CommandBuffer *command_buffer) co
     HE_VK_CHECK(vkQueueSubmit2(m_queue, 1, &submit_info, VK_NULL_HANDLE), vkQueueSubmit2);
 }
 
+void VulkanRenderDriver::bind_buffer(const Buffer *buffer, const uint32_t slot) const
+{
+    const VulkanBuffer *vulkan_buffer = reinterpret_cast<const VulkanBuffer *>(buffer);
+
+    const VkDescriptorBufferInfo buffer_info = {
+        .buffer = vulkan_buffer->buffer,
+        .offset = 0,
+        .range = VK_WHOLE_SIZE,
+    };
+
+    const VkWriteDescriptorSet descriptor_write = {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .pNext = nullptr,
+        .dstSet = m_descriptor_sets[0],
+        .dstBinding = 0,
+        .dstArrayElement = slot,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        .pImageInfo = nullptr,
+        .pBufferInfo = &buffer_info,
+        .pTexelBufferView = nullptr,
+    };
+
+    vkUpdateDescriptorSets(m_device, 1, &descriptor_write, 0, nullptr);
+}
+
+void VulkanRenderDriver::bind_sampler(const Sampler *sampler, const uint32_t slot) const
+{
+    const VulkanSampler *vulkan_sampler = static_cast<const VulkanSampler *>(sampler);
+
+    const VkDescriptorImageInfo image_info = {
+        .sampler = vulkan_sampler->sampler,
+        .imageView = VK_NULL_HANDLE,
+        .imageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    const VkWriteDescriptorSet descriptor_write = {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .pNext = nullptr,
+        .dstSet = m_descriptor_sets[3],
+        .dstBinding = 0,
+        .dstArrayElement = slot,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
+        .pImageInfo = &image_info,
+        .pBufferInfo = nullptr,
+        .pTexelBufferView = nullptr,
+    };
+
+    vkUpdateDescriptorSets(m_device, 1, &descriptor_write, 0, nullptr);
+}
+
+void VulkanRenderDriver::bind_texture(const Texture *texture, const uint32_t slot) const
+{
+    (void) texture;
+    (void) slot;
+
+    // FIXME: Implement VulkanRenderDriver::bind_texture
+    HE_PANIC("TODO: Implement `VulkanRenderDriver::bind_texture`");
+}
+
 std::pair<uint32_t, bool> VulkanRenderDriver::acquire_swapchain_texture(const CommandBuffer *command_buffer)
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
@@ -868,6 +939,24 @@ void VulkanRenderDriver::end_gpu_marker(const CommandBuffer *command_buffer) con
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
     vkCmdEndDebugUtilsLabelEXT(vulkan_command_buffer->command_buffer);
+}
+
+void VulkanRenderDriver::push_constants(
+    const CommandBuffer *command_buffer,
+    const PipelineLayout *pipeline_layout,
+    const void *data,
+    const size_t data_size)
+{
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    const VulkanPipelineLayout *vulkan_pipeline_layout = reinterpret_cast<const VulkanPipelineLayout *>(pipeline_layout);
+
+    vkCmdPushConstants(
+        vulkan_command_buffer->command_buffer,
+        vulkan_pipeline_layout->pipeline_layout,
+        VK_SHADER_STAGE_ALL,
+        0,
+        static_cast<uint32_t>(data_size),
+        &data);
 }
 
 void VulkanRenderDriver::begin_compute_pass(const CommandBuffer *command_buffer) const
@@ -1542,6 +1631,134 @@ void VulkanRenderDriver::on_resize(const WindowResizeEvent &event)
     m_swapchain_width = event.width();
     m_swapchain_height = event.height();
     m_swapchain_out_of_date = true;
+}
+
+void VulkanRenderDriver::find_descriptor_counts()
+{
+    VkPhysicalDeviceProperties properties = {};
+    vkGetPhysicalDeviceProperties(m_physical_device, &properties);
+
+    for (size_t index = 0; index != s_descriptor_count; ++index)
+    {
+        const VkDescriptorType &descriptor_type = s_descriptor_types[index];
+
+        const uint32_t limit = [&properties, &descriptor_type]()
+        {
+            switch (descriptor_type)
+            {
+            case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+                return properties.limits.maxDescriptorSetStorageBuffers;
+            case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+                return properties.limits.maxDescriptorSetSampledImages;
+            case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+                return properties.limits.maxDescriptorSetStorageImages;
+            case VK_DESCRIPTOR_TYPE_SAMPLER:
+                return properties.limits.maxDescriptorSetSamplers;
+            default:
+                HE_UNREACHABLE();
+            }
+        }();
+
+        const uint32_t descriptor_count = limit > s_descriptor_limit ? s_descriptor_limit : limit;
+        m_descriptor_counts[index] = descriptor_count;
+    }
+}
+
+void VulkanRenderDriver::create_descriptor_pool()
+{
+    std::array<VkDescriptorPoolSize, s_descriptor_count> descriptor_pool_sizes = {};
+    for (size_t index = 0; index < s_descriptor_count; index++)
+    {
+        const VkDescriptorType &descriptor_type = s_descriptor_types[index];
+        const uint32_t descriptor_count = m_descriptor_counts[index];
+
+        const VkDescriptorPoolSize descriptor_pool_size = {
+            .type = descriptor_type,
+            .descriptorCount = descriptor_count,
+        };
+
+        descriptor_pool_sizes[index] = descriptor_pool_size;
+    }
+
+    const VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
+        .maxSets = static_cast<uint32_t>(s_descriptor_count),
+        .poolSizeCount = static_cast<uint32_t>(descriptor_pool_sizes.size()),
+        .pPoolSizes = descriptor_pool_sizes.data(),
+    };
+
+    HE_VK_CHECK(vkCreateDescriptorPool(m_device, &descriptor_pool_create_info, nullptr, &m_descriptor_pool), vkCreateDescriptorPool);
+    HE_ASSERT(m_descriptor_pool != VK_NULL_HANDLE);
+}
+
+void VulkanRenderDriver::create_descriptor_set_layouts()
+{
+    for (size_t index = 0; index != s_descriptor_count; ++index)
+    {
+        const VkDescriptorType &descriptor_type = s_descriptor_types[index];
+        const uint32_t descriptor_count = m_descriptor_counts[index];
+
+        const VkDescriptorSetLayoutBinding descriptor_set_layout_binding = {
+            .binding = 0,
+            .descriptorType = descriptor_type,
+            .descriptorCount = descriptor_count,
+            .stageFlags = VK_SHADER_STAGE_ALL,
+            .pImmutableSamplers = nullptr,
+        };
+
+        constexpr VkDescriptorBindingFlags descriptor_binding_flags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
+                                                                      VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
+                                                                      VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+
+        VkDescriptorSetLayoutBindingFlagsCreateInfo descriptor_set_layout_binding_flags_info = {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO,
+            .pNext = nullptr,
+            .bindingCount = 1,
+            .pBindingFlags = &descriptor_binding_flags,
+        };
+
+        const VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+            .pNext = &descriptor_set_layout_binding_flags_info,
+            .flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT,
+            .bindingCount = 1,
+            .pBindings = &descriptor_set_layout_binding,
+        };
+
+        HE_VK_CHECK(
+            vkCreateDescriptorSetLayout(m_device, &descriptor_set_layout_create_info, nullptr, &m_descriptor_set_layouts[index]),
+            vkCreateDescriptorSetLayout);
+        HE_ASSERT(m_descriptor_set_layouts[index] != VK_NULL_HANDLE);
+    }
+}
+
+void VulkanRenderDriver::create_descriptor_sets()
+{
+    for (size_t index = 0; index != m_descriptor_set_layouts.size(); ++index)
+    {
+        const VkDescriptorSetLayout &descriptor_set_layout = m_descriptor_set_layouts[index];
+        const uint32_t descriptor_count = m_descriptor_counts[index];
+
+        VkDescriptorSetVariableDescriptorCountAllocateInfo descriptor_set_variable_descriptor_count_info = {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO,
+            .pNext = nullptr,
+            .descriptorSetCount = 1,
+            .pDescriptorCounts = &descriptor_count,
+        };
+
+        const VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+            .pNext = &descriptor_set_variable_descriptor_count_info,
+            .descriptorPool = m_descriptor_pool,
+            .descriptorSetCount = 1,
+            .pSetLayouts = &descriptor_set_layout,
+        };
+
+        HE_VK_CHECK(vkAllocateDescriptorSets(m_device, &descriptor_set_allocate_info, &m_descriptor_sets[index]), vkAllocateDescriptorSets);
+        HE_ASSERT(m_descriptor_sets[index] != VK_NULL_HANDLE);
+    }
 }
 
 void VulkanRenderDriver::transition_texture_layout(const CommandBuffer *command_buffer, Texture *texture, const VkImageLayout new_layout)

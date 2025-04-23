@@ -27,6 +27,16 @@ private:
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     };
 
+    static constexpr std::array<VkDescriptorType, 4> s_descriptor_types = {
+        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+        VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+        VK_DESCRIPTOR_TYPE_SAMPLER,
+    };
+
+    static constexpr size_t s_descriptor_count = s_descriptor_types.size();
+    static constexpr uint32_t s_descriptor_limit = 1000 * 1000;
+
 private:
     struct VulkanBuffer : Buffer
     {
@@ -150,11 +160,17 @@ public:
     void acquire_command_buffer(const CommandBuffer *command_buffer) const override;
     void submit_command_buffer(CommandBuffer *command_buffer) const override;
 
+    void bind_buffer(const Buffer *buffer, uint32_t slot) const override;
+    void bind_sampler(const Sampler *sampler, uint32_t slot) const override;
+    void bind_texture(const Texture *texture, uint32_t slot) const override;
+
     std::pair<uint32_t, bool> acquire_swapchain_texture(const CommandBuffer *command_buffer) override;
     void present() override;
 
     void begin_gpu_marker(const CommandBuffer *command_buffer, Label label) const override;
     void end_gpu_marker(const CommandBuffer *command_buffer) const override;
+
+    void push_constants(const CommandBuffer *command_buffer, const PipelineLayout *pipeline_layout, const void *data, size_t data_size) override;
 
     // Compute Pass
     void begin_compute_pass(const CommandBuffer *command_buffer) const override;
@@ -191,6 +207,11 @@ private:
     void destroy_swapchain();
 
     void on_resize(const WindowResizeEvent &event);
+
+    void find_descriptor_counts();
+    void create_descriptor_pool();
+    void create_descriptor_set_layouts();
+    void create_descriptor_sets();
 
     static bool is_validation_layer_supported();
     static bool check_extension_support(const VkPhysicalDevice &physical_device);
@@ -254,4 +275,10 @@ private:
 
     bool m_swapchain_out_of_date = false;
     uint32_t m_swapchain_texture_index = 0;
+
+    std::array<uint32_t, s_descriptor_count> m_descriptor_counts = {};
+
+    VkDescriptorPool m_descriptor_pool = VK_NULL_HANDLE;
+    std::array<VkDescriptorSetLayout, s_descriptor_count> m_descriptor_set_layouts = {};
+    std::array<VkDescriptorSet, s_descriptor_count> m_descriptor_sets = {};
 };
