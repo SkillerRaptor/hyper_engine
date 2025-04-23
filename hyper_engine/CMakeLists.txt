@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 set(SOURCES
+        src/engine.cpp
         src/main.cpp
         src/core/filesystem.cpp
         src/core/logger.cpp
@@ -21,6 +22,7 @@ set(SOURCES
         src/systems/window/window_events.cpp)
 
 set(HEADERS
+        include/engine.hpp
         include/core/assertion.hpp
         include/core/bit_flags.hpp
         include/core/filesystem.hpp
