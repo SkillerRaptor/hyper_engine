@@ -216,6 +216,8 @@ private:
     void create_descriptor_set_layouts();
     void create_descriptor_sets();
 
+    VkImageView create_internal_image_view(const VkImage image, const Dimension dimension, const Format format) const;
+
     static bool is_validation_layer_supported();
     static bool check_extension_support(const VkPhysicalDevice &physical_device);
     static bool check_feature_support(const VkPhysicalDevice &physical_device);

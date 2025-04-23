@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-// FIXME: The destroy function doesn't queue the resources so it's not ensured that they are safe to be destroyed
-
 #include "systems/render_system.hpp"
 
 #include "core/assertion.hpp"

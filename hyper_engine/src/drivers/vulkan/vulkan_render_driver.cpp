@@ -327,20 +327,54 @@ Texture *VulkanRenderDriver::create_texture(
     const Dimension dimension,
     const BitFlags<TextureUsage> usage) const
 {
-    (void) label;
-    (void) width;
-    (void) height;
-    (void) depth;
-    (void) array_size;
-    (void) mip_levels;
-    (void) format;
-    (void) dimension;
-    (void) usage;
+    const VkImageCreateInfo image_create_info = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .imageType = get_image_type(dimension),
+        .format = get_format(format),
+        .extent =
+            {
+                .width = width,
+                .height = height,
+                .depth = depth,
+            },
+        .mipLevels = mip_levels,
+        .arrayLayers = array_size,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .tiling = VK_IMAGE_TILING_OPTIMAL,
+        .usage = get_image_usage_flags(usage, format),
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .queueFamilyIndexCount = 0,
+        .pQueueFamilyIndices = nullptr,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+    };
 
-    // FIXME: Implement VulkanRenderDriver::create_texture
-    HE_PANIC("TODO: Implement `VulkanRenderDriver::create_texture`");
+    constexpr VmaAllocationCreateInfo allocation_create_info = {
+        .flags = 0,
+        .usage = VMA_MEMORY_USAGE_AUTO,
+        .requiredFlags = 0,
+        .preferredFlags = 0,
+        .memoryTypeBits = 0,
+        .pool = VK_NULL_HANDLE,
+        .pUserData = nullptr,
+        .priority = 0,
+    };
 
-    return nullptr;
+    VkImage image = VK_NULL_HANDLE;
+    VmaAllocation allocation = VK_NULL_HANDLE;
+    HE_VK_CHECK(vmaCreateImage(m_allocator, &image_create_info, &allocation_create_info, &image, &allocation, nullptr), vmaCreateImage);
+    HE_ASSERT(image != VK_NULL_HANDLE);
+    HE_ASSERT(allocation != VK_NULL_HANDLE);
+
+    const VkImageView image_view = create_internal_image_view(image, dimension, format);
+
+    return new VulkanTexture({
+        .image = image,
+        .allocation = allocation,
+        .image_view = image_view,
+        .image_layout = VK_IMAGE_LAYOUT_UNDEFINED,
+    });
 }
 
 void VulkanRenderDriver::destroy_texture(const Texture *texture) const
@@ -713,8 +747,6 @@ void VulkanRenderDriver::destroy_command_buffer(const CommandBuffer *command_buf
 
 void VulkanRenderDriver::acquire_command_buffer(const CommandBuffer *command_buffer) const
 {
-    // FIXME: Add resource destruction
-
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
     const uint64_t wait_frame_index = vulkan_command_buffer->semaphore_counter;
@@ -820,7 +852,7 @@ void VulkanRenderDriver::bind_buffer(const Buffer *buffer, const uint32_t slot) 
 
 void VulkanRenderDriver::bind_sampler(const Sampler *sampler, const uint32_t slot) const
 {
-    const VulkanSampler *vulkan_sampler = static_cast<const VulkanSampler *>(sampler);
+    const VulkanSampler *vulkan_sampler = reinterpret_cast<const VulkanSampler *>(sampler);
 
     const VkDescriptorImageInfo image_info = {
         .sampler = vulkan_sampler->sampler,
@@ -846,11 +878,28 @@ void VulkanRenderDriver::bind_sampler(const Sampler *sampler, const uint32_t slo
 
 void VulkanRenderDriver::bind_texture(const Texture *texture, const uint32_t slot) const
 {
-    (void) texture;
-    (void) slot;
+    const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(texture);
 
-    // FIXME: Implement VulkanRenderDriver::bind_texture
-    HE_PANIC("TODO: Implement `VulkanRenderDriver::bind_texture`");
+    const VkDescriptorImageInfo image_info = {
+        .sampler = VK_NULL_HANDLE,
+        .imageView = vulkan_texture->image_view,
+        .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+    };
+
+    const VkWriteDescriptorSet descriptor_write = {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .pNext = nullptr,
+        .dstSet = m_descriptor_sets[2],
+        .dstBinding = 0,
+        .dstArrayElement = slot,
+        .descriptorCount = 1,
+        .descriptorType = (vulkan_texture->usage & TextureUsage::Storage) ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+        .pImageInfo = &image_info,
+        .pBufferInfo = nullptr,
+        .pTexelBufferView = nullptr,
+    };
+
+    vkUpdateDescriptorSets(m_device, 1, &descriptor_write, 0, nullptr);
 }
 
 void VulkanRenderDriver::clear_buffer(const CommandBuffer *command_buffer, const Buffer *buffer, const size_t size, const uint64_t offset) const
@@ -1629,37 +1678,8 @@ void VulkanRenderDriver::create_swapchain(const uint32_t width, const uint32_t h
 
     for (const VkImage image : images)
     {
-        // FIXME: Go through create texture function
-
-        constexpr VkComponentMapping component_mapping = {
-            .r = VK_COMPONENT_SWIZZLE_IDENTITY,
-            .g = VK_COMPONENT_SWIZZLE_IDENTITY,
-            .b = VK_COMPONENT_SWIZZLE_IDENTITY,
-            .a = VK_COMPONENT_SWIZZLE_IDENTITY,
-        };
-
-        constexpr VkImageSubresourceRange subresource_range = {
-            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-            .baseMipLevel = 0,
-            .levelCount = 1,
-            .baseArrayLayer = 0,
-            .layerCount = 1,
-        };
-
-        const VkImageViewCreateInfo image_view_create_info = {
-            .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-            .pNext = nullptr,
-            .flags = 0,
-            .image = image,
-            .viewType = VK_IMAGE_VIEW_TYPE_2D,
-            .format = surface_format.format,
-            .components = component_mapping,
-            .subresourceRange = subresource_range,
-        };
-
-        VkImageView image_view = VK_NULL_HANDLE;
-        HE_VK_CHECK(vkCreateImageView(m_device, &image_view_create_info, nullptr, &image_view), vkCreateImageView);
-        HE_ASSERT(image_view != VK_NULL_HANDLE);
+        const Format format = format_to_texture_format(surface_format.format);
+        const VkImageView image_view = create_internal_image_view(image, Dimension::Texture2D, format);
 
         Texture *texture = new VulkanTexture({
             .image = image,
@@ -1673,7 +1693,7 @@ void VulkanRenderDriver::create_swapchain(const uint32_t width, const uint32_t h
         texture->depth = 1;
         texture->array_size = 1;
         texture->mip_levels = 1;
-        texture->format = format_to_texture_format(surface_format.format);
+        texture->format = format;
         texture->dimension = Dimension::Texture2D;
         texture->usage = TextureUsage::RenderAttachment;
 
@@ -1835,6 +1855,42 @@ void VulkanRenderDriver::create_descriptor_sets()
         HE_VK_CHECK(vkAllocateDescriptorSets(m_device, &descriptor_set_allocate_info, &m_descriptor_sets[index]), vkAllocateDescriptorSets);
         HE_ASSERT(m_descriptor_sets[index] != VK_NULL_HANDLE);
     }
+}
+
+VkImageView VulkanRenderDriver::create_internal_image_view(const VkImage image, const Dimension dimension, const Format format) const
+{
+    constexpr VkComponentMapping component_mapping = {
+        .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+        .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+        .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+        .a = VK_COMPONENT_SWIZZLE_IDENTITY,
+    };
+
+    // FIXME: Add subresource
+    const VkImageSubresourceRange subresource_range = {
+        .aspectMask = get_image_aspect_flags(format),
+        .baseMipLevel = 0,
+        .levelCount = 1,
+        .baseArrayLayer = 0,
+        .layerCount = 1,
+    };
+
+    const VkImageViewCreateInfo image_view_create_info = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .image = image,
+        .viewType = get_image_view_type(dimension),
+        .format = get_format(format),
+        .components = component_mapping,
+        .subresourceRange = subresource_range,
+    };
+
+    VkImageView image_view = VK_NULL_HANDLE;
+    HE_VK_CHECK(vkCreateImageView(m_device, &image_view_create_info, nullptr, &image_view), vkCreateImageView);
+    HE_ASSERT(image_view != VK_NULL_HANDLE);
+
+    return image_view;
 }
 
 void VulkanRenderDriver::transition_texture_layout(const CommandBuffer *command_buffer, Texture *texture, const VkImageLayout new_layout)
