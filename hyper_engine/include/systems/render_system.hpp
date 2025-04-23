@@ -189,6 +189,15 @@ public:
     void bind_sampler(SamplerId id, uint32_t slot) const;
     void bind_texture(TextureId id, uint32_t slot) const;
 
+    void clear_buffer(CommandBufferId id, BufferId buffer, size_t size, uint64_t offset) const;
+    void write_buffer(CommandBufferId id, BufferId buffer, const void *data, size_t size, uint64_t offset) const;
+
+    template <typename T>
+    void write_buffer(const CommandBufferId id, const BufferId buffer, const T &data, const uint64_t offset) const
+    {
+        write_buffer(id, buffer, &data, sizeof(T), offset);
+    }
+
     TextureId acquire_swapchain_texture(CommandBufferId id);
 
     // Compute Pass

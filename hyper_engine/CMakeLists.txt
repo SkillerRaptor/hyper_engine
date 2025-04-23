@@ -13,6 +13,8 @@ set(SOURCES
         src/systems/input_system.cpp
         src/systems/render_system.cpp
         src/systems/window_system.cpp
+        src/systems/render/camera.cpp
+        src/systems/render/resource_handle.cpp
         src/systems/render/shader_compiler.cpp
         src/systems/window/key_events.cpp
         src/systems/window/mouse_events.cpp
@@ -31,7 +33,10 @@ set(HEADERS
         include/systems/input_system.hpp
         include/systems/render_system.hpp
         include/systems/window_system.hpp
+        include/systems/render/camera.hpp
         include/systems/render/render_driver.hpp
+        include/systems/render/render_driver_common.hpp
+        include/systems/render/resource_handle.hpp
         include/systems/render/shader_compiler.hpp
         include/systems/window/event_bus.hpp
         include/systems/window/event_handler.hpp

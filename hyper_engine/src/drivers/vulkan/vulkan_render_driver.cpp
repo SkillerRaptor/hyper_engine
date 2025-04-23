@@ -363,13 +363,12 @@ PipelineLayout *VulkanRenderDriver::create_pipeline_layout(const std::optional<s
         .size = push_constant_size,
     };
 
-    // FIXME: Add descriptors
     const VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .setLayoutCount = 0,
-        .pSetLayouts = nullptr,
+        .setLayoutCount = static_cast<uint32_t>(m_descriptor_set_layouts.size()),
+        .pSetLayouts = m_descriptor_set_layouts.data(),
         .pushConstantRangeCount = static_cast<uint32_t>(push_constant_size == 0 ? 0 : 1),
         .pPushConstantRanges = push_constant_size == 0 ? nullptr : &push_constant_range,
     };
@@ -854,6 +853,79 @@ void VulkanRenderDriver::bind_texture(const Texture *texture, const uint32_t slo
     HE_PANIC("TODO: Implement `VulkanRenderDriver::bind_texture`");
 }
 
+void VulkanRenderDriver::clear_buffer(const CommandBuffer *command_buffer, const Buffer *buffer, const size_t size, const uint64_t offset) const
+{
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    const VulkanBuffer *vulkan_buffer = reinterpret_cast<const VulkanBuffer *>(buffer);
+
+    vkCmdFillBuffer(vulkan_command_buffer->command_buffer, vulkan_buffer->buffer, offset, size, 0);
+}
+
+void VulkanRenderDriver::write_buffer(
+    const CommandBuffer *command_buffer,
+    const Buffer *buffer,
+    const void *data,
+    const size_t size,
+    const uint64_t offset) const
+{
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    const VulkanBuffer *vulkan_buffer = reinterpret_cast<const VulkanBuffer *>(buffer);
+
+    if (vulkan_buffer->size <= 65535)
+    {
+        vkCmdUpdateBuffer(vulkan_command_buffer->command_buffer, vulkan_buffer->buffer, offset, size, data);
+    }
+    else
+    {
+        const Buffer *staging_buffer = create_buffer(std::nullopt, size, BufferUsage::Storage, true);
+        const VulkanBuffer *vulkan_staging_buffer = reinterpret_cast<const VulkanBuffer *>(staging_buffer);
+
+        void *mapped_ptr = nullptr;
+        vmaMapMemory(m_allocator, vulkan_staging_buffer->allocation, &mapped_ptr);
+        memcpy(mapped_ptr, data, size);
+        vmaUnmapMemory(m_allocator, vulkan_staging_buffer->allocation);
+
+        const VkBufferCopy2 region = {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_COPY_2,
+            .pNext = nullptr,
+            .srcOffset = 0,
+            .dstOffset = offset,
+            .size = static_cast<uint64_t>(size),
+        };
+
+        const VkCopyBufferInfo2 copy_buffer_info = {
+            .sType = VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2,
+            .pNext = nullptr,
+            .srcBuffer = vulkan_staging_buffer->buffer,
+            .dstBuffer = vulkan_buffer->buffer,
+            .regionCount = 1,
+            .pRegions = &region,
+        };
+
+        vkCmdCopyBuffer2(vulkan_command_buffer->command_buffer, &copy_buffer_info);
+
+        destroy_buffer(staging_buffer);
+    }
+}
+
+void VulkanRenderDriver::push_constants(
+    const CommandBuffer *command_buffer,
+    const PipelineLayout *pipeline_layout,
+    const void *data,
+    const size_t data_size)
+{
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    const VulkanPipelineLayout *vulkan_pipeline_layout = reinterpret_cast<const VulkanPipelineLayout *>(pipeline_layout);
+
+    vkCmdPushConstants(
+        vulkan_command_buffer->command_buffer,
+        vulkan_pipeline_layout->pipeline_layout,
+        VK_SHADER_STAGE_ALL,
+        0,
+        static_cast<uint32_t>(data_size),
+        &data);
+}
+
 std::pair<uint32_t, bool> VulkanRenderDriver::acquire_swapchain_texture(const CommandBuffer *command_buffer)
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
@@ -941,24 +1013,6 @@ void VulkanRenderDriver::end_gpu_marker(const CommandBuffer *command_buffer) con
     vkCmdEndDebugUtilsLabelEXT(vulkan_command_buffer->command_buffer);
 }
 
-void VulkanRenderDriver::push_constants(
-    const CommandBuffer *command_buffer,
-    const PipelineLayout *pipeline_layout,
-    const void *data,
-    const size_t data_size)
-{
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
-    const VulkanPipelineLayout *vulkan_pipeline_layout = reinterpret_cast<const VulkanPipelineLayout *>(pipeline_layout);
-
-    vkCmdPushConstants(
-        vulkan_command_buffer->command_buffer,
-        vulkan_pipeline_layout->pipeline_layout,
-        VK_SHADER_STAGE_ALL,
-        0,
-        static_cast<uint32_t>(data_size),
-        &data);
-}
-
 void VulkanRenderDriver::begin_compute_pass(const CommandBuffer *command_buffer) const
 {
     (void) command_buffer;
@@ -977,6 +1031,17 @@ void VulkanRenderDriver::bind_compute_pipeline(const CommandBuffer *command_buff
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     const VulkanComputePipeline *vulkan_compute_pipeline = reinterpret_cast<const VulkanComputePipeline *>(pipeline);
+    const VulkanPipelineLayout *vulkan_pipeline_layout = reinterpret_cast<const VulkanPipelineLayout *>(vulkan_compute_pipeline->layout);
+
+    vkCmdBindDescriptorSets(
+        vulkan_command_buffer->command_buffer,
+        VK_PIPELINE_BIND_POINT_COMPUTE,
+        vulkan_pipeline_layout->pipeline_layout,
+        0,
+        static_cast<uint32_t>(m_descriptor_sets.size()),
+        m_descriptor_sets.data(),
+        0,
+        nullptr);
 
     vkCmdBindPipeline(vulkan_command_buffer->command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_compute_pipeline->pipeline);
 }
@@ -1071,6 +1136,17 @@ void VulkanRenderDriver::bind_render_pipeline(const CommandBuffer *command_buffe
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     const VulkanRenderPipeline *vulkan_render_pipeline = reinterpret_cast<const VulkanRenderPipeline *>(pipeline);
+    const VulkanPipelineLayout *vulkan_pipeline_layout = reinterpret_cast<const VulkanPipelineLayout *>(vulkan_render_pipeline->layout);
+
+    vkCmdBindDescriptorSets(
+        vulkan_command_buffer->command_buffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        vulkan_pipeline_layout->pipeline_layout,
+        0,
+        static_cast<uint32_t>(m_descriptor_sets.size()),
+        m_descriptor_sets.data(),
+        0,
+        nullptr);
 
     vkCmdBindPipeline(vulkan_command_buffer->command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_render_pipeline->pipeline);
 }

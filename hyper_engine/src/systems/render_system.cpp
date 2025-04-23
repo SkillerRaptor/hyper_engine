@@ -521,6 +521,23 @@ void RenderSystem::bind_texture(const TextureId id, const uint32_t slot) const
     m_render_driver->bind_texture(texture, slot);
 }
 
+void RenderSystem::clear_buffer(const CommandBufferId id, const BufferId buffer, const size_t size, const uint64_t offset) const
+{
+    const CommandBuffer *command_buffer = resolve_command_buffer(id);
+
+    const Buffer *buffer_ptr = m_buffers.get(buffer);
+    m_render_driver->clear_buffer(command_buffer, buffer_ptr, size, offset);
+}
+
+void RenderSystem::write_buffer(const CommandBufferId id, const BufferId buffer, const void *data, const size_t size, const uint64_t offset)
+    const
+{
+    const CommandBuffer *command_buffer = resolve_command_buffer(id);
+
+    const Buffer *buffer_ptr = m_buffers.get(buffer);
+    m_render_driver->write_buffer(command_buffer, buffer_ptr, data, size, offset);
+}
+
 RenderPassId RenderSystem::begin_render_pass(const CommandBufferId id, const RenderPassDescriptor &descriptor)
 {
     HE_ASSERT(m_textures.contains(descriptor.texture));

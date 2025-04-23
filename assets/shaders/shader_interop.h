@@ -10,7 +10,7 @@
 #ifdef __cplusplus
 #    include <glm/glm.hpp>
 #
-#    include <hyper_rhi/resource_handle.hpp>
+#    include <systems/render/resource_handle.hpp>
 
 #    define float2 ::glm::vec2
 #    define float3 ::glm::vec3
@@ -26,7 +26,7 @@
 #    define uint3 ::glm::u32vec3
 #    define uint4 ::glm::u32vec4
 
-#    define RESOURCE_HANDLE ::hyper_engine::ResourceHandle
+#    define RESOURCE_HANDLE ::ResourceHandle
 #    define SIMPLE_BUFFER RESOURCE_HANDLE
 #    define RW_SIMPLE_BUFFER RESOURCE_HANDLE
 #    define ARRAY_BUFFER RESOURCE_HANDLE

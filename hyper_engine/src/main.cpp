@@ -7,7 +7,9 @@
 #include <chrono>
 
 #include "core/logger.hpp"
+#include "shader_interop.h"
 #include "systems/input_system.hpp"
+#include "systems/render/camera.hpp"
 #include "systems/render_system.hpp"
 #include "systems/window/window_events.hpp"
 #include "systems/window_system.hpp"
@@ -84,7 +86,7 @@ int main()
             {
                 .topology = PrimitiveTopology::TriangleList,
                 .front_face = FrontFace::CounterClockwise,
-                .cull_mode = Face::Back,
+                .cull_mode = Face::None,
                 .polygon_mode = PolygonMode::Fill,
             },
         .depth_stencil_state =
@@ -107,6 +109,32 @@ int main()
     render_system->destroy_shader(fragment_shader);
     render_system->destroy_shader(vertex_shader);
 
+    Camera camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f), -90.0f, 0.0f);
+
+    window_system->register_listener<MouseMoveEvent>(
+        [&input_system, &camera](const MouseMoveEvent &event)
+        {
+            camera.process_mouse_movement(event.x(), event.y(), input_system->is_mouse_button_pressed(MouseCode::ButtonMiddle));
+        });
+
+    window_system->register_listener<MouseScrollEvent>(
+        [&camera](const MouseScrollEvent &event)
+        {
+            camera.process_mouse_scroll(event.delta_y());
+        });
+
+    const BufferDescriptor camera_buffer_descriptor = {
+        .label = std::nullopt,
+        .size = sizeof(ShaderCamera),
+        .usage =
+            {
+                BufferUsage::Storage,
+                BufferUsage::ShaderResource,
+            },
+    };
+    const BufferId camera_buffer = render_system->create_buffer(camera_buffer_descriptor);
+    render_system->bind_buffer(camera_buffer, HE_DESCRIPTOR_SET_SLOT_CAMERA);
+
     bool running = true;
     window_system->register_listener<WindowCloseEvent>(
         [&running](const WindowCloseEvent &)
@@ -118,11 +146,70 @@ int main()
     const std::chrono::duration<double> elapsed_seconds = end_time - start_time;
     HE_INFO("Engine initialized in {:.2}s", elapsed_seconds.count());
 
+    float total_time = 0.0;
+    constexpr float delta_time = 1.0f / 60.0f;
+
+    float accumulator = 0.0;
+    std::chrono::time_point current_time = std::chrono::steady_clock::now();
     while (running)
     {
+        const std::chrono::time_point new_time = std::chrono::steady_clock::now();
+        const float frame_time = std::chrono::duration<float>(new_time - current_time).count();
+        current_time = new_time;
+
+        accumulator += frame_time;
+
         window_system->poll_events();
 
+        while (accumulator >= delta_time)
+        {
+            // Fixed Update
+            accumulator -= delta_time;
+            total_time += delta_time;
+        }
+
+        // Update
+        if (input_system->is_key_pressed(KeyCode::W))
+        {
+            camera.process_keyboard(Camera::Movement::Forward, delta_time);
+        }
+
+        if (input_system->is_key_pressed(KeyCode::S))
+        {
+            camera.process_keyboard(Camera::Movement::Backward, delta_time);
+        }
+
+        if (input_system->is_key_pressed(KeyCode::A))
+        {
+            camera.process_keyboard(Camera::Movement::Left, delta_time);
+        }
+
+        if (input_system->is_key_pressed(KeyCode::D))
+        {
+            camera.process_keyboard(Camera::Movement::Right, delta_time);
+        }
+
+        // Render
         const CommandBufferId command_buffer = render_system->acquire_command_buffer();
+
+        const glm::mat4 view_matrix = camera.view_matrix();
+        const glm::mat4 projection_matrix = camera.projection_matrix();
+        const glm::mat4 view_projection_matrix = projection_matrix * view_matrix;
+        const ShaderCamera shader_camera = {
+            .position = glm::vec4(camera.position(), 1.0),
+            .view = view_matrix,
+            .inverse_view = glm::inverse(view_matrix),
+            .projection = projection_matrix,
+            .inverse_projection = glm::inverse(projection_matrix),
+            .view_projection = view_projection_matrix,
+            .inverse_view_projection = glm::inverse(view_projection_matrix),
+            .near_plane = camera.near_plane(),
+            .far_plane = camera.far_plane(),
+            .padding_0 = 0.0,
+            .padding_1 = 0.0,
+        };
+        render_system->write_buffer(command_buffer, camera_buffer, shader_camera, 0);
+
         const TextureId swapchain_texture = render_system->acquire_swapchain_texture(command_buffer);
 
         const RenderPassDescriptor render_pass_descriptor = {
@@ -152,6 +239,7 @@ int main()
         render_system->submit_command_buffer(command_buffer);
     }
 
+    render_system->destroy_buffer(camera_buffer);
     render_system->destroy_render_pipeline(pipeline);
     render_system->destroy_pipeline_layout(pipeline_layout);
     window_system->destroy_window(window);

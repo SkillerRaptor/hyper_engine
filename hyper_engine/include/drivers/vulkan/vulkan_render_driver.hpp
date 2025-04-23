@@ -164,13 +164,16 @@ public:
     void bind_sampler(const Sampler *sampler, uint32_t slot) const override;
     void bind_texture(const Texture *texture, uint32_t slot) const override;
 
+    void clear_buffer(const CommandBuffer *command_buffer, const Buffer *buffer, size_t size, uint64_t offset) const override;
+    void write_buffer(const CommandBuffer *command_buffer, const Buffer *buffer, const void *data, size_t size, uint64_t offset) const override;
+
+    void push_constants(const CommandBuffer *command_buffer, const PipelineLayout *pipeline_layout, const void *data, size_t data_size) override;
+
     std::pair<uint32_t, bool> acquire_swapchain_texture(const CommandBuffer *command_buffer) override;
     void present() override;
 
     void begin_gpu_marker(const CommandBuffer *command_buffer, Label label) const override;
     void end_gpu_marker(const CommandBuffer *command_buffer) const override;
-
-    void push_constants(const CommandBuffer *command_buffer, const PipelineLayout *pipeline_layout, const void *data, size_t data_size) override;
 
     // Compute Pass
     void begin_compute_pass(const CommandBuffer *command_buffer) const override;
