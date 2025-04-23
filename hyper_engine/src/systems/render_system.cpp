@@ -347,7 +347,7 @@ ComputePassId RenderSystem::begin_compute_pass(const CommandBufferId id, const C
     command_buffer->compute_pass_in_progress = true;
     m_compute_passes.push_back(compute_pass);
 
-    return ComputePassId(m_compute_passes.size() - 1, command_buffer->generation);
+    return ComputePassId(static_cast<uint32_t>(m_compute_passes.size()) - 1, command_buffer->generation);
 }
 
 void RenderSystem::end_compute_pass(const ComputePassId id) const
@@ -400,7 +400,7 @@ RenderPassId RenderSystem::begin_render_pass(const CommandBufferId id, const Ren
     command_buffer->render_pass_in_progress = true;
     m_render_passes.push_back(render_pass);
 
-    return RenderPassId(m_render_passes.size() - 1, command_buffer->generation);
+    return RenderPassId(static_cast<uint32_t>(m_render_passes.size()) - 1, command_buffer->generation);
 }
 
 void RenderSystem::end_render_pass(const RenderPassId id) const

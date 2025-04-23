@@ -105,16 +105,17 @@ struct RenderPassDescriptor
 };
 
 class RenderDriver;
-class Buffer;
-class Shader;
-class Sampler;
-class Texture;
-class PipelineLayout;
-class ComputePipeline;
-class RenderPipeline;
-class CommandBuffer;
-class ComputePass;
-class RenderPass;
+
+struct Buffer;
+struct Shader;
+struct Sampler;
+struct Texture;
+struct PipelineLayout;
+struct ComputePipeline;
+struct RenderPipeline;
+struct CommandBuffer;
+struct ComputePass;
+struct RenderPass;
 
 class RenderSystem
 {
