@@ -95,6 +95,18 @@ struct ComputePass
     bool ended = false;
 };
 
+struct RenderPassColorAttachment
+{
+    Texture *texture = nullptr;
+    Operations operations = {};
+};
+
+struct RenderPassDepthStencilAttachment
+{
+    Texture *texture = nullptr;
+    Operations depth_operations = {};
+};
+
 struct RenderPass
 {
     CommandBuffer *command_buffer = nullptr;
@@ -205,7 +217,10 @@ public:
     virtual void bind_compute_pipeline(const CommandBuffer *command_buffer, const ComputePipeline *pipeline) const = 0;
 
     // Render Pass
-    virtual void begin_render_pass(const CommandBuffer *command_buffer, const Texture *texture) const = 0;
+    virtual void begin_render_pass(
+        const CommandBuffer *command_buffer,
+        const std::vector<RenderPassColorAttachment> &color_attachments,
+        const std::optional<RenderPassDepthStencilAttachment> &depth_stencil_attachment) const = 0;
     virtual void end_render_pass(const CommandBuffer *command_buffer) const = 0;
 
     virtual void bind_render_pipeline(const CommandBuffer *command_buffer, const RenderPipeline *pipeline) const = 0;

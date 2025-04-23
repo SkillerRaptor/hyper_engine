@@ -98,10 +98,24 @@ struct ComputePassDescriptor
     std::optional<Label> label;
 };
 
+struct ColorAttachment
+{
+    TextureId texture;
+    Operations operations = {};
+};
+
+struct DepthStencilAttachment
+{
+    TextureId texture;
+    Operations depth_operations;
+    // FIXME: Add stencil operation
+};
+
 struct RenderPassDescriptor
 {
     std::optional<Label> label;
-    TextureId texture;
+    std::vector<ColorAttachment> color_attachments;
+    std::optional<DepthStencilAttachment> depth_stencil_attachment;
 };
 
 class RenderDriver;

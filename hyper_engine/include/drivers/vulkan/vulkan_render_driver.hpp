@@ -182,7 +182,10 @@ public:
     void bind_compute_pipeline(const CommandBuffer *command_buffer, const ComputePipeline *pipeline) const override;
 
     // Render Pass
-    void begin_render_pass(const CommandBuffer *command_buffer, const Texture *texture) const override;
+    void begin_render_pass(
+        const CommandBuffer *command_buffer,
+        const std::vector<RenderPassColorAttachment> &color_attachments,
+        const std::optional<RenderPassDepthStencilAttachment> &depth_stencil_attachment) const override;
     void end_render_pass(const CommandBuffer *command_buffer) const override;
 
     void bind_render_pipeline(const CommandBuffer *command_buffer, const RenderPipeline *pipeline) const override;
@@ -256,6 +259,9 @@ private:
     static VkBlendFactor get_blend_factor(BlendFactor blend_factor);
     static VkBlendOp get_blend_operation(BlendOperation blend_operation);
     static VkColorComponentFlags get_color_component_flags(BitFlags<ColorWrites> color_writes);
+
+    static VkAttachmentLoadOp get_attachment_load_operation(LoadOperation load_operation);
+    static VkAttachmentStoreOp get_attachment_store_operation(StoreOperation store_operation);
 
 private:
     ShaderCompiler m_compiler = ShaderCompiler(ShaderCompiler::CompilerTarget::Spirv);

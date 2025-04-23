@@ -62,6 +62,12 @@ void Engine::initialize()
     m_render_system->bind_buffer(m_camera_buffer, HE_DESCRIPTOR_SET_SLOT_CAMERA);
 
     // Rendering
+    const PipelineLayoutDescriptor pipeline_layout_descriptor = {
+        .label = std::nullopt,
+        .push_constant_size = 0,
+    };
+    m_pipeline_layout = m_render_system->create_pipeline_layout(pipeline_layout_descriptor);
+
     const ShaderDescriptor vertex_shader_descriptor = {
         .label = std::nullopt,
         .type = ShaderType::Vertex,
@@ -77,12 +83,6 @@ void Engine::initialize()
         .path = "./assets/shaders/triangle_shader.hlsl",
     };
     const ShaderId fragment_shader = m_render_system->create_shader(fragment_shader_descriptor);
-
-    const PipelineLayoutDescriptor pipeline_layout_descriptor = {
-        .label = std::nullopt,
-        .push_constant_size = 0,
-    };
-    m_pipeline_layout = m_render_system->create_pipeline_layout(pipeline_layout_descriptor);
 
     const RenderPipelineDescriptor pipeline_descriptor = {
         .label = std::nullopt,
@@ -115,10 +115,10 @@ void Engine::initialize()
             },
         .depth_stencil_state =
             {
-                .depth_test_enable = false,
-                .depth_write_enable = false,
-                .depth_format = Format::Unknown,
-                .depth_compare_operation = CompareOperation::Never,
+                .depth_test_enable = true,
+                .depth_write_enable = true,
+                .depth_format = Format::D32Sfloat,
+                .depth_compare_operation = CompareOperation::Less,
                 .depth_bias_state =
                     {
                         .depth_bias_enable = false,
@@ -129,6 +129,105 @@ void Engine::initialize()
             },
     };
     m_render_pipeline = m_render_system->create_render_pipeline(pipeline_descriptor);
+
+    const ShaderDescriptor grid_vertex_shader_descriptor = {
+        .label = std::nullopt,
+        .type = ShaderType::Vertex,
+        .entry = "vs_main",
+        .path = "./assets/shaders/grid_shader.hlsl",
+    };
+    const ShaderId grid_vertex_shader = m_render_system->create_shader(grid_vertex_shader_descriptor);
+
+    const ShaderDescriptor grid_fragment_shader_descriptor = {
+        .label = std::nullopt,
+        .type = ShaderType::Fragment,
+        .entry = "fs_main",
+        .path = "./assets/shaders/grid_shader.hlsl",
+    };
+    const ShaderId grid_fragment_shader = m_render_system->create_shader(grid_fragment_shader_descriptor);
+
+    const RenderPipelineDescriptor grid_pipeline_descriptor = {
+        .label = std::nullopt,
+        .layout = m_pipeline_layout,
+        .vertex_shader = grid_vertex_shader,
+        .fragment_shader = grid_fragment_shader,
+        .color_attachment_states =
+            {
+                {
+                    .format = Format::Bgra8Unorm,
+                    .blend_state =
+                        {
+                            .blend_enable = true,
+                            .src_blend_factor = BlendFactor::SrcAlpha,
+                            .dst_blend_factor = BlendFactor::One,
+                            .operation = BlendOperation::Add,
+                            .alpha_src_blend_factor = BlendFactor::One,
+                            .alpha_dst_blend_factor = BlendFactor::Zero,
+                            .alpha_operation = BlendOperation::Add,
+                            .color_writes = ColorWrites::All,
+                        },
+                },
+            },
+        .primitive_state =
+            {
+                .topology = PrimitiveTopology::TriangleList,
+                .front_face = FrontFace::CounterClockwise,
+                .cull_mode = Face::None,
+                .polygon_mode = PolygonMode::Fill,
+            },
+        .depth_stencil_state =
+            {
+                .depth_test_enable = true,
+                .depth_write_enable = true,
+                .depth_format = Format::D32Sfloat,
+                .depth_compare_operation = CompareOperation::Less,
+                .depth_bias_state =
+                    {
+                        .depth_bias_enable = false,
+                        .constant = 0.0f,
+                        .clamp = 0.0f,
+                        .slope = 0.0f,
+                    },
+            },
+    };
+    m_grid_pipeline = m_render_system->create_render_pipeline(grid_pipeline_descriptor);
+
+    m_render_system->destroy_shader(grid_fragment_shader);
+    m_render_system->destroy_shader(grid_vertex_shader);
+
+    const glm::uvec2 window_size = m_window_system->get_window_size(m_window);
+    const TextureDescriptor depth_texture_descriptor = {
+        .label = std::nullopt,
+        .width = window_size.x,
+        .height = window_size.y,
+        .depth = 1,
+        .array_size = 1,
+        .mip_levels = 1,
+        .format = Format::D32Sfloat,
+        .dimension = Dimension::Texture2D,
+        .usage = TextureUsage::RenderAttachment,
+    };
+    m_depth_texture = m_render_system->create_texture(depth_texture_descriptor);
+
+    m_window_system->register_listener<WindowResizeEvent>(
+        [this](const WindowResizeEvent &event)
+        {
+            m_render_system->destroy_texture(m_depth_texture);
+
+            const TextureDescriptor new_depth_texture_descriptor = {
+                .label = std::nullopt,
+                .width = event.width(),
+                .height = event.height(),
+                .depth = 1,
+                .array_size = 1,
+                .mip_levels = 1,
+                .format = Format::D32Sfloat,
+                .dimension = Dimension::Texture2D,
+                .usage = TextureUsage::RenderAttachment,
+            };
+
+            m_depth_texture = m_render_system->create_texture(new_depth_texture_descriptor);
+        });
 
     m_render_system->destroy_shader(fragment_shader);
     m_render_system->destroy_shader(vertex_shader);
@@ -146,9 +245,11 @@ void Engine::initialize()
 
 void Engine::shutdown() const
 {
-    m_render_system->destroy_buffer(m_camera_buffer);
+    m_render_system->destroy_texture(m_depth_texture);
     m_render_system->destroy_render_pipeline(m_render_pipeline);
+    m_render_system->destroy_render_pipeline(m_grid_pipeline);
     m_render_system->destroy_pipeline_layout(m_pipeline_layout);
+    m_render_system->destroy_buffer(m_camera_buffer);
 
     m_window_system->destroy_window(m_window);
 }
@@ -238,6 +339,7 @@ void Engine::render() const
     m_render_system->write_buffer(command_buffer, m_camera_buffer, shader_camera, 0);
 
     const TextureId swapchain_texture = m_render_system->acquire_swapchain_texture(command_buffer);
+
     const RenderPassDescriptor render_pass_descriptor = {
         .label =
             Label{
@@ -249,18 +351,70 @@ void Engine::render() const
                         .b = 0,
                     },
             },
-        .texture = swapchain_texture,
+        .color_attachments =
+            {
+                {
+                    .texture = swapchain_texture,
+                    .operations =
+                        {
+                            .load_operation = LoadOperation::Clear,
+                            .store_operation = StoreOperation::Store,
+                        },
+                },
+            },
+        .depth_stencil_attachment =
+            DepthStencilAttachment{
+                .texture = m_depth_texture,
+                .depth_operations =
+                    {
+                        .load_operation = LoadOperation::Clear,
+                        .store_operation = StoreOperation::Store,
+                    },
+            },
     };
 
     const RenderPassId render_pass = m_render_system->begin_render_pass(command_buffer, render_pass_descriptor);
     m_render_system->bind_pipeline(render_pass, m_render_pipeline);
-
-    const glm::uvec2 window_size = m_window_system->get_window_size(m_window);
-    m_render_system->set_viewport(render_pass, 0.0f, 0.0f, static_cast<float>(window_size.x), static_cast<float>(window_size.y), 0.0f, 1.0f);
-    m_render_system->set_scissor(render_pass, 0, 0, window_size.x, window_size.y);
-
     m_render_system->draw(render_pass, 3, 1, 0, 0);
     m_render_system->end_render_pass(render_pass);
+
+    const RenderPassDescriptor grid_render_pass_descriptor = {
+        .label =
+            Label{
+                .name = "Grid Render Pass",
+                .color =
+                    {
+                        .r = 0,
+                        .g = 255,
+                        .b = 0,
+                    },
+            },
+        .color_attachments =
+            {
+                {
+                    .texture = swapchain_texture,
+                    .operations =
+                        {
+                            .load_operation = LoadOperation::Load,
+                            .store_operation = StoreOperation::Store,
+                        },
+                },
+            },
+        .depth_stencil_attachment =
+            DepthStencilAttachment{
+                .texture = m_depth_texture,
+                .depth_operations =
+                    {
+                        .load_operation = LoadOperation::Load,
+                        .store_operation = StoreOperation::Store,
+                    },
+            },
+    };
+
+    const RenderPassId grid_render_pass = m_render_system->begin_render_pass(command_buffer, grid_render_pass_descriptor);
+    m_render_system->bind_pipeline(grid_render_pass, m_grid_pipeline);
+    m_render_system->draw(grid_render_pass, 6, 1, 0, 0);
+    m_render_system->end_render_pass(grid_render_pass);
 
     m_render_system->submit_command_buffer(command_buffer);
 }

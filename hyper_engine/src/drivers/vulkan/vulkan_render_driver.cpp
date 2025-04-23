@@ -1095,14 +1095,17 @@ void VulkanRenderDriver::bind_compute_pipeline(const CommandBuffer *command_buff
     vkCmdBindPipeline(vulkan_command_buffer->command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_compute_pipeline->pipeline);
 }
 
-void VulkanRenderDriver::begin_render_pass(const CommandBuffer *command_buffer, const Texture *texture) const
+void VulkanRenderDriver::begin_render_pass(
+    const CommandBuffer *command_buffer,
+    const std::vector<RenderPassColorAttachment> &color_attachments,
+    const std::optional<RenderPassDepthStencilAttachment> &depth_stencil_attachment) const
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
-    const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(texture);
 
+    // FIXME: This always uses the first color attachment
     const VkExtent2D extent = {
-        .width = vulkan_texture->width,
-        .height = vulkan_texture->height,
+        .width = color_attachments[0].texture->width,
+        .height = color_attachments[0].texture->height,
     };
 
     const VkRect2D render_area = {
@@ -1127,25 +1130,58 @@ void VulkanRenderDriver::begin_render_pass(const CommandBuffer *command_buffer, 
             },
     };
 
-    std::vector<VkRenderingAttachmentInfo> color_attachments = {};
+    std::vector<VkRenderingAttachmentInfo> rendering_color_attachments = {};
+    for (const RenderPassColorAttachment &color_attachment : color_attachments)
+    {
+        const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(color_attachment.texture);
 
-    // FIXME: Add color attachments array & determine load/store op based on the specified operation in the color attachment
-    const VkRenderingAttachmentInfo color_attachment_info = {
-        .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-        .pNext = nullptr,
-        .imageView = vulkan_texture->image_view,
-        .imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-        .resolveMode = VK_RESOLVE_MODE_NONE,
-        .resolveImageView = VK_NULL_HANDLE,
-        .resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-        .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-        .clearValue = clear_value,
-    };
+        const VkRenderingAttachmentInfo color_attachment_info = {
+            .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+            .pNext = nullptr,
+            .imageView = vulkan_texture->image_view,
+            .imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+            .resolveMode = VK_RESOLVE_MODE_NONE,
+            .resolveImageView = VK_NULL_HANDLE,
+            .resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .loadOp = get_attachment_load_operation(color_attachment.operations.load_operation),
+            .storeOp = get_attachment_store_operation(color_attachment.operations.store_operation),
+            .clearValue = clear_value,
+        };
 
-    color_attachments.push_back(color_attachment_info);
+        rendering_color_attachments.push_back(color_attachment_info);
+    }
 
-    // FIXME: Add depth/stencil attachment
+    std::optional<VkRenderingAttachmentInfo> depth_attachment_info = std::nullopt;
+    if (depth_stencil_attachment.has_value())
+    {
+        const RenderPassDepthStencilAttachment &render_pass_depth_stencil_attachment = depth_stencil_attachment.value();
+        const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(render_pass_depth_stencil_attachment.texture);
+
+        constexpr VkClearValue depth_clear_value = {
+            .depthStencil =
+                {
+                    .depth = 1.0f,
+                    .stencil = 0,
+                },
+        };
+
+        depth_attachment_info = {
+            .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+            .pNext = nullptr,
+            .imageView = vulkan_texture->image_view,
+            .imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+            .resolveMode = VK_RESOLVE_MODE_NONE,
+            .resolveImageView = VK_NULL_HANDLE,
+            .resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .loadOp = get_attachment_load_operation(render_pass_depth_stencil_attachment.depth_operations.load_operation),
+            .storeOp = get_attachment_store_operation(render_pass_depth_stencil_attachment.depth_operations.store_operation),
+            .clearValue = depth_clear_value,
+        };
+
+        // FIXME: This is a hack
+        transition_texture_layout(
+            command_buffer, render_pass_depth_stencil_attachment.texture, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+    }
 
     const VkRenderingInfo rendering_info = {
         .sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
@@ -1154,9 +1190,9 @@ void VulkanRenderDriver::begin_render_pass(const CommandBuffer *command_buffer, 
         .renderArea = render_area,
         .layerCount = 1,
         .viewMask = 0,
-        .colorAttachmentCount = static_cast<uint32_t>(color_attachments.size()),
-        .pColorAttachments = color_attachments.data(),
-        .pDepthAttachment = nullptr,
+        .colorAttachmentCount = static_cast<uint32_t>(rendering_color_attachments.size()),
+        .pColorAttachments = rendering_color_attachments.data(),
+        .pDepthAttachment = depth_attachment_info.has_value() ? &depth_attachment_info.value() : nullptr,
         .pStencilAttachment = nullptr,
     };
 
@@ -2966,4 +3002,32 @@ VkColorComponentFlags VulkanRenderDriver::get_color_component_flags(const BitFla
     }
 
     return color_component_flags;
+}
+
+VkAttachmentLoadOp VulkanRenderDriver::get_attachment_load_operation(LoadOperation load_operation)
+{
+    switch (load_operation)
+    {
+    case LoadOperation::Clear:
+        return VK_ATTACHMENT_LOAD_OP_CLEAR;
+    case LoadOperation::Load:
+        return VK_ATTACHMENT_LOAD_OP_LOAD;
+    case LoadOperation::DontCare:
+        return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    default:
+        HE_UNREACHABLE();
+    }
+}
+
+VkAttachmentStoreOp VulkanRenderDriver::get_attachment_store_operation(StoreOperation store_operation)
+{
+    switch (store_operation)
+    {
+    case StoreOperation::Store:
+        return VK_ATTACHMENT_STORE_OP_STORE;
+    case StoreOperation::DontCare:
+        return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    default:
+        HE_UNREACHABLE();
+    }
 }

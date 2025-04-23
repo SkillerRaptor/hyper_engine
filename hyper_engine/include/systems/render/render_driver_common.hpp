@@ -311,3 +311,22 @@ struct Label
     std::string name;
     LabelColor color;
 };
+
+enum class LoadOperation : uint8_t
+{
+    Clear,
+    Load,
+    DontCare,
+};
+
+enum class StoreOperation : uint8_t
+{
+    Store,
+    DontCare,
+};
+
+struct Operations
+{
+    LoadOperation load_operation = LoadOperation::Clear;
+    StoreOperation store_operation = StoreOperation::Store;
+};

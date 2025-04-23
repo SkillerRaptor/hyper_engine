@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <fastgltf/types.hpp>
-
 #include "systems/input_system.hpp"
 #include "systems/render/camera.hpp"
 #include "systems/render_system.hpp"
@@ -37,7 +35,11 @@ private:
     BufferId m_camera_buffer;
 
     PipelineLayoutId m_pipeline_layout;
+
+    RenderPipelineId m_grid_pipeline;
     RenderPipelineId m_render_pipeline;
+
+    TextureId m_depth_texture;
 
     bool m_running = true;
 };

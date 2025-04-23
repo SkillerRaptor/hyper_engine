@@ -538,7 +538,16 @@ void RenderSystem::write_buffer(const CommandBufferId id, const BufferId buffer,
 
 RenderPassId RenderSystem::begin_render_pass(const CommandBufferId id, const RenderPassDescriptor &descriptor)
 {
-    HE_ASSERT(m_textures.contains(descriptor.texture));
+    HE_ASSERT(!descriptor.color_attachments.empty());
+    for (const ColorAttachment &color_attachment : descriptor.color_attachments)
+    {
+        HE_ASSERT(m_textures.contains(color_attachment.texture));
+    }
+
+    if (descriptor.depth_stencil_attachment.has_value())
+    {
+        HE_ASSERT(m_textures.contains(descriptor.depth_stencil_attachment.value().texture));
+    }
 
     CommandBuffer *command_buffer = resolve_command_buffer(id);
     HE_ASSERT(!command_buffer->render_pass_in_progress);
@@ -555,8 +564,27 @@ RenderPassId RenderSystem::begin_render_pass(const CommandBufferId id, const Ren
         render_pass->has_label = true;
     }
 
-    const Texture *texture = m_textures.get(descriptor.texture);
-    m_render_driver->begin_render_pass(command_buffer, texture);
+    std::vector<RenderPassColorAttachment> render_pass_color_attachments;
+    for (const ColorAttachment &color_attachment : descriptor.color_attachments)
+    {
+        const RenderPassColorAttachment render_pass_color_attachment = {
+            .texture = m_textures.get(color_attachment.texture),
+            .operations = color_attachment.operations,
+        };
+        render_pass_color_attachments.push_back(render_pass_color_attachment);
+    }
+
+    std::optional<RenderPassDepthStencilAttachment> render_pass_depth_stencil_attachment = std::nullopt;
+    if (descriptor.depth_stencil_attachment.has_value())
+    {
+        const DepthStencilAttachment depth_stencil_attachment = descriptor.depth_stencil_attachment.value();
+        render_pass_depth_stencil_attachment = {
+            .texture = m_textures.get(depth_stencil_attachment.texture),
+            .depth_operations = depth_stencil_attachment.depth_operations,
+        };
+    }
+
+    m_render_driver->begin_render_pass(command_buffer, render_pass_color_attachments, render_pass_depth_stencil_attachment);
 
     command_buffer->render_pass_in_progress = true;
     m_render_passes.push_back(render_pass);
