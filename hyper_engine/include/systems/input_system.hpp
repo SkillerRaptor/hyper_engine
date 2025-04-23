@@ -10,12 +10,10 @@
 #include "systems/window/mouse_events.hpp"
 #include "systems/window_system.hpp"
 
-using IS = class InputSystem;
-
 class InputSystem
 {
 public:
-    void initialize(WS &window_system);
+    void initialize(WindowSystem &window_system);
 
     // Keys
     bool is_key_pressed(KeyCode key_code) const;

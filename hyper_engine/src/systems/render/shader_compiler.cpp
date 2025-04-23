@@ -26,11 +26,11 @@ std::vector<uint8_t> ShaderCompiler::compile(const ShaderCompilationDescriptor &
 
         switch (descriptor.type)
         {
-        case RenderSystem::ShaderType::Compute:
+        case ShaderType::Compute:
             return L"cs_6_6";
-        case RenderSystem::ShaderType::Fragment:
+        case ShaderType::Fragment:
             return L"ps_6_6";
-        case RenderSystem::ShaderType::Vertex:
+        case ShaderType::Vertex:
             return L"vs_6_6";
         default:
             HE_UNREACHABLE();
@@ -71,7 +71,7 @@ std::vector<uint8_t> ShaderCompiler::compile(const ShaderCompilationDescriptor &
             arguments_wchar.emplace_back(argument);
         }
 
-        if (descriptor.type == RenderSystem::ShaderType::Vertex)
+        if (descriptor.type == ShaderType::Vertex)
         {
             arguments_wchar.emplace_back(L"-fvk-invert-y");
         }

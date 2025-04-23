@@ -22,7 +22,7 @@ RenderSystem::~RenderSystem()
     delete m_render_driver;
 }
 
-void RenderSystem::initialize(const WindowSystem &window_system, const WindowSystem::WindowId window)
+void RenderSystem::initialize(const WindowSystem &window_system, const WindowId window)
 {
     // FIXME: Add selection to change render driver
     m_render_driver = new VulkanRenderDriver();
@@ -40,8 +40,9 @@ void RenderSystem::initialize(const WindowSystem &window_system, const WindowSys
     {
         CommandBuffer *command_buffer = m_render_driver->create_command_buffer();
         command_buffer->generation = 0;
+        command_buffer->compute_pass_in_progress = false;
+        command_buffer->render_pass_in_progress = false;
         command_buffer->swapchain_texture_acquired = false;
-        command_buffer->submitted = false;
 
         m_command_buffers[i] = command_buffer;
     }
@@ -49,50 +50,53 @@ void RenderSystem::initialize(const WindowSystem &window_system, const WindowSys
     HE_INFO("Successfully initialized RenderSystem");
 }
 
-RenderSystem::BufferId RenderSystem::create_buffer(const BufferDescriptor &descriptor)
+BufferId RenderSystem::create_buffer(const BufferDescriptor &descriptor)
 {
-    HE_ASSERT(descriptor.byte_size > 0);
+    HE_ASSERT(descriptor.size > 0);
     HE_ASSERT(descriptor.usage != BufferUsage::None);
 
-    Buffer *buffer = m_render_driver->create_buffer(descriptor.label, descriptor.byte_size, descriptor.usage);
-    buffer->descriptor = descriptor;
+    Buffer *buffer = m_render_driver->create_buffer(descriptor.label, descriptor.size, descriptor.usage, false);
+    buffer->label = descriptor.label;
+    buffer->size = descriptor.size;
+    buffer->usage = descriptor.usage;
 
-    const BufferId buffer_id = m_buffers.create(buffer);
-    return buffer_id;
+    return m_buffers.create(buffer);
 }
 
 void RenderSystem::destroy_buffer(const BufferId id)
 {
     HE_ASSERT(m_buffers.contains(id));
 
-    Buffer *buffer = m_buffers.get(id);
+    const Buffer *buffer = m_buffers.get(id);
     m_render_driver->destroy_buffer(buffer);
     m_buffers.destroy(id);
 }
 
-RenderSystem::ShaderId RenderSystem::create_shader(const ShaderDescriptor &descriptor)
+ShaderId RenderSystem::create_shader(const ShaderDescriptor &descriptor)
 {
     HE_ASSERT(descriptor.type != ShaderType::None);
     HE_ASSERT(!descriptor.entry.empty());
     HE_ASSERT(!descriptor.path.empty());
 
     Shader *shader = m_render_driver->create_shader(descriptor.label, descriptor.type, descriptor.entry, descriptor.path);
-    shader->descriptor = descriptor;
+    shader->label = descriptor.label;
+    shader->type = descriptor.type;
+    shader->entry = descriptor.entry;
+    shader->path = descriptor.path;
 
-    const ShaderId shader_id = m_shaders.create(shader);
-    return shader_id;
+    return m_shaders.create(shader);
 }
 
 void RenderSystem::destroy_shader(const ShaderId id)
 {
     HE_ASSERT(m_shaders.contains(id));
 
-    Shader *shader = m_shaders.get(id);
+    const Shader *shader = m_shaders.get(id);
     m_render_driver->destroy_shader(shader);
     m_shaders.destroy(id);
 }
 
-RenderSystem::SamplerId RenderSystem::create_sampler(const SamplerDescriptor &descriptor)
+SamplerId RenderSystem::create_sampler(const SamplerDescriptor &descriptor)
 {
     // FIXME: Add assertions
 
@@ -109,22 +113,32 @@ RenderSystem::SamplerId RenderSystem::create_sampler(const SamplerDescriptor &de
         descriptor.min_lod,
         descriptor.max_lod,
         descriptor.border_color);
-    sampler->descriptor = descriptor;
+    sampler->label = descriptor.label;
+    sampler->mag_filter = descriptor.mag_filter;
+    sampler->min_filter = descriptor.min_filter;
+    sampler->mipmap_filter = descriptor.mipmap_filter;
+    sampler->address_mode_u = descriptor.address_mode_u;
+    sampler->address_mode_v = descriptor.address_mode_v;
+    sampler->address_mode_w = descriptor.address_mode_w;
+    sampler->mip_lod_bias = descriptor.mip_lod_bias;
+    sampler->compare_operation = descriptor.compare_operation;
+    sampler->min_lod = descriptor.min_lod;
+    sampler->max_lod = descriptor.max_lod;
+    sampler->border_color = descriptor.border_color;
 
-    const SamplerId sampler_id = m_samplers.create(sampler);
-    return sampler_id;
+    return m_samplers.create(sampler);
 }
 
 void RenderSystem::destroy_sampler(const SamplerId id)
 {
     HE_ASSERT(m_samplers.contains(id));
 
-    Sampler *sampler = m_samplers.get(id);
+    const Sampler *sampler = m_samplers.get(id);
     m_render_driver->destroy_sampler(sampler);
     m_samplers.destroy(id);
 }
 
-RenderSystem::TextureId RenderSystem::create_texture(const TextureDescriptor &descriptor)
+TextureId RenderSystem::create_texture(const TextureDescriptor &descriptor)
 {
     HE_ASSERT(descriptor.width > 0);
     HE_ASSERT(descriptor.height > 0);
@@ -145,42 +159,49 @@ RenderSystem::TextureId RenderSystem::create_texture(const TextureDescriptor &de
         descriptor.format,
         descriptor.dimension,
         descriptor.usage);
-    texture->descriptor = descriptor;
+    texture->label = descriptor.label;
+    texture->width = descriptor.width;
+    texture->height = descriptor.height;
+    texture->depth = descriptor.depth;
+    texture->array_size = descriptor.array_size;
+    texture->mip_levels = descriptor.mip_levels;
+    texture->format = descriptor.format;
+    texture->dimension = descriptor.dimension;
+    texture->usage = descriptor.usage;
 
-    const TextureId texture_id = m_textures.create(texture);
-    return texture_id;
+    return m_textures.create(texture);
 }
 
 void RenderSystem::destroy_texture(const TextureId id)
 {
     HE_ASSERT(m_textures.contains(id));
 
-    Texture *texture = m_textures.get(id);
+    const Texture *texture = m_textures.get(id);
     m_render_driver->destroy_texture(texture);
     m_textures.destroy(id);
 }
 
-RenderSystem::PipelineLayoutId RenderSystem::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
+PipelineLayoutId RenderSystem::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
 {
     HE_ASSERT((descriptor.push_constant_size % 4) == 0);
 
     PipelineLayout *pipeline_layout = m_render_driver->create_pipeline_layout(descriptor.label, descriptor.push_constant_size);
-    pipeline_layout->descriptor = descriptor;
+    pipeline_layout->label = descriptor.label;
+    pipeline_layout->push_constant_size = descriptor.push_constant_size;
 
-    const PipelineLayoutId pipeline_layout_id = m_pipeline_layouts.create(pipeline_layout);
-    return pipeline_layout_id;
+    return m_pipeline_layouts.create(pipeline_layout);
 }
 
 void RenderSystem::destroy_pipeline_layout(const PipelineLayoutId id)
 {
     HE_ASSERT(m_pipeline_layouts.contains(id));
 
-    PipelineLayout *pipeline_layout = m_pipeline_layouts.get(id);
+    const PipelineLayout *pipeline_layout = m_pipeline_layouts.get(id);
     m_render_driver->destroy_pipeline_layout(pipeline_layout);
     m_pipeline_layouts.destroy(id);
 }
 
-RenderSystem::ComputePipelineId RenderSystem::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
+ComputePipelineId RenderSystem::create_compute_pipeline(const ComputePipelineDescriptor &descriptor)
 {
     HE_ASSERT(m_pipeline_layouts.contains(descriptor.layout));
     HE_ASSERT(m_shaders.contains(descriptor.shader));
@@ -189,22 +210,23 @@ RenderSystem::ComputePipelineId RenderSystem::create_compute_pipeline(const Comp
     Shader *shader = m_shaders.get(descriptor.shader);
 
     ComputePipeline *compute_pipeline = m_render_driver->create_compute_pipeline(descriptor.label, layout, shader);
-    compute_pipeline->descriptor = descriptor;
+    compute_pipeline->label = descriptor.label;
+    compute_pipeline->layout = layout;
+    compute_pipeline->shader = shader;
 
-    const ComputePipelineId compute_pipeline_id = m_compute_pipelines.create(compute_pipeline);
-    return compute_pipeline_id;
+    return m_compute_pipelines.create(compute_pipeline);
 }
 
 void RenderSystem::destroy_compute_pipeline(const ComputePipelineId id)
 {
     HE_ASSERT(m_compute_pipelines.contains(id));
 
-    ComputePipeline *compute_pipeline = m_compute_pipelines.get(id);
+    const ComputePipeline *compute_pipeline = m_compute_pipelines.get(id);
     m_render_driver->destroy_compute_pipeline(compute_pipeline);
     m_compute_pipelines.destroy(id);
 }
 
-RenderSystem::RenderPipelineId RenderSystem::create_render_pipeline(const RenderPipelineDescriptor &descriptor)
+RenderPipelineId RenderSystem::create_render_pipeline(const RenderPipelineDescriptor &descriptor)
 {
     HE_ASSERT(m_pipeline_layouts.contains(descriptor.layout));
     HE_ASSERT(m_shaders.contains(descriptor.vertex_shader));
@@ -233,28 +255,34 @@ RenderSystem::RenderPipelineId RenderSystem::create_render_pipeline(const Render
         descriptor.color_attachment_states,
         descriptor.primitive_state,
         descriptor.depth_stencil_state);
-    render_pipeline->descriptor = descriptor;
+    render_pipeline->label = descriptor.label;
+    render_pipeline->layout = layout;
+    render_pipeline->vertex_shader = vertex_shader;
+    render_pipeline->fragment_shader = fragment_shader;
+    render_pipeline->color_attachment_states = descriptor.color_attachment_states;
+    render_pipeline->primitive_state = descriptor.primitive_state;
+    render_pipeline->depth_stencil_state = descriptor.depth_stencil_state;
 
-    const RenderPipelineId render_pipeline_id = m_render_pipelines.create(render_pipeline);
-    return render_pipeline_id;
+    return m_render_pipelines.create(render_pipeline);
 }
 
 void RenderSystem::destroy_render_pipeline(const RenderPipelineId id)
 {
     HE_ASSERT(m_render_pipelines.contains(id));
 
-    RenderPipeline *render_pipeline = m_render_pipelines.get(id);
+    const RenderPipeline *render_pipeline = m_render_pipelines.get(id);
     m_render_driver->destroy_render_pipeline(render_pipeline);
     m_render_pipelines.destroy(id);
 }
 
-RenderSystem::CommandBufferId RenderSystem::acquire_command_buffer() const
+CommandBufferId RenderSystem::acquire_command_buffer() const
 {
     const uint32_t command_buffer_id = m_frame_index % static_cast<uint32_t>(m_command_buffers.size());
 
     CommandBuffer *command_buffer = m_command_buffers[command_buffer_id];
     command_buffer->generation += 1;
-    command_buffer->submitted = false;
+    command_buffer->compute_pass_in_progress = false;
+    command_buffer->render_pass_in_progress = false;
     command_buffer->swapchain_texture_acquired = false;
 
     m_render_driver->acquire_command_buffer(command_buffer);
@@ -265,9 +293,6 @@ RenderSystem::CommandBufferId RenderSystem::acquire_command_buffer() const
 void RenderSystem::submit_command_buffer(const CommandBufferId id)
 {
     CommandBuffer *command_buffer = resolve_command_buffer(id);
-    command_buffer->submitted = true;
-
-    // FIXME: Submit and Present if a swapchain texture was acquired
 
     m_render_driver->submit_command_buffer(command_buffer);
 
@@ -276,12 +301,22 @@ void RenderSystem::submit_command_buffer(const CommandBufferId id)
         m_render_driver->present();
     }
 
+    for (const ComputePass *compute_pass : m_compute_passes)
+    {
+        delete compute_pass;
+    }
+
+    for (const RenderPass *render_pass : m_render_passes)
+    {
+        delete render_pass;
+    }
+
     m_compute_passes.clear();
     m_render_passes.clear();
     m_frame_index += 1;
 }
 
-RenderSystem::TextureId RenderSystem::acquire_swapchain_texture(const CommandBufferId id)
+TextureId RenderSystem::acquire_swapchain_texture(const CommandBufferId id)
 {
     CommandBuffer *command_buffer = resolve_command_buffer(id);
     command_buffer->swapchain_texture_acquired = true;
@@ -290,98 +325,128 @@ RenderSystem::TextureId RenderSystem::acquire_swapchain_texture(const CommandBuf
     return m_swapchain_textures[swapchain_texture_index];
 }
 
-RenderSystem::ComputePassId RenderSystem::begin_compute_pass(const CommandBufferId id)
+ComputePassId RenderSystem::begin_compute_pass(const CommandBufferId id, const ComputePassDescriptor &descriptor)
 {
     CommandBuffer *command_buffer = resolve_command_buffer(id);
+    HE_ASSERT(!command_buffer->compute_pass_in_progress);
 
-    const ComputePass compute_pass = {
-        .command_buffer = id,
+    ComputePass *compute_pass = new ComputePass{
+        .command_buffer = command_buffer,
     };
-    m_compute_passes.push_back(compute_pass);
+
+    if (descriptor.label.has_value())
+    {
+        const Label label = descriptor.label.value();
+        m_render_driver->begin_gpu_marker(command_buffer, label);
+
+        compute_pass->has_label = true;
+    }
 
     m_render_driver->begin_compute_pass(command_buffer);
+
+    command_buffer->compute_pass_in_progress = true;
+    m_compute_passes.push_back(compute_pass);
 
     return ComputePassId(m_compute_passes.size() - 1, command_buffer->generation);
 }
 
-void RenderSystem::end_compute_pass(const ComputePassId id)
+void RenderSystem::end_compute_pass(const ComputePassId id) const
 {
-    const ComputePass &compute_pass = resolve_compute_pass(id);
-    CommandBuffer *command_buffer = resolve_command_buffer(compute_pass.command_buffer);
+    ComputePass *compute_pass = resolve_compute_pass(id);
 
-    m_render_driver->end_compute_pass(command_buffer);
+    m_render_driver->end_compute_pass(compute_pass->command_buffer);
+
+    if (compute_pass->has_label)
+    {
+        m_render_driver->end_gpu_marker(compute_pass->command_buffer);
+    }
+
+    compute_pass->ended = true;
+    compute_pass->command_buffer->render_pass_in_progress = false;
 }
 
 void RenderSystem::bind_compute_pipeline(const ComputePassId id, const ComputePipelineId pipeline_id)
 {
     HE_ASSERT(m_compute_pipelines.contains(pipeline_id));
 
-    const ComputePass &compute_pass = resolve_compute_pass(id);
-    CommandBuffer *command_buffer = resolve_command_buffer(compute_pass.command_buffer);
+    const ComputePass *compute_pass = resolve_compute_pass(id);
 
-    ComputePipeline *compute_pipeline = m_compute_pipelines.get(pipeline_id);
-    m_render_driver->bind_compute_pipeline(command_buffer, compute_pipeline);
+    const ComputePipeline *compute_pipeline = m_compute_pipelines.get(pipeline_id);
+    m_render_driver->bind_compute_pipeline(compute_pass->command_buffer, compute_pipeline);
 }
 
-RenderSystem::RenderPassId RenderSystem::begin_render_pass(const CommandBufferId id, const RenderPassDescriptor &descriptor)
+RenderPassId RenderSystem::begin_render_pass(const CommandBufferId id, const RenderPassDescriptor &descriptor)
 {
     HE_ASSERT(m_textures.contains(descriptor.texture));
-    CommandBuffer *command_buffer = resolve_command_buffer(id);
 
-    const RenderPass render_pass = {
-        .command_buffer = id,
+    CommandBuffer *command_buffer = resolve_command_buffer(id);
+    HE_ASSERT(!command_buffer->render_pass_in_progress);
+
+    RenderPass *render_pass = new RenderPass{
+        .command_buffer = command_buffer,
     };
-    m_render_passes.push_back(render_pass);
 
     if (descriptor.label.has_value())
     {
         const Label label = descriptor.label.value();
-        m_render_driver->begin_gpu_marker(command_buffer, label.name, label.color);
+        m_render_driver->begin_gpu_marker(command_buffer, label);
 
-        // FIXME: Save if the render pass has a label
+        render_pass->has_label = true;
     }
 
-    Texture *texture = m_textures.get(descriptor.texture);
-    m_render_driver->begin_render_pass(command_buffer, descriptor, texture);
+    const Texture *texture = m_textures.get(descriptor.texture);
+    m_render_driver->begin_render_pass(command_buffer, texture);
+
+    command_buffer->render_pass_in_progress = true;
+    m_render_passes.push_back(render_pass);
 
     return RenderPassId(m_render_passes.size() - 1, command_buffer->generation);
 }
 
-void RenderSystem::end_render_pass(const RenderPassId id)
+void RenderSystem::end_render_pass(const RenderPassId id) const
 {
-    const RenderPass &render_pass = resolve_render_pass(id);
-    CommandBuffer *command_buffer = resolve_command_buffer(render_pass.command_buffer);
+    RenderPass *render_pass = resolve_render_pass(id);
 
-    m_render_driver->end_render_pass(command_buffer);
+    m_render_driver->end_render_pass(render_pass->command_buffer);
 
-    m_render_driver->end_gpu_marker(command_buffer);
+    if (render_pass->has_label)
+    {
+        m_render_driver->end_gpu_marker(render_pass->command_buffer);
+    }
+
+    render_pass->ended = true;
+    render_pass->command_buffer->render_pass_in_progress = false;
 }
 
 void RenderSystem::bind_render_pipeline(const RenderPassId id, const RenderPipelineId pipeline_id)
 {
     HE_ASSERT(m_render_pipelines.contains(pipeline_id));
 
-    const RenderPass &render_pass = resolve_render_pass(id);
-    CommandBuffer *command_buffer = resolve_command_buffer(render_pass.command_buffer);
+    const RenderPass *render_pass = resolve_render_pass(id);
 
-    RenderPipeline *render_pipeline = m_render_pipelines.get(pipeline_id);
-    m_render_driver->bind_render_pipeline(command_buffer, render_pipeline);
+    const RenderPipeline *render_pipeline = m_render_pipelines.get(pipeline_id);
+    m_render_driver->bind_render_pipeline(render_pass->command_buffer, render_pipeline);
 }
 
-void RenderSystem::set_viewport(const RenderPassId id, const Viewport &viewport)
+void RenderSystem::set_viewport(
+    const RenderPassId id,
+    const float x,
+    const float y,
+    const float width,
+    const float height,
+    const float min_depth,
+    const float max_depth) const
 {
-    const RenderPass &render_pass = resolve_render_pass(id);
-    CommandBuffer *command_buffer = resolve_command_buffer(render_pass.command_buffer);
+    const RenderPass *render_pass = resolve_render_pass(id);
 
-    m_render_driver->set_viewport(command_buffer, viewport);
+    m_render_driver->set_viewport(render_pass->command_buffer, x, y, width, height, min_depth, max_depth);
 }
 
-void RenderSystem::set_scissor(const RenderPassId id, const Scissor &scissor)
+void RenderSystem::set_scissor(const RenderPassId id, const int32_t x, const int32_t y, const uint32_t width, const uint32_t height) const
 {
-    const RenderPass &render_pass = resolve_render_pass(id);
-    CommandBuffer *command_buffer = resolve_command_buffer(render_pass.command_buffer);
+    const RenderPass *render_pass = resolve_render_pass(id);
 
-    m_render_driver->set_scissor(command_buffer, scissor);
+    m_render_driver->set_scissor(render_pass->command_buffer, x, y, width, height);
 }
 
 void RenderSystem::draw(
@@ -389,15 +454,14 @@ void RenderSystem::draw(
     const uint32_t vertex_count,
     const uint32_t instance_count,
     const uint32_t first_vertex,
-    const uint32_t first_instance)
+    const uint32_t first_instance) const
 {
-    const RenderPass &render_pass = resolve_render_pass(id);
-    CommandBuffer *command_buffer = resolve_command_buffer(render_pass.command_buffer);
+    const RenderPass *render_pass = resolve_render_pass(id);
 
-    m_render_driver->draw(command_buffer, vertex_count, instance_count, first_vertex, first_instance);
+    m_render_driver->draw(render_pass->command_buffer, vertex_count, instance_count, first_vertex, first_instance);
 }
 
-RenderSystem::CommandBuffer *RenderSystem::resolve_command_buffer(const CommandBufferId id) const
+CommandBuffer *RenderSystem::resolve_command_buffer(const CommandBufferId id) const
 {
     HE_ASSERT(id.id() < m_command_buffers.size());
 
@@ -407,24 +471,24 @@ RenderSystem::CommandBuffer *RenderSystem::resolve_command_buffer(const CommandB
     return command_buffer;
 }
 
-RenderSystem::ComputePass &RenderSystem::resolve_compute_pass(const ComputePassId id)
+ComputePass *RenderSystem::resolve_compute_pass(const ComputePassId id) const
 {
     HE_ASSERT(id.id() < m_compute_passes.size());
 
-    ComputePass &compute_pass = m_compute_passes[id.id()];
-    CommandBuffer *command_buffer = resolve_command_buffer(compute_pass.command_buffer);
-    HE_ASSERT(id.version() == command_buffer->generation);
+    ComputePass *compute_pass = m_compute_passes[id.id()];
+    HE_ASSERT(id.version() == compute_pass->command_buffer->generation);
+    HE_ASSERT(!compute_pass->ended);
 
     return compute_pass;
 }
 
-RenderSystem::RenderPass &RenderSystem::resolve_render_pass(const RenderPassId id)
+RenderPass *RenderSystem::resolve_render_pass(const RenderPassId id) const
 {
     HE_ASSERT(id.id() < m_render_passes.size());
 
-    RenderPass &render_pass = m_render_passes[id.id()];
-    CommandBuffer *command_buffer = resolve_command_buffer(render_pass.command_buffer);
-    HE_ASSERT(id.version() == command_buffer->generation);
+    RenderPass *render_pass = m_render_passes[id.id()];
+    HE_ASSERT(id.version() == render_pass->command_buffer->generation);
+    HE_ASSERT(!render_pass->ended);
 
     return render_pass;
 }

@@ -11,22 +11,19 @@
 #include "core/resource_owner.hpp"
 #include "systems/window/event_bus.hpp"
 
-using WS = class WindowSystem;
+HE_DEFINE_ID(Window);
+
+struct WindowDescriptor
+{
+    std::string title;
+    uint32_t width = 1280;
+    uint32_t height = 720;
+};
 
 struct SDL_Window;
 
 class WindowSystem
 {
-public:
-    HE_DEFINE_ID(Window);
-
-    struct WindowDescriptor
-    {
-        std::string title;
-        uint32_t width = 1280;
-        uint32_t height = 720;
-    };
-
 private:
     struct WindowData
     {

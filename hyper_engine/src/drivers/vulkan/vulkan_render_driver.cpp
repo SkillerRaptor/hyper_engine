@@ -52,7 +52,7 @@ VulkanRenderDriver::~VulkanRenderDriver()
     vkDestroyInstance(m_instance, nullptr);
 }
 
-void VulkanRenderDriver::initialize(const WindowSystem &window_system, const WindowSystem::WindowId window)
+void VulkanRenderDriver::initialize(const WindowSystem &window_system, const WindowId window)
 {
     const VkResult result = volkInitialize();
     HE_VK_CHECK(result, volkInitialize);
@@ -84,48 +84,87 @@ void VulkanRenderDriver::initialize(const WindowSystem &window_system, const Win
     create_swapchain(window_system, window);
 
     // FIXME: Add descriptors
-    // FIXME: Add per frame structures
 
     HE_INFO("Successfully initialized VulkanRenderDriver");
 }
 
-std::vector<RS::Texture *> VulkanRenderDriver::query_swapchain_textures()
+std::vector<Texture *> VulkanRenderDriver::query_swapchain_textures()
 {
     return m_swapchain_textures;
 }
 
-RS::Buffer *
-    VulkanRenderDriver::create_buffer(const std::optional<std::string> &label, const uint64_t byte_size, const BitFlags<RS::BufferUsage> usage)
-{
-    return create_internal_buffer(label, byte_size, usage, false);
-}
-
-RS::Buffer *VulkanRenderDriver::create_staging_buffer(
+Buffer *VulkanRenderDriver::create_buffer(
     const std::optional<std::string> &label,
     const uint64_t byte_size,
-    const BitFlags<RS::BufferUsage> usage)
+    const BitFlags<BufferUsage> usage,
+    const bool staging) const
 {
-    return create_internal_buffer(label, byte_size, usage, true);
+    uint64_t buffer_byte_size = byte_size;
+    if (buffer_byte_size < 65535)
+    {
+        buffer_byte_size = (buffer_byte_size + 3) & ~3ull;
+    }
+
+    const VkBufferCreateInfo buffer_create_info = {
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .size = byte_size,
+        .usage = get_buffer_usage_flags(usage),
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .queueFamilyIndexCount = 0,
+        .pQueueFamilyIndices = nullptr,
+    };
+
+    VmaAllocationCreateFlags allocation_flags = 0;
+    if (staging)
+    {
+        allocation_flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+        allocation_flags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
+    }
+
+    const VmaAllocationCreateInfo allocation_create_info = {
+        .flags = allocation_flags,
+        .usage = VMA_MEMORY_USAGE_AUTO,
+        .requiredFlags = 0,
+        .preferredFlags = 0,
+        .memoryTypeBits = 0,
+        .pool = VK_NULL_HANDLE,
+        .pUserData = nullptr,
+        .priority = 0,
+    };
+
+    VkBuffer buffer = VK_NULL_HANDLE;
+    VmaAllocation allocation = VK_NULL_HANDLE;
+    HE_VK_CHECK(vmaCreateBuffer(m_allocator, &buffer_create_info, &allocation_create_info, &buffer, &allocation, nullptr), vmaCreateBuffer);
+    HE_ASSERT(buffer != VK_NULL_HANDLE);
+    HE_ASSERT(allocation != VK_NULL_HANDLE);
+
+    return new VulkanBuffer({
+        .buffer = buffer,
+        .allocation = allocation,
+    });
 }
 
-void VulkanRenderDriver::destroy_buffer(RS::Buffer *buffer)
+void VulkanRenderDriver::destroy_buffer(const Buffer *buffer) const
 {
-    const VulkanBuffer *vulkan_buffer = reinterpret_cast<VulkanBuffer *>(buffer);
+    const VulkanBuffer *vulkan_buffer = reinterpret_cast<const VulkanBuffer *>(buffer);
+
     vkDestroyBuffer(m_device, vulkan_buffer->buffer, nullptr);
     delete vulkan_buffer;
 }
 
-RS::Shader *VulkanRenderDriver::create_shader(
+Shader *VulkanRenderDriver::create_shader(
     const std::optional<std::string> &label,
-    const RS::ShaderType type,
-    const std::string &entry,
-    const std::string &path)
+    const ShaderType type,
+    const std::string_view entry,
+    const std::string_view path) const
 {
     const std::vector<uint8_t> data = filesystem::read_file(path);
     HE_ASSERT(!data.empty());
 
     const ShaderCompilationDescriptor shader_compilation_descriptor = {
-        .entry_name = entry,
+        .entry_name = entry.data(),
         .type = type,
         .data = data,
     };
@@ -140,11 +179,11 @@ RS::Shader *VulkanRenderDriver::create_shader(
         {
             switch (type)
             {
-            case RS::ShaderType::Compute:
+            case ShaderType::Compute:
                 return "compute";
-            case RS::ShaderType::Fragment:
+            case ShaderType::Fragment:
                 return "fragment";
-            case RS::ShaderType::Vertex:
+            case ShaderType::Vertex:
                 return "vertex";
             default:
                 HE_UNREACHABLE();
@@ -162,61 +201,62 @@ RS::Shader *VulkanRenderDriver::create_shader(
         .pCode = reinterpret_cast<const uint32_t *>(code.data()),
     };
 
-    VkShaderModule vk_shader_module = VK_NULL_HANDLE;
-    HE_VK_CHECK(vkCreateShaderModule(m_device, &shader_module_create_info, nullptr, &vk_shader_module), vkCreateShaderModule);
-
-    HE_ASSERT(vk_shader_module != VK_NULL_HANDLE);
+    VkShaderModule shader_module = VK_NULL_HANDLE;
+    HE_VK_CHECK(vkCreateShaderModule(m_device, &shader_module_create_info, nullptr, &shader_module), vkCreateShaderModule);
+    HE_ASSERT(shader_module != VK_NULL_HANDLE);
 
     const VkShaderStageFlagBits shader_stage_flag_bits = [type]()
     {
         switch (type)
         {
-        case RS::ShaderType::Compute:
+        case ShaderType::Compute:
             return VK_SHADER_STAGE_COMPUTE_BIT;
-        case RS::ShaderType::Fragment:
+        case ShaderType::Fragment:
             return VK_SHADER_STAGE_FRAGMENT_BIT;
-        case RS::ShaderType::Vertex:
+        case ShaderType::Vertex:
             return VK_SHADER_STAGE_VERTEX_BIT;
         default:
             HE_UNREACHABLE();
         }
     }();
+
     const VkPipelineShaderStageCreateInfo pipeline_shader_stage_create_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
         .stage = shader_stage_flag_bits,
-        .module = vk_shader_module,
-        .pName = entry.c_str(),
+        .module = shader_module,
+        .pName = entry.data(),
         .pSpecializationInfo = nullptr,
     };
 
     return new VulkanShader({
-        .shader_module = vk_shader_module,
+        .shader_module = shader_module,
         .pipeline_stage_create_info = pipeline_shader_stage_create_info,
     });
 }
 
-void VulkanRenderDriver::destroy_shader(RS::Shader *shader)
+void VulkanRenderDriver::destroy_shader(const Shader *shader) const
 {
-    const VulkanShader *vulkan_shader = reinterpret_cast<VulkanShader *>(shader);
+    const VulkanShader *vulkan_shader = reinterpret_cast<const VulkanShader *>(shader);
+
     vkDestroyShaderModule(m_device, vulkan_shader->shader_module, nullptr);
     delete vulkan_shader;
 }
 
-RS::Sampler *VulkanRenderDriver::create_sampler(
+Sampler *VulkanRenderDriver::create_sampler(
     const std::optional<std::string> &label,
-    const RS::Filter mag_filter,
-    const RS::Filter min_filter,
-    const RS::Filter mipmap_filter,
-    const RS::AddressMode address_mode_u,
-    const RS::AddressMode address_mode_v,
-    const RS::AddressMode address_mode_w,
+    const Filter mag_filter,
+    const Filter min_filter,
+    const Filter mipmap_filter,
+    const AddressMode address_mode_u,
+    const AddressMode address_mode_v,
+    const AddressMode address_mode_w,
     const float mip_lod_bias,
-    const RS::CompareOperation compare_operation,
+    const CompareOperation compare_operation,
     const float min_lod,
     const float max_lod,
-    const RS::BorderColor border_color)
+    const BorderColor border_color) const
 {
     const VkSamplerCreateInfo sampler_create_info = {
         .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
@@ -239,33 +279,33 @@ RS::Sampler *VulkanRenderDriver::create_sampler(
         .unnormalizedCoordinates = VK_FALSE,
     };
 
-    VkSampler vk_sampler = VK_NULL_HANDLE;
-    HE_VK_CHECK(vkCreateSampler(m_device, &sampler_create_info, nullptr, &vk_sampler), vkCreateSampler);
-
-    HE_ASSERT(vk_sampler != VK_NULL_HANDLE);
+    VkSampler sampler = VK_NULL_HANDLE;
+    HE_VK_CHECK(vkCreateSampler(m_device, &sampler_create_info, nullptr, &sampler), vkCreateSampler);
+    HE_ASSERT(sampler != VK_NULL_HANDLE);
 
     return new VulkanSampler({
-        .sampler = vk_sampler,
+        .sampler = sampler,
     });
 }
 
-void VulkanRenderDriver::destroy_sampler(RS::Sampler *sampler)
+void VulkanRenderDriver::destroy_sampler(const Sampler *sampler) const
 {
-    const VulkanSampler *vulkan_sampler = reinterpret_cast<VulkanSampler *>(sampler);
+    const VulkanSampler *vulkan_sampler = reinterpret_cast<const VulkanSampler *>(sampler);
+
     vkDestroySampler(m_device, vulkan_sampler->sampler, nullptr);
     delete vulkan_sampler;
 }
 
-RS::Texture *VulkanRenderDriver::create_texture(
+Texture *VulkanRenderDriver::create_texture(
     const std::optional<std::string> &label,
     const uint32_t width,
     const uint32_t height,
     const uint32_t depth,
     const uint32_t array_size,
     const uint32_t mip_levels,
-    const RS::Format format,
-    const RS::Dimension dimension,
-    const BitFlags<RS::TextureUsage> usage)
+    const Format format,
+    const Dimension dimension,
+    const BitFlags<TextureUsage> usage) const
 {
     (void) label;
     (void) width;
@@ -277,21 +317,21 @@ RS::Texture *VulkanRenderDriver::create_texture(
     (void) dimension;
     (void) usage;
 
-    // FIXME: Implement this
+    // FIXME: Implement VulkanRenderDriver::create_texture
     HE_PANIC("TODO: Implement `VulkanRenderDriver::create_texture`");
 
     return nullptr;
 }
 
-void VulkanRenderDriver::destroy_texture(RS::Texture *texture)
+void VulkanRenderDriver::destroy_texture(const Texture *texture) const
 {
     (void) texture;
 
-    // FIXME: Implement this
+    // FIXME: Implement VulkanRenderDriver::destroy_texture
     HE_PANIC("TODO: Implement `VulkanRenderDriver::destroy_texture`");
 }
 
-RS::PipelineLayout *VulkanRenderDriver::create_pipeline_layout(const std::optional<std::string> &label, const uint32_t push_constant_size)
+PipelineLayout *VulkanRenderDriver::create_pipeline_layout(const std::optional<std::string> &label, const uint32_t push_constant_size) const
 {
     const VkPushConstantRange push_constant_range = {
         .stageFlags = VK_SHADER_STAGE_ALL,
@@ -310,28 +350,30 @@ RS::PipelineLayout *VulkanRenderDriver::create_pipeline_layout(const std::option
         .pPushConstantRanges = push_constant_size == 0 ? nullptr : &push_constant_range,
     };
 
-    VkPipelineLayout vk_pipeline_layout = VK_NULL_HANDLE;
-    HE_VK_CHECK(vkCreatePipelineLayout(m_device, &pipeline_layout_create_info, nullptr, &vk_pipeline_layout), vkCreatePipelineLayout);
-
-    HE_ASSERT(vk_pipeline_layout != VK_NULL_HANDLE);
+    VkPipelineLayout pipeline_layout = VK_NULL_HANDLE;
+    HE_VK_CHECK(vkCreatePipelineLayout(m_device, &pipeline_layout_create_info, nullptr, &pipeline_layout), vkCreatePipelineLayout);
+    HE_ASSERT(pipeline_layout != VK_NULL_HANDLE);
 
     return new VulkanPipelineLayout({
-        .pipeline_layout = vk_pipeline_layout,
+        .pipeline_layout = pipeline_layout,
     });
 }
 
-void VulkanRenderDriver::destroy_pipeline_layout(RS::PipelineLayout *pipeline_layout)
+void VulkanRenderDriver::destroy_pipeline_layout(const PipelineLayout *pipeline_layout) const
 {
-    const VulkanPipelineLayout *vulkan_pipeline_layout = reinterpret_cast<VulkanPipelineLayout *>(pipeline_layout);
+    const VulkanPipelineLayout *vulkan_pipeline_layout = reinterpret_cast<const VulkanPipelineLayout *>(pipeline_layout);
+
     vkDestroyPipelineLayout(m_device, vulkan_pipeline_layout->pipeline_layout, nullptr);
     delete vulkan_pipeline_layout;
 }
 
-RS::ComputePipeline *
-    VulkanRenderDriver::create_compute_pipeline(const std::optional<std::string> &label, RS::PipelineLayout *layout, RS::Shader *shader)
+ComputePipeline *VulkanRenderDriver::create_compute_pipeline(
+    const std::optional<std::string> &label,
+    const PipelineLayout *layout,
+    const Shader *shader) const
 {
-    const VulkanPipelineLayout *vulkan_layout = reinterpret_cast<VulkanPipelineLayout *>(layout);
-    const VulkanShader *vulkan_shader = reinterpret_cast<VulkanShader *>(shader);
+    const VulkanPipelineLayout *vulkan_layout = reinterpret_cast<const VulkanPipelineLayout *>(layout);
+    const VulkanShader *vulkan_shader = reinterpret_cast<const VulkanShader *>(shader);
 
     const VkComputePipelineCreateInfo compute_pipeline_create_info = {
         .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
@@ -343,35 +385,35 @@ RS::ComputePipeline *
         .basePipelineIndex = -1,
     };
 
-    VkPipeline vk_pipeline = VK_NULL_HANDLE;
+    VkPipeline pipeline = VK_NULL_HANDLE;
     HE_VK_CHECK(
-        vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_create_info, nullptr, &vk_pipeline), vkCreateComputePipelines);
-
-    HE_ASSERT(vk_pipeline != VK_NULL_HANDLE);
+        vkCreateComputePipelines(m_device, VK_NULL_HANDLE, 1, &compute_pipeline_create_info, nullptr, &pipeline), vkCreateComputePipelines);
+    HE_ASSERT(pipeline != VK_NULL_HANDLE);
 
     return new VulkanComputePipeline({
-        .pipeline = vk_pipeline,
+        .pipeline = pipeline,
     });
 }
 
-void VulkanRenderDriver::destroy_compute_pipeline(RS::ComputePipeline *compute_pipeline)
+void VulkanRenderDriver::destroy_compute_pipeline(const ComputePipeline *compute_pipeline) const
 {
-    const VulkanComputePipeline *vulkan_compute_pipeline = reinterpret_cast<VulkanComputePipeline *>(compute_pipeline);
+    const VulkanComputePipeline *vulkan_compute_pipeline = reinterpret_cast<const VulkanComputePipeline *>(compute_pipeline);
+
     vkDestroyPipeline(m_device, vulkan_compute_pipeline->pipeline, nullptr);
     delete vulkan_compute_pipeline;
 }
 
-RS::RenderPipeline *VulkanRenderDriver::create_render_pipeline(
+RenderPipeline *VulkanRenderDriver::create_render_pipeline(
     const std::optional<std::string> &label,
-    RS::PipelineLayout *layout,
-    RS::Shader *vertex_shader,
-    RS::Shader *fragment_shader,
-    const std::vector<RS::ColorAttachmentState> &color_attachment_states,
-    const RS::PrimitiveState &primitive_state,
-    const RS::DepthStencilState &depth_stencil_state)
+    const PipelineLayout *layout,
+    const Shader *vertex_shader,
+    const Shader *fragment_shader,
+    const std::vector<ColorAttachmentState> &color_attachment_states,
+    const PrimitiveState &primitive_state,
+    const DepthStencilState &depth_stencil_state) const
 {
-    const VulkanShader *vulkan_vertex_shader = reinterpret_cast<VulkanShader *>(vertex_shader);
-    const VulkanShader *vulkan_fragment_shader = reinterpret_cast<VulkanShader *>(fragment_shader);
+    const VulkanShader *vulkan_vertex_shader = reinterpret_cast<const VulkanShader *>(vertex_shader);
+    const VulkanShader *vulkan_fragment_shader = reinterpret_cast<const VulkanShader *>(fragment_shader);
 
     const std::array<VkPipelineShaderStageCreateInfo, 2> shader_stage_create_infos = {
         vulkan_vertex_shader->pipeline_stage_create_info,
@@ -388,12 +430,11 @@ RS::RenderPipeline *VulkanRenderDriver::create_render_pipeline(
         .pVertexAttributeDescriptions = nullptr,
     };
 
-    const VkPrimitiveTopology primitive_topology = get_primitive_topology(primitive_state.topology);
     const VkPipelineInputAssemblyStateCreateInfo input_assembly_state_create_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .topology = primitive_topology,
+        .topology = get_primitive_topology(primitive_state.topology),
         .primitiveRestartEnable = false,
     };
 
@@ -446,8 +487,7 @@ RS::RenderPipeline *VulkanRenderDriver::create_render_pipeline(
         .alphaToOneEnable = false,
     };
 
-    // FIXME: Add stencil
-    // FIXME: Add depth bounds
+    // FIXME: Add depth bounds & stencil
     const VkCompareOp depth_compare_operation = get_compare_operation(depth_stencil_state.depth_compare_operation);
     const VkPipelineDepthStencilStateCreateInfo depth_stencil_state_create_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
@@ -465,9 +505,9 @@ RS::RenderPipeline *VulkanRenderDriver::create_render_pipeline(
     };
 
     std::vector<VkPipelineColorBlendAttachmentState> color_blend_attachment_states = {};
-    for (const RS::ColorAttachmentState &color_attachment_state : color_attachment_states)
+    for (const ColorAttachmentState &color_attachment_state : color_attachment_states)
     {
-        const RS::BlendState &blend_state = color_attachment_state.blend_state;
+        const BlendState &blend_state = color_attachment_state.blend_state;
 
         const VkBlendFactor src_color_blend_factor = get_blend_factor(blend_state.src_blend_factor);
         const VkBlendFactor dst_color_blend_factor = get_blend_factor(blend_state.dst_blend_factor);
@@ -521,23 +561,22 @@ RS::RenderPipeline *VulkanRenderDriver::create_render_pipeline(
     };
 
     std::vector<VkFormat> color_attachment_formats = {};
-    for (const RS::ColorAttachmentState &color_attachment_state : color_attachment_states)
+    for (const ColorAttachmentState &color_attachment_state : color_attachment_states)
     {
         color_attachment_formats.push_back(get_format(color_attachment_state.format));
     }
 
-    const VkFormat depth_attachment_format = get_format(depth_stencil_state.depth_format);
     const VkPipelineRenderingCreateInfo rendering_create_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
         .pNext = nullptr,
         .viewMask = 0,
         .colorAttachmentCount = static_cast<uint32_t>(color_attachment_formats.size()),
         .pColorAttachmentFormats = color_attachment_formats.data(),
-        .depthAttachmentFormat = depth_attachment_format,
+        .depthAttachmentFormat = get_format(depth_stencil_state.depth_format),
         .stencilAttachmentFormat = VK_FORMAT_UNDEFINED,
     };
 
-    const VulkanPipelineLayout *vulkan_pipeline_layout = reinterpret_cast<VulkanPipelineLayout *>(layout);
+    const VulkanPipelineLayout *vulkan_pipeline_layout = reinterpret_cast<const VulkanPipelineLayout *>(layout);
 
     const VkGraphicsPipelineCreateInfo graphics_pipeline_create_info = {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -561,26 +600,25 @@ RS::RenderPipeline *VulkanRenderDriver::create_render_pipeline(
         .basePipelineIndex = -1,
     };
 
-    VkPipeline vk_pipeline = VK_NULL_HANDLE;
+    VkPipeline pipeline = VK_NULL_HANDLE;
     HE_VK_CHECK(
-        vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, nullptr, &vk_pipeline),
-        vkCreateGraphicsPipelines);
-
-    HE_ASSERT(vk_pipeline != VK_NULL_HANDLE);
+        vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, nullptr, &pipeline), vkCreateGraphicsPipelines);
+    HE_ASSERT(pipeline != VK_NULL_HANDLE);
 
     return new VulkanRenderPipeline({
-        .pipeline = vk_pipeline,
+        .pipeline = pipeline,
     });
 }
 
-void VulkanRenderDriver::destroy_render_pipeline(RS::RenderPipeline *render_pipeline)
+void VulkanRenderDriver::destroy_render_pipeline(const RenderPipeline *render_pipeline) const
 {
-    const VulkanRenderPipeline *vulkan_render_pipeline = reinterpret_cast<VulkanRenderPipeline *>(render_pipeline);
+    const VulkanRenderPipeline *vulkan_render_pipeline = reinterpret_cast<const VulkanRenderPipeline *>(render_pipeline);
+
     vkDestroyPipeline(m_device, vulkan_render_pipeline->pipeline, nullptr);
     delete vulkan_render_pipeline;
 }
 
-RS::CommandBuffer *VulkanRenderDriver::create_command_buffer()
+CommandBuffer *VulkanRenderDriver::create_command_buffer() const
 {
     const VkCommandPoolCreateInfo command_pool_create_info = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -640,18 +678,21 @@ RS::CommandBuffer *VulkanRenderDriver::create_command_buffer()
     });
 }
 
-void VulkanRenderDriver::destroy_command_buffer(RS::CommandBuffer *command_buffer)
+void VulkanRenderDriver::destroy_command_buffer(const CommandBuffer *command_buffer) const
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+
     vkDestroyCommandPool(m_device, vulkan_command_buffer->command_pool, nullptr);
     vkDestroyFence(m_device, vulkan_command_buffer->render_fence, nullptr);
     vkDestroySemaphore(m_device, vulkan_command_buffer->submit_semaphore, nullptr);
     delete vulkan_command_buffer;
 }
 
-void VulkanRenderDriver::acquire_command_buffer(RS::CommandBuffer *command_buffer)
+void VulkanRenderDriver::acquire_command_buffer(const CommandBuffer *command_buffer) const
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
+    // FIXME: Add resource destruction
+
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
     const uint64_t wait_frame_index = vulkan_command_buffer->semaphore_counter;
     const VkSemaphoreWaitInfo semaphore_wait_info = {
@@ -676,14 +717,13 @@ void VulkanRenderDriver::acquire_command_buffer(RS::CommandBuffer *command_buffe
     HE_VK_CHECK(vkBeginCommandBuffer(vulkan_command_buffer->command_buffer, &command_buffer_begin_info), vkBeginCommandBuffer);
 }
 
-void VulkanRenderDriver::submit_command_buffer(RS::CommandBuffer *command_buffer)
+void VulkanRenderDriver::submit_command_buffer(CommandBuffer *command_buffer) const
 {
     VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
 
-    // FIXME: Transition to Present
     if (vulkan_command_buffer->swapchain_texture_acquired)
     {
-        RS::Texture *swapchain_texture = m_swapchain_textures[m_swapchain_texture_index];
+        Texture *swapchain_texture = m_swapchain_textures[m_swapchain_texture_index];
         transition_texture_layout(command_buffer, swapchain_texture, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
     }
 
@@ -729,18 +769,11 @@ void VulkanRenderDriver::submit_command_buffer(RS::CommandBuffer *command_buffer
     HE_VK_CHECK(vkQueueSubmit2(m_queue, 1, &submit_info, VK_NULL_HANDLE), vkQueueSubmit2);
 }
 
-uint32_t VulkanRenderDriver::acquire_swapchain_texture(RS::CommandBuffer *command_buffer)
+uint32_t VulkanRenderDriver::acquire_swapchain_texture(const CommandBuffer *command_buffer)
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
-    /*
-    destroy_resources();
-
-    if (vulkan_surface.resized())
-    {
-        vulkan_surface.rebuild();
-    }
-    */
+    // FIXME: Resize swapchain
 
     uint32_t image_index = 0;
     HE_VK_CHECK(
@@ -753,7 +786,7 @@ uint32_t VulkanRenderDriver::acquire_swapchain_texture(RS::CommandBuffer *comman
     return m_swapchain_texture_index;
 }
 
-void VulkanRenderDriver::present()
+void VulkanRenderDriver::present() const
 {
     const VkPresentInfoKHR present_info = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
@@ -769,17 +802,17 @@ void VulkanRenderDriver::present()
     HE_VK_CHECK(vkQueuePresentKHR(m_queue, &present_info), vkQueuePresentKHR);
 }
 
-void VulkanRenderDriver::begin_gpu_marker(RS::CommandBuffer *command_buffer, const std::string_view name, const RS::LabelColor label_color) const
+void VulkanRenderDriver::begin_gpu_marker(const CommandBuffer *command_buffer, const Label label) const
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
-    const float r = static_cast<float>(label_color.r) / 255.0f;
-    const float g = static_cast<float>(label_color.g) / 255.0f;
-    const float b = static_cast<float>(label_color.b) / 255.0f;
+    const float r = static_cast<float>(label.color.r) / 255.0f;
+    const float g = static_cast<float>(label.color.g) / 255.0f;
+    const float b = static_cast<float>(label.color.b) / 255.0f;
     const VkDebugUtilsLabelEXT debug_label = {
         .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT,
         .pNext = nullptr,
-        .pLabelName = name.data(),
+        .pLabelName = label.name.data(),
         .color =
             {
                 r,
@@ -792,52 +825,52 @@ void VulkanRenderDriver::begin_gpu_marker(RS::CommandBuffer *command_buffer, con
     vkCmdBeginDebugUtilsLabelEXT(vulkan_command_buffer->command_buffer, &debug_label);
 }
 
-void VulkanRenderDriver::end_gpu_marker(RS::CommandBuffer *command_buffer) const
+void VulkanRenderDriver::end_gpu_marker(const CommandBuffer *command_buffer) const
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
     vkCmdEndDebugUtilsLabelEXT(vulkan_command_buffer->command_buffer);
 }
 
-void VulkanRenderDriver::begin_compute_pass(RS::CommandBuffer *command_buffer)
+void VulkanRenderDriver::begin_compute_pass(const CommandBuffer *command_buffer) const
 {
     (void) command_buffer;
+
+    // NOTE: noop
 }
 
-void VulkanRenderDriver::end_compute_pass(RS::CommandBuffer *command_buffer)
+void VulkanRenderDriver::end_compute_pass(const CommandBuffer *command_buffer) const
 {
     (void) command_buffer;
+
+    // NOTE: noop
 }
 
-void VulkanRenderDriver::bind_compute_pipeline(RS::CommandBuffer *command_buffer, RS::ComputePipeline *pipeline)
+void VulkanRenderDriver::bind_compute_pipeline(const CommandBuffer *command_buffer, const ComputePipeline *pipeline) const
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
-    const VulkanComputePipeline *vulkan_compute_pipeline = reinterpret_cast<VulkanComputePipeline *>(pipeline);
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    const VulkanComputePipeline *vulkan_compute_pipeline = reinterpret_cast<const VulkanComputePipeline *>(pipeline);
 
     vkCmdBindPipeline(vulkan_command_buffer->command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_compute_pipeline->pipeline);
 }
 
-void VulkanRenderDriver::begin_render_pass(RS::CommandBuffer *command_buffer, const RS::RenderPassDescriptor &descriptor, RS::Texture *texture)
+void VulkanRenderDriver::begin_render_pass(const CommandBuffer *command_buffer, const Texture *texture) const
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
-    const VulkanTexture *vulkan_texture = reinterpret_cast<VulkanTexture *>(texture);
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(texture);
 
-    // FIXME: Add Marker
-
-    // FIXME: Should this always use the first image?
-    const VkExtent2D render_area_extent = {
-        .width = vulkan_texture->descriptor.width,
-        .height = vulkan_texture->descriptor.height,
-    };
-
-    constexpr VkOffset2D render_area_offset = {
-        .x = 0,
-        .y = 0,
+    const VkExtent2D extent = {
+        .width = vulkan_texture->width,
+        .height = vulkan_texture->height,
     };
 
     const VkRect2D render_area = {
-        .offset = render_area_offset,
-        .extent = render_area_extent,
+        .offset =
+            {
+                .x = 0,
+                .y = 0,
+            },
+        .extent = extent,
     };
 
     constexpr VkClearValue clear_value = {
@@ -855,6 +888,7 @@ void VulkanRenderDriver::begin_render_pass(RS::CommandBuffer *command_buffer, co
 
     std::vector<VkRenderingAttachmentInfo> color_attachments = {};
 
+    // FIXME: Add color attachments array & determine load/store op based on the specified operation in the color attachment
     const VkRenderingAttachmentInfo color_attachment_info = {
         .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
         .pNext = nullptr,
@@ -863,8 +897,6 @@ void VulkanRenderDriver::begin_render_pass(RS::CommandBuffer *command_buffer, co
         .resolveMode = VK_RESOLVE_MODE_NONE,
         .resolveImageView = VK_NULL_HANDLE,
         .resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        //.loadOp = VulkanRenderPass::get_attachment_load_operation(color_attachment.operation.load_operation),
-        //.storeOp = VulkanRenderPass::get_attachment_store_operation(color_attachment.operation.store_operation),
         .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
         .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
         .clearValue = clear_value,
@@ -872,55 +904,7 @@ void VulkanRenderDriver::begin_render_pass(RS::CommandBuffer *command_buffer, co
 
     color_attachments.push_back(color_attachment_info);
 
-    /*
-    for (const ColorAttachment &color_attachment : m_color_attachments)
-    {
-        const VulkanTextureView &color_attachment_view = static_cast<const VulkanTextureView &>(*color_attachment.view);
-
-        const VkRenderingAttachmentInfo color_attachment_info = {
-            .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-            .pNext = nullptr,
-            .imageView = color_attachment_view.image_view(),
-            .imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-            .resolveMode = VK_RESOLVE_MODE_NONE,
-            .resolveImageView = VK_NULL_HANDLE,
-            .resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-            .loadOp = VulkanRenderPass::get_attachment_load_operation(color_attachment.operation.load_operation),
-            .storeOp = VulkanRenderPass::get_attachment_store_operation(color_attachment.operation.store_operation),
-            .clearValue = clear_value,
-        };
-
-        color_attachments.push_back(color_attachment_info);
-    }
-    */
-
-    constexpr VkClearValue depth_clear_value = {
-        .depthStencil =
-            {
-                .depth = 1.0,
-                .stencil = 0,
-            },
-    };
-
-    /*
-    const VkImageView depth_attachment_view = m_depth_stencil_attachment.view == nullptr
-                                                  ? VK_NULL_HANDLE
-                                                  : static_cast<const VulkanTextureView &>(*m_depth_stencil_attachment.view).image_view();
-
-
-    const VkRenderingAttachmentInfo depth_attachment_info = {
-        .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-        .pNext = nullptr,
-        .imageView = depth_attachment_view,
-        .imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-        .resolveMode = VK_RESOLVE_MODE_NONE,
-        .resolveImageView = VK_NULL_HANDLE,
-        .resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        .loadOp = VulkanRenderPass::get_attachment_load_operation(m_depth_stencil_attachment.depth_operation.load_operation),
-        .storeOp = VulkanRenderPass::get_attachment_store_operation(m_depth_stencil_attachment.depth_operation.store_operation),
-        .clearValue = depth_clear_value,
-    };
-    */
+    // FIXME: Add depth/stencil attachment
 
     const VkRenderingInfo rendering_info = {
         .sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
@@ -931,7 +915,6 @@ void VulkanRenderDriver::begin_render_pass(RS::CommandBuffer *command_buffer, co
         .viewMask = 0,
         .colorAttachmentCount = static_cast<uint32_t>(color_attachments.size()),
         .pColorAttachments = color_attachments.data(),
-        //.pDepthAttachment = depth_attachment_view == nullptr ? nullptr : &depth_attachment_info,
         .pDepthAttachment = nullptr,
         .pStencilAttachment = nullptr,
     };
@@ -939,91 +922,86 @@ void VulkanRenderDriver::begin_render_pass(RS::CommandBuffer *command_buffer, co
     const VkViewport viewport = {
         .x = 0.0,
         .y = 0,
-        .width = static_cast<float>(render_area_extent.width),
-        .height = static_cast<float>(render_area_extent.height),
+        .width = static_cast<float>(extent.width),
+        .height = static_cast<float>(extent.height),
         .minDepth = 0.0,
         .maxDepth = 1.0,
     };
 
-    constexpr VkOffset2D offset = {
-        .x = 0,
-        .y = 0,
-    };
-
-    const VkRect2D scissor = {
-        .offset = offset,
-        .extent = render_area_extent,
-    };
-
     vkCmdBeginRendering(vulkan_command_buffer->command_buffer, &rendering_info);
     vkCmdSetViewport(vulkan_command_buffer->command_buffer, 0, 1, &viewport);
-    vkCmdSetScissor(vulkan_command_buffer->command_buffer, 0, 1, &scissor);
+    vkCmdSetScissor(vulkan_command_buffer->command_buffer, 0, 1, &render_area);
 }
 
-void VulkanRenderDriver::end_render_pass(RS::CommandBuffer *command_buffer)
+void VulkanRenderDriver::end_render_pass(const CommandBuffer *command_buffer) const
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
     vkCmdEndRendering(vulkan_command_buffer->command_buffer);
-
-    // FIXME: Add Marker
 }
 
-void VulkanRenderDriver::bind_render_pipeline(RS::CommandBuffer *command_buffer, RS::RenderPipeline *pipeline)
+void VulkanRenderDriver::bind_render_pipeline(const CommandBuffer *command_buffer, const RenderPipeline *pipeline) const
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
-    const VulkanRenderPipeline *vulkan_render_pipeline = reinterpret_cast<VulkanRenderPipeline *>(pipeline);
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    const VulkanRenderPipeline *vulkan_render_pipeline = reinterpret_cast<const VulkanRenderPipeline *>(pipeline);
 
     vkCmdBindPipeline(vulkan_command_buffer->command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_render_pipeline->pipeline);
 }
 
-void VulkanRenderDriver::set_viewport(RS::CommandBuffer *command_buffer, const RS::Viewport &viewport)
+void VulkanRenderDriver::set_viewport(
+    const CommandBuffer *command_buffer,
+    const float x,
+    const float y,
+    const float width,
+    const float height,
+    const float min_depth,
+    const float max_depth) const
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
-    const VkViewport vk_viewport = {
-        .x = viewport.x,
-        .y = viewport.y,
-        .width = viewport.width,
-        .height = viewport.height,
-        .minDepth = viewport.min_depth,
-        .maxDepth = viewport.max_depth,
+    const VkViewport viewport = {
+        .x = x,
+        .y = y,
+        .width = width,
+        .height = height,
+        .minDepth = min_depth,
+        .maxDepth = max_depth,
     };
-
-    vkCmdSetViewport(vulkan_command_buffer->command_buffer, 0, 1, &vk_viewport);
+    vkCmdSetViewport(vulkan_command_buffer->command_buffer, 0, 1, &viewport);
 }
 
-void VulkanRenderDriver::set_scissor(RS::CommandBuffer *command_buffer, const RS::Scissor &scissor)
+void VulkanRenderDriver::set_scissor(
+    const CommandBuffer *command_buffer,
+    const int32_t x,
+    const int32_t y,
+    const uint32_t width,
+    const uint32_t height) const
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
-    const VkOffset2D offset = {
-        .x = scissor.x,
-        .y = scissor.y,
+    const VkRect2D scissor = {
+        .offset =
+            {
+                .x = x,
+                .y = y,
+            },
+        .extent =
+            {
+                .width = width,
+                .height = height,
+            },
     };
-
-    const VkExtent2D extent = {
-        .width = scissor.width,
-        .height = scissor.height,
-    };
-
-    const VkRect2D vk_scissor = {
-        .offset = offset,
-        .extent = extent,
-    };
-
-    vkCmdSetScissor(vulkan_command_buffer->command_buffer, 0, 1, &vk_scissor);
+    vkCmdSetScissor(vulkan_command_buffer->command_buffer, 0, 1, &scissor);
 }
 
 void VulkanRenderDriver::draw(
-    RS::CommandBuffer *command_buffer,
+    const CommandBuffer *command_buffer,
     const uint32_t vertex_count,
     const uint32_t instance_count,
     const uint32_t first_vertex,
-    const uint32_t first_instance)
+    const uint32_t first_instance) const
 {
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
-
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     vkCmdDraw(vulkan_command_buffer->command_buffer, vertex_count, instance_count, first_vertex, first_instance);
 }
 
@@ -1367,7 +1345,7 @@ void VulkanRenderDriver::create_allocator()
     HE_VK_CHECK(result, vmaCreateAllocator);
 }
 
-void VulkanRenderDriver::create_surface(const WS &window_system, const WS::WindowId id)
+void VulkanRenderDriver::create_surface(const WindowSystem &window_system, const WindowId id)
 {
     SDL_Window *window = window_system.get_native_window(id);
 
@@ -1375,7 +1353,7 @@ void VulkanRenderDriver::create_surface(const WS &window_system, const WS::Windo
     HE_ASSERT(m_surface != VK_NULL_HANDLE);
 }
 
-void VulkanRenderDriver::create_swapchain(const WS &window_system, const WS::WindowId id)
+void VulkanRenderDriver::create_swapchain(const WindowSystem &window_system, const WindowId id)
 {
     const glm::uvec2 size = window_system.get_window_size(id);
 
@@ -1450,22 +1428,6 @@ void VulkanRenderDriver::create_swapchain(const WS &window_system, const WS::Win
     {
         // FIXME: Go through create texture function
 
-        const RS::TextureDescriptor descriptor = {
-            .label = std::nullopt,
-            .width = surface_extent.width,
-            .height = surface_extent.height,
-            .depth = 1,
-            .array_size = 1,
-            .mip_levels = 1,
-            .format = format_to_texture_format(surface_format.format),
-            .dimension = RS::Dimension::Texture2D,
-            .usage = RS::TextureUsage::RenderAttachment,
-        };
-
-        const VkImageViewType view_type = get_image_view_type(descriptor.dimension);
-
-        const VkFormat format = get_format(descriptor.format);
-
         constexpr VkComponentMapping component_mapping = {
             .r = VK_COMPONENT_SWIZZLE_IDENTITY,
             .g = VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -1473,9 +1435,8 @@ void VulkanRenderDriver::create_swapchain(const WS &window_system, const WS::Win
             .a = VK_COMPONENT_SWIZZLE_IDENTITY,
         };
 
-        const VkImageAspectFlags aspect_mask = get_image_aspect_flags(descriptor.format);
-        const VkImageSubresourceRange subresource_range = {
-            .aspectMask = aspect_mask,
+        constexpr VkImageSubresourceRange subresource_range = {
+            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
             .baseMipLevel = 0,
             .levelCount = 1,
             .baseArrayLayer = 0,
@@ -1487,8 +1448,8 @@ void VulkanRenderDriver::create_swapchain(const WS &window_system, const WS::Win
             .pNext = nullptr,
             .flags = 0,
             .image = image,
-            .viewType = view_type,
-            .format = format,
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .format = surface_format.format,
             .components = component_mapping,
             .subresourceRange = subresource_range,
         };
@@ -1497,84 +1458,36 @@ void VulkanRenderDriver::create_swapchain(const WS &window_system, const WS::Win
         HE_VK_CHECK(vkCreateImageView(m_device, &image_view_create_info, nullptr, &image_view), vkCreateImageView);
         HE_ASSERT(image_view != VK_NULL_HANDLE);
 
-        RS::Texture *texture = new VulkanTexture({
+        Texture *texture = new VulkanTexture({
             .image = image,
             .allocation = VK_NULL_HANDLE,
             .image_view = image_view,
         });
 
-        texture->descriptor = descriptor;
+        texture->label = std::nullopt;
+        texture->width = surface_extent.width;
+        texture->height = surface_extent.height;
+        texture->depth = 1;
+        texture->array_size = 1;
+        texture->mip_levels = 1;
+        texture->format = format_to_texture_format(surface_format.format);
+        texture->dimension = Dimension::Texture2D;
+        texture->usage = TextureUsage::RenderAttachment;
 
         m_swapchain_textures.push_back(texture);
     }
 }
 
-RS::Buffer *VulkanRenderDriver::create_internal_buffer(
-    const std::optional<std::string> &label,
-    const uint64_t byte_size,
-    const BitFlags<RS::BufferUsage> usage,
-    const bool staging) const
+void VulkanRenderDriver::transition_texture_layout(const CommandBuffer *command_buffer, Texture *texture, const VkImageLayout new_layout)
 {
-    const VkBufferUsageFlags usage_flags = get_buffer_usage_flags(usage);
-
-    uint64_t buffer_byte_size = byte_size;
-    if (buffer_byte_size < 65535)
-    {
-        buffer_byte_size = (buffer_byte_size + 3) & ~3ull;
-    }
-
-    const VkBufferCreateInfo buffer_create_info = {
-        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = 0,
-        .size = byte_size,
-        .usage = usage_flags,
-        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .queueFamilyIndexCount = 0,
-        .pQueueFamilyIndices = nullptr,
-    };
-
-    VmaAllocationCreateFlags allocation_flags = 0;
-    if (staging)
-    {
-        allocation_flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-        allocation_flags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
-    }
-
-    const VmaAllocationCreateInfo allocation_create_info = {
-        .flags = allocation_flags,
-        .usage = VMA_MEMORY_USAGE_AUTO,
-        .requiredFlags = 0,
-        .preferredFlags = 0,
-        .memoryTypeBits = 0,
-        .pool = VK_NULL_HANDLE,
-        .pUserData = nullptr,
-        .priority = 0,
-    };
-
-    VkBuffer buffer = VK_NULL_HANDLE;
-    VmaAllocation allocation = VK_NULL_HANDLE;
-    HE_VK_CHECK(vmaCreateBuffer(m_allocator, &buffer_create_info, &allocation_create_info, &buffer, &allocation, nullptr), vmaCreateBuffer);
-
-    HE_ASSERT(buffer != VK_NULL_HANDLE);
-    HE_ASSERT(allocation != VK_NULL_HANDLE);
-
-    return new VulkanBuffer({
-        .buffer = buffer,
-        .allocation = allocation,
-    });
-}
-
-void VulkanRenderDriver::transition_texture_layout(RS::CommandBuffer *command_buffer, RS::Texture *texture, const VkImageLayout new_layout)
-{
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     VulkanTexture *vulkan_texture = reinterpret_cast<VulkanTexture *>(texture);
 
     // FIXME: Add more specific src/dst stage/access masks
 
-    // FIXME: Add Subresources
+    // FIXME: Add Subresource
     const VkImageSubresourceRange subresource_range = {
-        .aspectMask = get_image_aspect_flags(vulkan_texture->descriptor.format),
+        .aspectMask = get_image_aspect_flags(vulkan_texture->format),
         .baseMipLevel = 0,
         .levelCount = 1,
         .baseArrayLayer = 0,
@@ -1794,21 +1707,21 @@ VkPresentModeKHR VulkanRenderDriver::choose_present_mode(const std::vector<VkPre
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkBufferUsageFlags VulkanRenderDriver::get_buffer_usage_flags(const BitFlags<RS::BufferUsage> buffer_usage_flags)
+VkBufferUsageFlags VulkanRenderDriver::get_buffer_usage_flags(const BitFlags<BufferUsage> buffer_usage_flags)
 {
     VkBufferUsageFlags usage_flags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-    if (buffer_usage_flags & RS::BufferUsage::Index)
+    if (buffer_usage_flags & BufferUsage::Index)
     {
         usage_flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
     }
 
-    if (buffer_usage_flags & RS::BufferUsage::Indirect)
+    if (buffer_usage_flags & BufferUsage::Indirect)
     {
         usage_flags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
     }
 
-    if (buffer_usage_flags & RS::BufferUsage::Storage)
+    if (buffer_usage_flags & BufferUsage::Storage)
     {
         usage_flags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
     }
@@ -1816,430 +1729,430 @@ VkBufferUsageFlags VulkanRenderDriver::get_buffer_usage_flags(const BitFlags<RS:
     return usage_flags;
 }
 
-VkFilter VulkanRenderDriver::get_filter(const RS::Filter filter)
+VkFilter VulkanRenderDriver::get_filter(const Filter filter)
 {
     switch (filter)
     {
-    case RS::Filter::Nearest:
+    case Filter::Nearest:
         return VK_FILTER_NEAREST;
-    case RS::Filter::Linear:
+    case Filter::Linear:
         return VK_FILTER_LINEAR;
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkSamplerMipmapMode VulkanRenderDriver::get_sampler_mipmap_mode(const RS::Filter filter)
+VkSamplerMipmapMode VulkanRenderDriver::get_sampler_mipmap_mode(const Filter filter)
 {
     switch (filter)
     {
-    case RS::Filter::Nearest:
+    case Filter::Nearest:
         return VK_SAMPLER_MIPMAP_MODE_NEAREST;
-    case RS::Filter::Linear:
+    case Filter::Linear:
         return VK_SAMPLER_MIPMAP_MODE_LINEAR;
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkSamplerAddressMode VulkanRenderDriver::get_sampler_address_mode(const RS::AddressMode filter)
+VkSamplerAddressMode VulkanRenderDriver::get_sampler_address_mode(const AddressMode filter)
 {
     switch (filter)
     {
-    case RS::AddressMode::Repeat:
+    case AddressMode::Repeat:
         return VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    case RS::AddressMode::MirroredRepeat:
+    case AddressMode::MirroredRepeat:
         return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-    case RS::AddressMode::ClampToEdge:
+    case AddressMode::ClampToEdge:
         return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    case RS::AddressMode::ClampToBorder:
+    case AddressMode::ClampToBorder:
         return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-    case RS::AddressMode::MirrorClampToEdge:
+    case AddressMode::MirrorClampToEdge:
         return VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE;
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkBorderColor VulkanRenderDriver::get_border_color(const RS::BorderColor border_color)
+VkBorderColor VulkanRenderDriver::get_border_color(const BorderColor border_color)
 {
     switch (border_color)
     {
-    case RS::BorderColor::TransparentBlack:
+    case BorderColor::TransparentBlack:
         return VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
-    case RS::BorderColor::OpaqueBlack:
+    case BorderColor::OpaqueBlack:
         return VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
-    case RS::BorderColor::OpaqueWhite:
+    case BorderColor::OpaqueWhite:
         return VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
     default:
         HE_UNREACHABLE();
     }
 }
 
-RS::Format VulkanRenderDriver::format_to_texture_format(const VkFormat format)
+Format VulkanRenderDriver::format_to_texture_format(const VkFormat format)
 {
     switch (format)
     {
     case VK_FORMAT_UNDEFINED:
-        return RS::Format::Unknown;
+        return Format::Unknown;
     case VK_FORMAT_R8_UNORM:
-        return RS::Format::R8Unorm;
+        return Format::R8Unorm;
     case VK_FORMAT_R8_SNORM:
-        return RS::Format::R8Snorm;
+        return Format::R8Snorm;
     case VK_FORMAT_R8_UINT:
-        return RS::Format::R8Uint;
+        return Format::R8Uint;
     case VK_FORMAT_R8_SINT:
-        return RS::Format::R8Sint;
+        return Format::R8Sint;
     case VK_FORMAT_R8_SRGB:
-        return RS::Format::R8Srgb;
+        return Format::R8Srgb;
     case VK_FORMAT_R8G8_UNORM:
-        return RS::Format::Rg8Unorm;
+        return Format::Rg8Unorm;
     case VK_FORMAT_R8G8_SNORM:
-        return RS::Format::Rg8Snorm;
+        return Format::Rg8Snorm;
     case VK_FORMAT_R8G8_UINT:
-        return RS::Format::Rg8Uint;
+        return Format::Rg8Uint;
     case VK_FORMAT_R8G8_SINT:
-        return RS::Format::Rg8Sint;
+        return Format::Rg8Sint;
     case VK_FORMAT_R8G8_SRGB:
-        return RS::Format::Rg8Srgb;
+        return Format::Rg8Srgb;
     case VK_FORMAT_R8G8B8_UNORM:
-        return RS::Format::Rgb8Unorm;
+        return Format::Rgb8Unorm;
     case VK_FORMAT_R8G8B8_SNORM:
-        return RS::Format::Rgb8Snorm;
+        return Format::Rgb8Snorm;
     case VK_FORMAT_R8G8B8_UINT:
-        return RS::Format::Rgb8Uint;
+        return Format::Rgb8Uint;
     case VK_FORMAT_R8G8B8_SINT:
-        return RS::Format::Rgb8Sint;
+        return Format::Rgb8Sint;
     case VK_FORMAT_R8G8B8_SRGB:
-        return RS::Format::Rgb8Srgb;
+        return Format::Rgb8Srgb;
     case VK_FORMAT_B8G8R8_UNORM:
-        return RS::Format::Bgr8Unorm;
+        return Format::Bgr8Unorm;
     case VK_FORMAT_B8G8R8_SNORM:
-        return RS::Format::Bgr8Snorm;
+        return Format::Bgr8Snorm;
     case VK_FORMAT_B8G8R8_UINT:
-        return RS::Format::Bgr8Uint;
+        return Format::Bgr8Uint;
     case VK_FORMAT_B8G8R8_SINT:
-        return RS::Format::Bgr8Sint;
+        return Format::Bgr8Sint;
     case VK_FORMAT_B8G8R8_SRGB:
-        return RS::Format::Bgr8Srgb;
+        return Format::Bgr8Srgb;
     case VK_FORMAT_R8G8B8A8_UNORM:
-        return RS::Format::Rgba8Unorm;
+        return Format::Rgba8Unorm;
     case VK_FORMAT_R8G8B8A8_SNORM:
-        return RS::Format::Rgba8Snorm;
+        return Format::Rgba8Snorm;
     case VK_FORMAT_R8G8B8A8_UINT:
-        return RS::Format::Rgba8Uint;
+        return Format::Rgba8Uint;
     case VK_FORMAT_R8G8B8A8_SINT:
-        return RS::Format::Rgba8Sint;
+        return Format::Rgba8Sint;
     case VK_FORMAT_R8G8B8A8_SRGB:
-        return RS::Format::Rgba8Srgb;
+        return Format::Rgba8Srgb;
     case VK_FORMAT_B8G8R8A8_UNORM:
-        return RS::Format::Bgra8Unorm;
+        return Format::Bgra8Unorm;
     case VK_FORMAT_B8G8R8A8_SNORM:
-        return RS::Format::Bgra8Snorm;
+        return Format::Bgra8Snorm;
     case VK_FORMAT_B8G8R8A8_UINT:
-        return RS::Format::Bgra8Uint;
+        return Format::Bgra8Uint;
     case VK_FORMAT_B8G8R8A8_SINT:
-        return RS::Format::Bgra8Sint;
+        return Format::Bgra8Sint;
     case VK_FORMAT_B8G8R8A8_SRGB:
-        return RS::Format::Bgra8Srgb;
+        return Format::Bgra8Srgb;
     case VK_FORMAT_R16_UNORM:
-        return RS::Format::R16Unorm;
+        return Format::R16Unorm;
     case VK_FORMAT_R16_SNORM:
-        return RS::Format::R16Snorm;
+        return Format::R16Snorm;
     case VK_FORMAT_R16_UINT:
-        return RS::Format::R16Uint;
+        return Format::R16Uint;
     case VK_FORMAT_R16_SINT:
-        return RS::Format::R16Sint;
+        return Format::R16Sint;
     case VK_FORMAT_R16_SFLOAT:
-        return RS::Format::R16Sfloat;
+        return Format::R16Sfloat;
     case VK_FORMAT_R16G16_UNORM:
-        return RS::Format::Rg16Unorm;
+        return Format::Rg16Unorm;
     case VK_FORMAT_R16G16_SNORM:
-        return RS::Format::Rg16Snorm;
+        return Format::Rg16Snorm;
     case VK_FORMAT_R16G16_UINT:
-        return RS::Format::Rg16Uint;
+        return Format::Rg16Uint;
     case VK_FORMAT_R16G16_SINT:
-        return RS::Format::Rg16Sint;
+        return Format::Rg16Sint;
     case VK_FORMAT_R16G16_SFLOAT:
-        return RS::Format::Rg16Sfloat;
+        return Format::Rg16Sfloat;
     case VK_FORMAT_R16G16B16_UNORM:
-        return RS::Format::Rgb16Unorm;
+        return Format::Rgb16Unorm;
     case VK_FORMAT_R16G16B16_SNORM:
-        return RS::Format::Rgb16Snorm;
+        return Format::Rgb16Snorm;
     case VK_FORMAT_R16G16B16_UINT:
-        return RS::Format::Rgb16Uint;
+        return Format::Rgb16Uint;
     case VK_FORMAT_R16G16B16_SINT:
-        return RS::Format::Rgb16Sint;
+        return Format::Rgb16Sint;
     case VK_FORMAT_R16G16B16_SFLOAT:
-        return RS::Format::Rgb16Sfloat;
+        return Format::Rgb16Sfloat;
     case VK_FORMAT_R16G16B16A16_UNORM:
-        return RS::Format::Rgba16Unorm;
+        return Format::Rgba16Unorm;
     case VK_FORMAT_R16G16B16A16_SNORM:
-        return RS::Format::Rgba16Snorm;
+        return Format::Rgba16Snorm;
     case VK_FORMAT_R16G16B16A16_UINT:
-        return RS::Format::Rgba16Uint;
+        return Format::Rgba16Uint;
     case VK_FORMAT_R16G16B16A16_SINT:
-        return RS::Format::Rgba16Sint;
+        return Format::Rgba16Sint;
     case VK_FORMAT_R16G16B16A16_SFLOAT:
-        return RS::Format::Rgba16Sfloat;
+        return Format::Rgba16Sfloat;
     case VK_FORMAT_R32_UINT:
-        return RS::Format::R32Uint;
+        return Format::R32Uint;
     case VK_FORMAT_R32_SINT:
-        return RS::Format::R32Sint;
+        return Format::R32Sint;
     case VK_FORMAT_R32_SFLOAT:
-        return RS::Format::R32Sfloat;
+        return Format::R32Sfloat;
     case VK_FORMAT_R32G32_UINT:
-        return RS::Format::Rg32Uint;
+        return Format::Rg32Uint;
     case VK_FORMAT_R32G32_SINT:
-        return RS::Format::Rg32Sint;
+        return Format::Rg32Sint;
     case VK_FORMAT_R32G32_SFLOAT:
-        return RS::Format::Rg32Sfloat;
+        return Format::Rg32Sfloat;
     case VK_FORMAT_R32G32B32_UINT:
-        return RS::Format::Rgb32Uint;
+        return Format::Rgb32Uint;
     case VK_FORMAT_R32G32B32_SINT:
-        return RS::Format::Rgb32Sint;
+        return Format::Rgb32Sint;
     case VK_FORMAT_R32G32B32_SFLOAT:
-        return RS::Format::Rgb32Sfloat;
+        return Format::Rgb32Sfloat;
     case VK_FORMAT_R32G32B32A32_UINT:
-        return RS::Format::Rgba32Uint;
+        return Format::Rgba32Uint;
     case VK_FORMAT_R32G32B32A32_SINT:
-        return RS::Format::Rgba32Sint;
+        return Format::Rgba32Sint;
     case VK_FORMAT_R32G32B32A32_SFLOAT:
-        return RS::Format::Rgba32Sfloat;
+        return Format::Rgba32Sfloat;
     case VK_FORMAT_R64_UINT:
-        return RS::Format::R64Uint;
+        return Format::R64Uint;
     case VK_FORMAT_R64_SINT:
-        return RS::Format::R64Sint;
+        return Format::R64Sint;
     case VK_FORMAT_R64_SFLOAT:
-        return RS::Format::R64Sfloat;
+        return Format::R64Sfloat;
     case VK_FORMAT_R64G64_UINT:
-        return RS::Format::Rg64Uint;
+        return Format::Rg64Uint;
     case VK_FORMAT_R64G64_SINT:
-        return RS::Format::Rg64Sint;
+        return Format::Rg64Sint;
     case VK_FORMAT_R64G64_SFLOAT:
-        return RS::Format::Rg64Sfloat;
+        return Format::Rg64Sfloat;
     case VK_FORMAT_R64G64B64_UINT:
-        return RS::Format::Rgb64Uint;
+        return Format::Rgb64Uint;
     case VK_FORMAT_R64G64B64_SINT:
-        return RS::Format::Rgb64Sint;
+        return Format::Rgb64Sint;
     case VK_FORMAT_R64G64B64_SFLOAT:
-        return RS::Format::Rgb64Sfloat;
+        return Format::Rgb64Sfloat;
     case VK_FORMAT_R64G64B64A64_UINT:
-        return RS::Format::Rgba64Uint;
+        return Format::Rgba64Uint;
     case VK_FORMAT_R64G64B64A64_SINT:
-        return RS::Format::Rgba64Sint;
+        return Format::Rgba64Sint;
     case VK_FORMAT_R64G64B64A64_SFLOAT:
-        return RS::Format::Rgba64Sfloat;
+        return Format::Rgba64Sfloat;
     case VK_FORMAT_D16_UNORM:
-        return RS::Format::D16Unorm;
+        return Format::D16Unorm;
     case VK_FORMAT_D32_SFLOAT:
-        return RS::Format::D32Sfloat;
+        return Format::D32Sfloat;
     case VK_FORMAT_S8_UINT:
-        return RS::Format::S8Uint;
+        return Format::S8Uint;
     case VK_FORMAT_D16_UNORM_S8_UINT:
-        return RS::Format::D16UnormS8Uint;
+        return Format::D16UnormS8Uint;
     case VK_FORMAT_D24_UNORM_S8_UINT:
-        return RS::Format::D24UnormS8Uint;
+        return Format::D24UnormS8Uint;
     case VK_FORMAT_D32_SFLOAT_S8_UINT:
-        return RS::Format::D32SfloatS8Uint;
+        return Format::D32SfloatS8Uint;
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkFormat VulkanRenderDriver::get_format(const RS::Format format)
+VkFormat VulkanRenderDriver::get_format(const Format format)
 {
     switch (format)
     {
-    case RS::Format::Unknown:
+    case Format::Unknown:
         return VK_FORMAT_UNDEFINED;
-    case RS::Format::R8Unorm:
+    case Format::R8Unorm:
         return VK_FORMAT_R8_UNORM;
-    case RS::Format::R8Snorm:
+    case Format::R8Snorm:
         return VK_FORMAT_R8_SNORM;
-    case RS::Format::R8Uint:
+    case Format::R8Uint:
         return VK_FORMAT_R8_UINT;
-    case RS::Format::R8Sint:
+    case Format::R8Sint:
         return VK_FORMAT_R8_SINT;
-    case RS::Format::R8Srgb:
+    case Format::R8Srgb:
         return VK_FORMAT_R8_SRGB;
-    case RS::Format::Rg8Unorm:
+    case Format::Rg8Unorm:
         return VK_FORMAT_R8G8_UNORM;
-    case RS::Format::Rg8Snorm:
+    case Format::Rg8Snorm:
         return VK_FORMAT_R8G8_SNORM;
-    case RS::Format::Rg8Uint:
+    case Format::Rg8Uint:
         return VK_FORMAT_R8G8_UINT;
-    case RS::Format::Rg8Sint:
+    case Format::Rg8Sint:
         return VK_FORMAT_R8G8_SINT;
-    case RS::Format::Rg8Srgb:
+    case Format::Rg8Srgb:
         return VK_FORMAT_R8G8_SRGB;
-    case RS::Format::Rgb8Unorm:
+    case Format::Rgb8Unorm:
         return VK_FORMAT_R8G8B8_UNORM;
-    case RS::Format::Rgb8Snorm:
+    case Format::Rgb8Snorm:
         return VK_FORMAT_R8G8B8_SNORM;
-    case RS::Format::Rgb8Uint:
+    case Format::Rgb8Uint:
         return VK_FORMAT_R8G8B8_UINT;
-    case RS::Format::Rgb8Sint:
+    case Format::Rgb8Sint:
         return VK_FORMAT_R8G8B8_SINT;
-    case RS::Format::Rgb8Srgb:
+    case Format::Rgb8Srgb:
         return VK_FORMAT_R8G8B8_SRGB;
-    case RS::Format::Bgr8Unorm:
+    case Format::Bgr8Unorm:
         return VK_FORMAT_B8G8R8_UNORM;
-    case RS::Format::Bgr8Snorm:
+    case Format::Bgr8Snorm:
         return VK_FORMAT_B8G8R8_SNORM;
-    case RS::Format::Bgr8Uint:
+    case Format::Bgr8Uint:
         return VK_FORMAT_B8G8R8_UINT;
-    case RS::Format::Bgr8Sint:
+    case Format::Bgr8Sint:
         return VK_FORMAT_B8G8R8_SINT;
-    case RS::Format::Bgr8Srgb:
+    case Format::Bgr8Srgb:
         return VK_FORMAT_B8G8R8_SRGB;
-    case RS::Format::Rgba8Unorm:
+    case Format::Rgba8Unorm:
         return VK_FORMAT_R8G8B8A8_UNORM;
-    case RS::Format::Rgba8Snorm:
+    case Format::Rgba8Snorm:
         return VK_FORMAT_R8G8B8A8_SNORM;
-    case RS::Format::Rgba8Uint:
+    case Format::Rgba8Uint:
         return VK_FORMAT_R8G8B8A8_UINT;
-    case RS::Format::Rgba8Sint:
+    case Format::Rgba8Sint:
         return VK_FORMAT_R8G8B8A8_SINT;
-    case RS::Format::Rgba8Srgb:
+    case Format::Rgba8Srgb:
         return VK_FORMAT_R8G8B8A8_SRGB;
-    case RS::Format::Bgra8Unorm:
+    case Format::Bgra8Unorm:
         return VK_FORMAT_B8G8R8A8_UNORM;
-    case RS::Format::Bgra8Snorm:
+    case Format::Bgra8Snorm:
         return VK_FORMAT_B8G8R8A8_SNORM;
-    case RS::Format::Bgra8Uint:
+    case Format::Bgra8Uint:
         return VK_FORMAT_B8G8R8A8_UINT;
-    case RS::Format::Bgra8Sint:
+    case Format::Bgra8Sint:
         return VK_FORMAT_B8G8R8A8_SINT;
-    case RS::Format::Bgra8Srgb:
+    case Format::Bgra8Srgb:
         return VK_FORMAT_B8G8R8A8_SRGB;
-    case RS::Format::R16Unorm:
+    case Format::R16Unorm:
         return VK_FORMAT_R16_UNORM;
-    case RS::Format::R16Snorm:
+    case Format::R16Snorm:
         return VK_FORMAT_R16_SNORM;
-    case RS::Format::R16Uint:
+    case Format::R16Uint:
         return VK_FORMAT_R16_UINT;
-    case RS::Format::R16Sint:
+    case Format::R16Sint:
         return VK_FORMAT_R16_SINT;
-    case RS::Format::R16Sfloat:
+    case Format::R16Sfloat:
         return VK_FORMAT_R16_SFLOAT;
-    case RS::Format::Rg16Unorm:
+    case Format::Rg16Unorm:
         return VK_FORMAT_R16G16_UNORM;
-    case RS::Format::Rg16Snorm:
+    case Format::Rg16Snorm:
         return VK_FORMAT_R16G16_SNORM;
-    case RS::Format::Rg16Uint:
+    case Format::Rg16Uint:
         return VK_FORMAT_R16G16_UINT;
-    case RS::Format::Rg16Sint:
+    case Format::Rg16Sint:
         return VK_FORMAT_R16G16_SINT;
-    case RS::Format::Rg16Sfloat:
+    case Format::Rg16Sfloat:
         return VK_FORMAT_R16G16_SFLOAT;
-    case RS::Format::Rgb16Unorm:
+    case Format::Rgb16Unorm:
         return VK_FORMAT_R16G16B16_UNORM;
-    case RS::Format::Rgb16Snorm:
+    case Format::Rgb16Snorm:
         return VK_FORMAT_R16G16B16_SNORM;
-    case RS::Format::Rgb16Uint:
+    case Format::Rgb16Uint:
         return VK_FORMAT_R16G16B16_UINT;
-    case RS::Format::Rgb16Sint:
+    case Format::Rgb16Sint:
         return VK_FORMAT_R16G16B16_SINT;
-    case RS::Format::Rgb16Sfloat:
+    case Format::Rgb16Sfloat:
         return VK_FORMAT_R16G16B16_SFLOAT;
-    case RS::Format::Rgba16Unorm:
+    case Format::Rgba16Unorm:
         return VK_FORMAT_R16G16B16A16_UNORM;
-    case RS::Format::Rgba16Snorm:
+    case Format::Rgba16Snorm:
         return VK_FORMAT_R16G16B16A16_SNORM;
-    case RS::Format::Rgba16Uint:
+    case Format::Rgba16Uint:
         return VK_FORMAT_R16G16B16A16_UINT;
-    case RS::Format::Rgba16Sint:
+    case Format::Rgba16Sint:
         return VK_FORMAT_R16G16B16A16_SINT;
-    case RS::Format::Rgba16Sfloat:
+    case Format::Rgba16Sfloat:
         return VK_FORMAT_R16G16B16A16_SFLOAT;
-    case RS::Format::R32Uint:
+    case Format::R32Uint:
         return VK_FORMAT_R32_UINT;
-    case RS::Format::R32Sint:
+    case Format::R32Sint:
         return VK_FORMAT_R32_SINT;
-    case RS::Format::R32Sfloat:
+    case Format::R32Sfloat:
         return VK_FORMAT_R32_SFLOAT;
-    case RS::Format::Rg32Uint:
+    case Format::Rg32Uint:
         return VK_FORMAT_R32G32_UINT;
-    case RS::Format::Rg32Sint:
+    case Format::Rg32Sint:
         return VK_FORMAT_R32G32_SINT;
-    case RS::Format::Rg32Sfloat:
+    case Format::Rg32Sfloat:
         return VK_FORMAT_R32G32_SFLOAT;
-    case RS::Format::Rgb32Uint:
+    case Format::Rgb32Uint:
         return VK_FORMAT_R32G32B32_UINT;
-    case RS::Format::Rgb32Sint:
+    case Format::Rgb32Sint:
         return VK_FORMAT_R32G32B32_SINT;
-    case RS::Format::Rgb32Sfloat:
+    case Format::Rgb32Sfloat:
         return VK_FORMAT_R32G32B32_SFLOAT;
-    case RS::Format::Rgba32Uint:
+    case Format::Rgba32Uint:
         return VK_FORMAT_R32G32B32A32_UINT;
-    case RS::Format::Rgba32Sint:
+    case Format::Rgba32Sint:
         return VK_FORMAT_R32G32B32A32_SINT;
-    case RS::Format::Rgba32Sfloat:
+    case Format::Rgba32Sfloat:
         return VK_FORMAT_R32G32B32A32_SFLOAT;
-    case RS::Format::R64Uint:
+    case Format::R64Uint:
         return VK_FORMAT_R64_UINT;
-    case RS::Format::R64Sint:
+    case Format::R64Sint:
         return VK_FORMAT_R64_SINT;
-    case RS::Format::R64Sfloat:
+    case Format::R64Sfloat:
         return VK_FORMAT_R64_SFLOAT;
-    case RS::Format::Rg64Uint:
+    case Format::Rg64Uint:
         return VK_FORMAT_R64G64_UINT;
-    case RS::Format::Rg64Sint:
+    case Format::Rg64Sint:
         return VK_FORMAT_R64G64_SINT;
-    case RS::Format::Rg64Sfloat:
+    case Format::Rg64Sfloat:
         return VK_FORMAT_R64G64_SFLOAT;
-    case RS::Format::Rgb64Uint:
+    case Format::Rgb64Uint:
         return VK_FORMAT_R64G64B64_UINT;
-    case RS::Format::Rgb64Sint:
+    case Format::Rgb64Sint:
         return VK_FORMAT_R64G64B64_SINT;
-    case RS::Format::Rgb64Sfloat:
+    case Format::Rgb64Sfloat:
         return VK_FORMAT_R64G64B64_SFLOAT;
-    case RS::Format::Rgba64Uint:
+    case Format::Rgba64Uint:
         return VK_FORMAT_R64G64B64A64_UINT;
-    case RS::Format::Rgba64Sint:
+    case Format::Rgba64Sint:
         return VK_FORMAT_R64G64B64A64_SINT;
-    case RS::Format::Rgba64Sfloat:
+    case Format::Rgba64Sfloat:
         return VK_FORMAT_R64G64B64A64_SFLOAT;
-    case RS::Format::D16Unorm:
+    case Format::D16Unorm:
         return VK_FORMAT_D16_UNORM;
-    case RS::Format::D32Sfloat:
+    case Format::D32Sfloat:
         return VK_FORMAT_D32_SFLOAT;
-    case RS::Format::S8Uint:
+    case Format::S8Uint:
         return VK_FORMAT_S8_UINT;
-    case RS::Format::D16UnormS8Uint:
+    case Format::D16UnormS8Uint:
         return VK_FORMAT_D16_UNORM_S8_UINT;
-    case RS::Format::D24UnormS8Uint:
+    case Format::D24UnormS8Uint:
         return VK_FORMAT_D24_UNORM_S8_UINT;
-    case RS::Format::D32SfloatS8Uint:
+    case Format::D32SfloatS8Uint:
         return VK_FORMAT_D32_SFLOAT_S8_UINT;
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkImageType VulkanRenderDriver::get_image_type(const RS::Dimension dimension)
+VkImageType VulkanRenderDriver::get_image_type(const Dimension dimension)
 {
     switch (dimension)
     {
-    case RS::Dimension::Texture1D:
-    case RS::Dimension::Texture1DArray:
+    case Dimension::Texture1D:
+    case Dimension::Texture1DArray:
         return VK_IMAGE_TYPE_1D;
-    case RS::Dimension::Texture2D:
-    case RS::Dimension::Texture2DArray:
+    case Dimension::Texture2D:
+    case Dimension::Texture2DArray:
         return VK_IMAGE_TYPE_2D;
-    case RS::Dimension::Texture3D:
+    case Dimension::Texture3D:
         return VK_IMAGE_TYPE_3D;
-    case RS::Dimension::Unknown:
+    case Dimension::Unknown:
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkImageUsageFlags VulkanRenderDriver::get_image_usage_flags(const BitFlags<RS::TextureUsage> texture_usage_flags, const RS::Format format)
+VkImageUsageFlags VulkanRenderDriver::get_image_usage_flags(const BitFlags<TextureUsage> texture_usage_flags, const Format format)
 {
     VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    if (texture_usage_flags & RS::TextureUsage::Storage)
+    if (texture_usage_flags & TextureUsage::Storage)
     {
         usage |= VK_IMAGE_USAGE_STORAGE_BIT;
     }
@@ -2248,95 +2161,95 @@ VkImageUsageFlags VulkanRenderDriver::get_image_usage_flags(const BitFlags<RS::T
         usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
     }
 
-    if (texture_usage_flags & RS::TextureUsage::RenderAttachment)
+    if (texture_usage_flags & TextureUsage::RenderAttachment)
     {
         switch (format)
         {
-        case RS::Format::R8Unorm:
-        case RS::Format::R8Snorm:
-        case RS::Format::R8Uint:
-        case RS::Format::R8Sint:
-        case RS::Format::R8Srgb:
-        case RS::Format::Rg8Unorm:
-        case RS::Format::Rg8Snorm:
-        case RS::Format::Rg8Uint:
-        case RS::Format::Rg8Sint:
-        case RS::Format::Rg8Srgb:
-        case RS::Format::Rgb8Unorm:
-        case RS::Format::Rgb8Snorm:
-        case RS::Format::Rgb8Uint:
-        case RS::Format::Rgb8Sint:
-        case RS::Format::Rgb8Srgb:
-        case RS::Format::Bgr8Unorm:
-        case RS::Format::Bgr8Snorm:
-        case RS::Format::Bgr8Uint:
-        case RS::Format::Bgr8Sint:
-        case RS::Format::Bgr8Srgb:
-        case RS::Format::Rgba8Unorm:
-        case RS::Format::Rgba8Snorm:
-        case RS::Format::Rgba8Uint:
-        case RS::Format::Rgba8Sint:
-        case RS::Format::Rgba8Srgb:
-        case RS::Format::Bgra8Unorm:
-        case RS::Format::Bgra8Snorm:
-        case RS::Format::Bgra8Uint:
-        case RS::Format::Bgra8Sint:
-        case RS::Format::Bgra8Srgb:
-        case RS::Format::R16Unorm:
-        case RS::Format::R16Snorm:
-        case RS::Format::R16Uint:
-        case RS::Format::R16Sint:
-        case RS::Format::R16Sfloat:
-        case RS::Format::Rg16Unorm:
-        case RS::Format::Rg16Snorm:
-        case RS::Format::Rg16Uint:
-        case RS::Format::Rg16Sint:
-        case RS::Format::Rg16Sfloat:
-        case RS::Format::Rgb16Unorm:
-        case RS::Format::Rgb16Snorm:
-        case RS::Format::Rgb16Uint:
-        case RS::Format::Rgb16Sint:
-        case RS::Format::Rgb16Sfloat:
-        case RS::Format::Rgba16Unorm:
-        case RS::Format::Rgba16Snorm:
-        case RS::Format::Rgba16Uint:
-        case RS::Format::Rgba16Sint:
-        case RS::Format::Rgba16Sfloat:
-        case RS::Format::R32Uint:
-        case RS::Format::R32Sint:
-        case RS::Format::R32Sfloat:
-        case RS::Format::Rg32Uint:
-        case RS::Format::Rg32Sint:
-        case RS::Format::Rg32Sfloat:
-        case RS::Format::Rgb32Uint:
-        case RS::Format::Rgb32Sint:
-        case RS::Format::Rgb32Sfloat:
-        case RS::Format::Rgba32Uint:
-        case RS::Format::Rgba32Sint:
-        case RS::Format::Rgba32Sfloat:
-        case RS::Format::R64Uint:
-        case RS::Format::R64Sint:
-        case RS::Format::R64Sfloat:
-        case RS::Format::Rg64Uint:
-        case RS::Format::Rg64Sint:
-        case RS::Format::Rg64Sfloat:
-        case RS::Format::Rgb64Uint:
-        case RS::Format::Rgb64Sint:
-        case RS::Format::Rgb64Sfloat:
-        case RS::Format::Rgba64Uint:
-        case RS::Format::Rgba64Sint:
-        case RS::Format::Rgba64Sfloat:
+        case Format::R8Unorm:
+        case Format::R8Snorm:
+        case Format::R8Uint:
+        case Format::R8Sint:
+        case Format::R8Srgb:
+        case Format::Rg8Unorm:
+        case Format::Rg8Snorm:
+        case Format::Rg8Uint:
+        case Format::Rg8Sint:
+        case Format::Rg8Srgb:
+        case Format::Rgb8Unorm:
+        case Format::Rgb8Snorm:
+        case Format::Rgb8Uint:
+        case Format::Rgb8Sint:
+        case Format::Rgb8Srgb:
+        case Format::Bgr8Unorm:
+        case Format::Bgr8Snorm:
+        case Format::Bgr8Uint:
+        case Format::Bgr8Sint:
+        case Format::Bgr8Srgb:
+        case Format::Rgba8Unorm:
+        case Format::Rgba8Snorm:
+        case Format::Rgba8Uint:
+        case Format::Rgba8Sint:
+        case Format::Rgba8Srgb:
+        case Format::Bgra8Unorm:
+        case Format::Bgra8Snorm:
+        case Format::Bgra8Uint:
+        case Format::Bgra8Sint:
+        case Format::Bgra8Srgb:
+        case Format::R16Unorm:
+        case Format::R16Snorm:
+        case Format::R16Uint:
+        case Format::R16Sint:
+        case Format::R16Sfloat:
+        case Format::Rg16Unorm:
+        case Format::Rg16Snorm:
+        case Format::Rg16Uint:
+        case Format::Rg16Sint:
+        case Format::Rg16Sfloat:
+        case Format::Rgb16Unorm:
+        case Format::Rgb16Snorm:
+        case Format::Rgb16Uint:
+        case Format::Rgb16Sint:
+        case Format::Rgb16Sfloat:
+        case Format::Rgba16Unorm:
+        case Format::Rgba16Snorm:
+        case Format::Rgba16Uint:
+        case Format::Rgba16Sint:
+        case Format::Rgba16Sfloat:
+        case Format::R32Uint:
+        case Format::R32Sint:
+        case Format::R32Sfloat:
+        case Format::Rg32Uint:
+        case Format::Rg32Sint:
+        case Format::Rg32Sfloat:
+        case Format::Rgb32Uint:
+        case Format::Rgb32Sint:
+        case Format::Rgb32Sfloat:
+        case Format::Rgba32Uint:
+        case Format::Rgba32Sint:
+        case Format::Rgba32Sfloat:
+        case Format::R64Uint:
+        case Format::R64Sint:
+        case Format::R64Sfloat:
+        case Format::Rg64Uint:
+        case Format::Rg64Sint:
+        case Format::Rg64Sfloat:
+        case Format::Rgb64Uint:
+        case Format::Rgb64Sint:
+        case Format::Rgb64Sfloat:
+        case Format::Rgba64Uint:
+        case Format::Rgba64Sint:
+        case Format::Rgba64Sfloat:
             usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
             break;
-        case RS::Format::D16Unorm:
-        case RS::Format::D32Sfloat:
-        case RS::Format::S8Uint:
-        case RS::Format::D16UnormS8Uint:
-        case RS::Format::D24UnormS8Uint:
-        case RS::Format::D32SfloatS8Uint:
+        case Format::D16Unorm:
+        case Format::D32Sfloat:
+        case Format::S8Uint:
+        case Format::D16UnormS8Uint:
+        case Format::D24UnormS8Uint:
+        case Format::D32SfloatS8Uint:
             usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
             break;
-        case RS::Format::Unknown:
+        case Format::Unknown:
         default:
             HE_UNREACHABLE();
         }
@@ -2345,294 +2258,294 @@ VkImageUsageFlags VulkanRenderDriver::get_image_usage_flags(const BitFlags<RS::T
     return usage;
 }
 
-VkImageAspectFlags VulkanRenderDriver::get_image_aspect_flags(const RS::Format format)
+VkImageAspectFlags VulkanRenderDriver::get_image_aspect_flags(const Format format)
 {
     switch (format)
     {
-    case RS::Format::R8Unorm:
-    case RS::Format::R8Snorm:
-    case RS::Format::R8Uint:
-    case RS::Format::R8Sint:
-    case RS::Format::R8Srgb:
-    case RS::Format::Rg8Unorm:
-    case RS::Format::Rg8Snorm:
-    case RS::Format::Rg8Uint:
-    case RS::Format::Rg8Sint:
-    case RS::Format::Rg8Srgb:
-    case RS::Format::Rgb8Unorm:
-    case RS::Format::Rgb8Snorm:
-    case RS::Format::Rgb8Uint:
-    case RS::Format::Rgb8Sint:
-    case RS::Format::Rgb8Srgb:
-    case RS::Format::Bgr8Unorm:
-    case RS::Format::Bgr8Snorm:
-    case RS::Format::Bgr8Uint:
-    case RS::Format::Bgr8Sint:
-    case RS::Format::Bgr8Srgb:
-    case RS::Format::Rgba8Unorm:
-    case RS::Format::Rgba8Snorm:
-    case RS::Format::Rgba8Uint:
-    case RS::Format::Rgba8Sint:
-    case RS::Format::Rgba8Srgb:
-    case RS::Format::Bgra8Unorm:
-    case RS::Format::Bgra8Snorm:
-    case RS::Format::Bgra8Uint:
-    case RS::Format::Bgra8Sint:
-    case RS::Format::Bgra8Srgb:
-    case RS::Format::R16Unorm:
-    case RS::Format::R16Snorm:
-    case RS::Format::R16Uint:
-    case RS::Format::R16Sint:
-    case RS::Format::R16Sfloat:
-    case RS::Format::Rg16Unorm:
-    case RS::Format::Rg16Snorm:
-    case RS::Format::Rg16Uint:
-    case RS::Format::Rg16Sint:
-    case RS::Format::Rg16Sfloat:
-    case RS::Format::Rgb16Unorm:
-    case RS::Format::Rgb16Snorm:
-    case RS::Format::Rgb16Uint:
-    case RS::Format::Rgb16Sint:
-    case RS::Format::Rgb16Sfloat:
-    case RS::Format::Rgba16Unorm:
-    case RS::Format::Rgba16Snorm:
-    case RS::Format::Rgba16Uint:
-    case RS::Format::Rgba16Sint:
-    case RS::Format::Rgba16Sfloat:
-    case RS::Format::R32Uint:
-    case RS::Format::R32Sint:
-    case RS::Format::R32Sfloat:
-    case RS::Format::Rg32Uint:
-    case RS::Format::Rg32Sint:
-    case RS::Format::Rg32Sfloat:
-    case RS::Format::Rgb32Uint:
-    case RS::Format::Rgb32Sint:
-    case RS::Format::Rgb32Sfloat:
-    case RS::Format::Rgba32Uint:
-    case RS::Format::Rgba32Sint:
-    case RS::Format::Rgba32Sfloat:
-    case RS::Format::R64Uint:
-    case RS::Format::R64Sint:
-    case RS::Format::R64Sfloat:
-    case RS::Format::Rg64Uint:
-    case RS::Format::Rg64Sint:
-    case RS::Format::Rg64Sfloat:
-    case RS::Format::Rgb64Uint:
-    case RS::Format::Rgb64Sint:
-    case RS::Format::Rgb64Sfloat:
-    case RS::Format::Rgba64Uint:
-    case RS::Format::Rgba64Sint:
-    case RS::Format::Rgba64Sfloat:
+    case Format::R8Unorm:
+    case Format::R8Snorm:
+    case Format::R8Uint:
+    case Format::R8Sint:
+    case Format::R8Srgb:
+    case Format::Rg8Unorm:
+    case Format::Rg8Snorm:
+    case Format::Rg8Uint:
+    case Format::Rg8Sint:
+    case Format::Rg8Srgb:
+    case Format::Rgb8Unorm:
+    case Format::Rgb8Snorm:
+    case Format::Rgb8Uint:
+    case Format::Rgb8Sint:
+    case Format::Rgb8Srgb:
+    case Format::Bgr8Unorm:
+    case Format::Bgr8Snorm:
+    case Format::Bgr8Uint:
+    case Format::Bgr8Sint:
+    case Format::Bgr8Srgb:
+    case Format::Rgba8Unorm:
+    case Format::Rgba8Snorm:
+    case Format::Rgba8Uint:
+    case Format::Rgba8Sint:
+    case Format::Rgba8Srgb:
+    case Format::Bgra8Unorm:
+    case Format::Bgra8Snorm:
+    case Format::Bgra8Uint:
+    case Format::Bgra8Sint:
+    case Format::Bgra8Srgb:
+    case Format::R16Unorm:
+    case Format::R16Snorm:
+    case Format::R16Uint:
+    case Format::R16Sint:
+    case Format::R16Sfloat:
+    case Format::Rg16Unorm:
+    case Format::Rg16Snorm:
+    case Format::Rg16Uint:
+    case Format::Rg16Sint:
+    case Format::Rg16Sfloat:
+    case Format::Rgb16Unorm:
+    case Format::Rgb16Snorm:
+    case Format::Rgb16Uint:
+    case Format::Rgb16Sint:
+    case Format::Rgb16Sfloat:
+    case Format::Rgba16Unorm:
+    case Format::Rgba16Snorm:
+    case Format::Rgba16Uint:
+    case Format::Rgba16Sint:
+    case Format::Rgba16Sfloat:
+    case Format::R32Uint:
+    case Format::R32Sint:
+    case Format::R32Sfloat:
+    case Format::Rg32Uint:
+    case Format::Rg32Sint:
+    case Format::Rg32Sfloat:
+    case Format::Rgb32Uint:
+    case Format::Rgb32Sint:
+    case Format::Rgb32Sfloat:
+    case Format::Rgba32Uint:
+    case Format::Rgba32Sint:
+    case Format::Rgba32Sfloat:
+    case Format::R64Uint:
+    case Format::R64Sint:
+    case Format::R64Sfloat:
+    case Format::Rg64Uint:
+    case Format::Rg64Sint:
+    case Format::Rg64Sfloat:
+    case Format::Rgb64Uint:
+    case Format::Rgb64Sint:
+    case Format::Rgb64Sfloat:
+    case Format::Rgba64Uint:
+    case Format::Rgba64Sint:
+    case Format::Rgba64Sfloat:
         return VK_IMAGE_ASPECT_COLOR_BIT;
-    case RS::Format::D16Unorm:
-    case RS::Format::D32Sfloat:
+    case Format::D16Unorm:
+    case Format::D32Sfloat:
         return VK_IMAGE_ASPECT_DEPTH_BIT;
-    case RS::Format::S8Uint:
+    case Format::S8Uint:
         return VK_IMAGE_ASPECT_STENCIL_BIT;
-    case RS::Format::D16UnormS8Uint:
-    case RS::Format::D24UnormS8Uint:
-    case RS::Format::D32SfloatS8Uint:
+    case Format::D16UnormS8Uint:
+    case Format::D24UnormS8Uint:
+    case Format::D32SfloatS8Uint:
         return VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-    case RS::Format::Unknown:
+    case Format::Unknown:
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkImageViewType VulkanRenderDriver::get_image_view_type(const RS::Dimension dimension)
+VkImageViewType VulkanRenderDriver::get_image_view_type(const Dimension dimension)
 {
     switch (dimension)
     {
-    case RS::Dimension::Texture1D:
+    case Dimension::Texture1D:
         return VK_IMAGE_VIEW_TYPE_1D;
-    case RS::Dimension::Texture1DArray:
+    case Dimension::Texture1DArray:
         return VK_IMAGE_VIEW_TYPE_1D_ARRAY;
-    case RS::Dimension::Texture2D:
+    case Dimension::Texture2D:
         return VK_IMAGE_VIEW_TYPE_2D;
-    case RS::Dimension::Texture2DArray:
+    case Dimension::Texture2DArray:
         return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
-    case RS::Dimension::Texture3D:
+    case Dimension::Texture3D:
         return VK_IMAGE_VIEW_TYPE_3D;
-    case RS::Dimension::Unknown:
+    case Dimension::Unknown:
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkPrimitiveTopology VulkanRenderDriver::get_primitive_topology(const RS::PrimitiveTopology primitive_topology)
+VkPrimitiveTopology VulkanRenderDriver::get_primitive_topology(const PrimitiveTopology primitive_topology)
 {
     switch (primitive_topology)
     {
-    case RS::PrimitiveTopology::PointList:
+    case PrimitiveTopology::PointList:
         return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-    case RS::PrimitiveTopology::LineList:
+    case PrimitiveTopology::LineList:
         return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-    case RS::PrimitiveTopology::LineStrip:
+    case PrimitiveTopology::LineStrip:
         return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-    case RS::PrimitiveTopology::TriangleList:
+    case PrimitiveTopology::TriangleList:
         return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    case RS::PrimitiveTopology::TriangleStrip:
+    case PrimitiveTopology::TriangleStrip:
         return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-    case RS::PrimitiveTopology::TriangleFan:
+    case PrimitiveTopology::TriangleFan:
         return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkPolygonMode VulkanRenderDriver::get_polygon_mode(const RS::PolygonMode polygon_mode)
+VkPolygonMode VulkanRenderDriver::get_polygon_mode(const PolygonMode polygon_mode)
 {
     switch (polygon_mode)
     {
-    case RS::PolygonMode::Fill:
+    case PolygonMode::Fill:
         return VK_POLYGON_MODE_FILL;
-    case RS::PolygonMode::Line:
+    case PolygonMode::Line:
         return VK_POLYGON_MODE_LINE;
-    case RS::PolygonMode::Point:
+    case PolygonMode::Point:
         return VK_POLYGON_MODE_POINT;
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkCullModeFlags VulkanRenderDriver::get_cull_mode_flags(const RS::Face face)
+VkCullModeFlags VulkanRenderDriver::get_cull_mode_flags(const Face face)
 {
     switch (face)
     {
-    case RS::Face::None:
+    case Face::None:
         return VK_CULL_MODE_NONE;
-    case RS::Face::Front:
+    case Face::Front:
         return VK_CULL_MODE_FRONT_BIT;
-    case RS::Face::Back:
+    case Face::Back:
         return VK_CULL_MODE_BACK_BIT;
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkFrontFace VulkanRenderDriver::get_front_face(const RS::FrontFace front_face)
+VkFrontFace VulkanRenderDriver::get_front_face(const FrontFace front_face)
 {
     switch (front_face)
     {
-    case RS::FrontFace::CounterClockwise:
+    case FrontFace::CounterClockwise:
         return VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    case RS::FrontFace::Clockwise:
+    case FrontFace::Clockwise:
         return VK_FRONT_FACE_CLOCKWISE;
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkCompareOp VulkanRenderDriver::get_compare_operation(const RS::CompareOperation compare_operation)
+VkCompareOp VulkanRenderDriver::get_compare_operation(const CompareOperation compare_operation)
 {
     switch (compare_operation)
     {
-    case RS::CompareOperation::Never:
+    case CompareOperation::Never:
         return VK_COMPARE_OP_NEVER;
-    case RS::CompareOperation::Less:
+    case CompareOperation::Less:
         return VK_COMPARE_OP_LESS;
-    case RS::CompareOperation::Equal:
+    case CompareOperation::Equal:
         return VK_COMPARE_OP_EQUAL;
-    case RS::CompareOperation::LessEqual:
+    case CompareOperation::LessEqual:
         return VK_COMPARE_OP_LESS_OR_EQUAL;
-    case RS::CompareOperation::Greater:
+    case CompareOperation::Greater:
         return VK_COMPARE_OP_GREATER;
-    case RS::CompareOperation::NotEqual:
+    case CompareOperation::NotEqual:
         return VK_COMPARE_OP_NOT_EQUAL;
-    case RS::CompareOperation::GreaterEqual:
+    case CompareOperation::GreaterEqual:
         return VK_COMPARE_OP_GREATER_OR_EQUAL;
-    case RS::CompareOperation::Always:
+    case CompareOperation::Always:
         return VK_COMPARE_OP_ALWAYS;
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkBlendFactor VulkanRenderDriver::get_blend_factor(const RS::BlendFactor blend_factor)
+VkBlendFactor VulkanRenderDriver::get_blend_factor(const BlendFactor blend_factor)
 {
     switch (blend_factor)
     {
-    case RS::BlendFactor::Zero:
+    case BlendFactor::Zero:
         return VK_BLEND_FACTOR_ZERO;
-    case RS::BlendFactor::One:
+    case BlendFactor::One:
         return VK_BLEND_FACTOR_ONE;
-    case RS::BlendFactor::SrcColor:
+    case BlendFactor::SrcColor:
         return VK_BLEND_FACTOR_SRC_COLOR;
-    case RS::BlendFactor::OneMinusSrcColor:
+    case BlendFactor::OneMinusSrcColor:
         return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
-    case RS::BlendFactor::DstColor:
+    case BlendFactor::DstColor:
         return VK_BLEND_FACTOR_DST_COLOR;
-    case RS::BlendFactor::OneMinusDstColor:
+    case BlendFactor::OneMinusDstColor:
         return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
-    case RS::BlendFactor::SrcAlpha:
+    case BlendFactor::SrcAlpha:
         return VK_BLEND_FACTOR_SRC_ALPHA;
-    case RS::BlendFactor::OneMinusSrcAlpha:
+    case BlendFactor::OneMinusSrcAlpha:
         return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    case RS::BlendFactor::DstAlpha:
+    case BlendFactor::DstAlpha:
         return VK_BLEND_FACTOR_DST_ALPHA;
-    case RS::BlendFactor::OneMinusDstAlpha:
+    case BlendFactor::OneMinusDstAlpha:
         return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
-    case RS::BlendFactor::ConstantColor:
+    case BlendFactor::ConstantColor:
         return VK_BLEND_FACTOR_CONSTANT_ALPHA;
-    case RS::BlendFactor::OneMinusConstantColor:
+    case BlendFactor::OneMinusConstantColor:
         return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
-    case RS::BlendFactor::ConstantAlpha:
+    case BlendFactor::ConstantAlpha:
         return VK_BLEND_FACTOR_CONSTANT_ALPHA;
-    case RS::BlendFactor::OneMinusConstantAlpha:
+    case BlendFactor::OneMinusConstantAlpha:
         return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
-    case RS::BlendFactor::SrcAlphaSaturate:
+    case BlendFactor::SrcAlphaSaturate:
         return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
-    case RS::BlendFactor::Src1Color:
+    case BlendFactor::Src1Color:
         return VK_BLEND_FACTOR_SRC1_COLOR;
-    case RS::BlendFactor::OneMinusSrc1Color:
+    case BlendFactor::OneMinusSrc1Color:
         return VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR;
-    case RS::BlendFactor::Src1Alpha:
+    case BlendFactor::Src1Alpha:
         return VK_BLEND_FACTOR_SRC1_ALPHA;
-    case RS::BlendFactor::OneMinusSrc1Alpha:
+    case BlendFactor::OneMinusSrc1Alpha:
         return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkBlendOp VulkanRenderDriver::get_blend_operation(const RS::BlendOperation blend_operation)
+VkBlendOp VulkanRenderDriver::get_blend_operation(const BlendOperation blend_operation)
 {
     switch (blend_operation)
     {
-    case RS::BlendOperation::Add:
+    case BlendOperation::Add:
         return VK_BLEND_OP_ADD;
-    case RS::BlendOperation::Subtract:
+    case BlendOperation::Subtract:
         return VK_BLEND_OP_SUBTRACT;
-    case RS::BlendOperation::ReverseSubtract:
+    case BlendOperation::ReverseSubtract:
         return VK_BLEND_OP_REVERSE_SUBTRACT;
-    case RS::BlendOperation::Min:
+    case BlendOperation::Min:
         return VK_BLEND_OP_MIN;
-    case RS::BlendOperation::Max:
+    case BlendOperation::Max:
         return VK_BLEND_OP_MAX;
     default:
         HE_UNREACHABLE();
     }
 }
 
-VkColorComponentFlags VulkanRenderDriver::get_color_component_flags(const BitFlags<RS::ColorWrites> color_writes)
+VkColorComponentFlags VulkanRenderDriver::get_color_component_flags(const BitFlags<ColorWrites> color_writes)
 {
     VkColorComponentFlags color_component_flags = 0;
-    if (color_writes & RS::ColorWrites::R)
+    if (color_writes & ColorWrites::R)
     {
         color_component_flags |= VK_COLOR_COMPONENT_R_BIT;
     }
 
-    if (color_writes & RS::ColorWrites::G)
+    if (color_writes & ColorWrites::G)
     {
         color_component_flags |= VK_COLOR_COMPONENT_G_BIT;
     }
 
-    if (color_writes & RS::ColorWrites::B)
+    if (color_writes & ColorWrites::B)
     {
         color_component_flags |= VK_COLOR_COMPONENT_B_BIT;
     }
 
-    if (color_writes & RS::ColorWrites::A)
+    if (color_writes & ColorWrites::A)
     {
         color_component_flags |= VK_COLOR_COMPONENT_A_BIT;
     }

@@ -72,7 +72,7 @@ void WindowSystem::poll_events()
     }
 }
 
-WindowSystem::WindowId WindowSystem::create_window(const WindowDescriptor &descriptor)
+WindowId WindowSystem::create_window(const WindowDescriptor &descriptor)
 {
     HE_ASSERT(!descriptor.title.empty());
     HE_ASSERT(descriptor.width != 0);

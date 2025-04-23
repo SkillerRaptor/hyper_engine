@@ -20,7 +20,7 @@
 struct ShaderCompilationDescriptor
 {
     std::string entry_name = "main";
-    RenderSystem::ShaderType type = RenderSystem::ShaderType::None;
+    ShaderType type = ShaderType::None;
     std::vector<uint8_t> data;
 };
 

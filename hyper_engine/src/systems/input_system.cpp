@@ -8,7 +8,7 @@
 
 #include "core/prerequisites.hpp"
 
-void InputSystem::initialize(WS &window_system)
+void InputSystem::initialize(WindowSystem &window_system)
 {
     window_system.register_listener<MouseMoveEvent>(HE_BIND_FUNCTION(on_mouse_move));
     window_system.register_listener<MouseButtonPressEvent>(HE_BIND_FUNCTION(on_mouse_button_press));
