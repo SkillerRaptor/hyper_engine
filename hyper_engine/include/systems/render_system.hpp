@@ -122,6 +122,31 @@ class RenderSystem
 private:
     static constexpr uint8_t s_frames_in_flight = 3;
 
+private:
+    enum class ResourceTag
+    {
+        None,
+        Buffer,
+        Shader,
+        Sampler,
+        Texture,
+        PipelineLayout,
+        ComputePipeline,
+        RenderPipeline,
+    };
+
+    struct Resource
+    {
+        ResourceTag tag = ResourceTag::None;
+        const void *inner_resource = nullptr;
+    };
+
+    struct FrameData
+    {
+        CommandBuffer *command_buffer = nullptr;
+        std::vector<Resource> deletion_queue = {};
+    };
+
 public:
     ~RenderSystem();
 
@@ -156,7 +181,7 @@ public:
     void destroy_render_pipeline(RenderPipelineId id);
 
     // Commands
-    CommandBufferId acquire_command_buffer() const;
+    CommandBufferId acquire_command_buffer();
     void submit_command_buffer(CommandBufferId id);
 
     TextureId acquire_swapchain_texture(CommandBufferId id);
@@ -178,6 +203,9 @@ public:
     void draw(RenderPassId id, uint32_t vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance) const;
 
 private:
+    // FIXME: Decouple frame from the current command buffer
+    FrameData &current_frame();
+
     CommandBuffer *resolve_command_buffer(CommandBufferId id) const;
     ComputePass *resolve_compute_pass(ComputePassId id) const;
     RenderPass *resolve_render_pass(RenderPassId id) const;
@@ -185,7 +213,7 @@ private:
 private:
     RenderDriver *m_render_driver = nullptr;
     std::unordered_map<uint32_t, TextureId> m_swapchain_textures = {};
-    std::array<CommandBuffer *, s_frames_in_flight> m_command_buffers = {};
+    std::array<FrameData, s_frames_in_flight> m_frames = {};
     std::vector<ComputePass *> m_compute_passes;
     std::vector<RenderPass *> m_render_passes;
 

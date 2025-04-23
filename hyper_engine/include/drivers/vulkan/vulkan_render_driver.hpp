@@ -78,9 +78,11 @@ private:
     };
 
 public:
-    ~VulkanRenderDriver() override;
-
     void initialize(WindowSystem &window_system, WindowId window) override;
+    void shutdown() override;
+
+    void wait_idle() const override;
+
     std::vector<Texture *> query_swapchain_textures() override;
 
     // Buffer
@@ -186,6 +188,7 @@ private:
     void create_swapchain(uint32_t width, uint32_t height);
 
     void recreate_swapchain();
+    void destroy_swapchain();
 
     void on_resize(const WindowResizeEvent &event);
 

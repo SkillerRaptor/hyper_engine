@@ -13,7 +13,6 @@ set(SOURCES
         src/systems/input_system.cpp
         src/systems/render_system.cpp
         src/systems/window_system.cpp
-        src/systems/render/render_driver.cpp
         src/systems/render/shader_compiler.cpp
         src/systems/window/key_events.cpp
         src/systems/window/mouse_events.cpp

@@ -35,23 +35,6 @@
         }                                                                   \
     } while (0)
 
-VulkanRenderDriver::~VulkanRenderDriver()
-{
-    const VkResult result = vkDeviceWaitIdle(m_device);
-    HE_VK_CHECK(result, vkDeviceWaitIdle);
-
-    vmaDestroyAllocator(m_allocator);
-
-    vkDestroyDevice(m_device, nullptr);
-
-    if (m_validation_layer_enabled)
-    {
-        vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messenger, nullptr);
-    }
-
-    vkDestroyInstance(m_instance, nullptr);
-}
-
 void VulkanRenderDriver::initialize(WindowSystem &window_system, const WindowId window)
 {
     const VkResult result = volkInitialize();
@@ -90,6 +73,29 @@ void VulkanRenderDriver::initialize(WindowSystem &window_system, const WindowId 
     window_system.register_listener<WindowResizeEvent>(HE_BIND_FUNCTION(on_resize));
 
     HE_INFO("Successfully initialized VulkanRenderDriver");
+}
+
+void VulkanRenderDriver::shutdown()
+{
+    destroy_swapchain();
+    vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+
+    vmaDestroyAllocator(m_allocator);
+
+    vkDestroyDevice(m_device, nullptr);
+
+    if (m_validation_layer_enabled)
+    {
+        vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messenger, nullptr);
+    }
+
+    vkDestroyInstance(m_instance, nullptr);
+}
+
+void VulkanRenderDriver::wait_idle() const
+{
+    const VkResult result = vkDeviceWaitIdle(m_device);
+    HE_VK_CHECK(result, vkDeviceWaitIdle);
 }
 
 std::vector<Texture *> VulkanRenderDriver::query_swapchain_textures()
@@ -154,7 +160,7 @@ void VulkanRenderDriver::destroy_buffer(const Buffer *buffer) const
 {
     const VulkanBuffer *vulkan_buffer = reinterpret_cast<const VulkanBuffer *>(buffer);
 
-    vkDestroyBuffer(m_device, vulkan_buffer->buffer, nullptr);
+    vmaDestroyBuffer(m_allocator, vulkan_buffer->buffer, vulkan_buffer->allocation);
     delete vulkan_buffer;
 }
 
@@ -329,10 +335,14 @@ Texture *VulkanRenderDriver::create_texture(
 
 void VulkanRenderDriver::destroy_texture(const Texture *texture) const
 {
-    (void) texture;
+    const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(texture);
 
-    // FIXME: Implement VulkanRenderDriver::destroy_texture
-    HE_PANIC("TODO: Implement `VulkanRenderDriver::destroy_texture`");
+    vkDestroyImageView(m_device, vulkan_texture->image_view, nullptr);
+    if (vulkan_texture->allocation != VK_NULL_HANDLE)
+    {
+        vmaDestroyImage(m_allocator, vulkan_texture->image, vulkan_texture->allocation);
+    }
+    delete vulkan_texture;
 }
 
 PipelineLayout *VulkanRenderDriver::create_pipeline_layout(const std::optional<std::string> &label, const uint32_t push_constant_size) const
@@ -1508,8 +1518,14 @@ void VulkanRenderDriver::create_swapchain(const uint32_t width, const uint32_t h
 
 void VulkanRenderDriver::recreate_swapchain()
 {
-    // FIXME: Destroy old swapchain
+    destroy_swapchain();
+    create_swapchain(m_swapchain_width, m_swapchain_height);
 
+    m_swapchain_out_of_date = false;
+}
+
+void VulkanRenderDriver::destroy_swapchain()
+{
     for (const Texture *texture : m_swapchain_textures)
     {
         destroy_texture(texture);
@@ -1517,9 +1533,7 @@ void VulkanRenderDriver::recreate_swapchain()
 
     m_swapchain_textures.clear();
 
-    create_swapchain(m_swapchain_width, m_swapchain_height);
-
-    m_swapchain_out_of_date = false;
+    vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
 }
 
 // FIXME: Check if the window id matches and maybe save the width/height

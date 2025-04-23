@@ -107,6 +107,10 @@ public:
     virtual ~RenderDriver() = default;
 
     virtual void initialize(WindowSystem &window_system, WindowId window) = 0;
+    virtual void shutdown() = 0;
+
+    virtual void wait_idle() const = 0;
+
     virtual std::vector<Texture *> query_swapchain_textures() = 0;
 
     // Buffer

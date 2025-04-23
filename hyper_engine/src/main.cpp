@@ -153,6 +153,7 @@ int main()
     }
 
     render_system->destroy_render_pipeline(pipeline);
+    render_system->destroy_pipeline_layout(pipeline_layout);
     window_system->destroy_window(window);
 
     return 0;

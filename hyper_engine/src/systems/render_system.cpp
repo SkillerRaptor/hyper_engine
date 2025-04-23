@@ -14,10 +14,44 @@
 
 RenderSystem::~RenderSystem()
 {
+    m_render_driver->wait_idle();
+
     for (uint8_t i = 0; i < s_frames_in_flight; ++i)
     {
-        m_render_driver->destroy_command_buffer(m_command_buffers[i]);
+        const FrameData &frame_data = m_frames[i];
+        for (const Resource &resource : frame_data.deletion_queue)
+        {
+            switch (resource.tag)
+            {
+            case ResourceTag::Buffer:
+                m_render_driver->destroy_buffer(static_cast<const Buffer *>(resource.inner_resource));
+                break;
+            case ResourceTag::Shader:
+                m_render_driver->destroy_shader(static_cast<const Shader *>(resource.inner_resource));
+                break;
+            case ResourceTag::Sampler:
+                m_render_driver->destroy_sampler(static_cast<const Sampler *>(resource.inner_resource));
+                break;
+            case ResourceTag::Texture:
+                m_render_driver->destroy_texture(static_cast<const Texture *>(resource.inner_resource));
+                break;
+            case ResourceTag::PipelineLayout:
+                m_render_driver->destroy_pipeline_layout(static_cast<const PipelineLayout *>(resource.inner_resource));
+                break;
+            case ResourceTag::ComputePipeline:
+                m_render_driver->destroy_compute_pipeline(static_cast<const ComputePipeline *>(resource.inner_resource));
+                break;
+            case ResourceTag::RenderPipeline:
+                m_render_driver->destroy_render_pipeline(static_cast<const RenderPipeline *>(resource.inner_resource));
+                break;
+            default:
+                break;
+            }
+        }
+        m_render_driver->destroy_command_buffer(frame_data.command_buffer);
     }
+
+    m_render_driver->shutdown();
 
     delete m_render_driver;
 }
@@ -44,7 +78,12 @@ void RenderSystem::initialize(WindowSystem &window_system, const WindowId window
         command_buffer->render_pass_in_progress = false;
         command_buffer->swapchain_texture_acquired = false;
 
-        m_command_buffers[i] = command_buffer;
+        const FrameData frame_data = {
+            .command_buffer = command_buffer,
+            .deletion_queue = {},
+        };
+
+        m_frames[i] = frame_data;
     }
 
     HE_INFO("Successfully initialized RenderSystem");
@@ -68,7 +107,11 @@ void RenderSystem::destroy_buffer(const BufferId id)
     HE_ASSERT(m_buffers.contains(id));
 
     const Buffer *buffer = m_buffers.get(id);
-    m_render_driver->destroy_buffer(buffer);
+    current_frame().deletion_queue.push_back(
+        Resource{
+            .tag = ResourceTag::Buffer,
+            .inner_resource = buffer,
+        });
     m_buffers.destroy(id);
 }
 
@@ -92,7 +135,11 @@ void RenderSystem::destroy_shader(const ShaderId id)
     HE_ASSERT(m_shaders.contains(id));
 
     const Shader *shader = m_shaders.get(id);
-    m_render_driver->destroy_shader(shader);
+    current_frame().deletion_queue.push_back(
+        Resource{
+            .tag = ResourceTag::Shader,
+            .inner_resource = shader,
+        });
     m_shaders.destroy(id);
 }
 
@@ -134,7 +181,11 @@ void RenderSystem::destroy_sampler(const SamplerId id)
     HE_ASSERT(m_samplers.contains(id));
 
     const Sampler *sampler = m_samplers.get(id);
-    m_render_driver->destroy_sampler(sampler);
+    current_frame().deletion_queue.push_back(
+        Resource{
+            .tag = ResourceTag::Sampler,
+            .inner_resource = sampler,
+        });
     m_samplers.destroy(id);
 }
 
@@ -177,7 +228,11 @@ void RenderSystem::destroy_texture(const TextureId id)
     HE_ASSERT(m_textures.contains(id));
 
     const Texture *texture = m_textures.get(id);
-    m_render_driver->destroy_texture(texture);
+    current_frame().deletion_queue.push_back(
+        Resource{
+            .tag = ResourceTag::Texture,
+            .inner_resource = texture,
+        });
     m_textures.destroy(id);
 }
 
@@ -197,7 +252,11 @@ void RenderSystem::destroy_pipeline_layout(const PipelineLayoutId id)
     HE_ASSERT(m_pipeline_layouts.contains(id));
 
     const PipelineLayout *pipeline_layout = m_pipeline_layouts.get(id);
-    m_render_driver->destroy_pipeline_layout(pipeline_layout);
+    current_frame().deletion_queue.push_back(
+        Resource{
+            .tag = ResourceTag::PipelineLayout,
+            .inner_resource = pipeline_layout,
+        });
     m_pipeline_layouts.destroy(id);
 }
 
@@ -222,7 +281,11 @@ void RenderSystem::destroy_compute_pipeline(const ComputePipelineId id)
     HE_ASSERT(m_compute_pipelines.contains(id));
 
     const ComputePipeline *compute_pipeline = m_compute_pipelines.get(id);
-    m_render_driver->destroy_compute_pipeline(compute_pipeline);
+    current_frame().deletion_queue.push_back(
+        Resource{
+            .tag = ResourceTag::ComputePipeline,
+            .inner_resource = compute_pipeline,
+        });
     m_compute_pipelines.destroy(id);
 }
 
@@ -271,23 +334,59 @@ void RenderSystem::destroy_render_pipeline(const RenderPipelineId id)
     HE_ASSERT(m_render_pipelines.contains(id));
 
     const RenderPipeline *render_pipeline = m_render_pipelines.get(id);
-    m_render_driver->destroy_render_pipeline(render_pipeline);
+    current_frame().deletion_queue.push_back(
+        Resource{
+            .tag = ResourceTag::RenderPipeline,
+            .inner_resource = render_pipeline,
+        });
     m_render_pipelines.destroy(id);
 }
 
-CommandBufferId RenderSystem::acquire_command_buffer() const
+CommandBufferId RenderSystem::acquire_command_buffer()
 {
-    const uint32_t command_buffer_id = m_frame_index % static_cast<uint32_t>(m_command_buffers.size());
+    const uint32_t frame_id = m_frame_index % static_cast<uint32_t>(m_frames.size());
 
-    CommandBuffer *command_buffer = m_command_buffers[command_buffer_id];
-    command_buffer->generation += 1;
-    command_buffer->compute_pass_in_progress = false;
-    command_buffer->render_pass_in_progress = false;
-    command_buffer->swapchain_texture_acquired = false;
+    FrameData &frame_data = current_frame();
+    for (const Resource &resource : frame_data.deletion_queue)
+    {
+        switch (resource.tag)
+        {
+        case ResourceTag::Buffer:
+            m_render_driver->destroy_buffer(static_cast<const Buffer *>(resource.inner_resource));
+            break;
+        case ResourceTag::Shader:
+            m_render_driver->destroy_shader(static_cast<const Shader *>(resource.inner_resource));
+            break;
+        case ResourceTag::Sampler:
+            m_render_driver->destroy_sampler(static_cast<const Sampler *>(resource.inner_resource));
+            break;
+        case ResourceTag::Texture:
+            m_render_driver->destroy_texture(static_cast<const Texture *>(resource.inner_resource));
+            break;
+        case ResourceTag::PipelineLayout:
+            m_render_driver->destroy_pipeline_layout(static_cast<const PipelineLayout *>(resource.inner_resource));
+            break;
+        case ResourceTag::ComputePipeline:
+            m_render_driver->destroy_compute_pipeline(static_cast<const ComputePipeline *>(resource.inner_resource));
+            break;
+        case ResourceTag::RenderPipeline:
+            m_render_driver->destroy_render_pipeline(static_cast<const RenderPipeline *>(resource.inner_resource));
+            break;
+        default:
+            break;
+        }
+    }
 
-    m_render_driver->acquire_command_buffer(command_buffer);
+    frame_data.deletion_queue.clear();
 
-    return CommandBufferId(command_buffer_id, command_buffer->generation);
+    frame_data.command_buffer->generation += 1;
+    frame_data.command_buffer->compute_pass_in_progress = false;
+    frame_data.command_buffer->render_pass_in_progress = false;
+    frame_data.command_buffer->swapchain_texture_acquired = false;
+
+    m_render_driver->acquire_command_buffer(frame_data.command_buffer);
+
+    return CommandBufferId(frame_id, frame_data.command_buffer->generation);
 }
 
 void RenderSystem::submit_command_buffer(const CommandBufferId id)
@@ -475,11 +574,17 @@ void RenderSystem::draw(
     m_render_driver->draw(render_pass->command_buffer, vertex_count, instance_count, first_vertex, first_instance);
 }
 
+RenderSystem::FrameData &RenderSystem::current_frame()
+{
+    return m_frames[static_cast<size_t>(m_frame_index) % m_frames.size()];
+}
+
 CommandBuffer *RenderSystem::resolve_command_buffer(const CommandBufferId id) const
 {
-    HE_ASSERT(id.id() < m_command_buffers.size());
+    HE_ASSERT(id.id() < m_frames.size());
 
-    CommandBuffer *command_buffer = m_command_buffers[id.id()];
+    const FrameData &frame_data = m_frames[id.id()];
+    CommandBuffer *command_buffer = frame_data.command_buffer;
     HE_ASSERT(id.version() == command_buffer->generation);
 
     return command_buffer;
