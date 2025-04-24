@@ -181,14 +181,14 @@ public:
         const CommandBuffer *command_buffer,
         const Buffer *src,
         uint64_t src_offset,
-        const Texture *dst,
+        Texture *dst,
         Offset3d dst_offset,
         Extent3d dst_extent,
         uint32_t dst_mip_level,
         uint32_t dst_array_index) const override;
     void copy_texture_to_buffer(
         const CommandBuffer *command_buffer,
-        const Texture *src,
+        Texture *src,
         Offset3d src_offset,
         Extent3d src_extent,
         uint32_t src_mip_level,
@@ -197,11 +197,11 @@ public:
         uint64_t dst_offset) const override;
     void copy_texture_to_texture(
         const CommandBuffer *command_buffer,
-        const Texture *src,
+        Texture *src,
         Offset3d src_offset,
         uint32_t src_mip_level,
         uint32_t src_array_index,
-        const Texture *dst,
+        Texture *dst,
         Offset3d dst_offset,
         uint32_t dst_mip_level,
         uint32_t dst_array_index,
@@ -229,6 +229,7 @@ public:
     void end_render_pass(const CommandBuffer *command_buffer) const override;
 
     void bind_render_pipeline(const CommandBuffer *command_buffer, const RenderPipeline *pipeline) const override;
+    void bind_index_buffer(const CommandBuffer *command_buffer, const Buffer *buffer) const override;
 
     void set_viewport(const CommandBuffer *command_buffer, float x, float y, float width, float height, float min_depth, float max_depth)
         const override;
@@ -236,6 +237,13 @@ public:
     void
         draw(const CommandBuffer *command_buffer, uint32_t vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance)
             const override;
+    void draw_indexed(
+        const CommandBuffer *command_buffer,
+        uint32_t index_count,
+        uint32_t instance_count,
+        uint32_t first_index,
+        int32_t vertex_offset,
+        uint32_t first_instance) const override;
 
 private:
     void create_instance();

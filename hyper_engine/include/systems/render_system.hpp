@@ -284,6 +284,7 @@ public:
     void end_render_pass(RenderPassId id) const;
 
     void bind_pipeline(RenderPassId id, RenderPipelineId pipeline_id) const;
+    void bind_index_buffer(RenderPassId id, BufferId buffer) const;
     void push_constants(RenderPassId id, const void *data, size_t data_size) const;
 
     template <typename T>
@@ -295,6 +296,13 @@ public:
     void set_viewport(RenderPassId id, float x, float y, float width, float height, float min_depth, float max_depth) const;
     void set_scissor(RenderPassId id, int32_t x, int32_t y, uint32_t width, uint32_t height) const;
     void draw(RenderPassId id, uint32_t vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance) const;
+    void draw_indexed(
+        RenderPassId id,
+        uint32_t index_count,
+        uint32_t instance_count,
+        uint32_t first_index,
+        int32_t vertex_offset,
+        uint32_t first_instance) const;
 
 private:
     CommandBuffer *resolve_command_buffer(CommandBufferId id) const;

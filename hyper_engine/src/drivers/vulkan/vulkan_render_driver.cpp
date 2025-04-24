@@ -900,7 +900,7 @@ void VulkanRenderDriver::bind_texture(const Texture *texture, const uint32_t slo
     const VkWriteDescriptorSet descriptor_write = {
         .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
         .pNext = nullptr,
-        .dstSet = m_descriptor_sets[2],
+        .dstSet = m_descriptor_sets[(vulkan_texture->usage & TextureUsage::Storage) ? 2 : 1],
         .dstBinding = 0,
         .dstArrayElement = slot,
         .descriptorCount = 1,
@@ -1094,7 +1094,7 @@ void VulkanRenderDriver::copy_buffer_to_texture(
     const CommandBuffer *command_buffer,
     const Buffer *src,
     const uint64_t src_offset,
-    const Texture *dst,
+    Texture *dst,
     const Offset3d dst_offset,
     const Extent3d dst_extent,
     const uint32_t dst_mip_level,
@@ -1103,6 +1103,8 @@ void VulkanRenderDriver::copy_buffer_to_texture(
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     const VulkanBuffer *vulkan_src = reinterpret_cast<const VulkanBuffer *>(src);
     const VulkanTexture *vulkan_dst = reinterpret_cast<const VulkanTexture *>(dst);
+
+    transition_texture_layout(command_buffer, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
     const VkImageSubresourceLayers subresource_layers = {
         .aspectMask = get_image_aspect_flags(vulkan_dst->format),
@@ -1147,7 +1149,7 @@ void VulkanRenderDriver::copy_buffer_to_texture(
 
 void VulkanRenderDriver::copy_texture_to_buffer(
     const CommandBuffer *command_buffer,
-    const Texture *src,
+    Texture *src,
     const Offset3d src_offset,
     const Extent3d src_extent,
     const uint32_t src_mip_level,
@@ -1158,6 +1160,8 @@ void VulkanRenderDriver::copy_texture_to_buffer(
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     const VulkanTexture *vulkan_src = reinterpret_cast<const VulkanTexture *>(src);
     const VulkanBuffer *vulkan_dst = reinterpret_cast<const VulkanBuffer *>(dst);
+
+    transition_texture_layout(command_buffer, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
     const VkImageSubresourceLayers subresource_layers = {
         .aspectMask = get_image_aspect_flags(vulkan_src->format),
@@ -1202,11 +1206,11 @@ void VulkanRenderDriver::copy_texture_to_buffer(
 
 void VulkanRenderDriver::copy_texture_to_texture(
     const CommandBuffer *command_buffer,
-    const Texture *src,
+    Texture *src,
     const Offset3d src_offset,
     const uint32_t src_mip_level,
     const uint32_t src_array_index,
-    const Texture *dst,
+    Texture *dst,
     const Offset3d dst_offset,
     const uint32_t dst_mip_level,
     const uint32_t dst_array_index,
@@ -1215,6 +1219,9 @@ void VulkanRenderDriver::copy_texture_to_texture(
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     const VulkanTexture *vulkan_src = reinterpret_cast<const VulkanTexture *>(src);
     const VulkanTexture *vulkan_dst = reinterpret_cast<const VulkanTexture *>(dst);
+
+    transition_texture_layout(command_buffer, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+    transition_texture_layout(command_buffer, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
     const VkImageCopy2 region = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_COPY_2,
@@ -1445,6 +1452,8 @@ void VulkanRenderDriver::begin_render_pass(
     {
         const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(color_attachment.texture);
 
+        transition_texture_layout(command_buffer, color_attachment.texture, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
         const VkRenderingAttachmentInfo color_attachment_info = {
             .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
             .pNext = nullptr,
@@ -1467,6 +1476,9 @@ void VulkanRenderDriver::begin_render_pass(
         const RenderPassDepthStencilAttachment &render_pass_depth_stencil_attachment = depth_stencil_attachment.value();
         const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(render_pass_depth_stencil_attachment.texture);
 
+        transition_texture_layout(
+            command_buffer, render_pass_depth_stencil_attachment.texture, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+
         constexpr VkClearValue depth_clear_value = {
             .depthStencil =
                 {
@@ -1487,10 +1499,6 @@ void VulkanRenderDriver::begin_render_pass(
             .storeOp = get_attachment_store_operation(render_pass_depth_stencil_attachment.depth_operations.store_operation),
             .clearValue = depth_clear_value,
         };
-
-        // FIXME: This is a hack
-        transition_texture_layout(
-            command_buffer, render_pass_depth_stencil_attachment.texture, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     }
 
     const VkRenderingInfo rendering_info = {
@@ -1544,6 +1552,14 @@ void VulkanRenderDriver::bind_render_pipeline(const CommandBuffer *command_buffe
         nullptr);
 
     vkCmdBindPipeline(vulkan_command_buffer->command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_render_pipeline->pipeline);
+}
+
+void VulkanRenderDriver::bind_index_buffer(const CommandBuffer *command_buffer, const Buffer *buffer) const
+{
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    const VulkanBuffer *vulkan_buffer = reinterpret_cast<const VulkanBuffer *>(buffer);
+
+    vkCmdBindIndexBuffer(vulkan_command_buffer->command_buffer, vulkan_buffer->buffer, 0, VK_INDEX_TYPE_UINT32);
 }
 
 void VulkanRenderDriver::set_viewport(
@@ -1601,6 +1617,18 @@ void VulkanRenderDriver::draw(
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     vkCmdDraw(vulkan_command_buffer->command_buffer, vertex_count, instance_count, first_vertex, first_instance);
+}
+
+void VulkanRenderDriver::draw_indexed(
+    const CommandBuffer *command_buffer,
+    const uint32_t index_count,
+    const uint32_t instance_count,
+    const uint32_t first_index,
+    const int32_t vertex_offset,
+    const uint32_t first_instance) const
+{
+    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
+    vkCmdDrawIndexed(vulkan_command_buffer->command_buffer, index_count, instance_count, first_index, vertex_offset, first_instance);
 }
 
 void VulkanRenderDriver::create_instance()

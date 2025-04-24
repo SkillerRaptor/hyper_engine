@@ -590,7 +590,7 @@ void RenderSystem::write_texture(
     memcpy(mapped_ptr, data, data_size);
     m_render_driver->unmap_buffer(staging_buffer);
 
-    const Texture *texture_ptr = m_textures.get(texture);
+    Texture *texture_ptr = m_textures.get(texture);
     m_render_driver->copy_buffer_to_texture(command_buffer, staging_buffer, data_offset, texture_ptr, offset, extent, mip_level, array_index);
 
     m_deletion_queue.push_back(
@@ -634,7 +634,7 @@ void RenderSystem::copy_buffer_to_texture(
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
 
     const Buffer *src_ptr = m_buffers.get(src);
-    const Texture *dst_ptr = m_textures.get(dst);
+    Texture *dst_ptr = m_textures.get(dst);
     m_render_driver->copy_buffer_to_texture(
         command_buffer, src_ptr, src_offset, dst_ptr, dst_offset, dst_extent, dst_mip_level, dst_array_index);
 }
@@ -654,7 +654,7 @@ void RenderSystem::copy_texture_to_buffer(
 
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
 
-    const Texture *src_ptr = m_textures.get(src);
+    Texture *src_ptr = m_textures.get(src);
     const Buffer *dst_ptr = m_buffers.get(dst);
     m_render_driver->copy_texture_to_buffer(
         command_buffer, src_ptr, src_offset, src_extent, src_mip_level, src_array_index, dst_ptr, dst_offset);
@@ -677,8 +677,8 @@ void RenderSystem::copy_texture_to_texture(
 
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
 
-    const Texture *src_ptr = m_textures.get(src);
-    const Texture *dst_ptr = m_textures.get(dst);
+    Texture *src_ptr = m_textures.get(src);
+    Texture *dst_ptr = m_textures.get(dst);
     m_render_driver->copy_texture_to_texture(
         command_buffer, src_ptr, src_offset, src_mip_level, src_array_index, dst_ptr, dst_offset, dst_mip_level, dst_array_index, extent);
 }
@@ -765,6 +765,15 @@ void RenderSystem::bind_pipeline(const RenderPassId id, const RenderPipelineId p
     m_render_driver->bind_render_pipeline(render_pass->command_buffer, render_pipeline);
 }
 
+void RenderSystem::bind_index_buffer(const RenderPassId id, const BufferId buffer) const
+{
+    HE_ASSERT(m_buffers.contains(buffer));
+
+    const RenderPass *render_pass = resolve_render_pass(id);
+    const Buffer *buffer_ptr = m_buffers.get(buffer);
+    m_render_driver->bind_index_buffer(render_pass->command_buffer, buffer_ptr);
+}
+
 void RenderSystem::push_constants(const RenderPassId id, const void *data, const size_t data_size) const
 {
     const RenderPass *render_pass = resolve_render_pass(id);
@@ -804,6 +813,19 @@ void RenderSystem::draw(
     const RenderPass *render_pass = resolve_render_pass(id);
 
     m_render_driver->draw(render_pass->command_buffer, vertex_count, instance_count, first_vertex, first_instance);
+}
+
+void RenderSystem::draw_indexed(
+    const RenderPassId id,
+    const uint32_t index_count,
+    const uint32_t instance_count,
+    const uint32_t first_index,
+    const int32_t vertex_offset,
+    const uint32_t first_instance) const
+{
+    const RenderPass *render_pass = resolve_render_pass(id);
+
+    m_render_driver->draw_indexed(render_pass->command_buffer, index_count, instance_count, first_index, vertex_offset, first_instance);
 }
 
 CommandBuffer *RenderSystem::resolve_command_buffer(const CommandBufferId id) const
