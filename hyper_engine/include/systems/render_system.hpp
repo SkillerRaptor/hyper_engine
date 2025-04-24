@@ -8,10 +8,12 @@
 
 #include <array>
 #include <span>
+#include <stack>
 
 #include "core/bit_flags.hpp"
 #include "core/resource_owner.hpp"
 #include "systems/render/render_driver_common.hpp"
+#include "systems/render/resource_handle.hpp"
 #include "systems/window_system.hpp"
 
 HE_DEFINE_ID(Buffer);
@@ -30,6 +32,7 @@ struct BufferDescriptor
     std::optional<std::string> label;
     uint64_t size = 0;
     BitFlags<BufferUsage> usage = BufferUsage::None;
+    std::optional<ResourceHandle> handle;
 };
 
 struct ShaderDescriptor
@@ -54,6 +57,7 @@ struct SamplerDescriptor
     float min_lod = 0.0;
     float max_lod = 1.0;
     BorderColor border_color = BorderColor::TransparentBlack;
+    std::optional<ResourceHandle> handle;
 };
 
 struct TextureDescriptor
@@ -67,6 +71,7 @@ struct TextureDescriptor
     Format format = Format::Unknown;
     Dimension dimension = Dimension::Unknown;
     BitFlags<TextureUsage> usage = TextureUsage::None;
+    std::optional<ResourceHandle> handle;
 };
 
 struct PipelineLayoutDescriptor
@@ -156,6 +161,22 @@ private:
         uint8_t generation = 0;
     };
 
+    enum class DescriptorUpdateTag
+    {
+        None,
+        Buffer,
+        Sampler,
+        Texture,
+    };
+
+    struct DescriptorUpdate
+    {
+        DescriptorUpdateTag tag = DescriptorUpdateTag::None;
+        const void *inner_resource = nullptr;
+        ResourceHandle handle;
+        uint8_t generation = 0;
+    };
+
 public:
     ~RenderSystem();
 
@@ -165,6 +186,8 @@ public:
     BufferId create_buffer(const BufferDescriptor &descriptor);
     void destroy_buffer(BufferId id);
 
+    ResourceHandle get_buffer_handle(BufferId id) const;
+
     // Shader
     ShaderId create_shader(const ShaderDescriptor &descriptor);
     void destroy_shader(ShaderId id);
@@ -173,9 +196,13 @@ public:
     SamplerId create_sampler(const SamplerDescriptor &descriptor);
     void destroy_sampler(SamplerId id);
 
+    ResourceHandle get_sampler_handle(SamplerId id) const;
+
     // Texture
     TextureId create_texture(const TextureDescriptor &descriptor);
     void destroy_texture(TextureId id);
+
+    ResourceHandle get_texture_handle(TextureId id) const;
 
     // Pipeline Layout
     PipelineLayoutId create_pipeline_layout(const PipelineLayoutDescriptor &descriptor);
@@ -192,11 +219,6 @@ public:
     // Commands
     CommandBufferId acquire_command_buffer();
     void submit_command_buffer(CommandBufferId id);
-
-    // FIXME: Add an id system & add a system to prevent overriding in FiF, because memory changes are reflected immediately
-    void bind_buffer(BufferId id, uint32_t slot) const;
-    void bind_sampler(SamplerId id, uint32_t slot) const;
-    void bind_texture(TextureId id, uint32_t slot) const;
 
     void clear_buffer(CommandBufferId id, BufferId buffer, size_t size, uint64_t offset) const;
     void write_buffer(CommandBufferId id, BufferId buffer, const void *data, size_t size, uint64_t offset);
@@ -309,6 +331,9 @@ private:
     ComputePass *resolve_compute_pass(ComputePassId id) const;
     RenderPass *resolve_render_pass(RenderPassId id) const;
 
+    ResourceHandle allocate_handle();
+    void retire_handle(ResourceHandle handle);
+
 private:
     RenderDriver *m_render_driver = nullptr;
     std::unordered_map<uint32_t, TextureId> m_swapchain_textures = {};
@@ -316,6 +341,9 @@ private:
     std::vector<ComputePass *> m_compute_passes;
     std::vector<RenderPass *> m_render_passes;
     std::vector<Resource> m_deletion_queue;
+    std::vector<DescriptorUpdate> m_descriptor_updates;
+    std::stack<ResourceHandle> m_recycled_descriptors;
+    uint32_t m_current_descriptor_index = 0;
 
     uint32_t m_frame_index = 0;
 

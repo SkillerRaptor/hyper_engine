@@ -87,10 +87,33 @@ BufferId RenderSystem::create_buffer(const BufferDescriptor &descriptor)
     HE_ASSERT(descriptor.size > 0);
     HE_ASSERT(descriptor.usage != BufferUsage::None);
 
+    if (descriptor.handle.has_value())
+    {
+        HE_ASSERT(descriptor.usage & BufferUsage::ShaderResource);
+        HE_ASSERT(descriptor.handle.value().is_valid());
+    }
+
+    std::optional<ResourceHandle> handle = descriptor.handle;
+    if (!handle.has_value() && descriptor.usage & BufferUsage::ShaderResource)
+    {
+        handle = allocate_handle();
+    }
+
     Buffer *buffer = m_render_driver->create_buffer(descriptor.label, descriptor.size, descriptor.usage, false);
     buffer->label = descriptor.label;
     buffer->size = descriptor.size;
     buffer->usage = descriptor.usage;
+    buffer->handle = handle;
+
+    if (buffer->handle.has_value())
+    {
+        m_descriptor_updates.push_back(
+            DescriptorUpdate{
+                .tag = DescriptorUpdateTag::Buffer,
+                .inner_resource = buffer,
+                .handle = descriptor.handle.value(),
+            });
+    }
 
     return m_buffers.create(buffer);
 }
@@ -106,6 +129,17 @@ void RenderSystem::destroy_buffer(const BufferId id)
             .inner_resource = buffer,
         });
     m_buffers.destroy(id);
+}
+
+ResourceHandle RenderSystem::get_buffer_handle(const BufferId id) const
+{
+    HE_ASSERT(m_buffers.contains(id));
+
+    const Buffer *buffer = m_buffers.get(id);
+    HE_ASSERT(buffer->usage & BufferUsage::ShaderResource);
+    HE_ASSERT(buffer->handle.has_value());
+
+    return buffer->handle.value();
 }
 
 ShaderId RenderSystem::create_shader(const ShaderDescriptor &descriptor)
@@ -140,6 +174,17 @@ SamplerId RenderSystem::create_sampler(const SamplerDescriptor &descriptor)
 {
     // FIXME: Add assertions
 
+    if (descriptor.handle.has_value())
+    {
+        HE_ASSERT(descriptor.handle.value().is_valid());
+    }
+
+    std::optional<ResourceHandle> handle = descriptor.handle;
+    if (!handle.has_value())
+    {
+        handle = allocate_handle();
+    }
+
     Sampler *sampler = m_render_driver->create_sampler(
         descriptor.label,
         descriptor.mag_filter,
@@ -165,6 +210,17 @@ SamplerId RenderSystem::create_sampler(const SamplerDescriptor &descriptor)
     sampler->min_lod = descriptor.min_lod;
     sampler->max_lod = descriptor.max_lod;
     sampler->border_color = descriptor.border_color;
+    sampler->handle = handle;
+
+    if (sampler->handle.has_value())
+    {
+        m_descriptor_updates.push_back(
+            DescriptorUpdate{
+                .tag = DescriptorUpdateTag::Sampler,
+                .inner_resource = sampler,
+                .handle = descriptor.handle.value(),
+            });
+    }
 
     return m_samplers.create(sampler);
 }
@@ -182,6 +238,16 @@ void RenderSystem::destroy_sampler(const SamplerId id)
     m_samplers.destroy(id);
 }
 
+ResourceHandle RenderSystem::get_sampler_handle(const SamplerId id) const
+{
+    HE_ASSERT(m_samplers.contains(id));
+
+    const Sampler *sampler = m_samplers.get(id);
+    HE_ASSERT(sampler->handle.has_value());
+
+    return sampler->handle.value();
+}
+
 TextureId RenderSystem::create_texture(const TextureDescriptor &descriptor)
 {
     HE_ASSERT(descriptor.width > 0);
@@ -191,7 +257,18 @@ TextureId RenderSystem::create_texture(const TextureDescriptor &descriptor)
     HE_ASSERT(descriptor.mip_levels > 0);
     HE_ASSERT(descriptor.format != Format::Unknown);
     HE_ASSERT(descriptor.dimension != Dimension::Unknown);
-    HE_ASSERT(descriptor.usage != TextureUsage::None);
+
+    if (descriptor.handle.has_value())
+    {
+        HE_ASSERT(descriptor.usage & TextureUsage::ShaderResource);
+        HE_ASSERT(descriptor.handle.value().is_valid());
+    }
+
+    std::optional<ResourceHandle> handle = descriptor.handle;
+    if (!handle.has_value() && descriptor.usage & TextureUsage::ShaderResource)
+    {
+        handle = allocate_handle();
+    }
 
     Texture *texture = m_render_driver->create_texture(
         descriptor.label,
@@ -212,6 +289,17 @@ TextureId RenderSystem::create_texture(const TextureDescriptor &descriptor)
     texture->format = descriptor.format;
     texture->dimension = descriptor.dimension;
     texture->usage = descriptor.usage;
+    texture->handle = handle;
+
+    if (texture->handle.has_value())
+    {
+        m_descriptor_updates.push_back(
+            DescriptorUpdate{
+                .tag = DescriptorUpdateTag::Texture,
+                .inner_resource = texture,
+                .handle = descriptor.handle.value(),
+            });
+    }
 
     return m_textures.create(texture);
 }
@@ -227,6 +315,17 @@ void RenderSystem::destroy_texture(const TextureId id)
             .inner_resource = texture,
         });
     m_textures.destroy(id);
+}
+
+ResourceHandle RenderSystem::get_texture_handle(const TextureId id) const
+{
+    HE_ASSERT(m_textures.contains(id));
+
+    const Texture *texture = m_textures.get(id);
+    HE_ASSERT(texture->usage & TextureUsage::ShaderResource);
+    HE_ASSERT(texture->handle.has_value());
+
+    return texture->handle.value();
 }
 
 PipelineLayoutId RenderSystem::create_pipeline_layout(const PipelineLayoutDescriptor &descriptor)
@@ -356,17 +455,38 @@ CommandBufferId RenderSystem::acquire_command_buffer()
             switch (resource.tag)
             {
             case ResourceTag::Buffer:
-                m_render_driver->destroy_buffer(static_cast<const Buffer *>(resource.inner_resource));
+            {
+                const Buffer *buffer = static_cast<const Buffer *>(resource.inner_resource);
+                if (buffer->handle.has_value())
+                {
+                    retire_handle(buffer->handle.value());
+                }
+                m_render_driver->destroy_buffer(buffer);
                 break;
+            }
             case ResourceTag::Shader:
                 m_render_driver->destroy_shader(static_cast<const Shader *>(resource.inner_resource));
                 break;
             case ResourceTag::Sampler:
-                m_render_driver->destroy_sampler(static_cast<const Sampler *>(resource.inner_resource));
+            {
+                const Sampler *sampler = static_cast<const Sampler *>(resource.inner_resource);
+                if (sampler->handle.has_value())
+                {
+                    retire_handle(sampler->handle.value());
+                }
+                m_render_driver->destroy_sampler(sampler);
                 break;
+            }
             case ResourceTag::Texture:
-                m_render_driver->destroy_texture(static_cast<const Texture *>(resource.inner_resource));
+            {
+                const Texture *texture = static_cast<const Texture *>(resource.inner_resource);
+                if (texture->handle.has_value())
+                {
+                    retire_handle(texture->handle.value());
+                }
+                m_render_driver->destroy_texture(texture);
                 break;
+            }
             case ResourceTag::PipelineLayout:
                 m_render_driver->destroy_pipeline_layout(static_cast<const PipelineLayout *>(resource.inner_resource));
                 break;
@@ -387,6 +507,36 @@ CommandBufferId RenderSystem::acquire_command_buffer()
         [](const Resource &resource)
         {
             return resource.generation == s_frames_in_flight;
+        });
+
+    for (DescriptorUpdate &descriptor_update : m_descriptor_updates)
+    {
+        descriptor_update.generation += 1;
+
+        if (descriptor_update.generation == s_frames_in_flight)
+        {
+            switch (descriptor_update.tag)
+            {
+            case DescriptorUpdateTag::Buffer:
+                m_render_driver->bind_buffer(static_cast<const Buffer *>(descriptor_update.inner_resource));
+                break;
+            case DescriptorUpdateTag::Sampler:
+                m_render_driver->bind_sampler(static_cast<const Sampler *>(descriptor_update.inner_resource));
+                break;
+            case DescriptorUpdateTag::Texture:
+                m_render_driver->bind_texture(static_cast<const Texture *>(descriptor_update.inner_resource));
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    std::erase_if(
+        m_descriptor_updates,
+        [](const DescriptorUpdate &descriptor_update)
+        {
+            return descriptor_update.generation == s_frames_in_flight;
         });
 
     return CommandBufferId(frame_id, command_buffer->generation);
@@ -503,30 +653,6 @@ void RenderSystem::push_constants(const ComputePassId id, const void *data, cons
     HE_ASSERT(compute_pass->compute_pipeline != nullptr);
 
     m_render_driver->push_constants(compute_pass->command_buffer, compute_pass->compute_pipeline->layout, data, data_size);
-}
-
-void RenderSystem::bind_buffer(const BufferId id, const uint32_t slot) const
-{
-    HE_ASSERT(m_buffers.contains(id));
-
-    const Buffer *buffer = m_buffers.get(id);
-    m_render_driver->bind_buffer(buffer, slot);
-}
-
-void RenderSystem::bind_sampler(const SamplerId id, const uint32_t slot) const
-{
-    HE_ASSERT(m_samplers.contains(id));
-
-    const Sampler *sampler = m_samplers.get(id);
-    m_render_driver->bind_sampler(sampler, slot);
-}
-
-void RenderSystem::bind_texture(const TextureId id, const uint32_t slot) const
-{
-    HE_ASSERT(m_textures.contains(id));
-
-    const Texture *texture = m_textures.get(id);
-    m_render_driver->bind_texture(texture, slot);
 }
 
 void RenderSystem::clear_buffer(const CommandBufferId id, const BufferId buffer, const size_t size, const uint64_t offset) const
@@ -858,4 +984,26 @@ RenderPass *RenderSystem::resolve_render_pass(const RenderPassId id) const
     HE_ASSERT(!render_pass->ended);
 
     return render_pass;
+}
+
+ResourceHandle RenderSystem::allocate_handle()
+{
+    if (m_recycled_descriptors.empty())
+    {
+        return ResourceHandle(m_current_descriptor_index++);
+    }
+
+    const ResourceHandle handle = m_recycled_descriptors.top();
+    m_recycled_descriptors.pop();
+    return handle;
+}
+
+void RenderSystem::retire_handle(const ResourceHandle handle)
+{
+    if (handle.is_valid())
+    {
+        return;
+    }
+
+    m_recycled_descriptors.push(handle);
 }

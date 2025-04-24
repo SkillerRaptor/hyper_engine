@@ -57,9 +57,9 @@ void Engine::initialize()
                 BufferUsage::Storage,
                 BufferUsage::ShaderResource,
             },
+        .handle = ResourceHandle(HE_DESCRIPTOR_SET_SLOT_CAMERA),
     };
     m_camera_buffer = m_render_system->create_buffer(camera_buffer_descriptor);
-    m_render_system->bind_buffer(m_camera_buffer, HE_DESCRIPTOR_SET_SLOT_CAMERA);
 
     // Rendering
     const PipelineLayoutDescriptor pipeline_layout_descriptor = {

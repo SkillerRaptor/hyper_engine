@@ -835,8 +835,10 @@ void VulkanRenderDriver::submit_command_buffer(CommandBuffer *command_buffer) co
     HE_VK_CHECK(vkQueueSubmit2(m_queue, 1, &submit_info, VK_NULL_HANDLE), vkQueueSubmit2);
 }
 
-void VulkanRenderDriver::bind_buffer(const Buffer *buffer, const uint32_t slot) const
+void VulkanRenderDriver::bind_buffer(const Buffer *buffer) const
 {
+    HE_ASSERT(buffer->handle.has_value());
+
     const VulkanBuffer *vulkan_buffer = reinterpret_cast<const VulkanBuffer *>(buffer);
 
     const VkDescriptorBufferInfo buffer_info = {
@@ -850,7 +852,7 @@ void VulkanRenderDriver::bind_buffer(const Buffer *buffer, const uint32_t slot) 
         .pNext = nullptr,
         .dstSet = m_descriptor_sets[0],
         .dstBinding = 0,
-        .dstArrayElement = slot,
+        .dstArrayElement = vulkan_buffer->handle.value().handle(),
         .descriptorCount = 1,
         .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
         .pImageInfo = nullptr,
@@ -861,8 +863,10 @@ void VulkanRenderDriver::bind_buffer(const Buffer *buffer, const uint32_t slot) 
     vkUpdateDescriptorSets(m_device, 1, &descriptor_write, 0, nullptr);
 }
 
-void VulkanRenderDriver::bind_sampler(const Sampler *sampler, const uint32_t slot) const
+void VulkanRenderDriver::bind_sampler(const Sampler *sampler) const
 {
+    HE_ASSERT(sampler->handle.has_value());
+
     const VulkanSampler *vulkan_sampler = reinterpret_cast<const VulkanSampler *>(sampler);
 
     const VkDescriptorImageInfo image_info = {
@@ -876,7 +880,7 @@ void VulkanRenderDriver::bind_sampler(const Sampler *sampler, const uint32_t slo
         .pNext = nullptr,
         .dstSet = m_descriptor_sets[3],
         .dstBinding = 0,
-        .dstArrayElement = slot,
+        .dstArrayElement = vulkan_sampler->handle.value().handle(),
         .descriptorCount = 1,
         .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
         .pImageInfo = &image_info,
@@ -887,8 +891,10 @@ void VulkanRenderDriver::bind_sampler(const Sampler *sampler, const uint32_t slo
     vkUpdateDescriptorSets(m_device, 1, &descriptor_write, 0, nullptr);
 }
 
-void VulkanRenderDriver::bind_texture(const Texture *texture, const uint32_t slot) const
+void VulkanRenderDriver::bind_texture(const Texture *texture) const
 {
+    HE_ASSERT(texture->handle.has_value());
+
     const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(texture);
 
     const VkDescriptorImageInfo image_info = {
@@ -902,7 +908,7 @@ void VulkanRenderDriver::bind_texture(const Texture *texture, const uint32_t slo
         .pNext = nullptr,
         .dstSet = m_descriptor_sets[(vulkan_texture->usage & TextureUsage::Storage) ? 2 : 1],
         .dstBinding = 0,
-        .dstArrayElement = slot,
+        .dstArrayElement = vulkan_texture->handle.value().handle(),
         .descriptorCount = 1,
         .descriptorType = (vulkan_texture->usage & TextureUsage::Storage) ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
         .pImageInfo = &image_info,

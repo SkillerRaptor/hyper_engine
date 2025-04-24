@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "systems/render/render_driver_common.hpp"
+#include "systems/render/resource_handle.hpp"
 #include "systems/window_system.hpp"
 
 struct Buffer
@@ -16,6 +17,7 @@ struct Buffer
     std::optional<std::string> label;
     uint64_t size = 0;
     BitFlags<BufferUsage> usage = BufferUsage::None;
+    std::optional<ResourceHandle> handle = std::nullopt;
 };
 
 struct Shader
@@ -40,6 +42,7 @@ struct Sampler
     float min_lod = 0.0;
     float max_lod = 1.0;
     BorderColor border_color = BorderColor::TransparentBlack;
+    std::optional<ResourceHandle> handle = std::nullopt;
 };
 
 struct Texture
@@ -53,6 +56,7 @@ struct Texture
     Format format = Format::Unknown;
     Dimension dimension = Dimension::Unknown;
     BitFlags<TextureUsage> usage = TextureUsage::None;
+    std::optional<ResourceHandle> handle = std::nullopt;
 };
 
 struct PipelineLayout
@@ -196,9 +200,9 @@ public:
     virtual void acquire_command_buffer(const CommandBuffer *command_buffer) const = 0;
     virtual void submit_command_buffer(CommandBuffer *command_buffer) const = 0;
 
-    virtual void bind_buffer(const Buffer *buffer, uint32_t slot) const = 0;
-    virtual void bind_sampler(const Sampler *sampler, uint32_t slot) const = 0;
-    virtual void bind_texture(const Texture *texture, uint32_t slot) const = 0;
+    virtual void bind_buffer(const Buffer *buffer) const = 0;
+    virtual void bind_sampler(const Sampler *sampler) const = 0;
+    virtual void bind_texture(const Texture *texture) const = 0;
 
     virtual void clear_buffer(const CommandBuffer *command_buffer, const Buffer *buffer, size_t size, uint64_t offset) const = 0;
     virtual void clear_texture(const CommandBuffer *command_buffer, const Texture *texture, SubresourceRange subresource_range) const = 0;

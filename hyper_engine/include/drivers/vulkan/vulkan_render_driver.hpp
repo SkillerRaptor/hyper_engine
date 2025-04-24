@@ -163,9 +163,9 @@ public:
     void acquire_command_buffer(const CommandBuffer *command_buffer) const override;
     void submit_command_buffer(CommandBuffer *command_buffer) const override;
 
-    void bind_buffer(const Buffer *buffer, uint32_t slot) const override;
-    void bind_sampler(const Sampler *sampler, uint32_t slot) const override;
-    void bind_texture(const Texture *texture, uint32_t slot) const override;
+    void bind_buffer(const Buffer *buffer) const override;
+    void bind_sampler(const Sampler *sampler) const override;
+    void bind_texture(const Texture *texture) const override;
 
     void clear_buffer(const CommandBuffer *command_buffer, const Buffer *buffer, size_t size, uint64_t offset) const override;
     void clear_texture(const CommandBuffer *command_buffer, const Texture *texture, SubresourceRange subresource_range) const override;
