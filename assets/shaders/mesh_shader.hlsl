@@ -24,17 +24,17 @@ VertexOutput vs_main(
 
     const ShaderMaterial material = g_push.get_material();
 
-    const ShaderMesh mesh = g_push.get_mesh();
-    const float4 position = mesh.get_position(vertex_id);
-    const float3 normal = mesh.get_normal(vertex_id).xyz;
-    const float3 color = mesh.get_color(vertex_id).xyz;
-    const float2 tex_coord = mesh.get_tex_coord(vertex_id).xy;
+    const ShaderModel model = g_push.get_model();
+    const float4 position = float4(model.get_position(vertex_id), 1.0);
+    const float3 normal = model.get_normal(vertex_id);
+    const float3 color = model.get_color(vertex_id);
+    const float2 uv = model.get_uv(vertex_id);
 
     VertexOutput output = (VertexOutput) 0;
     output.position = mul(camera.view_projection, mul(g_push.transform_matrix, position));
     output.normal = normal;
     output.color = color * material.color_factors.xyz;
-    output.uv = tex_coord;
+    output.uv = uv;
     return output;
 }
 

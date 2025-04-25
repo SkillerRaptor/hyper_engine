@@ -161,22 +161,6 @@ private:
         uint8_t generation = 0;
     };
 
-    enum class DescriptorUpdateTag
-    {
-        None,
-        Buffer,
-        Sampler,
-        Texture,
-    };
-
-    struct DescriptorUpdate
-    {
-        DescriptorUpdateTag tag = DescriptorUpdateTag::None;
-        const void *inner_resource = nullptr;
-        ResourceHandle handle;
-        uint8_t generation = 0;
-    };
-
 public:
     ~RenderSystem();
 
@@ -341,7 +325,6 @@ private:
     std::vector<ComputePass *> m_compute_passes;
     std::vector<RenderPass *> m_render_passes;
     std::vector<Resource> m_deletion_queue;
-    std::vector<DescriptorUpdate> m_descriptor_updates;
     std::stack<ResourceHandle> m_recycled_descriptors;
     uint32_t m_current_descriptor_index = 0;
 

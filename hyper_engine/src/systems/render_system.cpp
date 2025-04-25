@@ -107,12 +107,7 @@ BufferId RenderSystem::create_buffer(const BufferDescriptor &descriptor)
 
     if (buffer->handle.has_value())
     {
-        m_descriptor_updates.push_back(
-            DescriptorUpdate{
-                .tag = DescriptorUpdateTag::Buffer,
-                .inner_resource = buffer,
-                .handle = descriptor.handle.value(),
-            });
+        m_render_driver->bind_buffer(buffer);
     }
 
     return m_buffers.create(buffer);
@@ -214,12 +209,7 @@ SamplerId RenderSystem::create_sampler(const SamplerDescriptor &descriptor)
 
     if (sampler->handle.has_value())
     {
-        m_descriptor_updates.push_back(
-            DescriptorUpdate{
-                .tag = DescriptorUpdateTag::Sampler,
-                .inner_resource = sampler,
-                .handle = descriptor.handle.value(),
-            });
+        m_render_driver->bind_sampler(sampler);
     }
 
     return m_samplers.create(sampler);
@@ -293,12 +283,7 @@ TextureId RenderSystem::create_texture(const TextureDescriptor &descriptor)
 
     if (texture->handle.has_value())
     {
-        m_descriptor_updates.push_back(
-            DescriptorUpdate{
-                .tag = DescriptorUpdateTag::Texture,
-                .inner_resource = texture,
-                .handle = descriptor.handle.value(),
-            });
+        m_render_driver->bind_texture(texture);
     }
 
     return m_textures.create(texture);
@@ -509,36 +494,6 @@ CommandBufferId RenderSystem::acquire_command_buffer()
             return resource.generation == s_frames_in_flight;
         });
 
-    for (DescriptorUpdate &descriptor_update : m_descriptor_updates)
-    {
-        descriptor_update.generation += 1;
-
-        if (descriptor_update.generation == s_frames_in_flight)
-        {
-            switch (descriptor_update.tag)
-            {
-            case DescriptorUpdateTag::Buffer:
-                m_render_driver->bind_buffer(static_cast<const Buffer *>(descriptor_update.inner_resource));
-                break;
-            case DescriptorUpdateTag::Sampler:
-                m_render_driver->bind_sampler(static_cast<const Sampler *>(descriptor_update.inner_resource));
-                break;
-            case DescriptorUpdateTag::Texture:
-                m_render_driver->bind_texture(static_cast<const Texture *>(descriptor_update.inner_resource));
-                break;
-            default:
-                break;
-            }
-        }
-    }
-
-    std::erase_if(
-        m_descriptor_updates,
-        [](const DescriptorUpdate &descriptor_update)
-        {
-            return descriptor_update.generation == s_frames_in_flight;
-        });
-
     return CommandBufferId(frame_id, command_buffer->generation);
 }
 
@@ -669,6 +624,9 @@ void RenderSystem::write_buffer(const CommandBufferId id, const BufferId buffer,
 {
     HE_ASSERT(m_buffers.contains(buffer));
 
+    const Buffer *buffer_ptr = m_buffers.get(buffer);
+    HE_ASSERT(buffer_ptr->size >= size);
+
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
 
     const Buffer *staging_buffer = m_render_driver->create_buffer(std::nullopt, size, BufferUsage::Storage, true);
@@ -676,7 +634,6 @@ void RenderSystem::write_buffer(const CommandBufferId id, const BufferId buffer,
     memcpy(mapped_ptr, data, size);
     m_render_driver->unmap_buffer(staging_buffer);
 
-    const Buffer *buffer_ptr = m_buffers.get(buffer);
     m_render_driver->copy_buffer_to_buffer(command_buffer, staging_buffer, 0, buffer_ptr, offset, size);
 
     m_deletion_queue.push_back(
@@ -709,6 +666,9 @@ void RenderSystem::write_texture(
 {
     HE_ASSERT(m_textures.contains(texture));
 
+    Texture *texture_ptr = m_textures.get(texture);
+    // FIXME: Add check for texture size and data size
+
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
 
     const Buffer *staging_buffer = m_render_driver->create_buffer(std::nullopt, data_size, BufferUsage::Storage, true);
@@ -716,7 +676,6 @@ void RenderSystem::write_texture(
     memcpy(mapped_ptr, data, data_size);
     m_render_driver->unmap_buffer(staging_buffer);
 
-    Texture *texture_ptr = m_textures.get(texture);
     m_render_driver->copy_buffer_to_texture(command_buffer, staging_buffer, data_offset, texture_ptr, offset, extent, mip_level, array_index);
 
     m_deletion_queue.push_back(
@@ -904,6 +863,7 @@ void RenderSystem::push_constants(const RenderPassId id, const void *data, const
 {
     const RenderPass *render_pass = resolve_render_pass(id);
     HE_ASSERT(render_pass->render_pipeline != nullptr);
+    HE_ASSERT(render_pass->render_pipeline->layout->push_constant_size == data_size);
 
     m_render_driver->push_constants(render_pass->command_buffer, render_pass->render_pipeline->layout, data, data_size);
 }

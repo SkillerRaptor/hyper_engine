@@ -8,6 +8,9 @@
 
 #include <chrono>
 
+#include <fastgltf/types.hpp>
+#include <glm/ext/matrix_transform.hpp>
+
 #include "core/logger.hpp"
 #include "shader_interop.h"
 #include "systems/window/window_events.hpp"
@@ -61,10 +64,86 @@ void Engine::initialize()
     };
     m_camera_buffer = m_render_system->create_buffer(camera_buffer_descriptor);
 
+    // Scene
+    const BufferDescriptor scene_buffer_descriptor = {
+        .label = std::nullopt,
+        .size = sizeof(ShaderScene),
+        .usage =
+            {
+                BufferUsage::Storage,
+                BufferUsage::ShaderResource,
+            },
+    };
+    m_scene_buffer = m_render_system->create_buffer(scene_buffer_descriptor);
+
+    // Default
+    const TextureDescriptor default_texture_descriptor = {
+        .label = std::nullopt,
+        .width = 16,
+        .height = 16,
+        .depth = 1,
+        .array_size = 1,
+        .mip_levels = 1,
+        .format = Format::Rgba8Unorm,
+        .dimension = Dimension::Texture2D,
+        .usage = TextureUsage::ShaderResource,
+    };
+    m_default_texture = m_render_system->create_texture(default_texture_descriptor);
+
+    const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
+
+    const uint32_t black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
+    const uint32_t magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
+
+    std::array<uint32_t, 16 * 16> pixels = {};
+    for (size_t x = 0; x < 16; x++)
+    {
+        for (size_t y = 0; y < 16; y++)
+        {
+            pixels[y * 16 + x] = ((x % 2) ^ (y % 2)) ? magenta : black;
+        }
+    }
+    m_render_system->write_texture(
+        command_buffer,
+        m_default_texture,
+        {
+            .x = 0,
+            .y = 0,
+            .z = 0,
+        },
+        {
+            .width = 16,
+            .height = 16,
+            .depth = 1,
+        },
+        0,
+        0,
+        &pixels,
+        sizeof(pixels),
+        0);
+
+    m_render_system->submit_command_buffer(command_buffer);
+
+    const SamplerDescriptor default_sampler_descriptor = {
+        .label = std::nullopt,
+        .mag_filter = Filter::Nearest,
+        .min_filter = Filter::Nearest,
+        .mipmap_filter = Filter::Nearest,
+        .address_mode_u = AddressMode::Repeat,
+        .address_mode_v = AddressMode::Repeat,
+        .address_mode_w = AddressMode::Repeat,
+        .mip_lod_bias = 0.0f,
+        .compare_operation = CompareOperation::Never,
+        .min_lod = 0.0f,
+        .max_lod = 1.0f,
+        .border_color = BorderColor::TransparentBlack,
+    };
+    m_default_sampler = m_render_system->create_sampler(default_sampler_descriptor);
+
     // Rendering
     const PipelineLayoutDescriptor pipeline_layout_descriptor = {
         .label = std::nullopt,
-        .push_constant_size = 0,
+        .push_constant_size = sizeof(ObjectPushConstants),
     };
     m_pipeline_layout = m_render_system->create_pipeline_layout(pipeline_layout_descriptor);
 
@@ -72,7 +151,7 @@ void Engine::initialize()
         .label = std::nullopt,
         .type = ShaderType::Vertex,
         .entry = "vs_main",
-        .path = "./assets/shaders/triangle_shader.hlsl",
+        .path = "./assets/shaders/mesh_shader.hlsl",
     };
     const ShaderId vertex_shader = m_render_system->create_shader(vertex_shader_descriptor);
 
@@ -80,7 +159,7 @@ void Engine::initialize()
         .label = std::nullopt,
         .type = ShaderType::Fragment,
         .entry = "fs_main",
-        .path = "./assets/shaders/triangle_shader.hlsl",
+        .path = "./assets/shaders/mesh_shader.hlsl",
     };
     const ShaderId fragment_shader = m_render_system->create_shader(fragment_shader_descriptor);
 
@@ -110,7 +189,7 @@ void Engine::initialize()
             {
                 .topology = PrimitiveTopology::TriangleList,
                 .front_face = FrontFace::CounterClockwise,
-                .cull_mode = Face::None,
+                .cull_mode = Face::Back,
                 .polygon_mode = PolygonMode::Fill,
             },
         .depth_stencil_state =
@@ -232,6 +311,9 @@ void Engine::initialize()
     m_render_system->destroy_shader(fragment_shader);
     m_render_system->destroy_shader(vertex_shader);
 
+    m_sponza = Asset::load("./assets/models/sponza/Sponza.gltf");
+    m_renderables = upload_asset(m_sponza);
+
     m_window_system->register_listener<WindowCloseEvent>(
         [this](const WindowCloseEvent &)
         {
@@ -338,8 +420,15 @@ void Engine::render() const
     };
     m_render_system->write_buffer(command_buffer, m_camera_buffer, shader_camera, 0);
 
-    const TextureId swapchain_texture = m_render_system->acquire_swapchain_texture(command_buffer);
+    constexpr ShaderScene shader_scene = {
+        .ambient_color = glm::vec4(0.1f),
+        .sunlight_direction = glm::vec4(0.0f, 1.0f, 0.5f, 1.0f),
+        .sunlight_color = glm::vec4(1.0f),
+        .padding_0 = glm::vec4(0.0f),
+    };
+    m_render_system->write_buffer(command_buffer, m_scene_buffer, shader_scene, 0);
 
+    const TextureId swapchain_texture = m_render_system->acquire_swapchain_texture(command_buffer);
     const RenderPassDescriptor render_pass_descriptor = {
         .label =
             Label{
@@ -374,8 +463,37 @@ void Engine::render() const
     };
 
     const RenderPassId render_pass = m_render_system->begin_render_pass(command_buffer, render_pass_descriptor);
-    m_render_system->bind_pipeline(render_pass, m_render_pipeline);
-    m_render_system->draw(render_pass, 3, 1, 0, 0);
+
+    const ResourceHandle scene_buffer_handle = m_render_system->get_buffer_handle(m_scene_buffer);
+    for (const GpuModel &model : m_renderables)
+    {
+        glm::mat4 transform = model.transform;
+        transform = glm::translate(transform, glm::vec3(0.0f, 10.0f, 0.0f));
+
+        const ResourceHandle model_buffer_handle = m_render_system->get_buffer_handle(model.model_buffer);
+
+        m_render_system->bind_index_buffer(render_pass, model.indices_buffer);
+
+        for (const GpuMesh &mesh : model.meshes)
+        {
+            const ResourceHandle material_buffer_handle = m_render_system->get_buffer_handle(mesh.material_buffer);
+            // FIXME: Pick pipeline based on material & optimization if it is the same pipeline from before
+            m_render_system->bind_pipeline(render_pass, m_render_pipeline);
+
+            const ObjectPushConstants mesh_push_constants = {
+                .scene = scene_buffer_handle,
+                .model = model_buffer_handle,
+                .material = material_buffer_handle,
+                .padding_0 = 0,
+                .transform_matrix = transform,
+            };
+            m_render_system->push_constants(render_pass, mesh_push_constants);
+
+            m_render_system->draw_indexed(
+                render_pass, static_cast<uint32_t>(mesh.index_count), 1, static_cast<uint32_t>(mesh.start_index), 0, 0);
+        }
+    }
+
     m_render_system->end_render_pass(render_pass);
 
     const RenderPassDescriptor grid_render_pass_descriptor = {
@@ -417,4 +535,315 @@ void Engine::render() const
     m_render_system->end_render_pass(grid_render_pass);
 
     m_render_system->submit_command_buffer(command_buffer);
+}
+
+std::vector<Engine::GpuModel> Engine::upload_asset(const Asset &asset)
+{
+    std::vector<GpuModel> gpu_models;
+
+    const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
+    for (const Asset::Scene &scene : asset.scenes())
+    {
+        for (const size_t node_index : scene.node_indices)
+        {
+            const Asset::Node *node = asset.nodes()[node_index].get();
+            upload_model(command_buffer, asset, node, glm::mat4(1.0f), gpu_models);
+        }
+    }
+    m_render_system->submit_command_buffer(command_buffer);
+
+    return gpu_models;
+}
+
+void Engine::upload_model(
+    const CommandBufferId command_buffer,
+    const Asset &asset,
+    const Asset::Node *node,
+    const glm::mat4 &parent_transform,
+    std::vector<GpuModel> &models)
+{
+    const glm::mat4 transform = parent_transform * node->local_transform;
+
+    if (node->model_index.has_value())
+    {
+        const size_t model_index = node->model_index.value();
+        const Asset::Model &asset_model = asset.models()[model_index];
+
+        const BufferDescriptor positions_buffer_descriptor = {
+            .label = std::nullopt,
+            .size = asset_model.positions.size() * sizeof(glm::vec3),
+            .usage =
+                {
+                    BufferUsage::Storage,
+                    BufferUsage::ShaderResource,
+                },
+        };
+        const BufferId positions_buffer = m_render_system->create_buffer(positions_buffer_descriptor);
+        m_render_system->write_buffer(
+            command_buffer, positions_buffer, asset_model.positions.data(), asset_model.positions.size() * sizeof(glm::vec3), 0);
+
+        const BufferDescriptor normals_buffer_descriptor = {
+            .label = std::nullopt,
+            .size = asset_model.normals.size() * sizeof(glm::vec3),
+            .usage =
+                {
+                    BufferUsage::Storage,
+                    BufferUsage::ShaderResource,
+                },
+        };
+        const BufferId normals_buffer = m_render_system->create_buffer(normals_buffer_descriptor);
+        m_render_system->write_buffer(
+            command_buffer, normals_buffer, asset_model.normals.data(), asset_model.normals.size() * sizeof(glm::vec3), 0);
+
+        const BufferDescriptor colors_buffer_descriptor = {
+            .label = std::nullopt,
+            .size = asset_model.colors.size() * sizeof(glm::vec3),
+            .usage =
+                {
+                    BufferUsage::Storage,
+                    BufferUsage::ShaderResource,
+                },
+        };
+        const BufferId colors_buffer = m_render_system->create_buffer(colors_buffer_descriptor);
+        m_render_system->write_buffer(
+            command_buffer, colors_buffer, asset_model.colors.data(), asset_model.colors.size() * sizeof(glm::vec3), 0);
+
+        const BufferDescriptor uvs_buffer_descriptor = {
+            .label = std::nullopt,
+            .size = asset_model.uvs.size() * sizeof(glm::vec2),
+            .usage =
+                {
+                    BufferUsage::Storage,
+                    BufferUsage::ShaderResource,
+                },
+        };
+        const BufferId uvs_buffer = m_render_system->create_buffer(uvs_buffer_descriptor);
+        m_render_system->write_buffer(command_buffer, uvs_buffer, asset_model.uvs.data(), asset_model.uvs.size() * sizeof(glm::vec2), 0);
+
+        const ShaderModel shader_model = {
+            .positions = m_render_system->get_buffer_handle(positions_buffer),
+            .normals = m_render_system->get_buffer_handle(normals_buffer),
+            .colors = m_render_system->get_buffer_handle(colors_buffer),
+            .uvs = m_render_system->get_buffer_handle(uvs_buffer),
+        };
+        const BufferDescriptor model_buffer_descriptor = {
+            .label = std::nullopt,
+            .size = sizeof(ShaderModel),
+            .usage =
+                {
+                    BufferUsage::Storage,
+                    BufferUsage::ShaderResource,
+                },
+        };
+        const BufferId model_buffer = m_render_system->create_buffer(model_buffer_descriptor);
+        m_render_system->write_buffer(command_buffer, model_buffer, shader_model, 0);
+
+        const BufferDescriptor indices_buffer_descriptor = {
+            .label = std::nullopt,
+            .size = asset_model.indices.size() * sizeof(uint32_t),
+            .usage =
+                {
+                    BufferUsage::Index,
+                },
+        };
+        const BufferId indices_buffer = m_render_system->create_buffer(indices_buffer_descriptor);
+        m_render_system->write_buffer(
+            command_buffer, indices_buffer, asset_model.indices.data(), asset_model.indices.size() * sizeof(uint32_t), 0);
+
+        std::vector<GpuMesh> meshes;
+        for (const Asset::Mesh &asset_mesh : asset_model.meshes)
+        {
+            const Asset::Material &asset_material = asset.materials()[asset_mesh.material_index];
+
+            ResourceHandle color_texture;
+            if (asset_material.base_color_texture_index.has_value())
+            {
+                const Asset::Texture &asset_texture = asset.textures()[asset_material.base_color_texture_index.value()];
+
+                const TextureDescriptor texture_descriptor = {
+                    .label = std::nullopt,
+                    .width = asset_texture.width,
+                    .height = asset_texture.height,
+                    .depth = 1,
+                    .array_size = 1,
+                    .mip_levels = 1,
+                    .format = Format::Rgba8Srgb,
+                    .dimension = Dimension::Texture2D,
+                    .usage = TextureUsage::ShaderResource,
+                };
+
+                const TextureId texture = m_render_system->create_texture(texture_descriptor);
+
+                m_render_system->write_texture(
+                    command_buffer,
+                    texture,
+                    {
+                        .x = 0,
+                        .y = 0,
+                        .z = 0,
+                    },
+                    {
+                        .width = static_cast<uint32_t>(asset_texture.width),
+                        .height = static_cast<uint32_t>(asset_texture.height),
+                        .depth = 1,
+                    },
+                    0,
+                    0,
+                    asset_texture.data.data(),
+                    static_cast<uint32_t>(asset_texture.width) * static_cast<uint32_t>(asset_texture.height) * asset_texture.channels,
+                    0);
+
+                color_texture = m_render_system->get_texture_handle(texture);
+            }
+            else
+            {
+                color_texture = m_render_system->get_texture_handle(m_default_texture);
+            }
+
+            ResourceHandle color_sampler;
+            if (asset_material.base_color_sampler_index.has_value())
+            {
+                const Asset::Sampler &asset_sampler = asset.samplers()[asset_material.base_color_sampler_index.value()];
+
+                const SamplerDescriptor sampler_descriptor = {
+                    .label = std::nullopt,
+                    .mag_filter = asset_sampler.mag_filter,
+                    .min_filter = asset_sampler.min_filter,
+                    .mipmap_filter = asset_sampler.min_filter,
+                    .address_mode_u = AddressMode::Repeat,
+                    .address_mode_v = AddressMode::Repeat,
+                    .address_mode_w = AddressMode::Repeat,
+                    .mip_lod_bias = 0.0f,
+                    .compare_operation = CompareOperation::Never,
+                    .min_lod = 0.0f,
+                    .max_lod = 1.0f,
+                    .border_color = BorderColor::TransparentBlack,
+                };
+
+                const SamplerId sampler = m_render_system->create_sampler(sampler_descriptor);
+                color_sampler = m_render_system->get_sampler_handle(sampler);
+            }
+            else
+            {
+                color_sampler = m_render_system->get_sampler_handle(m_default_sampler);
+            }
+
+            ResourceHandle metal_roughness_texture;
+            if (asset_material.metallic_roughness_texture_index.has_value())
+            {
+                const Asset::Texture &asset_texture = asset.textures()[asset_material.metallic_roughness_texture_index.value()];
+
+                const TextureDescriptor texture_descriptor = {
+                    .label = std::nullopt,
+                    .width = asset_texture.width,
+                    .height = asset_texture.height,
+                    .depth = 1,
+                    .array_size = 1,
+                    .mip_levels = 1,
+                    .format = Format::Rgba8Unorm,
+                    .dimension = Dimension::Texture2D,
+                    .usage = TextureUsage::ShaderResource,
+                };
+
+                const TextureId texture = m_render_system->create_texture(texture_descriptor);
+
+                m_render_system->write_texture(
+                    command_buffer,
+                    texture,
+                    {
+                        .x = 0,
+                        .y = 0,
+                        .z = 0,
+                    },
+                    {
+                        .width = static_cast<uint32_t>(asset_texture.width),
+                        .height = static_cast<uint32_t>(asset_texture.height),
+                        .depth = 1,
+                    },
+                    0,
+                    0,
+                    asset_texture.data.data(),
+                    static_cast<uint32_t>(asset_texture.width) * static_cast<uint32_t>(asset_texture.height) * asset_texture.channels,
+                    0);
+
+                metal_roughness_texture = m_render_system->get_texture_handle(texture);
+            }
+            else
+            {
+                metal_roughness_texture = m_render_system->get_texture_handle(m_default_texture);
+            }
+
+            ResourceHandle metal_roughness_sampler;
+            if (asset_material.metallic_roughness_sampler_index.has_value())
+            {
+                const Asset::Sampler &asset_sampler = asset.samplers()[asset_material.metallic_roughness_sampler_index.value()];
+
+                const SamplerDescriptor sampler_descriptor = {
+                    .label = std::nullopt,
+                    .mag_filter = asset_sampler.mag_filter,
+                    .min_filter = asset_sampler.min_filter,
+                    .mipmap_filter = asset_sampler.min_filter,
+                    .address_mode_u = AddressMode::Repeat,
+                    .address_mode_v = AddressMode::Repeat,
+                    .address_mode_w = AddressMode::Repeat,
+                    .mip_lod_bias = 0.0f,
+                    .compare_operation = CompareOperation::Never,
+                    .min_lod = 0.0f,
+                    .max_lod = 1.0f,
+                    .border_color = BorderColor::TransparentBlack,
+                };
+
+                const SamplerId sampler = m_render_system->create_sampler(sampler_descriptor);
+                metal_roughness_sampler = m_render_system->get_sampler_handle(sampler);
+            }
+            else
+            {
+                metal_roughness_sampler = m_render_system->get_sampler_handle(m_default_sampler);
+            }
+
+            const ShaderMaterial shader_material = {
+                .color_factors = asset_material.color_factors,
+                .color_texture = color_texture,
+                .color_sampler = color_sampler,
+                .padding_0 = 0,
+                .padding_1 = 0,
+                .metal_roughness_factors = asset_material.metallic_roughness_factor,
+                .metal_roughness_texture = metal_roughness_texture,
+                .metal_roughness_sampler = metal_roughness_sampler,
+            };
+            const BufferDescriptor material_buffer_descriptor = {
+                .label = std::nullopt,
+                .size = sizeof(ShaderMaterial),
+                .usage =
+                    {
+                        BufferUsage::Storage,
+                        BufferUsage::ShaderResource,
+                    },
+            };
+            const BufferId material_buffer = m_render_system->create_buffer(material_buffer_descriptor);
+            m_render_system->write_buffer(command_buffer, material_buffer, shader_material, 0);
+
+            const GpuMesh mesh = {
+                .start_index = asset_mesh.start_index,
+                .index_count = asset_mesh.index_count,
+                .material_buffer = material_buffer,
+            };
+
+            meshes.push_back(mesh);
+        }
+
+        const GpuModel model = {
+            .transform = transform,
+            .model_buffer = model_buffer,
+            .indices_buffer = indices_buffer,
+            .meshes = meshes,
+        };
+
+        models.push_back(model);
+    }
+
+    for (const Asset::Node *child : node->children)
+    {
+        upload_model(command_buffer, asset, child, transform, models);
+    }
 }

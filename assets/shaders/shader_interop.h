@@ -59,32 +59,32 @@ struct ShaderScene
     float4 padding_0;
 };
 
-struct ShaderMesh
+struct ShaderModel
 {
     ARRAY_BUFFER positions;
     ARRAY_BUFFER normals;
     ARRAY_BUFFER colors;
-    ARRAY_BUFFER tex_coords;
+    ARRAY_BUFFER uvs;
 
 #ifndef __cplusplus
-    inline float4 get_position(uint index)
+    inline float3 get_position(uint index)
     {
-        return positions.load<float4>(index);
+        return positions.load<float3>(index);
     }
 
-    inline float4 get_normal(uint index)
+    inline float3 get_normal(uint index)
     {
-        return normals.load<float4>(index);
+        return normals.load<float3>(index);
     }
 
-    inline float4 get_color(uint index)
+    inline float3 get_color(uint index)
     {
-        return colors.load<float4>(index);
+        return colors.load<float3>(index);
     }
 
-    inline float4 get_tex_coord(uint index)
+    inline float2 get_uv(uint index)
     {
-        return tex_coords.load<float4>(index);
+        return uvs.load<float2>(index);
     }
 #endif
 };
@@ -97,11 +97,9 @@ struct ShaderMaterial
     uint padding_0;
     uint padding_1;
 
-    float4 metal_roughness_factors;
+    float2 metal_roughness_factors;
     TEXTURE metal_roughness_texture;
     SAMPLER metal_roughness_sampler;
-    uint padding_2;
-    uint padding_3;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +117,7 @@ struct ShaderMaterial
 struct ObjectPushConstants
 {
     SIMPLE_BUFFER scene;
-    SIMPLE_BUFFER mesh;
+    SIMPLE_BUFFER model;
     SIMPLE_BUFFER material;
     uint padding_0;
     float4x4 transform_matrix;
@@ -130,9 +128,9 @@ struct ObjectPushConstants
         return scene.load<ShaderScene>();
     }
 
-    inline ShaderMesh get_mesh()
+    inline ShaderModel get_model()
     {
-        return mesh.load<ShaderMesh>();
+        return model.load<ShaderModel>();
     }
 
     inline ShaderMaterial get_material()

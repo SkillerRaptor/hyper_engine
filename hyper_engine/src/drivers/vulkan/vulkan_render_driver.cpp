@@ -175,6 +175,8 @@ void *VulkanRenderDriver::map_buffer(const Buffer *buffer) const
     void *mapped_ptr = nullptr;
     vmaMapMemory(m_allocator, vulkan_buffer->allocation, &mapped_ptr);
 
+    HE_ASSERT(mapped_ptr != nullptr);
+
     return mapped_ptr;
 }
 
@@ -1295,7 +1297,7 @@ void VulkanRenderDriver::push_constants(
         VK_SHADER_STAGE_ALL,
         0,
         static_cast<uint32_t>(data_size),
-        &data);
+        data);
 }
 
 std::pair<uint32_t, bool> VulkanRenderDriver::acquire_swapchain_texture(const CommandBuffer *command_buffer)
