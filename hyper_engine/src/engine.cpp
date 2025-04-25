@@ -539,6 +539,8 @@ void Engine::render() const
 
 std::vector<Engine::GpuModel> Engine::upload_asset(const Asset &asset)
 {
+    const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+
     std::vector<GpuModel> gpu_models;
 
     const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
@@ -551,6 +553,10 @@ std::vector<Engine::GpuModel> Engine::upload_asset(const Asset &asset)
         }
     }
     m_render_system->submit_command_buffer(command_buffer);
+
+    const std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+    const std::chrono::duration<double> elapsed_seconds = end_time - start_time;
+    HE_INFO("Asset uploaded in {:.2}s", elapsed_seconds.count());
 
     return gpu_models;
 }

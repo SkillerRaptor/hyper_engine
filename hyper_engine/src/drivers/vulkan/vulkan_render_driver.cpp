@@ -1359,6 +1359,11 @@ void VulkanRenderDriver::present()
 
 void VulkanRenderDriver::begin_gpu_marker(const CommandBuffer *command_buffer, const Label label) const
 {
+    if (!m_validation_layer_enabled)
+    {
+        return;
+    }
+
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
     const float r = static_cast<float>(label.color.r) / 255.0f;
@@ -1382,6 +1387,11 @@ void VulkanRenderDriver::begin_gpu_marker(const CommandBuffer *command_buffer, c
 
 void VulkanRenderDriver::end_gpu_marker(const CommandBuffer *command_buffer) const
 {
+    if (!m_validation_layer_enabled)
+    {
+        return;
+    }
+
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
     vkCmdEndDebugUtilsLabelEXT(vulkan_command_buffer->command_buffer);
