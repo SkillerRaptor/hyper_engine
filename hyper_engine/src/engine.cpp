@@ -25,12 +25,11 @@ void Engine::initialize()
     HE_ASSERT(m_window_system != nullptr);
     m_window_system->initialize();
 
-    const WindowDescriptor window_descriptor = {
+    m_window = m_window_system->create_window({
         .title = "HyperEngine",
         .width = 1280,
         .height = 720,
-    };
-    m_window = m_window_system->create_window(window_descriptor);
+    });
 
     m_input_system = new InputSystem();
     HE_ASSERT(m_input_system != nullptr);
@@ -52,7 +51,7 @@ void Engine::initialize()
             m_camera.process_mouse_scroll(event.delta_y());
         });
 
-    const BufferDescriptor camera_buffer_descriptor = {
+    m_camera_buffer = m_render_system->create_buffer({
         .label = std::nullopt,
         .size = sizeof(ShaderCamera),
         .usage =
@@ -61,11 +60,10 @@ void Engine::initialize()
                 BufferUsage::ShaderResource,
             },
         .handle = ResourceHandle(HE_DESCRIPTOR_SET_SLOT_CAMERA),
-    };
-    m_camera_buffer = m_render_system->create_buffer(camera_buffer_descriptor);
+    });
 
     // Scene
-    const BufferDescriptor scene_buffer_descriptor = {
+    m_scene_buffer = m_render_system->create_buffer({
         .label = std::nullopt,
         .size = sizeof(ShaderScene),
         .usage =
@@ -73,11 +71,10 @@ void Engine::initialize()
                 BufferUsage::Storage,
                 BufferUsage::ShaderResource,
             },
-    };
-    m_scene_buffer = m_render_system->create_buffer(scene_buffer_descriptor);
+    });
 
     // Default
-    const TextureDescriptor default_texture_descriptor = {
+    m_default_texture = m_render_system->create_texture({
         .label = std::nullopt,
         .width = 16,
         .height = 16,
@@ -87,8 +84,7 @@ void Engine::initialize()
         .format = Format::Rgba8Unorm,
         .dimension = Dimension::Texture2D,
         .usage = TextureUsage::ShaderResource,
-    };
-    m_default_texture = m_render_system->create_texture(default_texture_descriptor);
+    });
 
     const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
 
@@ -124,7 +120,7 @@ void Engine::initialize()
 
     m_render_system->submit_command_buffer(command_buffer);
 
-    const SamplerDescriptor default_sampler_descriptor = {
+    m_default_sampler = m_render_system->create_sampler({
         .label = std::nullopt,
         .mag_filter = Filter::Nearest,
         .min_filter = Filter::Nearest,
@@ -137,33 +133,29 @@ void Engine::initialize()
         .min_lod = 0.0f,
         .max_lod = 1.0f,
         .border_color = BorderColor::TransparentBlack,
-    };
-    m_default_sampler = m_render_system->create_sampler(default_sampler_descriptor);
+    });
 
     // Rendering
-    const PipelineLayoutDescriptor pipeline_layout_descriptor = {
+    m_pipeline_layout = m_render_system->create_pipeline_layout({
         .label = std::nullopt,
         .push_constant_size = sizeof(ObjectPushConstants),
-    };
-    m_pipeline_layout = m_render_system->create_pipeline_layout(pipeline_layout_descriptor);
+    });
 
-    const ShaderDescriptor vertex_shader_descriptor = {
+    const ShaderId vertex_shader = m_render_system->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Vertex,
         .entry = "vs_main",
         .path = "./assets/shaders/mesh_shader.hlsl",
-    };
-    const ShaderId vertex_shader = m_render_system->create_shader(vertex_shader_descriptor);
+    });
 
-    const ShaderDescriptor fragment_shader_descriptor = {
+    const ShaderId fragment_shader = m_render_system->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Fragment,
         .entry = "fs_main",
         .path = "./assets/shaders/mesh_shader.hlsl",
-    };
-    const ShaderId fragment_shader = m_render_system->create_shader(fragment_shader_descriptor);
+    });
 
-    const RenderPipelineDescriptor pipeline_descriptor = {
+    m_render_pipeline = m_render_system->create_render_pipeline({
         .label = std::nullopt,
         .layout = m_pipeline_layout,
         .vertex_shader = vertex_shader,
@@ -206,26 +198,23 @@ void Engine::initialize()
                         .slope = 0.0f,
                     },
             },
-    };
-    m_render_pipeline = m_render_system->create_render_pipeline(pipeline_descriptor);
+    });
 
-    const ShaderDescriptor grid_vertex_shader_descriptor = {
+    const ShaderId grid_vertex_shader = m_render_system->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Vertex,
         .entry = "vs_main",
         .path = "./assets/shaders/grid_shader.hlsl",
-    };
-    const ShaderId grid_vertex_shader = m_render_system->create_shader(grid_vertex_shader_descriptor);
+    });
 
-    const ShaderDescriptor grid_fragment_shader_descriptor = {
+    const ShaderId grid_fragment_shader = m_render_system->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Fragment,
         .entry = "fs_main",
         .path = "./assets/shaders/grid_shader.hlsl",
-    };
-    const ShaderId grid_fragment_shader = m_render_system->create_shader(grid_fragment_shader_descriptor);
+    });
 
-    const RenderPipelineDescriptor grid_pipeline_descriptor = {
+    m_grid_pipeline = m_render_system->create_render_pipeline({
         .label = std::nullopt,
         .layout = m_pipeline_layout,
         .vertex_shader = grid_vertex_shader,
@@ -268,14 +257,13 @@ void Engine::initialize()
                         .slope = 0.0f,
                     },
             },
-    };
-    m_grid_pipeline = m_render_system->create_render_pipeline(grid_pipeline_descriptor);
+    });
 
     m_render_system->destroy_shader(grid_fragment_shader);
     m_render_system->destroy_shader(grid_vertex_shader);
 
     const glm::uvec2 window_size = m_window_system->get_window_size(m_window);
-    const TextureDescriptor depth_texture_descriptor = {
+    m_depth_texture = m_render_system->create_texture({
         .label = std::nullopt,
         .width = window_size.x,
         .height = window_size.y,
@@ -285,15 +273,14 @@ void Engine::initialize()
         .format = Format::D32Sfloat,
         .dimension = Dimension::Texture2D,
         .usage = TextureUsage::RenderAttachment,
-    };
-    m_depth_texture = m_render_system->create_texture(depth_texture_descriptor);
+    });
 
     m_window_system->register_listener<WindowResizeEvent>(
         [this](const WindowResizeEvent &event)
         {
             m_render_system->destroy_texture(m_depth_texture);
 
-            const TextureDescriptor new_depth_texture_descriptor = {
+            m_depth_texture = m_render_system->create_texture({
                 .label = std::nullopt,
                 .width = event.width(),
                 .height = event.height(),
@@ -303,9 +290,7 @@ void Engine::initialize()
                 .format = Format::D32Sfloat,
                 .dimension = Dimension::Texture2D,
                 .usage = TextureUsage::RenderAttachment,
-            };
-
-            m_depth_texture = m_render_system->create_texture(new_depth_texture_descriptor);
+            });
         });
 
     m_render_system->destroy_shader(fragment_shader);
@@ -429,40 +414,41 @@ void Engine::render() const
     m_render_system->write_buffer(command_buffer, m_scene_buffer, shader_scene, 0);
 
     const TextureId swapchain_texture = m_render_system->acquire_swapchain_texture(command_buffer);
-    const RenderPassDescriptor render_pass_descriptor = {
-        .label =
-            Label{
-                .name = "Render Pass",
-                .color =
-                    {
-                        .r = 255,
-                        .g = 0,
-                        .b = 0,
-                    },
-            },
-        .color_attachments =
-            {
+
+    const RenderPassId render_pass = m_render_system->begin_render_pass(
+        command_buffer,
+        {
+            .label =
+                Label{
+                    .name = "Render Pass",
+                    .color =
+                        {
+                            .r = 255,
+                            .g = 0,
+                            .b = 0,
+                        },
+                },
+            .color_attachments =
                 {
-                    .texture = swapchain_texture,
-                    .operations =
+                    {
+                        .texture = swapchain_texture,
+                        .operations =
+                            {
+                                .load_operation = LoadOperation::Clear,
+                                .store_operation = StoreOperation::Store,
+                            },
+                    },
+                },
+            .depth_stencil_attachment =
+                DepthStencilAttachment{
+                    .texture = m_depth_texture,
+                    .depth_operations =
                         {
                             .load_operation = LoadOperation::Clear,
                             .store_operation = StoreOperation::Store,
                         },
                 },
-            },
-        .depth_stencil_attachment =
-            DepthStencilAttachment{
-                .texture = m_depth_texture,
-                .depth_operations =
-                    {
-                        .load_operation = LoadOperation::Clear,
-                        .store_operation = StoreOperation::Store,
-                    },
-            },
-    };
-
-    const RenderPassId render_pass = m_render_system->begin_render_pass(command_buffer, render_pass_descriptor);
+        });
 
     const ResourceHandle scene_buffer_handle = m_render_system->get_buffer_handle(m_scene_buffer);
     for (const GpuModel &model : m_renderables)
@@ -496,40 +482,40 @@ void Engine::render() const
 
     m_render_system->end_render_pass(render_pass);
 
-    const RenderPassDescriptor grid_render_pass_descriptor = {
-        .label =
-            Label{
-                .name = "Grid Render Pass",
-                .color =
-                    {
-                        .r = 0,
-                        .g = 255,
-                        .b = 0,
-                    },
-            },
-        .color_attachments =
-            {
+    const RenderPassId grid_render_pass = m_render_system->begin_render_pass(
+        command_buffer,
+        {
+            .label =
+                Label{
+                    .name = "Grid Render Pass",
+                    .color =
+                        {
+                            .r = 0,
+                            .g = 255,
+                            .b = 0,
+                        },
+                },
+            .color_attachments =
                 {
-                    .texture = swapchain_texture,
-                    .operations =
+                    {
+                        .texture = swapchain_texture,
+                        .operations =
+                            {
+                                .load_operation = LoadOperation::Load,
+                                .store_operation = StoreOperation::Store,
+                            },
+                    },
+                },
+            .depth_stencil_attachment =
+                DepthStencilAttachment{
+                    .texture = m_depth_texture,
+                    .depth_operations =
                         {
                             .load_operation = LoadOperation::Load,
                             .store_operation = StoreOperation::Store,
                         },
                 },
-            },
-        .depth_stencil_attachment =
-            DepthStencilAttachment{
-                .texture = m_depth_texture,
-                .depth_operations =
-                    {
-                        .load_operation = LoadOperation::Load,
-                        .store_operation = StoreOperation::Store,
-                    },
-            },
-    };
-
-    const RenderPassId grid_render_pass = m_render_system->begin_render_pass(command_buffer, grid_render_pass_descriptor);
+        });
     m_render_system->bind_pipeline(grid_render_pass, m_grid_pipeline);
     m_render_system->draw(grid_render_pass, 6, 1, 0, 0);
     m_render_system->end_render_pass(grid_render_pass);
@@ -575,7 +561,7 @@ void Engine::upload_model(
         const size_t model_index = node->model_index.value();
         const Asset::Model &asset_model = asset.models()[model_index];
 
-        const BufferDescriptor positions_buffer_descriptor = {
+        const BufferId positions_buffer = m_render_system->create_buffer({
             .label = std::nullopt,
             .size = asset_model.positions.size() * sizeof(glm::vec3),
             .usage =
@@ -583,12 +569,11 @@ void Engine::upload_model(
                     BufferUsage::Storage,
                     BufferUsage::ShaderResource,
                 },
-        };
-        const BufferId positions_buffer = m_render_system->create_buffer(positions_buffer_descriptor);
+        });
         m_render_system->write_buffer(
             command_buffer, positions_buffer, asset_model.positions.data(), asset_model.positions.size() * sizeof(glm::vec3), 0);
 
-        const BufferDescriptor normals_buffer_descriptor = {
+        const BufferId normals_buffer = m_render_system->create_buffer({
             .label = std::nullopt,
             .size = asset_model.normals.size() * sizeof(glm::vec3),
             .usage =
@@ -596,12 +581,11 @@ void Engine::upload_model(
                     BufferUsage::Storage,
                     BufferUsage::ShaderResource,
                 },
-        };
-        const BufferId normals_buffer = m_render_system->create_buffer(normals_buffer_descriptor);
+        });
         m_render_system->write_buffer(
             command_buffer, normals_buffer, asset_model.normals.data(), asset_model.normals.size() * sizeof(glm::vec3), 0);
 
-        const BufferDescriptor colors_buffer_descriptor = {
+        const BufferId colors_buffer = m_render_system->create_buffer({
             .label = std::nullopt,
             .size = asset_model.colors.size() * sizeof(glm::vec3),
             .usage =
@@ -609,12 +593,11 @@ void Engine::upload_model(
                     BufferUsage::Storage,
                     BufferUsage::ShaderResource,
                 },
-        };
-        const BufferId colors_buffer = m_render_system->create_buffer(colors_buffer_descriptor);
+        });
         m_render_system->write_buffer(
             command_buffer, colors_buffer, asset_model.colors.data(), asset_model.colors.size() * sizeof(glm::vec3), 0);
 
-        const BufferDescriptor uvs_buffer_descriptor = {
+        const BufferId uvs_buffer = m_render_system->create_buffer({
             .label = std::nullopt,
             .size = asset_model.uvs.size() * sizeof(glm::vec2),
             .usage =
@@ -622,8 +605,7 @@ void Engine::upload_model(
                     BufferUsage::Storage,
                     BufferUsage::ShaderResource,
                 },
-        };
-        const BufferId uvs_buffer = m_render_system->create_buffer(uvs_buffer_descriptor);
+        });
         m_render_system->write_buffer(command_buffer, uvs_buffer, asset_model.uvs.data(), asset_model.uvs.size() * sizeof(glm::vec2), 0);
 
         const ShaderModel shader_model = {
@@ -632,7 +614,8 @@ void Engine::upload_model(
             .colors = m_render_system->get_buffer_handle(colors_buffer),
             .uvs = m_render_system->get_buffer_handle(uvs_buffer),
         };
-        const BufferDescriptor model_buffer_descriptor = {
+
+        const BufferId model_buffer = m_render_system->create_buffer({
             .label = std::nullopt,
             .size = sizeof(ShaderModel),
             .usage =
@@ -640,19 +623,17 @@ void Engine::upload_model(
                     BufferUsage::Storage,
                     BufferUsage::ShaderResource,
                 },
-        };
-        const BufferId model_buffer = m_render_system->create_buffer(model_buffer_descriptor);
+        });
         m_render_system->write_buffer(command_buffer, model_buffer, shader_model, 0);
 
-        const BufferDescriptor indices_buffer_descriptor = {
+        const BufferId indices_buffer = m_render_system->create_buffer({
             .label = std::nullopt,
             .size = asset_model.indices.size() * sizeof(uint32_t),
             .usage =
                 {
                     BufferUsage::Index,
                 },
-        };
-        const BufferId indices_buffer = m_render_system->create_buffer(indices_buffer_descriptor);
+        });
         m_render_system->write_buffer(
             command_buffer, indices_buffer, asset_model.indices.data(), asset_model.indices.size() * sizeof(uint32_t), 0);
 
@@ -666,7 +647,7 @@ void Engine::upload_model(
             {
                 const Asset::Texture &asset_texture = asset.textures()[asset_material.base_color_texture_index.value()];
 
-                const TextureDescriptor texture_descriptor = {
+                const TextureId texture = m_render_system->create_texture({
                     .label = std::nullopt,
                     .width = asset_texture.width,
                     .height = asset_texture.height,
@@ -676,9 +657,7 @@ void Engine::upload_model(
                     .format = Format::Rgba8Srgb,
                     .dimension = Dimension::Texture2D,
                     .usage = TextureUsage::ShaderResource,
-                };
-
-                const TextureId texture = m_render_system->create_texture(texture_descriptor);
+                });
 
                 m_render_system->write_texture(
                     command_buffer,
@@ -711,7 +690,7 @@ void Engine::upload_model(
             {
                 const Asset::Sampler &asset_sampler = asset.samplers()[asset_material.base_color_sampler_index.value()];
 
-                const SamplerDescriptor sampler_descriptor = {
+                const SamplerId sampler = m_render_system->create_sampler({
                     .label = std::nullopt,
                     .mag_filter = asset_sampler.mag_filter,
                     .min_filter = asset_sampler.min_filter,
@@ -724,9 +703,8 @@ void Engine::upload_model(
                     .min_lod = 0.0f,
                     .max_lod = 1.0f,
                     .border_color = BorderColor::TransparentBlack,
-                };
+                });
 
-                const SamplerId sampler = m_render_system->create_sampler(sampler_descriptor);
                 color_sampler = m_render_system->get_sampler_handle(sampler);
             }
             else
@@ -739,7 +717,7 @@ void Engine::upload_model(
             {
                 const Asset::Texture &asset_texture = asset.textures()[asset_material.metallic_roughness_texture_index.value()];
 
-                const TextureDescriptor texture_descriptor = {
+                const TextureId texture = m_render_system->create_texture({
                     .label = std::nullopt,
                     .width = asset_texture.width,
                     .height = asset_texture.height,
@@ -749,9 +727,7 @@ void Engine::upload_model(
                     .format = Format::Rgba8Unorm,
                     .dimension = Dimension::Texture2D,
                     .usage = TextureUsage::ShaderResource,
-                };
-
-                const TextureId texture = m_render_system->create_texture(texture_descriptor);
+                });
 
                 m_render_system->write_texture(
                     command_buffer,
@@ -784,7 +760,7 @@ void Engine::upload_model(
             {
                 const Asset::Sampler &asset_sampler = asset.samplers()[asset_material.metallic_roughness_sampler_index.value()];
 
-                const SamplerDescriptor sampler_descriptor = {
+                const SamplerId sampler = m_render_system->create_sampler({
                     .label = std::nullopt,
                     .mag_filter = asset_sampler.mag_filter,
                     .min_filter = asset_sampler.min_filter,
@@ -797,9 +773,7 @@ void Engine::upload_model(
                     .min_lod = 0.0f,
                     .max_lod = 1.0f,
                     .border_color = BorderColor::TransparentBlack,
-                };
-
-                const SamplerId sampler = m_render_system->create_sampler(sampler_descriptor);
+                });
                 metal_roughness_sampler = m_render_system->get_sampler_handle(sampler);
             }
             else
@@ -817,7 +791,8 @@ void Engine::upload_model(
                 .metal_roughness_texture = metal_roughness_texture,
                 .metal_roughness_sampler = metal_roughness_sampler,
             };
-            const BufferDescriptor material_buffer_descriptor = {
+
+            const BufferId material_buffer = m_render_system->create_buffer({
                 .label = std::nullopt,
                 .size = sizeof(ShaderMaterial),
                 .usage =
@@ -825,8 +800,7 @@ void Engine::upload_model(
                         BufferUsage::Storage,
                         BufferUsage::ShaderResource,
                     },
-            };
-            const BufferId material_buffer = m_render_system->create_buffer(material_buffer_descriptor);
+            });
             m_render_system->write_buffer(command_buffer, material_buffer, shader_material, 0);
 
             const GpuMesh mesh = {
@@ -838,14 +812,12 @@ void Engine::upload_model(
             meshes.push_back(mesh);
         }
 
-        const GpuModel model = {
+        models.push_back({
             .transform = transform,
             .model_buffer = model_buffer,
             .indices_buffer = indices_buffer,
             .meshes = meshes,
-        };
-
-        models.push_back(model);
+        });
     }
 
     for (const Asset::Node *child : node->children)

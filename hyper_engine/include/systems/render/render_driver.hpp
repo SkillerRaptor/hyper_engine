@@ -68,8 +68,8 @@ struct PipelineLayout
 struct ComputePipeline
 {
     std::optional<std::string> label;
-    PipelineLayout *layout;
-    Shader *shader;
+    PipelineLayout *layout = nullptr;
+    Shader *shader = nullptr;
 };
 
 struct RenderPipeline

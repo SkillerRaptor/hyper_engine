@@ -118,11 +118,10 @@ void RenderSystem::destroy_buffer(const BufferId id)
     HE_ASSERT(m_buffers.contains(id));
 
     const Buffer *buffer = m_buffers.get(id);
-    m_deletion_queue.push_back(
-        Resource{
-            .tag = ResourceTag::Buffer,
-            .inner_resource = buffer,
-        });
+    m_deletion_queue.push_back({
+        .tag = ResourceTag::Buffer,
+        .inner_resource = buffer,
+    });
     m_buffers.destroy(id);
 }
 
@@ -157,11 +156,10 @@ void RenderSystem::destroy_shader(const ShaderId id)
     HE_ASSERT(m_shaders.contains(id));
 
     const Shader *shader = m_shaders.get(id);
-    m_deletion_queue.push_back(
-        Resource{
-            .tag = ResourceTag::Shader,
-            .inner_resource = shader,
-        });
+    m_deletion_queue.push_back({
+        .tag = ResourceTag::Shader,
+        .inner_resource = shader,
+    });
     m_shaders.destroy(id);
 }
 
@@ -220,11 +218,10 @@ void RenderSystem::destroy_sampler(const SamplerId id)
     HE_ASSERT(m_samplers.contains(id));
 
     const Sampler *sampler = m_samplers.get(id);
-    m_deletion_queue.push_back(
-        Resource{
-            .tag = ResourceTag::Sampler,
-            .inner_resource = sampler,
-        });
+    m_deletion_queue.push_back({
+        .tag = ResourceTag::Sampler,
+        .inner_resource = sampler,
+    });
     m_samplers.destroy(id);
 }
 
@@ -294,11 +291,10 @@ void RenderSystem::destroy_texture(const TextureId id)
     HE_ASSERT(m_textures.contains(id));
 
     const Texture *texture = m_textures.get(id);
-    m_deletion_queue.push_back(
-        Resource{
-            .tag = ResourceTag::Texture,
-            .inner_resource = texture,
-        });
+    m_deletion_queue.push_back({
+        .tag = ResourceTag::Texture,
+        .inner_resource = texture,
+    });
     m_textures.destroy(id);
 }
 
@@ -329,11 +325,10 @@ void RenderSystem::destroy_pipeline_layout(const PipelineLayoutId id)
     HE_ASSERT(m_pipeline_layouts.contains(id));
 
     const PipelineLayout *pipeline_layout = m_pipeline_layouts.get(id);
-    m_deletion_queue.push_back(
-        Resource{
-            .tag = ResourceTag::PipelineLayout,
-            .inner_resource = pipeline_layout,
-        });
+    m_deletion_queue.push_back({
+        .tag = ResourceTag::PipelineLayout,
+        .inner_resource = pipeline_layout,
+    });
     m_pipeline_layouts.destroy(id);
 }
 
@@ -358,11 +353,10 @@ void RenderSystem::destroy_compute_pipeline(const ComputePipelineId id)
     HE_ASSERT(m_compute_pipelines.contains(id));
 
     const ComputePipeline *compute_pipeline = m_compute_pipelines.get(id);
-    m_deletion_queue.push_back(
-        Resource{
-            .tag = ResourceTag::ComputePipeline,
-            .inner_resource = compute_pipeline,
-        });
+    m_deletion_queue.push_back({
+        .tag = ResourceTag::ComputePipeline,
+        .inner_resource = compute_pipeline,
+    });
     m_compute_pipelines.destroy(id);
 }
 
@@ -411,11 +405,10 @@ void RenderSystem::destroy_render_pipeline(const RenderPipelineId id)
     HE_ASSERT(m_render_pipelines.contains(id));
 
     const RenderPipeline *render_pipeline = m_render_pipelines.get(id);
-    m_deletion_queue.push_back(
-        Resource{
-            .tag = ResourceTag::RenderPipeline,
-            .inner_resource = render_pipeline,
-        });
+    m_deletion_queue.push_back({
+        .tag = ResourceTag::RenderPipeline,
+        .inner_resource = render_pipeline,
+    });
     m_render_pipelines.destroy(id);
 }
 
@@ -799,11 +792,10 @@ RenderPassId RenderSystem::begin_render_pass(const CommandBufferId id, const Ren
     std::vector<RenderPassColorAttachment> render_pass_color_attachments;
     for (const ColorAttachment &color_attachment : descriptor.color_attachments)
     {
-        const RenderPassColorAttachment render_pass_color_attachment = {
+        render_pass_color_attachments.push_back({
             .texture = m_textures.get(color_attachment.texture),
             .operations = color_attachment.operations,
-        };
-        render_pass_color_attachments.push_back(render_pass_color_attachment);
+        });
     }
 
     std::optional<RenderPassDepthStencilAttachment> render_pass_depth_stencil_attachment = std::nullopt;

@@ -47,7 +47,6 @@ private:
     struct VulkanShader : Shader
     {
         VkShaderModule shader_module = VK_NULL_HANDLE;
-        VkPipelineShaderStageCreateInfo pipeline_stage_create_info = {};
     };
 
     struct VulkanSampler : Sampler

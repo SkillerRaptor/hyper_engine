@@ -238,34 +238,8 @@ Shader *VulkanRenderDriver::create_shader(
     HE_VK_CHECK(vkCreateShaderModule(m_device, &shader_module_create_info, nullptr, &shader_module), vkCreateShaderModule);
     HE_ASSERT(shader_module != VK_NULL_HANDLE);
 
-    const VkShaderStageFlagBits shader_stage_flag_bits = [type]()
-    {
-        switch (type)
-        {
-        case ShaderType::Compute:
-            return VK_SHADER_STAGE_COMPUTE_BIT;
-        case ShaderType::Fragment:
-            return VK_SHADER_STAGE_FRAGMENT_BIT;
-        case ShaderType::Vertex:
-            return VK_SHADER_STAGE_VERTEX_BIT;
-        default:
-            HE_UNREACHABLE();
-        }
-    }();
-
-    const VkPipelineShaderStageCreateInfo pipeline_shader_stage_create_info = {
-        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = 0,
-        .stage = shader_stage_flag_bits,
-        .module = shader_module,
-        .pName = entry.data(),
-        .pSpecializationInfo = nullptr,
-    };
-
     return new VulkanShader({
         .shader_module = shader_module,
-        .pipeline_stage_create_info = pipeline_shader_stage_create_info,
     });
 }
 
@@ -445,11 +419,21 @@ ComputePipeline *VulkanRenderDriver::create_compute_pipeline(
     const VulkanPipelineLayout *vulkan_layout = reinterpret_cast<const VulkanPipelineLayout *>(layout);
     const VulkanShader *vulkan_shader = reinterpret_cast<const VulkanShader *>(shader);
 
+    const VkPipelineShaderStageCreateInfo pipeline_shader_stage_create_info = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .stage = VK_SHADER_STAGE_COMPUTE_BIT,
+        .module = vulkan_shader->shader_module,
+        .pName = vulkan_shader->entry.c_str(),
+        .pSpecializationInfo = nullptr,
+    };
+
     const VkComputePipelineCreateInfo compute_pipeline_create_info = {
         .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .stage = vulkan_shader->pipeline_stage_create_info,
+        .stage = pipeline_shader_stage_create_info,
         .layout = vulkan_layout->pipeline_layout,
         .basePipelineHandle = VK_NULL_HANDLE,
         .basePipelineIndex = -1,
@@ -483,11 +467,32 @@ RenderPipeline *VulkanRenderDriver::create_render_pipeline(
     const DepthStencilState &depth_stencil_state) const
 {
     const VulkanShader *vulkan_vertex_shader = reinterpret_cast<const VulkanShader *>(vertex_shader);
+
+    const VkPipelineShaderStageCreateInfo vertex_pipeline_shader_stage_create_info = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .stage = VK_SHADER_STAGE_VERTEX_BIT,
+        .module = vulkan_vertex_shader->shader_module,
+        .pName = vulkan_vertex_shader->entry.c_str(),
+        .pSpecializationInfo = nullptr,
+    };
+
     const VulkanShader *vulkan_fragment_shader = reinterpret_cast<const VulkanShader *>(fragment_shader);
 
+    const VkPipelineShaderStageCreateInfo fragment_pipeline_shader_stage_create_info = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
+        .module = vulkan_fragment_shader->shader_module,
+        .pName = vulkan_fragment_shader->entry.c_str(),
+        .pSpecializationInfo = nullptr,
+    };
+
     const std::array<VkPipelineShaderStageCreateInfo, 2> shader_stage_create_infos = {
-        vulkan_vertex_shader->pipeline_stage_create_info,
-        vulkan_fragment_shader->pipeline_stage_create_info,
+        vertex_pipeline_shader_stage_create_info,
+        fragment_pipeline_shader_stage_create_info,
     };
 
     constexpr VkPipelineVertexInputStateCreateInfo vertex_input_state_create_info = {
