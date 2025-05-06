@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "engine.hpp"
+#if !HE_TESTS
+#    include "engine.hpp"
 
 int main()
 {
@@ -17,3 +18,4 @@ int main()
 
     return 0;
 }
+#endif

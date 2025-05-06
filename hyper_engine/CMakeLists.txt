@@ -50,37 +50,51 @@ set(HEADERS
         include/systems/window/mouse_events.hpp
         include/systems/window/window_events.hpp)
 
-hyperengine_define_executable(hyper_engine)
-target_link_libraries(
-        hyper_engine
-        PRIVATE
-        EnTT::EnTT
-        fastgltf
-        fmt
-        glm
-        libassert::assert
-        imgui
-        spdlog
-        stb
-        DirectXShaderCompiler
-        SDL3::SDL3
-        volk
-        VulkanMemoryAllocator)
-if (WIN32)
+function(define_target TARGET)
+    hyperengine_define_executable(${TARGET})
     target_link_libraries(
-            hyper_engine
+            ${TARGET}
+            PRIVATE
+            EnTT::EnTT
+            fastgltf
+            fmt
+            glm
+            libassert::assert
+            imgui
+            spdlog
+            stb
+            DirectXShaderCompiler
+            SDL3::SDL3
+            volk
+            VulkanMemoryAllocator)
+    if (WIN32)
+        target_link_libraries(
+                ${TARGET}
+                PUBLIC
+                d3d12.lib
+                dxgi.lib
+                D3D12MemoryAllocator)
+    endif ()
+
+    target_compile_definitions(
+            ${TARGET}
             PUBLIC
-            d3d12.lib
-            dxgi.lib
-            D3D12MemoryAllocator)
-endif ()
+            -DGLM_FORCE_RADIANS
+            -DGLM_FORCE_DEPTH_ZERO_TO_ONE)
+    target_include_directories(
+            ${TARGET}
+            PRIVATE
+            ${CMAKE_SOURCE_DIR}/assets/shaders)
+endfunction()
+
+define_target(hyper_engine)
+target_link_libraries(hyper_engine PRIVATE Catch2::Catch2)
+
+define_target(hyper_engine_tests)
+target_link_libraries(hyper_engine_tests PRIVATE Catch2::Catch2WithMain)
 
 target_compile_definitions(
-        hyper_engine
+        hyper_engine_tests
         PUBLIC
-        -DGLM_FORCE_RADIANS
-        -DGLM_FORCE_DEPTH_ZERO_TO_ONE)
-target_include_directories(
-        hyper_engine
-        PRIVATE
-        ${CMAKE_SOURCE_DIR}/assets/shaders)
+        -DHE_TESTS=1
+        -DCATCH_CONFIG_MAIN)
