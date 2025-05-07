@@ -10,6 +10,7 @@
 
 #include <fastgltf/types.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <tracy/Tracy.hpp>
 
 #include "core/logger.hpp"
 #include "shader_interop.h"
@@ -17,6 +18,7 @@
 
 void Engine::initialize()
 {
+    ZoneScoped;
     const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
     Logger::initialize();
@@ -312,6 +314,7 @@ void Engine::initialize()
 
 void Engine::shutdown() const
 {
+    ZoneScoped;
     m_render_system->destroy_texture(m_depth_texture);
     m_render_system->destroy_render_pipeline(m_render_pipeline);
     m_render_system->destroy_render_pipeline(m_grid_pipeline);
@@ -323,6 +326,7 @@ void Engine::shutdown() const
 
 void Engine::run()
 {
+    ZoneScoped;
     float total_time = 0.0;
     constexpr float delta_time = 1.0f / 60.0f;
 
@@ -352,16 +356,21 @@ void Engine::run()
 
         // Render
         render();
+
+        FrameMark;
     }
 }
 
 void Engine::fixed_update(const float delta_time)
 {
+    ZoneScoped;
     (void) delta_time;
 }
 
 void Engine::update(const float delta_time)
 {
+    ZoneScoped;
+
     if (m_input_system->is_key_pressed(KeyCode::W))
     {
         m_camera.process_keyboard(Camera::Movement::Forward, delta_time);
@@ -385,6 +394,8 @@ void Engine::update(const float delta_time)
 
 void Engine::render() const
 {
+    ZoneScoped;
+
     const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
 
     const glm::mat4 view_matrix = m_camera.view_matrix();

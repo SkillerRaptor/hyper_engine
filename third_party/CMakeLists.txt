@@ -352,6 +352,21 @@ FetchContent_MakeAvailable(stb)
 add_subdirectory(stb)
 
 #-------------------------------------------------------------------------------------------
+# tracy
+#-------------------------------------------------------------------------------------------
+FetchContent_Declare(
+        tracy
+        SYSTEM
+        GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+        GIT_TAG 5d542dc09f3d9378d005092a4ad446bd405f819a)
+
+set(TRACY_STATIC ON CACHE INTERNAL "")
+set(TRACY_Fortran OFF CACHE INTERNAL "")
+set(TRACY_LTO OFF CACHE INTERNAL "")
+
+FetchContent_MakeAvailable(tracy)
+
+#-------------------------------------------------------------------------------------------
 # volk
 #-------------------------------------------------------------------------------------------
 FetchContent_Declare(

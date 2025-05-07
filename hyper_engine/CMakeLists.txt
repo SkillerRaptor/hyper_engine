@@ -63,6 +63,7 @@ function(define_target TARGET)
             imgui
             spdlog
             stb
+            TracyClient
             DirectXShaderCompiler
             SDL3::SDL3
             volk
@@ -79,6 +80,8 @@ function(define_target TARGET)
     target_compile_definitions(
             ${TARGET}
             PUBLIC
+            # This should only be enabled when profiling
+            -DTRACY_ENABLE
             -DGLM_FORCE_RADIANS
             -DGLM_FORCE_DEPTH_ZERO_TO_ONE)
     target_include_directories(
