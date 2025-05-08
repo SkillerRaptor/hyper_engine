@@ -19,6 +19,7 @@
 void Engine::initialize()
 {
     ZoneScoped;
+
     const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
     Logger::initialize();
@@ -103,22 +104,25 @@ void Engine::initialize()
     }
     m_render_system->write_texture(
         command_buffer,
-        m_default_texture,
         {
-            .x = 0,
-            .y = 0,
-            .z = 0,
+            .texture = m_default_texture,
+            .offset =
+                {
+                    .x = 0,
+                    .y = 0,
+                    .z = 0,
+                },
+            .extent =
+                {
+                    .width = 16,
+                    .height = 16,
+                    .depth = 1,
+                },
+            .mip_level = 0,
+            .array_index = 0,
         },
-        {
-            .width = 16,
-            .height = 16,
-            .depth = 1,
-        },
-        0,
-        0,
-        &pixels,
-        sizeof(pixels),
-        0);
+        pixels.data(),
+        pixels.size() * sizeof(uint32_t));
 
     m_render_system->submit_command_buffer(command_buffer);
 
@@ -315,6 +319,7 @@ void Engine::initialize()
 void Engine::shutdown() const
 {
     ZoneScoped;
+
     m_render_system->destroy_texture(m_depth_texture);
     m_render_system->destroy_render_pipeline(m_render_pipeline);
     m_render_system->destroy_render_pipeline(m_grid_pipeline);
@@ -326,7 +331,6 @@ void Engine::shutdown() const
 
 void Engine::run()
 {
-    ZoneScoped;
     float total_time = 0.0;
     constexpr float delta_time = 1.0f / 60.0f;
 
@@ -364,6 +368,7 @@ void Engine::run()
 void Engine::fixed_update(const float delta_time)
 {
     ZoneScoped;
+
     (void) delta_time;
 }
 
@@ -414,7 +419,13 @@ void Engine::render() const
         .padding_0 = 0.0,
         .padding_1 = 0.0,
     };
-    m_render_system->write_buffer(command_buffer, m_camera_buffer, shader_camera, 0);
+    m_render_system->write_buffer(
+        command_buffer,
+        {
+            .buffer = m_camera_buffer,
+            .offset = 0,
+        },
+        shader_camera);
 
     constexpr ShaderScene shader_scene = {
         .ambient_color = glm::vec4(0.1f),
@@ -422,7 +433,13 @@ void Engine::render() const
         .sunlight_color = glm::vec4(1.0f),
         .padding_0 = glm::vec4(0.0f),
     };
-    m_render_system->write_buffer(command_buffer, m_scene_buffer, shader_scene, 0);
+    m_render_system->write_buffer(
+        command_buffer,
+        {
+            .buffer = m_scene_buffer,
+            .offset = 0,
+        },
+        shader_scene);
 
     const TextureId swapchain_texture = m_render_system->acquire_swapchain_texture(command_buffer);
 
@@ -582,7 +599,13 @@ void Engine::upload_model(
                 },
         });
         m_render_system->write_buffer(
-            command_buffer, positions_buffer, asset_model.positions.data(), asset_model.positions.size() * sizeof(glm::vec3), 0);
+            command_buffer,
+            {
+                .buffer = positions_buffer,
+                .offset = 0,
+            },
+            asset_model.positions.data(),
+            asset_model.positions.size() * sizeof(glm::vec3));
 
         const BufferId normals_buffer = m_render_system->create_buffer({
             .label = std::nullopt,
@@ -594,7 +617,13 @@ void Engine::upload_model(
                 },
         });
         m_render_system->write_buffer(
-            command_buffer, normals_buffer, asset_model.normals.data(), asset_model.normals.size() * sizeof(glm::vec3), 0);
+            command_buffer,
+            {
+                .buffer = normals_buffer,
+                .offset = 0,
+            },
+            asset_model.normals.data(),
+            asset_model.normals.size() * sizeof(glm::vec3));
 
         const BufferId colors_buffer = m_render_system->create_buffer({
             .label = std::nullopt,
@@ -606,7 +635,13 @@ void Engine::upload_model(
                 },
         });
         m_render_system->write_buffer(
-            command_buffer, colors_buffer, asset_model.colors.data(), asset_model.colors.size() * sizeof(glm::vec3), 0);
+            command_buffer,
+            {
+                .buffer = colors_buffer,
+                .offset = 0,
+            },
+            asset_model.colors.data(),
+            asset_model.colors.size() * sizeof(glm::vec3));
 
         const BufferId uvs_buffer = m_render_system->create_buffer({
             .label = std::nullopt,
@@ -617,7 +652,14 @@ void Engine::upload_model(
                     BufferUsage::ShaderResource,
                 },
         });
-        m_render_system->write_buffer(command_buffer, uvs_buffer, asset_model.uvs.data(), asset_model.uvs.size() * sizeof(glm::vec2), 0);
+        m_render_system->write_buffer(
+            command_buffer,
+            {
+                .buffer = uvs_buffer,
+                .offset = 0,
+            },
+            asset_model.uvs.data(),
+            asset_model.uvs.size() * sizeof(glm::vec2));
 
         const ShaderModel shader_model = {
             .positions = m_render_system->get_buffer_handle(positions_buffer),
@@ -635,7 +677,13 @@ void Engine::upload_model(
                     BufferUsage::ShaderResource,
                 },
         });
-        m_render_system->write_buffer(command_buffer, model_buffer, shader_model, 0);
+        m_render_system->write_buffer(
+            command_buffer,
+            {
+                .buffer = model_buffer,
+                .offset = 0,
+            },
+            shader_model);
 
         const BufferId indices_buffer = m_render_system->create_buffer({
             .label = std::nullopt,
@@ -646,7 +694,13 @@ void Engine::upload_model(
                 },
         });
         m_render_system->write_buffer(
-            command_buffer, indices_buffer, asset_model.indices.data(), asset_model.indices.size() * sizeof(uint32_t), 0);
+            command_buffer,
+            {
+                .buffer = indices_buffer,
+                .offset = 0,
+            },
+            asset_model.indices.data(),
+            asset_model.indices.size() * sizeof(uint32_t));
 
         std::vector<GpuMesh> meshes;
         for (const Asset::Mesh &asset_mesh : asset_model.meshes)
@@ -672,22 +726,25 @@ void Engine::upload_model(
 
                 m_render_system->write_texture(
                     command_buffer,
-                    texture,
                     {
-                        .x = 0,
-                        .y = 0,
-                        .z = 0,
+                        .texture = texture,
+                        .offset =
+                            {
+                                .x = 0,
+                                .y = 0,
+                                .z = 0,
+                            },
+                        .extent =
+                            {
+                                .width = static_cast<uint32_t>(asset_texture.width),
+                                .height = static_cast<uint32_t>(asset_texture.height),
+                                .depth = 1,
+                            },
+                        .mip_level = 0,
+                        .array_index = 0,
                     },
-                    {
-                        .width = static_cast<uint32_t>(asset_texture.width),
-                        .height = static_cast<uint32_t>(asset_texture.height),
-                        .depth = 1,
-                    },
-                    0,
-                    0,
                     asset_texture.data.data(),
-                    static_cast<uint32_t>(asset_texture.width) * static_cast<uint32_t>(asset_texture.height) * asset_texture.channels,
-                    0);
+                    static_cast<uint32_t>(asset_texture.width) * static_cast<uint32_t>(asset_texture.height) * asset_texture.channels);
 
                 color_texture = m_render_system->get_texture_handle(texture);
             }
@@ -742,22 +799,25 @@ void Engine::upload_model(
 
                 m_render_system->write_texture(
                     command_buffer,
-                    texture,
                     {
-                        .x = 0,
-                        .y = 0,
-                        .z = 0,
+                        .texture = texture,
+                        .offset =
+                            {
+                                .x = 0,
+                                .y = 0,
+                                .z = 0,
+                            },
+                        .extent =
+                            {
+                                .width = static_cast<uint32_t>(asset_texture.width),
+                                .height = static_cast<uint32_t>(asset_texture.height),
+                                .depth = 1,
+                            },
+                        .mip_level = 0,
+                        .array_index = 0,
                     },
-                    {
-                        .width = static_cast<uint32_t>(asset_texture.width),
-                        .height = static_cast<uint32_t>(asset_texture.height),
-                        .depth = 1,
-                    },
-                    0,
-                    0,
                     asset_texture.data.data(),
-                    static_cast<uint32_t>(asset_texture.width) * static_cast<uint32_t>(asset_texture.height) * asset_texture.channels,
-                    0);
+                    static_cast<uint32_t>(asset_texture.width) * static_cast<uint32_t>(asset_texture.height) * asset_texture.channels);
 
                 metal_roughness_texture = m_render_system->get_texture_handle(texture);
             }
@@ -812,7 +872,13 @@ void Engine::upload_model(
                         BufferUsage::ShaderResource,
                     },
             });
-            m_render_system->write_buffer(command_buffer, material_buffer, shader_material, 0);
+            m_render_system->write_buffer(
+                command_buffer,
+                {
+                    .buffer = material_buffer,
+                    .offset = 0,
+                },
+                shader_material);
 
             const GpuMesh mesh = {
                 .start_index = asset_mesh.start_index,

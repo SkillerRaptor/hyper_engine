@@ -595,29 +595,19 @@ void RenderSystem::bind_pipeline(const ComputePassId id, const ComputePipelineId
     m_render_driver->bind_compute_pipeline(compute_pass->command_buffer, compute_pipeline);
 }
 
-void RenderSystem::push_constants(const ComputePassId id, const void *data, const size_t data_size) const
+void RenderSystem::push_constants(const ComputePassId id, const void *data, const uint32_t size) const
 {
     const ComputePass *compute_pass = resolve_compute_pass(id);
     HE_ASSERT(compute_pass->compute_pipeline != nullptr);
 
-    m_render_driver->push_constants(compute_pass->command_buffer, compute_pass->compute_pipeline->layout, data, data_size);
+    m_render_driver->push_constants(compute_pass->command_buffer, compute_pass->compute_pipeline->layout, data, size);
 }
 
-void RenderSystem::clear_buffer(const CommandBufferId id, const BufferId buffer, const size_t size, const uint64_t offset) const
+void RenderSystem::write_buffer(const CommandBufferId id, const BufferTarget &dst, const void *data, const uint32_t size)
 {
-    HE_ASSERT(m_buffers.contains(buffer));
+    HE_ASSERT(m_buffers.contains(dst.buffer));
 
-    const CommandBuffer *command_buffer = resolve_command_buffer(id);
-
-    const Buffer *buffer_ptr = m_buffers.get(buffer);
-    m_render_driver->clear_buffer(command_buffer, buffer_ptr, size, offset);
-}
-
-void RenderSystem::write_buffer(const CommandBufferId id, const BufferId buffer, const void *data, const size_t size, const uint64_t offset)
-{
-    HE_ASSERT(m_buffers.contains(buffer));
-
-    const Buffer *buffer_ptr = m_buffers.get(buffer);
+    const Buffer *buffer_ptr = m_buffers.get(dst.buffer);
     HE_ASSERT(buffer_ptr->size >= size);
 
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
@@ -627,7 +617,7 @@ void RenderSystem::write_buffer(const CommandBufferId id, const BufferId buffer,
     memcpy(mapped_ptr, data, size);
     m_render_driver->unmap_buffer(staging_buffer);
 
-    m_render_driver->copy_buffer_to_buffer(command_buffer, staging_buffer, 0, buffer_ptr, offset, size);
+    m_render_driver->copy_buffer_to_buffer(command_buffer, staging_buffer, 0, buffer_ptr, dst.offset, size);
 
     m_deletion_queue.push_back(
         Resource{
@@ -636,40 +626,22 @@ void RenderSystem::write_buffer(const CommandBufferId id, const BufferId buffer,
         });
 }
 
-void RenderSystem::clear_texture(const CommandBufferId id, const TextureId texture, const SubresourceRange subresource_range) const
+void RenderSystem::write_texture(const CommandBufferId id, const TextureTarget &dst, const void *data, const uint32_t size)
 {
-    HE_ASSERT(m_textures.contains(texture));
+    HE_ASSERT(m_textures.contains(dst.texture));
 
-    const CommandBuffer *command_buffer = resolve_command_buffer(id);
-
-    const Texture *texture_ptr = m_textures.get(texture);
-    m_render_driver->clear_texture(command_buffer, texture_ptr, subresource_range);
-}
-
-void RenderSystem::write_texture(
-    const CommandBufferId id,
-    const TextureId texture,
-    const Offset3d offset,
-    const Extent3d extent,
-    const uint32_t mip_level,
-    const uint32_t array_index,
-    const void *data,
-    const size_t data_size,
-    const uint64_t data_offset)
-{
-    HE_ASSERT(m_textures.contains(texture));
-
-    Texture *texture_ptr = m_textures.get(texture);
+    Texture *texture_ptr = m_textures.get(dst.texture);
     // FIXME: Add check for texture size and data size
 
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
 
-    const Buffer *staging_buffer = m_render_driver->create_buffer(std::nullopt, data_size, BufferUsage::Storage, true);
+    const Buffer *staging_buffer = m_render_driver->create_buffer(std::nullopt, size, BufferUsage::Storage, true);
     void *mapped_ptr = m_render_driver->map_buffer(staging_buffer);
-    memcpy(mapped_ptr, data, data_size);
+    memcpy(mapped_ptr, data, size);
     m_render_driver->unmap_buffer(staging_buffer);
 
-    m_render_driver->copy_buffer_to_texture(command_buffer, staging_buffer, data_offset, texture_ptr, offset, extent, mip_level, array_index);
+    m_render_driver->copy_buffer_to_texture(
+        command_buffer, staging_buffer, 0, texture_ptr, dst.offset, dst.extent, dst.mip_level, dst.array_index);
 
     m_deletion_queue.push_back(
         Resource{
@@ -678,87 +650,61 @@ void RenderSystem::write_texture(
         });
 }
 
-void RenderSystem::copy_buffer_to_buffer(
-    const CommandBufferId id,
-    const BufferId src,
-    const uint64_t src_offset,
-    const BufferId dst,
-    const uint64_t dst_offset,
-    const size_t size) const
+void RenderSystem::copy_buffer_to_buffer(const CommandBufferId id, const BufferTarget &src, const BufferTarget &dst, const uint32_t size) const
 {
-    HE_ASSERT(m_buffers.contains(src));
-    HE_ASSERT(m_buffers.contains(dst));
+    HE_ASSERT(m_buffers.contains(src.buffer));
+    HE_ASSERT(m_buffers.contains(dst.buffer));
 
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
-
-    const Buffer *src_ptr = m_buffers.get(src);
-    const Buffer *dst_ptr = m_buffers.get(dst);
-    m_render_driver->copy_buffer_to_buffer(command_buffer, src_ptr, src_offset, dst_ptr, dst_offset, size);
+    const Buffer *src_buffer = m_buffers.get(src.buffer);
+    const Buffer *dst_buffer = m_buffers.get(dst.buffer);
+    m_render_driver->copy_buffer_to_buffer(command_buffer, src_buffer, src.offset, dst_buffer, dst.offset, size);
 }
 
-void RenderSystem::copy_buffer_to_texture(
-    const CommandBufferId id,
-    const BufferId src,
-    const uint64_t src_offset,
-    const TextureId dst,
-    const Offset3d dst_offset,
-    const Extent3d dst_extent,
-    const uint32_t dst_mip_level,
-    const uint32_t dst_array_index) const
+void RenderSystem::copy_buffer_to_texture(const CommandBufferId id, const BufferTarget &src, const TextureTarget &dst) const
 {
-    HE_ASSERT(m_buffers.contains(src));
-    HE_ASSERT(m_textures.contains(dst));
+    HE_ASSERT(m_buffers.contains(src.buffer));
+    HE_ASSERT(m_textures.contains(dst.texture));
 
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
-
-    const Buffer *src_ptr = m_buffers.get(src);
-    Texture *dst_ptr = m_textures.get(dst);
+    const Buffer *src_buffer = m_buffers.get(src.buffer);
+    Texture *dst_texture = m_textures.get(dst.texture);
     m_render_driver->copy_buffer_to_texture(
-        command_buffer, src_ptr, src_offset, dst_ptr, dst_offset, dst_extent, dst_mip_level, dst_array_index);
+        command_buffer, src_buffer, src.offset, dst_texture, dst.offset, dst.extent, dst.mip_level, dst.array_index);
 }
 
-void RenderSystem::copy_texture_to_buffer(
-    const CommandBufferId id,
-    const TextureId src,
-    const Offset3d src_offset,
-    const Extent3d src_extent,
-    const uint32_t src_mip_level,
-    const uint32_t src_array_index,
-    const BufferId dst,
-    const uint64_t dst_offset) const
+void RenderSystem::copy_texture_to_buffer(const CommandBufferId id, const TextureTarget &src, const BufferTarget &dst) const
 {
-    HE_ASSERT(m_textures.contains(src));
-    HE_ASSERT(m_buffers.contains(dst));
+    HE_ASSERT(m_textures.contains(src.texture));
+    HE_ASSERT(m_buffers.contains(dst.buffer));
 
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
-
-    Texture *src_ptr = m_textures.get(src);
-    const Buffer *dst_ptr = m_buffers.get(dst);
+    Texture *src_texture = m_textures.get(src.texture);
+    const Buffer *dst_buffer = m_buffers.get(dst.buffer);
     m_render_driver->copy_texture_to_buffer(
-        command_buffer, src_ptr, src_offset, src_extent, src_mip_level, src_array_index, dst_ptr, dst_offset);
+        command_buffer, src_texture, src.offset, src.extent, src.mip_level, src.array_index, dst_buffer, dst.offset);
 }
 
-void RenderSystem::copy_texture_to_texture(
-    const CommandBufferId id,
-    const TextureId src,
-    const Offset3d src_offset,
-    const uint32_t src_mip_level,
-    const uint32_t src_array_index,
-    const TextureId dst,
-    const Offset3d dst_offset,
-    const uint32_t dst_mip_level,
-    const uint32_t dst_array_index,
-    const Extent3d extent) const
+void RenderSystem::copy_texture_to_texture(const CommandBufferId id, const TextureTarget &src, const TextureTarget &dst, const Extent3d extent)
+    const
 {
-    HE_ASSERT(m_textures.contains(src));
-    HE_ASSERT(m_textures.contains(dst));
+    HE_ASSERT(m_textures.contains(src.texture));
+    HE_ASSERT(m_textures.contains(dst.texture));
 
     const CommandBuffer *command_buffer = resolve_command_buffer(id);
-
-    Texture *src_ptr = m_textures.get(src);
-    Texture *dst_ptr = m_textures.get(dst);
+    Texture *src_texture = m_textures.get(src.texture);
+    Texture *dst_texture = m_textures.get(dst.texture);
     m_render_driver->copy_texture_to_texture(
-        command_buffer, src_ptr, src_offset, src_mip_level, src_array_index, dst_ptr, dst_offset, dst_mip_level, dst_array_index, extent);
+        command_buffer,
+        src_texture,
+        src.offset,
+        src.mip_level,
+        src.array_index,
+        dst_texture,
+        dst.offset,
+        dst.mip_level,
+        dst.array_index,
+        extent);
 }
 
 RenderPassId RenderSystem::begin_render_pass(const CommandBufferId id, const RenderPassDescriptor &descriptor)
@@ -851,13 +797,13 @@ void RenderSystem::bind_index_buffer(const RenderPassId id, const BufferId buffe
     m_render_driver->bind_index_buffer(render_pass->command_buffer, buffer_ptr);
 }
 
-void RenderSystem::push_constants(const RenderPassId id, const void *data, const size_t data_size) const
+void RenderSystem::push_constants(const RenderPassId id, const void *data, const uint32_t size) const
 {
     const RenderPass *render_pass = resolve_render_pass(id);
     HE_ASSERT(render_pass->render_pipeline != nullptr);
-    HE_ASSERT(render_pass->render_pipeline->layout->push_constant_size == data_size);
+    HE_ASSERT(render_pass->render_pipeline->layout->push_constant_size == size);
 
-    m_render_driver->push_constants(render_pass->command_buffer, render_pass->render_pipeline->layout, data, data_size);
+    m_render_driver->push_constants(render_pass->command_buffer, render_pass->render_pipeline->layout, data, size);
 }
 
 void RenderSystem::set_viewport(

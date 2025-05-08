@@ -926,158 +926,13 @@ void VulkanRenderDriver::bind_texture(const Texture *texture) const
     vkUpdateDescriptorSets(m_device, 1, &descriptor_write, 0, nullptr);
 }
 
-void VulkanRenderDriver::clear_buffer(const CommandBuffer *command_buffer, const Buffer *buffer, const size_t size, const uint64_t offset) const
-{
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
-    const VulkanBuffer *vulkan_buffer = reinterpret_cast<const VulkanBuffer *>(buffer);
-
-    vkCmdFillBuffer(vulkan_command_buffer->command_buffer, vulkan_buffer->buffer, offset, size, 0);
-}
-
-void VulkanRenderDriver::clear_texture(const CommandBuffer *command_buffer, const Texture *texture, const SubresourceRange subresource_range)
-    const
-{
-    const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
-    const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(texture);
-
-    const VkImageSubresourceRange vulkan_subresource_range = {
-        .aspectMask = get_image_aspect_flags(vulkan_texture->format),
-        .baseMipLevel = subresource_range.base_mip_level,
-        .levelCount = subresource_range.mip_level_count,
-        .baseArrayLayer = subresource_range.base_array_level,
-        .layerCount = subresource_range.array_layer_count,
-    };
-
-    switch (vulkan_texture->format)
-    {
-    case Format::R8Unorm:
-    case Format::R8Snorm:
-    case Format::R8Uint:
-    case Format::R8Sint:
-    case Format::R8Srgb:
-    case Format::Rg8Unorm:
-    case Format::Rg8Snorm:
-    case Format::Rg8Uint:
-    case Format::Rg8Sint:
-    case Format::Rg8Srgb:
-    case Format::Rgb8Unorm:
-    case Format::Rgb8Snorm:
-    case Format::Rgb8Uint:
-    case Format::Rgb8Sint:
-    case Format::Rgb8Srgb:
-    case Format::Bgr8Unorm:
-    case Format::Bgr8Snorm:
-    case Format::Bgr8Uint:
-    case Format::Bgr8Sint:
-    case Format::Bgr8Srgb:
-    case Format::Rgba8Unorm:
-    case Format::Rgba8Snorm:
-    case Format::Rgba8Uint:
-    case Format::Rgba8Sint:
-    case Format::Rgba8Srgb:
-    case Format::Bgra8Unorm:
-    case Format::Bgra8Snorm:
-    case Format::Bgra8Uint:
-    case Format::Bgra8Sint:
-    case Format::Bgra8Srgb:
-    case Format::R16Unorm:
-    case Format::R16Snorm:
-    case Format::R16Uint:
-    case Format::R16Sint:
-    case Format::R16Sfloat:
-    case Format::Rg16Unorm:
-    case Format::Rg16Snorm:
-    case Format::Rg16Uint:
-    case Format::Rg16Sint:
-    case Format::Rg16Sfloat:
-    case Format::Rgb16Unorm:
-    case Format::Rgb16Snorm:
-    case Format::Rgb16Uint:
-    case Format::Rgb16Sint:
-    case Format::Rgb16Sfloat:
-    case Format::Rgba16Unorm:
-    case Format::Rgba16Snorm:
-    case Format::Rgba16Uint:
-    case Format::Rgba16Sint:
-    case Format::Rgba16Sfloat:
-    case Format::R32Uint:
-    case Format::R32Sint:
-    case Format::R32Sfloat:
-    case Format::Rg32Uint:
-    case Format::Rg32Sint:
-    case Format::Rg32Sfloat:
-    case Format::Rgb32Uint:
-    case Format::Rgb32Sint:
-    case Format::Rgb32Sfloat:
-    case Format::Rgba32Uint:
-    case Format::Rgba32Sint:
-    case Format::Rgba32Sfloat:
-    case Format::R64Uint:
-    case Format::R64Sint:
-    case Format::R64Sfloat:
-    case Format::Rg64Uint:
-    case Format::Rg64Sint:
-    case Format::Rg64Sfloat:
-    case Format::Rgb64Uint:
-    case Format::Rgb64Sint:
-    case Format::Rgb64Sfloat:
-    case Format::Rgba64Uint:
-    case Format::Rgba64Sint:
-    case Format::Rgba64Sfloat:
-    {
-        constexpr VkClearColorValue clear_color_value = {
-            .float32 =
-                {
-                    0.0,
-                    0.0,
-                    0.0,
-                    1.0,
-                },
-        };
-
-        vkCmdClearColorImage(
-            vulkan_command_buffer->command_buffer,
-            vulkan_texture->image,
-            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            &clear_color_value,
-            1,
-            &vulkan_subresource_range);
-        break;
-    }
-    case Format::D16Unorm:
-    case Format::D32Sfloat:
-    case Format::S8Uint:
-    case Format::D16UnormS8Uint:
-    case Format::D24UnormS8Uint:
-    case Format::D32SfloatS8Uint:
-    {
-        constexpr VkClearDepthStencilValue clear_depth_stencil_value = {
-            .depth = 1.0,
-            .stencil = 0,
-        };
-
-        vkCmdClearDepthStencilImage(
-            vulkan_command_buffer->command_buffer,
-            vulkan_texture->image,
-            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            &clear_depth_stencil_value,
-            1,
-            &vulkan_subresource_range);
-        break;
-    }
-    case Format::Unknown:
-    default:
-        HE_UNREACHABLE();
-    }
-}
-
 void VulkanRenderDriver::copy_buffer_to_buffer(
     const CommandBuffer *command_buffer,
     const Buffer *src,
-    const uint64_t src_offset,
+    const uint32_t src_offset,
     const Buffer *dst,
-    const uint64_t dst_offset,
-    const size_t size) const
+    const uint32_t dst_offset,
+    const uint32_t size) const
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     const VulkanBuffer *vulkan_src = reinterpret_cast<const VulkanBuffer *>(src);
@@ -1106,7 +961,7 @@ void VulkanRenderDriver::copy_buffer_to_buffer(
 void VulkanRenderDriver::copy_buffer_to_texture(
     const CommandBuffer *command_buffer,
     const Buffer *src,
-    const uint64_t src_offset,
+    const uint32_t src_offset,
     Texture *dst,
     const Offset3d dst_offset,
     const Extent3d dst_extent,
@@ -1168,7 +1023,7 @@ void VulkanRenderDriver::copy_texture_to_buffer(
     const uint32_t src_mip_level,
     const uint32_t src_array_index,
     const Buffer *dst,
-    const uint64_t dst_offset) const
+    const uint32_t dst_offset) const
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     const VulkanTexture *vulkan_src = reinterpret_cast<const VulkanTexture *>(src);
@@ -1291,18 +1146,12 @@ void VulkanRenderDriver::push_constants(
     const CommandBuffer *command_buffer,
     const PipelineLayout *pipeline_layout,
     const void *data,
-    const size_t data_size)
+    const uint32_t size)
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     const VulkanPipelineLayout *vulkan_pipeline_layout = reinterpret_cast<const VulkanPipelineLayout *>(pipeline_layout);
 
-    vkCmdPushConstants(
-        vulkan_command_buffer->command_buffer,
-        vulkan_pipeline_layout->pipeline_layout,
-        VK_SHADER_STAGE_ALL,
-        0,
-        static_cast<uint32_t>(data_size),
-        data);
+    vkCmdPushConstants(vulkan_command_buffer->command_buffer, vulkan_pipeline_layout->pipeline_layout, VK_SHADER_STAGE_ALL, 0, size, data);
 }
 
 std::pair<uint32_t, bool> VulkanRenderDriver::acquire_swapchain_texture(const CommandBuffer *command_buffer)

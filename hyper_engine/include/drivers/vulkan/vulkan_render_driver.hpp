@@ -166,20 +166,17 @@ public:
     void bind_sampler(const Sampler *sampler) const override;
     void bind_texture(const Texture *texture) const override;
 
-    void clear_buffer(const CommandBuffer *command_buffer, const Buffer *buffer, size_t size, uint64_t offset) const override;
-    void clear_texture(const CommandBuffer *command_buffer, const Texture *texture, SubresourceRange subresource_range) const override;
-
     void copy_buffer_to_buffer(
         const CommandBuffer *command_buffer,
         const Buffer *src,
-        uint64_t src_offset,
+        uint32_t src_offset,
         const Buffer *dst,
-        uint64_t dst_offset,
-        size_t size) const override;
+        uint32_t dst_offset,
+        uint32_t size) const override;
     void copy_buffer_to_texture(
         const CommandBuffer *command_buffer,
         const Buffer *src,
-        uint64_t src_offset,
+        uint32_t src_offset,
         Texture *dst,
         Offset3d dst_offset,
         Extent3d dst_extent,
@@ -193,7 +190,7 @@ public:
         uint32_t src_mip_level,
         uint32_t src_array_index,
         const Buffer *dst,
-        uint64_t dst_offset) const override;
+        uint32_t dst_offset) const override;
     void copy_texture_to_texture(
         const CommandBuffer *command_buffer,
         Texture *src,
@@ -206,7 +203,7 @@ public:
         uint32_t dst_array_index,
         Extent3d extent) const override;
 
-    void push_constants(const CommandBuffer *command_buffer, const PipelineLayout *pipeline_layout, const void *data, size_t data_size) override;
+    void push_constants(const CommandBuffer *command_buffer, const PipelineLayout *pipeline_layout, const void *data, uint32_t size) override;
 
     std::pair<uint32_t, bool> acquire_swapchain_texture(const CommandBuffer *command_buffer) override;
     void present() override;

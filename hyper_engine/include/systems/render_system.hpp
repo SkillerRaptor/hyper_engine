@@ -98,6 +98,21 @@ struct RenderPipelineDescriptor
     DepthStencilState depth_stencil_state;
 };
 
+struct BufferTarget
+{
+    BufferId buffer;
+    uint32_t offset = 0;
+};
+
+struct TextureTarget
+{
+    TextureId texture;
+    Offset3d offset = {};
+    Extent3d extent = {};
+    uint32_t mip_level = 0;
+    uint32_t array_index = 0;
+};
+
 struct ComputePassDescriptor
 {
     std::optional<Label> label;
@@ -204,71 +219,25 @@ public:
     CommandBufferId acquire_command_buffer();
     void submit_command_buffer(CommandBufferId id);
 
-    void clear_buffer(CommandBufferId id, BufferId buffer, size_t size, uint64_t offset) const;
-    void write_buffer(CommandBufferId id, BufferId buffer, const void *data, size_t size, uint64_t offset);
+    void write_buffer(CommandBufferId id, const BufferTarget &dst, const void *data, uint32_t size);
+    void write_texture(CommandBufferId id, const TextureTarget &dst, const void *data, uint32_t size);
 
     template <typename T>
-    void write_buffer(const CommandBufferId id, const BufferId buffer, const T &data, const uint64_t offset)
+    void write_buffer(const CommandBufferId id, const BufferTarget &dst, const T &data)
     {
-        write_buffer(id, buffer, &data, sizeof(T), offset);
+        write_buffer(id, dst, &data, sizeof(T));
     }
-
-    void clear_texture(CommandBufferId id, TextureId texture, SubresourceRange subresource_range) const;
-    void write_texture(
-        CommandBufferId id,
-        TextureId texture,
-        Offset3d offset,
-        Extent3d extent,
-        uint32_t mip_level,
-        uint32_t array_index,
-        const void *data,
-        size_t data_size,
-        uint64_t data_offset);
 
     template <typename T>
-    void write_texture(
-        const CommandBufferId id,
-        const TextureId texture,
-        const Offset3d offset,
-        const Extent3d extent,
-        const uint32_t mip_level,
-        const uint32_t array_index,
-        const T &data,
-        const uint64_t data_offset)
+    void write_texture(const CommandBufferId id, const TextureTarget &dst, const T &data)
     {
-        write_texture(id, texture, offset, extent, mip_level, array_index, &data, sizeof(T), data_offset);
+        write_texture(id, dst, &data, sizeof(T));
     }
 
-    void copy_buffer_to_buffer(CommandBufferId id, BufferId src, uint64_t src_offset, BufferId dst, uint64_t dst_offset, size_t size) const;
-    void copy_buffer_to_texture(
-        CommandBufferId id,
-        BufferId src,
-        uint64_t src_offset,
-        TextureId dst,
-        Offset3d dst_offset,
-        Extent3d dst_extent,
-        uint32_t dst_mip_level,
-        uint32_t dst_array_index) const;
-    void copy_texture_to_buffer(
-        CommandBufferId id,
-        TextureId src,
-        Offset3d src_offset,
-        Extent3d src_extent,
-        uint32_t src_mip_level,
-        uint32_t src_array_index,
-        BufferId dst,
-        uint64_t dst_offset) const;
-    void copy_texture_to_texture(
-        CommandBufferId id,
-        TextureId src,
-        Offset3d src_offset,
-        uint32_t src_mip_level,
-        uint32_t src_array_index,
-        TextureId dst,
-        Offset3d dst_offset,
-        uint32_t dst_mip_level,
-        uint32_t dst_array_index,
-        Extent3d extent) const;
+    void copy_buffer_to_buffer(CommandBufferId id, const BufferTarget &src, const BufferTarget &dst, uint32_t size) const;
+    void copy_buffer_to_texture(CommandBufferId id, const BufferTarget &src, const TextureTarget &dst) const;
+    void copy_texture_to_buffer(CommandBufferId id, const TextureTarget &src, const BufferTarget &dst) const;
+    void copy_texture_to_texture(CommandBufferId id, const TextureTarget &src, const TextureTarget &dst, Extent3d extent) const;
 
     TextureId acquire_swapchain_texture(CommandBufferId id);
 
@@ -277,7 +246,7 @@ public:
     void end_compute_pass(ComputePassId id) const;
 
     void bind_pipeline(ComputePassId id, ComputePipelineId pipeline_id) const;
-    void push_constants(ComputePassId id, const void *data, size_t data_size) const;
+    void push_constants(ComputePassId id, const void *data, uint32_t size) const;
 
     template <typename T>
     void push_constants(const ComputePassId id, const T &data) const
@@ -291,7 +260,7 @@ public:
 
     void bind_pipeline(RenderPassId id, RenderPipelineId pipeline_id) const;
     void bind_index_buffer(RenderPassId id, BufferId buffer) const;
-    void push_constants(RenderPassId id, const void *data, size_t data_size) const;
+    void push_constants(RenderPassId id, const void *data, uint32_t size) const;
 
     template <typename T>
     void push_constants(const RenderPassId id, const T &data) const
