@@ -129,8 +129,10 @@ struct ResourceHandle {
     static VulkanResourceDescriptorHeapInternal VkResourceDescriptorHeap;
 
     #define DESCRIPTOR_HEAP(handle_type, handle) VkResourceDescriptorHeap[(handle_type) handle]
+    #define SAMPLER_HEAP(handle_type, handle) VkResourceDescriptorHeap[(handle_type) handle]
 #else
     #define DESCRIPTOR_HEAP(handle_type, handle) ResourceDescriptorHeap[NonUniformResourceIndex(handle)]
+    #define SAMPLER_HEAP(handle_type, handle) SamplerDescriptorHeap[NonUniformResourceIndex(handle)]
 #endif
 
 struct SimpleBuffer {
@@ -327,7 +329,7 @@ struct Sampler {
     ResourceHandle handle;
 
     SamplerState load() {
-        SamplerState sampler_state_value = DESCRIPTOR_HEAP(SamplerStateHandle, this.handle.read_index());
+        SamplerState sampler_state_value = SAMPLER_HEAP(SamplerStateHandle, this.handle.read_index());
         return sampler_state_value;
     }
 };
