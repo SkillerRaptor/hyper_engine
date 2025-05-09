@@ -377,12 +377,12 @@ void VulkanRenderDriver::destroy_texture(const Texture *texture) const
     delete vulkan_texture;
 }
 
-PipelineLayout *VulkanRenderDriver::create_pipeline_layout(const std::optional<std::string> &label, const uint32_t push_constant_size) const
+PipelineLayout *VulkanRenderDriver::create_pipeline_layout(const std::optional<std::string> &label, const size_t push_constant_size) const
 {
     const VkPushConstantRange push_constant_range = {
         .stageFlags = VK_SHADER_STAGE_ALL,
         .offset = 0,
-        .size = push_constant_size,
+        .size = static_cast<uint32_t>(push_constant_size),
     };
 
     const VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
@@ -934,10 +934,10 @@ void VulkanRenderDriver::bind_texture(const Texture *texture) const
 void VulkanRenderDriver::copy_buffer_to_buffer(
     const CommandBuffer *command_buffer,
     const Buffer *src,
-    const uint32_t src_offset,
+    const uint64_t src_offset,
     const Buffer *dst,
-    const uint32_t dst_offset,
-    const uint32_t size) const
+    const uint64_t dst_offset,
+    const size_t size) const
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     const VulkanBuffer *vulkan_src = reinterpret_cast<const VulkanBuffer *>(src);
@@ -966,7 +966,7 @@ void VulkanRenderDriver::copy_buffer_to_buffer(
 void VulkanRenderDriver::copy_buffer_to_texture(
     const CommandBuffer *command_buffer,
     const Buffer *src,
-    const uint32_t src_offset,
+    const uint64_t src_offset,
     Texture *dst,
     const Offset3d dst_offset,
     const Extent3d dst_extent,
@@ -1028,7 +1028,7 @@ void VulkanRenderDriver::copy_texture_to_buffer(
     const uint32_t src_mip_level,
     const uint32_t src_array_index,
     const Buffer *dst,
-    const uint32_t dst_offset) const
+    const uint64_t dst_offset) const
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     const VulkanTexture *vulkan_src = reinterpret_cast<const VulkanTexture *>(src);
@@ -1151,12 +1151,18 @@ void VulkanRenderDriver::push_constants(
     const CommandBuffer *command_buffer,
     const PipelineLayout *pipeline_layout,
     const void *data,
-    const uint32_t size)
+    const size_t size)
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     const VulkanPipelineLayout *vulkan_pipeline_layout = reinterpret_cast<const VulkanPipelineLayout *>(pipeline_layout);
 
-    vkCmdPushConstants(vulkan_command_buffer->command_buffer, vulkan_pipeline_layout->pipeline_layout, VK_SHADER_STAGE_ALL, 0, size, data);
+    vkCmdPushConstants(
+        vulkan_command_buffer->command_buffer,
+        vulkan_pipeline_layout->pipeline_layout,
+        VK_SHADER_STAGE_ALL,
+        0,
+        static_cast<uint32_t>(size),
+        data);
 }
 
 std::pair<uint32_t, bool> VulkanRenderDriver::acquire_swapchain_texture(const CommandBuffer *command_buffer)

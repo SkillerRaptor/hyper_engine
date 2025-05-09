@@ -595,7 +595,7 @@ void RenderSystem::bind_pipeline(const ComputePassId id, const ComputePipelineId
     m_render_driver->bind_compute_pipeline(compute_pass->command_buffer, compute_pipeline);
 }
 
-void RenderSystem::push_constants(const ComputePassId id, const void *data, const uint32_t size) const
+void RenderSystem::push_constants(const ComputePassId id, const void *data, const size_t size) const
 {
     const ComputePass *compute_pass = resolve_compute_pass(id);
     HE_ASSERT(compute_pass->compute_pipeline != nullptr);
@@ -603,7 +603,7 @@ void RenderSystem::push_constants(const ComputePassId id, const void *data, cons
     m_render_driver->push_constants(compute_pass->command_buffer, compute_pass->compute_pipeline->layout, data, size);
 }
 
-void RenderSystem::write_buffer(const CommandBufferId id, const BufferTarget &dst, const void *data, const uint32_t size)
+void RenderSystem::write_buffer(const CommandBufferId id, const BufferTarget &dst, const void *data, const size_t size)
 {
     HE_ASSERT(m_buffers.contains(dst.buffer));
 
@@ -626,7 +626,7 @@ void RenderSystem::write_buffer(const CommandBufferId id, const BufferTarget &ds
         });
 }
 
-void RenderSystem::write_texture(const CommandBufferId id, const TextureTarget &dst, const void *data, const uint32_t size)
+void RenderSystem::write_texture(const CommandBufferId id, const TextureTarget &dst, const void *data, const size_t size)
 {
     HE_ASSERT(m_textures.contains(dst.texture));
 
@@ -650,7 +650,7 @@ void RenderSystem::write_texture(const CommandBufferId id, const TextureTarget &
         });
 }
 
-void RenderSystem::copy_buffer_to_buffer(const CommandBufferId id, const BufferTarget &src, const BufferTarget &dst, const uint32_t size) const
+void RenderSystem::copy_buffer_to_buffer(const CommandBufferId id, const BufferTarget &src, const BufferTarget &dst, const size_t size) const
 {
     HE_ASSERT(m_buffers.contains(src.buffer));
     HE_ASSERT(m_buffers.contains(dst.buffer));
@@ -797,7 +797,7 @@ void RenderSystem::bind_index_buffer(const RenderPassId id, const BufferId buffe
     m_render_driver->bind_index_buffer(render_pass->command_buffer, buffer_ptr);
 }
 
-void RenderSystem::push_constants(const RenderPassId id, const void *data, const uint32_t size) const
+void RenderSystem::push_constants(const RenderPassId id, const void *data, const size_t size) const
 {
     const RenderPass *render_pass = resolve_render_pass(id);
     HE_ASSERT(render_pass->render_pipeline != nullptr);

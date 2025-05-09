@@ -136,7 +136,7 @@ public:
     void destroy_texture(const Texture *texture) const override;
 
     // Pipeline Layout
-    PipelineLayout *create_pipeline_layout(const std::optional<std::string> &label, uint32_t push_constant_size) const override;
+    PipelineLayout *create_pipeline_layout(const std::optional<std::string> &label, size_t push_constant_size) const override;
     void destroy_pipeline_layout(const PipelineLayout *pipeline_layout) const override;
 
     // Compute Pipeline
@@ -169,14 +169,14 @@ public:
     void copy_buffer_to_buffer(
         const CommandBuffer *command_buffer,
         const Buffer *src,
-        uint32_t src_offset,
+        uint64_t src_offset,
         const Buffer *dst,
-        uint32_t dst_offset,
-        uint32_t size) const override;
+        uint64_t dst_offset,
+        size_t size) const override;
     void copy_buffer_to_texture(
         const CommandBuffer *command_buffer,
         const Buffer *src,
-        uint32_t src_offset,
+        uint64_t src_offset,
         Texture *dst,
         Offset3d dst_offset,
         Extent3d dst_extent,
@@ -190,7 +190,7 @@ public:
         uint32_t src_mip_level,
         uint32_t src_array_index,
         const Buffer *dst,
-        uint32_t dst_offset) const override;
+        uint64_t dst_offset) const override;
     void copy_texture_to_texture(
         const CommandBuffer *command_buffer,
         Texture *src,
@@ -203,7 +203,7 @@ public:
         uint32_t dst_array_index,
         Extent3d extent) const override;
 
-    void push_constants(const CommandBuffer *command_buffer, const PipelineLayout *pipeline_layout, const void *data, uint32_t size) override;
+    void push_constants(const CommandBuffer *command_buffer, const PipelineLayout *pipeline_layout, const void *data, size_t size) override;
 
     std::pair<uint32_t, bool> acquire_swapchain_texture(const CommandBuffer *command_buffer) override;
     void present() override;

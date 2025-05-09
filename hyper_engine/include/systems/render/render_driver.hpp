@@ -15,7 +15,7 @@
 struct Buffer
 {
     std::optional<std::string> label;
-    uint64_t size = 0;
+    size_t size = 0;
     BitFlags<BufferUsage> usage = BufferUsage::None;
     std::optional<ResourceHandle> handle = std::nullopt;
 };
@@ -62,7 +62,7 @@ struct Texture
 struct PipelineLayout
 {
     std::optional<std::string> label;
-    uint32_t push_constant_size = 0;
+    size_t push_constant_size = 0;
 };
 
 struct ComputePipeline
@@ -132,8 +132,7 @@ public:
     virtual std::vector<Texture *> query_swapchain_textures() = 0;
 
     // Buffer
-    virtual Buffer *
-        create_buffer(const std::optional<std::string> &label, uint64_t byte_size, BitFlags<BufferUsage> usage, bool staging) const = 0;
+    virtual Buffer *create_buffer(const std::optional<std::string> &label, size_t size, BitFlags<BufferUsage> usage, bool staging) const = 0;
     virtual void destroy_buffer(const Buffer *buffer) const = 0;
 
     virtual void *map_buffer(const Buffer *buffer) const = 0;
@@ -174,7 +173,7 @@ public:
     virtual void destroy_texture(const Texture *texture) const = 0;
 
     // Pipeline Layout
-    virtual PipelineLayout *create_pipeline_layout(const std::optional<std::string> &label, uint32_t push_constant_size) const = 0;
+    virtual PipelineLayout *create_pipeline_layout(const std::optional<std::string> &label, size_t push_constant_size) const = 0;
     virtual void destroy_pipeline_layout(const PipelineLayout *pipeline_layout) const = 0;
 
     // Compute Pipeline
@@ -207,14 +206,14 @@ public:
     virtual void copy_buffer_to_buffer(
         const CommandBuffer *command_buffer,
         const Buffer *src,
-        uint32_t src_offset,
+        uint64_t src_offset,
         const Buffer *dst,
-        uint32_t dst_offset,
-        uint32_t size) const = 0;
+        uint64_t dst_offset,
+        size_t size) const = 0;
     virtual void copy_buffer_to_texture(
         const CommandBuffer *command_buffer,
         const Buffer *src,
-        uint32_t src_offset,
+        uint64_t src_offset,
         Texture *dst,
         Offset3d dst_offset,
         Extent3d dst_extent,
@@ -228,7 +227,7 @@ public:
         uint32_t src_mip_level,
         uint32_t src_array_index,
         const Buffer *dst,
-        uint32_t dst_offset) const = 0;
+        uint64_t dst_offset) const = 0;
     virtual void copy_texture_to_texture(
         const CommandBuffer *command_buffer,
         Texture *src,
@@ -241,7 +240,7 @@ public:
         uint32_t dst_array_index,
         Extent3d extent) const = 0;
 
-    virtual void push_constants(const CommandBuffer *command_buffer, const PipelineLayout *pipeline_layout, const void *data, uint32_t size) = 0;
+    virtual void push_constants(const CommandBuffer *command_buffer, const PipelineLayout *pipeline_layout, const void *data, size_t size) = 0;
 
     virtual std::pair<uint32_t, bool> acquire_swapchain_texture(const CommandBuffer *command_buffer) = 0;
     virtual void present() = 0;
