@@ -16,6 +16,7 @@
 
 #define VMA_IMPLEMENTATION
 #include <SDL3/SDL_vulkan.h>
+#include <tracy/Tracy.hpp>
 #include <vk_mem_alloc.h>
 #include <vulkan/vk_enum_string_helper.h>
 
@@ -765,6 +766,8 @@ void VulkanRenderDriver::destroy_command_buffer(const CommandBuffer *command_buf
 
 void VulkanRenderDriver::acquire_command_buffer(const CommandBuffer *command_buffer) const
 {
+    ZoneScopedNC("AcquireCommandBuffer", 0xff8a02);
+
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
     const uint64_t wait_frame_index = vulkan_command_buffer->semaphore_counter;
@@ -792,6 +795,8 @@ void VulkanRenderDriver::acquire_command_buffer(const CommandBuffer *command_buf
 
 void VulkanRenderDriver::submit_command_buffer(CommandBuffer *command_buffer) const
 {
+    ZoneScopedNC("SubmitCommandBuffer", 0xff8a02);
+
     VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<VulkanCommandBuffer *>(command_buffer);
 
     if (vulkan_command_buffer->swapchain_texture_acquired)
@@ -1156,6 +1161,8 @@ void VulkanRenderDriver::push_constants(
 
 std::pair<uint32_t, bool> VulkanRenderDriver::acquire_swapchain_texture(const CommandBuffer *command_buffer)
 {
+    ZoneScopedNC("AcquireSwapchainTexture", 0xff8a02);
+
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
 
     bool recreated = false;
@@ -1189,6 +1196,8 @@ std::pair<uint32_t, bool> VulkanRenderDriver::acquire_swapchain_texture(const Co
 
 void VulkanRenderDriver::present()
 {
+    ZoneScopedNC("Present", 0xff8a02);
+
     const VkPresentInfoKHR present_info = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
         .pNext = nullptr,

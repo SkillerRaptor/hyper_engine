@@ -367,14 +367,14 @@ void Engine::run()
 
 void Engine::fixed_update(const float delta_time)
 {
-    ZoneScoped;
+    ZoneScopedN("FixedUpdate");
 
     (void) delta_time;
 }
 
 void Engine::update(const float delta_time)
 {
-    ZoneScoped;
+    ZoneScopedN("Update");
 
     if (m_input_system->is_key_pressed(KeyCode::W))
     {
@@ -399,7 +399,7 @@ void Engine::update(const float delta_time)
 
 void Engine::render() const
 {
-    ZoneScoped;
+    ZoneScopedN("Render");
 
     const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
 
