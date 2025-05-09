@@ -174,6 +174,7 @@ enum class Dimension : uint8_t
     Texture2D,
     Texture2DArray,
     Texture3D,
+    TextureCube,
 };
 
 enum class TextureUsage : uint8_t

@@ -231,6 +231,12 @@ struct Texture {
     }
 
     template<typename T>
+    T sample_cube(SamplerState s, float3 uvw) {
+        TextureCube<T> texture = DESCRIPTOR_HEAP(TextureCubeHandle<T>, this.handle.read_index());
+        return texture.Sample(s, uvw);
+    }
+
+    template<typename T>
     T sample_level_1d(SamplerState s, float u, float mip) {
         Texture1D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle.read_index());
         return texture.SampleLevel(s, u, mip);
@@ -245,6 +251,12 @@ struct Texture {
     template<typename T>
     T sample_level_3d(SamplerState s, float3 uvw, float mip) {
         Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle.read_index());
+        return texture.SampleLevel(s, uvw, mip);
+    }
+
+    template<typename T>
+    T sample_level_cube(SamplerState s, float3 uvw, float mip) {
+        TextureCube<T> texture = DESCRIPTOR_HEAP(TextureCubeHandle<T>, this.handle.read_index());
         return texture.SampleLevel(s, uvw, mip);
     }
 };
@@ -307,6 +319,12 @@ struct RwTexture {
     }
 
     template<typename T>
+    T sample_cube(SamplerState s, float3 uvw) {
+        TextureCube<T> texture = DESCRIPTOR_HEAP(TextureCubeHandle<T>, this.handle.read_index());
+        return texture.Sample(s, uvw);
+    }
+
+    template<typename T>
     T sample_level_1d(SamplerState sampler, float u, float mip) {
         Texture1D<T> texture = DESCRIPTOR_HEAP(Texture1DHandle<T>, this.handle.read_index());
         return texture.SampleLevel(sampler, u, mip);
@@ -322,6 +340,12 @@ struct RwTexture {
     T sample_level_3d(SamplerState sampler, float3 uvw, float mip) {
         Texture3D<T> texture = DESCRIPTOR_HEAP(Texture3DHandle<T>, this.handle.read_index());
         return texture.SampleLevel(sampler, uvw, mip);
+    }
+
+    template<typename T>
+    T sample_level_cube(SamplerState s, float3 uvw, float mip) {
+        TextureCube<T> texture = DESCRIPTOR_HEAP(TextureCubeHandle<T>, this.handle.read_index());
+        return texture.SampleLevel(s, uvw, mip);
     }
 };
 

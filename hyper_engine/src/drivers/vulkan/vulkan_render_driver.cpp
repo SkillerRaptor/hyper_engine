@@ -315,10 +315,16 @@ Texture *VulkanRenderDriver::create_texture(
     const Dimension dimension,
     const BitFlags<TextureUsage> usage) const
 {
+    VkImageCreateFlags image_create_flags = 0;
+    if (dimension == Dimension::TextureCube)
+    {
+        image_create_flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+    }
+
     const VkImageCreateInfo image_create_info = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
         .pNext = nullptr,
-        .flags = 0,
+        .flags = image_create_flags,
         .imageType = get_image_type(dimension),
         .format = get_format(format),
         .extent =
@@ -355,7 +361,7 @@ Texture *VulkanRenderDriver::create_texture(
     HE_ASSERT(image != VK_NULL_HANDLE);
     HE_ASSERT(allocation != VK_NULL_HANDLE);
 
-    const VkImageView image_view = create_internal_image_view(image, dimension, format);
+    const VkImageView image_view = create_internal_image_view(image, dimension, format, mip_levels, array_size);
 
     return new VulkanTexture({
         .image = image,
@@ -802,7 +808,7 @@ void VulkanRenderDriver::submit_command_buffer(CommandBuffer *command_buffer) co
     if (vulkan_command_buffer->swapchain_texture_acquired)
     {
         Texture *swapchain_texture = m_swapchain_textures[m_swapchain_texture_index];
-        transition_texture_layout(command_buffer, swapchain_texture, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        transition_texture_layout(command_buffer, swapchain_texture, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 0, 0);
     }
 
     HE_VK_CHECK(vkEndCommandBuffer(vulkan_command_buffer->command_buffer), vkEndCommandBuffer);
@@ -977,7 +983,7 @@ void VulkanRenderDriver::copy_buffer_to_texture(
     const VulkanBuffer *vulkan_src = reinterpret_cast<const VulkanBuffer *>(src);
     const VulkanTexture *vulkan_dst = reinterpret_cast<const VulkanTexture *>(dst);
 
-    transition_texture_layout(command_buffer, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    transition_texture_layout(command_buffer, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, dst_mip_level, dst_array_index);
 
     const VkImageSubresourceLayers subresource_layers = {
         .aspectMask = get_image_aspect_flags(vulkan_dst->format),
@@ -1034,7 +1040,7 @@ void VulkanRenderDriver::copy_texture_to_buffer(
     const VulkanTexture *vulkan_src = reinterpret_cast<const VulkanTexture *>(src);
     const VulkanBuffer *vulkan_dst = reinterpret_cast<const VulkanBuffer *>(dst);
 
-    transition_texture_layout(command_buffer, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+    transition_texture_layout(command_buffer, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, src_mip_level, src_array_index);
 
     const VkImageSubresourceLayers subresource_layers = {
         .aspectMask = get_image_aspect_flags(vulkan_src->format),
@@ -1093,8 +1099,8 @@ void VulkanRenderDriver::copy_texture_to_texture(
     const VulkanTexture *vulkan_src = reinterpret_cast<const VulkanTexture *>(src);
     const VulkanTexture *vulkan_dst = reinterpret_cast<const VulkanTexture *>(dst);
 
-    transition_texture_layout(command_buffer, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-    transition_texture_layout(command_buffer, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    transition_texture_layout(command_buffer, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, src_mip_level, src_array_index);
+    transition_texture_layout(command_buffer, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, dst_mip_level, dst_array_index);
 
     const VkImageCopy2 region = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_COPY_2,
@@ -1339,7 +1345,7 @@ void VulkanRenderDriver::begin_render_pass(
     {
         const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(color_attachment.texture);
 
-        transition_texture_layout(command_buffer, color_attachment.texture, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        transition_texture_layout(command_buffer, color_attachment.texture, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 0, 0);
 
         const VkRenderingAttachmentInfo color_attachment_info = {
             .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
@@ -1364,7 +1370,7 @@ void VulkanRenderDriver::begin_render_pass(
         const VulkanTexture *vulkan_texture = reinterpret_cast<const VulkanTexture *>(render_pass_depth_stencil_attachment.texture);
 
         transition_texture_layout(
-            command_buffer, render_pass_depth_stencil_attachment.texture, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+            command_buffer, render_pass_depth_stencil_attachment.texture, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 0, 0);
 
         constexpr VkClearValue depth_clear_value = {
             .depthStencil =
@@ -1940,7 +1946,7 @@ void VulkanRenderDriver::create_swapchain(const uint32_t width, const uint32_t h
     for (const VkImage image : images)
     {
         const Format format = format_to_texture_format(surface_format.format);
-        const VkImageView image_view = create_internal_image_view(image, Dimension::Texture2D, format);
+        const VkImageView image_view = create_internal_image_view(image, Dimension::Texture2D, format, 1, 1);
 
         Texture *texture = new VulkanTexture({
             .image = image,
@@ -2113,7 +2119,12 @@ void VulkanRenderDriver::create_descriptor_sets()
     }
 }
 
-VkImageView VulkanRenderDriver::create_internal_image_view(const VkImage image, const Dimension dimension, const Format format) const
+VkImageView VulkanRenderDriver::create_internal_image_view(
+    const VkImage image,
+    const Dimension dimension,
+    const Format format,
+    const uint32_t mip_levels,
+    const uint32_t array_size) const
 {
     constexpr VkComponentMapping component_mapping = {
         .r = VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -2126,9 +2137,9 @@ VkImageView VulkanRenderDriver::create_internal_image_view(const VkImage image, 
     const VkImageSubresourceRange subresource_range = {
         .aspectMask = get_image_aspect_flags(format),
         .baseMipLevel = 0,
-        .levelCount = 1,
+        .levelCount = mip_levels,
         .baseArrayLayer = 0,
-        .layerCount = 1,
+        .layerCount = array_size,
     };
 
     const VkImageViewCreateInfo image_view_create_info = {
@@ -2149,20 +2160,25 @@ VkImageView VulkanRenderDriver::create_internal_image_view(const VkImage image, 
     return image_view;
 }
 
-void VulkanRenderDriver::transition_texture_layout(const CommandBuffer *command_buffer, Texture *texture, const VkImageLayout new_layout)
+void VulkanRenderDriver::transition_texture_layout(
+    const CommandBuffer *command_buffer,
+    Texture *texture,
+    const VkImageLayout new_layout,
+    const uint32_t mip_level,
+    const uint32_t array_index)
 {
     const VulkanCommandBuffer *vulkan_command_buffer = reinterpret_cast<const VulkanCommandBuffer *>(command_buffer);
     VulkanTexture *vulkan_texture = reinterpret_cast<VulkanTexture *>(texture);
 
     // FIXME: Add more specific src/dst stage/access masks
 
-    // FIXME: Add Subresource
+    // FIXME
     const VkImageSubresourceRange subresource_range = {
         .aspectMask = get_image_aspect_flags(vulkan_texture->format),
         .baseMipLevel = 0,
-        .levelCount = 1,
+        .levelCount = VK_REMAINING_MIP_LEVELS,
         .baseArrayLayer = 0,
-        .layerCount = 1,
+        .layerCount = VK_REMAINING_ARRAY_LAYERS,
     };
 
     const VkImageMemoryBarrier2 image_memory_barrier = {
@@ -2811,6 +2827,7 @@ VkImageType VulkanRenderDriver::get_image_type(const Dimension dimension)
         return VK_IMAGE_TYPE_1D;
     case Dimension::Texture2D:
     case Dimension::Texture2DArray:
+    case Dimension::TextureCube:
         return VK_IMAGE_TYPE_2D;
     case Dimension::Texture3D:
         return VK_IMAGE_TYPE_3D;
@@ -3037,6 +3054,8 @@ VkImageViewType VulkanRenderDriver::get_image_view_type(const Dimension dimensio
         return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
     case Dimension::Texture3D:
         return VK_IMAGE_VIEW_TYPE_3D;
+    case Dimension::TextureCube:
+        return VK_IMAGE_VIEW_TYPE_CUBE;
     case Dimension::Unknown:
     default:
         HE_UNREACHABLE();

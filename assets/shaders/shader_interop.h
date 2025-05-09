@@ -140,6 +140,15 @@ struct ObjectPushConstants
 #endif
 };
 
+// NOTE: Should the skybox be a push constant?
+struct SkyboxPushConstants
+{
+    TEXTURE skybox_texture;
+    SAMPLER skybox_sampler;
+    uint padding_0;
+    uint padding_1;
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 // Globals
 ////////////////////////////////////////////////////////////////////////////////
@@ -182,6 +191,8 @@ struct ShaderCamera
     float4x4 inverse_projection;
     float4x4 view_projection;
     float4x4 inverse_view_projection;
+
+    float4x4 smaller_view;
 
     float near_plane;
     float far_plane;

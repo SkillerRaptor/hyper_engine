@@ -263,7 +263,7 @@ private:
     void create_descriptor_set_layouts();
     void create_descriptor_sets();
 
-    VkImageView create_internal_image_view(const VkImage image, const Dimension dimension, const Format format) const;
+    VkImageView create_internal_image_view(VkImage image, Dimension dimension, Format format, uint32_t mip_levels, uint32_t array_size) const;
 
     static bool is_validation_layer_supported();
     static bool check_extension_support(const VkPhysicalDevice &physical_device);
@@ -275,7 +275,12 @@ private:
         const VkDebugUtilsMessengerCallbackDataEXT *callback_data,
         void *);
 
-    static void transition_texture_layout(const CommandBuffer *command_buffer, Texture *texture, VkImageLayout new_layout);
+    static void transition_texture_layout(
+        const CommandBuffer *command_buffer,
+        Texture *texture,
+        VkImageLayout new_layout,
+        uint32_t mip_level,
+        uint32_t array_index);
 
     static VkExtent2D choose_extent(uint32_t width, uint32_t height, const VkSurfaceCapabilitiesKHR &capabilities);
     static VkSurfaceFormatKHR choose_format(const std::vector<VkSurfaceFormatKHR> &formats);
