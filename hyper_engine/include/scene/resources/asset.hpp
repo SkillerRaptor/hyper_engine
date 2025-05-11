@@ -47,6 +47,10 @@ public:
         std::optional<size_t> metallic_roughness_texture_index = std::nullopt;
         std::optional<size_t> metallic_roughness_sampler_index = std::nullopt;
 
+        std::optional<size_t> normal_texture_index = std::nullopt;
+        std::optional<size_t> normal_sampler_index = std::nullopt;
+        float normal_scale = 1.0f;
+
         AlphaMode alpha_mode = AlphaMode::Opaque;
         float alpha_cutoff = 0.0f;
 

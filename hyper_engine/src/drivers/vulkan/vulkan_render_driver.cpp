@@ -3243,7 +3243,7 @@ VkColorComponentFlags VulkanRenderDriver::get_color_component_flags(const BitFla
     return color_component_flags;
 }
 
-VkAttachmentLoadOp VulkanRenderDriver::get_attachment_load_operation(LoadOperation load_operation)
+VkAttachmentLoadOp VulkanRenderDriver::get_attachment_load_operation(const LoadOperation load_operation)
 {
     switch (load_operation)
     {
@@ -3258,10 +3258,12 @@ VkAttachmentLoadOp VulkanRenderDriver::get_attachment_load_operation(LoadOperati
     }
 }
 
-VkAttachmentStoreOp VulkanRenderDriver::get_attachment_store_operation(StoreOperation store_operation)
+VkAttachmentStoreOp VulkanRenderDriver::get_attachment_store_operation(const StoreOperation store_operation)
 {
     switch (store_operation)
     {
+    case StoreOperation::None:
+        return VK_ATTACHMENT_STORE_OP_NONE;
     case StoreOperation::Store:
         return VK_ATTACHMENT_STORE_OP_STORE;
     case StoreOperation::DontCare:

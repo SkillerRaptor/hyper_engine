@@ -77,104 +77,6 @@ void Engine::initialize()
             },
     });
 
-    // Default
-    m_default_texture = m_render_system->create_texture({
-        .label = std::nullopt,
-        .width = 16,
-        .height = 16,
-        .depth = 1,
-        .array_size = 1,
-        .mip_levels = 1,
-        .format = Format::Rgba8Unorm,
-        .dimension = Dimension::Texture2D,
-        .usage = TextureUsage::ShaderResource,
-    });
-
-    const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
-
-    const uint32_t black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
-    const uint32_t magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
-
-    std::array<uint32_t, 16 * 16> pixels = {};
-    for (size_t x = 0; x < 16; x++)
-    {
-        for (size_t y = 0; y < 16; y++)
-        {
-            pixels[y * 16 + x] = ((x % 2) ^ (y % 2)) ? magenta : black;
-        }
-    }
-    m_render_system->write_texture(
-        command_buffer,
-        {
-            .texture = m_default_texture,
-            .offset =
-                {
-                    .x = 0,
-                    .y = 0,
-                    .z = 0,
-                },
-            .extent =
-                {
-                    .width = 16,
-                    .height = 16,
-                    .depth = 1,
-                },
-            .mip_level = 0,
-            .array_index = 0,
-        },
-        pixels.data(),
-        pixels.size() * sizeof(uint32_t));
-
-    m_render_system->submit_command_buffer(command_buffer);
-
-    m_default_sampler = m_render_system->create_sampler({
-        .label = std::nullopt,
-        .mag_filter = Filter::Nearest,
-        .min_filter = Filter::Nearest,
-        .mipmap_filter = Filter::Nearest,
-        .address_mode_u = AddressMode::Repeat,
-        .address_mode_v = AddressMode::Repeat,
-        .address_mode_w = AddressMode::Repeat,
-        .mip_lod_bias = 0.0f,
-        .compare_operation = CompareOperation::Never,
-        .min_lod = 0.0f,
-        .max_lod = 1.0f,
-        .border_color = BorderColor::TransparentBlack,
-    });
-
-    // Rendering
-
-    const glm::uvec2 window_size = m_window_system->get_window_size(m_window);
-    m_depth_texture = m_render_system->create_texture({
-        .label = std::nullopt,
-        .width = window_size.x,
-        .height = window_size.y,
-        .depth = 1,
-        .array_size = 1,
-        .mip_levels = 1,
-        .format = Format::D32Sfloat,
-        .dimension = Dimension::Texture2D,
-        .usage = TextureUsage::RenderAttachment,
-    });
-
-    m_window_system->register_listener<WindowResizeEvent>(
-        [this](const WindowResizeEvent &event)
-        {
-            m_render_system->destroy_texture(m_depth_texture);
-
-            m_depth_texture = m_render_system->create_texture({
-                .label = std::nullopt,
-                .width = event.width(),
-                .height = event.height(),
-                .depth = 1,
-                .array_size = 1,
-                .mip_levels = 1,
-                .format = Format::D32Sfloat,
-                .dimension = Dimension::Texture2D,
-                .usage = TextureUsage::RenderAttachment,
-            });
-        });
-
     m_pipeline_layout = m_render_system->create_pipeline_layout({
         .label = std::nullopt,
         .push_constant_size = sizeof(ObjectPushConstants),
@@ -184,14 +86,14 @@ void Engine::initialize()
         .label = std::nullopt,
         .type = ShaderType::Vertex,
         .entry = "vs_main",
-        .path = "./assets/shaders/mesh_shader.hlsl",
+        .path = "./assets/shaders/pbr_shader.hlsl",
     });
 
     const ShaderId fragment_shader = m_render_system->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Fragment,
         .entry = "fs_main",
-        .path = "./assets/shaders/mesh_shader.hlsl",
+        .path = "./assets/shaders/pbr_shader.hlsl",
     });
 
     m_render_pipeline = m_render_system->create_render_pipeline({
@@ -202,7 +104,7 @@ void Engine::initialize()
         .color_attachment_states =
             {
                 {
-                    .format = Format::Bgra8Unorm,
+                    .format = Format::Rgba16Sfloat,
                     .blend_state =
                         {
                             .blend_enable = false,
@@ -242,68 +144,6 @@ void Engine::initialize()
     m_render_system->destroy_shader(fragment_shader);
     m_render_system->destroy_shader(vertex_shader);
 
-    const ShaderId grid_vertex_shader = m_render_system->create_shader({
-        .label = std::nullopt,
-        .type = ShaderType::Vertex,
-        .entry = "vs_main",
-        .path = "./assets/shaders/grid_shader.hlsl",
-    });
-
-    const ShaderId grid_fragment_shader = m_render_system->create_shader({
-        .label = std::nullopt,
-        .type = ShaderType::Fragment,
-        .entry = "fs_main",
-        .path = "./assets/shaders/grid_shader.hlsl",
-    });
-
-    m_grid_pipeline = m_render_system->create_render_pipeline({
-        .label = std::nullopt,
-        .layout = m_pipeline_layout,
-        .vertex_shader = grid_vertex_shader,
-        .fragment_shader = grid_fragment_shader,
-        .color_attachment_states =
-            {
-                {
-                    .format = Format::Bgra8Unorm,
-                    .blend_state =
-                        {
-                            .blend_enable = true,
-                            .src_blend_factor = BlendFactor::SrcAlpha,
-                            .dst_blend_factor = BlendFactor::One,
-                            .operation = BlendOperation::Add,
-                            .alpha_src_blend_factor = BlendFactor::One,
-                            .alpha_dst_blend_factor = BlendFactor::Zero,
-                            .alpha_operation = BlendOperation::Add,
-                            .color_writes = ColorWrites::All,
-                        },
-                },
-            },
-        .primitive_state =
-            {
-                .topology = PrimitiveTopology::TriangleList,
-                .front_face = FrontFace::CounterClockwise,
-                .cull_mode = Face::None,
-                .polygon_mode = PolygonMode::Fill,
-            },
-        .depth_stencil_state =
-            {
-                .depth_test_enable = true,
-                .depth_write_enable = true,
-                .depth_format = Format::D32Sfloat,
-                .depth_compare_operation = CompareOperation::Less,
-                .depth_bias_state =
-                    {
-                        .depth_bias_enable = false,
-                        .constant = 0.0f,
-                        .clamp = 0.0f,
-                        .slope = 0.0f,
-                    },
-            },
-    });
-
-    m_render_system->destroy_shader(grid_fragment_shader);
-    m_render_system->destroy_shader(grid_vertex_shader);
-
     m_skybox_pipeline_layout = m_render_system->create_pipeline_layout({
         .label = std::nullopt,
         .push_constant_size = sizeof(SkyboxPushConstants),
@@ -331,7 +171,7 @@ void Engine::initialize()
         .color_attachment_states =
             {
                 {
-                    .format = Format::Bgra8Unorm,
+                    .format = Format::Rgba16Sfloat,
                     .blend_state =
                         {
                             .blend_enable = false,
@@ -371,7 +211,7 @@ void Engine::initialize()
     m_render_system->destroy_shader(skybox_fragment_shader);
     m_render_system->destroy_shader(skybox_vertex_shader);
 
-    std::array<uint8_t *, 6> texture_datas;
+    std::array<uint8_t *, 6> texture_datas = {};
 
     int width = 0;
     int height = 0;
@@ -417,13 +257,293 @@ void Engine::initialize()
         .border_color = BorderColor::TransparentBlack,
     });
 
-    const CommandBufferId upload_command_buffer = m_render_system->acquire_command_buffer();
-    for (size_t i = 0; i < 6; ++i)
     {
-        m_render_system->write_texture(
-            upload_command_buffer,
+        const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
+        for (size_t i = 0; i < 6; ++i)
+        {
+            m_render_system->write_texture(
+                command_buffer,
+                {
+                    .texture = m_skybox_texture,
+                    .offset =
+                        {
+                            .x = 0,
+                            .y = 0,
+                            .z = 0,
+                        },
+                    .extent =
+                        {
+                            .width = static_cast<uint32_t>(width),
+                            .height = static_cast<uint32_t>(height),
+                            .depth = 1,
+                        },
+                    .mip_level = 0,
+                    .array_index = static_cast<uint32_t>(i),
+                },
+                texture_datas[i],
+                layer_size);
+        }
+        m_render_system->submit_command_buffer(command_buffer);
+    }
+
+    // Grid
+    const ShaderId grid_vertex_shader = m_render_system->create_shader({
+        .label = std::nullopt,
+        .type = ShaderType::Vertex,
+        .entry = "vs_main",
+        .path = "./assets/shaders/grid_shader.hlsl",
+    });
+
+    const ShaderId grid_fragment_shader = m_render_system->create_shader({
+        .label = std::nullopt,
+        .type = ShaderType::Fragment,
+        .entry = "fs_main",
+        .path = "./assets/shaders/grid_shader.hlsl",
+    });
+
+    m_grid_pipeline = m_render_system->create_render_pipeline({
+        .label = std::nullopt,
+        .layout = m_pipeline_layout,
+        .vertex_shader = grid_vertex_shader,
+        .fragment_shader = grid_fragment_shader,
+        .color_attachment_states =
             {
-                .texture = m_skybox_texture,
+                {
+                    .format = Format::Rgba16Sfloat,
+                    .blend_state =
+                        {
+                            .blend_enable = true,
+                            .src_blend_factor = BlendFactor::SrcAlpha,
+                            .dst_blend_factor = BlendFactor::One,
+                            .operation = BlendOperation::Add,
+                            .alpha_src_blend_factor = BlendFactor::One,
+                            .alpha_dst_blend_factor = BlendFactor::Zero,
+                            .alpha_operation = BlendOperation::Add,
+                            .color_writes = ColorWrites::All,
+                        },
+                },
+            },
+        .primitive_state =
+            {
+                .topology = PrimitiveTopology::TriangleList,
+                .front_face = FrontFace::CounterClockwise,
+                .cull_mode = Face::None,
+                .polygon_mode = PolygonMode::Fill,
+            },
+        .depth_stencil_state =
+            {
+                .depth_test_enable = true,
+                .depth_write_enable = true,
+                .depth_format = Format::D32Sfloat,
+                .depth_compare_operation = CompareOperation::Less,
+                .depth_bias_state =
+                    {
+                        .depth_bias_enable = false,
+                        .constant = 0.0f,
+                        .clamp = 0.0f,
+                        .slope = 0.0f,
+                    },
+            },
+    });
+
+    m_render_system->destroy_shader(grid_fragment_shader);
+    m_render_system->destroy_shader(grid_vertex_shader);
+
+    // HDR
+    m_composition_pipeline_layout = m_render_system->create_pipeline_layout({
+        .label = std::nullopt,
+        .push_constant_size = sizeof(CompositionPushConstants),
+    });
+
+    const ShaderId composition_vertex_shader = m_render_system->create_shader({
+        .label = std::nullopt,
+        .type = ShaderType::Vertex,
+        .entry = "vs_main",
+        .path = "./assets/shaders/composition_shader.hlsl",
+    });
+
+    const ShaderId composition_fragment_shader = m_render_system->create_shader({
+        .label = std::nullopt,
+        .type = ShaderType::Fragment,
+        .entry = "fs_main",
+        .path = "./assets/shaders/composition_shader.hlsl",
+    });
+
+    m_composition_pipeline = m_render_system->create_render_pipeline({
+        .label = std::nullopt,
+        .layout = m_composition_pipeline_layout,
+        .vertex_shader = composition_vertex_shader,
+        .fragment_shader = composition_fragment_shader,
+        .color_attachment_states =
+            {
+                {
+                    .format = Format::Bgra8Unorm,
+                    .blend_state =
+                        {
+                            .blend_enable = false,
+                            .src_blend_factor = BlendFactor::One,
+                            .dst_blend_factor = BlendFactor::Zero,
+                            .operation = BlendOperation::Add,
+                            .alpha_src_blend_factor = BlendFactor::One,
+                            .alpha_dst_blend_factor = BlendFactor::Zero,
+                            .alpha_operation = BlendOperation::Add,
+                            .color_writes = ColorWrites::All,
+                        },
+                },
+            },
+        .primitive_state =
+            {
+                .topology = PrimitiveTopology::TriangleList,
+                .front_face = FrontFace::CounterClockwise,
+                .cull_mode = Face::Back,
+                .polygon_mode = PolygonMode::Fill,
+            },
+        .depth_stencil_state =
+            {
+                .depth_test_enable = false,
+                .depth_write_enable = false,
+                .depth_format = Format::D32Sfloat,
+                .depth_compare_operation = CompareOperation::Less,
+                .depth_bias_state =
+                    {
+                        .depth_bias_enable = false,
+                        .constant = 0.0f,
+                        .clamp = 0.0f,
+                        .slope = 0.0f,
+                    },
+            },
+    });
+
+    m_render_system->destroy_shader(composition_fragment_shader);
+    m_render_system->destroy_shader(composition_vertex_shader);
+
+    const glm::uvec2 window_size = m_window_system->get_window_size(m_window);
+    m_hdr_texture = m_render_system->create_texture({
+        .label = std::nullopt,
+        .width = window_size.x,
+        .height = window_size.y,
+        .depth = 1,
+        .array_size = 1,
+        .mip_levels = 1,
+        .format = Format::Rgba16Sfloat,
+        .dimension = Dimension::Texture2D,
+        .usage =
+            {
+                TextureUsage::RenderAttachment,
+                TextureUsage::ShaderResource,
+            },
+    });
+
+    m_hdr_sampler = m_render_system->create_sampler({
+        .label = std::nullopt,
+        .mag_filter = Filter::Nearest,
+        .min_filter = Filter::Nearest,
+        .mipmap_filter = Filter::Nearest,
+        .address_mode_u = AddressMode::Repeat,
+        .address_mode_v = AddressMode::Repeat,
+        .address_mode_w = AddressMode::Repeat,
+        .mip_lod_bias = 0.0f,
+        .compare_operation = CompareOperation::Never,
+        .min_lod = 0.0f,
+        .max_lod = 1.0f,
+        .border_color = BorderColor::TransparentBlack,
+    });
+
+    // Depth
+    m_depth_texture = m_render_system->create_texture({
+        .label = std::nullopt,
+        .width = window_size.x,
+        .height = window_size.y,
+        .depth = 1,
+        .array_size = 1,
+        .mip_levels = 1,
+        .format = Format::D32Sfloat,
+        .dimension = Dimension::Texture2D,
+        .usage = TextureUsage::RenderAttachment,
+    });
+
+    m_window_system->register_listener<WindowResizeEvent>(
+        [this](const WindowResizeEvent &event)
+        {
+            m_render_system->destroy_texture(m_depth_texture);
+            m_render_system->destroy_texture(m_hdr_texture);
+
+            m_hdr_texture = m_render_system->create_texture({
+                .label = std::nullopt,
+                .width = event.width(),
+                .height = event.height(),
+                .depth = 1,
+                .array_size = 1,
+                .mip_levels = 1,
+                .format = Format::Rgba16Sfloat,
+                .dimension = Dimension::Texture2D,
+                .usage =
+                    {
+                        TextureUsage::RenderAttachment,
+                        TextureUsage::ShaderResource,
+                    },
+            });
+
+            m_depth_texture = m_render_system->create_texture({
+                .label = std::nullopt,
+                .width = event.width(),
+                .height = event.height(),
+                .depth = 1,
+                .array_size = 1,
+                .mip_levels = 1,
+                .format = Format::D32Sfloat,
+                .dimension = Dimension::Texture2D,
+                .usage = TextureUsage::RenderAttachment,
+            });
+        });
+
+    // Default
+    m_default_texture = m_render_system->create_texture({
+        .label = std::nullopt,
+        .width = 16,
+        .height = 16,
+        .depth = 1,
+        .array_size = 1,
+        .mip_levels = 1,
+        .format = Format::Rgba8Unorm,
+        .dimension = Dimension::Texture2D,
+        .usage = TextureUsage::ShaderResource,
+    });
+
+    m_default_sampler = m_render_system->create_sampler({
+        .label = std::nullopt,
+        .mag_filter = Filter::Nearest,
+        .min_filter = Filter::Nearest,
+        .mipmap_filter = Filter::Nearest,
+        .address_mode_u = AddressMode::Repeat,
+        .address_mode_v = AddressMode::Repeat,
+        .address_mode_w = AddressMode::Repeat,
+        .mip_lod_bias = 0.0f,
+        .compare_operation = CompareOperation::Never,
+        .min_lod = 0.0f,
+        .max_lod = 1.0f,
+        .border_color = BorderColor::TransparentBlack,
+    });
+
+    {
+        const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
+
+        const uint32_t black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
+        const uint32_t magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
+
+        std::array<uint32_t, 16 * 16> pixels = {};
+        for (size_t x = 0; x < 16; x++)
+        {
+            for (size_t y = 0; y < 16; y++)
+            {
+                pixels[y * 16 + x] = ((x % 2) ^ (y % 2)) ? magenta : black;
+            }
+        }
+
+        m_render_system->write_texture(
+            command_buffer,
+            {
+                .texture = m_default_texture,
                 .offset =
                     {
                         .x = 0,
@@ -432,17 +552,18 @@ void Engine::initialize()
                     },
                 .extent =
                     {
-                        .width = static_cast<uint32_t>(width),
-                        .height = static_cast<uint32_t>(height),
+                        .width = 16,
+                        .height = 16,
                         .depth = 1,
                     },
                 .mip_level = 0,
-                .array_index = static_cast<uint32_t>(i),
+                .array_index = 0,
             },
-            texture_datas[i],
-            layer_size);
+            pixels.data(),
+            pixels.size() * sizeof(uint32_t));
+
+        m_render_system->submit_command_buffer(command_buffer);
     }
-    m_render_system->submit_command_buffer(upload_command_buffer);
 
     m_sponza = Asset::load("./assets/models/sponza/Sponza.gltf");
     m_renderables = upload_asset(m_sponza);
@@ -473,6 +594,7 @@ void Engine::shutdown() const
     m_render_system->destroy_pipeline_layout(m_pipeline_layout);
 
     m_render_system->destroy_texture(m_depth_texture);
+    m_render_system->destroy_texture(m_hdr_texture);
 
     m_render_system->destroy_sampler(m_default_sampler);
     m_render_system->destroy_texture(m_default_texture);
@@ -596,8 +718,6 @@ void Engine::render() const
         },
         shader_scene);
 
-    const TextureId swapchain_texture = m_render_system->acquire_swapchain_texture(command_buffer);
-
     const RenderPassId render_pass = m_render_system->begin_render_pass(
         command_buffer,
         {
@@ -614,7 +734,7 @@ void Engine::render() const
             .color_attachments =
                 {
                     {
-                        .texture = swapchain_texture,
+                        .texture = m_hdr_texture,
                         .operations =
                             {
                                 .load_operation = LoadOperation::Clear,
@@ -681,7 +801,7 @@ void Engine::render() const
             .color_attachments =
                 {
                     {
-                        .texture = swapchain_texture,
+                        .texture = m_hdr_texture,
                         .operations =
                             {
                                 .load_operation = LoadOperation::Load,
@@ -695,7 +815,7 @@ void Engine::render() const
                     .depth_operations =
                         {
                             .load_operation = LoadOperation::Load,
-                            .store_operation = StoreOperation::DontCare,
+                            .store_operation = StoreOperation::None,
                         },
                 },
         });
@@ -727,7 +847,7 @@ void Engine::render() const
             .color_attachments =
                 {
                     {
-                        .texture = swapchain_texture,
+                        .texture = m_hdr_texture,
                         .operations =
                             {
                                 .load_operation = LoadOperation::Load,
@@ -748,6 +868,45 @@ void Engine::render() const
     m_render_system->bind_pipeline(grid_render_pass, m_grid_pipeline);
     m_render_system->draw(grid_render_pass, 6, 1, 0, 0);
     m_render_system->end_render_pass(grid_render_pass);
+
+    const TextureId swapchain_texture = m_render_system->acquire_swapchain_texture(command_buffer);
+
+    const RenderPassId composition_render_pass = m_render_system->begin_render_pass(
+        command_buffer,
+        {
+            .label =
+                Label{
+                    .name = "Composition Render Pass",
+                    .color =
+                        {
+                            .r = 255,
+                            .g = 255,
+                            .b = 0,
+                        },
+                },
+            .color_attachments =
+                {
+                    {
+                        .texture = swapchain_texture,
+                        .operations =
+                            {
+                                .load_operation = LoadOperation::Clear,
+                                .store_operation = StoreOperation::Store,
+                            },
+                    },
+                },
+            .depth_stencil_attachment = std::nullopt,
+        });
+    m_render_system->bind_pipeline(composition_render_pass, m_composition_pipeline);
+    const CompositionPushConstants composition_push_constants = {
+        .hdr_texture = m_render_system->get_texture_handle(m_hdr_texture),
+        .hdr_sampler = m_render_system->get_sampler_handle(m_hdr_sampler),
+        .padding_0 = 0,
+        .padding_1 = 0,
+    };
+    m_render_system->push_constants(composition_render_pass, composition_push_constants);
+    m_render_system->draw(composition_render_pass, 3, 1, 0, 0);
+    m_render_system->end_render_pass(composition_render_pass);
 
     m_render_system->submit_command_buffer(command_buffer);
 }
@@ -1053,15 +1212,93 @@ void Engine::upload_model(
                 metal_roughness_sampler = m_render_system->get_sampler_handle(m_default_sampler);
             }
 
+            ResourceHandle normal_texture;
+            if (asset_material.normal_texture_index.has_value())
+            {
+                const Asset::Texture &asset_texture = asset.textures()[asset_material.normal_texture_index.value()];
+
+                const TextureId texture = m_render_system->create_texture({
+                    .label = std::nullopt,
+                    .width = asset_texture.width,
+                    .height = asset_texture.height,
+                    .depth = 1,
+                    .array_size = 1,
+                    .mip_levels = 1,
+                    .format = Format::Rgba8Unorm,
+                    .dimension = Dimension::Texture2D,
+                    .usage = TextureUsage::ShaderResource,
+                });
+
+                m_render_system->write_texture(
+                    command_buffer,
+                    {
+                        .texture = texture,
+                        .offset =
+                            {
+                                .x = 0,
+                                .y = 0,
+                                .z = 0,
+                            },
+                        .extent =
+                            {
+                                .width = static_cast<uint32_t>(asset_texture.width),
+                                .height = static_cast<uint32_t>(asset_texture.height),
+                                .depth = 1,
+                            },
+                        .mip_level = 0,
+                        .array_index = 0,
+                    },
+                    asset_texture.data.data(),
+                    static_cast<uint32_t>(asset_texture.width) * static_cast<uint32_t>(asset_texture.height) * asset_texture.channels);
+
+                normal_texture = m_render_system->get_texture_handle(texture);
+            }
+            else
+            {
+                normal_texture = m_render_system->get_texture_handle(m_default_texture);
+            }
+
+            ResourceHandle normal_sampler;
+            if (asset_material.normal_sampler_index.has_value())
+            {
+                const Asset::Sampler &asset_sampler = asset.samplers()[asset_material.normal_sampler_index.value()];
+
+                const SamplerId sampler = m_render_system->create_sampler({
+                    .label = std::nullopt,
+                    .mag_filter = asset_sampler.mag_filter,
+                    .min_filter = asset_sampler.min_filter,
+                    .mipmap_filter = asset_sampler.min_filter,
+                    .address_mode_u = AddressMode::Repeat,
+                    .address_mode_v = AddressMode::Repeat,
+                    .address_mode_w = AddressMode::Repeat,
+                    .mip_lod_bias = 0.0f,
+                    .compare_operation = CompareOperation::Never,
+                    .min_lod = 0.0f,
+                    .max_lod = 1.0f,
+                    .border_color = BorderColor::TransparentBlack,
+                });
+                normal_sampler = m_render_system->get_sampler_handle(sampler);
+            }
+            else
+            {
+                normal_sampler = m_render_system->get_sampler_handle(m_default_sampler);
+            }
+
+            const float normal_scale = asset_material.normal_scale;
+
             const ShaderMaterial shader_material = {
-                .color_factors = asset_material.color_factors,
-                .color_texture = color_texture,
-                .color_sampler = color_sampler,
+                .albedo_factors = asset_material.color_factors,
+                .albedo_texture = color_texture,
+                .albedo_sampler = color_sampler,
                 .padding_0 = 0,
                 .padding_1 = 0,
                 .metal_roughness_factors = asset_material.metallic_roughness_factor,
                 .metal_roughness_texture = metal_roughness_texture,
                 .metal_roughness_sampler = metal_roughness_sampler,
+                .normal_texture = normal_texture,
+                .normal_sampler = normal_sampler,
+                .normal_scale = normal_scale,
+                .padding_2 = 0,
             };
 
             const BufferId material_buffer = m_render_system->create_buffer({

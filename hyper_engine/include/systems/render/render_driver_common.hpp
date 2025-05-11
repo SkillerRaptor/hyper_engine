@@ -322,6 +322,7 @@ enum class LoadOperation : uint8_t
 
 enum class StoreOperation : uint8_t
 {
+    None,
     Store,
     DontCare,
 };

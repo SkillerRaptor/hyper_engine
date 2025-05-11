@@ -185,6 +185,23 @@ Asset Asset::load(const std::string_view path)
             metallic_roughness_sampler = sampler_index;
         }
 
+        std::optional<size_t> normal_texture = std::nullopt;
+        std::optional<size_t> normal_sampler = std::nullopt;
+        float normal_scale = 1.0f;
+        if (gltf_material.normalTexture.has_value())
+        {
+            const fastgltf::NormalTextureInfo &normal_texture_info = gltf_material.normalTexture.value();
+            const fastgltf::Texture &texture = asset->textures[normal_texture_info.textureIndex];
+
+            const size_t image_index = texture.imageIndex.value();
+            normal_texture = image_index;
+
+            const size_t sampler_index = texture.samplerIndex.value();
+            normal_sampler = sampler_index;
+
+            normal_scale = normal_texture_info.scale;
+        }
+
         const AlphaMode alpha_mode = [&gltf_material]()
         {
             switch (gltf_material.alphaMode)
@@ -204,6 +221,9 @@ Asset Asset::load(const std::string_view path)
             .metallic_roughness_factor = metallic_roughness_factor,
             .metallic_roughness_texture_index = metallic_roughness_texture,
             .metallic_roughness_sampler_index = metallic_roughness_sampler,
+            .normal_texture_index = normal_texture,
+            .normal_sampler_index = normal_sampler,
+            .normal_scale = normal_scale,
             .alpha_mode = alpha_mode,
             .alpha_cutoff = gltf_material.alphaCutoff,
         };

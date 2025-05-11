@@ -91,15 +91,20 @@ struct ShaderModel
 
 struct ShaderMaterial
 {
-    float4 color_factors;
-    TEXTURE color_texture;
-    SAMPLER color_sampler;
+    float4 albedo_factors;
+    TEXTURE albedo_texture;
+    SAMPLER albedo_sampler;
     uint padding_0;
     uint padding_1;
 
     float2 metal_roughness_factors;
     TEXTURE metal_roughness_texture;
     SAMPLER metal_roughness_sampler;
+    
+    TEXTURE normal_texture;
+    SAMPLER normal_sampler;
+    float normal_scale;
+    uint padding_2;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -145,6 +150,15 @@ struct SkyboxPushConstants
 {
     TEXTURE skybox_texture;
     SAMPLER skybox_sampler;
+    uint padding_0;
+    uint padding_1;
+};
+
+// NOTE: Should the skybox be a push constant?
+struct CompositionPushConstants
+{
+    TEXTURE hdr_texture;
+    SAMPLER hdr_sampler;
     uint padding_0;
     uint padding_1;
 };

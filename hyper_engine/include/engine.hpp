@@ -62,20 +62,25 @@ private:
     BufferId m_camera_buffer;
     BufferId m_scene_buffer;
 
-    TextureId m_default_texture;
-    SamplerId m_default_sampler;
-
-    TextureId m_depth_texture;
-
     PipelineLayoutId m_pipeline_layout;
     RenderPipelineId m_render_pipeline;
-    RenderPipelineId m_grid_pipeline;
 
     PipelineLayoutId m_skybox_pipeline_layout;
     RenderPipelineId m_skybox_pipeline;
-
     TextureId m_skybox_texture;
     SamplerId m_skybox_sampler;
+
+    RenderPipelineId m_grid_pipeline;
+
+    PipelineLayoutId m_composition_pipeline_layout;
+    RenderPipelineId m_composition_pipeline;
+    TextureId m_hdr_texture;
+    SamplerId m_hdr_sampler;
+
+    TextureId m_depth_texture;
+
+    TextureId m_default_texture;
+    SamplerId m_default_sampler;
 
     Asset m_sponza;
     std::vector<GpuModel> m_renderables;
