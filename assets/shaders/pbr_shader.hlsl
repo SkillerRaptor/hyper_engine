@@ -175,7 +175,7 @@ float4 fs_main(VertexOutput input) : SV_TARGET {
     float3 color = ambient + l_0;
 	
     // Reinhard Tone Mapping
-    color = color / (color + float3(1.0, 1.0, 1.0));
+    color = apply_reinhard_tone_mapping(color);
 
     // Applying Gamme Correction
     color = apply_srgb(color);

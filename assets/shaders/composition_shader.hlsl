@@ -32,7 +32,7 @@ VertexOutput vs_main(
 }
 
 float4 fs_main(VertexOutput input) : SV_TARGET {
-    const SamplerState hdr_sampler = g_push.hdr_sampler.load();
-    const float4 color = g_push.hdr_texture.sample_2d<float4>(hdr_sampler, input.uv);
+    const SamplerState composition_sampler = g_push.composition_sampler.load();
+    const float4 color = g_push.composition_texture.sample_2d<float4>(composition_sampler, input.uv);
     return color;
 }

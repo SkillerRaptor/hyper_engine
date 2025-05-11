@@ -11,3 +11,7 @@ float3 apply_srgb(float3 x) {
 float3 remove_srgb(float3 x) {
     return pow(x, 2.2);
 }
+
+float3 apply_reinhard_tone_mapping(float3 x) {
+    return x / (x + float3(1.0, 1.0, 1.0));
+}

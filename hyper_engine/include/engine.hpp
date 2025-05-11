@@ -43,6 +43,12 @@ private:
     void update(float delta_time);
     void render() const;
 
+    void create_pbr();
+    void create_skybox();
+    void create_grid();
+    void create_composition();
+    void create_default();
+
     std::vector<GpuModel> upload_asset(const Asset &asset);
     void upload_model(
         CommandBufferId command_buffer,
@@ -62,21 +68,20 @@ private:
     BufferId m_camera_buffer;
     BufferId m_scene_buffer;
 
-    PipelineLayoutId m_pipeline_layout;
-    RenderPipelineId m_render_pipeline;
+    PipelineLayoutId m_pbr_layout;
+    RenderPipelineId m_pbr_pipeline;
 
-    PipelineLayoutId m_skybox_pipeline_layout;
+    PipelineLayoutId m_skybox_layout;
     RenderPipelineId m_skybox_pipeline;
     TextureId m_skybox_texture;
     SamplerId m_skybox_sampler;
 
     RenderPipelineId m_grid_pipeline;
 
-    PipelineLayoutId m_composition_pipeline_layout;
+    PipelineLayoutId m_composition_layout;
     RenderPipelineId m_composition_pipeline;
-    TextureId m_hdr_texture;
-    SamplerId m_hdr_sampler;
-
+    TextureId m_composition_texture;
+    SamplerId m_composition_sampler;
     TextureId m_depth_texture;
 
     TextureId m_default_texture;

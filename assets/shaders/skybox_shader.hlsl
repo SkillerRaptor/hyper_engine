@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "color_space.hlsli"
 #include "globals.hlsli"
 #include "shader_interop.h"
 
@@ -72,6 +73,10 @@ VertexOutput vs_main(
 }
 
 float4 fs_main(VertexOutput input) : SV_TARGET {
-    const float4 color = g_push.skybox_texture.sample_cube<float4>(g_push.skybox_sampler.load(), input.uvw);
-    return float4(color.xyz, 1.0);
+    float3 color = g_push.skybox_texture.sample_cube<float4>(g_push.skybox_sampler.load(), input.uvw).xyz;
+
+    color = apply_reinhard_tone_mapping(color);
+    color = apply_srgb(color);
+
+    return float4(color, 1.0);
 }

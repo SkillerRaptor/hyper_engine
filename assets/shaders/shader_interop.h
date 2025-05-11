@@ -165,8 +165,8 @@ struct SkyboxPushConstants
 // NOTE: Should the skybox be a push constant?
 struct CompositionPushConstants
 {
-    TEXTURE hdr_texture;
-    SAMPLER hdr_sampler;
+    TEXTURE composition_texture;
+    SAMPLER composition_sampler;
     uint padding_0;
     uint padding_1;
 };
