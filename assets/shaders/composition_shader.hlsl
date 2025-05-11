@@ -18,12 +18,16 @@ struct VertexOutput {
 VertexOutput vs_main(
   uint vertex_id : SV_VertexID
 ) {
-    const float2 uv = float2((vertex_id << 1) & 2, vertex_id & 2);
+    float2 uv = float2((vertex_id << 1) & 2, vertex_id & 2);
     const float4 position = float4(uv * 2.0 - 1.0, 0.0, 1.0);
+
+#if HE_VULKAN
+    uv.y = 1.0 - uv.y;
+#endif
 
     VertexOutput output = (VertexOutput) 0;
     output.position = position;
-    output.uv = float2(uv.x, 1.0 - uv.y);
+    output.uv = uv;
     return output;
 }
 
