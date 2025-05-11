@@ -237,6 +237,7 @@ Asset Asset::load(const std::string_view path)
     {
         std::vector<glm::vec3> positions;
         std::vector<glm::vec3> normals;
+        std::vector<glm::vec4> tangents;
         std::vector<glm::vec3> colors;
         std::vector<glm::vec2> uvs;
         std::vector<uint32_t> indices;
@@ -259,6 +260,7 @@ Asset Asset::load(const std::string_view path)
             fastgltf::Accessor &positions_attribute = asset->accessors[gltf_primitive.findAttribute("POSITION")->accessorIndex];
             positions.resize(positions.size() + positions_attribute.count);
             normals.resize(normals.size() + positions_attribute.count);
+            tangents.resize(tangents.size() + positions_attribute.count);
             colors.resize(colors.size() + positions_attribute.count);
             uvs.resize(uvs.size() + positions_attribute.count);
 
@@ -268,7 +270,8 @@ Asset Asset::load(const std::string_view path)
                 [&](const glm::vec3 value, const size_t index)
                 {
                     positions[initial_vertex + index] = value;
-                    normals[initial_vertex + index] = glm::vec3(1.0, 0.0, 0.0);
+                    normals[initial_vertex + index] = glm::vec3(0.0, 0.0, 1.0);
+                    tangents[initial_vertex + index] = glm::vec4(1.0, 0.0, 0.0, 1.0);
                     colors[initial_vertex + index] = glm::vec3(1.0, 1.0, 1.0);
                     uvs[initial_vertex + index] = glm::vec2(0.0, 0.0);
                 });
@@ -282,6 +285,18 @@ Asset Asset::load(const std::string_view path)
                     [&](const glm::vec3 value, const size_t index)
                     {
                         normals[initial_vertex + index] = value;
+                    });
+            }
+
+            const fastgltf::Attribute *tangents_attribute = gltf_primitive.findAttribute("TANGENT");
+            if (tangents_attribute != gltf_primitive.attributes.end())
+            {
+                fastgltf::iterateAccessorWithIndex<glm::vec4>(
+                    asset.get(),
+                    asset->accessors[tangents_attribute->accessorIndex],
+                    [&](const glm::vec4 value, const size_t index)
+                    {
+                        tangents[initial_vertex + index] = value;
                     });
             }
 
@@ -323,6 +338,7 @@ Asset Asset::load(const std::string_view path)
         const Model model = {
             .positions = positions,
             .normals = normals,
+            .tangents = tangents,
             .colors = colors,
             .uvs = uvs,
             .indices = indices,

@@ -13,6 +13,7 @@ HE_PUSH_CONSTANT(ObjectPushConstants, g_push);
 struct VertexOutput {
     float4 position : SV_POSITION;
     float3 normal : NORMAL;
+    float3x3 tbn : TBN;
     float3 color : COLOR;
     float2 uv : TEXCOORD;
     float3 world_pos : TEXCOORD1;
@@ -28,14 +29,24 @@ VertexOutput vs_main(
     const ShaderModel model = g_push.get_model();
     const float4 position = float4(model.get_position(vertex_id), 1.0);
     const float3 normal = model.get_normal(vertex_id);
+    const float4 tangent = model.get_tangent(vertex_id);
     const float3 color = model.get_color(vertex_id);
     const float2 uv = model.get_uv(vertex_id);
+
+    const float3 n = normalize(float3(mul(g_push.transform_matrix, float4(normal, 0.0)).xyz));
+    float3 t = normalize(float3(mul(g_push.transform_matrix, float4(tangent.xyz, 0.0)).xyz));
+
+    t = normalize(t - dot(t, n) * n);
+    
+    const float3 b = cross(n, t) * tangent.w;
+    const float3x3 tbn = float3x3(t, b, n);
 
     const float4 world_position = mul(g_push.transform_matrix, position);
 
     VertexOutput output = (VertexOutput) 0;
     output.position = mul(camera.view_projection, world_position);
-    output.normal = normal;
+    output.normal = n;
+    output.tbn = transpose(tbn);
     output.color = color;
     output.uv = uv;
     output.world_pos = world_position.xyz;
@@ -112,8 +123,11 @@ float4 fs_main(VertexOutput input) : SV_TARGET {
     if (material.normal_texture.handle.is_valid()) {
         const SamplerState normal_sampler = material.normal_sampler.load();
         const float3 normal_value = material.normal_texture.sample_2d<float3>(normal_sampler, input.uv);
-        const float3 scaled_normal_value = material.normal_scale * normal_value;
-        normal = normalize(scaled_normal_value);
+
+        const float3 tangent_space_normal = normalize(normal_value * 2.0 - 1.0);
+        const float3 scaled_tangent_space_normal = material.normal_scale * tangent_space_normal;
+        const float3 tbn_normal = mul(input.tbn, tangent_space_normal);
+        normal = normalize(tbn_normal);
     }
 
     const ShaderCamera camera = get_camera();
@@ -138,8 +152,8 @@ float4 fs_main(VertexOutput input) : SV_TARGET {
         const float3 radiance = light_color * attenuation;
 
         // Cook-Torrance BRDF
-        float ndf = distribution_ggx(normal, halfway, roughness);        
-        float g   = geometry_smith(normal, view_direction, light_direction, roughness);      
+        const float ndf = distribution_ggx(normal, halfway, roughness);        
+        const float g = geometry_smith(normal, view_direction, light_direction, roughness);      
         const float3 f = fresnel_schlick(max(dot(halfway, view_direction), 0.0), f_0);
   
         const float3 k_s = f;
@@ -162,7 +176,7 @@ float4 fs_main(VertexOutput input) : SV_TARGET {
 	
     // Reinhard Tone Mapping
     color = color / (color + float3(1.0, 1.0, 1.0));
-    
+
     // Applying Gamme Correction
     color = apply_srgb(color);
 

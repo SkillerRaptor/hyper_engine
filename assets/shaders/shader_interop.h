@@ -15,6 +15,7 @@
 #    define float2 ::glm::vec2
 #    define float3 ::glm::vec3
 #    define float4 ::glm::vec4
+#    define float3x3 ::glm::mat3
 #    define float4x4 ::glm::mat4
 
 #    define int2 ::glm::i32vec2
@@ -63,6 +64,7 @@ struct ShaderModel
 {
     ARRAY_BUFFER positions;
     ARRAY_BUFFER normals;
+    ARRAY_BUFFER tangents;
     ARRAY_BUFFER colors;
     ARRAY_BUFFER uvs;
 
@@ -75,6 +77,11 @@ struct ShaderModel
     inline float3 get_normal(uint index)
     {
         return normals.load<float3>(index);
+    }
+
+    inline float4 get_tangent(uint index)
+    {
+        return tangents.load<float4>(index);
     }
 
     inline float3 get_color(uint index)
@@ -100,7 +107,7 @@ struct ShaderMaterial
     float2 metal_roughness_factors;
     TEXTURE metal_roughness_texture;
     SAMPLER metal_roughness_sampler;
-    
+
     TEXTURE normal_texture;
     SAMPLER normal_sampler;
     float normal_scale;
@@ -126,6 +133,7 @@ struct ObjectPushConstants
     SIMPLE_BUFFER material;
     uint padding_0;
     float4x4 transform_matrix;
+    float3x3 normal_matrix;
 
 #ifndef __cplusplus
     inline ShaderScene get_scene()

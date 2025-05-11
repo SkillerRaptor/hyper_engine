@@ -985,6 +985,24 @@ void Engine::upload_model(
             asset_model.normals.data(),
             asset_model.normals.size() * sizeof(glm::vec3));
 
+        const BufferId tangents_buffer = m_render_system->create_buffer({
+            .label = std::nullopt,
+            .size = asset_model.tangents.size() * sizeof(glm::vec4),
+            .usage =
+                {
+                    BufferUsage::Storage,
+                    BufferUsage::ShaderResource,
+                },
+        });
+        m_render_system->write_buffer(
+            command_buffer,
+            {
+                .buffer = tangents_buffer,
+                .offset = 0,
+            },
+            asset_model.tangents.data(),
+            asset_model.tangents.size() * sizeof(glm::vec4));
+
         const BufferId colors_buffer = m_render_system->create_buffer({
             .label = std::nullopt,
             .size = asset_model.colors.size() * sizeof(glm::vec3),
@@ -1024,6 +1042,7 @@ void Engine::upload_model(
         const ShaderModel shader_model = {
             .positions = m_render_system->get_buffer_handle(positions_buffer),
             .normals = m_render_system->get_buffer_handle(normals_buffer),
+            .tangents = m_render_system->get_buffer_handle(tangents_buffer),
             .colors = m_render_system->get_buffer_handle(colors_buffer),
             .uvs = m_render_system->get_buffer_handle(uvs_buffer),
         };
