@@ -10,6 +10,7 @@ set(SOURCES
         src/core/logger.cpp
         src/core/resource_id.cpp
         src/core/string_utils.cpp
+        src/drivers/vulkan/vulkan_render_conversion.cpp
         src/drivers/vulkan/vulkan_render_driver.cpp
         src/scene/resources/asset.cpp
         src/systems/input_system.cpp
@@ -32,6 +33,7 @@ set(HEADERS
         include/core/resource_id.hpp
         include/core/resource_owner.hpp
         include/core/string_utils.hpp
+        include/drivers/vulkan/vulkan_render_conversion.hpp
         include/drivers/vulkan/vulkan_render_driver.hpp
         include/scene/resources/asset.hpp
         include/systems/input_system.hpp
@@ -39,7 +41,7 @@ set(HEADERS
         include/systems/window_system.hpp
         include/systems/render/camera.hpp
         include/systems/render/render_driver.hpp
-        include/systems/render/render_driver_common.hpp
+        include/systems/render/render_types.hpp
         include/systems/render/resource_handle.hpp
         include/systems/render/shader_compiler.hpp
         include/systems/window/event_bus.hpp

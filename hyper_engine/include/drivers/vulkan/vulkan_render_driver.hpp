@@ -286,32 +286,6 @@ private:
     static VkSurfaceFormatKHR choose_format(const std::vector<VkSurfaceFormatKHR> &formats);
     static VkPresentModeKHR choose_present_mode(const std::vector<VkPresentModeKHR> &present_modes);
 
-    static VkBufferUsageFlags get_buffer_usage_flags(BitFlags<BufferUsage> buffer_usage_flags);
-
-    static VkFilter get_filter(Filter filter);
-    static VkSamplerMipmapMode get_sampler_mipmap_mode(Filter filter);
-    static VkSamplerAddressMode get_sampler_address_mode(AddressMode filter);
-    static VkBorderColor get_border_color(BorderColor border_color);
-
-    static Format format_to_texture_format(VkFormat format);
-    static VkFormat get_format(Format format);
-    static VkImageType get_image_type(Dimension dimension);
-    static VkImageUsageFlags get_image_usage_flags(BitFlags<TextureUsage> texture_usage_flags, Format format);
-    static VkImageAspectFlags get_image_aspect_flags(Format format);
-    static VkImageViewType get_image_view_type(Dimension dimension);
-
-    static VkPrimitiveTopology get_primitive_topology(PrimitiveTopology primitive_topology);
-    static VkPolygonMode get_polygon_mode(PolygonMode polygon_mode);
-    static VkCullModeFlags get_cull_mode_flags(Face face);
-    static VkFrontFace get_front_face(FrontFace front_face);
-    static VkCompareOp get_compare_operation(CompareOperation compare_operation);
-    static VkBlendFactor get_blend_factor(BlendFactor blend_factor);
-    static VkBlendOp get_blend_operation(BlendOperation blend_operation);
-    static VkColorComponentFlags get_color_component_flags(BitFlags<ColorWrites> color_writes);
-
-    static VkAttachmentLoadOp get_attachment_load_operation(LoadOperation load_operation);
-    static VkAttachmentStoreOp get_attachment_store_operation(StoreOperation store_operation);
-
 private:
     ShaderCompiler m_compiler = ShaderCompiler(ShaderCompiler::CompilerTarget::Spirv);
 

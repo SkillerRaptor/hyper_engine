@@ -12,7 +12,7 @@
 
 #include "core/bit_flags.hpp"
 #include "core/resource_owner.hpp"
-#include "systems/render/render_driver_common.hpp"
+#include "systems/render/render_types.hpp"
 #include "systems/render/resource_handle.hpp"
 #include "systems/window_system.hpp"
 

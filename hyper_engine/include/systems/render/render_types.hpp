@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include <optional>
 #include <string>
 
 #include "core/bit_flags.hpp"

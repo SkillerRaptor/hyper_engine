@@ -7,12 +7,13 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string_view>
 #include <vector>
 
 #include <glm/glm.hpp>
 
-#include "systems/render/render_driver_common.hpp"
+#include "systems/render/render_types.hpp"
 
 class Asset
 {
