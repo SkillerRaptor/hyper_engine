@@ -50,54 +50,61 @@ set(HEADERS
         include/systems/window/mouse_events.hpp
         include/systems/window/window_events.hpp)
 
-function(define_target TARGET)
-    hyperengine_define_executable(${TARGET})
-    target_link_libraries(
-            ${TARGET}
-            PRIVATE
-            EnTT::EnTT
-            fastgltf
-            fmt
-            glm
-            libassert::assert
-            imgui
-            spdlog
-            stb
-            TracyClient
-            DirectXShaderCompiler
-            SDL3::SDL3
-            volk
-            VulkanMemoryAllocator)
-    if (WIN32)
-        target_link_libraries(
-                ${TARGET}
-                PUBLIC
-                d3d12.lib
-                dxgi.lib
-                D3D12MemoryAllocator)
-    endif ()
+#-------------------------------------------------------------------------------------------
 
-    target_compile_definitions(
-            ${TARGET}
-            PUBLIC
-            # This should only be enabled when profiling
-            -DTRACY_ENABLE
-            -DGLM_FORCE_RADIANS
-            -DGLM_FORCE_DEPTH_ZERO_TO_ONE)
-    target_include_directories(
-            ${TARGET}
-            PRIVATE
-            ${CMAKE_SOURCE_DIR}/assets/shaders)
-endfunction()
+link_libraries(
+        DirectXShaderCompiler
+        EnTT::EnTT
+        fastgltf
+        fmt
+        glm
+        imgui
+        libassert::assert
+        SDL3::SDL3
+        spdlog
+        stb
+        TracyClient
+        volk
+        VulkanMemoryAllocator)
+if (WIN32)
+    link_libraries(
+            d3d12.lib
+            dxgi.lib
+            D3D12MemoryAllocator)
+endif ()
 
-define_target(hyper_engine)
-target_link_libraries(hyper_engine PRIVATE Catch2::Catch2)
+add_compile_definitions(
+        -DGLM_FORCE_RADIANS
+        -DGLM_FORCE_DEPTH_ZE_TO_ONE)
 
-define_target(hyper_engine_tests)
-target_link_libraries(hyper_engine_tests PRIVATE Catch2::Catch2WithMain)
+include_directories(${CMAKE_SOURCE_DIR}/assets/shaders)
 
+#-------------------------------------------------------------------------------------------
+
+hyperengine_define_executable(hyper_engine)
+target_link_libraries(
+        hyper_engine
+        PRIVATE
+        Catch2::Catch2)
+
+hyperengine_define_executable(hyper_engine_tests)
+target_link_libraries(
+        hyper_engine_tests
+        PRIVATE
+        Catch2::Catch2WithMain)
 target_compile_definitions(
         hyper_engine_tests
-        PUBLIC
-        -DHE_TESTS=1
-        -DCATCH_CONFIG_MAIN)
+        PRIVATE
+        -DCATCH_CONFIG_MAIN
+        -DHE_TESTS=1)
+
+hyperengine_define_executable(hyper_engine_profiling)
+target_link_libraries(
+        hyper_engine_profiling
+        PRIVATE
+        Catch2::Catch2)
+target_compile_definitions(
+        hyper_engine_tests
+        PRIVATE
+        -DTRACY_ENABLE
+        -DHE_PROFILING=1)
