@@ -26,12 +26,12 @@ public:
     void process_mouse_movement(float x_position, float y_position, bool mouse_button_pressed);
     void process_mouse_scroll(float y_offset);
 
-    void set_aspect_ratio(float aspect_ratio);
+    void set_aspect_ratio(const float aspect_ratio) { m_aspect_ratio = aspect_ratio; };
 
-    glm::vec3 position() const;
+    glm::vec3 position() const { return m_position; }
 
-    float near_plane() const;
-    float far_plane() const;
+    float near_plane() const { return m_near; }
+    float far_plane() const { return m_far; };
 
     glm::mat4 projection_matrix() const;
     glm::mat4 view_matrix() const;
@@ -40,10 +40,10 @@ private:
     void update_camera_vectors();
 
 private:
-    glm::vec3 m_position = {0.0f, 0.0f, 0.0f};
-    glm::vec3 m_front = {0.0f, 0.0f, 0.0f};
-    glm::vec3 m_up = {0.0f, 0.0f, 0.0f};
-    glm::vec3 m_right = {0.0f, 0.0f, 0.0f};
+    glm::vec3 m_position = { 0.0f, 0.0f, 0.0f };
+    glm::vec3 m_front = { 0.0f, 0.0f, 0.0f };
+    glm::vec3 m_up = { 0.0f, 0.0f, 0.0f };
+    glm::vec3 m_right = { 0.0f, 0.0f, 0.0f };
 
     float m_yaw = 0.0f;
     float m_pitch = 0.0f;

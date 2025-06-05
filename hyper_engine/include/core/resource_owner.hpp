@@ -21,7 +21,7 @@ public:
     {
         // FIXME: Replace this with placement new, when adding custom memory pool
         const Id id = create_id();
-        m_resources.insert({id.get(), resource});
+        m_resources.insert({ id.get(), resource });
 
         return id;
     }
@@ -67,7 +67,7 @@ private:
         {
             // 2. Create new id based on the size of already created ids
             const uint32_t new_id = static_cast<uint32_t>(m_ids.size());
-            const Id id = Id(new_id, 0);
+            const Id id { new_id, 0 };
             m_ids.push_back(id);
 
             return id;
@@ -78,7 +78,7 @@ private:
         const Id unrecycled_id = m_ids.at(current_unrecycled_id);
 
         // 3. Swap the internal id of `m_next_unrecycled_id` and the `Id` pointed by `m_next_unrecycled_id`
-        m_ids[current_unrecycled_id] = Id(current_unrecycled_id, unrecycled_id.version());
+        m_ids[current_unrecycled_id] = { current_unrecycled_id, unrecycled_id.version() };
         m_next_unrecycled_id = unrecycled_id.id();
 
         // 4. Decrease the amount of unrecycled ids
@@ -95,7 +95,7 @@ private:
 
         // 2. Swap the internal id of `m_next_unrecycled_id` and the retrieved `Id`
         const uint32_t next_unrecycled_id = m_next_unrecycled_id;
-        m_ids[internal_id] = Id(next_unrecycled_id, real_id.version() + 1);
+        m_ids[internal_id] = { next_unrecycled_id, real_id.version() + 1 };
         m_next_unrecycled_id = real_id.id();
 
         // 3. Increase the amount of unrecycled ids
@@ -103,9 +103,9 @@ private:
     }
 
 private:
-    size_t m_unrecycled_ids = 0;
-    uint32_t m_next_unrecycled_id = std::numeric_limits<uint32_t>::max();
-    std::vector<Id> m_ids;
+    size_t m_unrecycled_ids { 0 };
+    uint32_t m_next_unrecycled_id { std::numeric_limits<uint32_t>::max() };
+    std::vector<Id> m_ids {};
 
-    std::unordered_map<uint64_t, T> m_resources;
+    std::unordered_map<uint64_t, T> m_resources {};
 };

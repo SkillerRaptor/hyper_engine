@@ -27,20 +27,12 @@ bool InputSystem::is_mouse_button_pressed(const MouseCode mouse_code) const
     return m_mouse_buttons.contains(mouse_code) ? m_mouse_buttons.at(mouse_code) : false;
 }
 
-glm::vec2 InputSystem::mouse_position() const
-{
-    return m_mouse_position;
-}
-
 void InputSystem::on_mouse_move(const MouseMoveEvent &event)
 {
     const float x = event.x();
     const float y = event.y();
 
-    m_mouse_position = {
-        x,
-        y,
-    };
+    m_mouse_position = { x, y };
 }
 
 void InputSystem::on_mouse_button_press(const MouseButtonPressEvent &event)

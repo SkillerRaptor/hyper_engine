@@ -15,7 +15,7 @@ class Logger
 public:
     static void initialize();
 
-    static std::shared_ptr<spdlog::logger> internal_logger();
+    static std::shared_ptr<spdlog::logger> internal_logger() { return s_internal_logger; };
 
 private:
     static std::shared_ptr<spdlog::logger> s_internal_logger;

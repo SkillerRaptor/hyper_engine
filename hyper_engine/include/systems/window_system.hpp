@@ -15,9 +15,9 @@ HE_DEFINE_ID(Window);
 
 struct WindowDescriptor
 {
-    std::string title;
-    uint32_t width = 1280;
-    uint32_t height = 720;
+    std::string title {};
+    uint32_t width { 1280 };
+    uint32_t height { 720 };
 };
 
 struct SDL_Window;
@@ -27,7 +27,7 @@ class WindowSystem
 private:
     struct WindowData
     {
-        SDL_Window *native_handle;
+        SDL_Window *native_handle { nullptr };
     };
 
 public:
@@ -43,7 +43,7 @@ public:
         m_event_bus.subscribe<T>(callback);
     }
 
-    WindowId create_window(const WindowDescriptor &descriptor);
+    WindowId create_window(const WindowDescriptor &desc);
     void destroy_window(WindowId id);
 
     SDL_Window *get_native_window(WindowId id) const;
@@ -61,7 +61,6 @@ public:
     bool is_window_resizable(WindowId id) const;
 
 private:
-    ResourceOwner<WindowId, WindowData> m_windows;
-
-    EventBus m_event_bus;
+    ResourceOwner<WindowId, WindowData> m_windows {};
+    EventBus m_event_bus {};
 };

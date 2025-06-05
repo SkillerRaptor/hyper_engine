@@ -14,10 +14,7 @@
 #include "systems/window/mouse_events.hpp"
 #include "systems/window/window_events.hpp"
 
-WindowSystem::~WindowSystem()
-{
-    SDL_Quit();
-}
+WindowSystem::~WindowSystem() { SDL_Quit(); }
 
 void WindowSystem::initialize()
 {
@@ -37,9 +34,7 @@ void WindowSystem::poll_events()
         switch (event.type)
         {
         // NOTE: Window Events
-        case SDL_EVENT_QUIT:
-            m_event_bus.dispatch<WindowCloseEvent>();
-            break;
+        case SDL_EVENT_QUIT: m_event_bus.dispatch<WindowCloseEvent>(); break;
         case SDL_EVENT_WINDOW_MOVED:
             m_event_bus.dispatch<WindowMoveEvent>(event.window.data1, event.window.data2);
             break;
@@ -47,48 +42,37 @@ void WindowSystem::poll_events()
             m_event_bus.dispatch<WindowResizeEvent>(event.window.data1, event.window.data2);
             break;
         // NOTE: Key Events
-        case SDL_EVENT_KEY_DOWN:
-            m_event_bus.dispatch<KeyPressEvent>(static_cast<KeyCode>(event.key.key));
-            break;
-        case SDL_EVENT_KEY_UP:
-            m_event_bus.dispatch<KeyReleaseEvent>(static_cast<KeyCode>(event.key.key));
-            break;
+        case SDL_EVENT_KEY_DOWN: m_event_bus.dispatch<KeyPressEvent>(static_cast<KeyCode>(event.key.key)); break;
+        case SDL_EVENT_KEY_UP: m_event_bus.dispatch<KeyReleaseEvent>(static_cast<KeyCode>(event.key.key)); break;
         // NOTE: Mouse Events
-        case SDL_EVENT_MOUSE_MOTION:
-            m_event_bus.dispatch<MouseMoveEvent>(event.motion.x, event.motion.y);
-            break;
+        case SDL_EVENT_MOUSE_MOTION: m_event_bus.dispatch<MouseMoveEvent>(event.motion.x, event.motion.y); break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
             m_event_bus.dispatch<MouseButtonPressEvent>(static_cast<MouseCode>(event.button.button));
             break;
         case SDL_EVENT_MOUSE_BUTTON_UP:
             m_event_bus.dispatch<MouseButtonReleaseEvent>(static_cast<MouseCode>(event.button.button));
             break;
-        case SDL_EVENT_MOUSE_WHEEL:
-            m_event_bus.dispatch<MouseScrollEvent>(event.wheel.x, event.wheel.y);
-            break;
-        default:
-            break;
+        case SDL_EVENT_MOUSE_WHEEL: m_event_bus.dispatch<MouseScrollEvent>(event.wheel.x, event.wheel.y); break;
+        default: break;
         }
     }
 }
 
-WindowId WindowSystem::create_window(const WindowDescriptor &descriptor)
+WindowId WindowSystem::create_window(const WindowDescriptor &desc)
 {
-    HE_ASSERT(!descriptor.title.empty());
-    HE_ASSERT(descriptor.width != 0);
-    HE_ASSERT(descriptor.height != 0);
+    HE_ASSERT(!desc.title.empty());
+    HE_ASSERT(desc.width != 0);
+    HE_ASSERT(desc.height != 0);
 
     SDL_Window *native_window = SDL_CreateWindow(
-        descriptor.title.c_str(),
-        static_cast<int32_t>(descriptor.width),
-        static_cast<int32_t>(descriptor.height),
+        desc.title.c_str(), static_cast<int32_t>(desc.width), static_cast<int32_t>(desc.height),
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_VULKAN);
     if (native_window == nullptr)
     {
         HE_PANIC("Failed to create window", SDL_GetError());
     }
 
-    WindowData window = {};
+    WindowData window {};
     window.native_handle = native_window;
 
     return m_windows.create(window);
@@ -148,7 +132,7 @@ glm::u32vec2 WindowSystem::get_window_size(const WindowId id) const
     int32_t width = 0;
     int32_t height = 0;
     SDL_GetWindowSize(window.native_handle, &width, &height);
-    return {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+    return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
 }
 
 void WindowSystem::set_window_fullscreen(const WindowId id, const bool fullscreen) const

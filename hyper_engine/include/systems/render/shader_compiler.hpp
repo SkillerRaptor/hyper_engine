@@ -19,9 +19,9 @@
 
 struct ShaderCompilationDescriptor
 {
-    std::string entry_name = "main";
-    ShaderType type = ShaderType::None;
-    std::vector<uint8_t> data;
+    std::string entry_name { "main" };
+    ShaderType type { ShaderType::None };
+    std::vector<uint8_t> data {};
 };
 
 class ShaderCompiler
@@ -51,10 +51,10 @@ private:
 public:
     explicit ShaderCompiler(const CompilerTarget &compiler_target);
 
-    std::vector<uint8_t> compile(const ShaderCompilationDescriptor &descriptor) const;
+    std::vector<uint8_t> compile(const ShaderCompilationDescriptor &desc) const;
 
 private:
-    CompilerTarget m_compiler_target;
-    Microsoft::WRL::ComPtr<IDxcCompiler3> m_compiler;
-    Microsoft::WRL::ComPtr<IDxcUtils> m_utils;
+    CompilerTarget m_compiler_target { CompilerTarget::Spirv };
+    Microsoft::WRL::ComPtr<IDxcCompiler3> m_compiler { nullptr };
+    Microsoft::WRL::ComPtr<IDxcUtils> m_utils { nullptr };
 };

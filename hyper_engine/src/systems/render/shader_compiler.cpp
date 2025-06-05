@@ -12,43 +12,34 @@
 using Microsoft::WRL::ComPtr;
 
 ShaderCompiler::ShaderCompiler(const CompilerTarget &compiler_target)
-    : m_compiler_target(compiler_target)
+    : m_compiler_target { compiler_target }
 {
     DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&m_compiler));
     DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&m_utils));
 }
 
-std::vector<uint8_t> ShaderCompiler::compile(const ShaderCompilationDescriptor &descriptor) const
+std::vector<uint8_t> ShaderCompiler::compile(const ShaderCompilationDescriptor &desc) const
 {
-    const std::wstring shader_model = [&descriptor]()
+    const std::wstring shader_model = [&desc]()
     {
         // FIXME: Add more types of shaders
 
-        switch (descriptor.type)
+        switch (desc.type)
         {
-        case ShaderType::Compute:
-            return L"cs_6_6";
-        case ShaderType::Fragment:
-            return L"ps_6_6";
-        case ShaderType::Vertex:
-            return L"vs_6_6";
-        default:
-            HE_UNREACHABLE();
+        case ShaderType::Compute: return L"cs_6_6";
+        case ShaderType::Fragment: return L"ps_6_6";
+        case ShaderType::Vertex: return L"vs_6_6";
+        default: HE_UNREACHABLE();
         }
     }();
 
-    const std::wstring entry_name = string_utils::to_wstring(descriptor.entry_name);
+    const std::wstring entry_name = string_utils::to_wstring(desc.entry_name);
 
-    const std::vector<std::wstring> arguments = {
-        L"-I",
-        L"./assets/shaders/",
-        L"-T",
-        shader_model,
-        L"-E",
-        entry_name,
+    const std::vector<std::wstring> arguments {
+        L"-I", L"./assets/shaders/", L"-T", shader_model, L"-E", entry_name,
     };
 
-    std::vector<const wchar_t *> arguments_wchar = {};
+    std::vector<const wchar_t *> arguments_wchar {};
     arguments_wchar.reserve(arguments.size() + s_compiler_args.size() + s_spirv_args.size());
 
     for (const std::wstring &argument : arguments)
@@ -61,7 +52,7 @@ std::vector<uint8_t> ShaderCompiler::compile(const ShaderCompilationDescriptor &
         arguments_wchar.emplace_back(argument);
     }
 
-    ComPtr<IDxcIncludeHandler> include_handler = nullptr;
+    ComPtr<IDxcIncludeHandler> include_handler { nullptr };
     m_utils->CreateDefaultIncludeHandler(include_handler.GetAddressOf());
 
     if (m_compiler_target == CompilerTarget::Spirv)
@@ -71,26 +62,27 @@ std::vector<uint8_t> ShaderCompiler::compile(const ShaderCompilationDescriptor &
             arguments_wchar.emplace_back(argument);
         }
 
-        if (descriptor.type == ShaderType::Vertex)
+        if (desc.type == ShaderType::Vertex)
         {
             arguments_wchar.emplace_back(L"-fvk-invert-y");
         }
     }
 
-    const DxcBuffer source_buffer = {
-        .Ptr = descriptor.data.data(),
-        .Size = descriptor.data.size(),
+    const DxcBuffer source_buffer {
+        .Ptr = desc.data.data(),
+        .Size = desc.data.size(),
         .Encoding = DXC_CP_ACP,
     };
 
-    ComPtr<IDxcResult> result = nullptr;
+    ComPtr<IDxcResult> result { nullptr };
     m_compiler->Compile(
-        &source_buffer, arguments_wchar.data(), static_cast<uint32_t>(arguments_wchar.size()), include_handler.Get(), IID_PPV_ARGS(&result));
+        &source_buffer, arguments_wchar.data(), static_cast<uint32_t>(arguments_wchar.size()), include_handler.Get(),
+        IID_PPV_ARGS(&result));
 
-    HRESULT compile_status = S_OK;
+    HRESULT compile_status { S_OK };
     result->GetStatus(&compile_status);
 
-    ComPtr<IDxcBlobUtf8> errors = nullptr;
+    ComPtr<IDxcBlobUtf8> errors { nullptr };
     result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr);
 
     // FIXME: Add more informational logging
@@ -108,10 +100,10 @@ std::vector<uint8_t> ShaderCompiler::compile(const ShaderCompilationDescriptor &
         }
     }
 
-    ComPtr<IDxcBlob> blob = nullptr;
+    ComPtr<IDxcBlob> blob { nullptr };
     result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(blob.GetAddressOf()), nullptr);
 
-    std::vector<uint8_t> bytes;
+    std::vector<uint8_t> bytes {};
     bytes.resize(blob->GetBufferSize());
     memcpy(bytes.data(), blob->GetBufferPointer(), blob->GetBufferSize());
 

@@ -12,9 +12,9 @@
 #include "systems/window/mouse_codes.hpp"
 
 Camera::Camera(const glm::vec3 position, const float yaw, const float pitch)
-    : m_position(position)
-    , m_yaw(yaw)
-    , m_pitch(pitch)
+    : m_position { position }
+    , m_yaw { yaw }
+    , m_pitch { pitch }
 {
     update_camera_vectors();
 }
@@ -24,20 +24,11 @@ void Camera::process_keyboard(const Movement movement, const float delta_time)
     const float velocity = m_movement_speed * delta_time;
     switch (movement)
     {
-    case Movement::Forward:
-        m_position += m_front * velocity;
-        break;
-    case Movement::Backward:
-        m_position -= m_front * velocity;
-        break;
-    case Movement::Left:
-        m_position -= m_right * velocity;
-        break;
-    case Movement::Right:
-        m_position += m_right * velocity;
-        break;
-    default:
-        HE_UNREACHABLE();
+    case Movement::Forward: m_position += m_front * velocity; break;
+    case Movement::Backward: m_position -= m_front * velocity; break;
+    case Movement::Left: m_position -= m_right * velocity; break;
+    case Movement::Right: m_position += m_right * velocity; break;
+    default: HE_UNREACHABLE();
     }
 }
 
@@ -90,39 +81,16 @@ void Camera::process_mouse_scroll(const float y_offset)
     }
 }
 
-void Camera::set_aspect_ratio(const float aspect_ratio)
-{
-    m_aspect_ratio = aspect_ratio;
-}
-
-glm::vec3 Camera::position() const
-{
-    return m_position;
-}
-
-float Camera::near_plane() const
-{
-    return m_near;
-}
-
-float Camera::far_plane() const
-{
-    return m_far;
-}
-
 glm::mat4 Camera::projection_matrix() const
 {
     return glm::perspective(glm::radians(m_fov), m_aspect_ratio, m_near, m_far);
 }
 
-glm::mat4 Camera::view_matrix() const
-{
-    return glm::lookAt(m_position, m_position + m_front, m_up);
-}
+glm::mat4 Camera::view_matrix() const { return glm::lookAt(m_position, m_position + m_front, m_up); }
 
 void Camera::update_camera_vectors()
 {
-    const glm::vec3 front = {
+    const glm::vec3 front {
         cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch)),
         sin(glm::radians(m_pitch)),
         sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch)),

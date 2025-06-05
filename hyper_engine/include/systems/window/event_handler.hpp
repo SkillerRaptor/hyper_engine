@@ -18,10 +18,7 @@ template <typename T>
 class EventHandlerImpl final : public EventHandler
 {
 public:
-    void subscribe(const std::function<void(const T &)> &callback)
-    {
-        m_callbacks.push_back(callback);
-    }
+    void subscribe(const std::function<void(const T &)> &callback) { m_callbacks.push_back(callback); }
 
     void dispatch(const T &event)
     {
@@ -32,5 +29,5 @@ public:
     }
 
 private:
-    std::vector<std::function<void(const T &)>> m_callbacks;
+    std::vector<std::function<void(const T &)>> m_callbacks {};
 };

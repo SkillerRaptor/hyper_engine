@@ -13,10 +13,10 @@ class MouseButtonPressEvent
 public:
     explicit MouseButtonPressEvent(MouseCode mouse_code);
 
-    MouseCode mouse_code() const;
+    MouseCode mouse_code() const { return m_mouse_code; }
 
 private:
-    MouseCode m_mouse_code = MouseCode::ButtonLeft;
+    MouseCode m_mouse_code { MouseCode::ButtonLeft };
 };
 
 class MouseButtonReleaseEvent
@@ -24,10 +24,10 @@ class MouseButtonReleaseEvent
 public:
     explicit MouseButtonReleaseEvent(MouseCode mouse_code);
 
-    MouseCode mouse_code() const;
+    MouseCode mouse_code() const { return m_mouse_code; }
 
 private:
-    MouseCode m_mouse_code = MouseCode::ButtonLeft;
+    MouseCode m_mouse_code { MouseCode::ButtonLeft };
 };
 
 // FIXME: Change individual positions to vector
@@ -36,12 +36,12 @@ class MouseMoveEvent
 public:
     MouseMoveEvent(float x, float y);
 
-    float x() const;
-    float y() const;
+    float x() const { return m_x; }
+    float y() const { return m_y; }
 
 private:
-    float m_x = 0.0;
-    float m_y = 0.0;
+    float m_x { 0.0 };
+    float m_y { 0.0 };
 };
 
 // FIXME: Change individual deltas to vector
@@ -50,10 +50,10 @@ class MouseScrollEvent
 public:
     MouseScrollEvent(float delta_x, float delta_y);
 
-    float delta_x() const;
-    float delta_y() const;
+    float delta_x() const { return m_delta_x; }
+    float delta_y() const { return m_delta_y; }
 
 private:
-    float m_delta_x = 0.0;
-    float m_delta_y = 0.0;
+    float m_delta_x { 0.0 };
+    float m_delta_y { 0.0 };
 };

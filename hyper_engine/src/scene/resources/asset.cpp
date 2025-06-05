@@ -18,6 +18,22 @@
 #include "core/assertion.hpp"
 #include "core/logger.hpp"
 
+Asset::Asset(
+    std::vector<Sampler> samplers,
+    std::vector<Texture> textures,
+    std::vector<Material> materials,
+    std::vector<Model> models,
+    std::vector<std::unique_ptr<Node>> nodes,
+    std::vector<Scene> scenes)
+    : m_samplers(std::move(samplers))
+    , m_textures(std::move(textures))
+    , m_materials(std::move(materials))
+    , m_models(std::move(models))
+    , m_nodes(std::move(nodes))
+    , m_scenes(std::move(scenes))
+{
+}
+
 Asset Asset::load(const std::string_view path)
 {
     const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
@@ -26,11 +42,13 @@ Asset Asset::load(const std::string_view path)
     fastgltf::Expected<fastgltf::GltfDataBuffer> gltf_data_buffer = fastgltf::GltfDataBuffer::FromPath(file_path);
     HE_ASSERT(gltf_data_buffer.error() == fastgltf::Error::None);
 
-    constexpr fastgltf::Options options = fastgltf::Options::DontRequireValidAssetMember | fastgltf::Options::LoadExternalBuffers |
-                                          fastgltf::Options::LoadExternalImages | fastgltf::Options::GenerateMeshIndices;
+    constexpr fastgltf::Options options
+        = fastgltf::Options::DontRequireValidAssetMember | fastgltf::Options::LoadExternalBuffers
+          | fastgltf::Options::LoadExternalImages | fastgltf::Options::GenerateMeshIndices;
 
     fastgltf::Parser parser;
-    fastgltf::Expected<fastgltf::Asset> asset = parser.loadGltf(gltf_data_buffer.get(), file_path.parent_path(), options);
+    fastgltf::Expected<fastgltf::Asset> asset
+        = parser.loadGltf(gltf_data_buffer.get(), file_path.parent_path(), options);
     HE_ASSERT(asset.error() == fastgltf::Error::None);
 
     std::vector<Sampler> samplers;
@@ -42,14 +60,11 @@ Asset Asset::load(const std::string_view path)
             {
             case fastgltf::Filter::Nearest:
             case fastgltf::Filter::NearestMipMapNearest:
-            case fastgltf::Filter::NearestMipMapLinear:
-                return Filter::Nearest;
+            case fastgltf::Filter::NearestMipMapLinear: return Filter::Nearest;
             case fastgltf::Filter::Linear:
             case fastgltf::Filter::LinearMipMapNearest:
-            case fastgltf::Filter::LinearMipMapLinear:
-                return Filter::Linear;
-            default:
-                HE_UNREACHABLE();
+            case fastgltf::Filter::LinearMipMapLinear: return Filter::Linear;
+            default: HE_UNREACHABLE();
             }
         };
 
@@ -71,7 +86,7 @@ Asset Asset::load(const std::string_view path)
         int32_t height = 0;
         uint8_t *image_data = nullptr;
         std::visit(
-            fastgltf::visitor{
+            fastgltf::visitor {
                 [](auto &)
                 {
                     HE_UNREACHABLE();
@@ -88,11 +103,7 @@ Asset Asset::load(const std::string_view path)
                 {
                     image_data = stbi_load_from_memory(
                         reinterpret_cast<const unsigned char *>(array.bytes.data()),
-                        static_cast<int>(array.bytes.size()),
-                        &width,
-                        &height,
-                        nullptr,
-                        4);
+                        static_cast<int>(array.bytes.size()), &width, &height, nullptr, 4);
                 },
                 [&](const fastgltf::sources::BufferView &view)
                 {
@@ -100,7 +111,7 @@ Asset Asset::load(const std::string_view path)
                     const fastgltf::Buffer &buffer = asset->buffers[bufferView.bufferIndex];
 
                     std::visit(
-                        fastgltf::visitor{
+                        fastgltf::visitor {
                             [](auto &)
                             {
                                 HE_UNREACHABLE();
@@ -109,11 +120,7 @@ Asset Asset::load(const std::string_view path)
                             {
                                 image_data = stbi_load_from_memory(
                                     reinterpret_cast<const unsigned char *>(array.bytes.data() + bufferView.byteOffset),
-                                    static_cast<int>(bufferView.byteLength),
-                                    &width,
-                                    &height,
-                                    nullptr,
-                                    4);
+                                    static_cast<int>(bufferView.byteLength), &width, &height, nullptr, 4);
                             },
                         },
                         buffer.data);
@@ -207,10 +214,8 @@ Asset Asset::load(const std::string_view path)
             switch (gltf_material.alphaMode)
             {
             case fastgltf::AlphaMode::Opaque:
-            default:
-                return AlphaMode::Opaque;
-            case fastgltf::AlphaMode::Blend:
-                return AlphaMode::Transparent;
+            default: return AlphaMode::Opaque;
+            case fastgltf::AlphaMode::Blend: return AlphaMode::Transparent;
             }
         }();
 
@@ -250,14 +255,14 @@ Asset Asset::load(const std::string_view path)
             fastgltf::Accessor &accessor = asset->accessors[gltf_primitive.indicesAccessor.value()];
 
             fastgltf::iterateAccessor<uint32_t>(
-                asset.get(),
-                accessor,
+                asset.get(), accessor,
                 [&](const uint32_t index)
                 {
                     indices.push_back(index + initial_vertex);
                 });
 
-            fastgltf::Accessor &positions_attribute = asset->accessors[gltf_primitive.findAttribute("POSITION")->accessorIndex];
+            fastgltf::Accessor &positions_attribute
+                = asset->accessors[gltf_primitive.findAttribute("POSITION")->accessorIndex];
             positions.resize(positions.size() + positions_attribute.count);
             normals.resize(normals.size() + positions_attribute.count);
             tangents.resize(tangents.size() + positions_attribute.count);
@@ -265,8 +270,7 @@ Asset Asset::load(const std::string_view path)
             uvs.resize(uvs.size() + positions_attribute.count);
 
             fastgltf::iterateAccessorWithIndex<glm::vec3>(
-                asset.get(),
-                positions_attribute,
+                asset.get(), positions_attribute,
                 [&](const glm::vec3 value, const size_t index)
                 {
                     positions[initial_vertex + index] = value;
@@ -280,8 +284,7 @@ Asset Asset::load(const std::string_view path)
             if (normals_attribute != gltf_primitive.attributes.end())
             {
                 fastgltf::iterateAccessorWithIndex<glm::vec3>(
-                    asset.get(),
-                    asset->accessors[normals_attribute->accessorIndex],
+                    asset.get(), asset->accessors[normals_attribute->accessorIndex],
                     [&](const glm::vec3 value, const size_t index)
                     {
                         normals[initial_vertex + index] = value;
@@ -292,8 +295,7 @@ Asset Asset::load(const std::string_view path)
             if (tangents_attribute != gltf_primitive.attributes.end())
             {
                 fastgltf::iterateAccessorWithIndex<glm::vec4>(
-                    asset.get(),
-                    asset->accessors[tangents_attribute->accessorIndex],
+                    asset.get(), asset->accessors[tangents_attribute->accessorIndex],
                     [&](const glm::vec4 value, const size_t index)
                     {
                         tangents[initial_vertex + index] = value;
@@ -304,8 +306,7 @@ Asset Asset::load(const std::string_view path)
             if (colors_attribute != gltf_primitive.attributes.end())
             {
                 fastgltf::iterateAccessorWithIndex<glm::vec4>(
-                    asset.get(),
-                    asset->accessors[colors_attribute->accessorIndex],
+                    asset.get(), asset->accessors[colors_attribute->accessorIndex],
                     [&](const glm::vec4 value, const size_t index)
                     {
                         colors[initial_vertex + index] = value;
@@ -316,15 +317,15 @@ Asset Asset::load(const std::string_view path)
             if (uvs_attribute != gltf_primitive.attributes.end())
             {
                 fastgltf::iterateAccessorWithIndex<glm::vec2>(
-                    asset.get(),
-                    asset->accessors[uvs_attribute->accessorIndex],
+                    asset.get(), asset->accessors[uvs_attribute->accessorIndex],
                     [&](const glm::vec2 value, const size_t index)
                     {
                         uvs[initial_vertex + index] = value;
                     });
             }
 
-            const uint32_t index_count = static_cast<uint32_t>(asset->accessors[gltf_primitive.indicesAccessor.value()].count);
+            const uint32_t index_count
+                = static_cast<uint32_t>(asset->accessors[gltf_primitive.indicesAccessor.value()].count);
             const size_t material_index = gltf_primitive.materialIndex.value_or(0);
             const Mesh mesh = {
                 .start_index = start_index,
@@ -335,7 +336,7 @@ Asset Asset::load(const std::string_view path)
             meshes.push_back(mesh);
         }
 
-        const Model model = {
+        const Model model {
             .positions = positions,
             .normals = normals,
             .tangents = tangents,
@@ -354,15 +355,17 @@ Asset Asset::load(const std::string_view path)
         glm::mat4 local_transform = glm::mat4(1.0);
 
         std::visit(
-            fastgltf::visitor{
+            fastgltf::visitor {
                 [&](fastgltf::math::fmat4x4 matrix)
                 {
                     memcpy(&local_transform, matrix.data(), sizeof(matrix));
                 },
                 [&](fastgltf::TRS transform)
                 {
-                    const glm::vec3 translation(transform.translation.x(), transform.translation.y(), transform.translation.z());
-                    const glm::quat rotation(transform.rotation.w(), transform.rotation.x(), transform.rotation.y(), transform.rotation.z());
+                    const glm::vec3 translation(
+                        transform.translation.x(), transform.translation.y(), transform.translation.z());
+                    const glm::quat rotation(
+                        transform.rotation.w(), transform.rotation.x(), transform.rotation.y(), transform.rotation.z());
                     const glm::vec3 scale(transform.scale.x(), transform.scale.y(), transform.scale.z());
 
                     const glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), translation);
@@ -380,7 +383,8 @@ Asset Asset::load(const std::string_view path)
             model_index = gltf_node.meshIndex.value();
         }
 
-        std::unique_ptr<Node> node = std::make_unique<Node>(nullptr, std::vector<Node *>{}, local_transform, model_index);
+        std::unique_ptr<Node> node
+            = std::make_unique<Node>(nullptr, std::vector<Node *> {}, local_transform, model_index);
         nodes.push_back(std::move(node));
     }
 
@@ -415,58 +419,8 @@ Asset Asset::load(const std::string_view path)
     const std::chrono::duration<double> elapsed_seconds = end_time - start_time;
     HE_INFO("Loaded '{}' in {:.2}s", path, elapsed_seconds.count());
 
-    return Asset{
-        std::move(samplers),
-        std::move(textures),
-        std::move(materials),
-        std::move(models),
-        std::move(nodes),
-        std::move(scenes),
+    return Asset {
+        std::move(samplers), std::move(textures), std::move(materials),
+        std::move(models),   std::move(nodes),    std::move(scenes),
     };
-}
-
-const std::vector<Asset::Sampler> &Asset::samplers() const
-{
-    return m_samplers;
-}
-
-const std::vector<Asset::Texture> &Asset::textures() const
-{
-    return m_textures;
-}
-
-const std::vector<Asset::Material> &Asset::materials() const
-{
-    return m_materials;
-}
-
-const std::vector<Asset::Model> &Asset::models() const
-{
-    return m_models;
-}
-
-const std::vector<std::unique_ptr<Asset::Node>> &Asset::nodes() const
-{
-    return m_nodes;
-}
-
-const std::vector<Asset::Scene> &Asset::scenes() const
-{
-    return m_scenes;
-}
-
-Asset::Asset(
-    std::vector<Sampler> &&samplers,
-    std::vector<Texture> &&textures,
-    std::vector<Material> &&materials,
-    std::vector<Model> &&models,
-    std::vector<std::unique_ptr<Node>> &&nodes,
-    std::vector<Scene> &&scenes)
-    : m_samplers(std::move(samplers))
-    , m_textures(std::move(textures))
-    , m_materials(std::move(materials))
-    , m_models(std::move(models))
-    , m_nodes(std::move(nodes))
-    , m_scenes(std::move(scenes))
-{
 }

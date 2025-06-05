@@ -11,12 +11,11 @@
 class ResourceHandle
 {
 public:
-    ResourceHandle();
     explicit ResourceHandle(uint32_t handle);
 
-    bool is_valid() const;
-    uint32_t handle() const;
+    bool is_valid() const { return m_handle != 0xffffffff; }
+    uint32_t handle() const { return m_handle; }
 
 private:
-    uint32_t m_handle;
+    uint32_t m_handle { 0xffffffff };
 };

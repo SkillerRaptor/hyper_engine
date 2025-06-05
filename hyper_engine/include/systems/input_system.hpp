@@ -20,7 +20,7 @@ public:
 
     // Mouse
     bool is_mouse_button_pressed(MouseCode mouse_code) const;
-    glm::vec2 mouse_position() const;
+    glm::vec2 mouse_position() const { return m_mouse_position; }
 
 private:
     void on_mouse_move(const MouseMoveEvent &event);
@@ -30,10 +30,7 @@ private:
     void on_key_release(const KeyReleaseEvent &event);
 
 private:
-    std::unordered_map<KeyCode, bool> m_keys;
-    std::unordered_map<MouseCode, bool> m_mouse_buttons;
-    glm::vec2 m_mouse_position = {
-        0.0f,
-        0.0f,
-    };
+    std::unordered_map<KeyCode, bool> m_keys {};
+    std::unordered_map<MouseCode, bool> m_mouse_buttons {};
+    glm::vec2 m_mouse_position { 0.0f, 0.0f };
 };

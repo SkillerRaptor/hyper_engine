@@ -19,17 +19,17 @@ private:
 
 public:
     constexpr BitFlags()
-        : m_flags(static_cast<UnderlyingT>(0))
+        : m_flags { static_cast<UnderlyingT>(0) }
     {
     }
 
     constexpr BitFlags(const T flag)
-        : m_flags(static_cast<UnderlyingT>(flag))
+        : m_flags { static_cast<UnderlyingT>(flag) }
     {
     }
 
     constexpr BitFlags(const std::initializer_list<T> flags)
-        : BitFlags()
+        : BitFlags {}
     {
         for (const T flag : flags)
         {
@@ -37,10 +37,7 @@ public:
         }
     }
 
-    constexpr operator bool() const
-    {
-        return m_flags != static_cast<UnderlyingT>(0);
-    }
+    constexpr operator bool() const { return m_flags != static_cast<UnderlyingT>(0); }
 
     friend constexpr BitFlags operator|(const BitFlags left, const T right)
     {
@@ -108,10 +105,7 @@ public:
         return left;
     }
 
-    friend constexpr BitFlags operator~(const BitFlags &bit_flags)
-    {
-        return BitFlags(~bit_flags.m_flags);
-    }
+    friend constexpr BitFlags operator~(const BitFlags &bit_flags) { return BitFlags(~bit_flags.m_flags); }
 
     friend constexpr bool operator==(const BitFlags &left, const BitFlags &right)
     {
@@ -123,22 +117,16 @@ public:
         return left.m_flags != right.m_flags;
     }
 
-    static constexpr BitFlags from_raw(const UnderlyingT flags)
-    {
-        return BitFlags(flags);
-    }
+    static constexpr BitFlags from_raw(const UnderlyingT flags) { return BitFlags(flags); }
 
-    constexpr UnderlyingT to_raw() const
-    {
-        return m_flags;
-    }
+    constexpr UnderlyingT to_raw() const { return m_flags; }
 
 private:
     constexpr explicit BitFlags(const UnderlyingT flags)
-        : m_flags(flags)
+        : m_flags { flags }
     {
     }
 
 private:
-    UnderlyingT m_flags = 0;
+    UnderlyingT m_flags { 0 };
 };
