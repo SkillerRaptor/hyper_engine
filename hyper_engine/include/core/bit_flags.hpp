@@ -107,15 +107,9 @@ public:
 
     friend constexpr BitFlags operator~(const BitFlags &bit_flags) { return BitFlags(~bit_flags.m_flags); }
 
-    friend constexpr bool operator==(const BitFlags &left, const BitFlags &right)
-    {
-        return left.m_flags == right.m_flags;
-    }
+    friend constexpr bool operator==(const BitFlags &left, const BitFlags &right) { return left.m_flags == right.m_flags; }
 
-    friend constexpr bool operator!=(const BitFlags &left, const BitFlags &right)
-    {
-        return left.m_flags != right.m_flags;
-    }
+    friend constexpr bool operator!=(const BitFlags &left, const BitFlags &right) { return left.m_flags != right.m_flags; }
 
     static constexpr BitFlags from_raw(const UnderlyingT flags) { return BitFlags(flags); }
 

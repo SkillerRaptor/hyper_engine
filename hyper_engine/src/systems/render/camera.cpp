@@ -81,10 +81,7 @@ void Camera::process_mouse_scroll(const float y_offset)
     }
 }
 
-glm::mat4 Camera::projection_matrix() const
-{
-    return glm::perspective(glm::radians(m_fov), m_aspect_ratio, m_near, m_far);
-}
+glm::mat4 Camera::projection_matrix() const { return glm::perspective(glm::radians(m_fov), m_aspect_ratio, m_near, m_far); }
 
 glm::mat4 Camera::view_matrix() const { return glm::lookAt(m_position, m_position + m_front, m_up); }
 

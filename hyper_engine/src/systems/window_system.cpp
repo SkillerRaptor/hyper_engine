@@ -35,9 +35,7 @@ void WindowSystem::poll_events()
         {
         // NOTE: Window Events
         case SDL_EVENT_QUIT: m_event_bus.dispatch<WindowCloseEvent>(); break;
-        case SDL_EVENT_WINDOW_MOVED:
-            m_event_bus.dispatch<WindowMoveEvent>(event.window.data1, event.window.data2);
-            break;
+        case SDL_EVENT_WINDOW_MOVED: m_event_bus.dispatch<WindowMoveEvent>(event.window.data1, event.window.data2); break;
         case SDL_EVENT_WINDOW_RESIZED:
             m_event_bus.dispatch<WindowResizeEvent>(event.window.data1, event.window.data2);
             break;
