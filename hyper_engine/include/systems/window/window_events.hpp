@@ -18,7 +18,11 @@ public:
 class WindowMoveEvent
 {
 public:
-    WindowMoveEvent(uint32_t x, uint32_t y);
+    WindowMoveEvent::WindowMoveEvent(const uint32_t x, const uint32_t y)
+        : m_x { x }
+        , m_y { y }
+    {
+    }
 
     uint32_t x() const { return m_x; }
     uint32_t y() const { return m_y; }
@@ -32,7 +36,11 @@ private:
 class WindowResizeEvent
 {
 public:
-    WindowResizeEvent(uint32_t width, uint32_t height);
+    WindowResizeEvent::WindowResizeEvent(const uint32_t width, const uint32_t height)
+        : m_width { width }
+        , m_height { height }
+    {
+    }
 
     uint32_t width() const { return m_width; }
     uint32_t height() const { return m_height; }

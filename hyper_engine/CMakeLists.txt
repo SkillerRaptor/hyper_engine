@@ -8,7 +8,6 @@ set(SOURCES
         src/main.cpp
         src/core/filesystem.cpp
         src/core/logger.cpp
-        src/core/resource_id.cpp
         src/core/string_utils.cpp
         src/drivers/vulkan/vulkan_render_conversion.cpp
         src/drivers/vulkan/vulkan_render_driver.cpp
@@ -17,11 +16,7 @@ set(SOURCES
         src/systems/render_system.cpp
         src/systems/window_system.cpp
         src/systems/render/camera.cpp
-        src/systems/render/resource_handle.cpp
-        src/systems/render/shader_compiler.cpp
-        src/systems/window/key_events.cpp
-        src/systems/window/mouse_events.cpp
-        src/systems/window/window_events.cpp)
+        src/systems/render/shader_compiler.cpp)
 
 set(HEADERS
         include/engine.hpp

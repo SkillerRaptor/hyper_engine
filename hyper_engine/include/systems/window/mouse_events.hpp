@@ -11,7 +11,10 @@
 class MouseButtonPressEvent
 {
 public:
-    explicit MouseButtonPressEvent(MouseCode);
+    explicit MouseButtonPressEvent::MouseButtonPressEvent(const MouseCode mouse_code)
+        : m_mouse_code { mouse_code }
+    {
+    }
 
     MouseCode mouse_code() const { return m_mouse_code; }
 
@@ -22,7 +25,10 @@ private:
 class MouseButtonReleaseEvent
 {
 public:
-    explicit MouseButtonReleaseEvent(MouseCode);
+    explicit MouseButtonReleaseEvent::MouseButtonReleaseEvent(const MouseCode mouse_code)
+        : m_mouse_code { mouse_code }
+    {
+    }
 
     MouseCode mouse_code() const { return m_mouse_code; }
 
@@ -34,7 +40,11 @@ private:
 class MouseMoveEvent
 {
 public:
-    MouseMoveEvent(float x, float y);
+    MouseMoveEvent::MouseMoveEvent(const float x, const float y)
+        : m_x { x }
+        , m_y { y }
+    {
+    }
 
     float x() const { return m_x; }
     float y() const { return m_y; }
@@ -48,7 +58,11 @@ private:
 class MouseScrollEvent
 {
 public:
-    MouseScrollEvent(float delta_x, float delta_y);
+    MouseScrollEvent::MouseScrollEvent(const float delta_x, const float delta_y)
+        : m_delta_x { delta_x }
+        , m_delta_y { delta_y }
+    {
+    }
 
     float delta_x() const { return m_delta_x; }
     float delta_y() const { return m_delta_y; }

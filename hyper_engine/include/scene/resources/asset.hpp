@@ -104,13 +104,21 @@ public:
     std::span<const Scene> scenes() const { return m_scenes; }
 
 private:
-    Asset(
+    Asset::Asset(
         std::vector<Sampler> samplers,
         std::vector<Texture> textures,
         std::vector<Material> materials,
         std::vector<Model> models,
         std::vector<std::unique_ptr<Node>> nodes,
-        std::vector<Scene> scenes);
+        std::vector<Scene> scenes)
+        : m_samplers(std::move(samplers))
+        , m_textures(std::move(textures))
+        , m_materials(std::move(materials))
+        , m_models(std::move(models))
+        , m_nodes(std::move(nodes))
+        , m_scenes(std::move(scenes))
+    {
+    }
 
 private:
     std::vector<Sampler> m_samplers {};

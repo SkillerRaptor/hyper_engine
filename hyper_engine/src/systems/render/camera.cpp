@@ -9,7 +9,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "core/assertion.hpp"
-#include "systems/window/mouse_codes.hpp"
 
 Camera::Camera(const glm::vec3 position, const float yaw, const float pitch)
     : m_position { position }
@@ -82,7 +81,6 @@ void Camera::process_mouse_scroll(const float y_offset)
 }
 
 glm::mat4 Camera::projection_matrix() const { return glm::perspective(glm::radians(m_fov), m_aspect_ratio, m_near, m_far); }
-
 glm::mat4 Camera::view_matrix() const { return glm::lookAt(m_position, m_position + m_front, m_up); }
 
 void Camera::update_camera_vectors()

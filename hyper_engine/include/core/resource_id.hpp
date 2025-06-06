@@ -18,7 +18,12 @@ public:
 
 public:
     ResourceId() = default;
-    ResourceId(uint32_t id, uint32_t version);
+
+    ResourceId::ResourceId(const uint32_t id, const uint32_t version)
+        : m_id { ((static_cast<uint64_t>(id) << s_id_shift) & s_id_mask)
+                 | (static_cast<uint64_t>(version) & s_version_mask) }
+    {
+    }
 
     uint32_t id() const { return static_cast<uint32_t>((m_id & s_id_mask) >> s_id_shift); }
     uint32_t version() const { return static_cast<uint32_t>(m_id & s_version_mask); }
