@@ -22,7 +22,7 @@ public:
 public:
     Camera(glm::vec3 position, float yaw, float pitch);
 
-    void process_keyboard(Movement movement, float delta_time);
+    void process_keyboard(Movement, float delta_time);
     void process_mouse_movement(float x_position, float y_position, bool mouse_button_pressed);
     void process_mouse_scroll(float y_offset);
 

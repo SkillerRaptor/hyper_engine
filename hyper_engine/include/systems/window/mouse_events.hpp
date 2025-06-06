@@ -11,7 +11,7 @@
 class MouseButtonPressEvent
 {
 public:
-    explicit MouseButtonPressEvent(MouseCode mouse_code);
+    explicit MouseButtonPressEvent(MouseCode);
 
     MouseCode mouse_code() const { return m_mouse_code; }
 
@@ -22,7 +22,7 @@ private:
 class MouseButtonReleaseEvent
 {
 public:
-    explicit MouseButtonReleaseEvent(MouseCode mouse_code);
+    explicit MouseButtonReleaseEvent(MouseCode);
 
     MouseCode mouse_code() const { return m_mouse_code; }
 

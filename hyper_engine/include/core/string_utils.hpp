@@ -10,5 +10,5 @@
 
 namespace string_utils
 {
-    std::wstring to_wstring(const std::string &string);
+    std::wstring to_wstring(const std::string &);
 } // namespace string_utils

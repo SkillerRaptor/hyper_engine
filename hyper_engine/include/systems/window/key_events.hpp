@@ -11,7 +11,7 @@
 class KeyPressEvent
 {
 public:
-    explicit KeyPressEvent(KeyCode key_code);
+    explicit KeyPressEvent(KeyCode);
 
     KeyCode key_code() const { return m_key_code; }
 
@@ -22,7 +22,7 @@ private:
 class KeyReleaseEvent
 {
 public:
-    explicit KeyReleaseEvent(KeyCode key_code);
+    explicit KeyReleaseEvent(KeyCode);
 
     KeyCode key_code() const { return m_key_code; }
 

@@ -49,9 +49,9 @@ private:
     };
 
 public:
-    explicit ShaderCompiler(const CompilerTarget &compiler_target);
+    explicit ShaderCompiler(const CompilerTarget &);
 
-    std::vector<uint8_t> compile(const ShaderCompilationDescriptor &desc) const;
+    std::vector<uint8_t> compile(const ShaderCompilationDescriptor &) const;
 
 private:
     CompilerTarget m_compiler_target { CompilerTarget::Spirv };

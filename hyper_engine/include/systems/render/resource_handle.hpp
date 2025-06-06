@@ -11,7 +11,7 @@
 class ResourceHandle
 {
 public:
-    explicit ResourceHandle(uint32_t handle);
+    explicit ResourceHandle(uint32_t);
 
     bool is_valid() const { return m_handle != 0xffffffff; }
     uint32_t handle() const { return m_handle; }

@@ -43,22 +43,22 @@ public:
         m_event_bus.subscribe<T>(callback);
     }
 
-    WindowId create_window(const WindowDescriptor &desc);
-    void destroy_window(WindowId id);
+    WindowId create_window(const WindowDescriptor &);
+    void destroy_window(WindowId);
 
-    SDL_Window *get_native_window(WindowId id) const;
+    SDL_Window *get_native_window(WindowId) const;
 
-    void set_window_title(WindowId id, const std::string &title) const;
-    std::string get_window_title(WindowId id) const;
+    void set_window_title(WindowId, const std::string &) const;
+    std::string get_window_title(WindowId) const;
 
-    void set_window_size(WindowId id, uint32_t width, uint32_t height) const;
-    glm::u32vec2 get_window_size(WindowId id) const;
+    void set_window_size(WindowId, uint32_t width, uint32_t height) const;
+    glm::u32vec2 get_window_size(WindowId) const;
 
-    void set_window_fullscreen(WindowId id, bool fullscreen) const;
-    bool is_window_fullscreen(WindowId id) const;
+    void set_window_fullscreen(WindowId, bool) const;
+    bool is_window_fullscreen(WindowId) const;
 
-    void set_window_resizable(WindowId id, bool resizable) const;
-    bool is_window_resizable(WindowId id) const;
+    void set_window_resizable(WindowId, bool) const;
+    bool is_window_resizable(WindowId) const;
 
 private:
     ResourceOwner<WindowId, WindowData> m_windows {};

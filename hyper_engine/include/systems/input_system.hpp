@@ -13,13 +13,13 @@
 class InputSystem
 {
 public:
-    void initialize(WindowSystem &window_system);
+    void initialize(WindowSystem &);
 
     // Keys
-    bool is_key_pressed(KeyCode key_code) const;
+    bool is_key_pressed(KeyCode) const;
 
     // Mouse
-    bool is_mouse_button_pressed(MouseCode mouse_code) const;
+    bool is_mouse_button_pressed(MouseCode) const;
     glm::vec2 mouse_position() const { return m_mouse_position; }
 
 private:
