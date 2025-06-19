@@ -44,7 +44,7 @@ Cpp11BracedListStyle: false
 DerivePointerAlignment: false
 DisableFormat: false
 EmptyLineAfterAccessModifier: Never
-EmptyLineBeforeAccessModifier: Always
+EmptyLineBeforeAccessModifier: Leave
 FixNamespaceComments: true
 IncludeBlocks: Regroup
 IncludeCategories:
@@ -55,7 +55,7 @@ IncludeCategories:
   - Regex: '"([A-Za-z0-9.\Q/-_\E])+"'
     Priority: 3
 IndentAccessModifiers: false
-IndentCaseBlocks: true
+IndentCaseBlocks: false
 IndentCaseLabels: false
 IndentPPDirectives: AfterHash
 IndentRequiresClause: true

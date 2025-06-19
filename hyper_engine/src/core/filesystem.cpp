@@ -8,7 +8,7 @@
 
 #include <fstream>
 
-namespace filesystem
+namespace Filesystem
 {
     std::vector<uint8_t> read_file(const std::string_view path)
     {

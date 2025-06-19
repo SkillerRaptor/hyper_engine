@@ -33,7 +33,7 @@ std::vector<uint8_t> ShaderCompiler::compile(const ShaderCompilationDescriptor &
         }
     }();
 
-    const std::wstring entry_name = string_utils::to_wstring(desc.entry_name);
+    const std::wstring entry_name = StringUtils::to_wstring(desc.entry_name);
 
     const std::vector<std::wstring> arguments {
         L"-I", L"./assets/shaders/", L"-T", shader_model, L"-E", entry_name,
