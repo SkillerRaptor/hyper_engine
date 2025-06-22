@@ -8,7 +8,7 @@
 
 #include <string>
 
-namespace StringUtils
+namespace string_utils
 {
     std::wstring to_wstring(const std::string &);
-} // namespace StringUtils
+} // namespace string_utils

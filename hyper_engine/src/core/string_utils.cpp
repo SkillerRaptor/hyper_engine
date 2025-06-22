@@ -6,7 +6,7 @@
 
 #include "core/string_utils.hpp"
 
-namespace StringUtils
+namespace string_utils
 {
     std::wstring to_wstring(const std::string &string)
     {
