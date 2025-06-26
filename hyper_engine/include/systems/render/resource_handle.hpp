@@ -11,8 +11,8 @@
 class ResourceHandle
 {
 public:
-    explicit ResourceHandle::ResourceHandle(const uint32_t handle)
-        : m_handle(handle)
+    explicit ResourceHandle(const uint32_t handle)
+        : m_handle { handle }
     {
     }
 

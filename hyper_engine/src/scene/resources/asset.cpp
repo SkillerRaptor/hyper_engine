@@ -18,7 +18,6 @@
 #include "core/assertion.hpp"
 #include "core/logger.hpp"
 
-
 Asset Asset::load(const std::string_view path)
 {
     const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
@@ -27,13 +26,12 @@ Asset Asset::load(const std::string_view path)
     fastgltf::Expected<fastgltf::GltfDataBuffer> gltf_data_buffer = fastgltf::GltfDataBuffer::FromPath(file_path);
     HE_ASSERT(gltf_data_buffer.error() == fastgltf::Error::None);
 
-    constexpr fastgltf::Options options
-        = fastgltf::Options::DontRequireValidAssetMember | fastgltf::Options::LoadExternalBuffers
-          | fastgltf::Options::LoadExternalImages | fastgltf::Options::GenerateMeshIndices;
+    constexpr fastgltf::Options options = fastgltf::Options::DontRequireValidAssetMember
+                                          | fastgltf::Options::LoadExternalBuffers | fastgltf::Options::LoadExternalImages
+                                          | fastgltf::Options::GenerateMeshIndices;
 
     fastgltf::Parser parser {};
-    fastgltf::Expected<fastgltf::Asset> asset
-        = parser.loadGltf(gltf_data_buffer.get(), file_path.parent_path(), options);
+    fastgltf::Expected<fastgltf::Asset> asset = parser.loadGltf(gltf_data_buffer.get(), file_path.parent_path(), options);
     HE_ASSERT(asset.error() == fastgltf::Error::None);
 
     std::vector<Sampler> samplers {};
@@ -87,8 +85,8 @@ Asset Asset::load(const std::string_view path)
                 [&](const fastgltf::sources::Array &array)
                 {
                     image_data = stbi_load_from_memory(
-                        reinterpret_cast<const unsigned char *>(array.bytes.data()),
-                        static_cast<int>(array.bytes.size()), &width, &height, nullptr, 4);
+                        reinterpret_cast<const unsigned char *>(array.bytes.data()), static_cast<int>(array.bytes.size()),
+                        &width, &height, nullptr, 4);
                 },
                 [&](const fastgltf::sources::BufferView &view)
                 {
@@ -368,8 +366,7 @@ Asset Asset::load(const std::string_view path)
             model_index = gltf_node.meshIndex.value();
         }
 
-        std::unique_ptr<Node> node
-            = std::make_unique<Node>(nullptr, std::vector<Node *> {}, local_transform, model_index);
+        std::unique_ptr<Node> node = std::make_unique<Node>(nullptr, std::vector<Node *> {}, local_transform, model_index);
         nodes.push_back(std::move(node));
     }
 

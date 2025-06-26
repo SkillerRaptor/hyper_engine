@@ -11,7 +11,7 @@
 class KeyPressEvent
 {
 public:
-    explicit KeyPressEvent::KeyPressEvent(const KeyCode key_code)
+    explicit KeyPressEvent(const KeyCode key_code)
         : m_key_code { key_code }
     {
     }
@@ -25,7 +25,7 @@ private:
 class KeyReleaseEvent
 {
 public:
-    explicit KeyReleaseEvent::KeyReleaseEvent(const KeyCode key_code)
+    explicit KeyReleaseEvent(const KeyCode key_code)
         : m_key_code { key_code }
     {
     }
