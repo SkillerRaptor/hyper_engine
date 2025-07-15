@@ -9,46 +9,46 @@ set(SOURCES
         src/core/filesystem.cpp
         src/core/logger.cpp
         src/core/string_utils.cpp
-        src/drivers/vulkan/vulkan_render_conversion.cpp
-        src/drivers/vulkan/vulkan_render_driver.cpp
-        src/scene/resources/asset.cpp
-        src/systems/input_system.cpp
-        src/systems/render_system.cpp
-        src/systems/window_system.cpp
-        src/systems/render/camera.cpp
-        src/systems/render/shader_compiler.cpp)
+        src/platform/event_server.cpp
+        src/platform/input_server.cpp
+        src/platform/window_server.cpp
+        src/render/camera.cpp
+        src/render/render_driver.cpp
+        src/render/render_server.cpp
+        src/render/shader_compiler.cpp
+        src/render/vulkan/vulkan_render_conversion.cpp
+        src/render/vulkan/vulkan_render_driver.cpp
+        src/scene/resources/asset.cpp)
 
 set(HEADERS
         include/engine.hpp
         include/core/assertion.hpp
         include/core/bit_flags.hpp
         include/core/filesystem.hpp
+        include/core/id.hpp
         include/core/logger.hpp
         include/core/prerequisites.hpp
-        include/core/resource_id.hpp
-        include/core/resource_owner.hpp
         include/core/string_utils.hpp
-        include/drivers/vulkan/vulkan_render_conversion.hpp
-        include/drivers/vulkan/vulkan_render_driver.hpp
-        include/scene/resources/asset.hpp
-        include/systems/input_system.hpp
-        include/systems/render_system.hpp
-        include/systems/window_system.hpp
-        include/systems/render/camera.hpp
-        include/systems/render/render_driver.hpp
-        include/systems/render/render_types.hpp
-        include/systems/render/resource_handle.hpp
-        include/systems/render/shader_compiler.hpp
-        include/systems/window/event_bus.hpp
-        include/systems/window/event_handler.hpp
-        include/systems/window/key_codes.hpp
-        include/systems/window/key_events.hpp
-        include/systems/window/mouse_codes.hpp
-        include/systems/window/mouse_events.hpp
-        include/systems/window/window_events.hpp)
+        include/core/types.hpp
+        include/platform/event_server.hpp
+        include/platform/input_server.hpp
+        include/platform/window_server.hpp
+        include/platform/key_codes.hpp
+        include/platform/key_events.hpp
+        include/platform/mouse_codes.hpp
+        include/platform/mouse_events.hpp
+        include/platform/window_events.hpp
+        include/render/camera.hpp
+        include/render/definitions.hpp
+        include/render/render_driver.hpp
+        include/render/render_server.hpp
+        include/render/resource_handle.hpp
+        include/render/shader_compiler.hpp
+        include/render/vulkan/vulkan_render_conversion.hpp
+        include/render/vulkan/vulkan_render_driver.hpp
+        include/scene/resources/asset.hpp)
 
 #-------------------------------------------------------------------------------------------
-
 link_libraries(
         DirectXShaderCompiler
         EnTT::EnTT
@@ -56,7 +56,6 @@ link_libraries(
         fmt
         glm
         imgui
-        libassert::assert
         SDL3::SDL3
         spdlog
         stb
@@ -64,15 +63,10 @@ link_libraries(
         volk
         VulkanMemoryAllocator)
 if (WIN32)
-    link_libraries(
-            d3d12.lib
-            dxgi.lib
-            D3D12MemoryAllocator)
+    link_libraries(d3d12.lib dxgi.lib D3D12MemoryAllocator)
 endif ()
 
-add_compile_definitions(
-        -DGLM_FORCE_RADIANS
-        -DGLM_FORCE_DEPTH_ZE_TO_ONE)
+add_compile_definitions(-DGLM_FORCE_RADIANS -DGLM_FORCE_DEPTH_ZE_TO_ONE)
 
 include_directories(${CMAKE_SOURCE_DIR}/assets/shaders)
 

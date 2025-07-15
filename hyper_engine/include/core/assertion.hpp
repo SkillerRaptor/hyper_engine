@@ -6,11 +6,21 @@
 
 #pragma once
 
-#include <libassert/assert.hpp>
+#include "core/logger.hpp"
+#include "core/prerequisites.hpp"
 
-#define HE_ASSERT(expression, ...) LIBASSERT_ASSERT(expression, __VA_ARGS__)
-#define HE_ASSERT_VALUE(expression, ...) LIBASSERT_ASSERT_VAL(expression, __VA_ARGS__)
-#define HE_DEBUG_ASSERT(expression, ...) LIBASSERT_DEBUG_ASSERT(expression, __VA_ARGS__)
-#define HE_DEBUG_ASSERT_VALUE(expression, ...) LIBASSERT_DEBUG_ASSERT_VAL(expression, __VA_ARGS__)
-#define HE_PANIC(...) LIBASSERT_PANIC(__VA_ARGS__)
-#define HE_UNREACHABLE(...) LIBASSERT_UNREACHABLE(__VA_ARGS__)
+#define HE_ASSERT(expression, ...)                                      \
+    do                                                                  \
+    {                                                                   \
+        [[unlikely]] if (!(expression))                                 \
+        {                                                               \
+            HE_ERROR("Assertion failed: {}", HE_STRINGIFY(expression)); \
+            std::abort();                                               \
+        }                                                               \
+    } while (false)
+
+#ifdef HE_DEBUG_BUILD
+#    define HE_DEBUG_ASSERT(expression, ...) HE_ASSERT(expression)
+#else
+#    define HE_DEBUG_ASSERT(expression, ...) ((void) 0)
+#endif

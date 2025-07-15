@@ -30,11 +30,17 @@ void Logger::initialize()
     const auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("latest.log", true);
     file_sink->set_pattern("%Y-%m-%d%H:%M:%S.%f %l %s:%#: %v");
 
-    s_internal_logger = std::make_shared<spdlog::logger>(
-        "HyperEngine", spdlog::sinks_init_list {
-                           stdout_sink,
-                           file_sink,
-                       });
+    s_internal_logger = std::make_shared<spdlog::logger>("HyperEngine",
+        spdlog::sinks_init_list {
+            stdout_sink,
+            file_sink,
+        });
+
+#if HE_DEBUG_BUILD
+    s_internal_logger->set_level(spdlog::level::debug);
+    s_internal_logger->flush_on(spdlog::level::debug);
+#else
     s_internal_logger->set_level(spdlog::level::info);
     s_internal_logger->flush_on(spdlog::level::info);
+#endif
 }

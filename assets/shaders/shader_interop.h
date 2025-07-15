@@ -10,7 +10,7 @@
 #ifdef __cplusplus
 #    include <glm/glm.hpp>
 #
-#    include <systems/render/resource_handle.hpp>
+#    include <render/resource_handle.hpp>
 
 #    define float2 ::glm::vec2
 #    define float3 ::glm::vec3
@@ -69,30 +69,11 @@ struct ShaderModel
     ARRAY_BUFFER uvs;
 
 #ifndef __cplusplus
-    inline float3 get_position(uint index)
-    {
-        return positions.load<float3>(index);
-    }
-
-    inline float3 get_normal(uint index)
-    {
-        return normals.load<float3>(index);
-    }
-
-    inline float4 get_tangent(uint index)
-    {
-        return tangents.load<float4>(index);
-    }
-
-    inline float3 get_color(uint index)
-    {
-        return colors.load<float3>(index);
-    }
-
-    inline float2 get_uv(uint index)
-    {
-        return uvs.load<float2>(index);
-    }
+    inline float3 get_position(uint index) { return positions.load<float3>(index); }
+    inline float3 get_normal(uint index) { return normals.load<float3>(index); }
+    inline float4 get_tangent(uint index) { return tangents.load<float4>(index); }
+    inline float3 get_color(uint index) { return colors.load<float3>(index); }
+    inline float2 get_uv(uint index) { return uvs.load<float2>(index); }
 #endif
 };
 
@@ -136,20 +117,9 @@ struct ObjectPushConstants
     float3x3 normal_matrix;
 
 #ifndef __cplusplus
-    inline ShaderScene get_scene()
-    {
-        return scene.load<ShaderScene>();
-    }
-
-    inline ShaderModel get_model()
-    {
-        return model.load<ShaderModel>();
-    }
-
-    inline ShaderMaterial get_material()
-    {
-        return material.load<ShaderMaterial>();
-    }
+    inline ShaderScene get_scene() { return scene.load<ShaderScene>(); }
+    inline ShaderModel get_model() { return model.load<ShaderModel>(); }
+    inline ShaderMaterial get_material() { return material.load<ShaderMaterial>(); }
 #endif
 };
 

@@ -14,8 +14,8 @@
 #include <tracy/Tracy.hpp>
 
 #include "core/logger.hpp"
+#include "platform/window_events.hpp"
 #include "shader_interop.h"
-#include "systems/window/window_events.hpp"
 
 void Engine::initialize()
 {
@@ -25,60 +25,47 @@ void Engine::initialize()
 
     Logger::initialize();
 
-    m_window_system = new WindowSystem();
-    HE_ASSERT(m_window_system != nullptr);
-    m_window_system->initialize();
+    m_window_server = WindowServer::create();
+    m_window = m_window_server->create_window("HyperEngine", 1280, 720);
 
-    m_window = m_window_system->create_window({
-        .title = "HyperEngine",
-        .width = 1280,
-        .height = 720,
-    });
+    m_event_server = EventServer::create();
+    m_input_server = InputServer::create(*m_event_server);
 
-    m_input_system = new InputSystem();
-    HE_ASSERT(m_input_system != nullptr);
-    m_input_system->initialize(*m_window_system);
-
-    m_render_system = new RenderSystem();
-    HE_ASSERT(m_render_system != nullptr);
-    m_render_system->initialize(*m_window_system, m_window);
+    const u32 width = m_window_server->get_width(m_window);
+    const u32 height = m_window_server->get_height(m_window);
+    m_render_server = RenderServer::create(*m_event_server, m_window_server->get_native(m_window), width, height);
 
     // Camera
-    m_window_system->register_listener<MouseMoveEvent>(
+    m_event_server->subscribe<MouseMoveEvent>(
         [this](const MouseMoveEvent &event)
         {
-            m_camera.process_mouse_movement(event.x(), event.y(), m_input_system->is_mouse_button_pressed(MouseCode::ButtonMiddle));
+            m_camera.process_mouse_movement(
+                event.x(), event.y(), m_input_server->is_mouse_button_pressed(MouseCode::ButtonMiddle));
         });
-    m_window_system->register_listener<MouseScrollEvent>(
+
+    m_event_server->subscribe<MouseScrollEvent>(
         [this](const MouseScrollEvent &event)
         {
             m_camera.process_mouse_scroll(event.delta_y());
         });
 
-    m_camera_buffer = m_render_system->create_buffer({
+    m_camera_buffer = m_render_server->create_buffer({
         .label = std::nullopt,
         .size = sizeof(ShaderCamera),
-        .usage =
-            {
-                BufferUsage::Storage,
-                BufferUsage::ShaderResource,
-            },
+        .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
         .handle = ResourceHandle(HE_DESCRIPTOR_SET_SLOT_CAMERA),
     });
 
     // Scene
-    m_scene_buffer = m_render_system->create_buffer({
+    m_scene_buffer = m_render_server->create_buffer({
         .label = std::nullopt,
         .size = sizeof(ShaderScene),
-        .usage =
-            {
-                BufferUsage::Storage,
-                BufferUsage::ShaderResource,
-            },
+        .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
+        .handle = std::nullopt,
     });
 
     create_pbr();
-    create_skybox();
+    // create_skybox();
     create_grid();
     create_composition();
     create_default();
@@ -86,14 +73,14 @@ void Engine::initialize()
     m_sponza = Asset::load("./assets/models/sponza/Sponza.gltf");
     m_renderables = upload_asset(m_sponza);
 
-    m_window_system->register_listener<WindowCloseEvent>(
+    m_event_server->subscribe<WindowCloseEvent>(
         [this](const WindowCloseEvent &)
         {
             m_running = false;
         });
 
     const std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
-    const std::chrono::duration<double> elapsed_seconds = end_time - start_time;
+    const std::chrono::duration<f64> elapsed_seconds = end_time - start_time;
     HE_INFO("Engine initialized in {:.2}s", elapsed_seconds.count());
 }
 
@@ -101,44 +88,50 @@ void Engine::shutdown() const
 {
     ZoneScoped;
 
-    m_render_system->destroy_sampler(m_skybox_sampler);
-    m_render_system->destroy_texture(m_skybox_texture);
+    // m_render_server->destroy_sampler(m_skybox_sampler);
+    // m_render_server->destroy_texture(m_skybox_texture);
+    // m_render_server->destroy_render_pipeline(m_skybox_pipeline);
+    // m_render_server->destroy_pipeline_layout(m_skybox_layout);
 
-    m_render_system->destroy_render_pipeline(m_skybox_pipeline);
-    m_render_system->destroy_pipeline_layout(m_skybox_layout);
+    m_render_server->destroy_sampler(m_default_sampler);
+    m_render_server->destroy_texture_view(m_default_texture_view);
+    m_render_server->destroy_texture(m_default_texture);
 
-    m_render_system->destroy_render_pipeline(m_pbr_pipeline);
-    m_render_system->destroy_render_pipeline(m_grid_pipeline);
-    m_render_system->destroy_pipeline_layout(m_pbr_layout);
+    m_render_server->destroy_texture_view(m_depth_texture_view);
+    m_render_server->destroy_texture(m_depth_texture);
+    m_render_server->destroy_sampler(m_composition_sampler);
+    m_render_server->destroy_texture_view(m_composition_texture_view);
+    m_render_server->destroy_texture(m_composition_texture);
+    m_render_server->destroy_render_pipeline(m_composition_pipeline);
+    m_render_server->destroy_pipeline_layout(m_composition_layout);
 
-    m_render_system->destroy_texture(m_depth_texture);
-    m_render_system->destroy_texture(m_composition_texture);
+    m_render_server->destroy_render_pipeline(m_grid_pipeline);
 
-    m_render_system->destroy_sampler(m_default_sampler);
-    m_render_system->destroy_texture(m_default_texture);
+    m_render_server->destroy_render_pipeline(m_pbr_pipeline);
+    m_render_server->destroy_pipeline_layout(m_pbr_layout);
 
-    m_render_system->destroy_buffer(m_scene_buffer);
-    m_render_system->destroy_buffer(m_camera_buffer);
+    m_render_server->destroy_buffer(m_scene_buffer);
+    m_render_server->destroy_buffer(m_camera_buffer);
 
-    m_window_system->destroy_window(m_window);
+    m_window_server->destroy_window(m_window);
 }
 
 void Engine::run()
 {
-    float total_time = 0.0;
-    constexpr float delta_time = 1.0f / 60.0f;
+    f32 total_time = 0.0;
+    constexpr f32 delta_time = 1.0f / 60.0f;
 
-    float accumulator = 0.0;
+    f32 accumulator = 0.0;
     std::chrono::time_point current_time = std::chrono::steady_clock::now();
     while (m_running)
     {
         const std::chrono::time_point new_time = std::chrono::steady_clock::now();
-        const float frame_time = std::chrono::duration<float>(new_time - current_time).count();
+        const f32 frame_time = std::chrono::duration<f32>(new_time - current_time).count();
         current_time = new_time;
 
         accumulator += frame_time;
 
-        m_window_system->poll_events();
+        m_event_server->poll();
 
         while (accumulator >= delta_time)
         {
@@ -159,33 +152,33 @@ void Engine::run()
     }
 }
 
-void Engine::fixed_update(const float delta_time)
+void Engine::fixed_update(const f32 delta_time)
 {
     ZoneScopedN("FixedUpdate");
 
     (void) delta_time;
 }
 
-void Engine::update(const float delta_time)
+void Engine::update(const f32 delta_time)
 {
     ZoneScopedN("Update");
 
-    if (m_input_system->is_key_pressed(KeyCode::W))
+    if (m_input_server->is_key_pressed(KeyCode::W))
     {
         m_camera.process_keyboard(Camera::Movement::Forward, delta_time);
     }
 
-    if (m_input_system->is_key_pressed(KeyCode::S))
+    if (m_input_server->is_key_pressed(KeyCode::S))
     {
         m_camera.process_keyboard(Camera::Movement::Backward, delta_time);
     }
 
-    if (m_input_system->is_key_pressed(KeyCode::A))
+    if (m_input_server->is_key_pressed(KeyCode::A))
     {
         m_camera.process_keyboard(Camera::Movement::Left, delta_time);
     }
 
-    if (m_input_system->is_key_pressed(KeyCode::D))
+    if (m_input_server->is_key_pressed(KeyCode::D))
     {
         m_camera.process_keyboard(Camera::Movement::Right, delta_time);
     }
@@ -195,7 +188,7 @@ void Engine::render() const
 {
     ZoneScopedN("Render");
 
-    const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
+    const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
 
     const glm::mat4 view_matrix = m_camera.view_matrix();
     const glm::mat4 projection_matrix = m_camera.projection_matrix();
@@ -214,8 +207,7 @@ void Engine::render() const
         .padding_0 = 0.0,
         .padding_1 = 0.0,
     };
-    m_render_system->write_buffer(
-        command_buffer,
+    m_render_server->write_buffer(command_buffer,
         {
             .buffer = m_camera_buffer,
             .offset = 0,
@@ -228,19 +220,18 @@ void Engine::render() const
         .sunlight_color = glm::vec4(1.0f),
         .padding_0 = glm::vec4(0.0f),
     };
-    m_render_system->write_buffer(
-        command_buffer,
+    m_render_server->write_buffer(command_buffer,
         {
             .buffer = m_scene_buffer,
             .offset = 0,
         },
         shader_scene);
 
-    const RenderPassId render_pass = m_render_system->begin_render_pass(
+    const RenderPassId render_pass = m_render_server->begin_render_pass(
         command_buffer,
         {
             .label =
-                Label{
+                PassLabel{
                     .name = "Render Pass",
                     .color =
                         {
@@ -251,41 +242,41 @@ void Engine::render() const
                 },
             .color_attachments =
                 {
-                    {
-                        .texture = m_composition_texture,
+                    ColorAttachment{
+                        .view = m_composition_texture_view,
                         .operations =
                             {
-                                .load_operation = LoadOperation::Clear,
-                                .store_operation = StoreOperation::Store,
+                                .load_op = LoadOperation::Clear,
+                                .store_op = StoreOperation::Store,
                             },
                     },
                 },
             .depth_stencil_attachment =
                 DepthStencilAttachment{
-                    .texture = m_depth_texture,
+                    .view = m_depth_texture_view,
                     .depth_operations =
                         {
-                            .load_operation = LoadOperation::Clear,
-                            .store_operation = StoreOperation::Store,
+                            .load_op = LoadOperation::Clear,
+                            .store_op = StoreOperation::Store,
                         },
                 },
         });
 
-    const ResourceHandle scene_buffer_handle = m_render_system->get_buffer_handle(m_scene_buffer);
+    const ResourceHandle scene_buffer_handle = m_render_server->get_buffer_handle(m_scene_buffer);
     for (const GpuModel &model : m_renderables)
     {
         glm::mat4 transform = model.transform;
         transform = glm::translate(transform, glm::vec3(0.0f, 10.0f, 0.0f));
 
-        const ResourceHandle model_buffer_handle = m_render_system->get_buffer_handle(model.model_buffer);
+        const ResourceHandle model_buffer_handle = m_render_server->get_buffer_handle(model.model_buffer);
 
-        m_render_system->bind_index_buffer(render_pass, model.indices_buffer);
+        m_render_server->bind_index_buffer(render_pass, model.indices_buffer);
 
         for (const GpuMesh &mesh : model.meshes)
         {
-            const ResourceHandle material_buffer_handle = m_render_system->get_buffer_handle(mesh.material_buffer);
+            const ResourceHandle material_buffer_handle = m_render_server->get_buffer_handle(mesh.material_buffer);
             // FIXME: Pick pipeline based on material & optimization if it is the same pipeline from before
-            m_render_system->bind_pipeline(render_pass, m_pbr_pipeline);
+            m_render_server->bind_pipeline(render_pass, m_pbr_pipeline);
 
             const ObjectPushConstants mesh_push_constants = {
                 .scene = scene_buffer_handle,
@@ -294,66 +285,66 @@ void Engine::render() const
                 .padding_0 = 0,
                 .transform_matrix = transform,
             };
-            m_render_system->push_constants(render_pass, mesh_push_constants);
+            m_render_server->push_constants(render_pass, mesh_push_constants);
 
-            m_render_system->draw_indexed(
-                render_pass, static_cast<uint32_t>(mesh.index_count), 1, static_cast<uint32_t>(mesh.start_index), 0, 0);
+            m_render_server->draw_indexed(
+                render_pass, static_cast<u32>(mesh.index_count), 1, static_cast<u32>(mesh.start_index), 0, 0);
         }
     }
 
-    m_render_system->end_render_pass(render_pass);
+    m_render_server->end_render_pass(render_pass);
 
-    const RenderPassId skybox_render_pass = m_render_system->begin_render_pass(
+    // const RenderPassId skybox_render_pass = m_render_server->begin_render_pass(
+    //     command_buffer,
+    //     {
+    //         .label =
+    //             Label{
+    //                 .name = "Skybox Render Pass",
+    //                 .color =
+    //                     {
+    //                         .r = 0,
+    //                         .g = 0,
+    //                         .b = 255,
+    //                     },
+    //             },
+    //         .color_attachments =
+    //             {
+    //                 {
+    //                     .texture = m_composition_texture,
+    //                     .operations =
+    //                         {
+    //                             .load_op = LoadOperation::Load,
+    //                             .store_op = StoreOperation::Store,
+    //                         },
+    //                 },
+    //             },
+    //         .depth_stencil_attachment =
+    //             DepthStencilAttachment{
+    //                 .texture = m_depth_texture,
+    //                 .depth_operations =
+    //                     {
+    //                         .load_op = LoadOperation::Load,
+    //                         .store_op = StoreOperation::None,
+    //                     },
+    //             },
+    //     });
+    //
+    // m_render_server->bind_pipeline(skybox_render_pass, m_skybox_pipeline);
+    // const SkyboxPushConstants skybox_push_constants = {
+    //     .skybox_texture = m_render_server->get_texture_view_handle(m_skybox_texture),
+    //     .skybox_sampler = m_render_server->get_sampler_handle(m_skybox_sampler),
+    //     .padding_0 = 0,
+    //     .padding_1 = 0,
+    // };
+    // m_render_server->push_constants(skybox_render_pass, skybox_push_constants);
+    // m_render_server->draw(skybox_render_pass, 36, 1, 0, 0);
+    // m_render_server->end_render_pass(skybox_render_pass);
+
+    const RenderPassId grid_render_pass = m_render_server->begin_render_pass(
         command_buffer,
         {
             .label =
-                Label{
-                    .name = "Skybox Render Pass",
-                    .color =
-                        {
-                            .r = 0,
-                            .g = 0,
-                            .b = 255,
-                        },
-                },
-            .color_attachments =
-                {
-                    {
-                        .texture = m_composition_texture,
-                        .operations =
-                            {
-                                .load_operation = LoadOperation::Load,
-                                .store_operation = StoreOperation::Store,
-                            },
-                    },
-                },
-            .depth_stencil_attachment =
-                DepthStencilAttachment{
-                    .texture = m_depth_texture,
-                    .depth_operations =
-                        {
-                            .load_operation = LoadOperation::Load,
-                            .store_operation = StoreOperation::None,
-                        },
-                },
-        });
-
-    m_render_system->bind_pipeline(skybox_render_pass, m_skybox_pipeline);
-    const SkyboxPushConstants skybox_push_constants = {
-        .skybox_texture = m_render_system->get_texture_handle(m_skybox_texture),
-        .skybox_sampler = m_render_system->get_sampler_handle(m_skybox_sampler),
-        .padding_0 = 0,
-        .padding_1 = 0,
-    };
-    m_render_system->push_constants(skybox_render_pass, skybox_push_constants);
-    m_render_system->draw(skybox_render_pass, 36, 1, 0, 0);
-    m_render_system->end_render_pass(skybox_render_pass);
-
-    const RenderPassId grid_render_pass = m_render_system->begin_render_pass(
-        command_buffer,
-        {
-            .label =
-                Label{
+                PassLabel{
                     .name = "Grid Render Pass",
                     .color =
                         {
@@ -364,36 +355,35 @@ void Engine::render() const
                 },
             .color_attachments =
                 {
-                    {
-                        .texture = m_composition_texture,
+                    ColorAttachment{
+                        .view = m_composition_texture_view,
                         .operations =
                             {
-                                .load_operation = LoadOperation::Load,
-                                .store_operation = StoreOperation::Store,
+                                .load_op = LoadOperation::Load,
+                                .store_op = StoreOperation::Store,
                             },
                     },
                 },
             .depth_stencil_attachment =
                 DepthStencilAttachment{
-                    .texture = m_depth_texture,
+                    .view = m_depth_texture_view,
                     .depth_operations =
                         {
-                            .load_operation = LoadOperation::Load,
-                            .store_operation = StoreOperation::Store,
+                            .load_op = LoadOperation::Load,
+                            .store_op = StoreOperation::Store,
                         },
                 },
         });
-    m_render_system->bind_pipeline(grid_render_pass, m_grid_pipeline);
-    m_render_system->draw(grid_render_pass, 6, 1, 0, 0);
-    m_render_system->end_render_pass(grid_render_pass);
+    m_render_server->bind_pipeline(grid_render_pass, m_grid_pipeline);
+    m_render_server->draw(grid_render_pass, 6, 1, 0, 0);
+    m_render_server->end_render_pass(grid_render_pass);
 
-    const TextureId swapchain_texture = m_render_system->acquire_swapchain_texture(command_buffer);
-
-    const RenderPassId composition_render_pass = m_render_system->begin_render_pass(
+    const TextureViewId swapchain_texture_view = m_render_server->acquire_swapchain_texture(command_buffer);
+    const RenderPassId composition_render_pass = m_render_server->begin_render_pass(
         command_buffer,
         {
             .label =
-                Label{
+                PassLabel{
                     .name = "Composition Render Pass",
                     .color =
                         {
@@ -404,74 +394,57 @@ void Engine::render() const
                 },
             .color_attachments =
                 {
-                    {
-                        .texture = swapchain_texture,
+                    ColorAttachment{
+                        .view = swapchain_texture_view,
                         .operations =
                             {
-                                .load_operation = LoadOperation::Clear,
-                                .store_operation = StoreOperation::Store,
+                                .load_op = LoadOperation::Clear,
+                                .store_op = StoreOperation::Store,
                             },
                     },
                 },
             .depth_stencil_attachment = std::nullopt,
         });
-    m_render_system->bind_pipeline(composition_render_pass, m_composition_pipeline);
+    m_render_server->bind_pipeline(composition_render_pass, m_composition_pipeline);
     const CompositionPushConstants composition_push_constants = {
-        .composition_texture = m_render_system->get_texture_handle(m_composition_texture),
-        .composition_sampler = m_render_system->get_sampler_handle(m_composition_sampler),
+        .composition_texture = m_render_server->get_texture_view_handle(m_composition_texture_view),
+        .composition_sampler = m_render_server->get_sampler_handle(m_composition_sampler),
         .padding_0 = 0,
         .padding_1 = 0,
     };
-    m_render_system->push_constants(composition_render_pass, composition_push_constants);
-    m_render_system->draw(composition_render_pass, 3, 1, 0, 0);
-    m_render_system->end_render_pass(composition_render_pass);
+    m_render_server->push_constants(composition_render_pass, composition_push_constants);
+    m_render_server->draw(composition_render_pass, 3, 1, 0, 0);
+    m_render_server->end_render_pass(composition_render_pass);
 
-    m_render_system->submit_command_buffer(command_buffer);
+    m_render_server->submit_command_buffer(command_buffer);
 }
 
 void Engine::create_pbr()
 {
-    m_pbr_layout = m_render_system->create_pipeline_layout({
+    m_pbr_layout = m_render_server->create_pipeline_layout({
         .label = std::nullopt,
         .push_constant_size = sizeof(ObjectPushConstants),
     });
 
-    const ShaderId vertex_shader = m_render_system->create_shader({
+    const ShaderId vertex_shader = m_render_server->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Vertex,
         .entry = "vs_main",
         .path = "./assets/shaders/pbr_shader.hlsl",
     });
 
-    const ShaderId fragment_shader = m_render_system->create_shader({
+    const ShaderId fragment_shader = m_render_server->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Fragment,
         .entry = "fs_main",
         .path = "./assets/shaders/pbr_shader.hlsl",
     });
 
-    m_pbr_pipeline = m_render_system->create_render_pipeline({
+    m_pbr_pipeline = m_render_server->create_render_pipeline({
         .label = std::nullopt,
         .layout = m_pbr_layout,
         .vertex_shader = vertex_shader,
         .fragment_shader = fragment_shader,
-        .color_attachment_states =
-            {
-                {
-                    .format = Format::Rgba16Sfloat,
-                    .blend_state =
-                        {
-                            .blend_enable = false,
-                            .src_blend_factor = BlendFactor::One,
-                            .dst_blend_factor = BlendFactor::Zero,
-                            .operation = BlendOperation::Add,
-                            .alpha_src_blend_factor = BlendFactor::One,
-                            .alpha_dst_blend_factor = BlendFactor::Zero,
-                            .alpha_operation = BlendOperation::Add,
-                            .color_writes = ColorWrites::All,
-                        },
-                },
-            },
         .primitive_state =
             {
                 .topology = PrimitiveTopology::TriangleList,
@@ -479,15 +452,31 @@ void Engine::create_pbr()
                 .cull_mode = Face::Back,
                 .polygon_mode = PolygonMode::Fill,
             },
-        .depth_stencil_state =
+        .color_attachment_states =
             {
+                ColorAttachmentState{
+                    .format = Format::Rgba16Sfloat,
+                    .blend_state =
+                        {
+                            .enable = false,
+                            .src_factor = BlendFactor::One,
+                            .dst_factor = BlendFactor::Zero,
+                            .operation = BlendOperation::Add,
+                            .alpha_src_factor = BlendFactor::One,
+                            .alpha_dst_factor = BlendFactor::Zero,
+                            .alpha_operation = BlendOperation::Add,
+                            .color_writes = ColorWrites::All,
+                        },
+                },
+            },
+        .depth_stencil_state =
+            DepthStencilState{
                 .depth_test_enable = true,
                 .depth_write_enable = true,
                 .depth_format = Format::D32Sfloat,
                 .depth_compare_operation = CompareOperation::Less,
-                .depth_bias_state =
-                    {
-                        .depth_bias_enable = false,
+                .depth_bias_state = {
+                        .enable = false,
                         .constant = 0.0f,
                         .clamp = 0.0f,
                         .slope = 0.0f,
@@ -495,13 +484,14 @@ void Engine::create_pbr()
             },
     });
 
-    m_render_system->destroy_shader(fragment_shader);
-    m_render_system->destroy_shader(vertex_shader);
+    m_render_server->destroy_shader(fragment_shader);
+    m_render_server->destroy_shader(vertex_shader);
 }
 
 void Engine::create_skybox()
 {
-    std::array<uint8_t *, 6> texture_datas = {};
+    /*
+    std::array<u8 *, 6> texture_datas = {};
 
     int width = 0;
     int height = 0;
@@ -513,23 +503,23 @@ void Engine::create_skybox()
     texture_datas[4] = stbi_load("./assets/images/skybox/front.jpg", &width, &height, nullptr, 4);
     texture_datas[5] = stbi_load("./assets/images/skybox/back.jpg", &width, &height, nullptr, 4);
 
-    const size_t image_size = width * height * 4 * 6;
-    const size_t layer_size = image_size / 6;
+    const usize image_size = width * height * 4 * 6;
+    const usize layer_size = image_size / 6;
 
     // FIXME: Cube Maps needs to be sampled image (add assertions)
-    m_skybox_texture = m_render_system->create_texture({
+    m_skybox_texture = m_render_server->create_texture({
         .label = std::nullopt,
-        .width = static_cast<uint32_t>(width),
-        .height = static_cast<uint32_t>(height),
+        .width = static_cast<u32>(width),
+        .height = static_cast<u32>(height),
         .depth = 1,
         .array_size = 6,
         .mip_levels = 1,
         .format = Format::Rgba8Unorm,
         .dimension = Dimension::TextureCube,
-        .usage = TextureUsage::ShaderResource,
+        .usage = TextureUsage::Resource,
     });
 
-    m_skybox_sampler = m_render_system->create_sampler({
+    m_skybox_sampler = m_render_server->create_sampler({
         .label = std::nullopt,
         .mag_filter = Filter::Linear,
         .min_filter = Filter::Linear,
@@ -545,10 +535,10 @@ void Engine::create_skybox()
     });
 
     {
-        const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
-        for (size_t i = 0; i < 6; ++i)
+        const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
+        for (usize i = 0; i < 6; ++i)
         {
-            m_render_system->write_texture(
+            m_render_server->write_texture(
                 command_buffer,
                 {
                     .texture = m_skybox_texture,
@@ -560,41 +550,41 @@ void Engine::create_skybox()
                         },
                     .extent =
                         {
-                            .width = static_cast<uint32_t>(width),
-                            .height = static_cast<uint32_t>(height),
+                            .width = static_cast<u32>(width),
+                            .height = static_cast<u32>(height),
                             .depth = 1,
                         },
                     .mip_level = 0,
-                    .array_index = static_cast<uint32_t>(i),
+                    .array_index = static_cast<u32>(i),
                 },
                 texture_datas[i],
                 layer_size);
         }
-        m_render_system->submit_command_buffer(command_buffer);
+        m_render_server->submit_command_buffer(command_buffer);
     }
 
     //
 
-    m_skybox_layout = m_render_system->create_pipeline_layout({
+    m_skybox_layout = m_render_server->create_pipeline_layout({
         .label = std::nullopt,
         .push_constant_size = sizeof(SkyboxPushConstants),
     });
 
-    const ShaderId skybox_vertex_shader = m_render_system->create_shader({
+    const ShaderId skybox_vertex_shader = m_render_server->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Vertex,
         .entry = "vs_main",
         .path = "./assets/shaders/skybox_shader.hlsl",
     });
 
-    const ShaderId skybox_fragment_shader = m_render_system->create_shader({
+    const ShaderId skybox_fragment_shader = m_render_server->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Fragment,
         .entry = "fs_main",
         .path = "./assets/shaders/skybox_shader.hlsl",
     });
 
-    m_skybox_pipeline = m_render_system->create_render_pipeline({
+    m_skybox_pipeline = m_render_server->create_render_pipeline({
         .label = std::nullopt,
         .layout = m_skybox_layout,
         .vertex_shader = skybox_vertex_shader,
@@ -602,15 +592,15 @@ void Engine::create_skybox()
         .color_attachment_states =
             {
                 {
-                    .format = Format::Rgba16Sfloat,
+                    .format = Format::Rgba16Sf32,
                     .blend_state =
                         {
                             .blend_enable = false,
-                            .src_blend_factor = BlendFactor::One,
-                            .dst_blend_factor = BlendFactor::Zero,
+                            .src_factor = BlendFactor::One,
+                            .dst_factor = BlendFactor::Zero,
                             .operation = BlendOperation::Add,
-                            .alpha_src_blend_factor = BlendFactor::One,
-                            .alpha_dst_blend_factor = BlendFactor::Zero,
+                            .alpha_src_factor = BlendFactor::One,
+                            .alpha_dst_factor = BlendFactor::Zero,
                             .alpha_operation = BlendOperation::Add,
                             .color_writes = ColorWrites::All,
                         },
@@ -627,11 +617,11 @@ void Engine::create_skybox()
             {
                 .depth_test_enable = true,
                 .depth_write_enable = false,
-                .depth_format = Format::D32Sfloat,
+                .depth_format = Format::D32Sf32,
                 .depth_compare_operation = CompareOperation::LessEqual,
                 .depth_bias_state =
                     {
-                        .depth_bias_enable = false,
+                        .enable = false,
                         .constant = 0.0f,
                         .clamp = 0.0f,
                         .slope = 0.0f,
@@ -639,48 +629,32 @@ void Engine::create_skybox()
             },
     });
 
-    m_render_system->destroy_shader(skybox_fragment_shader);
-    m_render_system->destroy_shader(skybox_vertex_shader);
+    m_render_server->destroy_shader(skybox_fragment_shader);
+    m_render_server->destroy_shader(skybox_vertex_shader);
+    */
 }
 
 void Engine::create_grid()
 {
-    const ShaderId grid_vertex_shader = m_render_system->create_shader({
+    const ShaderId grid_vertex_shader = m_render_server->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Vertex,
         .entry = "vs_main",
         .path = "./assets/shaders/grid_shader.hlsl",
     });
 
-    const ShaderId grid_fragment_shader = m_render_system->create_shader({
+    const ShaderId grid_fragment_shader = m_render_server->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Fragment,
         .entry = "fs_main",
         .path = "./assets/shaders/grid_shader.hlsl",
     });
 
-    m_grid_pipeline = m_render_system->create_render_pipeline({
+    m_grid_pipeline = m_render_server->create_render_pipeline({
         .label = std::nullopt,
         .layout = m_pbr_layout,
         .vertex_shader = grid_vertex_shader,
         .fragment_shader = grid_fragment_shader,
-        .color_attachment_states =
-            {
-                {
-                    .format = Format::Rgba16Sfloat,
-                    .blend_state =
-                        {
-                            .blend_enable = true,
-                            .src_blend_factor = BlendFactor::SrcAlpha,
-                            .dst_blend_factor = BlendFactor::One,
-                            .operation = BlendOperation::Add,
-                            .alpha_src_blend_factor = BlendFactor::One,
-                            .alpha_dst_blend_factor = BlendFactor::Zero,
-                            .alpha_operation = BlendOperation::Add,
-                            .color_writes = ColorWrites::All,
-                        },
-                },
-            },
         .primitive_state =
             {
                 .topology = PrimitiveTopology::TriangleList,
@@ -688,15 +662,32 @@ void Engine::create_grid()
                 .cull_mode = Face::None,
                 .polygon_mode = PolygonMode::Fill,
             },
-        .depth_stencil_state =
+        .color_attachment_states =
             {
+                ColorAttachmentState{
+                    .format = Format::Rgba16Sfloat,
+                    .blend_state =
+                        {
+                            .enable = true,
+                            .src_factor = BlendFactor::SrcAlpha,
+                            .dst_factor = BlendFactor::One,
+                            .operation = BlendOperation::Add,
+                            .alpha_src_factor = BlendFactor::One,
+                            .alpha_dst_factor = BlendFactor::Zero,
+                            .alpha_operation = BlendOperation::Add,
+                            .color_writes = ColorWrites::All,
+                        },
+                },
+            },
+        .depth_stencil_state =
+            DepthStencilState{
                 .depth_test_enable = true,
                 .depth_write_enable = true,
                 .depth_format = Format::D32Sfloat,
                 .depth_compare_operation = CompareOperation::Less,
                 .depth_bias_state =
                     {
-                        .depth_bias_enable = false,
+                        .enable = false,
                         .constant = 0.0f,
                         .clamp = 0.0f,
                         .slope = 0.0f,
@@ -704,53 +695,36 @@ void Engine::create_grid()
             },
     });
 
-    m_render_system->destroy_shader(grid_fragment_shader);
-    m_render_system->destroy_shader(grid_vertex_shader);
+    m_render_server->destroy_shader(grid_fragment_shader);
+    m_render_server->destroy_shader(grid_vertex_shader);
 }
 
 void Engine::create_composition()
 {
-    m_composition_layout = m_render_system->create_pipeline_layout({
+    m_composition_layout = m_render_server->create_pipeline_layout({
         .label = std::nullopt,
         .push_constant_size = sizeof(CompositionPushConstants),
     });
 
-    const ShaderId composition_vertex_shader = m_render_system->create_shader({
+    const ShaderId composition_vertex_shader = m_render_server->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Vertex,
         .entry = "vs_main",
         .path = "./assets/shaders/composition_shader.hlsl",
     });
 
-    const ShaderId composition_fragment_shader = m_render_system->create_shader({
+    const ShaderId composition_fragment_shader = m_render_server->create_shader({
         .label = std::nullopt,
         .type = ShaderType::Fragment,
         .entry = "fs_main",
         .path = "./assets/shaders/composition_shader.hlsl",
     });
 
-    m_composition_pipeline = m_render_system->create_render_pipeline({
+    m_composition_pipeline = m_render_server->create_render_pipeline({
         .label = std::nullopt,
         .layout = m_composition_layout,
         .vertex_shader = composition_vertex_shader,
         .fragment_shader = composition_fragment_shader,
-        .color_attachment_states =
-            {
-                {
-                    .format = Format::Bgra8Unorm,
-                    .blend_state =
-                        {
-                            .blend_enable = false,
-                            .src_blend_factor = BlendFactor::One,
-                            .dst_blend_factor = BlendFactor::Zero,
-                            .operation = BlendOperation::Add,
-                            .alpha_src_blend_factor = BlendFactor::One,
-                            .alpha_dst_blend_factor = BlendFactor::Zero,
-                            .alpha_operation = BlendOperation::Add,
-                            .color_writes = ColorWrites::All,
-                        },
-                },
-            },
         .primitive_state =
             {
                 .topology = PrimitiveTopology::TriangleList,
@@ -758,15 +732,32 @@ void Engine::create_composition()
                 .cull_mode = Face::Back,
                 .polygon_mode = PolygonMode::Fill,
             },
-        .depth_stencil_state =
+        .color_attachment_states =
             {
+                ColorAttachmentState{
+                    .format = Format::Bgra8Unorm,
+                    .blend_state =
+                        {
+                            .enable = false,
+                            .src_factor = BlendFactor::One,
+                            .dst_factor = BlendFactor::Zero,
+                            .operation = BlendOperation::Add,
+                            .alpha_src_factor = BlendFactor::One,
+                            .alpha_dst_factor = BlendFactor::Zero,
+                            .alpha_operation = BlendOperation::Add,
+                            .color_writes = ColorWrites::All,
+                        },
+                },
+            },
+        .depth_stencil_state =
+            DepthStencilState{
                 .depth_test_enable = false,
                 .depth_write_enable = false,
                 .depth_format = Format::D32Sfloat,
                 .depth_compare_operation = CompareOperation::Less,
                 .depth_bias_state =
                     {
-                        .depth_bias_enable = false,
+                        .enable = false,
                         .constant = 0.0f,
                         .clamp = 0.0f,
                         .slope = 0.0f,
@@ -774,28 +765,35 @@ void Engine::create_composition()
             },
     });
 
-    m_render_system->destroy_shader(composition_fragment_shader);
-    m_render_system->destroy_shader(composition_vertex_shader);
+    m_render_server->destroy_shader(composition_fragment_shader);
+    m_render_server->destroy_shader(composition_vertex_shader);
 
-    const glm::uvec2 window_size = m_window_system->get_window_size(m_window);
-
-    m_composition_texture = m_render_system->create_texture({
+    const u32 width = m_window_server->get_width(m_window);
+    const u32 height = m_window_server->get_height(m_window);
+    m_composition_texture = m_render_server->create_texture({
         .label = std::nullopt,
-        .width = window_size.x,
-        .height = window_size.y,
-        .depth = 1,
-        .array_size = 1,
+        .extent = {
+            .width = width,
+            .height = height,
+            .depth = 1,
+        },
         .mip_levels = 1,
         .format = Format::Rgba16Sfloat,
-        .dimension = Dimension::Texture2D,
-        .usage =
-            {
-                TextureUsage::RenderAttachment,
-                TextureUsage::ShaderResource,
-            },
+        .dimension = Dimension::D2,
+        .usage = TextureUsage::RenderAttachment | TextureUsage::Resource,
     });
 
-    m_composition_sampler = m_render_system->create_sampler({
+    m_composition_texture_view = m_render_server->create_texture_view({
+        .label = std::nullopt,
+        .texture = m_composition_texture,
+        .dimension = ViewDimension::D2,
+        .base_mip_level = 0,
+        .mip_levels = 1,
+        .base_array_layer = 0,
+        .array_layers = 1,
+    });
+
+    m_composition_sampler = m_render_server->create_sampler({
         .label = std::nullopt,
         .mag_filter = Filter::Nearest,
         .min_filter = Filter::Nearest,
@@ -803,76 +801,115 @@ void Engine::create_composition()
         .address_mode_u = AddressMode::Repeat,
         .address_mode_v = AddressMode::Repeat,
         .address_mode_w = AddressMode::Repeat,
-        .mip_lod_bias = 0.0f,
         .compare_operation = CompareOperation::Never,
         .min_lod = 0.0f,
         .max_lod = 1.0f,
         .border_color = BorderColor::TransparentBlack,
     });
 
-    m_depth_texture = m_render_system->create_texture({
+    m_depth_texture = m_render_server->create_texture({
         .label = std::nullopt,
-        .width = window_size.x,
-        .height = window_size.y,
-        .depth = 1,
-        .array_size = 1,
+        .extent = {
+            .width = width,
+            .height = height,
+            .depth = 1,
+        },
         .mip_levels = 1,
         .format = Format::D32Sfloat,
-        .dimension = Dimension::Texture2D,
+        .dimension = Dimension::D2,
         .usage = TextureUsage::RenderAttachment,
     });
 
-    m_window_system->register_listener<WindowResizeEvent>(
+    m_depth_texture_view = m_render_server->create_texture_view({
+        .label = std::nullopt,
+        .texture = m_depth_texture,
+        .dimension = ViewDimension::D2,
+        .base_mip_level = 0,
+        .mip_levels = 1,
+        .base_array_layer = 0,
+        .array_layers = 1,
+    });
+
+    m_event_server->subscribe<WindowResizeEvent>(
         [this](const WindowResizeEvent &event)
         {
-            m_render_system->destroy_texture(m_depth_texture);
-            m_render_system->destroy_texture(m_composition_texture);
+            m_render_server->destroy_texture(m_depth_texture);
+            m_render_server->destroy_texture(m_composition_texture);
 
-            m_composition_texture = m_render_system->create_texture({
+            m_composition_texture = m_render_server->create_texture({
                 .label = std::nullopt,
-                .width = event.width(),
-                .height = event.height(),
-                .depth = 1,
-                .array_size = 1,
+                .extent = {
+                    .width = event.width(),
+                    .height = event.height(),
+                    .depth = 1,
+                },
                 .mip_levels = 1,
                 .format = Format::Rgba16Sfloat,
-                .dimension = Dimension::Texture2D,
-                .usage =
-                    {
-                        TextureUsage::RenderAttachment,
-                        TextureUsage::ShaderResource,
-                    },
+                .dimension = Dimension::D2,
+                .usage = TextureUsage::RenderAttachment | TextureUsage::Resource,
             });
 
-            m_depth_texture = m_render_system->create_texture({
+            m_composition_texture_view = m_render_server->create_texture_view({
                 .label = std::nullopt,
-                .width = event.width(),
-                .height = event.height(),
-                .depth = 1,
-                .array_size = 1,
+                .texture = m_composition_texture,
+                .dimension = ViewDimension::D2,
+                .base_mip_level = 0,
+                .mip_levels = 1,
+                .base_array_layer = 0,
+                .array_layers = 1,
+            });
+
+            m_depth_texture = m_render_server->create_texture({
+                .label = std::nullopt,
+                .extent = {
+                    .width = event.width(),
+                    .height = event.height(),
+                    .depth = 1,
+                },
                 .mip_levels = 1,
                 .format = Format::D32Sfloat,
-                .dimension = Dimension::Texture2D,
+                .dimension = Dimension::D2,
                 .usage = TextureUsage::RenderAttachment,
+            });
+
+            m_depth_texture_view = m_render_server->create_texture_view({
+                .label = std::nullopt,
+                .texture = m_depth_texture,
+                .dimension = ViewDimension::D2,
+                .base_mip_level = 0,
+                .mip_levels = 1,
+                .base_array_layer = 0,
+                .array_layers = 1,
             });
         });
 }
 
 void Engine::create_default()
 {
-    m_default_texture = m_render_system->create_texture({
+    m_default_texture = m_render_server->create_texture({
         .label = std::nullopt,
-        .width = 16,
-        .height = 16,
-        .depth = 1,
-        .array_size = 1,
+        .extent = {
+            .width = 16,
+            .height = 16,
+            .depth = 1,
+        },
         .mip_levels = 1,
         .format = Format::Rgba8Unorm,
-        .dimension = Dimension::Texture2D,
-        .usage = TextureUsage::ShaderResource,
+        .dimension = Dimension::D2,
+        .usage = TextureUsage::TransferDst | TextureUsage::Resource,
     });
 
-    m_default_sampler = m_render_system->create_sampler({
+    m_default_texture_view = m_render_server->create_texture_view({
+        .label = std::nullopt,
+        .texture = m_default_texture,
+        .dimension = ViewDimension::D2,
+        .base_mip_level = 0,
+        .mip_levels = 1,
+        .base_array_layer = 0,
+        .array_layers = 1,
+    });
+
+    m_default_sampler = m_render_server->create_sampler({
         .label = std::nullopt,
         .mag_filter = Filter::Nearest,
         .min_filter = Filter::Nearest,
@@ -880,28 +917,27 @@ void Engine::create_default()
         .address_mode_u = AddressMode::Repeat,
         .address_mode_v = AddressMode::Repeat,
         .address_mode_w = AddressMode::Repeat,
-        .mip_lod_bias = 0.0f,
         .compare_operation = CompareOperation::Never,
         .min_lod = 0.0f,
         .max_lod = 1.0f,
         .border_color = BorderColor::TransparentBlack,
     });
 
-    const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
+    const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
 
-    const uint32_t black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
-    const uint32_t magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
+    const u32 black = glm::packUnorm4x8(glm::vec4(0, 0, 0, 1));
+    const u32 magenta = glm::packUnorm4x8(glm::vec4(1, 0, 1, 1));
 
-    std::array<uint32_t, 16 * 16> pixels = {};
-    for (size_t x = 0; x < 16; x++)
+    std::array<u32, 16 * 16> pixels = {};
+    for (usize x = 0; x < 16; x++)
     {
-        for (size_t y = 0; y < 16; y++)
+        for (usize y = 0; y < 16; y++)
         {
             pixels[y * 16 + x] = ((x % 2) ^ (y % 2)) ? magenta : black;
         }
     }
 
-    m_render_system->write_texture(
+    m_render_server->write_texture(
         command_buffer,
         {
             .texture = m_default_texture,
@@ -911,19 +947,18 @@ void Engine::create_default()
                     .y = 0,
                     .z = 0,
                 },
-            .extent =
-                {
-                    .width = 16,
-                    .height = 16,
-                    .depth = 1,
-                },
             .mip_level = 0,
             .array_index = 0,
         },
         pixels.data(),
-        pixels.size() * sizeof(uint32_t));
+        pixels.size() * sizeof(u32),
+        {
+            .width = 16,
+            .height = 16,
+            .depth = 1,
+        });
 
-    m_render_system->submit_command_buffer(command_buffer);
+    m_render_server->submit_command_buffer(command_buffer);
 }
 
 std::vector<Engine::GpuModel> Engine::upload_asset(const Asset &asset)
@@ -932,26 +967,25 @@ std::vector<Engine::GpuModel> Engine::upload_asset(const Asset &asset)
 
     std::vector<GpuModel> gpu_models;
 
-    const CommandBufferId command_buffer = m_render_system->acquire_command_buffer();
+    const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
     for (const Asset::Scene &scene : asset.scenes())
     {
-        for (const size_t node_index : scene.node_indices)
+        for (const usize node_index : scene.node_indices)
         {
             const Asset::Node *node = asset.nodes()[node_index].get();
             upload_model(command_buffer, asset, node, glm::mat4(1.0f), gpu_models);
         }
     }
-    m_render_system->submit_command_buffer(command_buffer);
+    m_render_server->submit_command_buffer(command_buffer);
 
     const std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
-    const std::chrono::duration<double> elapsed_seconds = end_time - start_time;
+    const std::chrono::duration<f64> elapsed_seconds = end_time - start_time;
     HE_INFO("Asset uploaded in {:.2}s", elapsed_seconds.count());
 
     return gpu_models;
 }
 
-void Engine::upload_model(
-    const CommandBufferId command_buffer,
+void Engine::upload_model(const CommandBufferId command_buffer,
     const Asset &asset,
     const Asset::Node *node,
     const glm::mat4 &parent_transform,
@@ -961,164 +995,131 @@ void Engine::upload_model(
 
     if (node->model_index.has_value())
     {
-        const size_t model_index = node->model_index.value();
+        const usize model_index = node->model_index.value();
         const Asset::Model &asset_model = asset.models()[model_index];
 
-        const BufferId positions_buffer = m_render_system->create_buffer({
+        const BufferId positions_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = asset_model.positions.size() * sizeof(glm::vec3),
-            .usage =
-                {
-                    BufferUsage::Storage,
-                    BufferUsage::ShaderResource,
-                },
+            .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
         });
-        m_render_system->write_buffer(
-            command_buffer,
+        m_render_server->write_buffer(command_buffer,
             {
                 .buffer = positions_buffer,
                 .offset = 0,
             },
-            asset_model.positions.data(),
-            asset_model.positions.size() * sizeof(glm::vec3));
+            asset_model.positions.data(), asset_model.positions.size() * sizeof(glm::vec3));
 
-        const BufferId normals_buffer = m_render_system->create_buffer({
+        const BufferId normals_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = asset_model.normals.size() * sizeof(glm::vec3),
-            .usage =
-                {
-                    BufferUsage::Storage,
-                    BufferUsage::ShaderResource,
-                },
+            .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
         });
-        m_render_system->write_buffer(
-            command_buffer,
+        m_render_server->write_buffer(command_buffer,
             {
                 .buffer = normals_buffer,
                 .offset = 0,
             },
-            asset_model.normals.data(),
-            asset_model.normals.size() * sizeof(glm::vec3));
+            asset_model.normals.data(), asset_model.normals.size() * sizeof(glm::vec3));
 
-        const BufferId tangents_buffer = m_render_system->create_buffer({
+        const BufferId tangents_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = asset_model.tangents.size() * sizeof(glm::vec4),
-            .usage =
-                {
-                    BufferUsage::Storage,
-                    BufferUsage::ShaderResource,
-                },
+            .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
         });
-        m_render_system->write_buffer(
-            command_buffer,
+        m_render_server->write_buffer(command_buffer,
             {
                 .buffer = tangents_buffer,
                 .offset = 0,
             },
-            asset_model.tangents.data(),
-            asset_model.tangents.size() * sizeof(glm::vec4));
+            asset_model.tangents.data(), asset_model.tangents.size() * sizeof(glm::vec4));
 
-        const BufferId colors_buffer = m_render_system->create_buffer({
+        const BufferId colors_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = asset_model.colors.size() * sizeof(glm::vec3),
-            .usage =
-                {
-                    BufferUsage::Storage,
-                    BufferUsage::ShaderResource,
-                },
+            .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
+
         });
-        m_render_system->write_buffer(
-            command_buffer,
+        m_render_server->write_buffer(command_buffer,
             {
                 .buffer = colors_buffer,
                 .offset = 0,
             },
-            asset_model.colors.data(),
-            asset_model.colors.size() * sizeof(glm::vec3));
+            asset_model.colors.data(), asset_model.colors.size() * sizeof(glm::vec3));
 
-        const BufferId uvs_buffer = m_render_system->create_buffer({
+        const BufferId uvs_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = asset_model.uvs.size() * sizeof(glm::vec2),
-            .usage =
-                {
-                    BufferUsage::Storage,
-                    BufferUsage::ShaderResource,
-                },
+            .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
+
         });
-        m_render_system->write_buffer(
-            command_buffer,
+        m_render_server->write_buffer(command_buffer,
             {
                 .buffer = uvs_buffer,
                 .offset = 0,
             },
-            asset_model.uvs.data(),
-            asset_model.uvs.size() * sizeof(glm::vec2));
+            asset_model.uvs.data(), asset_model.uvs.size() * sizeof(glm::vec2));
 
         const ShaderModel shader_model = {
-            .positions = m_render_system->get_buffer_handle(positions_buffer),
-            .normals = m_render_system->get_buffer_handle(normals_buffer),
-            .tangents = m_render_system->get_buffer_handle(tangents_buffer),
-            .colors = m_render_system->get_buffer_handle(colors_buffer),
-            .uvs = m_render_system->get_buffer_handle(uvs_buffer),
+            .positions = m_render_server->get_buffer_handle(positions_buffer),
+            .normals = m_render_server->get_buffer_handle(normals_buffer),
+            .tangents = m_render_server->get_buffer_handle(tangents_buffer),
+            .colors = m_render_server->get_buffer_handle(colors_buffer),
+            .uvs = m_render_server->get_buffer_handle(uvs_buffer),
         };
 
-        const BufferId model_buffer = m_render_system->create_buffer({
+        const BufferId model_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = sizeof(ShaderModel),
-            .usage =
-                {
-                    BufferUsage::Storage,
-                    BufferUsage::ShaderResource,
-                },
+            .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
         });
-        m_render_system->write_buffer(
-            command_buffer,
+        m_render_server->write_buffer(command_buffer,
             {
                 .buffer = model_buffer,
                 .offset = 0,
             },
             shader_model);
 
-        const BufferId indices_buffer = m_render_system->create_buffer({
+        const BufferId indices_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
-            .size = asset_model.indices.size() * sizeof(uint32_t),
-            .usage =
-                {
-                    BufferUsage::Index,
-                },
+            .size = asset_model.indices.size() * sizeof(u32),
+            .usage = BufferUsage::TransferDst | BufferUsage::Index,
         });
-        m_render_system->write_buffer(
-            command_buffer,
+        m_render_server->write_buffer(command_buffer,
             {
                 .buffer = indices_buffer,
                 .offset = 0,
             },
-            asset_model.indices.data(),
-            asset_model.indices.size() * sizeof(uint32_t));
+            asset_model.indices.data(), asset_model.indices.size() * sizeof(u32));
 
         std::vector<GpuMesh> meshes;
         for (const Asset::Mesh &asset_mesh : asset_model.meshes)
         {
             const Asset::Material &asset_material = asset.materials()[asset_mesh.material_index];
 
-            ResourceHandle color_texture;
-            if (asset_material.base_color_texture_index.has_value())
+            const auto create_texture = [&](const std::optional<usize> texture_index, const Format format)
             {
-                const Asset::Texture &asset_texture = asset.textures()[asset_material.base_color_texture_index.value()];
+                if (!texture_index.has_value())
+                {
+                    return m_render_server->get_texture_view_handle(m_default_texture_view);
+                }
 
-                const TextureId texture = m_render_system->create_texture({
-                    .label = std::nullopt,
-                    .width = asset_texture.width,
-                    .height = asset_texture.height,
-                    .depth = 1,
-                    .array_size = 1,
-                    .mip_levels = 1,
-                    .format = Format::Rgba8Srgb,
-                    .dimension = Dimension::Texture2D,
-                    .usage = TextureUsage::ShaderResource,
-                });
+                const Asset::Texture &asset_texture = asset.textures()[texture_index.value()];
 
-                m_render_system->write_texture(
+                const TextureId texture = m_render_server->create_texture({
+                        .label = std::nullopt,
+                        .extent = {
+                            .width = asset_texture.width,
+                            .height = asset_texture.height,
+                            .depth = 1,
+                        },
+                        .mip_levels = 1,
+                        .format = format,
+                        .dimension = Dimension::D2,
+                        .usage = TextureUsage::TransferDst | TextureUsage::Resource,
+                    });
+
+                m_render_server->write_texture(
                     command_buffer,
                     {
                         .texture = texture,
@@ -1128,31 +1129,41 @@ void Engine::upload_model(
                                 .y = 0,
                                 .z = 0,
                             },
-                        .extent =
-                            {
-                                .width = static_cast<uint32_t>(asset_texture.width),
-                                .height = static_cast<uint32_t>(asset_texture.height),
-                                .depth = 1,
-                            },
                         .mip_level = 0,
                         .array_index = 0,
                     },
                     asset_texture.data.data(),
-                    static_cast<uint32_t>(asset_texture.width) * static_cast<uint32_t>(asset_texture.height) * asset_texture.channels);
+                    static_cast<u32>(asset_texture.width) * static_cast<u32>(asset_texture.height) *
+                    asset_texture.channels,
+                {
+                        .width = static_cast<u32>(asset_texture.width),
+                        .height = static_cast<u32>(asset_texture.height),
+                        .depth = 1,
+                    });
 
-                color_texture = m_render_system->get_texture_handle(texture);
-            }
-            else
-            {
-                color_texture = m_render_system->get_texture_handle(m_default_texture);
-            }
+                // FIXME
+                const TextureViewId texture_view = m_render_server->create_texture_view({
+                    .label = std::nullopt,
+                    .texture = texture,
+                    .dimension = ViewDimension::D2,
+                    .base_mip_level = 0,
+                    .mip_levels = 1,
+                    .base_array_layer = 0,
+                    .array_layers = 1,
+                });
 
-            ResourceHandle color_sampler;
-            if (asset_material.base_color_sampler_index.has_value())
+                return m_render_server->get_texture_view_handle(texture_view);
+            };
+
+            const auto create_sampler = [&](const std::optional<usize> sampler_index)
             {
+                if (!sampler_index.has_value())
+                {
+                    return m_render_server->get_sampler_handle(m_default_sampler);
+                }
                 const Asset::Sampler &asset_sampler = asset.samplers()[asset_material.base_color_sampler_index.value()];
 
-                const SamplerId sampler = m_render_system->create_sampler({
+                const SamplerId sampler = m_render_server->create_sampler({
                     .label = std::nullopt,
                     .mag_filter = asset_sampler.mag_filter,
                     .min_filter = asset_sampler.min_filter,
@@ -1160,165 +1171,26 @@ void Engine::upload_model(
                     .address_mode_u = AddressMode::Repeat,
                     .address_mode_v = AddressMode::Repeat,
                     .address_mode_w = AddressMode::Repeat,
-                    .mip_lod_bias = 0.0f,
                     .compare_operation = CompareOperation::Never,
                     .min_lod = 0.0f,
                     .max_lod = 1.0f,
                     .border_color = BorderColor::TransparentBlack,
                 });
 
-                color_sampler = m_render_system->get_sampler_handle(sampler);
-            }
-            else
-            {
-                color_sampler = m_render_system->get_sampler_handle(m_default_sampler);
-            }
+                return m_render_server->get_sampler_handle(sampler);
+            };
 
-            ResourceHandle metal_roughness_texture;
-            if (asset_material.metallic_roughness_texture_index.has_value())
-            {
-                const Asset::Texture &asset_texture = asset.textures()[asset_material.metallic_roughness_texture_index.value()];
+            const ResourceHandle color_texture = create_texture(asset_material.base_color_texture_index, Format::Rgba8Srgb);
+            const ResourceHandle color_sampler = create_sampler(asset_material.base_color_sampler_index);
 
-                const TextureId texture = m_render_system->create_texture({
-                    .label = std::nullopt,
-                    .width = asset_texture.width,
-                    .height = asset_texture.height,
-                    .depth = 1,
-                    .array_size = 1,
-                    .mip_levels = 1,
-                    .format = Format::Rgba8Unorm,
-                    .dimension = Dimension::Texture2D,
-                    .usage = TextureUsage::ShaderResource,
-                });
+            const ResourceHandle metal_roughness_texture
+                = create_texture(asset_material.metallic_roughness_texture_index, Format::Rgba8Unorm);
+            const ResourceHandle metal_roughness_sampler = create_sampler(asset_material.metallic_roughness_sampler_index);
 
-                m_render_system->write_texture(
-                    command_buffer,
-                    {
-                        .texture = texture,
-                        .offset =
-                            {
-                                .x = 0,
-                                .y = 0,
-                                .z = 0,
-                            },
-                        .extent =
-                            {
-                                .width = static_cast<uint32_t>(asset_texture.width),
-                                .height = static_cast<uint32_t>(asset_texture.height),
-                                .depth = 1,
-                            },
-                        .mip_level = 0,
-                        .array_index = 0,
-                    },
-                    asset_texture.data.data(),
-                    static_cast<uint32_t>(asset_texture.width) * static_cast<uint32_t>(asset_texture.height) * asset_texture.channels);
+            const ResourceHandle normal_texture = create_texture(asset_material.normal_texture_index, Format::Rgba8Unorm);
+            const ResourceHandle normal_sampler = create_sampler(asset_material.normal_sampler_index);
 
-                metal_roughness_texture = m_render_system->get_texture_handle(texture);
-            }
-            else
-            {
-                metal_roughness_texture = m_render_system->get_texture_handle(m_default_texture);
-            }
-
-            ResourceHandle metal_roughness_sampler;
-            if (asset_material.metallic_roughness_sampler_index.has_value())
-            {
-                const Asset::Sampler &asset_sampler = asset.samplers()[asset_material.metallic_roughness_sampler_index.value()];
-
-                const SamplerId sampler = m_render_system->create_sampler({
-                    .label = std::nullopt,
-                    .mag_filter = asset_sampler.mag_filter,
-                    .min_filter = asset_sampler.min_filter,
-                    .mipmap_filter = asset_sampler.min_filter,
-                    .address_mode_u = AddressMode::Repeat,
-                    .address_mode_v = AddressMode::Repeat,
-                    .address_mode_w = AddressMode::Repeat,
-                    .mip_lod_bias = 0.0f,
-                    .compare_operation = CompareOperation::Never,
-                    .min_lod = 0.0f,
-                    .max_lod = 1.0f,
-                    .border_color = BorderColor::TransparentBlack,
-                });
-                metal_roughness_sampler = m_render_system->get_sampler_handle(sampler);
-            }
-            else
-            {
-                metal_roughness_sampler = m_render_system->get_sampler_handle(m_default_sampler);
-            }
-
-            ResourceHandle normal_texture;
-            if (asset_material.normal_texture_index.has_value())
-            {
-                const Asset::Texture &asset_texture = asset.textures()[asset_material.normal_texture_index.value()];
-
-                const TextureId texture = m_render_system->create_texture({
-                    .label = std::nullopt,
-                    .width = asset_texture.width,
-                    .height = asset_texture.height,
-                    .depth = 1,
-                    .array_size = 1,
-                    .mip_levels = 1,
-                    .format = Format::Rgba8Unorm,
-                    .dimension = Dimension::Texture2D,
-                    .usage = TextureUsage::ShaderResource,
-                });
-
-                m_render_system->write_texture(
-                    command_buffer,
-                    {
-                        .texture = texture,
-                        .offset =
-                            {
-                                .x = 0,
-                                .y = 0,
-                                .z = 0,
-                            },
-                        .extent =
-                            {
-                                .width = static_cast<uint32_t>(asset_texture.width),
-                                .height = static_cast<uint32_t>(asset_texture.height),
-                                .depth = 1,
-                            },
-                        .mip_level = 0,
-                        .array_index = 0,
-                    },
-                    asset_texture.data.data(),
-                    static_cast<uint32_t>(asset_texture.width) * static_cast<uint32_t>(asset_texture.height) * asset_texture.channels);
-
-                normal_texture = m_render_system->get_texture_handle(texture);
-            }
-            else
-            {
-                normal_texture = m_render_system->get_texture_handle(m_default_texture);
-            }
-
-            ResourceHandle normal_sampler;
-            if (asset_material.normal_sampler_index.has_value())
-            {
-                const Asset::Sampler &asset_sampler = asset.samplers()[asset_material.normal_sampler_index.value()];
-
-                const SamplerId sampler = m_render_system->create_sampler({
-                    .label = std::nullopt,
-                    .mag_filter = asset_sampler.mag_filter,
-                    .min_filter = asset_sampler.min_filter,
-                    .mipmap_filter = asset_sampler.min_filter,
-                    .address_mode_u = AddressMode::Repeat,
-                    .address_mode_v = AddressMode::Repeat,
-                    .address_mode_w = AddressMode::Repeat,
-                    .mip_lod_bias = 0.0f,
-                    .compare_operation = CompareOperation::Never,
-                    .min_lod = 0.0f,
-                    .max_lod = 1.0f,
-                    .border_color = BorderColor::TransparentBlack,
-                });
-                normal_sampler = m_render_system->get_sampler_handle(sampler);
-            }
-            else
-            {
-                normal_sampler = m_render_system->get_sampler_handle(m_default_sampler);
-            }
-
-            const float normal_scale = asset_material.normal_scale;
+            const f32 normal_scale = asset_material.normal_scale;
 
             const ShaderMaterial shader_material = {
                 .albedo_factors = asset_material.color_factors,
@@ -1335,17 +1207,12 @@ void Engine::upload_model(
                 .padding_2 = 0,
             };
 
-            const BufferId material_buffer = m_render_system->create_buffer({
+            const BufferId material_buffer = m_render_server->create_buffer({
                 .label = std::nullopt,
                 .size = sizeof(ShaderMaterial),
-                .usage =
-                    {
-                        BufferUsage::Storage,
-                        BufferUsage::ShaderResource,
-                    },
+                .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
             });
-            m_render_system->write_buffer(
-                command_buffer,
+            m_render_server->write_buffer(command_buffer,
                 {
                     .buffer = material_buffer,
                     .offset = 0,

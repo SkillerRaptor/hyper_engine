@@ -27,8 +27,8 @@ Asset Asset::load(const std::string_view path)
     HE_ASSERT(gltf_data_buffer.error() == fastgltf::Error::None);
 
     constexpr fastgltf::Options options = fastgltf::Options::DontRequireValidAssetMember
-                                          | fastgltf::Options::LoadExternalBuffers | fastgltf::Options::LoadExternalImages
-                                          | fastgltf::Options::GenerateMeshIndices;
+        | fastgltf::Options::LoadExternalBuffers | fastgltf::Options::LoadExternalImages
+        | fastgltf::Options::GenerateMeshIndices;
 
     fastgltf::Parser parser {};
     fastgltf::Expected<fastgltf::Asset> asset = parser.loadGltf(gltf_data_buffer.get(), file_path.parent_path(), options);
@@ -84,14 +84,13 @@ Asset Asset::load(const std::string_view path)
                 },
                 [&](const fastgltf::sources::Array &array)
                 {
-                    image_data = stbi_load_from_memory(
-                        reinterpret_cast<const unsigned char *>(array.bytes.data()), static_cast<int>(array.bytes.size()),
-                        &width, &height, nullptr, 4);
+                    image_data = stbi_load_from_memory(reinterpret_cast<const unsigned char *>(array.bytes.data()),
+                        static_cast<int>(array.bytes.size()), &width, &height, nullptr, 4);
                 },
                 [&](const fastgltf::sources::BufferView &view)
                 {
-                    const fastgltf::BufferView &bufferView = asset->bufferViews[view.bufferViewIndex];
-                    const fastgltf::Buffer &buffer = asset->buffers[bufferView.bufferIndex];
+                    const fastgltf::BufferView &buffer_view = asset->bufferViews[view.bufferViewIndex];
+                    const fastgltf::Buffer &buffer = asset->buffers[buffer_view.bufferIndex];
 
                     std::visit(
                         fastgltf::visitor {
@@ -102,8 +101,8 @@ Asset Asset::load(const std::string_view path)
                             [&](const fastgltf::sources::Array &array)
                             {
                                 image_data = stbi_load_from_memory(
-                                    reinterpret_cast<const unsigned char *>(array.bytes.data() + bufferView.byteOffset),
-                                    static_cast<int>(bufferView.byteLength), &width, &height, nullptr, 4);
+                                    reinterpret_cast<const unsigned char *>(array.bytes.data() + buffer_view.byteOffset),
+                                    static_cast<int>(buffer_view.byteLength), &width, &height, nullptr, 4);
                             },
                         },
                         buffer.data);
@@ -111,10 +110,7 @@ Asset Asset::load(const std::string_view path)
             },
             gltf_image.data);
 
-        if (image_data == nullptr)
-        {
-            HE_PANIC();
-        }
+        HE_ASSERT(image_data != nullptr);
 
         std::vector<uint8_t> data(image_data, image_data + width * height * 4);
 
@@ -237,8 +233,7 @@ Asset Asset::load(const std::string_view path)
 
             fastgltf::Accessor &accessor = asset->accessors[gltf_primitive.indicesAccessor.value()];
 
-            fastgltf::iterateAccessor<uint32_t>(
-                asset.get(), accessor,
+            fastgltf::iterateAccessor<uint32_t>(asset.get(), accessor,
                 [&](const uint32_t index)
                 {
                     indices.push_back(index + initial_vertex);
@@ -252,8 +247,7 @@ Asset Asset::load(const std::string_view path)
             colors.resize(colors.size() + positions_attribute.count);
             uvs.resize(uvs.size() + positions_attribute.count);
 
-            fastgltf::iterateAccessorWithIndex<glm::vec3>(
-                asset.get(), positions_attribute,
+            fastgltf::iterateAccessorWithIndex<glm::vec3>(asset.get(), positions_attribute,
                 [&](const glm::vec3 value, const size_t index)
                 {
                     positions[initial_vertex + index] = value;
@@ -266,8 +260,8 @@ Asset Asset::load(const std::string_view path)
             const fastgltf::Attribute *normals_attribute = gltf_primitive.findAttribute("NORMAL");
             if (normals_attribute != gltf_primitive.attributes.end())
             {
-                fastgltf::iterateAccessorWithIndex<glm::vec3>(
-                    asset.get(), asset->accessors[normals_attribute->accessorIndex],
+                fastgltf::iterateAccessorWithIndex<glm::vec3>(asset.get(),
+                    asset->accessors[normals_attribute->accessorIndex],
                     [&](const glm::vec3 value, const size_t index)
                     {
                         normals[initial_vertex + index] = value;
@@ -277,8 +271,8 @@ Asset Asset::load(const std::string_view path)
             const fastgltf::Attribute *tangents_attribute = gltf_primitive.findAttribute("TANGENT");
             if (tangents_attribute != gltf_primitive.attributes.end())
             {
-                fastgltf::iterateAccessorWithIndex<glm::vec4>(
-                    asset.get(), asset->accessors[tangents_attribute->accessorIndex],
+                fastgltf::iterateAccessorWithIndex<glm::vec4>(asset.get(),
+                    asset->accessors[tangents_attribute->accessorIndex],
                     [&](const glm::vec4 value, const size_t index)
                     {
                         tangents[initial_vertex + index] = value;
@@ -288,8 +282,7 @@ Asset Asset::load(const std::string_view path)
             const fastgltf::Attribute *colors_attribute = gltf_primitive.findAttribute("COLOR_0");
             if (colors_attribute != gltf_primitive.attributes.end())
             {
-                fastgltf::iterateAccessorWithIndex<glm::vec4>(
-                    asset.get(), asset->accessors[colors_attribute->accessorIndex],
+                fastgltf::iterateAccessorWithIndex<glm::vec4>(asset.get(), asset->accessors[colors_attribute->accessorIndex],
                     [&](const glm::vec4 value, const size_t index)
                     {
                         colors[initial_vertex + index] = value;
@@ -299,8 +292,7 @@ Asset Asset::load(const std::string_view path)
             const fastgltf::Attribute *uvs_attribute = gltf_primitive.findAttribute("TEXCOORD_0");
             if (uvs_attribute != gltf_primitive.attributes.end())
             {
-                fastgltf::iterateAccessorWithIndex<glm::vec2>(
-                    asset.get(), asset->accessors[uvs_attribute->accessorIndex],
+                fastgltf::iterateAccessorWithIndex<glm::vec2>(asset.get(), asset->accessors[uvs_attribute->accessorIndex],
                     [&](const glm::vec2 value, const size_t index)
                     {
                         uvs[initial_vertex + index] = value;
@@ -402,7 +394,11 @@ Asset Asset::load(const std::string_view path)
     HE_INFO("Loaded '{}' in {:.2}s", path, elapsed_seconds.count());
 
     return Asset {
-        std::move(samplers), std::move(textures), std::move(materials),
-        std::move(models),   std::move(nodes),    std::move(scenes),
+        std::move(samplers),
+        std::move(textures),
+        std::move(materials),
+        std::move(models),
+        std::move(nodes),
+        std::move(scenes),
     };
 }

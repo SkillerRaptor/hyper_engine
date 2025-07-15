@@ -14,7 +14,8 @@
 
 #include <glm/glm.hpp>
 
-#include "systems/render/render_types.hpp"
+#include "core/types.hpp"
+#include "render/definitions.hpp"
 
 class Asset
 {
@@ -27,10 +28,10 @@ public:
 
     struct Texture
     {
-        uint32_t width { 0 };
-        uint32_t height { 0 };
-        uint8_t channels { 0 };
-        std::vector<uint8_t> data {};
+        u32 width { 0 };
+        u32 height { 0 };
+        u8 channels { 0 };
+        std::vector<u8> data {};
     };
 
     enum class AlphaMode
@@ -42,28 +43,28 @@ public:
     struct Material
     {
         glm::vec4 color_factors { 0.0f };
-        std::optional<size_t> base_color_texture_index { std::nullopt };
-        std::optional<size_t> base_color_sampler_index { std::nullopt };
+        std::optional<usize> base_color_texture_index { std::nullopt };
+        std::optional<usize> base_color_sampler_index { std::nullopt };
 
         glm::vec2 metallic_roughness_factor { 0.0f };
-        std::optional<size_t> metallic_roughness_texture_index { std::nullopt };
-        std::optional<size_t> metallic_roughness_sampler_index { std::nullopt };
+        std::optional<usize> metallic_roughness_texture_index { std::nullopt };
+        std::optional<usize> metallic_roughness_sampler_index { std::nullopt };
 
-        std::optional<size_t> normal_texture_index { std::nullopt };
-        std::optional<size_t> normal_sampler_index { std::nullopt };
-        float normal_scale { 1.0f };
+        std::optional<usize> normal_texture_index { std::nullopt };
+        std::optional<usize> normal_sampler_index { std::nullopt };
+        f32 normal_scale { 1.0f };
 
         AlphaMode alpha_mode { AlphaMode::Opaque };
-        float alpha_cutoff { 0.0f };
+        f32 alpha_cutoff { 0.0f };
 
         bool double_sided { false };
     };
 
     struct Mesh
     {
-        size_t start_index { 0 };
-        size_t index_count { 0 };
-        size_t material_index { 0 };
+        usize start_index { 0 };
+        usize index_count { 0 };
+        usize material_index { 0 };
     };
 
     struct Model
@@ -73,7 +74,7 @@ public:
         std::vector<glm::vec4> tangents {};
         std::vector<glm::vec3> colors {};
         std::vector<glm::vec2> uvs {};
-        std::vector<uint32_t> indices {};
+        std::vector<u32> indices {};
         std::vector<Mesh> meshes {};
     };
 
@@ -83,12 +84,12 @@ public:
         std::vector<Node *> children {};
 
         glm::mat4 local_transform { 1.0 };
-        std::optional<size_t> model_index { std::nullopt };
+        std::optional<usize> model_index { std::nullopt };
     };
 
     struct Scene
     {
-        std::vector<size_t> node_indices {};
+        std::vector<usize> node_indices {};
     };
 
 public:
@@ -104,8 +105,7 @@ public:
     std::span<const Scene> scenes() const { return m_scenes; }
 
 private:
-    Asset(
-        std::vector<Sampler> samplers,
+    Asset(std::vector<Sampler> samplers,
         std::vector<Texture> textures,
         std::vector<Material> materials,
         std::vector<Model> models,

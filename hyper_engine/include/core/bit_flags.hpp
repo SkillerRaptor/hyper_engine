@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-present, SkillerRaptor
+ * Copyrhs (c) 2025-present, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
@@ -12,115 +12,37 @@
 #include <utility>
 
 template <typename T>
-class BitFlags
+    requires std::is_enum_v<T>
+constexpr bool s_enable_bit_flags = false;
+
+template <typename T>
+    requires s_enable_bit_flags<T>
+static constexpr T operator&(const T lhs, const T rhs)
 {
-private:
-    using UnderlyingT = std::underlying_type_t<T>;
+    return T(std::to_underlying(lhs) & std::to_underlying(rhs));
+}
 
-public:
-    constexpr BitFlags()
-        : m_flags { static_cast<UnderlyingT>(0) }
-    {
-    }
+template <typename T>
+    requires s_enable_bit_flags<T>
+static constexpr T operator|(const T lhs, const T rhs)
+{
+    return T(std::to_underlying(lhs) | std::to_underlying(rhs));
+}
 
-    constexpr BitFlags(const T flag)
-        : m_flags { static_cast<UnderlyingT>(flag) }
-    {
-    }
+template <typename T>
+    requires s_enable_bit_flags<T>
+static constexpr T operator^(const T lhs, const T rhs)
+{
+    return T(std::to_underlying(lhs) ^ std::to_underlying(rhs));
+}
 
-    constexpr BitFlags(const std::initializer_list<T> flags)
-        : BitFlags {}
-    {
-        for (const T flag : flags)
-        {
-            m_flags |= static_cast<UnderlyingT>(flag);
-        }
-    }
+template <typename T>
+    requires s_enable_bit_flags<T>
+static constexpr T operator~(const T value)
+{
+    return T(~std::to_underlying(value));
+}
 
-    constexpr operator bool() const { return m_flags != static_cast<UnderlyingT>(0); }
-
-    friend constexpr BitFlags operator|(const BitFlags left, const T right)
-    {
-        return BitFlags(left.m_flags | static_cast<UnderlyingT>(right));
-    }
-
-    friend constexpr BitFlags operator|(const BitFlags left, const BitFlags right)
-    {
-        return BitFlags(left.m_flags | right.m_flags);
-    }
-
-    friend constexpr BitFlags operator&(const BitFlags left, const T right)
-    {
-        return BitFlags(left.m_flags & static_cast<UnderlyingT>(right));
-    }
-
-    friend constexpr BitFlags operator&(const BitFlags left, const BitFlags right)
-    {
-        return BitFlags(left.m_flags & right.m_flags);
-    }
-
-    friend constexpr BitFlags operator^(const BitFlags left, const T right)
-    {
-        return BitFlags(left.m_flags ^ static_cast<UnderlyingT>(right));
-    }
-
-    friend constexpr BitFlags operator^(const BitFlags left, const BitFlags right)
-    {
-        return BitFlags(left.m_flags ^ right.m_flags);
-    }
-
-    friend constexpr BitFlags &operator|=(BitFlags &left, const T right)
-    {
-        left.m_flags |= static_cast<UnderlyingT>(right);
-        return left;
-    }
-
-    friend constexpr BitFlags &operator|=(BitFlags &left, const BitFlags right)
-    {
-        left.m_flags |= right.m_flags;
-        return left;
-    }
-
-    friend constexpr BitFlags &operator&=(BitFlags &left, const T right)
-    {
-        left.m_flags &= static_cast<UnderlyingT>(right);
-        return left;
-    }
-
-    friend constexpr BitFlags &operator&=(BitFlags &left, const BitFlags right)
-    {
-        left.m_flags &= right.m_flags;
-        return left;
-    }
-
-    friend constexpr BitFlags &operator^=(BitFlags &left, const T right)
-    {
-        left.m_flags ^= static_cast<UnderlyingT>(right);
-        return left;
-    }
-
-    friend constexpr BitFlags &operator^=(BitFlags &left, const BitFlags right)
-    {
-        left.m_flags ^= right.m_flags;
-        return left;
-    }
-
-    friend constexpr BitFlags operator~(const BitFlags &bit_flags) { return BitFlags(~bit_flags.m_flags); }
-
-    friend constexpr bool operator==(const BitFlags &left, const BitFlags &right) { return left.m_flags == right.m_flags; }
-
-    friend constexpr bool operator!=(const BitFlags &left, const BitFlags &right) { return left.m_flags != right.m_flags; }
-
-    static constexpr BitFlags from_raw(const UnderlyingT flags) { return BitFlags(flags); }
-
-    constexpr UnderlyingT to_raw() const { return m_flags; }
-
-private:
-    constexpr explicit BitFlags(const UnderlyingT flags)
-        : m_flags { flags }
-    {
-    }
-
-private:
-    UnderlyingT m_flags { 0 };
-};
+#define HE_ENABLE_BIT_FLAGS(name) \
+    template <>                   \
+    constexpr bool ::s_enable_bit_flags<name> = true

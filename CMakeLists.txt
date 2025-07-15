@@ -7,7 +7,7 @@
 #-------------------------------------------------------------------------------------------
 # CMake Info
 #-------------------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.1...4.1)
 project(HyperEngine LANGUAGES C CXX)
 
 #-------------------------------------------------------------------------------------------
@@ -26,14 +26,14 @@ endif ()
 # Project Libraries
 #-------------------------------------------------------------------------------------------
 add_library(ProjectOptions INTERFACE)
-target_compile_features(ProjectOptions INTERFACE cxx_std_20)
+target_compile_features(ProjectOptions INTERFACE cxx_std_23)
 
 add_library(ProjectWarnings INTERFACE)
 
 #-------------------------------------------------------------------------------------------
 # Warnings
 #-------------------------------------------------------------------------------------------
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
