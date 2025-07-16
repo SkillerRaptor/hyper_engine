@@ -298,7 +298,11 @@ TextureId VulkanRenderDriver::create_texture(const TextureDescriptor &desc)
         .flags = flags,
         .imageType = map_dimension(desc.dimension),
         .format = map_format(desc.format),
-        .extent = map_extent_3d(desc.extent),
+        .extent = {
+            .width = desc.extent.width,
+            .height = desc.extent.height,
+            .depth = desc.dimension != Dimension::D3 ? 1 : desc.extent.depth,
+        },
         .mipLevels = desc.mip_levels,
         .arrayLayers = desc.extent.depth,
         .samples = VK_SAMPLE_COUNT_1_BIT,
@@ -450,23 +454,38 @@ void VulkanRenderDriver::bind_texture_view_to_slot(const TextureViewId id, const
         .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
     };
 
-    const bool is_storage_texture = (texture->desc.usage & TextureUsage::Storage) == TextureUsage::Storage;
-
-    const VkWriteDescriptorSet descriptor_write = {
+    const VkWriteDescriptorSet sampled_descriptor_write = {
         .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
         .pNext = nullptr,
-        .dstSet = m_descriptors.descriptor_sets[static_cast<usize>(
-            is_storage_texture ? DescriptorType::StorageImage : DescriptorType::SampledImage)],
+        .dstSet = m_descriptors.descriptor_sets[static_cast<usize>(DescriptorType::SampledImage)],
         .dstBinding = 0,
         .dstArrayElement = handle.get(),
         .descriptorCount = 1,
-        .descriptorType = is_storage_texture ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+        .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
         .pImageInfo = &image_info,
         .pBufferInfo = nullptr,
         .pTexelBufferView = nullptr,
     };
 
-    vkUpdateDescriptorSets(m_device.raw, 1, &descriptor_write, 0, nullptr);
+    vkUpdateDescriptorSets(m_device.raw, 1, &sampled_descriptor_write, 0, nullptr);
+
+    if ((texture->desc.usage & TextureUsage::Storage) == TextureUsage::Storage)
+    {
+        const VkWriteDescriptorSet storage_descriptor_write = {
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .pNext = nullptr,
+            .dstSet = m_descriptors.descriptor_sets[static_cast<usize>(DescriptorType::StorageImage)],
+            .dstBinding = 0,
+            .dstArrayElement = handle.get(),
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            .pImageInfo = &image_info,
+            .pBufferInfo = nullptr,
+            .pTexelBufferView = nullptr,
+        };
+
+        vkUpdateDescriptorSets(m_device.raw, 1, &storage_descriptor_write, 0, nullptr);
+    }
 }
 
 PipelineLayoutId VulkanRenderDriver::create_pipeline_layout(const PipelineLayoutDescriptor &desc)
@@ -1257,6 +1276,12 @@ void VulkanRenderDriver::bind_compute_pipeline(const CommandBufferId id, const C
     vkCmdBindDescriptorSets(command_buffer->raw, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline_layout->raw, 0,
         static_cast<uint32_t>(m_descriptors.descriptor_sets.size()), m_descriptors.descriptor_sets.data(), 0, nullptr);
     vkCmdBindPipeline(command_buffer->raw, VK_PIPELINE_BIND_POINT_COMPUTE, compute_pipeline->raw);
+}
+
+void VulkanRenderDriver::dispatch(const CommandBufferId id, const u32 x, const u32 y, const u32 z) const
+{
+    const VulkanCommandBuffer *command_buffer = id.as<VulkanCommandBuffer>();
+    vkCmdDispatch(command_buffer->raw, x, y, z);
 }
 
 void VulkanRenderDriver::begin_render_pass(const CommandBufferId id, const RenderPassDescriptor &desc) const

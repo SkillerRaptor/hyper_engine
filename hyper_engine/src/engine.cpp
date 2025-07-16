@@ -7,12 +7,14 @@
 #include "engine.hpp"
 
 #include <chrono>
+#include <ranges>
 
 #include <fastgltf/types.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <stb_image.h>
 #include <tracy/Tracy.hpp>
 
+#include "core/assertion.hpp"
 #include "core/logger.hpp"
 #include "platform/window_events.hpp"
 #include "shader_interop.h"
@@ -65,13 +67,19 @@ void Engine::initialize()
     });
 
     create_pbr();
-    // create_skybox();
+    create_skybox();
     create_grid();
     create_composition();
     create_default();
 
     m_sponza = Asset::load("./assets/models/sponza/Sponza.gltf");
-    m_renderables = upload_asset(m_sponza);
+    m_damaged_helmet = Asset::load("./assets/models/DamagedHelmet.glb");
+
+    const std::vector<GpuModel> sponza_models = upload_asset(m_sponza);
+    m_renderables.insert(m_renderables.end(), sponza_models.begin(), sponza_models.end());
+
+    const std::vector<GpuModel> damaged_helmet_models = upload_asset(m_damaged_helmet);
+    m_renderables.insert(m_renderables.end(), damaged_helmet_models.begin(), damaged_helmet_models.end());
 
     m_event_server->subscribe<WindowCloseEvent>(
         [this](const WindowCloseEvent &)
@@ -88,24 +96,23 @@ void Engine::shutdown() const
 {
     ZoneScoped;
 
-    // m_render_server->destroy_sampler(m_skybox_sampler);
-    // m_render_server->destroy_texture(m_skybox_texture);
-    // m_render_server->destroy_render_pipeline(m_skybox_pipeline);
-    // m_render_server->destroy_pipeline_layout(m_skybox_layout);
-
     m_render_server->destroy_sampler(m_default_sampler);
-    m_render_server->destroy_texture_view(m_default_texture_view);
     m_render_server->destroy_texture(m_default_texture);
 
-    m_render_server->destroy_texture_view(m_depth_texture_view);
     m_render_server->destroy_texture(m_depth_texture);
     m_render_server->destroy_sampler(m_composition_sampler);
-    m_render_server->destroy_texture_view(m_composition_texture_view);
     m_render_server->destroy_texture(m_composition_texture);
     m_render_server->destroy_render_pipeline(m_composition_pipeline);
     m_render_server->destroy_pipeline_layout(m_composition_layout);
 
     m_render_server->destroy_render_pipeline(m_grid_pipeline);
+
+    m_render_server->destroy_sampler(m_irradiance_sampler);
+    m_render_server->destroy_texture(m_irradiance_texture);
+    m_render_server->destroy_sampler(m_skybox_sampler);
+    m_render_server->destroy_texture(m_skybox_texture);
+    m_render_server->destroy_render_pipeline(m_skybox_pipeline);
+    m_render_server->destroy_pipeline_layout(m_skybox_layout);
 
     m_render_server->destroy_render_pipeline(m_pbr_pipeline);
     m_render_server->destroy_pipeline_layout(m_pbr_layout);
@@ -214,11 +221,11 @@ void Engine::render() const
         },
         shader_camera);
 
-    constexpr ShaderScene shader_scene = {
-        .ambient_color = glm::vec4(0.1f),
-        .sunlight_direction = glm::vec4(0.0f, 1.0f, 0.5f, 1.0f),
-        .sunlight_color = glm::vec4(1.0f),
-        .padding_0 = glm::vec4(0.0f),
+    const ShaderScene shader_scene = {
+        .irradiance_texture = m_render_server->get_texture_view_handle(m_irradiance_texture_view),
+        .irradiance_sampler = m_render_server->get_sampler_handle(m_irradiance_sampler),
+        .padding_0 = 0,
+        .padding_1 = 0,
     };
     m_render_server->write_buffer(command_buffer,
         {
@@ -266,7 +273,7 @@ void Engine::render() const
     for (const GpuModel &model : m_renderables)
     {
         glm::mat4 transform = model.transform;
-        transform = glm::translate(transform, glm::vec3(0.0f, 10.0f, 0.0f));
+        transform = glm::translate(transform, glm::vec3(0.0f, 25.0f, 0.0f));
 
         const ResourceHandle model_buffer_handle = m_render_server->get_buffer_handle(model.model_buffer);
 
@@ -294,51 +301,51 @@ void Engine::render() const
 
     m_render_server->end_render_pass(render_pass);
 
-    // const RenderPassId skybox_render_pass = m_render_server->begin_render_pass(
-    //     command_buffer,
-    //     {
-    //         .label =
-    //             Label{
-    //                 .name = "Skybox Render Pass",
-    //                 .color =
-    //                     {
-    //                         .r = 0,
-    //                         .g = 0,
-    //                         .b = 255,
-    //                     },
-    //             },
-    //         .color_attachments =
-    //             {
-    //                 {
-    //                     .texture = m_composition_texture,
-    //                     .operations =
-    //                         {
-    //                             .load_op = LoadOperation::Load,
-    //                             .store_op = StoreOperation::Store,
-    //                         },
-    //                 },
-    //             },
-    //         .depth_stencil_attachment =
-    //             DepthStencilAttachment{
-    //                 .texture = m_depth_texture,
-    //                 .depth_operations =
-    //                     {
-    //                         .load_op = LoadOperation::Load,
-    //                         .store_op = StoreOperation::None,
-    //                     },
-    //             },
-    //     });
+    const RenderPassId skybox_render_pass = m_render_server->begin_render_pass(
+        command_buffer,
+        {
+            .label =
+                PassLabel{
+                    .name = "Skybox Render Pass",
+                    .color =
+                        {
+                            .r = 0,
+                            .g = 0,
+                            .b = 255,
+                        },
+                },
+            .color_attachments =
+                {
+                    ColorAttachment{
+                        .view = m_composition_texture_view,
+                        .operations =
+                            {
+                                .load_op = LoadOperation::Load,
+                                .store_op = StoreOperation::Store,
+                            },
+                    },
+                },
+            .depth_stencil_attachment =
+                DepthStencilAttachment{
+                    .view = m_depth_texture_view,
+                    .depth_operations =
+                        {
+                            .load_op = LoadOperation::Load,
+                            .store_op = StoreOperation::None,
+                        },
+                },
+        });
     //
-    // m_render_server->bind_pipeline(skybox_render_pass, m_skybox_pipeline);
-    // const SkyboxPushConstants skybox_push_constants = {
-    //     .skybox_texture = m_render_server->get_texture_view_handle(m_skybox_texture),
-    //     .skybox_sampler = m_render_server->get_sampler_handle(m_skybox_sampler),
-    //     .padding_0 = 0,
-    //     .padding_1 = 0,
-    // };
-    // m_render_server->push_constants(skybox_render_pass, skybox_push_constants);
-    // m_render_server->draw(skybox_render_pass, 36, 1, 0, 0);
-    // m_render_server->end_render_pass(skybox_render_pass);
+    m_render_server->bind_pipeline(skybox_render_pass, m_skybox_pipeline);
+    const SkyboxPushConstants skybox_push_constants = {
+        .skybox_texture = m_render_server->get_texture_view_handle(m_skybox_texture_view),
+        .skybox_sampler = m_render_server->get_sampler_handle(m_skybox_sampler),
+        .padding_0 = 0,
+        .padding_1 = 0,
+    };
+    m_render_server->push_constants(skybox_render_pass, skybox_push_constants);
+    m_render_server->draw(skybox_render_pass, 36, 1, 0, 0);
+    m_render_server->end_render_pass(skybox_render_pass);
 
     const RenderPassId grid_render_pass = m_render_server->begin_render_pass(
         command_buffer,
@@ -490,80 +497,93 @@ void Engine::create_pbr()
 
 void Engine::create_skybox()
 {
-    /*
-    std::array<u8 *, 6> texture_datas = {};
-
-    int width = 0;
-    int height = 0;
-
-    texture_datas[0] = stbi_load("./assets/images/skybox/right.jpg", &width, &height, nullptr, 4);
-    texture_datas[1] = stbi_load("./assets/images/skybox/left.jpg", &width, &height, nullptr, 4);
-    texture_datas[2] = stbi_load("./assets/images/skybox/top.jpg", &width, &height, nullptr, 4);
-    texture_datas[3] = stbi_load("./assets/images/skybox/bottom.jpg", &width, &height, nullptr, 4);
-    texture_datas[4] = stbi_load("./assets/images/skybox/front.jpg", &width, &height, nullptr, 4);
-    texture_datas[5] = stbi_load("./assets/images/skybox/back.jpg", &width, &height, nullptr, 4);
-
-    const usize image_size = width * height * 4 * 6;
-    const usize layer_size = image_size / 6;
-
-    // FIXME: Cube Maps needs to be sampled image (add assertions)
-    m_skybox_texture = m_render_server->create_texture({
+    const PipelineLayoutId equirectangular_layout = m_render_server->create_pipeline_layout({
         .label = std::nullopt,
-        .width = static_cast<u32>(width),
-        .height = static_cast<u32>(height),
-        .depth = 1,
-        .array_size = 6,
-        .mip_levels = 1,
-        .format = Format::Rgba8Unorm,
-        .dimension = Dimension::TextureCube,
-        .usage = TextureUsage::Resource,
+        .push_constant_size = sizeof(EquirectangularPushConstants),
     });
 
-    m_skybox_sampler = m_render_server->create_sampler({
+    const ShaderId equirectangular_shader = m_render_server->create_shader({
         .label = std::nullopt,
-        .mag_filter = Filter::Linear,
-        .min_filter = Filter::Linear,
-        .mipmap_filter = Filter::Linear,
-        .address_mode_u = AddressMode::ClampToEdge,
-        .address_mode_v = AddressMode::ClampToEdge,
-        .address_mode_w = AddressMode::ClampToEdge,
-        .mip_lod_bias = 0.0f,
-        .compare_operation = CompareOperation::Less,
-        .min_lod = 0.0f,
-        .max_lod = 1.0f,
-        .border_color = BorderColor::TransparentBlack,
+        .type = ShaderType::Compute,
+        .entry = "main",
+        .path = "./assets/shaders/equirectangular_to_cubemap.hlsl",
+    });
+
+    const ComputePipelineId equirectangular_pipeline = m_render_server->create_compute_pipeline({
+        .label = std::nullopt,
+        .layout = equirectangular_layout,
+        .shader = equirectangular_shader,
+    });
+
+    m_render_server->destroy_shader(equirectangular_shader);
+
+    i32 width { 0 };
+    i32 height { 0 };
+    i32 channels { 0 };
+    f32 *data = stbi_loadf("./assets/images/mirrored_hall_4k.hdr", &width, &height, &channels, 0);
+    HE_ASSERT(data != nullptr);
+
+    std::vector<f32> new_data;
+    for (u32 i { 0 }; i != static_cast<u32>(width * height * 3); i += 3)
+    {
+        new_data.push_back(data[i + 0]);
+        new_data.push_back(data[i + 1]);
+        new_data.push_back(data[i + 2]);
+        new_data.push_back(1.0f);
+    }
+
+    stbi_image_free(data);
+
+    const TextureId equirectangular_texture = m_render_server->create_texture({
+        .label = std::nullopt,
+        .extent = {
+            .width = static_cast<u32>(width),
+            .height = static_cast<u32>(height),
+            .depth = 1,
+        },
+        .mip_levels = 1,
+        .format = Format::Rgba32Sfloat,
+        .dimension = Dimension::D2,
+        .usage = TextureUsage::TransferDst | TextureUsage::Resource,
+    });
+
+    const TextureViewId equirectangular_texture_view = m_render_server->create_texture_view({
+        .label = std::nullopt,
+        .texture = equirectangular_texture,
+        .dimension = ViewDimension::D2,
+        .base_mip_level = 0,
+        .mip_levels = 1,
+        .base_array_layer = 0,
+        .array_layers = 1,
     });
 
     {
         const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
-        for (usize i = 0; i < 6; ++i)
-        {
-            m_render_server->write_texture(
-                command_buffer,
-                {
-                    .texture = m_skybox_texture,
-                    .offset =
-                        {
-                            .x = 0,
-                            .y = 0,
-                            .z = 0,
-                        },
-                    .extent =
-                        {
-                            .width = static_cast<u32>(width),
-                            .height = static_cast<u32>(height),
-                            .depth = 1,
-                        },
-                    .mip_level = 0,
-                    .array_index = static_cast<u32>(i),
-                },
-                texture_datas[i],
-                layer_size);
-        }
+        m_render_server->write_texture(
+            command_buffer,
+            {
+                .texture = equirectangular_texture,
+                .offset =
+                    {
+                        .x = 0,
+                        .y = 0,
+                        .z = 0,
+                    },
+                .mip_level = 0,
+                .array_index = 0,
+            },
+            new_data.data(),
+            width * height * 4 * sizeof(f32),
+    {
+                .width = static_cast<u32>(width),
+                .height = static_cast<u32>(height),
+                .depth = 1,
+            });
+
         m_render_server->submit_command_buffer(command_buffer);
     }
 
-    //
+    m_render_server->wait_idle();
 
     m_skybox_layout = m_render_server->create_pipeline_layout({
         .label = std::nullopt,
@@ -589,13 +609,20 @@ void Engine::create_skybox()
         .layout = m_skybox_layout,
         .vertex_shader = skybox_vertex_shader,
         .fragment_shader = skybox_fragment_shader,
+        .primitive_state =
+            {
+                .topology = PrimitiveTopology::TriangleList,
+                .front_face = FrontFace::CounterClockwise,
+                .cull_mode = Face::None,
+                .polygon_mode = PolygonMode::Fill,
+            },
         .color_attachment_states =
             {
-                {
-                    .format = Format::Rgba16Sf32,
+               ColorAttachmentState {
+                    .format = Format::Rgba16Sfloat,
                     .blend_state =
                         {
-                            .blend_enable = false,
+                            .enable = false,
                             .src_factor = BlendFactor::One,
                             .dst_factor = BlendFactor::Zero,
                             .operation = BlendOperation::Add,
@@ -604,20 +631,13 @@ void Engine::create_skybox()
                             .alpha_operation = BlendOperation::Add,
                             .color_writes = ColorWrites::All,
                         },
-                },
-            },
-        .primitive_state =
-            {
-                .topology = PrimitiveTopology::TriangleList,
-                .front_face = FrontFace::CounterClockwise,
-                .cull_mode = Face::None,
-                .polygon_mode = PolygonMode::Fill,
+                    },
             },
         .depth_stencil_state =
-            {
+            DepthStencilState {
                 .depth_test_enable = true,
                 .depth_write_enable = false,
-                .depth_format = Format::D32Sf32,
+                .depth_format = Format::D32Sfloat,
                 .depth_compare_operation = CompareOperation::LessEqual,
                 .depth_bias_state =
                     {
@@ -631,7 +651,172 @@ void Engine::create_skybox()
 
     m_render_server->destroy_shader(skybox_fragment_shader);
     m_render_server->destroy_shader(skybox_vertex_shader);
-    */
+
+    m_skybox_texture = m_render_server->create_texture({
+        .label = std::nullopt,
+        .extent = {
+            .width = static_cast<u32>(height),
+            .height = static_cast<u32>(height),
+            .depth = 6,
+        },
+        .mip_levels = 1,
+        .format = Format::Rgba16Sfloat,
+        .dimension = Dimension::D2,
+        .usage = TextureUsage::TransferDst | TextureUsage::Storage | TextureUsage::Resource,
+    });
+
+    m_skybox_texture_view = m_render_server->create_texture_view({
+        .label = std::nullopt,
+        .texture = m_skybox_texture,
+        .dimension = ViewDimension::Cube,
+        .base_mip_level = 0,
+        .mip_levels = 1,
+        .base_array_layer = 0,
+        .array_layers = 6,
+    });
+
+    m_skybox_sampler = m_render_server->create_sampler({
+        .label = std::nullopt,
+        .mag_filter = Filter::Linear,
+        .min_filter = Filter::Linear,
+        .mipmap_filter = Filter::Linear,
+        .address_mode_u = AddressMode::ClampToEdge,
+        .address_mode_v = AddressMode::ClampToEdge,
+        .address_mode_w = AddressMode::ClampToEdge,
+        .compare_operation = CompareOperation::Less,
+        .min_lod = 0.0f,
+        .max_lod = 1.0f,
+        .border_color = BorderColor::TransparentBlack,
+    });
+
+    {
+        const u32 workgroups = (height + 15) / 16;
+
+        const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
+        const ComputePassId compute_pass = m_render_server->begin_compute_pass(command_buffer,
+            {
+                .label = PassLabel {
+                    .name = "Equirectangular to Cubemap",
+                    .color = {
+                        .r = 255,
+                        .g = 0,
+                        .b = 255,
+                    },
+                },
+            });
+        m_render_server->bind_pipeline(compute_pass, equirectangular_pipeline);
+        const EquirectangularPushConstants equirectangular_push_constants = {
+            .equirectangular_texture = m_render_server->get_texture_view_handle(equirectangular_texture_view),
+            .equirectangular_width = static_cast<u32>(width),
+            .equirectangular_height = static_cast<u32>(height),
+            .padding_0 = 0,
+            .skybox_texture = m_render_server->get_texture_view_handle(m_skybox_texture_view),
+            .skybox_size = static_cast<u32>(height),
+            .padding_1 = 0,
+        };
+        m_render_server->push_constants(compute_pass, equirectangular_push_constants);
+        m_render_server->dispatch(compute_pass, workgroups, workgroups, 6);
+        m_render_server->end_compute_pass(compute_pass);
+
+        m_render_server->submit_command_buffer(command_buffer);
+    }
+
+    m_render_server->wait_idle();
+
+    m_render_server->destroy_pipeline_layout(equirectangular_layout);
+    m_render_server->destroy_compute_pipeline(equirectangular_pipeline);
+    m_render_server->destroy_texture(equirectangular_texture);
+
+    const PipelineLayoutId irradiance_layout = m_render_server->create_pipeline_layout({
+        .label = std::nullopt,
+        .push_constant_size = sizeof(IrradiancePushConstants),
+    });
+
+    const ShaderId irradiance_shader = m_render_server->create_shader({
+        .label = std::nullopt,
+        .type = ShaderType::Compute,
+        .entry = "main",
+        .path = "./assets/shaders/irradiance.hlsl",
+    });
+
+    const ComputePipelineId irradiance_pipeline = m_render_server->create_compute_pipeline({
+        .label = std::nullopt,
+        .layout = irradiance_layout,
+        .shader = irradiance_shader,
+    });
+
+    m_render_server->destroy_shader(irradiance_shader);
+
+    m_irradiance_texture = m_render_server->create_texture({
+        .label = std::nullopt,
+        .extent = {
+            .width = static_cast<u32>(height),
+            .height = static_cast<u32>(height),
+            .depth = 6,
+        },
+        .mip_levels = 1,
+        .format = Format::Rgba16Sfloat,
+        .dimension = Dimension::D2,
+        .usage = TextureUsage::TransferDst | TextureUsage::Storage | TextureUsage::Resource,
+    });
+
+    m_irradiance_texture_view = m_render_server->create_texture_view({
+        .label = std::nullopt,
+        .texture = m_irradiance_texture,
+        .dimension = ViewDimension::Cube,
+        .base_mip_level = 0,
+        .mip_levels = 1,
+        .base_array_layer = 0,
+        .array_layers = 6,
+    });
+
+    m_irradiance_sampler = m_render_server->create_sampler({
+        .label = std::nullopt,
+        .mag_filter = Filter::Linear,
+        .min_filter = Filter::Linear,
+        .mipmap_filter = Filter::Linear,
+        .address_mode_u = AddressMode::ClampToEdge,
+        .address_mode_v = AddressMode::ClampToEdge,
+        .address_mode_w = AddressMode::ClampToEdge,
+        .compare_operation = CompareOperation::Less,
+        .min_lod = 0.0f,
+        .max_lod = 1.0f,
+        .border_color = BorderColor::TransparentBlack,
+    });
+
+    {
+        const u32 workgroups = (height + 15) / 16;
+
+        const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
+        const ComputePassId compute_pass = m_render_server->begin_compute_pass(command_buffer,
+            {
+                .label = PassLabel {
+                    .name = "Generate Irradiance map",
+                    .color = {
+                        .r = 255,
+                        .g = 255,
+                        .b = 0,
+                    },
+                },
+            });
+        m_render_server->bind_pipeline(compute_pass, irradiance_pipeline);
+        const IrradiancePushConstants irradiance_push_constants = {
+            .skybox_texture = m_render_server->get_texture_view_handle(m_skybox_texture_view),
+            .skybox_sampler = m_render_server->get_sampler_handle(m_skybox_sampler),
+            .irradiance_texture = m_render_server->get_texture_view_handle(m_irradiance_texture_view),
+            .size = static_cast<u32>(height),
+        };
+        m_render_server->push_constants(compute_pass, irradiance_push_constants);
+        m_render_server->dispatch(compute_pass, workgroups, workgroups, 6);
+        m_render_server->end_compute_pass(compute_pass);
+
+        m_render_server->submit_command_buffer(command_buffer);
+    }
+
+    m_render_server->wait_idle();
+
+    m_render_server->destroy_pipeline_layout(irradiance_layout);
+    m_render_server->destroy_compute_pipeline(irradiance_pipeline);
 }
 
 void Engine::create_grid()

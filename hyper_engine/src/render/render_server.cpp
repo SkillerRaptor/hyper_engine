@@ -134,6 +134,8 @@ RenderServer::~RenderServer()
     HE_INFO("Shutdown render server");
 }
 
+void RenderServer::wait_idle() const { m_render_driver->wait_idle(); }
+
 BufferId RenderServer::create_buffer(const BufferDescriptor &desc)
 {
     if (desc.label.has_value())
@@ -798,6 +800,17 @@ void RenderServer::push_constants(const ComputePassId id, const void *data, cons
     HE_ASSERT(pipeline_layout->desc.push_constant_size == size);
 
     m_render_driver->push_constants(compute_pass->command_buffer, compute_pipeline->desc.layout, data, size);
+}
+
+void RenderServer::dispatch(const ComputePassId id, const u32 x, const u32 y, const u32 z) const
+{
+    HE_ASSERT(id.is_valid());
+
+    const ComputePass *compute_pass = id.as<ComputePass>();
+    HE_ASSERT(!compute_pass->ended);
+    HE_ASSERT(compute_pass->compute_pipeline.is_valid());
+
+    m_render_driver->dispatch(compute_pass->command_buffer, x, y, z);
 }
 
 RenderPassId RenderServer::begin_render_pass(const CommandBufferId id, const RenderPassDescriptor &desc)

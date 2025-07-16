@@ -295,7 +295,7 @@ VkFormat map_format(const Format format)
 
 VkImageUsageFlags map_texture_usage(const TextureUsage texture_usage_flags, const Format format)
 {
-    VkImageUsageFlags usage { 0 };
+    VkImageUsageFlags usage { VK_IMAGE_USAGE_SAMPLED_BIT };
 
     if ((texture_usage_flags & TextureUsage::TransferSrc) == TextureUsage::TransferSrc)
     {
@@ -310,10 +310,6 @@ VkImageUsageFlags map_texture_usage(const TextureUsage texture_usage_flags, cons
     if ((texture_usage_flags & TextureUsage::Storage) == TextureUsage::Storage)
     {
         usage |= VK_IMAGE_USAGE_STORAGE_BIT;
-    }
-    else
-    {
-        usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
     }
 
     if ((texture_usage_flags & TextureUsage::RenderAttachment) == TextureUsage::RenderAttachment)

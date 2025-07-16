@@ -37,7 +37,7 @@ VertexOutput vs_main(
     float3 t = normalize(float3(mul(g_push.transform_matrix, float4(tangent.xyz, 0.0)).xyz));
 
     t = normalize(t - dot(t, n) * n);
-    
+
     const float3 b = cross(n, t) * tangent.w;
     const float3x3 tbn = float3x3(t, b, n);
 
@@ -69,13 +69,13 @@ float distribution_ggx(float3 n, float3 h, float roughness) {
 }
 
 // Describes the self-shadowing property of the microfacets
-float geometry_schlick_ggx(float n_dot_v, float roughness) {   
+float geometry_schlick_ggx(float n_dot_v, float roughness) {
     const float r = (roughness + 1.0);
     const float k = (r * r) / 8.0;
 
     const float num   = n_dot_v;
     const float denom = n_dot_v * (1.0 - k) + k;
-	
+
     return num / denom;
 }
 
@@ -85,7 +85,7 @@ float geometry_smith(float3 n, float3 v, float3 l, float roughness) {
 
     const float n_dot_v = max(dot(n, v), 0.0);
     const float ggx2  = geometry_schlick_ggx(n_dot_v, roughness);
-	
+
     return ggx1 * ggx2;
 }
 
@@ -94,10 +94,14 @@ float3 fresnel_schlick(float cos_theta, float3 f_0) {
     return f_0 + (1.0 - f_0) * pow(clamp(1.0 - cos_theta, 0.0, 1.0), 5.0);
 }
 
+float3 fresnel_schlick_roughness(float cos_theta, float3 f_0, float roughness) {
+    return f_0 + (max(float3(1.0 - roughness, 1.0 - roughness, 1.0 - roughness), f_0) - f_0) * pow(clamp(1.0 - cos_theta, 0.0, 1.0), 5.0);
+}
+
 float4 fs_main(VertexOutput input) : SV_TARGET {
     const ShaderScene scene = g_push.get_scene();
     const ShaderMaterial material = g_push.get_material();
-    
+
     float3 albedo = input.color;
     if (material.albedo_texture.handle.is_valid()) {
         const SamplerState albedo_sampler = material.albedo_sampler.load();
@@ -105,13 +109,13 @@ float4 fs_main(VertexOutput input) : SV_TARGET {
         const float3 final_albedo_value = material.albedo_factors.xyz * albedo_value;
         albedo = final_albedo_value;
     }
-    
+
     float roughness = 1.0;
     float metallic = 0.0;
     if (material.metal_roughness_texture.handle.is_valid()) {
         const SamplerState metal_roughness_sampler = material.metal_roughness_sampler.load();
         const float3 metal_roughness_value = material.metal_roughness_texture.sample_2d<float3>(metal_roughness_sampler, input.uv);
-        
+
         const float final_roughness_value = material.metal_roughness_factors.x * metal_roughness_value.g;
         roughness = final_roughness_value;
 
@@ -132,7 +136,7 @@ float4 fs_main(VertexOutput input) : SV_TARGET {
 
     const ShaderCamera camera = get_camera();
     const float3 view_direction = normalize(camera.position.xyz - input.world_pos);
-    
+
     float3 f_0 = float3(0.04, 0.04, 0.04);
     f_0 = lerp(f_0, albedo, metallic);
 
@@ -152,32 +156,34 @@ float4 fs_main(VertexOutput input) : SV_TARGET {
         const float3 radiance = light_color * attenuation;
 
         // Cook-Torrance BRDF
-        const float ndf = distribution_ggx(normal, halfway, roughness);        
-        const float g = geometry_smith(normal, view_direction, light_direction, roughness);      
+        const float ndf = distribution_ggx(normal, halfway, roughness);
+        const float g = geometry_smith(normal, view_direction, light_direction, roughness);
         const float3 f = fresnel_schlick(max(dot(halfway, view_direction), 0.0), f_0);
-  
+
         const float3 k_s = f;
         float3 k_d = float3(1.0, 1.0, 1.0) - k_s;
-        k_d *= 1.0 - metallic;	  
-        
+        k_d *= 1.0 - metallic;
+
         const float3 numerator = ndf * g * f;
         const float denominator = 4.0 * max(dot(normal, view_direction), 0.0) * max(dot(normal, light_direction), 0.0) + 0.0001;
-        const float3 specular = numerator / denominator;  
-            
+        const float3 specular = numerator / denominator;
+
         // Add to outgoing radiance L_0
-        const float n_dot_l = max(dot(normal, light_direction), 0.0);                
-        l_0 += (k_d * albedo / PI + specular) * radiance * n_dot_l; 
+        const float n_dot_l = max(dot(normal, light_direction), 0.0);
+        l_0 += (k_d * albedo / PI + specular) * radiance * n_dot_l;
     }
 
-    // FIXME: Add Ambient Occlusion
-    const float3 ambient = float3(0.03, 0.03, 0.03) * albedo;
+    const float3 k_s = fresnel_schlick_roughness(max(dot(view_direction, normal), 0.0), f_0, roughness);
+    float3 k_d = float3(1.0, 1.0, 1.0) - k_s;
+    k_d *= 1.0 - metallic;
+    const float3 irradiance = scene.irradiance_texture.sample_cube<float4>(scene.irradiance_sampler.load(), normal).xyz;
+    const float3 diffuse = irradiance * albedo;
+
+    // FIXME: Add ambient occlusion
+    const float3 ambient = (k_d * diffuse); // * ao;
 
     float3 color = ambient + l_0;
-	
-    // Reinhard Tone Mapping
     color = apply_reinhard_tone_mapping(color);
-
-    // Applying Gamme Correction
     color = apply_srgb(color);
 
     return float4(color, 1.0);

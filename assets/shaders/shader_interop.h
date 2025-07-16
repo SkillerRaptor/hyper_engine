@@ -54,10 +54,10 @@
 
 struct ShaderScene
 {
-    float4 ambient_color;
-    float4 sunlight_direction; // .w for sun power
-    float4 sunlight_color;
-    float4 padding_0;
+    TEXTURE irradiance_texture;
+    SAMPLER irradiance_sampler;
+    uint padding_0;
+    uint padding_1;
 };
 
 struct ShaderModel
@@ -123,7 +123,26 @@ struct ObjectPushConstants
 #endif
 };
 
-// NOTE: Should the skybox be a push constant?
+struct EquirectangularPushConstants
+{
+    TEXTURE equirectangular_texture;
+    uint equirectangular_width;
+    uint equirectangular_height;
+    uint padding_0;
+    RW_TEXTURE skybox_texture;
+    uint skybox_size;
+    uint padding_1;
+    uint padding_2;
+};
+
+struct IrradiancePushConstants
+{
+    RW_TEXTURE skybox_texture;
+    SAMPLER skybox_sampler;
+    RW_TEXTURE irradiance_texture;
+    uint size;
+};
+
 struct SkyboxPushConstants
 {
     TEXTURE skybox_texture;
@@ -132,7 +151,6 @@ struct SkyboxPushConstants
     uint padding_1;
 };
 
-// NOTE: Should the skybox be a push constant?
 struct CompositionPushConstants
 {
     TEXTURE composition_texture;

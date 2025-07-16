@@ -147,6 +147,8 @@ public:
 
     virtual void bind_compute_pipeline(CommandBufferId, ComputePipelineId) const = 0;
 
+    virtual void dispatch(CommandBufferId, u32 x, u32 y, u32 z) const = 0;
+
     // Render Pass
     virtual void begin_render_pass(CommandBufferId, const RenderPassDescriptor &) const = 0;
     virtual void end_render_pass(CommandBufferId) const = 0;

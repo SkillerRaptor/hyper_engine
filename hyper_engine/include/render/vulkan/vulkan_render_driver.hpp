@@ -207,6 +207,8 @@ public:
 
     void bind_compute_pipeline(CommandBufferId, ComputePipelineId) const override;
 
+    void dispatch(CommandBufferId, u32 x, u32 y, u32 z) const override;
+
     // Render Pass
     void begin_render_pass(CommandBufferId, const RenderPassDescriptor &) const override;
     void end_render_pass(CommandBufferId) const override;

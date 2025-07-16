@@ -81,6 +81,8 @@ public:
     static std::unique_ptr<RenderServer> create(EventServer &, void *native_window, u32 width, u32 height);
     ~RenderServer();
 
+    void wait_idle() const;
+
     BufferId create_buffer(const BufferDescriptor &);
     void destroy_buffer(BufferId);
 
@@ -155,6 +157,8 @@ public:
     {
         push_constants(id, &data, sizeof(T));
     }
+
+    void dispatch(ComputePassId, u32 x, u32 y, u32 z) const;
 
     // Render Pass
     RenderPassId begin_render_pass(CommandBufferId, const RenderPassDescriptor &);

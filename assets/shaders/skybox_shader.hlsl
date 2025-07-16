@@ -15,21 +15,21 @@ static float3 s_skybox[36] = {
     float3( 1.0, -1.0, -1.0),
     float3( 1.0,  1.0, -1.0),
     float3(-1.0,  1.0, -1.0),
-    
+
     float3(-1.0, -1.0,  1.0),
     float3(-1.0, -1.0, -1.0),
     float3(-1.0,  1.0, -1.0),
     float3(-1.0,  1.0, -1.0),
     float3(-1.0,  1.0,  1.0),
     float3(-1.0, -1.0,  1.0),
-    
+
     float3( 1.0, -1.0, -1.0),
     float3( 1.0, -1.0,  1.0),
     float3( 1.0,  1.0,  1.0),
     float3( 1.0,  1.0,  1.0),
     float3( 1.0,  1.0, -1.0),
     float3( 1.0, -1.0, -1.0),
-    
+
     float3(-1.0, -1.0,  1.0),
     float3(-1.0,  1.0,  1.0),
     float3( 1.0,  1.0,  1.0),
@@ -43,7 +43,7 @@ static float3 s_skybox[36] = {
     float3( 1.0,  1.0,  1.0),
     float3(-1.0,  1.0,  1.0),
     float3(-1.0,  1.0, -1.0),
-    
+
     float3(-1.0, -1.0, -1.0),
     float3(-1.0, -1.0,  1.0),
     float3( 1.0, -1.0, -1.0),
@@ -65,7 +65,7 @@ VertexOutput vs_main(
     const ShaderCamera camera = get_camera();
 
     const float4 position = float4(s_skybox[vertex_id], 1.0);
-    
+
     VertexOutput output = (VertexOutput) 0;
     output.position = mul(camera.projection, mul(camera.smaller_view, position)).xyww;
     output.uvw = position.xyz;

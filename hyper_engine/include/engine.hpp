@@ -72,12 +72,14 @@ private:
     PipelineLayoutId m_pbr_layout {};
     RenderPipelineId m_pbr_pipeline {};
 
-    /*
-    PipelineLayoutId m_skybox_layout;
-    RenderPipelineId m_skybox_pipeline;
-    TextureId m_skybox_texture;
-    SamplerId m_skybox_sampler;
-    */
+    PipelineLayoutId m_skybox_layout {};
+    RenderPipelineId m_skybox_pipeline {};
+    TextureId m_skybox_texture {};
+    TextureViewId m_skybox_texture_view {};
+    SamplerId m_skybox_sampler {};
+    TextureId m_irradiance_texture {};
+    TextureViewId m_irradiance_texture_view {};
+    SamplerId m_irradiance_sampler {};
 
     RenderPipelineId m_grid_pipeline {};
 
@@ -94,6 +96,7 @@ private:
     SamplerId m_default_sampler {};
 
     Asset m_sponza;
+    Asset m_damaged_helmet;
     std::vector<GpuModel> m_renderables {};
 
     bool m_running { true };
