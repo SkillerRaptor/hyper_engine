@@ -96,6 +96,8 @@ public:
     virtual TextureId create_texture(const TextureDescriptor &) = 0;
     virtual void destroy_texture(TextureId) = 0;
 
+    virtual void generate_mip_maps(CommandBufferId, TextureId) = 0;
+
     virtual TextureViewId create_texture_view(const TextureViewDescriptor &) = 0;
     virtual void destroy_texture_view(TextureViewId) = 0;
 

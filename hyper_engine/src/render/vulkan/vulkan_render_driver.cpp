@@ -354,6 +354,141 @@ void VulkanRenderDriver::destroy_texture(const TextureId id)
     delete texture;
 }
 
+void VulkanRenderDriver::generate_mip_maps(const CommandBufferId id, const TextureId texture_id)
+{
+    const VulkanCommandBuffer *command_buffer = id.as<VulkanCommandBuffer>();
+    VulkanTexture *texture = texture_id.as<VulkanTexture>();
+
+    transition_texture_layout(command_buffer->raw, texture, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 0, 1);
+
+    for (u32 i { 1 }; i < texture->desc.mip_levels; ++i)
+    {
+        const VkImageBlit image_blit {
+            .srcSubresource = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .mipLevel = i - 1,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            },
+            .srcOffsets = {
+                {
+                    .x = 0,
+                    .y = 0,
+                    .z = 0,
+                },
+                {
+                    .x = static_cast<i32>(texture->desc.extent.width >> (i - 1)),
+                    .y = static_cast<i32>(texture->desc.extent.height >> (i - 1)),
+                    .z = 1,
+                }
+            },
+            .dstSubresource = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .mipLevel = i,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            },
+            .dstOffsets = {
+                {
+                    .x = 0,
+                    .y = 0,
+                    .z = 0,
+                },
+                {
+                    .x = static_cast<i32>(texture->desc.extent.width >> i),
+                    .y = static_cast<i32>(texture->desc.extent.height >> i),
+                    .z = 1,
+                }
+            },
+        };
+
+        {
+            const VkImageSubresourceRange subresource_range {
+                .aspectMask = map_aspect(texture->desc.format),
+                .baseMipLevel = i,
+                .levelCount = 1,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            };
+
+            const VkImageMemoryBarrier2 image_memory_barrier {
+                .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                .pNext = nullptr,
+                .srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                .srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
+                .dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                .dstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
+                .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                .srcQueueFamilyIndex = 0,
+                .dstQueueFamilyIndex = 0,
+                .image = texture->raw,
+                .subresourceRange = subresource_range,
+            };
+
+            const VkDependencyInfo dependency_info {
+                .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+                .pNext = nullptr,
+                .dependencyFlags = 0,
+                .memoryBarrierCount = 0,
+                .pMemoryBarriers = nullptr,
+                .bufferMemoryBarrierCount = 0,
+                .pBufferMemoryBarriers = nullptr,
+                .imageMemoryBarrierCount = 1,
+                .pImageMemoryBarriers = &image_memory_barrier,
+            };
+
+            vkCmdPipelineBarrier2(command_buffer->raw, &dependency_info);
+        }
+
+        vkCmdBlitImage(command_buffer->raw, texture->raw, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, texture->raw,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &image_blit, VK_FILTER_LINEAR);
+
+        {
+            // FIXME: Add more specific src/dst stage/access masks
+            const VkImageSubresourceRange subresource_range {
+                .aspectMask = map_aspect(texture->desc.format),
+                .baseMipLevel = i,
+                .levelCount = 1,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            };
+
+            const VkImageMemoryBarrier2 image_memory_barrier {
+                .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                .pNext = nullptr,
+                .srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                .srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
+                .dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                .dstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
+                .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                .newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                .srcQueueFamilyIndex = 0,
+                .dstQueueFamilyIndex = 0,
+                .image = texture->raw,
+                .subresourceRange = subresource_range,
+            };
+
+            const VkDependencyInfo dependency_info {
+                .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+                .pNext = nullptr,
+                .dependencyFlags = 0,
+                .memoryBarrierCount = 0,
+                .pMemoryBarriers = nullptr,
+                .bufferMemoryBarrierCount = 0,
+                .pBufferMemoryBarriers = nullptr,
+                .imageMemoryBarrierCount = 1,
+                .pImageMemoryBarriers = &image_memory_barrier,
+            };
+
+            vkCmdPipelineBarrier2(command_buffer->raw, &dependency_info);
+        }
+    }
+
+    transition_texture_layout(
+        command_buffer->raw, texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 0, texture->desc.mip_levels);
+}
+
 TextureViewId VulkanRenderDriver::create_texture_view(const TextureViewDescriptor &desc)
 {
     const VulkanTexture *texture = desc.texture.as<VulkanTexture>();
@@ -903,7 +1038,7 @@ void VulkanRenderDriver::submit_command_buffer(const CommandBufferId id)
     if (command_buffer->swapchain_texture_acquired)
     {
         VulkanTexture *swapchain_texture = m_swapchain.textures[m_swapchain.texture_index].as<VulkanTexture>();
-        transition_texture_layout(command_buffer->raw, swapchain_texture, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        transition_texture_layout(command_buffer->raw, swapchain_texture, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 0, 1);
     }
 
     HE_VK_CHECK(vkEndCommandBuffer(command_buffer->raw), vkEndCommandBuffer);
@@ -1125,7 +1260,7 @@ void VulkanRenderDriver::copy_buffer_to_texture(const CommandBufferId id,
     const VulkanBuffer *vulkan_src = src.buffer.as<VulkanBuffer>();
     VulkanTexture *vulkan_dst = dst.texture.as<VulkanTexture>();
 
-    transition_texture_layout(command_buffer->raw, vulkan_dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    transition_texture_layout(command_buffer->raw, vulkan_dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, dst.mip_level, 1);
 
     const VkImageSubresourceLayers subresource_layers = {
         .aspectMask = map_aspect(vulkan_dst->desc.format),
@@ -1167,7 +1302,7 @@ void VulkanRenderDriver::copy_texture_to_buffer(const CommandBufferId id,
     VulkanTexture *vulkan_src = src.texture.as<VulkanTexture>();
     const VulkanBuffer *vulkan_dst = dst.buffer.as<VulkanBuffer>();
 
-    transition_texture_layout(command_buffer->raw, vulkan_src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+    transition_texture_layout(command_buffer->raw, vulkan_src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, src.mip_level, 1);
 
     const VkImageSubresourceLayers subresource_layers = {
         .aspectMask = map_aspect(vulkan_src->desc.format),
@@ -1209,8 +1344,8 @@ void VulkanRenderDriver::copy_texture_to_texture(const CommandBufferId id,
     VulkanTexture *vulkan_src = src.texture.as<VulkanTexture>();
     VulkanTexture *vulkan_dst = dst.texture.as<VulkanTexture>();
 
-    transition_texture_layout(command_buffer->raw, vulkan_src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-    transition_texture_layout(command_buffer->raw, vulkan_dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    transition_texture_layout(command_buffer->raw, vulkan_src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, src.mip_level, 1);
+    transition_texture_layout(command_buffer->raw, vulkan_dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, dst.mip_level, 1);
 
     const VkImageCopy2 region = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_COPY_2,
@@ -1257,12 +1392,12 @@ void VulkanRenderDriver::push_constants(
     vkCmdPushConstants(command_buffer->raw, pipeline_layout->raw, VK_SHADER_STAGE_ALL, 0, static_cast<uint32_t>(size), data);
 }
 
-void VulkanRenderDriver::begin_compute_pass(const CommandBufferId id, const ComputePassDescriptor &) const
+void VulkanRenderDriver::begin_compute_pass(const CommandBufferId, const ComputePassDescriptor &) const
 {
     // NOTE: noop
 }
 
-void VulkanRenderDriver::end_compute_pass(const CommandBufferId id) const
+void VulkanRenderDriver::end_compute_pass(const CommandBufferId) const
 {
     // NOTE: noop
 }
@@ -1323,7 +1458,8 @@ void VulkanRenderDriver::begin_render_pass(const CommandBufferId id, const Rende
         const VulkanTextureView *color_attachment_texture_view = color_attachment.view.as<VulkanTextureView>();
         VulkanTexture *color_attachment_texture = color_attachment_texture_view->desc.texture.as<VulkanTexture>();
 
-        transition_texture_layout(command_buffer->raw, color_attachment_texture, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        transition_texture_layout(
+            command_buffer->raw, color_attachment_texture, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 0, 1);
 
         const VkRenderingAttachmentInfo color_attachment_info {
             .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
@@ -1349,7 +1485,7 @@ void VulkanRenderDriver::begin_render_pass(const CommandBufferId id, const Rende
         VulkanTexture *depth_stencil_texture = depth_stencil_texture_view->desc.texture.as<VulkanTexture>();
 
         transition_texture_layout(
-            command_buffer->raw, depth_stencil_texture, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+            command_buffer->raw, depth_stencil_texture, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 0, 1);
 
         constexpr VkClearValue depth_clear_value {
             .depthStencil =
@@ -2385,23 +2521,26 @@ VulkanRenderDriver::Descriptors VulkanRenderDriver::create_descriptors(const Dev
     };
 }
 
-void VulkanRenderDriver::transition_texture_layout(
-    const VkCommandBuffer command_buffer, VulkanTexture *texture, const VkImageLayout new_layout)
+void VulkanRenderDriver::transition_texture_layout(const VkCommandBuffer command_buffer,
+    VulkanTexture *texture,
+    const VkImageLayout new_layout,
+    const u32 base_mip_level,
+    const u32 level_count)
 {
     // FIXME: Add more specific src/dst stage/access masks
     const VkImageSubresourceRange subresource_range {
         .aspectMask = map_aspect(texture->desc.format),
-        .baseMipLevel = 0,
-        .levelCount = VK_REMAINING_MIP_LEVELS,
+        .baseMipLevel = base_mip_level,
+        .levelCount = level_count,
         .baseArrayLayer = 0,
-        .layerCount = VK_REMAINING_ARRAY_LAYERS,
+        .layerCount = 1,
     };
 
     const VkImageMemoryBarrier2 image_memory_barrier {
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
         .pNext = nullptr,
         .srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-        .srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
+        .srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
         .dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
         .dstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
         .oldLayout = texture->layout,

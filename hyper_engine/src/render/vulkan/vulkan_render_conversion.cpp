@@ -11,17 +11,7 @@
 // Buffer
 VkBufferUsageFlags map_buffer_usage(const BufferUsage buffer_usage_flags)
 {
-    VkBufferUsageFlags usage_flags { 0 };
-
-    if ((buffer_usage_flags & BufferUsage::TransferSrc) == BufferUsage::TransferSrc)
-    {
-        usage_flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-    }
-
-    if ((buffer_usage_flags & BufferUsage::TransferDst) == BufferUsage::TransferDst)
-    {
-        usage_flags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-    }
+    VkBufferUsageFlags usage_flags { VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT };
 
     if ((buffer_usage_flags & BufferUsage::Index) == BufferUsage::Index)
     {
@@ -295,17 +285,8 @@ VkFormat map_format(const Format format)
 
 VkImageUsageFlags map_texture_usage(const TextureUsage texture_usage_flags, const Format format)
 {
-    VkImageUsageFlags usage { VK_IMAGE_USAGE_SAMPLED_BIT };
-
-    if ((texture_usage_flags & TextureUsage::TransferSrc) == TextureUsage::TransferSrc)
-    {
-        usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-    }
-
-    if ((texture_usage_flags & TextureUsage::TransferDst) == TextureUsage::TransferDst)
-    {
-        usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    }
+    VkImageUsageFlags usage { VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT
+        | VK_IMAGE_USAGE_SAMPLED_BIT };
 
     if ((texture_usage_flags & TextureUsage::Storage) == TextureUsage::Storage)
     {

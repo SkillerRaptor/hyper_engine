@@ -161,6 +161,8 @@ public:
     TextureId create_texture(const TextureDescriptor &) override;
     void destroy_texture(TextureId) override;
 
+    void generate_mip_maps(CommandBufferId, TextureId) override;
+
     TextureViewId create_texture_view(const TextureViewDescriptor &) override;
     void destroy_texture_view(TextureViewId) override;
 
@@ -277,7 +279,8 @@ private:
     static VkDescriptorType map_descriptor_type(DescriptorType);
     static Descriptors create_descriptors(const Device &);
 
-    static void transition_texture_layout(VkCommandBuffer, VulkanTexture *, VkImageLayout new_layout);
+    static void transition_texture_layout(
+        VkCommandBuffer, VulkanTexture *, VkImageLayout new_layout, u32 base_mip_level, u32 level_count);
 
 private:
     Instance m_instance {};

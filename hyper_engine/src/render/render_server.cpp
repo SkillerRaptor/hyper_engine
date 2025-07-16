@@ -329,6 +329,14 @@ void RenderServer::destroy_texture(const TextureId id)
     });
 }
 
+void RenderServer::generate_mip_maps(const CommandBufferId id, const TextureId texture_id)
+{
+    HE_ASSERT(texture_id.is_valid());
+    HE_ASSERT(m_textures.contains(texture_id));
+
+    m_render_driver->generate_mip_maps(id, texture_id);
+}
+
 TextureViewId RenderServer::create_texture_view(const TextureViewDescriptor &desc)
 {
     if (desc.label.has_value())
@@ -608,7 +616,7 @@ void RenderServer::write_buffer(
     const BufferId staging_buffer = m_render_driver->create_buffer({
         .label = std::nullopt,
         .size = size,
-        .usage = BufferUsage::TransferSrc | BufferUsage::Storage,
+        .usage = BufferUsage::Storage,
     });
     void *mapped_ptr = m_render_driver->map_buffer(staging_buffer);
     memcpy(mapped_ptr, data, size);
@@ -642,7 +650,7 @@ void RenderServer::write_texture(const CommandBufferId id,
     const BufferId staging_buffer = m_render_driver->create_buffer({
         .label = std::nullopt,
         .size = size,
-        .usage = BufferUsage::TransferSrc | BufferUsage::Storage,
+        .usage = BufferUsage::Storage,
     });
     void *mapped_ptr = m_render_driver->map_buffer(staging_buffer);
     memcpy(mapped_ptr, data, size);

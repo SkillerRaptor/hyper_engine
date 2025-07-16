@@ -54,7 +54,7 @@ void Engine::initialize()
     m_camera_buffer = m_render_server->create_buffer({
         .label = std::nullopt,
         .size = sizeof(ShaderCamera),
-        .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
+        .usage = BufferUsage::Storage | BufferUsage::Resource,
         .handle = ResourceHandle(HE_DESCRIPTOR_SET_SLOT_CAMERA),
     });
 
@@ -62,7 +62,7 @@ void Engine::initialize()
     m_scene_buffer = m_render_server->create_buffer({
         .label = std::nullopt,
         .size = sizeof(ShaderScene),
-        .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
+        .usage = BufferUsage::Storage | BufferUsage::Resource,
         .handle = std::nullopt,
     });
 
@@ -73,13 +73,13 @@ void Engine::initialize()
     create_default();
 
     m_sponza = Asset::load("./assets/models/sponza/Sponza.gltf");
-    m_damaged_helmet = Asset::load("./assets/models/DamagedHelmet.glb");
+    // m_damaged_helmet = Asset::load("./assets/models/DamagedHelmet.glb");
 
     const std::vector<GpuModel> sponza_models = upload_asset(m_sponza);
     m_renderables.insert(m_renderables.end(), sponza_models.begin(), sponza_models.end());
 
-    const std::vector<GpuModel> damaged_helmet_models = upload_asset(m_damaged_helmet);
-    m_renderables.insert(m_renderables.end(), damaged_helmet_models.begin(), damaged_helmet_models.end());
+    // const std::vector<GpuModel> damaged_helmet_models = upload_asset(m_damaged_helmet);
+    // m_renderables.insert(m_renderables.end(), damaged_helmet_models.begin(), damaged_helmet_models.end());
 
     m_event_server->subscribe<WindowCloseEvent>(
         [this](const WindowCloseEvent &)
@@ -544,7 +544,7 @@ void Engine::create_skybox()
         .mip_levels = 1,
         .format = Format::Rgba32Sfloat,
         .dimension = Dimension::D2,
-        .usage = TextureUsage::TransferDst | TextureUsage::Resource,
+        .usage = TextureUsage::Resource,
     });
 
     const TextureViewId equirectangular_texture_view = m_render_server->create_texture_view({
@@ -662,7 +662,7 @@ void Engine::create_skybox()
         .mip_levels = 1,
         .format = Format::Rgba16Sfloat,
         .dimension = Dimension::D2,
-        .usage = TextureUsage::TransferDst | TextureUsage::Storage | TextureUsage::Resource,
+        .usage = TextureUsage::Storage | TextureUsage::Resource,
     });
 
     m_skybox_texture_view = m_render_server->create_texture_view({
@@ -757,7 +757,7 @@ void Engine::create_skybox()
         .mip_levels = 1,
         .format = Format::Rgba16Sfloat,
         .dimension = Dimension::D2,
-        .usage = TextureUsage::TransferDst | TextureUsage::Storage | TextureUsage::Resource,
+        .usage =  TextureUsage::Storage | TextureUsage::Resource,
     });
 
     m_irradiance_texture_view = m_render_server->create_texture_view({
@@ -1081,7 +1081,7 @@ void Engine::create_default()
         .mip_levels = 1,
         .format = Format::Rgba8Unorm,
         .dimension = Dimension::D2,
-        .usage = TextureUsage::TransferDst | TextureUsage::Resource,
+        .usage = TextureUsage::Resource,
     });
 
     m_default_texture_view = m_render_server->create_texture_view({
@@ -1186,7 +1186,7 @@ void Engine::upload_model(const CommandBufferId command_buffer,
         const BufferId positions_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = asset_model.positions.size() * sizeof(glm::vec3),
-            .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
+            .usage = BufferUsage::Storage | BufferUsage::Resource,
         });
         m_render_server->write_buffer(command_buffer,
             {
@@ -1198,7 +1198,7 @@ void Engine::upload_model(const CommandBufferId command_buffer,
         const BufferId normals_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = asset_model.normals.size() * sizeof(glm::vec3),
-            .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
+            .usage = BufferUsage::Storage | BufferUsage::Resource,
         });
         m_render_server->write_buffer(command_buffer,
             {
@@ -1210,7 +1210,7 @@ void Engine::upload_model(const CommandBufferId command_buffer,
         const BufferId tangents_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = asset_model.tangents.size() * sizeof(glm::vec4),
-            .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
+            .usage = BufferUsage::Storage | BufferUsage::Resource,
         });
         m_render_server->write_buffer(command_buffer,
             {
@@ -1222,7 +1222,7 @@ void Engine::upload_model(const CommandBufferId command_buffer,
         const BufferId colors_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = asset_model.colors.size() * sizeof(glm::vec3),
-            .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
+            .usage = BufferUsage::Storage | BufferUsage::Resource,
 
         });
         m_render_server->write_buffer(command_buffer,
@@ -1235,7 +1235,7 @@ void Engine::upload_model(const CommandBufferId command_buffer,
         const BufferId uvs_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = asset_model.uvs.size() * sizeof(glm::vec2),
-            .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
+            .usage = BufferUsage::Storage | BufferUsage::Resource,
 
         });
         m_render_server->write_buffer(command_buffer,
@@ -1256,7 +1256,7 @@ void Engine::upload_model(const CommandBufferId command_buffer,
         const BufferId model_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = sizeof(ShaderModel),
-            .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
+            .usage = BufferUsage::Storage | BufferUsage::Resource,
         });
         m_render_server->write_buffer(command_buffer,
             {
@@ -1268,7 +1268,7 @@ void Engine::upload_model(const CommandBufferId command_buffer,
         const BufferId indices_buffer = m_render_server->create_buffer({
             .label = std::nullopt,
             .size = asset_model.indices.size() * sizeof(u32),
-            .usage = BufferUsage::TransferDst | BufferUsage::Index,
+            .usage = BufferUsage::Index,
         });
         m_render_server->write_buffer(command_buffer,
             {
@@ -1291,6 +1291,9 @@ void Engine::upload_model(const CommandBufferId command_buffer,
 
                 const Asset::Texture &asset_texture = asset.textures()[texture_index.value()];
 
+                const uint32_t mip_levels = std::min(
+                    static_cast<uint32_t>(floor(log2(std::max(asset_texture.width, asset_texture.height))) + 1), 16u);
+
                 const TextureId texture = m_render_server->create_texture({
                         .label = std::nullopt,
                         .extent = {
@@ -1298,11 +1301,21 @@ void Engine::upload_model(const CommandBufferId command_buffer,
                             .height = asset_texture.height,
                             .depth = 1,
                         },
-                        .mip_levels = 1,
+                        .mip_levels = mip_levels,
                         .format = format,
                         .dimension = Dimension::D2,
-                        .usage = TextureUsage::TransferDst | TextureUsage::Resource,
-                    });
+                        .usage = TextureUsage::Resource,
+                });
+
+                const TextureViewId texture_view = m_render_server->create_texture_view({
+                    .label = std::nullopt,
+                    .texture = texture,
+                    .dimension = ViewDimension::D2,
+                    .base_mip_level = 0,
+                    .mip_levels = mip_levels,
+                    .base_array_layer = 0,
+                    .array_layers = 1,
+                });
 
                 m_render_server->write_texture(
                     command_buffer,
@@ -1324,18 +1337,9 @@ void Engine::upload_model(const CommandBufferId command_buffer,
                         .width = static_cast<u32>(asset_texture.width),
                         .height = static_cast<u32>(asset_texture.height),
                         .depth = 1,
-                    });
-
-                // FIXME
-                const TextureViewId texture_view = m_render_server->create_texture_view({
-                    .label = std::nullopt,
-                    .texture = texture,
-                    .dimension = ViewDimension::D2,
-                    .base_mip_level = 0,
-                    .mip_levels = 1,
-                    .base_array_layer = 0,
-                    .array_layers = 1,
                 });
+
+                m_render_server->generate_mip_maps(command_buffer, texture);
 
                 return m_render_server->get_texture_view_handle(texture_view);
             };
@@ -1395,7 +1399,7 @@ void Engine::upload_model(const CommandBufferId command_buffer,
             const BufferId material_buffer = m_render_server->create_buffer({
                 .label = std::nullopt,
                 .size = sizeof(ShaderMaterial),
-                .usage = BufferUsage::TransferDst | BufferUsage::Storage | BufferUsage::Resource,
+                .usage = BufferUsage::Storage | BufferUsage::Resource,
             });
             m_render_server->write_buffer(command_buffer,
                 {

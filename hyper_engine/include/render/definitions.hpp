@@ -296,12 +296,10 @@ struct Offset3d
 enum class BufferUsage : u8
 {
     None = 0,
-    TransferSrc = 1 << 0,
-    TransferDst = 1 << 1,
-    Index = 1 << 2,
-    Indirect = 1 << 3,
-    Storage = 1 << 4,
-    Resource = 1 << 5,
+    Index = 1 << 0,
+    Indirect = 1 << 1,
+    Storage = 1 << 2,
+    Resource = 1 << 3,
 };
 
 HE_ENABLE_BIT_FLAGS(BufferUsage);
@@ -309,11 +307,9 @@ HE_ENABLE_BIT_FLAGS(BufferUsage);
 enum class TextureUsage : u8
 {
     None = 0,
-    TransferSrc = 1 << 0,
-    TransferDst = 1 << 1,
-    RenderAttachment = 1 << 2,
-    Storage = 1 << 3,
-    Resource = 1 << 4,
+    RenderAttachment = 1 << 0,
+    Storage = 1 << 1,
+    Resource = 1 << 2,
 };
 
 HE_ENABLE_BIT_FLAGS(TextureUsage);
