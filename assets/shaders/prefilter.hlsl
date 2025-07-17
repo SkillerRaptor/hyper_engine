@@ -29,14 +29,15 @@ float radical_inverse_vdc(uint bits) {
     bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xccccccccu) >> 2u);
     bits = ((bits & 0x0f0f0f0fu) << 4u) | ((bits & 0xf0f0f0f0u) >> 4u);
     bits = ((bits & 0x00ff00ffu) << 8u) | ((bits & 0xff00ff00u) >> 8u);
-     return float(bits) * 2.3283064365386963e-10;
+    return float(bits) * 2.3283064365386963e-10;
 }
 
-float2 hammersley(uint i, uint n) {
-    return float2(float(i) / float(n), radical_inverse_vdc(i));
+float2 hammersley(const uint i, const uint n) {
+    const float radical_inverse = radical_inverse_vdc(i);
+    return float2(float(i) / float(n), radical_inverse);
 }
 
-float3 importance_sample_ggx(float2 xi, float3 normal, float roughness) {
+float3 importance_sample_ggx(const float2 xi, const float3 normal, const float roughness) {
     const float a = roughness * roughness;
 
     const float phi = 2.0 * PI * xi.x;
@@ -86,7 +87,14 @@ void main(uint3 id : SV_DispatchThreadID) {
     const float3 r = normal;
     const float3 v = r;
 
-    const uint sample_count = 1024;
+    if (g_push.roughness == 0.0) {
+        const float3 color = g_push.skybox_texture.sample_level_cube<float4>(g_push.skybox_sampler.load(), r, 0.0).xyz;
+        const uint3 coord = uint3(id.x, g_push.size - 1 - id.y, id.z);
+        g_push.prefilter_texture.store_3d(coord, color);
+        return;
+    }
+
+    const uint sample_count = 64;
 
     float total_weight = 0.0;
     float3 prefiltered_color = float3(0.0, 0.0, 0.0);
@@ -95,18 +103,18 @@ void main(uint3 id : SV_DispatchThreadID) {
         const float3 h = importance_sample_ggx(xi, normal, g_push.roughness);
         const float3 l = normalize(2.0 * dot(v, h) * h - v);
 
-        const float n_dot_l = max(dot(normal, l), 0.0);
+        const float n_dot_l = saturate(dot(normal, l));
         if (n_dot_l > 0.0) {
+            const float n_dot_h = saturate(dot(normal, h));
+            const float h_dot_v = saturate(dot(h, v));
             const float d = distribution_ggx(normal, h, g_push.roughness);
-            const float n_dot_h = max(dot(normal, h), 0.0);
-            const float h_dot_v = max(dot(h, v), 0.0);
             const float pdf = d * n_dot_h / (4.0 * h_dot_v) + 0.0001;
 
             const float resolution = 512.0;
             const float sa_texel = 4.0 * PI / (6.0 * resolution * resolution);
             const float sa_sample = 1.0 / (float(sample_count) * pdf + 0.0001);
 
-            const float mip_level = g_push.roughness == 0.0 ? 0.0 : 0.5 * log2(sa_sample / sa_texel);
+            const float mip_level = max(0.5 * log2(sa_sample / sa_texel), 0.0);
 
             const float3 color = g_push.skybox_texture.sample_level_cube<float4>(g_push.skybox_sampler.load(), l, mip_level).xyz;
             prefiltered_color += color * n_dot_l;

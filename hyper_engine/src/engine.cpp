@@ -112,13 +112,13 @@ void Engine::initialize()
     const std::vector<GpuModel> sponza_models = upload_asset(m_sponza);
     m_renderables.insert(m_renderables.end(), sponza_models.begin(), sponza_models.end());
 
+    const std::vector<GpuModel> damaged_helmet_models = upload_asset(m_damaged_helmet);
+    m_renderables.insert(m_renderables.end(), damaged_helmet_models.begin(), damaged_helmet_models.end());
+
     if (g_render_doc)
     {
         HE_ASSERT(g_render_doc->EndFrameCapture(nullptr, nullptr));
     }
-
-    const std::vector<GpuModel> damaged_helmet_models = upload_asset(m_damaged_helmet);
-    m_renderables.insert(m_renderables.end(), damaged_helmet_models.begin(), damaged_helmet_models.end());
 
     m_event_server->subscribe<WindowCloseEvent>(
         [this](const WindowCloseEvent &)
@@ -315,7 +315,7 @@ void Engine::render() const
     for (const GpuModel &model : m_renderables)
     {
         glm::mat4 transform = model.transform;
-        transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, -10.0f));
+        transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 25.0f));
 
         const ResourceHandle model_buffer_handle = m_render_server->get_buffer_handle(model.model_buffer);
 
@@ -562,7 +562,7 @@ void Engine::create_skybox()
     i32 width { 0 };
     i32 height { 0 };
     i32 channels { 0 };
-    f32 *data = stbi_loadf("./assets/images/newport_loft.hdr", &width, &height, &channels, 0);
+    f32 *data = stbi_loadf("./assets/images/the_sky_is_on_fire_4k.hdr", &width, &height, &channels, 0);
     HE_ASSERT(data != nullptr);
 
     std::vector<f32> new_data;
@@ -1480,7 +1480,7 @@ void Engine::upload_model(const CommandBufferId command_buffer,
             {
                 if (!texture_index.has_value())
                 {
-                    return m_render_server->get_texture_view_handle(m_default_texture_view);
+                    return ResourceHandle();
                 }
 
                 const Asset::Texture &asset_texture = asset.textures()[texture_index.value()];
@@ -1540,8 +1540,9 @@ void Engine::upload_model(const CommandBufferId command_buffer,
             {
                 if (!sampler_index.has_value())
                 {
-                    return m_render_server->get_sampler_handle(m_default_sampler);
+                    return ResourceHandle();
                 }
+
                 const Asset::Sampler &asset_sampler = asset.samplers()[asset_material.base_color_sampler_index.value()];
 
                 const SamplerId sampler = m_render_server->create_sampler({

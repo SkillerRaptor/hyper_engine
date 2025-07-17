@@ -31,13 +31,13 @@ void main(uint3 id : SV_DispatchThreadID) {
 
     const float3 normal = normalize(direction);
 
-    float3 up = float3(0.0, 1.0, 0.0);
-    const float3 right = normalize(cross(up, normal));
-    up = normalize(cross(normal, right));
+    const float3 world_up = float3(0.0, 1.0, 0.0);
+    const float3 right = normalize(cross(world_up, normal));
+    const float3 up = normalize(cross(normal, right));
 
-    const float sample_delta = 0.03;
-    int sample_count = 0;
+    const float sample_delta = 0.05;
 
+    uint sample_count = 0;
     float3 irradiance = float3(0.0, 0.0, 0.0);
     for (float phi = 0.0; phi < 2.0 * PI; phi += sample_delta) {
         const float sin_phi = sin(phi);
@@ -52,12 +52,7 @@ void main(uint3 id : SV_DispatchThreadID) {
                 cos_theta
             );
 
-            const float3 sample_vector = normalize(
-                tangent_sample.x * right +
-                tangent_sample.y * up +
-                tangent_sample.z * normal
-            );
-
+            const float3 sample_vector = tangent_sample.x * right + tangent_sample.y * up + tangent_sample.z * normal;
             const float3 color = g_push.skybox_texture.sample_level_cube<float4>(g_push.skybox_sampler.load(), sample_vector, 0.0).xyz;
             irradiance += color * cos_theta * sin_theta;
             sample_count++;

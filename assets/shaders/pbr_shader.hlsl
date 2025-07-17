@@ -174,7 +174,7 @@ float4 fs_main(VertexOutput input) : SV_TARGET {
         l_0 += (k_d * albedo / PI + specular) * radiance * n_dot_l;
     }
 
-    const float3 f = fresnel_schlick_roughness(max(dot(view_direction, normal), 0.0), f_0, roughness);
+    const float3 f = fresnel_schlick_roughness(max(dot(normal, view_direction), 0.0), f_0, roughness);
 
     const float3 k_s = f;
     float3 k_d = 1.0 - k_s;
