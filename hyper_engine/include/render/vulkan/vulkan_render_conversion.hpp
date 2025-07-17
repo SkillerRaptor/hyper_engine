@@ -24,6 +24,7 @@ VkSamplerMipmapMode map_mipmap_mode(Filter);
 VkImageAspectFlags map_aspect(Format);
 VkImageType map_dimension(Dimension);
 VkFormat map_format(Format);
+VkSampleCountFlagBits map_sample_count(u32);
 VkImageUsageFlags map_texture_usage(TextureUsage, Format);
 VkImageViewType map_view_dimension(ViewDimension);
 Format map_vk_format(VkFormat);

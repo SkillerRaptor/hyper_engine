@@ -345,6 +345,8 @@ void RenderServer::transition_to_general(const CommandBufferId id, const Texture
     m_render_driver->transition_to_general(id, texture_id);
 }
 
+u32 RenderServer::get_max_sample_count() const { return m_render_driver->get_max_sample_count(); }
+
 TextureViewId RenderServer::create_texture_view(const TextureViewDescriptor &desc)
 {
     if (desc.label.has_value())

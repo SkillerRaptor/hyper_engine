@@ -501,6 +501,10 @@ void Engine::create_pbr()
                 .cull_mode = Face::Back,
                 .polygon_mode = PolygonMode::Fill,
             },
+        .multisample_state =
+            {
+                .sample_count = m_render_server->get_max_sample_count(),
+            },
         .color_attachment_states =
             {
                 ColorAttachmentState{
@@ -584,6 +588,7 @@ void Engine::create_skybox()
             .depth = 1,
         },
         .mip_levels = 1,
+        .sample_count = 1,
         .format = Format::Rgba32Sfloat,
         .dimension = Dimension::D2,
         .usage = TextureUsage::Resource,
@@ -656,6 +661,10 @@ void Engine::create_skybox()
                 .cull_mode = Face::None,
                 .polygon_mode = PolygonMode::Fill,
             },
+        .multisample_state =
+            {
+                .sample_count = m_render_server->get_max_sample_count(),
+            },
         .color_attachment_states =
             {
                ColorAttachmentState {
@@ -702,6 +711,7 @@ void Engine::create_skybox()
             .depth = 6,
         },
         .mip_levels = mip_levels,
+        .sample_count = 1,
         .format = Format::Rgba16Sfloat,
         .dimension = Dimension::D2,
         .usage = TextureUsage::Storage | TextureUsage::Resource,
@@ -794,6 +804,7 @@ void Engine::create_skybox()
             .depth = 6,
         },
         .mip_levels = 1,
+        .sample_count = 1,
         .format = Format::Rgba16Sfloat,
         .dimension = Dimension::D2,
         .usage =  TextureUsage::Storage | TextureUsage::Resource,
@@ -874,6 +885,7 @@ void Engine::create_skybox()
             .depth = 6,
         },
         .mip_levels = 5,
+        .sample_count = 1,
         .format = Format::Rgba16Sfloat,
         .dimension = Dimension::D2,
         .usage =  TextureUsage::Storage | TextureUsage::Resource,
@@ -980,6 +992,7 @@ void Engine::create_skybox()
             .depth = 1,
         },
         .mip_levels = 1,
+        .sample_count = 1,
         .format = Format::Rg16Sfloat,
         .dimension = Dimension::D2,
         .usage =  TextureUsage::Storage | TextureUsage::Resource,
@@ -1060,6 +1073,10 @@ void Engine::create_grid()
                 .cull_mode = Face::None,
                 .polygon_mode = PolygonMode::Fill,
             },
+        .multisample_state =
+            {
+                .sample_count = m_render_server->get_max_sample_count(),
+            },
         .color_attachment_states =
             {
                 ColorAttachmentState{
@@ -1130,6 +1147,10 @@ void Engine::create_composition()
                 .cull_mode = Face::Back,
                 .polygon_mode = PolygonMode::Fill,
             },
+        .multisample_state =
+            {
+                .sample_count = 1,
+            },
         .color_attachment_states =
             {
                 ColorAttachmentState{
@@ -1176,6 +1197,7 @@ void Engine::create_composition()
             .depth = 1,
         },
         .mip_levels = 1,
+        .sample_count = m_render_server->get_max_sample_count(),
         .format = Format::Rgba16Sfloat,
         .dimension = Dimension::D2,
         .usage = TextureUsage::RenderAttachment | TextureUsage::Resource,
@@ -1199,6 +1221,7 @@ void Engine::create_composition()
             .depth = 1,
         },
         .mip_levels = 1,
+        .sample_count = m_render_server->get_max_sample_count(),
         .format = Format::D32Sfloat,
         .dimension = Dimension::D2,
         .usage = TextureUsage::RenderAttachment,
@@ -1228,6 +1251,7 @@ void Engine::create_composition()
                     .depth = 1,
                 },
                 .mip_levels = 1,
+                .sample_count = m_render_server->get_max_sample_count(),
                 .format = Format::Rgba16Sfloat,
                 .dimension = Dimension::D2,
                 .usage = TextureUsage::RenderAttachment | TextureUsage::Resource,
@@ -1251,6 +1275,7 @@ void Engine::create_composition()
                     .depth = 1,
                 },
                 .mip_levels = 1,
+                .sample_count = m_render_server->get_max_sample_count(),
                 .format = Format::D32Sfloat,
                 .dimension = Dimension::D2,
                 .usage = TextureUsage::RenderAttachment,
@@ -1278,6 +1303,7 @@ void Engine::create_default()
             .depth = 1,
         },
         .mip_levels = 1,
+        .sample_count = 1,
         .format = Format::Rgba8Unorm,
         .dimension = Dimension::D2,
         .usage = TextureUsage::Resource,
@@ -1499,6 +1525,7 @@ void Engine::upload_model(const CommandBufferId command_buffer,
                             .depth = 1,
                         },
                         .mip_levels = mip_levels,
+                        .sample_count = 1,
                         .format = format,
                         .dimension = Dimension::D2,
                         .usage = TextureUsage::Resource,

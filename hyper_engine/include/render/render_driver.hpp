@@ -98,6 +98,7 @@ public:
 
     virtual void generate_mip_maps(CommandBufferId, TextureId) = 0;
     virtual void transition_to_general(CommandBufferId, TextureId) = 0;
+    virtual u32 get_max_sample_count() const = 0;
 
     virtual TextureViewId create_texture_view(const TextureViewDescriptor &) = 0;
     virtual void destroy_texture_view(TextureViewId) = 0;

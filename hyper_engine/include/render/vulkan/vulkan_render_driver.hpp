@@ -55,12 +55,14 @@ private:
         std::unordered_set<std::string> extensions {};
         FeatureSet feature_set;
         u32 queue_family { 0 };
-        VkPhysicalDevice raw {};
+        u32 sample_count { 1 };
+        VkPhysicalDevice raw { VK_NULL_HANDLE };
     };
 
     struct Device
     {
         u32 queue_family { 0 };
+        u32 sample_count { 1 };
         VkPhysicalDevice physical_device { VK_NULL_HANDLE };
         VkDevice raw { VK_NULL_HANDLE };
         VkQueue queue { VK_NULL_HANDLE };
@@ -163,6 +165,7 @@ public:
 
     void generate_mip_maps(CommandBufferId, TextureId) override;
     void transition_to_general(CommandBufferId, TextureId) override;
+    u32 get_max_sample_count() const override;
 
     TextureViewId create_texture_view(const TextureViewDescriptor &) override;
     void destroy_texture_view(TextureViewId) override;

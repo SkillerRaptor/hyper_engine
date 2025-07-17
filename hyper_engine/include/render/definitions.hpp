@@ -328,6 +328,11 @@ struct PrimitiveState
     PolygonMode polygon_mode { PolygonMode::Fill };
 };
 
+struct MultisampleState
+{
+    u32 sample_count { 1 };
+};
+
 struct BlendState
 {
     bool enable { false };
@@ -409,6 +414,7 @@ struct TextureDescriptor
     std::optional<std::string> label { std::nullopt };
     Extent3d extent {};
     u32 mip_levels { 1 };
+    u32 sample_count { 1 };
     Format format { Format::Unknown };
     Dimension dimension { Dimension::Unknown };
     TextureUsage usage { TextureUsage::None };
@@ -446,6 +452,7 @@ struct RenderPipelineDescriptor
     ShaderId vertex_shader {};
     ShaderId fragment_shader {};
     PrimitiveState primitive_state {};
+    MultisampleState multisample_state {};
     std::vector<ColorAttachmentState> color_attachment_states {};
     std::optional<DepthStencilState> depth_stencil_state { std::nullopt };
 };

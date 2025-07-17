@@ -21,8 +21,7 @@
 #include "render/vulkan/vulkan_render_conversion.hpp"
 
 #define HE_VK_CHECK(result, fn)                                                    \
-    do                                                                             \
-    {                                                                              \
+    do {                                                                           \
         const VkResult _result = (result);                                         \
         if ((_result) != VK_SUCCESS)                                               \
         {                                                                          \
@@ -306,7 +305,7 @@ TextureId VulkanRenderDriver::create_texture(const TextureDescriptor &desc)
         },
         .mipLevels = desc.mip_levels,
         .arrayLayers = desc.extent.depth,
-        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .samples = map_sample_count(desc.sample_count),
         .tiling = VK_IMAGE_TILING_OPTIMAL,
         .usage = map_texture_usage(desc.usage, desc.format),
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
@@ -537,6 +536,8 @@ void VulkanRenderDriver::transition_to_general(const CommandBufferId id, const T
 
     transition_texture_layout(command_buffer->raw, texture, VK_IMAGE_LAYOUT_GENERAL);
 }
+
+u32 VulkanRenderDriver::get_max_sample_count() const { return m_device.sample_count; }
 
 TextureViewId VulkanRenderDriver::create_texture_view(const TextureViewDescriptor &desc)
 {
@@ -836,14 +837,13 @@ RenderPipelineId VulkanRenderDriver::create_render_pipeline(const RenderPipeline
         rasterization_state_create_info.depthBiasSlopeFactor = depth_stencil_state.depth_bias_state.slope;
     }
 
-    // FIXME: Add multisampling
-    constexpr VkPipelineMultisampleStateCreateInfo multisample_state_create_info {
+    const VkPipelineMultisampleStateCreateInfo multisample_state_create_info {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
-        .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
-        .sampleShadingEnable = false,
-        .minSampleShading = 1.0,
+        .rasterizationSamples = map_sample_count(desc.multisample_state.sample_count),
+        .sampleShadingEnable = true,
+        .minSampleShading = 0.2f,
         .pSampleMask = nullptr,
         .alphaToCoverageEnable = false,
         .alphaToOneEnable = false,
@@ -1906,8 +1906,7 @@ std::optional<VulkanRenderDriver::PhysicalDevice::FeatureSet> VulkanRenderDriver
     };
 
 #define REQUIRE_FEATURE(s, feature)               \
-    do                                            \
-    {                                             \
+    do {                                          \
         if (s.feature == VK_FALSE)                \
         {                                         \
             return std::nullopt;                  \
@@ -1916,6 +1915,7 @@ std::optional<VulkanRenderDriver::PhysicalDevice::FeatureSet> VulkanRenderDriver
         HE_CONCAT(enabled_, s).feature = VK_TRUE; \
     } while (false)
 
+    REQUIRE_FEATURE(features.features, sampleRateShading);
     REQUIRE_FEATURE(features_12, shaderUniformBufferArrayNonUniformIndexing);
     REQUIRE_FEATURE(features_12, shaderSampledImageArrayNonUniformIndexing);
     REQUIRE_FEATURE(features_12, shaderStorageBufferArrayNonUniformIndexing);
@@ -2024,6 +2024,7 @@ VulkanRenderDriver::PhysicalDevice VulkanRenderDriver::choose_physical_device(co
     PhysicalDevice::FeatureSet chosen_feature_set {};
     u32 chosen_queue_family { 0 };
     VkPhysicalDevice raw { VK_NULL_HANDLE };
+    u32 sample_count { 1 };
 
     u32 highest_score { 0 };
     for (u32 i { 0 }; i < physical_device_count; ++i)
@@ -2069,6 +2070,38 @@ VulkanRenderDriver::PhysicalDevice VulkanRenderDriver::choose_physical_device(co
             chosen_extensions = extensions.value();
             chosen_feature_set = feature_set.value();
             chosen_queue_family = queue_family.value();
+
+            const VkSampleCountFlags counts
+                = properties.limits.framebufferColorSampleCounts & properties.limits.framebufferDepthSampleCounts;
+            if (counts & VK_SAMPLE_COUNT_64_BIT)
+            {
+                sample_count = 64;
+            }
+            else if (counts & VK_SAMPLE_COUNT_32_BIT)
+            {
+                sample_count = 32;
+            }
+            else if (counts & VK_SAMPLE_COUNT_16_BIT)
+            {
+                sample_count = 16;
+            }
+            else if (counts & VK_SAMPLE_COUNT_8_BIT)
+            {
+                sample_count = 8;
+            }
+            else if (counts & VK_SAMPLE_COUNT_4_BIT)
+            {
+                sample_count = 4;
+            }
+            else if (counts & VK_SAMPLE_COUNT_2_BIT)
+            {
+                sample_count = 2;
+            }
+            else
+            {
+                sample_count = 1;
+            }
+
             highest_score = device_type_score;
         }
     }
@@ -2079,6 +2112,7 @@ VulkanRenderDriver::PhysicalDevice VulkanRenderDriver::choose_physical_device(co
         .extensions = chosen_extensions,
         .feature_set = chosen_feature_set,
         .queue_family = chosen_queue_family,
+        .sample_count = sample_count,
         .raw = raw,
     };
 }
@@ -2143,6 +2177,7 @@ VulkanRenderDriver::Device VulkanRenderDriver::create_device(const Instance &ins
 
     return {
         .queue_family = physical_device.queue_family,
+        .sample_count = physical_device.sample_count,
         .physical_device = physical_device.raw,
         .raw = raw,
         .queue = queue,
