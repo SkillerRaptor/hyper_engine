@@ -315,7 +315,7 @@ void Engine::render() const
     for (const GpuModel &model : m_renderables)
     {
         glm::mat4 transform = model.transform;
-        transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 25.0f));
+        transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, -25.0f));
 
         const ResourceHandle model_buffer_handle = m_render_server->get_buffer_handle(model.model_buffer);
 
@@ -1574,8 +1574,17 @@ void Engine::upload_model(const CommandBufferId command_buffer,
 
             const ResourceHandle normal_texture = create_texture(asset_material.normal_texture_index, Format::Rgba8Unorm);
             const ResourceHandle normal_sampler = create_sampler(asset_material.normal_sampler_index);
-
             const f32 normal_scale = asset_material.normal_scale;
+
+            const ResourceHandle occlusion_texture
+                = create_texture(asset_material.occlusion_texture_index, Format::Rgba8Unorm);
+            const ResourceHandle occlusion_sampler = create_sampler(asset_material.occlusion_sampler_index);
+            const f32 occlusion_strength = asset_material.occlusion_strength;
+
+            const ResourceHandle emissive_texture = create_texture(asset_material.emissive_texture_index, Format::Rgba8Srgb);
+            const ResourceHandle emissive_sampler = create_sampler(asset_material.emissive_sampler_index);
+            const glm::vec3 emissive_factor = asset_material.emissive_factor;
+            const f32 emissive_strength = asset_material.emissive_strength;
 
             const ShaderMaterial shader_material = {
                 .albedo_factors = asset_material.color_factors,
@@ -1590,6 +1599,16 @@ void Engine::upload_model(const CommandBufferId command_buffer,
                 .normal_sampler = normal_sampler,
                 .normal_scale = normal_scale,
                 .padding_2 = 0,
+                .occlusion_texture = occlusion_texture,
+                .occlusion_sampler = occlusion_sampler,
+                .occlusion_strength = occlusion_strength,
+                .padding_3 = 0,
+                .emissive_texture = emissive_texture,
+                .emissive_sampler = emissive_sampler,
+                .padding_4 = 0,
+                .padding_5 = 0,
+                .emissive_factor = emissive_factor,
+                .emissive_strength = emissive_strength,
             };
 
             const BufferId material_buffer = m_render_server->create_buffer({

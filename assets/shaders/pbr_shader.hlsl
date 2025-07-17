@@ -174,24 +174,44 @@ float4 fs_main(VertexOutput input) : SV_TARGET {
         l_0 += (k_d * albedo / PI + specular) * radiance * n_dot_l;
     }
 
-    const float3 f = fresnel_schlick_roughness(max(dot(normal, view_direction), 0.0), f_0, roughness);
+    const float n_dot_v = saturate(dot(normal, view_direction));
+
+    const float3 f = fresnel_schlick_roughness(n_dot_v, f_0, roughness);
 
     const float3 k_s = f;
     float3 k_d = 1.0 - k_s;
     k_d *= 1.0 - metallic;
 
-    const float3 irradiance = scene.irradiance_texture.sample_cube<float4>(scene.irradiance_sampler.load(), normal).xyz;
+    // NOTE: Apply IBL
+    const float3 irradiance = scene.irradiance_texture.sample_cube<float3>(scene.irradiance_sampler.load(), normal);
     const float3 diffuse = irradiance * albedo;
 
-    const float max_reflection_lod = 4.0;
-    const float3 prefiltered_color = scene.prefilter_texture.sample_level_cube<float4>(scene.prefilter_sampler.load(), r, roughness * max_reflection_lod).xyz;
-    const float2 brdf = scene.brdf_texture.sample_2d<float2>(scene.brdf_sampler.load(), float2(max(dot(normal, view_direction), 0.0), roughness));
+    const float prefiltered_cube_map_levels = 4.0;
+    const float lod = roughness * prefiltered_cube_map_levels;
+    const float3 prefiltered_color = scene.prefilter_texture.sample_level_cube<float3>(scene.prefilter_sampler.load(), r, lod);
+    const float2 brdf = scene.brdf_texture.sample_2d<float2>(scene.brdf_sampler.load(), float2(n_dot_v, roughness));
     const float3 specular = prefiltered_color * (f * brdf.x + brdf.y);
 
-    // FIXME: Add ambient occlusion
-    const float3 ambient = (k_d * diffuse + specular); // * ao;
+    const float3 ambient = k_d * diffuse + specular;
 
     float3 color = ambient + l_0;
+
+    // NOTE: Applying occlusion
+    if (material.occlusion_texture.handle.is_valid()) {
+        const float ao = material.occlusion_texture.sample_2d<float>(material.occlusion_sampler.load(), input.uv);
+        color = lerp(color, color * ao, material.occlusion_strength);
+    }
+
+    // NOTE: Applying emissive
+    float3 emissive = material.emissive_factor * material.emissive_strength;
+    if (material.emissive_texture.handle.is_valid()) {
+        const float3 value = material.emissive_texture.sample_2d<float3>(material.emissive_sampler.load(), input.uv);
+        emissive *= value;
+    }
+
+    color += emissive;
+
+    // NOTE: Applying tone mapping and color space conversion
     color = apply_reinhard_tone_mapping(color);
     color = apply_srgb(color);
 

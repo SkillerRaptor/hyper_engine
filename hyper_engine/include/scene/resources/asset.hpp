@@ -54,6 +54,15 @@ public:
         std::optional<usize> normal_sampler_index { std::nullopt };
         f32 normal_scale { 1.0f };
 
+        std::optional<usize> occlusion_texture_index { std::nullopt };
+        std::optional<usize> occlusion_sampler_index { std::nullopt };
+        f32 occlusion_strength { 1.0f };
+
+        std::optional<usize> emissive_texture_index { std::nullopt };
+        std::optional<usize> emissive_sampler_index { std::nullopt };
+        glm::vec3 emissive_factor { 1.0f };
+        f32 emissive_strength { 1.0f };
+
         AlphaMode alpha_mode { AlphaMode::Opaque };
         f32 alpha_cutoff { 0.0f };
 

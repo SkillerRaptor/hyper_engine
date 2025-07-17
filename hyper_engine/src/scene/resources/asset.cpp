@@ -26,11 +26,13 @@ Asset Asset::load(const std::string_view path)
     fastgltf::Expected<fastgltf::GltfDataBuffer> gltf_data_buffer = fastgltf::GltfDataBuffer::FromPath(file_path);
     HE_ASSERT(gltf_data_buffer.error() == fastgltf::Error::None);
 
+    constexpr fastgltf::Extensions extensions = fastgltf::Extensions::KHR_materials_emissive_strength;
+
     constexpr fastgltf::Options options = fastgltf::Options::DontRequireValidAssetMember
         | fastgltf::Options::LoadExternalBuffers | fastgltf::Options::LoadExternalImages
         | fastgltf::Options::GenerateMeshIndices;
 
-    fastgltf::Parser parser {};
+    fastgltf::Parser parser { extensions };
     fastgltf::Expected<fastgltf::Asset> asset = parser.loadGltf(gltf_data_buffer.get(), file_path.parent_path(), options);
     HE_ASSERT(asset.error() == fastgltf::Error::None);
 
@@ -67,7 +69,7 @@ Asset Asset::load(const std::string_view path)
     {
         int32_t width { 0 };
         int32_t height { 0 };
-        uint8_t *image_data { nullptr };
+        u8 *image_data { nullptr };
         std::visit(
             fastgltf::visitor {
                 [](auto &)
@@ -112,11 +114,11 @@ Asset Asset::load(const std::string_view path)
 
         HE_ASSERT(image_data != nullptr);
 
-        std::vector<uint8_t> data(image_data, image_data + width * height * 4);
+        std::vector<u8> data(image_data, image_data + width * height * 4);
 
         const Texture texture {
-            .width = static_cast<uint32_t>(width),
-            .height = static_cast<uint32_t>(height),
+            .width = static_cast<u32>(width),
+            .height = static_cast<u32>(height),
             .channels = 4,
             .data = data,
         };
@@ -136,18 +138,17 @@ Asset Asset::load(const std::string_view path)
             pbr_data.baseColorFactor.w(),
         };
 
-        std::optional<size_t> base_color_texture { std::nullopt };
-        std::optional<size_t> base_color_sampler { std::nullopt };
-
+        std::optional<usize> base_color_texture { std::nullopt };
+        std::optional<usize> base_color_sampler { std::nullopt };
         if (pbr_data.baseColorTexture.has_value())
         {
             const fastgltf::TextureInfo &texture_info = pbr_data.baseColorTexture.value();
             const fastgltf::Texture &texture = asset->textures[texture_info.textureIndex];
 
-            const size_t image_index = texture.imageIndex.value();
+            const usize image_index = texture.imageIndex.value();
             base_color_texture = image_index;
 
-            const size_t sampler_index = texture.samplerIndex.value();
+            const usize sampler_index = texture.samplerIndex.value();
             base_color_sampler = sampler_index;
         }
 
@@ -156,36 +157,72 @@ Asset Asset::load(const std::string_view path)
             pbr_data.roughnessFactor,
         };
 
-        std::optional<size_t> metallic_roughness_texture { std::nullopt };
-        std::optional<size_t> metallic_roughness_sampler { std::nullopt };
-
+        std::optional<usize> metallic_roughness_texture { std::nullopt };
+        std::optional<usize> metallic_roughness_sampler { std::nullopt };
         if (pbr_data.metallicRoughnessTexture.has_value())
         {
             const fastgltf::TextureInfo &texture_info = pbr_data.metallicRoughnessTexture.value();
             const fastgltf::Texture &texture = asset->textures[texture_info.textureIndex];
 
-            const size_t image_index = texture.imageIndex.value();
+            const usize image_index = texture.imageIndex.value();
             metallic_roughness_texture = image_index;
 
-            const size_t sampler_index = texture.samplerIndex.value();
+            const usize sampler_index = texture.samplerIndex.value();
             metallic_roughness_sampler = sampler_index;
         }
 
-        std::optional<size_t> normal_texture { std::nullopt };
-        std::optional<size_t> normal_sampler { std::nullopt };
-        float normal_scale { 1.0f };
+        std::optional<usize> normal_texture { std::nullopt };
+        std::optional<usize> normal_sampler { std::nullopt };
+        f32 normal_scale { 1.0f };
         if (gltf_material.normalTexture.has_value())
         {
             const fastgltf::NormalTextureInfo &normal_texture_info = gltf_material.normalTexture.value();
             const fastgltf::Texture &texture = asset->textures[normal_texture_info.textureIndex];
 
-            const size_t image_index = texture.imageIndex.value();
+            const usize image_index = texture.imageIndex.value();
             normal_texture = image_index;
 
-            const size_t sampler_index = texture.samplerIndex.value();
+            const usize sampler_index = texture.samplerIndex.value();
             normal_sampler = sampler_index;
 
             normal_scale = normal_texture_info.scale;
+        }
+
+        std::optional<usize> occlusion_texture { std::nullopt };
+        std::optional<usize> occlusion_sampler { std::nullopt };
+        f32 occlusion_strength { 1.0f };
+        if (gltf_material.occlusionTexture.has_value())
+        {
+            const fastgltf::OcclusionTextureInfo &occlusion_texture_info = gltf_material.occlusionTexture.value();
+            const fastgltf::Texture &texture = asset->textures[occlusion_texture_info.textureIndex];
+
+            const usize image_index = texture.imageIndex.value();
+            occlusion_texture = image_index;
+
+            const usize sampler_index = texture.samplerIndex.value();
+            occlusion_sampler = sampler_index;
+
+            occlusion_strength = occlusion_texture_info.strength;
+        }
+
+        std::optional<usize> emissive_texture { std::nullopt };
+        std::optional<usize> emissive_sampler { std::nullopt };
+        glm::vec3 emissive_factor = glm::vec3 {
+            gltf_material.emissiveFactor.x(),
+            gltf_material.emissiveFactor.y(),
+            gltf_material.emissiveFactor.z(),
+        };
+        f32 emissive_strength = gltf_material.emissiveStrength;
+        if (gltf_material.emissiveTexture.has_value())
+        {
+            const fastgltf::TextureInfo &emissive_texture_info = gltf_material.emissiveTexture.value();
+            const fastgltf::Texture &texture = asset->textures[emissive_texture_info.textureIndex];
+
+            const usize image_index = texture.imageIndex.value();
+            emissive_texture = image_index;
+
+            const usize sampler_index = texture.samplerIndex.value();
+            emissive_sampler = sampler_index;
         }
 
         const AlphaMode alpha_mode = [&gltf_material]()
@@ -208,6 +245,13 @@ Asset Asset::load(const std::string_view path)
             .normal_texture_index = normal_texture,
             .normal_sampler_index = normal_sampler,
             .normal_scale = normal_scale,
+            .occlusion_texture_index = occlusion_texture,
+            .occlusion_sampler_index = occlusion_sampler,
+            .occlusion_strength = occlusion_strength,
+            .emissive_texture_index = emissive_texture,
+            .emissive_sampler_index = emissive_sampler,
+            .emissive_factor = emissive_factor,
+            .emissive_strength = emissive_strength,
             .alpha_mode = alpha_mode,
             .alpha_cutoff = gltf_material.alphaCutoff,
         };
@@ -224,17 +268,17 @@ Asset Asset::load(const std::string_view path)
         std::vector<glm::vec4> tangents {};
         std::vector<glm::vec3> colors {};
         std::vector<glm::vec2> uvs {};
-        std::vector<uint32_t> indices {};
+        std::vector<u32> indices {};
         std::vector<Mesh> meshes {};
         for (const fastgltf::Primitive &gltf_primitive : gltf_mesh.primitives)
         {
-            const uint32_t start_index = static_cast<uint32_t>(indices.size());
-            const auto initial_vertex = static_cast<uint32_t>(positions.size());
+            const u32 start_index = static_cast<u32>(indices.size());
+            const auto initial_vertex = static_cast<u32>(positions.size());
 
             fastgltf::Accessor &accessor = asset->accessors[gltf_primitive.indicesAccessor.value()];
 
-            fastgltf::iterateAccessor<uint32_t>(asset.get(), accessor,
-                [&](const uint32_t index)
+            fastgltf::iterateAccessor<u32>(asset.get(), accessor,
+                [&](const u32 index)
                 {
                     indices.push_back(index + initial_vertex);
                 });
@@ -248,7 +292,7 @@ Asset Asset::load(const std::string_view path)
             uvs.resize(uvs.size() + positions_attribute.count);
 
             fastgltf::iterateAccessorWithIndex<glm::vec3>(asset.get(), positions_attribute,
-                [&](const glm::vec3 value, const size_t index)
+                [&](const glm::vec3 value, const usize index)
                 {
                     positions[initial_vertex + index] = value;
                     normals[initial_vertex + index] = glm::vec3(0.0, 0.0, 1.0);
@@ -262,7 +306,7 @@ Asset Asset::load(const std::string_view path)
             {
                 fastgltf::iterateAccessorWithIndex<glm::vec3>(asset.get(),
                     asset->accessors[normals_attribute->accessorIndex],
-                    [&](const glm::vec3 value, const size_t index)
+                    [&](const glm::vec3 value, const usize index)
                     {
                         normals[initial_vertex + index] = value;
                     });
@@ -273,7 +317,7 @@ Asset Asset::load(const std::string_view path)
             {
                 fastgltf::iterateAccessorWithIndex<glm::vec4>(asset.get(),
                     asset->accessors[tangents_attribute->accessorIndex],
-                    [&](const glm::vec4 value, const size_t index)
+                    [&](const glm::vec4 value, const usize index)
                     {
                         tangents[initial_vertex + index] = value;
                     });
@@ -283,7 +327,7 @@ Asset Asset::load(const std::string_view path)
             if (colors_attribute != gltf_primitive.attributes.end())
             {
                 fastgltf::iterateAccessorWithIndex<glm::vec4>(asset.get(), asset->accessors[colors_attribute->accessorIndex],
-                    [&](const glm::vec4 value, const size_t index)
+                    [&](const glm::vec4 value, const usize index)
                     {
                         colors[initial_vertex + index] = value;
                     });
@@ -293,15 +337,14 @@ Asset Asset::load(const std::string_view path)
             if (uvs_attribute != gltf_primitive.attributes.end())
             {
                 fastgltf::iterateAccessorWithIndex<glm::vec2>(asset.get(), asset->accessors[uvs_attribute->accessorIndex],
-                    [&](const glm::vec2 value, const size_t index)
+                    [&](const glm::vec2 value, const usize index)
                     {
                         uvs[initial_vertex + index] = value;
                     });
             }
 
-            const uint32_t index_count
-                = static_cast<uint32_t>(asset->accessors[gltf_primitive.indicesAccessor.value()].count);
-            const size_t material_index = gltf_primitive.materialIndex.value_or(0);
+            const u32 index_count = static_cast<u32>(asset->accessors[gltf_primitive.indicesAccessor.value()].count);
+            const usize material_index = gltf_primitive.materialIndex.value_or(0);
             const Mesh mesh {
                 .start_index = start_index,
                 .index_count = index_count,
@@ -352,7 +395,7 @@ Asset Asset::load(const std::string_view path)
             },
             gltf_node.transform);
 
-        std::optional<size_t> model_index { std::nullopt };
+        std::optional<usize> model_index { std::nullopt };
         if (gltf_node.meshIndex.has_value())
         {
             model_index = gltf_node.meshIndex.value();
@@ -362,12 +405,12 @@ Asset Asset::load(const std::string_view path)
         nodes.push_back(std::move(node));
     }
 
-    for (size_t i { 0 }; i < asset->nodes.size(); ++i)
+    for (usize i { 0 }; i < asset->nodes.size(); ++i)
     {
         std::unique_ptr<Node> &node = nodes[i];
 
         const fastgltf::Node &gltf_node = asset->nodes[i];
-        for (const size_t child : gltf_node.children)
+        for (const usize child : gltf_node.children)
         {
             node->children.push_back(nodes[child].get());
             nodes[child]->parent = node.get();
@@ -377,8 +420,8 @@ Asset Asset::load(const std::string_view path)
     std::vector<Scene> scenes {};
     for (const fastgltf::Scene &gltf_scene : asset->scenes)
     {
-        std::vector<size_t> node_indices {};
-        for (const size_t node_index : gltf_scene.nodeIndices)
+        std::vector<usize> node_indices {};
+        for (const usize node_index : gltf_scene.nodeIndices)
         {
             node_indices.push_back(node_index);
         }

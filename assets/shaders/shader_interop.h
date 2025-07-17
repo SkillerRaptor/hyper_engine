@@ -97,6 +97,18 @@ struct ShaderMaterial
     SAMPLER normal_sampler;
     float normal_scale;
     uint padding_2;
+
+    TEXTURE occlusion_texture;
+    SAMPLER occlusion_sampler;
+    float occlusion_strength;
+    uint padding_3;
+
+    TEXTURE emissive_texture;
+    SAMPLER emissive_sampler;
+    uint padding_4;
+    uint padding_5;
+    float3 emissive_factor;
+    float emissive_strength;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
