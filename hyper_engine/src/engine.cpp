@@ -785,11 +785,12 @@ void Engine::create_skybox()
 
     m_render_server->destroy_shader(irradiance_shader);
 
+    const u32 irradiance_size = static_cast<u32>(height) / 4;
     m_irradiance_texture = m_render_server->create_texture({
         .label = std::nullopt,
         .extent = {
-            .width = static_cast<u32>(height),
-            .height = static_cast<u32>(height),
+            .width = irradiance_size,
+            .height = irradiance_size,
             .depth = 6,
         },
         .mip_levels = 1,
@@ -809,7 +810,7 @@ void Engine::create_skybox()
     });
 
     {
-        const u32 workgroups = (height + 15) / 16;
+        const u32 workgroups = (irradiance_size + 15) / 16;
 
         const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
         m_render_server->transition_to_general(command_buffer, m_irradiance_texture);
@@ -830,7 +831,7 @@ void Engine::create_skybox()
             .skybox_texture = m_render_server->get_texture_view_handle(m_skybox_texture_view),
             .skybox_sampler = m_render_server->get_sampler_handle(m_default_sampler),
             .irradiance_texture = m_render_server->get_texture_view_handle(m_irradiance_texture_view),
-            .size = static_cast<u32>(height),
+            .size = static_cast<u32>(irradiance_size),
         };
         m_render_server->push_constants(compute_pass, irradiance_push_constants);
         m_render_server->dispatch(compute_pass, workgroups, workgroups, 6);
@@ -864,11 +865,12 @@ void Engine::create_skybox()
 
     m_render_server->destroy_shader(prefilter_shader);
 
+    const u32 prefilter_size = static_cast<u32>(height) / 4;
     m_prefilter_texture = m_render_server->create_texture({
         .label = std::nullopt,
         .extent = {
-            .width = 128,
-            .height = 128,
+            .width = prefilter_size,
+            .height = prefilter_size,
             .depth = 6,
         },
         .mip_levels = 5,
@@ -904,7 +906,7 @@ void Engine::create_skybox()
     });
 
     {
-        const u32 workgroups = (height + 15) / 16;
+        const u32 workgroups = (prefilter_size + 15) / 16;
 
         const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
         m_render_server->transition_to_general(command_buffer, m_prefilter_texture);
@@ -923,7 +925,7 @@ void Engine::create_skybox()
         m_render_server->bind_pipeline(compute_pass, prefilter_pipeline);
         for (u32 mip { 0 }; mip < 5; ++mip)
         {
-            const u32 size = static_cast<u32>(128.0 * pow(0.5, mip));
+            const u32 size = static_cast<u32>(static_cast<f32>(prefilter_size) * pow(0.5, mip));
             const f32 roughness = static_cast<f32>(mip) / static_cast<f32>(5 - 1);
 
             const PrefilterPushConstants prefilter_push_constants = {
@@ -969,11 +971,12 @@ void Engine::create_skybox()
 
     m_render_server->destroy_shader(brdf_shader);
 
+    static constexpr u32 s_brdf_size { 512 };
     m_brdf_texture = m_render_server->create_texture({
         .label = std::nullopt,
         .extent = {
-            .width = 512,
-            .height = 512,
+            .width = s_brdf_size,
+            .height = s_brdf_size,
             .depth = 1,
         },
         .mip_levels = 1,
@@ -993,7 +996,7 @@ void Engine::create_skybox()
     });
 
     {
-        const u32 workgroups = (512 + 15) / 16;
+        const u32 workgroups = (s_brdf_size + 15) / 16;
 
         const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
         m_render_server->transition_to_general(command_buffer, m_brdf_texture);
@@ -1012,7 +1015,7 @@ void Engine::create_skybox()
         m_render_server->bind_pipeline(compute_pass, brdf_pipeline);
         const BrdfPushConstants brdf_push_constants = {
             .brdf_texture = m_render_server->get_texture_view_handle(m_brdf_texture_view),
-            .size = 512,
+            .size = s_brdf_size,
             .padding_0 = 0,
             .padding_1 = 0,
         };
