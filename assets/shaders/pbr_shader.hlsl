@@ -73,7 +73,7 @@ float geometry_schlick_ggx(float n_dot_v, float roughness) {
     const float r = (roughness + 1.0);
     const float k = (r * r) / 8.0;
 
-    const float num   = n_dot_v;
+    const float num = n_dot_v;
     const float denom = n_dot_v * (1.0 - k) + k;
 
     return num / denom;
@@ -136,6 +136,7 @@ float4 fs_main(VertexOutput input) : SV_TARGET {
 
     const ShaderCamera camera = get_camera();
     const float3 view_direction = normalize(camera.position.xyz - input.world_pos);
+    const float3 r = reflect(-view_direction, normal);
 
     float3 f_0 = float3(0.04, 0.04, 0.04);
     f_0 = lerp(f_0, albedo, metallic);
@@ -173,14 +174,22 @@ float4 fs_main(VertexOutput input) : SV_TARGET {
         l_0 += (k_d * albedo / PI + specular) * radiance * n_dot_l;
     }
 
-    const float3 k_s = fresnel_schlick_roughness(max(dot(view_direction, normal), 0.0), f_0, roughness);
-    float3 k_d = float3(1.0, 1.0, 1.0) - k_s;
+    const float3 f = fresnel_schlick_roughness(max(dot(view_direction, normal), 0.0), f_0, roughness);
+
+    const float3 k_s = f;
+    float3 k_d = 1.0 - k_s;
     k_d *= 1.0 - metallic;
+
     const float3 irradiance = scene.irradiance_texture.sample_cube<float4>(scene.irradiance_sampler.load(), normal).xyz;
     const float3 diffuse = irradiance * albedo;
 
+    const float max_reflection_lod = 4.0;
+    const float3 prefiltered_color = scene.prefilter_texture.sample_level_cube<float4>(scene.prefilter_sampler.load(), r, roughness * max_reflection_lod).xyz;
+    const float2 brdf = scene.brdf_texture.sample_2d<float2>(scene.brdf_sampler.load(), float2(max(dot(normal, view_direction), 0.0), roughness));
+    const float3 specular = prefiltered_color * (f * brdf.x + brdf.y);
+
     // FIXME: Add ambient occlusion
-    const float3 ambient = (k_d * diffuse); // * ao;
+    const float3 ambient = (k_d * diffuse + specular); // * ao;
 
     float3 color = ambient + l_0;
     color = apply_reinhard_tone_mapping(color);

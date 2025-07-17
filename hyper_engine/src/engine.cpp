@@ -11,13 +11,17 @@
 
 #include <fastgltf/types.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <renderdoc_app.h>
 #include <stb_image.h>
 #include <tracy/Tracy.hpp>
+#include <Windows.h>
 
 #include "core/assertion.hpp"
 #include "core/logger.hpp"
 #include "platform/window_events.hpp"
 #include "shader_interop.h"
+
+static RENDERDOC_API_1_1_2 *g_render_doc { nullptr };
 
 void Engine::initialize()
 {
@@ -26,6 +30,21 @@ void Engine::initialize()
     const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
     Logger::initialize();
+
+#if HE_WINDOWS
+    if (HMODULE mod = GetModuleHandleA("renderdoc.dll"))
+    {
+        const pRENDERDOC_GetAPI renderdoc_get_api
+            = reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(mod, "RENDERDOC_GetAPI"));
+        HE_ASSERT(renderdoc_get_api(eRENDERDOC_API_Version_1_6_0, reinterpret_cast<void **>(&g_render_doc)));
+    }
+#elif HE_LINUX
+    if (void *mod = dlopen("librenderdoc.so", RTLD_NOW | RTLD_NOLOAD))
+    {
+        const pRENDERDOC_GetAPI renderdoc_get_api = reinterpret_cast<pRENDERDOC_GetAPI>(dlsym(mod, "RENDERDOC_GetAPI"));
+        HE_ASSERT(renderdoc_get_api(eRENDERDOC_API_Version_1_6_0, reinterpret_cast<void **>(&g_render_doc));
+    }
+#endif
 
     m_window_server = WindowServer::create();
     m_window = m_window_server->create_window("HyperEngine", 1280, 720);
@@ -51,6 +70,11 @@ void Engine::initialize()
             m_camera.process_mouse_scroll(event.delta_y());
         });
 
+    if (g_render_doc)
+    {
+        g_render_doc->StartFrameCapture(nullptr, nullptr);
+    }
+
     m_camera_buffer = m_render_server->create_buffer({
         .label = std::nullopt,
         .size = sizeof(ShaderCamera),
@@ -66,20 +90,35 @@ void Engine::initialize()
         .handle = std::nullopt,
     });
 
+    create_default();
     create_pbr();
     create_skybox();
     create_grid();
     create_composition();
-    create_default();
+
+    if (g_render_doc)
+    {
+        HE_ASSERT(g_render_doc->EndFrameCapture(nullptr, nullptr));
+    }
+
+    if (g_render_doc)
+    {
+        g_render_doc->StartFrameCapture(nullptr, nullptr);
+    }
 
     m_sponza = Asset::load("./assets/models/sponza/Sponza.gltf");
-    // m_damaged_helmet = Asset::load("./assets/models/DamagedHelmet.glb");
+    m_damaged_helmet = Asset::load("./assets/models/DamagedHelmet.glb");
 
     const std::vector<GpuModel> sponza_models = upload_asset(m_sponza);
     m_renderables.insert(m_renderables.end(), sponza_models.begin(), sponza_models.end());
 
-    // const std::vector<GpuModel> damaged_helmet_models = upload_asset(m_damaged_helmet);
-    // m_renderables.insert(m_renderables.end(), damaged_helmet_models.begin(), damaged_helmet_models.end());
+    if (g_render_doc)
+    {
+        HE_ASSERT(g_render_doc->EndFrameCapture(nullptr, nullptr));
+    }
+
+    const std::vector<GpuModel> damaged_helmet_models = upload_asset(m_damaged_helmet);
+    m_renderables.insert(m_renderables.end(), damaged_helmet_models.begin(), damaged_helmet_models.end());
 
     m_event_server->subscribe<WindowCloseEvent>(
         [this](const WindowCloseEvent &)
@@ -96,26 +135,25 @@ void Engine::shutdown() const
 {
     ZoneScoped;
 
-    m_render_server->destroy_sampler(m_default_sampler);
-    m_render_server->destroy_texture(m_default_texture);
-
     m_render_server->destroy_texture(m_depth_texture);
-    m_render_server->destroy_sampler(m_composition_sampler);
     m_render_server->destroy_texture(m_composition_texture);
     m_render_server->destroy_render_pipeline(m_composition_pipeline);
     m_render_server->destroy_pipeline_layout(m_composition_layout);
 
     m_render_server->destroy_render_pipeline(m_grid_pipeline);
 
-    m_render_server->destroy_sampler(m_irradiance_sampler);
+    m_render_server->destroy_texture(m_brdf_texture);
+    m_render_server->destroy_texture(m_prefilter_texture);
     m_render_server->destroy_texture(m_irradiance_texture);
-    m_render_server->destroy_sampler(m_skybox_sampler);
     m_render_server->destroy_texture(m_skybox_texture);
     m_render_server->destroy_render_pipeline(m_skybox_pipeline);
     m_render_server->destroy_pipeline_layout(m_skybox_layout);
 
     m_render_server->destroy_render_pipeline(m_pbr_pipeline);
     m_render_server->destroy_pipeline_layout(m_pbr_layout);
+
+    m_render_server->destroy_sampler(m_default_sampler);
+    m_render_server->destroy_texture(m_default_texture);
 
     m_render_server->destroy_buffer(m_scene_buffer);
     m_render_server->destroy_buffer(m_camera_buffer);
@@ -223,7 +261,11 @@ void Engine::render() const
 
     const ShaderScene shader_scene = {
         .irradiance_texture = m_render_server->get_texture_view_handle(m_irradiance_texture_view),
-        .irradiance_sampler = m_render_server->get_sampler_handle(m_irradiance_sampler),
+        .irradiance_sampler = m_render_server->get_sampler_handle(m_default_sampler),
+        .prefilter_texture = m_render_server->get_texture_view_handle(m_prefilter_texture_view),
+        .prefilter_sampler = m_render_server->get_sampler_handle(m_default_sampler),
+        .brdf_texture = m_render_server->get_texture_view_handle(m_brdf_texture_view),
+        .brdf_sampler = m_render_server->get_sampler_handle(m_default_sampler),
         .padding_0 = 0,
         .padding_1 = 0,
     };
@@ -273,7 +315,7 @@ void Engine::render() const
     for (const GpuModel &model : m_renderables)
     {
         glm::mat4 transform = model.transform;
-        transform = glm::translate(transform, glm::vec3(0.0f, 25.0f, 0.0f));
+        transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, -10.0f));
 
         const ResourceHandle model_buffer_handle = m_render_server->get_buffer_handle(model.model_buffer);
 
@@ -339,7 +381,7 @@ void Engine::render() const
     m_render_server->bind_pipeline(skybox_render_pass, m_skybox_pipeline);
     const SkyboxPushConstants skybox_push_constants = {
         .skybox_texture = m_render_server->get_texture_view_handle(m_skybox_texture_view),
-        .skybox_sampler = m_render_server->get_sampler_handle(m_skybox_sampler),
+        .skybox_sampler = m_render_server->get_sampler_handle(m_default_sampler),
         .padding_0 = 0,
         .padding_1 = 0,
     };
@@ -415,7 +457,7 @@ void Engine::render() const
     m_render_server->bind_pipeline(composition_render_pass, m_composition_pipeline);
     const CompositionPushConstants composition_push_constants = {
         .composition_texture = m_render_server->get_texture_view_handle(m_composition_texture_view),
-        .composition_sampler = m_render_server->get_sampler_handle(m_composition_sampler),
+        .composition_sampler = m_render_server->get_sampler_handle(m_default_sampler),
         .padding_0 = 0,
         .padding_1 = 0,
     };
@@ -520,7 +562,7 @@ void Engine::create_skybox()
     i32 width { 0 };
     i32 height { 0 };
     i32 channels { 0 };
-    f32 *data = stbi_loadf("./assets/images/mirrored_hall_4k.hdr", &width, &height, &channels, 0);
+    f32 *data = stbi_loadf("./assets/images/newport_loft.hdr", &width, &height, &channels, 0);
     HE_ASSERT(data != nullptr);
 
     std::vector<f32> new_data;
@@ -569,12 +611,10 @@ void Engine::create_skybox()
                         .y = 0,
                         .z = 0,
                     },
-                .mip_level = 0,
-                .array_index = 0,
             },
             new_data.data(),
             width * height * 4 * sizeof(f32),
-    {
+            {
                 .width = static_cast<u32>(width),
                 .height = static_cast<u32>(height),
                 .depth = 1,
@@ -652,6 +692,8 @@ void Engine::create_skybox()
     m_render_server->destroy_shader(skybox_fragment_shader);
     m_render_server->destroy_shader(skybox_vertex_shader);
 
+    const uint32_t mip_levels = std::min(static_cast<uint32_t>(floor(log2(height)) + 1), 16u);
+
     m_skybox_texture = m_render_server->create_texture({
         .label = std::nullopt,
         .extent = {
@@ -659,7 +701,7 @@ void Engine::create_skybox()
             .height = static_cast<u32>(height),
             .depth = 6,
         },
-        .mip_levels = 1,
+        .mip_levels = mip_levels,
         .format = Format::Rgba16Sfloat,
         .dimension = Dimension::D2,
         .usage = TextureUsage::Storage | TextureUsage::Resource,
@@ -670,29 +712,17 @@ void Engine::create_skybox()
         .texture = m_skybox_texture,
         .dimension = ViewDimension::Cube,
         .base_mip_level = 0,
-        .mip_levels = 1,
+        .mip_levels = mip_levels,
         .base_array_layer = 0,
         .array_layers = 6,
-    });
-
-    m_skybox_sampler = m_render_server->create_sampler({
-        .label = std::nullopt,
-        .mag_filter = Filter::Linear,
-        .min_filter = Filter::Linear,
-        .mipmap_filter = Filter::Linear,
-        .address_mode_u = AddressMode::ClampToEdge,
-        .address_mode_v = AddressMode::ClampToEdge,
-        .address_mode_w = AddressMode::ClampToEdge,
-        .compare_operation = CompareOperation::Less,
-        .min_lod = 0.0f,
-        .max_lod = 1.0f,
-        .border_color = BorderColor::TransparentBlack,
     });
 
     {
         const u32 workgroups = (height + 15) / 16;
 
         const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
+        m_render_server->transition_to_general(command_buffer, m_skybox_texture);
+
         const ComputePassId compute_pass = m_render_server->begin_compute_pass(command_buffer,
             {
                 .label = PassLabel {
@@ -718,6 +748,14 @@ void Engine::create_skybox()
         m_render_server->dispatch(compute_pass, workgroups, workgroups, 6);
         m_render_server->end_compute_pass(compute_pass);
 
+        m_render_server->submit_command_buffer(command_buffer);
+    }
+
+    m_render_server->wait_idle();
+
+    {
+        const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
+        m_render_server->generate_mip_maps(command_buffer, m_skybox_texture);
         m_render_server->submit_command_buffer(command_buffer);
     }
 
@@ -770,24 +808,12 @@ void Engine::create_skybox()
         .array_layers = 6,
     });
 
-    m_irradiance_sampler = m_render_server->create_sampler({
-        .label = std::nullopt,
-        .mag_filter = Filter::Linear,
-        .min_filter = Filter::Linear,
-        .mipmap_filter = Filter::Linear,
-        .address_mode_u = AddressMode::ClampToEdge,
-        .address_mode_v = AddressMode::ClampToEdge,
-        .address_mode_w = AddressMode::ClampToEdge,
-        .compare_operation = CompareOperation::Less,
-        .min_lod = 0.0f,
-        .max_lod = 1.0f,
-        .border_color = BorderColor::TransparentBlack,
-    });
-
     {
         const u32 workgroups = (height + 15) / 16;
 
         const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
+        m_render_server->transition_to_general(command_buffer, m_irradiance_texture);
+
         const ComputePassId compute_pass = m_render_server->begin_compute_pass(command_buffer,
             {
                 .label = PassLabel {
@@ -802,7 +828,7 @@ void Engine::create_skybox()
         m_render_server->bind_pipeline(compute_pass, irradiance_pipeline);
         const IrradiancePushConstants irradiance_push_constants = {
             .skybox_texture = m_render_server->get_texture_view_handle(m_skybox_texture_view),
-            .skybox_sampler = m_render_server->get_sampler_handle(m_skybox_sampler),
+            .skybox_sampler = m_render_server->get_sampler_handle(m_default_sampler),
             .irradiance_texture = m_render_server->get_texture_view_handle(m_irradiance_texture_view),
             .size = static_cast<u32>(height),
         };
@@ -817,6 +843,190 @@ void Engine::create_skybox()
 
     m_render_server->destroy_pipeline_layout(irradiance_layout);
     m_render_server->destroy_compute_pipeline(irradiance_pipeline);
+
+    const PipelineLayoutId prefilter_layout = m_render_server->create_pipeline_layout({
+        .label = std::nullopt,
+        .push_constant_size = sizeof(PrefilterPushConstants),
+    });
+
+    const ShaderId prefilter_shader = m_render_server->create_shader({
+        .label = std::nullopt,
+        .type = ShaderType::Compute,
+        .entry = "main",
+        .path = "./assets/shaders/prefilter.hlsl",
+    });
+
+    const ComputePipelineId prefilter_pipeline = m_render_server->create_compute_pipeline({
+        .label = std::nullopt,
+        .layout = prefilter_layout,
+        .shader = prefilter_shader,
+    });
+
+    m_render_server->destroy_shader(prefilter_shader);
+
+    m_prefilter_texture = m_render_server->create_texture({
+        .label = std::nullopt,
+        .extent = {
+            .width = 128,
+            .height = 128,
+            .depth = 6,
+        },
+        .mip_levels = 5,
+        .format = Format::Rgba16Sfloat,
+        .dimension = Dimension::D2,
+        .usage =  TextureUsage::Storage | TextureUsage::Resource,
+    });
+
+    std::vector<TextureViewId> prefilter_mip_views {};
+    for (u32 i { 0 }; i < 5; ++i)
+    {
+        const TextureViewId texture_view = m_render_server->create_texture_view({
+            .label = std::nullopt,
+            .texture = m_prefilter_texture,
+            .dimension = ViewDimension::Cube,
+            .base_mip_level = i,
+            .mip_levels = 1,
+            .base_array_layer = 0,
+            .array_layers = 6,
+        });
+
+        prefilter_mip_views.push_back(texture_view);
+    }
+
+    m_prefilter_texture_view = m_render_server->create_texture_view({
+        .label = std::nullopt,
+        .texture = m_prefilter_texture,
+        .dimension = ViewDimension::Cube,
+        .base_mip_level = 0,
+        .mip_levels = 5,
+        .base_array_layer = 0,
+        .array_layers = 6,
+    });
+
+    {
+        const u32 workgroups = (height + 15) / 16;
+
+        const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
+        m_render_server->transition_to_general(command_buffer, m_prefilter_texture);
+
+        const ComputePassId compute_pass = m_render_server->begin_compute_pass(command_buffer,
+            {
+                .label = PassLabel {
+                    .name = "Generate Prefilter map",
+                    .color = {
+                        .r = 0,
+                        .g = 255,
+                        .b = 255,
+                    },
+                },
+            });
+        m_render_server->bind_pipeline(compute_pass, prefilter_pipeline);
+        for (u32 mip { 0 }; mip < 5; ++mip)
+        {
+            const u32 size = static_cast<u32>(128.0 * pow(0.5, mip));
+            const f32 roughness = static_cast<f32>(mip) / static_cast<f32>(5 - 1);
+
+            const PrefilterPushConstants prefilter_push_constants = {
+                .skybox_texture = m_render_server->get_texture_view_handle(m_skybox_texture_view),
+                .skybox_sampler = m_render_server->get_sampler_handle(m_default_sampler),
+                .prefilter_texture = m_render_server->get_texture_view_handle(prefilter_mip_views[mip]),
+                .size = static_cast<u32>(size),
+                .roughness = roughness,
+                .padding_0 = 0,
+                .padding_1 = 0,
+                .padding_2 = 0,
+            };
+            m_render_server->push_constants(compute_pass, prefilter_push_constants);
+            m_render_server->dispatch(compute_pass, workgroups, workgroups, 6);
+        }
+        m_render_server->end_compute_pass(compute_pass);
+
+        m_render_server->submit_command_buffer(command_buffer);
+    }
+
+    m_render_server->wait_idle();
+
+    m_render_server->destroy_pipeline_layout(prefilter_layout);
+    m_render_server->destroy_compute_pipeline(prefilter_pipeline);
+
+    const PipelineLayoutId brdf_layout = m_render_server->create_pipeline_layout({
+        .label = std::nullopt,
+        .push_constant_size = sizeof(BrdfPushConstants),
+    });
+
+    const ShaderId brdf_shader = m_render_server->create_shader({
+        .label = std::nullopt,
+        .type = ShaderType::Compute,
+        .entry = "main",
+        .path = "./assets/shaders/brdf.hlsl",
+    });
+
+    const ComputePipelineId brdf_pipeline = m_render_server->create_compute_pipeline({
+        .label = std::nullopt,
+        .layout = brdf_layout,
+        .shader = brdf_shader,
+    });
+
+    m_render_server->destroy_shader(brdf_shader);
+
+    m_brdf_texture = m_render_server->create_texture({
+        .label = std::nullopt,
+        .extent = {
+            .width = 512,
+            .height = 512,
+            .depth = 1,
+        },
+        .mip_levels = 1,
+        .format = Format::Rg16Sfloat,
+        .dimension = Dimension::D2,
+        .usage =  TextureUsage::Storage | TextureUsage::Resource,
+    });
+
+    m_brdf_texture_view = m_render_server->create_texture_view({
+        .label = std::nullopt,
+        .texture = m_brdf_texture,
+        .dimension = ViewDimension::D2,
+        .base_mip_level = 0,
+        .mip_levels = 1,
+        .base_array_layer = 0,
+        .array_layers = 1,
+    });
+
+    {
+        const u32 workgroups = (512 + 15) / 16;
+
+        const CommandBufferId command_buffer = m_render_server->acquire_command_buffer();
+        m_render_server->transition_to_general(command_buffer, m_brdf_texture);
+
+        const ComputePassId compute_pass = m_render_server->begin_compute_pass(command_buffer,
+            {
+                .label = PassLabel {
+                    .name = "Generate BRDF LUT",
+                    .color = {
+                        .r = 255,
+                        .g = 255,
+                        .b = 255,
+                    },
+                },
+            });
+        m_render_server->bind_pipeline(compute_pass, brdf_pipeline);
+        const BrdfPushConstants brdf_push_constants = {
+            .brdf_texture = m_render_server->get_texture_view_handle(m_brdf_texture_view),
+            .size = 512,
+            .padding_0 = 0,
+            .padding_1 = 0,
+        };
+        m_render_server->push_constants(compute_pass, brdf_push_constants);
+        m_render_server->dispatch(compute_pass, workgroups, workgroups, 1);
+        m_render_server->end_compute_pass(compute_pass);
+
+        m_render_server->submit_command_buffer(command_buffer);
+    }
+
+    m_render_server->wait_idle();
+
+    m_render_server->destroy_pipeline_layout(brdf_layout);
+    m_render_server->destroy_compute_pipeline(brdf_pipeline);
 }
 
 void Engine::create_grid()
@@ -978,20 +1188,6 @@ void Engine::create_composition()
         .array_layers = 1,
     });
 
-    m_composition_sampler = m_render_server->create_sampler({
-        .label = std::nullopt,
-        .mag_filter = Filter::Nearest,
-        .min_filter = Filter::Nearest,
-        .mipmap_filter = Filter::Nearest,
-        .address_mode_u = AddressMode::Repeat,
-        .address_mode_v = AddressMode::Repeat,
-        .address_mode_w = AddressMode::Repeat,
-        .compare_operation = CompareOperation::Never,
-        .min_lod = 0.0f,
-        .max_lod = 1.0f,
-        .border_color = BorderColor::TransparentBlack,
-    });
-
     m_depth_texture = m_render_server->create_texture({
         .label = std::nullopt,
         .extent = {
@@ -1132,8 +1328,6 @@ void Engine::create_default()
                     .y = 0,
                     .z = 0,
                 },
-            .mip_level = 0,
-            .array_index = 0,
         },
         pixels.data(),
         pixels.size() * sizeof(u32),
@@ -1327,8 +1521,6 @@ void Engine::upload_model(const CommandBufferId command_buffer,
                                 .y = 0,
                                 .z = 0,
                             },
-                        .mip_level = 0,
-                        .array_index = 0,
                     },
                     asset_texture.data.data(),
                     static_cast<u32>(asset_texture.width) * static_cast<u32>(asset_texture.height) *

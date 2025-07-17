@@ -337,6 +337,14 @@ void RenderServer::generate_mip_maps(const CommandBufferId id, const TextureId t
     m_render_driver->generate_mip_maps(id, texture_id);
 }
 
+void RenderServer::transition_to_general(const CommandBufferId id, const TextureId texture_id)
+{
+    HE_ASSERT(texture_id.is_valid());
+    HE_ASSERT(m_textures.contains(texture_id));
+
+    m_render_driver->transition_to_general(id, texture_id);
+}
+
 TextureViewId RenderServer::create_texture_view(const TextureViewDescriptor &desc)
 {
     if (desc.label.has_value())

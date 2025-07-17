@@ -100,6 +100,7 @@ public:
     void destroy_texture(TextureId);
 
     void generate_mip_maps(CommandBufferId, TextureId);
+    void transition_to_general(CommandBufferId, TextureId);
 
     TextureViewId create_texture_view(const TextureViewDescriptor &);
     void destroy_texture_view(TextureViewId);

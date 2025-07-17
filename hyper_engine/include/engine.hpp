@@ -69,6 +69,10 @@ private:
     BufferId m_camera_buffer {};
     BufferId m_scene_buffer {};
 
+    TextureId m_default_texture {};
+    TextureViewId m_default_texture_view {};
+    SamplerId m_default_sampler {};
+
     PipelineLayoutId m_pbr_layout {};
     RenderPipelineId m_pbr_pipeline {};
 
@@ -76,10 +80,12 @@ private:
     RenderPipelineId m_skybox_pipeline {};
     TextureId m_skybox_texture {};
     TextureViewId m_skybox_texture_view {};
-    SamplerId m_skybox_sampler {};
     TextureId m_irradiance_texture {};
     TextureViewId m_irradiance_texture_view {};
-    SamplerId m_irradiance_sampler {};
+    TextureId m_prefilter_texture {};
+    TextureViewId m_prefilter_texture_view {};
+    TextureId m_brdf_texture {};
+    TextureViewId m_brdf_texture_view {};
 
     RenderPipelineId m_grid_pipeline {};
 
@@ -87,13 +93,8 @@ private:
     RenderPipelineId m_composition_pipeline {};
     TextureId m_composition_texture {};
     TextureViewId m_composition_texture_view {};
-    SamplerId m_composition_sampler {};
     TextureId m_depth_texture {};
     TextureViewId m_depth_texture_view {};
-
-    TextureId m_default_texture {};
-    TextureViewId m_default_texture_view {};
-    SamplerId m_default_sampler {};
 
     Asset m_sponza;
     Asset m_damaged_helmet;

@@ -56,6 +56,10 @@ struct ShaderScene
 {
     TEXTURE irradiance_texture;
     SAMPLER irradiance_sampler;
+    TEXTURE prefilter_texture;
+    SAMPLER prefilter_sampler;
+    TEXTURE brdf_texture;
+    SAMPLER brdf_sampler;
     uint padding_0;
     uint padding_1;
 };
@@ -137,10 +141,30 @@ struct EquirectangularPushConstants
 
 struct IrradiancePushConstants
 {
-    RW_TEXTURE skybox_texture;
+    TEXTURE skybox_texture;
     SAMPLER skybox_sampler;
     RW_TEXTURE irradiance_texture;
     uint size;
+};
+
+struct PrefilterPushConstants
+{
+    TEXTURE skybox_texture;
+    SAMPLER skybox_sampler;
+    RW_TEXTURE prefilter_texture;
+    uint size;
+    float roughness;
+    uint padding_0;
+    uint padding_1;
+    uint padding_2;
+};
+
+struct BrdfPushConstants
+{
+    RW_TEXTURE brdf_texture;
+    uint size;
+    uint padding_0;
+    uint padding_1;
 };
 
 struct SkyboxPushConstants

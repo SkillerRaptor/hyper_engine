@@ -15,8 +15,6 @@ void main(uint3 id : SV_DispatchThreadID) {
         return;
     }
 
-    // const float3 world_position = cube_to_tex_coord(id, g_push.size);
-
     const float2 dimensions = float2(g_push.size, g_push.size);
     const float2 uv = float2(id.xy) / dimensions * 2.0 - 1.0;
 
@@ -24,19 +22,20 @@ void main(uint3 id : SV_DispatchThreadID) {
     switch (id.z) {
         case 0: direction = float3(1.0, uv.y, -uv.x); break;
         case 1: direction = float3(-1.0, uv.y, uv.x); break;
-        case 2: direction = float3(uv.x, -1.0, uv.y); break;
-        case 3: direction = float3(uv.x, 1.0, -uv.y); break;
+        case 2: direction = float3(uv.x, 1.0, -uv.y); break;
+        case 3: direction = float3(uv.x, -1.0, uv.y); break;
         case 4: direction = float3(uv.x, uv.y, 1.0); break;
         case 5: direction = float3(-uv.x, uv.y, -1.0); break;
         default: break;
     }
 
     const float3 normal = normalize(direction);
+
     float3 up = float3(0.0, 1.0, 0.0);
     const float3 right = normalize(cross(up, normal));
     up = normalize(cross(normal, right));
 
-    const float sample_delta = 0.25;
+    const float sample_delta = 0.03;
     int sample_count = 0;
 
     float3 irradiance = float3(0.0, 0.0, 0.0);
@@ -65,6 +64,8 @@ void main(uint3 id : SV_DispatchThreadID) {
         }
     }
 
-    irradiance = PI * irradiance * (1.0 / sample_count);
-    g_push.irradiance_texture.store_3d(id.xyz, irradiance);
+    irradiance = PI * irradiance * (1.0 / float(sample_count));
+
+    const uint3 coord = uint3(id.x, g_push.size - 1 - id.y, id.z);
+    g_push.irradiance_texture.store_3d(coord, irradiance);
 }

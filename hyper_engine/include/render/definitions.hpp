@@ -476,8 +476,6 @@ struct TextureTargetDescriptor
 {
     TextureId texture {};
     Offset3d offset {};
-    u32 mip_level { 0 };
-    u32 array_index { 0 };
 };
 
 struct ComputePassDescriptor
