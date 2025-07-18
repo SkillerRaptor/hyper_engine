@@ -85,20 +85,22 @@ public:
 
     BufferId create_buffer(const BufferDescriptor &);
     void destroy_buffer(BufferId);
+    BufferDescriptor get_buffer_descriptor(BufferId) const;
 
     ResourceHandle get_buffer_handle(BufferId) const;
 
     ShaderId create_shader(const ShaderDescriptor &);
     void destroy_shader(ShaderId);
+    ShaderDescriptor get_shader_descriptor(ShaderId) const;
 
     SamplerId create_sampler(const SamplerDescriptor &);
     void destroy_sampler(SamplerId);
+    SamplerDescriptor get_sampler_descriptor(SamplerId) const;
 
     ResourceHandle get_sampler_handle(SamplerId) const;
 
     TextureId create_texture(const TextureDescriptor &);
     void destroy_texture(TextureId);
-
     TextureDescriptor get_texture_descriptor(TextureId) const;
 
     void generate_mip_maps(CommandBufferId, TextureId);
@@ -107,17 +109,21 @@ public:
 
     TextureViewId create_texture_view(const TextureViewDescriptor &);
     void destroy_texture_view(TextureViewId);
+    TextureViewDescriptor get_texture_view_descriptor(TextureViewId) const;
 
     ResourceHandle get_texture_view_handle(TextureViewId) const;
 
     PipelineLayoutId create_pipeline_layout(const PipelineLayoutDescriptor &);
     void destroy_pipeline_layout(PipelineLayoutId);
+    PipelineLayoutDescriptor get_pipeline_layout_descriptor(PipelineLayoutId) const;
 
     ComputePipelineId create_compute_pipeline(const ComputePipelineDescriptor &);
     void destroy_compute_pipeline(ComputePipelineId);
+    ComputePipelineDescriptor get_compute_pipeline_descriptor(ComputePipelineId) const;
 
     RenderPipelineId create_render_pipeline(const RenderPipelineDescriptor &);
     void destroy_render_pipeline(RenderPipelineId);
+    RenderPipelineDescriptor get_render_pipeline_descriptor(RenderPipelineId) const;
 
     // Commands
     CommandBufferId acquire_command_buffer();
@@ -190,7 +196,7 @@ private:
     RenderServer(EventServer &,
         std::unique_ptr<RenderDriver>,
         std::array<CommandBufferId, s_frames_in_flight>,
-        std::unordered_set<TextureViewId> texture_views);
+        std::unordered_set<TextureViewId>);
 
     ResourceHandle allocate_handle();
     void retire_handle(ResourceHandle);

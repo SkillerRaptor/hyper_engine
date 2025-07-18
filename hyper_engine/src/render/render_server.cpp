@@ -179,6 +179,14 @@ void RenderServer::destroy_buffer(const BufferId id)
     });
 }
 
+BufferDescriptor RenderServer::get_buffer_descriptor(const BufferId id) const
+{
+    HE_ASSERT(id.is_valid());
+    HE_ASSERT(m_buffers.contains(id));
+
+    return id.as<Buffer>()->desc;
+}
+
 ResourceHandle RenderServer::get_buffer_handle(const BufferId id) const
 {
     HE_ASSERT(id.is_valid());
@@ -222,6 +230,14 @@ void RenderServer::destroy_shader(const ShaderId id)
     });
 }
 
+ShaderDescriptor RenderServer::get_shader_descriptor(const ShaderId id) const
+{
+    HE_ASSERT(id.is_valid());
+    HE_ASSERT(m_shaders.contains(id));
+
+    return id.as<Shader>()->desc;
+}
+
 SamplerId RenderServer::create_sampler(const SamplerDescriptor &desc)
 {
     if (desc.label.has_value())
@@ -263,6 +279,14 @@ void RenderServer::destroy_sampler(const SamplerId id)
         .sampler_id = id,
         .generation = 0,
     });
+}
+
+SamplerDescriptor RenderServer::get_sampler_descriptor(const SamplerId id) const
+{
+    HE_ASSERT(id.is_valid());
+    HE_ASSERT(m_samplers.contains(id));
+
+    return id.as<Sampler>()->desc;
 }
 
 ResourceHandle RenderServer::get_sampler_handle(const SamplerId id) const
@@ -334,8 +358,7 @@ TextureDescriptor RenderServer::get_texture_descriptor(const TextureId id) const
     HE_ASSERT(id.is_valid());
     HE_ASSERT(m_textures.contains(id));
 
-    const Texture *texture = id.as<Texture>();
-    return texture->desc;
+    return id.as<Texture>()->desc;
 }
 
 void RenderServer::generate_mip_maps(const CommandBufferId id, const TextureId texture_id)
@@ -410,6 +433,14 @@ void RenderServer::destroy_texture_view(const TextureViewId id)
     });
 }
 
+TextureViewDescriptor RenderServer::get_texture_view_descriptor(const TextureViewId id) const
+{
+    HE_ASSERT(id.is_valid());
+    HE_ASSERT(m_texture_views.contains(id));
+
+    return id.as<TextureView>()->desc;
+}
+
 ResourceHandle RenderServer::get_texture_view_handle(const TextureViewId id) const
 {
     HE_ASSERT(id.is_valid());
@@ -452,6 +483,14 @@ void RenderServer::destroy_pipeline_layout(const PipelineLayoutId id)
     });
 }
 
+PipelineLayoutDescriptor RenderServer::get_pipeline_layout_descriptor(const PipelineLayoutId id) const
+{
+    HE_ASSERT(id.is_valid());
+    HE_ASSERT(m_pipeline_layouts.contains(id));
+
+    return id.as<PipelineLayout>()->desc;
+}
+
 ComputePipelineId RenderServer::create_compute_pipeline(const ComputePipelineDescriptor &desc)
 {
     if (desc.label.has_value())
@@ -480,6 +519,14 @@ void RenderServer::destroy_compute_pipeline(const ComputePipelineId id)
         .compute_pipeline_id = id,
         .generation = 0,
     });
+}
+
+ComputePipelineDescriptor RenderServer::get_compute_pipeline_descriptor(const ComputePipelineId id) const
+{
+    HE_ASSERT(id.is_valid());
+    HE_ASSERT(m_compute_pipelines.contains(id));
+
+    return id.as<ComputePipeline>()->desc;
 }
 
 RenderPipelineId RenderServer::create_render_pipeline(const RenderPipelineDescriptor &desc)
@@ -526,6 +573,14 @@ void RenderServer::destroy_render_pipeline(const RenderPipelineId id)
         .render_pipeline_id = id,
         .generation = 0,
     });
+}
+
+RenderPipelineDescriptor RenderServer::get_render_pipeline_descriptor(const RenderPipelineId id) const
+{
+    HE_ASSERT(id.is_valid());
+    HE_ASSERT(m_render_pipelines.contains(id));
+
+    return id.as<RenderPipeline>()->desc;
 }
 
 CommandBufferId RenderServer::acquire_command_buffer()
