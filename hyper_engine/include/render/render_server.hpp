@@ -99,6 +99,8 @@ public:
     TextureId create_texture(const TextureDescriptor &);
     void destroy_texture(TextureId);
 
+    TextureDescriptor get_texture_descriptor(TextureId) const;
+
     void generate_mip_maps(CommandBufferId, TextureId);
     void transition_to_general(CommandBufferId, TextureId);
     u32 get_max_sample_count() const;

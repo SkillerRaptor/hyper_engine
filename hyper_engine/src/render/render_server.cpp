@@ -329,6 +329,15 @@ void RenderServer::destroy_texture(const TextureId id)
     });
 }
 
+TextureDescriptor RenderServer::get_texture_descriptor(const TextureId id) const
+{
+    HE_ASSERT(id.is_valid());
+    HE_ASSERT(m_textures.contains(id));
+
+    const Texture *texture = id.as<Texture>();
+    return texture->desc;
+}
+
 void RenderServer::generate_mip_maps(const CommandBufferId id, const TextureId texture_id)
 {
     HE_ASSERT(texture_id.is_valid());

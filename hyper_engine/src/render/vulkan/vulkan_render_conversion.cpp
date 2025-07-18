@@ -548,7 +548,7 @@ VkBlendOp map_blend_operation(const BlendOperation blend_operation)
 
 VkColorComponentFlags map_color_writes(const ColorWrites color_writes)
 {
-    VkColorComponentFlags color_component_flags { 0 };
+    VkColorComponentFlags color_component_flags {};
 
     if ((color_writes & ColorWrites::R) == ColorWrites::R)
     {

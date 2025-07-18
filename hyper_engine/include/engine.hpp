@@ -48,9 +48,17 @@ private:
 
     void create_pbr();
     void create_skybox();
+    void create_irradiance();
+    void create_prefilter();
+    void create_brdf();
     void create_grid();
     void create_composition();
     void create_default();
+
+    void render_pbr(CommandBufferId) const;
+    void render_skybox(CommandBufferId) const;
+    void render_grid(CommandBufferId) const;
+    void render_composition(CommandBufferId) const;
 
     std::vector<GpuModel> upload_asset(const Asset &);
     void upload_model(
@@ -76,14 +84,17 @@ private:
     PipelineLayoutId m_pbr_layout {};
     RenderPipelineId m_pbr_pipeline {};
 
-    PipelineLayoutId m_skybox_layout {};
-    RenderPipelineId m_skybox_pipeline {};
     TextureId m_skybox_texture {};
     TextureViewId m_skybox_texture_view {};
+    PipelineLayoutId m_skybox_layout {};
+    RenderPipelineId m_skybox_pipeline {};
+
     TextureId m_irradiance_texture {};
     TextureViewId m_irradiance_texture_view {};
+
     TextureId m_prefilter_texture {};
     TextureViewId m_prefilter_texture_view {};
+
     TextureId m_brdf_texture {};
     TextureViewId m_brdf_texture_view {};
 

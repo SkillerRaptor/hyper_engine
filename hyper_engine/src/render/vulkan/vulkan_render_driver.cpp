@@ -84,7 +84,7 @@ BufferId VulkanRenderDriver::create_buffer(const BufferDescriptor &desc)
         .pQueueFamilyIndices = nullptr,
     };
 
-    VmaAllocationCreateFlags allocation_flags { 0 };
+    VmaAllocationCreateFlags allocation_flags {};
     // if (staging)
     {
         allocation_flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
@@ -292,17 +292,19 @@ TextureId VulkanRenderDriver::create_texture(const TextureDescriptor &desc)
         flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
     }
 
+    const VkExtent3D extent {
+        .width = desc.extent.width,
+        .height = desc.extent.height,
+        .depth = desc.dimension != Dimension::D3 ? 1 : desc.extent.depth,
+    };
+
     const VkImageCreateInfo image_create_info {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
         .pNext = nullptr,
         .flags = flags,
         .imageType = map_dimension(desc.dimension),
         .format = map_format(desc.format),
-        .extent = {
-            .width = desc.extent.width,
-            .height = desc.extent.height,
-            .depth = desc.dimension != Dimension::D3 ? 1 : desc.extent.depth,
-        },
+        .extent = extent,
         .mipLevels = desc.mip_levels,
         .arrayLayers = desc.extent.depth,
         .samples = map_sample_count(desc.sample_count),
@@ -402,43 +404,43 @@ void VulkanRenderDriver::generate_mip_maps(const CommandBufferId id, const Textu
     {
         for (u32 mip { 1 }; mip < texture->desc.mip_levels; ++mip)
         {
+            const VkOffset3D zero_offset {
+                .x = 0,
+                .y = 0,
+                .z = 0,
+            };
+
+            const VkImageSubresourceLayers src_subresource {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .mipLevel = mip - 1,
+                .baseArrayLayer = layer,
+                .layerCount = 1,
+            };
+
+            const VkOffset3D src_offset {
+                .x = static_cast<i32>(texture->desc.extent.width >> (mip - 1)),
+                .y = static_cast<i32>(texture->desc.extent.height >> (mip - 1)),
+                .z = 1,
+            };
+
+            const VkImageSubresourceLayers dst_subresource {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .mipLevel = mip,
+                .baseArrayLayer = layer,
+                .layerCount = 1,
+            };
+
+            const VkOffset3D dst_offset {
+                .x = static_cast<i32>(texture->desc.extent.width >> mip),
+                .y = static_cast<i32>(texture->desc.extent.height >> mip),
+                .z = 1,
+            };
+
             const VkImageBlit image_blit {
-                .srcSubresource = {
-                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                    .mipLevel = mip - 1,
-                    .baseArrayLayer = layer,
-                    .layerCount = 1,
-                },
-                .srcOffsets = {
-                    {
-                        .x = 0,
-                        .y = 0,
-                        .z = 0,
-                    },
-                    {
-                        .x = static_cast<i32>(texture->desc.extent.width >> (mip - 1)),
-                        .y = static_cast<i32>(texture->desc.extent.height >> (mip - 1)),
-                        .z = 1,
-                    }
-                },
-                .dstSubresource = {
-                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                    .mipLevel = mip,
-                    .baseArrayLayer = layer,
-                    .layerCount = 1,
-                },
-                .dstOffsets = {
-                    {
-                        .x = 0,
-                        .y = 0,
-                        .z = 0,
-                    },
-                    {
-                        .x = static_cast<i32>(texture->desc.extent.width >> mip),
-                        .y = static_cast<i32>(texture->desc.extent.height >> mip),
-                        .z = 1,
-                    }
-                },
+                .srcSubresource = src_subresource,
+                .srcOffsets = { zero_offset, src_offset },
+                .dstSubresource = dst_subresource,
+                .dstOffsets = { zero_offset, dst_offset },
             };
 
             {
@@ -1396,24 +1398,26 @@ void VulkanRenderDriver::copy_texture_to_texture(const CommandBufferId id,
     transition_texture_layout(command_buffer->raw, vulkan_src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
     transition_texture_layout(command_buffer->raw, vulkan_dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
+    const VkImageSubresourceLayers src_subresource = {
+        .aspectMask = map_aspect(vulkan_src->desc.format),
+        .mipLevel = 0,
+        .baseArrayLayer = 0,
+        .layerCount = 1,
+    };
+
+    const VkImageSubresourceLayers dst_subresource = {
+        .aspectMask = map_aspect(vulkan_dst->desc.format),
+        .mipLevel = 0,
+        .baseArrayLayer = 0,
+        .layerCount = 1,
+    };
+
     const VkImageCopy2 region = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_COPY_2,
         .pNext = nullptr,
-        .srcSubresource =
-            {
-                .aspectMask = map_aspect(vulkan_src->desc.format),
-                .mipLevel = 0,
-                .baseArrayLayer = 0,
-                .layerCount = 1,
-            },
-        .srcOffset =map_offset_3d(src.offset),
-        .dstSubresource =
-            {
-                .aspectMask = map_aspect(vulkan_dst->desc.format),
-                .mipLevel = 0,
-                .baseArrayLayer = 0,
-                .layerCount = 1,
-            },
+        .srcSubresource = src_subresource,
+        .srcOffset = map_offset_3d(src.offset),
+        .dstSubresource = dst_subresource,
         .dstOffset = map_offset_3d(dst.offset),
         .extent = map_extent_3d(extent),
     };
@@ -1474,31 +1478,28 @@ void VulkanRenderDriver::begin_render_pass(const CommandBufferId id, const Rende
 
     const VulkanTextureView *texture_view = desc.color_attachments[0].view.as<VulkanTextureView>();
     const VulkanTexture *texture = texture_view->desc.texture.as<VulkanTexture>();
+
+    constexpr VkOffset2D offset {
+        .x = 0,
+        .y = 0,
+    };
+
     const VkExtent2D extent {
         .width = texture->desc.extent.width,
         .height = texture->desc.extent.height,
     };
 
     const VkRect2D render_area {
-        .offset =
-            {
-                .x = 0,
-                .y = 0,
-            },
+        .offset = offset,
         .extent = extent,
     };
 
+    constexpr VkClearColorValue clear_color {
+        .float32 = { 0.0f, 0.0f, 0.0f, 1.0f },
+    };
+
     constexpr VkClearValue clear_value {
-        .color =
-            {
-                .float32 =
-                    {
-                        0.0f,
-                        0.0f,
-                        0.0f,
-                        1.0f,
-                    },
-            },
+        .color = clear_color,
     };
 
     std::vector<VkRenderingAttachmentInfo> rendering_color_attachments {};
@@ -1535,12 +1536,13 @@ void VulkanRenderDriver::begin_render_pass(const CommandBufferId id, const Rende
         transition_texture_layout(
             command_buffer->raw, depth_stencil_texture, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
+        constexpr VkClearDepthStencilValue depth_stencil {
+            .depth = 1.0f,
+            .stencil = 0,
+        };
+
         constexpr VkClearValue depth_clear_value {
-            .depthStencil =
-                {
-                    .depth = 1.0f,
-                    .stencil = 0,
-                },
+            .depthStencil = depth_stencil,
         };
 
         depth_attachment_info = {
@@ -2371,13 +2373,15 @@ VulkanRenderDriver::Swapchain VulkanRenderDriver::create_swapchain(
 
                 const TextureId texture_id(texture);
 
+                const Extent3d texture_extent {
+                    .width = width,
+                    .height = height,
+                    .depth = 1,
+                };
+
                 const TextureDescriptor texture_desc {
                     .label = std::nullopt,
-                    .extent = {
-                        .width = width,
-                        .height = height,
-                        .depth = 1,
-                    },
+                    .extent = texture_extent,
                     .mip_levels = 1,
                     .format = map_vk_format(format.format),
                     .dimension = Dimension::D2,
