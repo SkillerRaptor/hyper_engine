@@ -38,26 +38,6 @@
 #    define HE_ALWAYS_INLINE __forceinline
 #endif
 
-#define HE_DEFAULT_COPYABLE(x) \
-public:                        \
-    x(x const &) = default;    \
-    x &operator=(x const &) = default
-
-#define HE_DEFAULT_MOVABLE(x)   \
-public:                         \
-    x(x &&) noexcept = default; \
-    x &operator=(x &&) noexcept = default
-
-#define HE_NON_COPYABLE(x) \
-private:                   \
-    x(x const &) = delete; \
-    x &operator=(x const &) = delete
-
-#define HE_NON_MOVABLE(x)      \
-private:                       \
-    x(x &&) noexcept = delete; \
-    x &operator=(x &&) noexcept = delete
-
 #define HE_BIND_FUNCTION(function) \
     [this](auto &&...args) -> decltype(auto) { return this->function(::std::forward<decltype(args)>(args)...); }
 

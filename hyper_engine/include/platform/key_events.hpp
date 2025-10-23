@@ -6,32 +6,36 @@
 
 #pragma once
 
+#include "core/prerequisites.hpp"
 #include "platform/key_codes.hpp"
 
-class KeyPressEvent
+namespace he
 {
-public:
-    explicit KeyPressEvent(const KeyCode key_code)
-        : m_key_code { key_code }
+    class KeyPressEvent
     {
-    }
+    public:
+        explicit KeyPressEvent(const KeyCode key_code)
+            : m_key_code { key_code }
+        {
+        }
 
-    KeyCode key_code() const { return m_key_code; }
+        HE_ALWAYS_INLINE KeyCode key_code() const { return m_key_code; }
 
-private:
-    KeyCode m_key_code { KeyCode::Unknown };
-};
+    private:
+        KeyCode m_key_code { KeyCode::Unknown };
+    };
 
-class KeyReleaseEvent
-{
-public:
-    explicit KeyReleaseEvent(const KeyCode key_code)
-        : m_key_code { key_code }
+    class KeyReleaseEvent
     {
-    }
+    public:
+        explicit KeyReleaseEvent(const KeyCode key_code)
+            : m_key_code { key_code }
+        {
+        }
 
-    KeyCode key_code() const { return m_key_code; }
+        HE_ALWAYS_INLINE KeyCode key_code() const { return m_key_code; }
 
-private:
-    KeyCode m_key_code { KeyCode::Unknown };
-};
+    private:
+        KeyCode m_key_code { KeyCode::Unknown };
+    };
+} // namespace he

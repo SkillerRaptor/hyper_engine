@@ -8,11 +8,14 @@
 
 #include "core/types.hpp"
 
-enum class MouseCode : u8
+namespace he
 {
-    ButtonLeft = 1,
-    ButtonMiddle = 2,
-    ButtonRight = 3,
-    ButtonX1 = 4,
-    ButtonX2 = 5,
-};
+    enum class MouseCode : u8
+    {
+        ButtonLeft = 1,
+        ButtonMiddle = 2,
+        ButtonRight = 3,
+        ButtonX1 = 4,
+        ButtonX2 = 5,
+    };
+} // namespace he
