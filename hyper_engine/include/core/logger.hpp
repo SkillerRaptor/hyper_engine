@@ -6,30 +6,23 @@
 
 #pragma once
 
-#include <memory>
-
 #include <spdlog/spdlog.h>
 
-#include "core/prerequisites.hpp"
+#include "core/memory.hpp"
 
-class Logger
+namespace he::logger
 {
-private:
-    HE_NON_COPYABLE(Logger);
-    HE_NON_MOVABLE(Logger);
+    namespace detail
+    {
+        RefPtr<spdlog::logger> spdlog_logger();
+    } // namespace detail
 
-public:
-    static void initialize();
+    void initialize(spdlog::level::level_enum);
+} // namespace he::logger
 
-    static std::shared_ptr<spdlog::logger> internal_logger() { return s_internal_logger; };
-
-private:
-    static std::shared_ptr<spdlog::logger> s_internal_logger;
-};
-
-#define HE_INFO(...) SPDLOG_LOGGER_CALL(::Logger::internal_logger(), spdlog::level::info, __VA_ARGS__)
-#define HE_WARN(...) SPDLOG_LOGGER_CALL(::Logger::internal_logger(), spdlog::level::warn, __VA_ARGS__)
-#define HE_ERROR(...) SPDLOG_LOGGER_CALL(::Logger::internal_logger(), spdlog::level::err, __VA_ARGS__)
-#define HE_FATAL(...) SPDLOG_LOGGER_CALL(::Logger::internal_logger(), spdlog::level::critical, __VA_ARGS__)
-#define HE_DEBUG(...) SPDLOG_LOGGER_CALL(::Logger::internal_logger(), spdlog::level::debug, __VA_ARGS__)
-#define HE_TRACE(...) SPDLOG_LOGGER_CALL(::Logger::internal_logger(), spdlog::level::trace, __VA_ARGS__)
+#define HE_INFO(...) SPDLOG_LOGGER_CALL(::he::logger::detail::spdlog_logger(), spdlog::level::info, __VA_ARGS__)
+#define HE_WARN(...) SPDLOG_LOGGER_CALL(::he::logger::detail::spdlog_logger(), spdlog::level::warn, __VA_ARGS__)
+#define HE_ERROR(...) SPDLOG_LOGGER_CALL(::he::logger::detail::spdlog_logger(), spdlog::level::err, __VA_ARGS__)
+#define HE_FATAL(...) SPDLOG_LOGGER_CALL(::he::logger::detail::spdlog_logger(), spdlog::level::critical, __VA_ARGS__)
+#define HE_DEBUG(...) SPDLOG_LOGGER_CALL(::he::logger::detail::spdlog_logger(), spdlog::level::debug, __VA_ARGS__)
+#define HE_TRACE(...) SPDLOG_LOGGER_CALL(::he::logger::detail::spdlog_logger(), spdlog::level::trace, __VA_ARGS__)

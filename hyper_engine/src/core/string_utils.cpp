@@ -6,7 +6,7 @@
 
 #include "core/string_utils.hpp"
 
-namespace string_utils
+namespace he::string_utils
 {
     std::wstring to_wstring(const std::string_view string)
     {
@@ -15,4 +15,4 @@ namespace string_utils
         std::mbstowcs(wstring.data(), string.data(), buffer_size);
         return wstring;
     }
-} // namespace string_utils
+} // namespace he::string_utils

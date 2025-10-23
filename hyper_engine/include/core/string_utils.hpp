@@ -8,7 +8,7 @@
 
 #include <string>
 
-namespace string_utils
+namespace he::string_utils
 {
     std::wstring to_wstring(std::string_view);
-} // namespace string_utils
+} // namespace he::string_utils

@@ -9,7 +9,7 @@
 #include <string_view>
 #include <vector>
 
-namespace filesystem
+namespace he::filesystem
 {
     std::vector<uint8_t> read_file(std::string_view path);
-} // namespace filesystem
+} // namespace he::filesystem
