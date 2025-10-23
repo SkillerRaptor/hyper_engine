@@ -56,7 +56,6 @@ link_libraries(
         fmt
         glm
         imgui
-        renderdoc
         SDL3::SDL3
         spdlog
         stb
