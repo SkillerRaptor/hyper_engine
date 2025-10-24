@@ -6,44 +6,79 @@
 
 #pragma once
 
-#include <type_traits>
 #include <utility>
 
-#define HE_ENABLE_BIT_FLAGS(name) \
-    template <>                   \
-    constexpr bool ::he::s_enable_bit_flags<name> = true
+#define HE_ENABLE_BIT_FLAGS(name)                                                                         \
+    inline constexpr name operator|(name lhs, name rhs)                                                   \
+    {                                                                                                     \
+        return static_cast<name>(std::to_underlying(lhs) | std::to_underlying(rhs));                      \
+    }                                                                                                     \
+                                                                                                          \
+    inline name &operator|=(name &lhs, name rhs)                                                          \
+    {                                                                                                     \
+        lhs = static_cast<name>(std::to_underlying(lhs) | std::to_underlying(rhs));                       \
+        return lhs;                                                                                       \
+    }                                                                                                     \
+                                                                                                          \
+    inline constexpr name operator&(name lhs, name rhs)                                                   \
+    {                                                                                                     \
+        return static_cast<name>(std::to_underlying(lhs) & std::to_underlying(rhs));                      \
+    }                                                                                                     \
+                                                                                                          \
+    inline name &operator&=(name &lhs, name rhs)                                                          \
+    {                                                                                                     \
+        lhs = static_cast<name>(std::to_underlying(lhs) & std::to_underlying(rhs));                       \
+        return lhs;                                                                                       \
+    }                                                                                                     \
+                                                                                                          \
+    inline constexpr name operator^(name lhs, name rhs)                                                   \
+    {                                                                                                     \
+        return static_cast<name>(std::to_underlying(lhs) ^ std::to_underlying(rhs));                      \
+    }                                                                                                     \
+                                                                                                          \
+    inline name &operator^=(name &lhs, name rhs)                                                          \
+    {                                                                                                     \
+        lhs = static_cast<name>(std::to_underlying(lhs) ^ std::to_underlying(rhs));                       \
+        return lhs;                                                                                       \
+    }                                                                                                     \
+                                                                                                          \
+    inline constexpr name operator~(name value) { return static_cast<name>(~std::to_underlying(value)); } \
+                                                                                                          \
+    inline constexpr bool operator!(name value) { return !std::to_underlying(value); }
 
-namespace he
+#define HE_FRIEND_BIT_FLAGS(name)                        \
+    friend constexpr name operator|(name lhs, name rhs); \
+    friend name &operator|=(name &lhs, name rhs);        \
+    friend constexpr name operator&(name lhs, name rhs); \
+    friend name &operator&=(name &lhs, name rhs);        \
+    friend constexpr name operator^(name lhs, name rhs); \
+    friend name &operator^=(name &lhs, name rhs);        \
+    friend constexpr name operator~(name value);         \
+    friend constexpr bool operator!(name value);
+
+namespace he::bit_flags
 {
-    template <typename T>
-        requires std::is_enum_v<T>
-    constexpr bool s_enable_bit_flags = false;
-
-    template <typename T>
-        requires s_enable_bit_flags<T>
-    static constexpr T operator&(const T lhs, const T rhs)
+    template <typename E>
+    static constexpr bool has_all_flags(const E flags, const E contains)
     {
-        return T(std::to_underlying(lhs) & std::to_underlying(rhs));
+        return (std::to_underlying(flags) & std::to_underlying(contains)) == std::to_underlying(contains);
     }
 
-    template <typename T>
-        requires s_enable_bit_flags<T>
-    static constexpr T operator|(const T lhs, const T rhs)
+    template <typename E>
+    static constexpr bool has_any_flags(const E flags, const E contains)
     {
-        return T(std::to_underlying(lhs) | std::to_underlying(rhs));
+        return (std::to_underlying(flags) & std::to_underlying(contains)) != 0;
     }
 
-    template <typename T>
-        requires s_enable_bit_flags<T>
-    static constexpr T operator^(const T lhs, const T rhs)
+    template <typename E>
+    static void add_flags(E &flags, E flags_to_add)
     {
-        return T(std::to_underlying(lhs) ^ std::to_underlying(rhs));
+        flags = static_cast<E>(std::to_underlying(flags) | std::to_underlying(flags_to_add));
     }
 
-    template <typename T>
-        requires s_enable_bit_flags<T>
-    static constexpr T operator~(const T value)
+    template <typename E>
+    static void remove_flags(E &flags, E flags_to_remove)
     {
-        return T(~std::to_underlying(value));
+        flags = static_cast<E>(std::to_underlying(flags) & ~std::to_underlying(flags_to_remove));
     }
-} // namespace he
+} // namespace he::bit_flags
