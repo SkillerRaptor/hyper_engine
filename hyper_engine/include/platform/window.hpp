@@ -35,10 +35,10 @@ namespace he
         std::pair<u32, u32> size() const;
 
         void set_fullscreen(bool);
-        bool fullscreen() const;
+        bool is_fullscreen() const;
 
         void set_resizable(bool);
-        bool resizable() const;
+        bool is_resizable() const;
 
         HE_ALWAYS_INLINE SDL_Window *native_handle() const { return m_native_handle; }
 
