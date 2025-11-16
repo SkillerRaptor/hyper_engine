@@ -25,9 +25,10 @@ set(HEADERS
         include/core/assertion.hpp
         include/core/bit_flags.hpp
         include/core/filesystem.hpp
-        include/core/id.hpp
         include/core/logger.hpp
+        include/core/memory.hpp
         include/core/prerequisites.hpp
+        include/core/result.hpp
         include/core/string_utils.hpp
         include/core/types.hpp
         include/platform/event_server.hpp
