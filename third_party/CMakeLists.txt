@@ -22,6 +22,16 @@ set(CATCH_ENABLE_REPRODUCIBLE_BUILD ON CACHE INTERNAL "")
 
 FetchContent_MakeAvailable(Catch2)
 
+set_target_properties(
+        Catch2
+        PROPERTIES
+        FOLDER "third_party")
+
+set_target_properties(
+        Catch2WithMain
+        PROPERTIES
+        FOLDER "third_party")
+
 #-------------------------------------------------------------------------------------------
 # entt (v3.15.0)
 #-------------------------------------------------------------------------------------------
@@ -294,7 +304,7 @@ FetchContent_MakeAvailable(sdl)
 set_target_properties(
         SDL3-static
         PROPERTIES
-        FOLDER " third_party")
+        FOLDER "third_party")
 set_target_properties(
         SDL_uclibc
         PROPERTIES
@@ -397,6 +407,11 @@ set(TRACY_VERBOSE OFF CACHE INTERNAL "")
 set(TRACY_DEMANGLE OFF CACHE INTERNAL "")
 
 FetchContent_MakeAvailable(tracy)
+
+set_target_properties(
+        TracyClient
+        PROPERTIES
+        FOLDER "third_party")
 
 #-------------------------------------------------------------------------------------------
 # volk (v1.4.304)
