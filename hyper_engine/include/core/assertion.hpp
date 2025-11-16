@@ -20,7 +20,7 @@
     } while (false)
 
 #ifdef HE_DEBUG_BUILD
-#    define HE_DEBUG_ASSERT(expression, ...) HE_ASSERT(expression)
+#    define HE_DEBUG_ASSERT(expression, ...) HE_ASSERT(expression, __VA_ARGS__)
 #else
 #    define HE_DEBUG_ASSERT(expression, ...) ((void) 0)
 #endif
