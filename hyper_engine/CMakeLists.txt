@@ -67,7 +67,7 @@ if (WIN32)
     link_libraries(d3d12.lib dxgi.lib D3D12MemoryAllocator)
 endif ()
 
-add_compile_definitions(-DGLM_FORCE_RADIANS -DGLM_FORCE_DEPTH_ZE_TO_ONE)
+add_compile_definitions(GLM_FORCE_RADIANS GLM_FORCE_DEPTH_ZE_TO_ONE)
 
 include_directories(${CMAKE_SOURCE_DIR}/assets/shaders)
 
@@ -87,8 +87,8 @@ target_link_libraries(
 target_compile_definitions(
         hyper_engine_tests
         PRIVATE
-        -DCATCH_CONFIG_MAIN
-        -DHE_TESTS=1)
+        CATCH_CONFIG_MAIN
+        HE_TESTS=1)
 
 hyperengine_define_executable(hyper_engine_profiling)
 target_link_libraries(
@@ -98,5 +98,5 @@ target_link_libraries(
 target_compile_definitions(
         hyper_engine_tests
         PRIVATE
-        -DTRACY_ENABLE
-        -DHE_PROFILING=1)
+        TRACY_ENABLE
+        HE_PROFILING=1)
