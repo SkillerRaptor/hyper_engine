@@ -14,7 +14,7 @@
     {                                                                   \
         [[unlikely]] if (!(expression))                                 \
         {                                                               \
-            HE_ERROR("Assertion failed: {}", HE_STRINGIFY(expression)); \
+            HE_FATAL("Assertion failed: {}", HE_STRINGIFY(expression)); \
             std::abort();                                               \
         }                                                               \
     } while (false)
