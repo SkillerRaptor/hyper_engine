@@ -10,7 +10,6 @@
 
 #include "core/logger.hpp"
 #include "core/prerequisites.hpp"
-#include "core/result.hpp"
 #include "core/types.hpp"
 
 struct SDL_Window;
@@ -20,7 +19,7 @@ namespace he
     class Window
     {
     public:
-        static Result<Window> create(std::string_view title, u32 width, u32 height);
+        static Window create(std::string_view title, u32 width, u32 height);
         ~Window();
 
         Window(const Window &) = delete;

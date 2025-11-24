@@ -10,8 +10,14 @@
 #include <vector>
 
 #include "core/result.hpp"
+#include "core/types.hpp"
 
 namespace he::filesystem
 {
-    Result<std::vector<uint8_t>> read_file(std::string_view path);
+    enum class FilesystemError
+    {
+        NotFound,
+    };
+
+    Result<std::vector<u8>, FilesystemError> read_file(std::string_view path);
 } // namespace he::filesystem

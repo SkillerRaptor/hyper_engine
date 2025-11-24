@@ -12,24 +12,16 @@
 
 namespace he
 {
-    template <typename T, typename E = std::string>
+    // NOTE: Abstract std::expected, so it can be replaced later
+    template <typename T, typename E>
     using Result = std::expected<T, E>;
 
-#define HE_VERIFY(expression, message, ...)                               \
-    do                                                                    \
-    {                                                                     \
-        [[unlikely]] if (!(expression))                                   \
-        {                                                                 \
-            return std::unexpected { fmt::format(message, __VA_ARGS__) }; \
-        }                                                                 \
-    } while (false)
-
-#define HE_VERIFY_RESULT(result)                       \
-    do                                                 \
-    {                                                  \
-        [[unlikely]] if (!((result).has_value()))      \
-        {                                              \
-            return std::unexpected { result.error() }; \
-        }                                              \
+#define HE_VERIFY(expression, result)          \
+    do                                         \
+    {                                          \
+        [[unlikely]] if (!(expression))        \
+        {                                      \
+            return std::unexpected { result }; \
+        }                                      \
     } while (false)
 } // namespace he
