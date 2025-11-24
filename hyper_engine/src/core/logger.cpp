@@ -32,11 +32,11 @@ namespace he::logger
         stdout_sink->set_color(spdlog::level::debug, "\033[38;2;0;0;255m");
         stdout_sink->set_color(spdlog::level::trace, "\033[38;2;128;0;128m");
         stdout_sink->set_pattern(
-            "\033[38;2;69;69;69m%Y-%m-%dT%H:%M:%S.%f %^%l%$ \033[38;2;120;120;120m%s:%#: \033[38;2;211;211;211m%v");
+            "\033[38;2;69;69;69m%Y-%m-%dT%H:%M:%S.%f %^%l%$\033[38;2;120;120;120m: \033[38;2;211;211;211m%v");
 
         const RefPtr<spdlog::sinks::basic_file_sink_mt> file_sink
             = make_ref<spdlog::sinks::basic_file_sink_mt>("latest.log", true);
-        file_sink->set_pattern("%Y-%m-%d%H:%M:%S.%f %l %s:%#: %v");
+        file_sink->set_pattern("%Y-%m-%d%H:%M:%S.%f %l: %v");
 
         s_logger = make_ref<spdlog::logger>(
             "HyperEngine",
