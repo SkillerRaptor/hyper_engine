@@ -19,7 +19,7 @@ namespace he
     class Window
     {
     public:
-        static Window create(std::string_view title, u32 width, u32 height);
+        explicit Window(std::string_view title, u32 width, u32 height);
         ~Window();
 
         Window(const Window &) = delete;
@@ -41,12 +41,6 @@ namespace he
         bool is_resizable() const;
 
         HE_ALWAYS_INLINE SDL_Window *native_handle() const { return m_native_handle; }
-
-    private:
-        explicit Window(SDL_Window *native_handle)
-            : m_native_handle { native_handle }
-        {
-        }
 
     private:
         SDL_Window *m_native_handle { nullptr };

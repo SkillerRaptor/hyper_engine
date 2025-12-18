@@ -12,7 +12,7 @@
 
 namespace he
 {
-    Window Window::create(const std::string_view title, const u32 width, const u32 height)
+    Window::Window(const std::string_view title, const u32 width, const u32 height)
     {
         HE_ASSERT(!title.empty());
         HE_ASSERT(width > 0);
@@ -20,14 +20,12 @@ namespace he
 
         HE_ASSERT(SDL_Init(SDL_INIT_VIDEO), "Failed to initialize SDL: {}", SDL_GetError());
 
-        SDL_Window *native_handle = SDL_CreateWindow(
+        m_native_handle = SDL_CreateWindow(
             title.data(),
             static_cast<i32>(width),
             static_cast<i32>(height),
             SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_VULKAN);
-        HE_ASSERT(native_handle != nullptr, "Failed to create SDL window: {}", SDL_GetError());
-
-        return Window { native_handle };
+        HE_ASSERT(m_native_handle != nullptr, "Failed to create SDL window: {}", SDL_GetError());
     }
 
     Window::~Window()

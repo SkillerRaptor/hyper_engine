@@ -44,7 +44,6 @@ namespace he::logger
                 stdout_sink,
                 file_sink,
             });
-
         s_logger->set_level(level);
         s_logger->flush_on(level);
     }
