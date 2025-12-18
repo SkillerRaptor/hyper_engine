@@ -6,18 +6,14 @@
 
 #pragma once
 
+#include <string>
 #include <string_view>
 #include <vector>
 
-#include "core/result.hpp"
 #include "core/types.hpp"
 
 namespace he::filesystem
 {
-    enum class FilesystemError
-    {
-        NotFound,
-    };
-
-    Result<std::vector<u8>, FilesystemError> read_file(std::string_view path);
+    std::vector<u8> read_to_bytes(std::string_view path);
+    std::string read_to_string(std::string_view path);
 } // namespace he::filesystem
