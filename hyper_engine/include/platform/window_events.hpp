@@ -21,8 +21,8 @@ namespace he
     {
     public:
         WindowMoveEvent(const u32 x, const u32 y)
-            : m_x { x }
-            , m_y { y }
+            : m_x(x)
+            , m_y(y)
         {
         }
 
@@ -30,16 +30,16 @@ namespace he
         HE_ALWAYS_INLINE u32 y() const { return m_y; }
 
     private:
-        u32 m_x { 0 };
-        u32 m_y { 0 };
+        u32 m_x = 0;
+        u32 m_y = 0;
     };
 
     class WindowResizeEvent
     {
     public:
         WindowResizeEvent(const u32 width, const u32 height)
-            : m_width { width }
-            , m_height { height }
+            : m_width(width)
+            , m_height(height)
         {
         }
 
@@ -47,7 +47,7 @@ namespace he
         HE_ALWAYS_INLINE u32 height() const { return m_height; }
 
     private:
-        u32 m_width { 0 };
-        u32 m_height { 0 };
+        u32 m_width = 0;
+        u32 m_height = 0;
     };
 } // namespace he

@@ -23,7 +23,7 @@ namespace he
         constexpr BitFlags() = default;
 
         constexpr BitFlags(T flag)
-            : m_flags { std::to_underlying(flag) }
+            : m_flags(std::to_underlying(flag))
         {
         }
 
@@ -55,12 +55,12 @@ namespace he
 
         HE_ALWAYS_INLINE friend constexpr BitFlags operator|(const BitFlags lhs, const T rhs)
         {
-            return BitFlags { lhs.m_flags | std::to_underlying(rhs) };
+            return BitFlags(lhs.m_flags | std::to_underlying(rhs));
         }
 
         HE_ALWAYS_INLINE friend constexpr BitFlags operator|(const BitFlags lhs, const BitFlags rhs)
         {
-            return BitFlags { lhs.m_flags | rhs.m_flags };
+            return BitFlags(lhs.m_flags | rhs.m_flags);
         }
 
         HE_ALWAYS_INLINE friend constexpr BitFlags &operator|=(BitFlags &lhs, const T rhs)
@@ -77,12 +77,12 @@ namespace he
 
         HE_ALWAYS_INLINE friend constexpr BitFlags operator&(const BitFlags lhs, const T rhs)
         {
-            return BitFlags { lhs.m_flags & std::to_underlying(rhs) };
+            return BitFlags(lhs.m_flags & std::to_underlying(rhs));
         }
 
         HE_ALWAYS_INLINE friend constexpr BitFlags operator&(const BitFlags lhs, const BitFlags rhs)
         {
-            return BitFlags { lhs.m_flags & rhs.m_flags };
+            return BitFlags(lhs.m_flags & rhs.m_flags);
         }
 
         HE_ALWAYS_INLINE friend constexpr BitFlags &operator&=(BitFlags &lhs, const T rhs)
@@ -99,12 +99,12 @@ namespace he
 
         HE_ALWAYS_INLINE friend constexpr BitFlags operator^(const BitFlags lhs, const T rhs)
         {
-            return BitFlags { lhs.m_flags ^ std::to_underlying(rhs) };
+            return BitFlags(lhs.m_flags ^ std::to_underlying(rhs));
         }
 
         HE_ALWAYS_INLINE friend constexpr BitFlags operator^(const BitFlags lhs, const BitFlags rhs)
         {
-            return BitFlags { lhs.m_flags ^ rhs.m_flags };
+            return BitFlags(lhs.m_flags ^ rhs.m_flags);
         }
 
         HE_ALWAYS_INLINE friend constexpr BitFlags &operator^=(BitFlags &lhs, const T rhs)
@@ -119,10 +119,7 @@ namespace he
             return lhs;
         }
 
-        HE_ALWAYS_INLINE friend constexpr BitFlags operator~(const BitFlags &flags)
-        {
-            return BitFlags { ~flags.m_flags };
-        }
+        HE_ALWAYS_INLINE friend constexpr BitFlags operator~(const BitFlags &flags) { return BitFlags(~flags.m_flags); }
 
         HE_ALWAYS_INLINE friend constexpr bool operator==(const BitFlags &lhs, const BitFlags &rhs)
         {
@@ -135,6 +132,6 @@ namespace he
         }
 
     private:
-        UnderlyingT m_flags { 0 };
+        UnderlyingT m_flags = 0;
     };
 } // namespace he

@@ -15,27 +15,27 @@ namespace he
     {
     public:
         explicit KeyPressEvent(const KeyCode key_code)
-            : m_key_code { key_code }
+            : m_key_code(key_code)
         {
         }
 
         HE_ALWAYS_INLINE KeyCode key_code() const { return m_key_code; }
 
     private:
-        KeyCode m_key_code { KeyCode::Unknown };
+        KeyCode m_key_code = KeyCode::Unknown;
     };
 
     class KeyReleaseEvent
     {
     public:
         explicit KeyReleaseEvent(const KeyCode key_code)
-            : m_key_code { key_code }
+            : m_key_code(key_code)
         {
         }
 
         HE_ALWAYS_INLINE KeyCode key_code() const { return m_key_code; }
 
     private:
-        KeyCode m_key_code { KeyCode::Unknown };
+        KeyCode m_key_code = KeyCode::Unknown;
     };
 } // namespace he

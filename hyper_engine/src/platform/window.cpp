@@ -12,20 +12,42 @@
 
 namespace he
 {
-    Window::Window(const std::string_view title, const u32 width, const u32 height)
+    std::optional<Window> Window::create(const std::string_view title, const u32 width, const u32 height)
     {
         HE_ASSERT(!title.empty());
         HE_ASSERT(width > 0);
         HE_ASSERT(height > 0);
 
-        HE_ASSERT(SDL_Init(SDL_INIT_VIDEO), "Failed to initialize SDL: {}", SDL_GetError());
+        if (SDL_WasInit(SDL_INIT_VIDEO) == 0 && !SDL_Init(SDL_INIT_VIDEO))
+        {
+            HE_ERROR("Failed to initialize SDL: {}", SDL_GetError());
+            return std::nullopt;
+        }
 
+        Window window { };
+        if (!window.initialize(title, width, height))
+        {
+            HE_ERROR("Failed to initialize window");
+            return std::nullopt;
+        }
+
+        return window;
+    }
+
+    bool Window::initialize(const std::string_view title, const u32 width, const u32 height)
+    {
         m_native_handle = SDL_CreateWindow(
             title.data(),
             static_cast<i32>(width),
             static_cast<i32>(height),
             SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_VULKAN);
-        HE_ASSERT(m_native_handle != nullptr, "Failed to create SDL window: {}", SDL_GetError());
+        if (m_native_handle == nullptr)
+        {
+            HE_ERROR("Failed to create SDL window: {}", SDL_GetError());
+            return false;
+        }
+
+        return true;
     }
 
     Window::~Window()

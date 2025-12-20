@@ -14,7 +14,7 @@
 
 namespace he::logger
 {
-    static RefPtr<spdlog::logger> s_logger { nullptr };
+    static RefPtr<spdlog::logger> s_logger = nullptr;
 
     namespace detail
     {

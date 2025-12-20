@@ -15,15 +15,23 @@
 
 namespace he::filesystem
 {
-    std::vector<u8> read_to_bytes(const std::string_view path)
+    std::optional<std::vector<u8>> read_to_bytes(const std::string_view path)
     {
         HE_ASSERT(!path.empty());
 
         const std::filesystem::path file_path(path);
-        HE_ASSERT(std::filesystem::exists(file_path));
+        if (!std::filesystem::exists(file_path))
+        {
+            HE_ERROR("Failed to find file: '%s'", path);
+            return std::nullopt;
+        }
 
-        std::ifstream file { file_path, std::ios::binary | std::ios::ate };
-        HE_ASSERT(file.is_open());
+        std::ifstream file(file_path, std::ios::binary | std::ios::ate);
+        if (!file.is_open())
+        {
+            HE_ERROR("Failed to open file: '%s'", path);
+            return std::nullopt;
+        }
 
         const std::ifstream::pos_type size = file.tellg();
 
@@ -34,15 +42,23 @@ namespace he::filesystem
         return data;
     }
 
-    std::string read_to_string(std::string_view path)
+    std::optional<std::string> read_to_string(std::string_view path)
     {
         HE_ASSERT(!path.empty());
 
         const std::filesystem::path file_path(path);
-        HE_ASSERT(std::filesystem::exists(file_path));
+        if (!std::filesystem::exists(file_path))
+        {
+            HE_ERROR("Failed to find file: '{}'", path);
+            return std::nullopt;
+        }
 
-        std::ifstream file { file_path, std::ios::ate };
-        HE_ASSERT(file.is_open());
+        std::ifstream file(file_path, std::ios::ate);
+        if (!file.is_open())
+        {
+            HE_ERROR("Failed to open file: '{}'", path);
+            return std::nullopt;
+        }
 
         const std::ifstream::pos_type size = file.tellg();
 

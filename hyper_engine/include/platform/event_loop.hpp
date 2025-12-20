@@ -32,7 +32,7 @@ namespace he
         private:
             static u32 identifier()
             {
-                static u32 value { 0 };
+                static u32 value = 0;
                 return value++;
             }
         };
@@ -58,7 +58,7 @@ namespace he
             }
 
         private:
-            std::vector<Callback<T>> m_callbacks {};
+            std::vector<Callback<T>> m_callbacks = { };
         };
 
     public:
@@ -97,10 +97,10 @@ namespace he
             }
 
             const HandlerImpl<T> *handler = static_cast<HandlerImpl<T> *>(m_handlers.at(id).get());
-            handler->dispatch(T { std::forward<Args>(args)... });
+            handler->dispatch(T(std::forward<Args>(args)...));
         }
 
     private:
-        std::unordered_map<u32, OwnPtr<Handler>> m_handlers {};
+        std::unordered_map<u32, OwnPtr<Handler>> m_handlers = { };
     };
 } // namespace he
