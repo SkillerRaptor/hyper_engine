@@ -16,7 +16,7 @@ namespace he
 {
     void EventLoop::poll() const
     {
-        SDL_Event event {};
+        SDL_Event event;
         while (SDL_PollEvent(&event))
         {
             switch (event.type)

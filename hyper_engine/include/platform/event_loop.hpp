@@ -101,6 +101,6 @@ namespace he
         }
 
     private:
-        std::unordered_map<u32, OwnPtr<Handler>> m_handlers = { };
+        std::unordered_map<u32, OwnPtr<Handler>> m_handlers;
     };
 } // namespace he

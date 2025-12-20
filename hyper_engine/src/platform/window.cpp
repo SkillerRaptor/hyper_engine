@@ -24,7 +24,7 @@ namespace he
             return std::nullopt;
         }
 
-        Window window { };
+        Window window;
         if (!window.initialize(title, width, height))
         {
             HE_ERROR("Failed to initialize window");
@@ -60,7 +60,7 @@ namespace he
     }
 
     Window::Window(Window &&other) noexcept
-        : m_native_handle { std::exchange(other.m_native_handle, nullptr) }
+        : m_native_handle(std::exchange(other.m_native_handle, nullptr))
     {
     }
 
@@ -93,8 +93,8 @@ namespace he
 
     std::pair<u32, u32> Window::size() const
     {
-        i32 width { 0 };
-        i32 height { 0 };
+        i32 width = 0;
+        i32 height = 0;
         SDL_GetWindowSize(m_native_handle, &width, &height);
         return { static_cast<u32>(width), static_cast<u32>(height) };
     }
