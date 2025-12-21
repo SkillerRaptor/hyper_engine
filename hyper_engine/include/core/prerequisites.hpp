@@ -37,6 +37,3 @@
 #elif HE_MSVC_COMPILER
 #    define HE_ALWAYS_INLINE __forceinline
 #endif
-
-#define HE_BIND_FUNCTION(function) \
-    [this](auto &&...args) -> decltype(auto) { return this->function(::std::forward<decltype(args)>(args)...); }

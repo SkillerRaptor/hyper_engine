@@ -28,6 +28,8 @@ namespace he
         Window(Window &&) noexcept;
         Window &operator=(Window &&) noexcept;
 
+        void update();
+
         void set_title(std::string_view);
         std::string title() const;
 
@@ -40,6 +42,8 @@ namespace he
         void set_resizable(bool);
         bool is_resizable() const;
 
+        HE_ALWAYS_INLINE bool is_close_requested() const { return m_close_requested; }
+
         HE_ALWAYS_INLINE SDL_Window *native_handle() const { return m_native_handle; }
 
     private:
@@ -49,5 +53,7 @@ namespace he
 
     private:
         SDL_Window *m_native_handle = nullptr;
+
+        bool m_close_requested = false;
     };
 } // namespace he

@@ -12,10 +12,10 @@ namespace he
 {
     enum class MouseCode : u8
     {
-        ButtonLeft = 1,
-        ButtonMiddle = 2,
-        ButtonRight = 3,
-        ButtonX1 = 4,
-        ButtonX2 = 5,
+        Left = 1,
+        Middle = 2,
+        Right = 3,
+        X1 = 4,
+        X2 = 5,
     };
 } // namespace he

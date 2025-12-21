@@ -74,6 +74,25 @@ namespace he
         return *this;
     }
 
+    void Window::update()
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            switch (event.type)
+            {
+            case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+                if (event.window.windowID == SDL_GetWindowID(m_native_handle))
+                {
+                    m_close_requested = true;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
     void Window::set_title(const std::string_view title)
     {
         HE_ASSERT(!title.empty());

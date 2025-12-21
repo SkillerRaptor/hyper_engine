@@ -6,29 +6,20 @@
 
 #pragma once
 
-#include <unordered_map>
+#include <array>
 
 #include <glm/vec2.hpp>
 
 #include "core/prerequisites.hpp"
-#include "platform/key_events.hpp"
-#include "platform/mouse_events.hpp"
+#include "platform/key_codes.hpp"
+#include "platform/mouse_codes.hpp"
 
 namespace he
 {
-    class EventLoop;
-
     class Input
     {
     public:
-        explicit Input(EventLoop &);
-        ~Input() = default;
-
-        Input(const Input &) = delete;
-        Input &operator=(const Input &) = delete;
-
-        Input(Input &&) noexcept = default;
-        Input &operator=(Input &&) noexcept = default;
+        void update();
 
         bool is_key_pressed(KeyCode) const;
         bool is_mouse_button_pressed(MouseCode) const;
@@ -36,15 +27,8 @@ namespace he
         HE_ALWAYS_INLINE glm::vec2 mouse_position() const { return m_mouse_position; }
 
     private:
-        void on_mouse_move(const MouseMoveEvent &event);
-        void on_mouse_button_press(const MouseButtonPressEvent &event);
-        void on_mouse_button_release(const MouseButtonReleaseEvent &event);
-        void on_key_press(const KeyPressEvent &event);
-        void on_key_release(const KeyReleaseEvent &event);
-
-    private:
-        std::unordered_map<KeyCode, bool> m_keys ;
-        std::unordered_map<MouseCode, bool> m_mouse_buttons;
+        std::array<bool, 512> m_key_states = { };
+        u32 m_mouse_state = 0;
         glm::vec2 m_mouse_position = { 0.0f, 0.0f };
     };
 } // namespace he
