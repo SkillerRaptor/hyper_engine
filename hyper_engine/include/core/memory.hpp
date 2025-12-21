@@ -20,11 +20,23 @@ namespace he
     }
 
     template <typename T>
+    OwnPtr<T> wrap_own(T *ptr)
+    {
+        return OwnPtr<T>(ptr);
+    }
+
+    template <typename T>
     using RefPtr = std::shared_ptr<T>;
 
     template <typename T, typename... Args>
     RefPtr<T> make_ref(Args &&...args)
     {
         return std::make_shared<T>(std::forward<Args>(args)...);
+    }
+
+    template <typename T>
+    RefPtr<T> wrap_ref(T *ptr)
+    {
+        return RefPtr<T>(ptr);
     }
 } // namespace he
