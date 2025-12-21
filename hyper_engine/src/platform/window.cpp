@@ -20,7 +20,7 @@ namespace he
 
         if (SDL_WasInit(SDL_INIT_VIDEO) == 0 && !SDL_Init(SDL_INIT_VIDEO))
         {
-            HE_ERROR("Failed to initialize SDL: {}", SDL_GetError());
+            HE_ERROR("Failed to initialize SDL: '{}'", SDL_GetError());
             return std::nullopt;
         }
 
@@ -43,7 +43,7 @@ namespace he
             SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_VULKAN);
         if (m_native_handle == nullptr)
         {
-            HE_ERROR("Failed to create SDL window: {}", SDL_GetError());
+            HE_ERROR("Failed to create SDL window: '{}'", SDL_GetError());
             return false;
         }
 
