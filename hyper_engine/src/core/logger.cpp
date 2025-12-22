@@ -46,5 +46,7 @@ namespace he::logger
             });
         s_logger->set_level(level);
         s_logger->flush_on(level);
+
+        HE_INFO("Initialized logger");
     }
 } // namespace he::logger

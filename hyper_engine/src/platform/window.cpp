@@ -31,6 +31,8 @@ namespace he
             return std::nullopt;
         }
 
+        HE_INFO("Created window (title='{}', width={}, height={})", title, width, height);
+
         return window;
     }
 
@@ -56,6 +58,8 @@ namespace he
         {
             SDL_DestroyWindow(m_native_handle);
             SDL_Quit();
+
+            HE_INFO("Destroyed window");
         }
     }
 
