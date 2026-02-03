@@ -74,3 +74,11 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 add_subdirectory(hyper_engine)
 
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT hyper_engine)
+
+#-------------------------------------------------------------------------------------------
+# Tests
+#-------------------------------------------------------------------------------------------
+include(CTest)
+if (BUILD_TESTING)
+    add_subdirectory(tests)
+endif ()
