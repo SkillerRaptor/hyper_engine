@@ -7,8 +7,12 @@
 #-------------------------------------------------------------------------------------------
 # CMake Info
 #-------------------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.1...4.1)
-project(HyperEngine LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.10)
+project(
+        HyperEngine
+        VERSION 0.0.1
+        DESCRIPTION ""
+        LANGUAGES C CXX)
 
 #-------------------------------------------------------------------------------------------
 # Standard Settings

@@ -20,10 +20,9 @@ int main()
 
     // TODO: Parse command line arguments
 
-    Result<Engine> engine = Engine::create();
+    std::optional<Engine> engine = Engine::create();
     if (!engine.has_value())
     {
-        HE_FATAL("Exiting with runtime error: \"{}\"", engine.error());
         return EXIT_FAILURE;
     }
 

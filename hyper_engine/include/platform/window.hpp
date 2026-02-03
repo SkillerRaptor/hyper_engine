@@ -19,7 +19,7 @@ namespace he
     class Window
     {
     public:
-        static std::optional<Window> create(std::string_view title, u32 width, u32 height);
+        static OwnPtr<Window> create(std::string_view title, u32 width, u32 height);
         ~Window();
 
         Window(const Window &) = delete;

@@ -12,7 +12,7 @@
 
 namespace he
 {
-    std::optional<Window> Window::create(const std::string_view title, const u32 width, const u32 height)
+    OwnPtr<Window> Window::create(const std::string_view title, const u32 width, const u32 height)
     {
         HE_ASSERT(!title.empty());
         HE_ASSERT(width > 0);
@@ -21,14 +21,14 @@ namespace he
         if (SDL_WasInit(SDL_INIT_VIDEO) == 0 && !SDL_Init(SDL_INIT_VIDEO))
         {
             HE_ERROR("Failed to initialize SDL: '{}'", SDL_GetError());
-            return std::nullopt;
+            return nullptr;
         }
 
-        Window window;
-        if (!window.initialize(title, width, height))
+        OwnPtr<Window> window = wrap_own<Window>(new Window());
+        if (!window->initialize(title, width, height))
         {
             HE_ERROR("Failed to initialize window");
-            return std::nullopt;
+            return nullptr;
         }
 
         HE_INFO("Created window (title='{}', width={}, height={})", title, width, height);

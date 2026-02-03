@@ -10,7 +10,7 @@
 #ifdef __cplusplus
 #    include <glm/glm.hpp>
 #
-#    include <render/resource_handle.hpp>
+#    include <rhi/resource_handle.hpp>
 
 #    define float2 ::glm::vec2
 #    define float3 ::glm::vec3
@@ -27,7 +27,7 @@
 #    define uint3 ::glm::u32vec3
 #    define uint4 ::glm::u32vec4
 
-#    define RESOURCE_HANDLE ::ResourceHandle
+#    define RESOURCE_HANDLE ::he::ResourceHandle
 #    define SIMPLE_BUFFER RESOURCE_HANDLE
 #    define RW_SIMPLE_BUFFER RESOURCE_HANDLE
 #    define ARRAY_BUFFER RESOURCE_HANDLE
@@ -52,181 +52,6 @@
 // Shader Interop
 ////////////////////////////////////////////////////////////////////////////////
 
-struct ShaderScene
-{
-    TEXTURE irradiance_texture;
-    SAMPLER irradiance_sampler;
-    TEXTURE prefilter_texture;
-    SAMPLER prefilter_sampler;
-    TEXTURE brdf_texture;
-    SAMPLER brdf_sampler;
-    uint padding_0;
-    uint padding_1;
-};
-
-struct ShaderModel
-{
-    ARRAY_BUFFER positions;
-    ARRAY_BUFFER normals;
-    ARRAY_BUFFER tangents;
-    ARRAY_BUFFER colors;
-    ARRAY_BUFFER uvs;
-
-#ifndef __cplusplus
-    inline float3 get_position(uint index) { return positions.load<float3>(index); }
-    inline float3 get_normal(uint index) { return normals.load<float3>(index); }
-    inline float4 get_tangent(uint index) { return tangents.load<float4>(index); }
-    inline float3 get_color(uint index) { return colors.load<float3>(index); }
-    inline float2 get_uv(uint index) { return uvs.load<float2>(index); }
-#endif
-};
-
-struct ShaderMaterial
-{
-    float4 albedo_factors;
-    TEXTURE albedo_texture;
-    SAMPLER albedo_sampler;
-    uint padding_0;
-    uint padding_1;
-
-    float2 metal_roughness_factors;
-    TEXTURE metal_roughness_texture;
-    SAMPLER metal_roughness_sampler;
-
-    TEXTURE normal_texture;
-    SAMPLER normal_sampler;
-    float normal_scale;
-    uint padding_2;
-
-    TEXTURE occlusion_texture;
-    SAMPLER occlusion_sampler;
-    float occlusion_strength;
-    uint padding_3;
-
-    TEXTURE emissive_texture;
-    SAMPLER emissive_sampler;
-    uint padding_4;
-    uint padding_5;
-    float3 emissive_factor;
-    float emissive_strength;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-// Push Constants
-////////////////////////////////////////////////////////////////////////////////
-
-#ifndef __cplusplus
-#    ifdef HE_VULKAN
-#        define HE_PUSH_CONSTANT(value_type, name) [[vk::push_constant]] value_type name
-#    else
-#        define HE_PUSH_CONSTANT(value_type, name) ConstantBuffer<value_type> name : register(b0, space0)
-#    endif
-#endif
-
-struct ObjectPushConstants
-{
-    SIMPLE_BUFFER scene;
-    SIMPLE_BUFFER model;
-    SIMPLE_BUFFER material;
-    uint padding_0;
-    float4x4 transform_matrix;
-    float3x3 normal_matrix;
-
-#ifndef __cplusplus
-    inline ShaderScene get_scene() { return scene.load<ShaderScene>(); }
-    inline ShaderModel get_model() { return model.load<ShaderModel>(); }
-    inline ShaderMaterial get_material() { return material.load<ShaderMaterial>(); }
-#endif
-};
-
-struct EquirectangularPushConstants
-{
-    TEXTURE equirectangular_texture;
-    uint equirectangular_width;
-    uint equirectangular_height;
-    uint padding_0;
-    RW_TEXTURE skybox_texture;
-    uint skybox_size;
-    uint padding_1;
-    uint padding_2;
-};
-
-struct IrradiancePushConstants
-{
-    TEXTURE skybox_texture;
-    SAMPLER skybox_sampler;
-    RW_TEXTURE irradiance_texture;
-    uint size;
-};
-
-struct PrefilterPushConstants
-{
-    TEXTURE skybox_texture;
-    SAMPLER skybox_sampler;
-    RW_TEXTURE prefilter_texture;
-    uint size;
-    float roughness;
-    uint padding_0;
-    uint padding_1;
-    uint padding_2;
-};
-
-struct BrdfPushConstants
-{
-    RW_TEXTURE brdf_texture;
-    uint size;
-    uint padding_0;
-    uint padding_1;
-};
-
-struct SkyboxPushConstants
-{
-    TEXTURE skybox_texture;
-    SAMPLER skybox_sampler;
-    uint padding_0;
-    uint padding_1;
-};
-
-struct CompositionPushConstants
-{
-    TEXTURE composition_texture;
-    SAMPLER composition_sampler;
-    uint padding_0;
-    uint padding_1;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-// Globals
-////////////////////////////////////////////////////////////////////////////////
-
-// NOTE: This assumes we have 1000 * 1000 descriptors available. This might need refining
-#define HE_DESCRIPTOR_SET_SLOT_FRAME ((1000 * 1000) - 1)
-#define HE_DESCRIPTOR_SET_SLOT_CAMERA ((1000 * 1000) - 2)
-
-struct ShaderFrame
-{
-    float time;
-    float delta_time;
-    float unused_0;
-    float unused_1;
-
-    uint frame_count;
-    uint unused_2;
-    uint unused_3;
-    uint unused_4;
-
-    float2 screen_size;
-    float2 unused_5;
-};
-
-#ifndef __cplusplus
-inline ShaderFrame get_frame()
-{
-    SimpleBuffer buffer = (SimpleBuffer) HE_DESCRIPTOR_SET_SLOT_FRAME;
-    return buffer.load<ShaderFrame>();
-}
-#endif
-
 struct ShaderCamera
 {
     float4 position;
@@ -246,13 +71,33 @@ struct ShaderCamera
     float padding_1;
 };
 
+////////////////////////////////////////////////////////////////////////////////
+// Push Constants
+////////////////////////////////////////////////////////////////////////////////
+
 #ifndef __cplusplus
-inline ShaderCamera get_camera()
-{
-    SimpleBuffer buffer = (SimpleBuffer) HE_DESCRIPTOR_SET_SLOT_CAMERA;
-    return buffer.load<ShaderCamera>();
-}
+#    ifdef HE_VULKAN
+#        define HE_PUSH_CONSTANT(value_type, name) [[vk::push_constant]] value_type name
+#    else
+#        define HE_PUSH_CONSTANT(value_type, name) ConstantBuffer<value_type> name : register(b0, space0)
+#    endif
 #endif
+
+struct DebugPushConstants
+{
+    SIMPLE_BUFFER camera;
+    uint padding_1;
+    uint padding_2;
+    uint padding_3;
+};
+
+struct CompositionPushConstants
+{
+    TEXTURE composition_texture;
+    SAMPLER composition_sampler;
+    uint padding_0;
+    uint padding_1;
+};
 
 #ifdef __cplusplus
 #    undef float2

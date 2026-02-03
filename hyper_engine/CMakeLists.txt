@@ -9,16 +9,19 @@ set(SOURCES
         src/core/filesystem.cpp
         src/core/logger.cpp
         src/core/string_utils.cpp
-        src/platform/event_server.cpp
-        src/platform/input_server.cpp
-        src/platform/window_server.cpp
-        src/render/camera.cpp
-        src/render/render_driver.cpp
-        src/render/render_server.cpp
-        src/render/shader_compiler.cpp
-        src/render/vulkan/vulkan_render_conversion.cpp
-        src/render/vulkan/vulkan_render_driver.cpp
-        src/scene/resources/asset.cpp)
+        src/platform/input.cpp
+        src/platform/window.cpp
+        src/rhi/graphics_device.cpp
+        src/rhi/validation.cpp
+        src/rhi/vulkan/buffer.cpp
+        src/rhi/vulkan/compute_pipeline.cpp
+        src/rhi/vulkan/graphics_device.cpp
+        src/rhi/vulkan/pipeline_layout.cpp
+        src/rhi/vulkan/render_conversion.cpp
+        src/rhi/vulkan/render_pipeline.cpp
+        src/rhi/vulkan/sampler.cpp
+        src/rhi/vulkan/shader.cpp
+        src/rhi/vulkan/texture.cpp)
 
 set(HEADERS
         include/engine.hpp
@@ -28,26 +31,32 @@ set(HEADERS
         include/core/logger.hpp
         include/core/memory.hpp
         include/core/prerequisites.hpp
-        include/core/result.hpp
         include/core/string_utils.hpp
         include/core/types.hpp
-        include/platform/event_server.hpp
-        include/platform/input_server.hpp
-        include/platform/window_server.hpp
+        include/platform/input.hpp
         include/platform/key_codes.hpp
-        include/platform/key_events.hpp
         include/platform/mouse_codes.hpp
-        include/platform/mouse_events.hpp
-        include/platform/window_events.hpp
-        include/render/camera.hpp
-        include/render/definitions.hpp
-        include/render/render_driver.hpp
-        include/render/render_server.hpp
-        include/render/resource_handle.hpp
-        include/render/shader_compiler.hpp
-        include/render/vulkan/vulkan_render_conversion.hpp
-        include/render/vulkan/vulkan_render_driver.hpp
-        include/scene/resources/asset.hpp)
+        include/platform/window.hpp
+        include/rhi/buffer.hpp
+        include/rhi/compute_pipeline.hpp
+        include/rhi/definitions.hpp
+        include/rhi/graphics_device.hpp
+        include/rhi/pipeline_layout.hpp
+        include/rhi/render_pipeline.hpp
+        include/rhi/resource_handle.hpp
+        include/rhi/sampler.hpp
+        include/rhi/shader.hpp
+        include/rhi/texture.hpp
+        include/rhi/validation.hpp
+        include/rhi/vulkan/buffer.hpp
+        include/rhi/vulkan/compute_pipeline.hpp
+        include/rhi/vulkan/graphics_device.hpp
+        include/rhi/vulkan/pipeline_layout.hpp
+        include/rhi/vulkan/render_conversion.hpp
+        include/rhi/vulkan/render_pipeline.hpp
+        include/rhi/vulkan/sampler.hpp
+        include/rhi/vulkan/shader.hpp
+        include/rhi/vulkan/texture.hpp)
 
 #-------------------------------------------------------------------------------------------
 link_libraries(
@@ -68,7 +77,6 @@ if (WIN32)
 endif ()
 
 add_compile_definitions(GLM_FORCE_RADIANS GLM_FORCE_DEPTH_ZE_TO_ONE)
-
 include_directories(${CMAKE_SOURCE_DIR}/assets/shaders)
 
 #-------------------------------------------------------------------------------------------

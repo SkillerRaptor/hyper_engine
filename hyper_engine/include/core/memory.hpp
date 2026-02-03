@@ -39,4 +39,10 @@ namespace he
     {
         return RefPtr<T>(ptr);
     }
+
+    template <typename T, typename U>
+    RefPtr<T> cast_ref(const RefPtr<U> &ptr)
+    {
+        return std::static_pointer_cast<T>(ptr);
+    }
 } // namespace he

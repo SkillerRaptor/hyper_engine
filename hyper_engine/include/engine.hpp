@@ -6,110 +6,41 @@
 
 #pragma once
 
-#include <memory>
+#include "platform/input.hpp"
+#include "platform/window.hpp"
+#include "rhi/graphics_device.hpp"
 
-#include "platform/event_server.hpp"
-#include "platform/input_server.hpp"
-#include "platform/window_server.hpp"
-#include "render/camera.hpp"
-#include "render/render_server.hpp"
-#include "scene/resources/asset.hpp"
-
-class Engine
+namespace he
 {
-private:
-    struct GpuMesh
+    class Engine
     {
-        size_t start_index { 0 };
-        size_t index_count { 0 };
+    public:
+        static std::optional<Engine> create();
+        ~Engine() = default;
 
-        BufferId material_buffer {};
+        Engine(const Engine &) = delete;
+        Engine &operator=(const Engine &) = delete;
+
+        Engine(Engine &&) noexcept = default;
+        Engine &operator=(Engine &&) noexcept = default;
+
+        void run();
+
+    private:
+        Engine() = default;
+
+        bool initialize();
+
+        void fixed_update(f32 delta_time);
+        void update(f32 delta_time);
+        void render() const;
+
+    private:
+        OwnPtr<Window> m_window = nullptr;
+        Input m_input;
+
+        RefPtr<GraphicsDevice> m_graphics_device = nullptr;
+
+        bool m_running = true;
     };
-
-    struct GpuModel
-    {
-        glm::mat4 transform { 1.0f };
-        BufferId model_buffer {};
-        BufferId indices_buffer {};
-
-        std::vector<GpuMesh> meshes {};
-    };
-
-public:
-    void initialize();
-    void shutdown() const;
-
-    void run();
-
-private:
-    void fixed_update(f32 delta_time);
-    void update(f32 delta_time);
-    void render() const;
-
-    void create_pbr();
-    void create_skybox();
-    void create_irradiance();
-    void create_prefilter();
-    void create_brdf();
-    void create_grid();
-    void create_composition();
-    void create_default();
-
-    void render_pbr(CommandBufferId) const;
-    void render_skybox(CommandBufferId) const;
-    void render_grid(CommandBufferId) const;
-    void render_composition(CommandBufferId) const;
-
-    std::vector<GpuModel> upload_asset(const Asset &);
-    void upload_model(
-        CommandBufferId, const Asset &, const Asset::Node *, const glm::mat4 &parent_transform, std::vector<GpuModel> &);
-
-private:
-    std::unique_ptr<WindowServer> m_window_server { nullptr };
-    WindowId m_window {};
-
-    std::unique_ptr<EventServer> m_event_server { nullptr };
-    std::unique_ptr<InputServer> m_input_server { nullptr };
-
-    std::unique_ptr<RenderServer> m_render_server { nullptr };
-
-    Camera m_camera { glm::vec3(0.0f, 0.0f, 3.0f), -90.0f, 0.0f };
-    BufferId m_camera_buffer {};
-    BufferId m_scene_buffer {};
-
-    TextureId m_default_texture {};
-    TextureViewId m_default_texture_view {};
-    SamplerId m_default_sampler {};
-
-    PipelineLayoutId m_pbr_layout {};
-    RenderPipelineId m_pbr_pipeline {};
-
-    TextureId m_skybox_texture {};
-    TextureViewId m_skybox_texture_view {};
-    PipelineLayoutId m_skybox_layout {};
-    RenderPipelineId m_skybox_pipeline {};
-
-    TextureId m_irradiance_texture {};
-    TextureViewId m_irradiance_texture_view {};
-
-    TextureId m_prefilter_texture {};
-    TextureViewId m_prefilter_texture_view {};
-
-    TextureId m_brdf_texture {};
-    TextureViewId m_brdf_texture_view {};
-
-    RenderPipelineId m_grid_pipeline {};
-
-    PipelineLayoutId m_composition_layout {};
-    RenderPipelineId m_composition_pipeline {};
-    TextureId m_composition_texture {};
-    TextureViewId m_composition_texture_view {};
-    TextureId m_depth_texture {};
-    TextureViewId m_depth_texture_view {};
-
-    Asset m_sponza;
-    Asset m_damaged_helmet;
-    std::vector<GpuModel> m_renderables {};
-
-    bool m_running { true };
-};
+} // namespace he
