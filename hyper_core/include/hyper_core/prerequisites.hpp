@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <utility>
-
 #ifndef NDEBUG
 #    define HE_DEBUG_BUILD 1
 #else
@@ -36,4 +34,6 @@
 #    define HE_ALWAYS_INLINE __attribute__((always_inline)) inline
 #elif HE_MSVC_COMPILER
 #    define HE_ALWAYS_INLINE __forceinline
+#else
+#    define HE_ALWAYS_INLINE inline
 #endif
