@@ -13,7 +13,6 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vk_enum_string_helper.h>
 
-#include "catch2/internal/catch_windows_h_proxy.hpp"
 #include "core/assertion.hpp"
 #include "core/logger.hpp"
 #include "platform/window.hpp"
