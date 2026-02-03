@@ -73,22 +73,20 @@ target_link_libraries(
         PRIVATE
         DirectXShaderCompiler
         EnTT::EnTT
-        fastgltf
-        fmt
+        fastgltf::fastgltf
+        fmt::fmt
         glm
         imgui
         SDL3::SDL3
-        spdlog
+        spdlog::spdlog
         stb
-        volk
+        volk::volk
         GPUOpen::VulkanMemoryAllocator)
 
 if (WIN32)
     target_link_libraries(
             hyper_engine
             PRIVATE
-            d3d12.lib
-            dxgi.lib
             D3D12MemoryAllocator)
 endif ()
 

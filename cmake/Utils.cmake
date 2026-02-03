@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 
-function(he_group_source SOURCE)
-    foreach (item IN ITEMS ${SOURCE})
+function(he_group_source source)
+    foreach (item IN ITEMS ${source})
         get_filename_component(src_path "${item}" PATH)
         string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "" group_path "${src_path}")
         string(REPLACE ".." "\\" group_path "${group_path}")
@@ -13,29 +13,57 @@ function(he_group_source SOURCE)
     endforeach ()
 endfunction()
 
-function(he_define_executable target)
+macro(he_define_executable target)
     he_group_source(${SOURCES})
-    if (HEADERS)
-        he_group_source(${HEADERS})
-    endif ()
+    he_group_source(${HEADERS})
 
     add_executable(${target} ${SOURCES} ${HEADERS})
-    target_link_libraries(${target} PRIVATE ProjectOptions ProjectWarnings)
     target_include_directories(${target} PUBLIC include)
-    target_compile_options(${target} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:/Zc:preprocessor>")
+    target_link_libraries(${target} PRIVATE ProjectOptions ProjectWarnings)
+    target_compile_options(${target} PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/Zc:preprocessor>")
 
     if (WIN32)
         target_compile_definitions(
                 ${target}
-                PUBLIC
-                HE_WINDOWS=1
+                PRIVATE
+                HE_PLATFORM_WINDOWS=1)
+
+        target_compile_definitions(
+                ${target}
+                PRIVATE
                 _CRT_SECURE_NO_WARNINGS
                 NOMINMAX
                 WIN32_LEAN_AND_MEAN)
     else ()
-        target_compile_definitions(${target} PUBLIC HE_LINUX=1)
+        target_compile_definitions(${target} PRIVATE HE_PLATFORM_LINUX=1)
     endif ()
-endfunction()
+endmacro()
+
+macro(he_add_library target)
+    he_group_source(${SOURCES})
+    he_group_source(${HEADERS})
+
+    add_library(${target} ${SOURCES} ${HEADERS})
+    target_include_directories(${target} PUBLIC include)
+    target_link_libraries(${target} PRIVATE ProjectOptions ProjectWarnings)
+    target_compile_options(${target} PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/Zc:preprocessor>")
+
+    if (WIN32)
+        target_compile_definitions(
+                ${target}
+                PRIVATE
+                HE_PLATFORM_WINDOWS=1)
+
+        target_compile_definitions(
+                ${target}
+                PRIVATE
+                _CRT_SECURE_NO_WARNINGS
+                NOMINMAX
+                WIN32_LEAN_AND_MEAN)
+    else ()
+        target_compile_definitions(${target} PRIVATE HE_PLATFORM_LINUX=1)
+    endif ()
+endmacro()
 
 function(he_download_and_extract URL DESTINATION FOLDER_NAME)
     if (NOT EXISTS ${CMAKE_BINARY_DIR}/download/${FOLDER_NAME}.zip)
