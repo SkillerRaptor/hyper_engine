@@ -4,72 +4,232 @@
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 
+include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
+
 include(FetchContent)
 
-#-------------------------------------------------------------------------------------------
-# Catch2 (v3.8.1)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        Catch2
-        SYSTEM
-        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG 2b60af89e23d28eefc081bc930831ee9d45ea58b)
+CPMAddPackage(
+        NAME Catch2
+        GITHUB_REPOSITORY catchorg/Catch2
+        GIT_TAG v3.12.0
+        OPTIONS
+        "CATCH_INSTALL_DOCS OFF"
+        "CATCH_INSTALL_EXTRAS ON"
+        "CATCH_DEVELOPMENT_BUILD OFF"
+        "CATCH_ENABLE_REPRODUCIBLE_BUILD ON")
 
-set(CATCH_INSTALL_DOCS OFF CACHE INTERNAL "")
-set(CATCH_INSTALL_EXTRAS ON CACHE INTERNAL "")
-set(CATCH_DEVELOPMENT_BUILD OFF CACHE INTERNAL "")
-set(CATCH_ENABLE_REPRODUCIBLE_BUILD ON CACHE INTERNAL "")
+CPMAddPackage(
+        NAME entt
+        GITHUB_REPOSITORY skypjack/entt
+        GIT_TAG v3.16.0
+        OPTIONS
+        "ENTT_USE_LIBCPP OFF"
+        "ENTT_USE_SANITIZER OFF"
+        "ENTT_USE_CLANG_TIDY OFF"
+        "ENTT_INCLUDE_HEADERS OFF"
+        "ENTT_INCLUDE_NATVIS OFF"
+        "ENTT_INSTALL OFF"
+        "ENTT_BUILD_TESTING OFF"
+        "ENTT_BUILD_TESTBED OFF"
+        "ENTT_BUILD_DOCS OFF")
 
-FetchContent_MakeAvailable(Catch2)
+CPMAddPackage(
+        NAME D3D12MemoryAllocator
+        GITHUB_REPOSITORY GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator
+        GIT_TAG v3.0.1
+        OPTIONS
+        "D3D12MA_BUILD_SAMPLE OFF")
 
-set_target_properties(
-        Catch2
-        PROPERTIES
-        FOLDER "third_party")
+CPMAddPackage(
+        NAME fastgltf
+        GITHUB_REPOSITORY spnda/fastgltf
+        GIT_TAG v0.9.0
+        OPTIONS
+        "FASTGLTF_USE_CUSTOM_SMALLVECTOR OFF"
+        "FASTGLTF_ENABLE_TESTS OFF"
+        "FASTGLTF_ENABLE_EXAMPLES OFF"
+        "FASTGLTF_ENABLE_DOCS OFF"
+        "FASTGLTF_ENABLE_GLTF_RS OFF"
+        "FASTGLTF_ENABLE_ASSIMP OFF"
+        "FASTGLTF_ENABLE_DEPRECATED_EXT OFF"
+        "FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL OFF"
+        "FASTGLTF_USE_64BIT_FLOAT OFF"
+        "FASTGLTF_COMPILE_AS_CPP20 ON"
+        "FASTGLTF_ENABLE_CPP_MODULES OFF"
+        "FASTGLTF_USE_STD_MODULE OFF"
+        "FASTGLTF_ENABLE_KHR_IMPLICIT_SHAPES OFF"
+        "FASTGLTF_ENABLE_KHR_PHYSICS_RIGID_BODIES OFF")
 
-set_target_properties(
-        Catch2WithMain
-        PROPERTIES
-        FOLDER "third_party")
+CPMAddPackage(
+        NAME fmt
+        GITHUB_REPOSITORY fmtlib/fmt
+        GIT_TAG 12.1.0
+        OPTIONS
+        "FMT_PEDANTIC OFF"
+        "FMT_WERROR OFF"
+        "FMT_DOC OFF"
+        "FMT_INSTALL OFF"
+        "FMT_TEST OFF"
+        "FMT_FUZZ OFF"
+        "FMT_CUDA_TEST OFF"
+        "FMT_OS ON"
+        "FMT_MODULE OFF"
+        "FMT_SYSTEM_HEADERS OFF"
+        "FMT_UNICODE ON")
 
-#-------------------------------------------------------------------------------------------
-# entt (v3.15.0)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        entt
-        SYSTEM
-        GIT_REPOSITORY https://github.com/skypjack/entt.git
-        GIT_TAG d4014c74dc3793aba95ae354d6e23a026c2796db)
+CPMAddPackage(
+        NAME glm
+        GITHUB_REPOSITORY g-truc/glm
+        GIT_TAG 1.0.3
+        OPTIONS
+        "GLM_BUILD_LIBRARY OFF"
+        "GLM_BUILD_TESTS OFF"
+        "GLM_BUILD_INSTALL OFF")
 
-set(ENTT_USE_LIBCPP OFF CACHE INTERNAL "")
-set(ENTT_USE_SANITIZER OFF CACHE INTERNAL "")
-set(ENTT_USE_CLANG_TIDY OFF CACHE INTERNAL "")
-set(ENTT_INCLUDE_HEADERS OFF CACHE INTERNAL "")
-set(ENTT_INCLUDE_NATVIS OFF CACHE INTERNAL "")
-set(ENTT_INSTALL OFF CACHE INTERNAL "")
-set(ENTT_BUILD_TESTING OFF CACHE INTERNAL "")
-set(ENTT_BUILD_TESTBED OFF CACHE INTERNAL "")
-set(ENTT_BUILD_DOCS OFF CACHE INTERNAL "")
+CPMAddPackage(
+        NAME imgui
+        GITHUB_REPOSITORY ocornut/imgui
+        GIT_TAG v1.92.5
+        DOWNLOAD_ONLY YES)
 
-FetchContent_MakeAvailable(entt)
+if (imgui_ADDED)
+    add_subdirectory(imgui)
+endif ()
 
-#-------------------------------------------------------------------------------------------
-# D3D12MemoryAllocator (v3.0.1)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        D3D12MemoryAllocator
-        SYSTEM
-        GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator.git
-        GIT_TAG 9ef66bc14edd10dee0de3a545b98578363552f66)
+CPMAddPackage(
+        NAME meshoptimizer
+        GITHUB_REPOSITORY zeux/meshoptimizer
+        GIT_TAG v1.0
+        OPTIONS
+        "MESHOPT_BUILD_DEMO OFF"
+        "MESHOPT_BUILD_GLTFPACK OFF"
+        "MESHOPT_BUILD_SHARED_LIBS OFF"
+        "MESHOPT_STABLE_EXPORTS OFF"
+        "MESHOPT_WERROR OFF"
+        "MESHOPT_INSTALL OFF")
 
-set(D3D12MA_BUILD_SAMPLE OFF CACHE INTERNAL "")
+CPMAddPackage(
+        NAME SDL
+        GITHUB_REPOSITORY libsdl-org/SDL
+        GIT_TAG release-3.4.0
+        OPTIONS
+        "SDL_SHARED OFF"
+        "SDL_STATIC ON"
+        "SDL_TEST_LIBRARY OFF"
+        "SDL_TESTS OFF"
+        "SDL_DISABLE_INSTALL ON"
+        "SDL_DISABLE_INSTALL_DOCS ON"
+        "SDL_INSTALL_TESTS OFF"
+        "SDL_AUDIO OFF"
+        "SDL_GPU OFF"
+        "SDL_RENDER OFF"
+        "SDL_CAMERA OFF"
+        "SDL_JOYSTICK OFF"
+        "SDL_HAPTIC OFF"
+        "SDL_HIDAPI OFF"
+        "SDL_POWER OFF"
+        "SDL_SENSOR OFF"
+        "SDL_DIALOG OFF"
+        "SDL_DUMMYVIDEO OFF"
+        "SDL_OFFSCREEN OFF"
+        "SDL_OPENGL OFF"
+        "SDL_OPENGLES OFF")
 
-FetchContent_MakeAvailable(D3D12MemoryAllocator)
+CPMAddPackage(
+        NAME spdlog
+        GITHUB_REPOSITORY gabime/spdlog
+        GIT_TAG v1.17.0
+        OPTIONS
+        "SPDLOG_BUILD_ALL OFF"
+        "SPDLOG_BUILD_SHARED OFF"
+        "SPDLOG_ENABLE_PCH OFF"
+        "SPDLOG_BUILD_PIC OFF"
+        "SPDLOG_BUILD_EXAMPLE OFF"
+        "SPDLOG_BUILD_EXAMPLE_HO OFF"
+        "SPDLOG_BUILD_TESTS OFF"
+        "SPDLOG_BUILD_TESTS_HO OFF"
+        "SPDLOG_BUILD_BENCH OFF"
+        "SPDLOG_SANITIZE_ADDRESS OFF"
+        "SPDLOG_SANITIZE_THREAD OFF"
+        "SPDLOG_BUILD_WARNINGS OFF"
+        "SPDLOG_SYSTEM_INCLUDES OFF"
+        "SPDLOG_INSTALL OFF"
+        "SPDLOG_USE_STD_FORMAT OFF"
+        "SPDLOG_FMT_EXTERNAL ON"
+        "SPDLOG_FMT_EXTERNAL_HO OFF"
+        "SPDLOG_NO_EXCEPTIONS OFF"
+        "SPDLOG_PREVENT_CHILD_FD OFF"
+        "SPDLOG_NO_THREAD_ID OFF"
+        "SPDLOG_NO_TLS OFF"
+        "SPDLOG_NO_ATOMIC_LEVELS OFF"
+        "SPDLOG_DISABLE_DEFAULT_LOGGER OFF"
+        "SPDLOG_FWRITE_UNLOCKED ON"
+        "SPDLOG_TIDY OFF")
 
-set_target_properties(
-        D3D12MemoryAllocator
-        PROPERTIES
-        FOLDER "third_party")
+CPMAddPackage(
+        NAME stb
+        GITHUB_REPOSITORY nothings/stb
+        GIT_TAG f1c79c02822848a9bed4315b12c8c8f3761e1296
+        DOWNLOAD_ONLY YES)
+
+if (stb_ADDED)
+    add_subdirectory(stb)
+endif ()
+
+CPMAddPackage(
+        NAME tracy
+        GITHUB_REPOSITORY wolfpld/tracy
+        GIT_TAG v0.13.1
+        OPTIONS
+        "TRACY_STATIC ON"
+        "TRACY_Fortran OFF"
+        "TRACY_LTO OFF"
+        "TRACY_ENABLE ON"
+        "TRACY_ON_DEMAND OFF"
+        "TRACY_CALLSTACK OFF"
+        "TRACY_NO_CALLSTACK OFF"
+        "TRACY_NO_CALLSTACK_INLINES OFF"
+        "TRACY_ONLY_LOCALHOST OFF"
+        "TRACY_NO_BROADCAST OFF"
+        "TRACY_ONLY_IPV4 OFF"
+        "TRACY_NO_CODE_TRANSFER OFF"
+        "TRACY_NO_CONTEXT_SWITCH OFF"
+        "TRACY_NO_EXIT OFF"
+        "TRACY_NO_SAMPLING OFF"
+        "TRACY_NO_VERIFY OFF"
+        "TRACY_NO_VSYNC_CAPTURE OFF"
+        "TRACY_NO_FRAME_IMAGE OFF"
+        "TRACY_NO_SYSTEM_TRACING OFF"
+        "TRACY_PATCHABLE_NOPSLEDS OFF"
+        "TRACY_DELAYED_INIT OFF"
+        "TRACY_MANUAL_LIFETIME OFF"
+        "TRACY_FIBERS OFF"
+        "TRACY_NO_CRASH_HANDLER OFF"
+        "TRACY_TIMER_FALLBACK OFF"
+        "TRACY_LIBUNWIND_BACKTRACE OFF"
+        "TRACY_SYMBOL_OFFLINE_RESOLVE OFF"
+        "TRACY_LIBBACKTRACE_ELF_DYNLOAD_SUPPORT OFF"
+        "TRACY_DEBUGINFOD OFF"
+        "TRACY_VERBOSE OFF"
+        "TRACY_DEMANGLE OFF")
+
+CPMAddPackage(
+        NAME volk
+        GITHUB_REPOSITORY zeux/volk
+        GIT_TAG 1.4.304
+        OPTIONS
+        "VOLK_PULL_IN_VULKAN ON"
+        "VOLK_INSTALL OFF"
+        "VOLK_HEADERS_ONLY OFF")
+
+CPMAddPackage(
+        NAME VulkanMemoryAllocator
+        GITHUB_REPOSITORY GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
+        GIT_TAG v3.3.0
+        OPTIONS
+        "VMA_ENABLE_INSTALL OFF"
+        "VMA_BUILD_DOCUMENTATION OFF"
+        "VMA_BUILD_SAMPLES OFF")
 
 #-------------------------------------------------------------------------------------------
 # DirectXShaderCompiler (v1.8.2502)
@@ -96,359 +256,3 @@ set_target_properties(
         FOLDER "third_party")
 
 hyperengine_deploy_files(${CMAKE_CURRENT_LIST_DIR}/DirectXShaderCompiler/bin/x64/ hyper_engine/)
-
-#-------------------------------------------------------------------------------------------
-# fastgltf (v0.9.0)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        fastgltf
-        SYSTEM
-        GIT_REPOSITORY https://github.com/spnda/fastgltf.git
-        GIT_TAG 0d1b67a28c4950ea2deb796702006dcbe31e02b3)
-
-set(FASTGLTF_USE_CUSTOM_SMALLVECTOR OFF CACHE INTERNAL "")
-set(FASTGLTF_ENABLE_TESTS OFF CACHE INTERNAL "")
-set(FASTGLTF_ENABLE_EXAMPLES OFF CACHE INTERNAL "")
-set(FASTGLTF_ENABLE_DOCS OFF CACHE INTERNAL "")
-set(FASTGLTF_ENABLE_GLTF_RS OFF CACHE INTERNAL "")
-set(FASTGLTF_ENABLE_ASSIMP OFF CACHE INTERNAL "")
-set(FASTGLTF_ENABLE_DEPRECATED_EXT OFF CACHE INTERNAL "")
-set(FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL OFF CACHE INTERNAL "")
-set(FASTGLTF_USE_64BIT_FLOAT OFF CACHE INTERNAL "")
-set(FASTGLTF_COMPILE_AS_CPP20 ON CACHE INTERNAL "")
-set(FASTGLTF_ENABLE_CPP_MODULES OFF CACHE INTERNAL "")
-set(FASTGLTF_USE_STD_MODULE OFF CACHE INTERNAL "")
-set(FASTGLTF_ENABLE_KHR_IMPLICIT_SHAPES OFF CACHE INTERNAL "")
-set(FASTGLTF_ENABLE_KHR_PHYSICS_RIGID_BODIES OFF CACHE INTERNAL "")
-
-FetchContent_MakeAvailable(fastgltf)
-
-set_target_properties(
-        fastgltf
-        PROPERTIES
-        FOLDER "third_party")
-
-#-------------------------------------------------------------------------------------------
-# fmt (v11.0.2)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        fmt
-        SYSTEM
-        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-        GIT_TAG 40626af88bd7df9a5fb80be7b25ac85b122d6c21)
-
-set(FMT_PEDANTIC OFF CACHE INTERNAL "")
-set(FMT_WERROR OFF CACHE INTERNAL "")
-set(FMT_DOC OFF CACHE INTERNAL "")
-set(FMT_INSTALL OFF CACHE INTERNAL "")
-set(FMT_TEST OFF CACHE INTERNAL "")
-set(FMT_FUZZ OFF CACHE INTERNAL "")
-set(FMT_CUDA_TEST OFF CACHE INTERNAL "")
-set(FMT_OS ON CACHE INTERNAL "")
-set(FMT_MODULE OFF CACHE INTERNAL "")
-set(FMT_SYSTEM_HEADERS OFF CACHE INTERNAL "")
-set(FMT_UNICODE ON CACHE INTERNAL "")
-
-FetchContent_MakeAvailable(fmt)
-
-set_target_properties(
-        fmt
-        PROPERTIES
-        FOLDER "third_party")
-
-#-------------------------------------------------------------------------------------------
-# glm (master - 07.02.2025)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        glm
-        SYSTEM
-        GIT_REPOSITORY https://github.com/g-truc/glm.git
-        GIT_TAG 2d4c4b4dd31fde06cfffad7915c2b3006402322f)
-
-set(GLM_BUILD_LIBRARY OFF CACHE INTERNAL "")
-set(GLM_BUILD_TESTS OFF CACHE INTERNAL "")
-set(GLM_BUILD_INSTALL OFF CACHE INTERNAL "")
-
-FetchContent_MakeAvailable(glm)
-
-target_compile_definitions(
-        glm
-        INTERFACE
-        GLM_ENABLE_EXPERIMENTAL)
-
-set_target_properties(
-        glm
-        PROPERTIES
-        FOLDER "third_party")
-
-#-------------------------------------------------------------------------------------------
-# imgui (v1.92.1)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        imgui
-        SYSTEM
-        GIT_REPOSITORY https://github.com/ocornut/imgui.git
-        GIT_TAG 5d4126876bc10396d4c6511853ff10964414c776)
-
-FetchContent_MakeAvailable(imgui)
-
-set(SOURCES
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/imgui.cpp
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/imgui_demo.cpp
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/imgui_draw.cpp
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/imgui_tables.cpp
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/imgui_widgets.cpp
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/backends/imgui_impl_sdl3.cpp
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/backends/imgui_impl_vulkan.cpp)
-
-set(HEADERS
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/imconfig.h
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/imgui.h
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/imgui_internal.h
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/imstb_rectpack.h
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/imstb_textedit.h
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/imstb_truetype.h
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/backends/imgui_impl_sdl3.h
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/backends/imgui_impl_vulkan.h)
-
-if (WIN32)
-    set(SOURCES
-            ${SOURCES}
-            ${CMAKE_BINARY_DIR}/_deps/imgui-src/backends/imgui_impl_dx12.cpp)
-
-    set(HEADERS
-            ${HEADERS}
-            ${CMAKE_BINARY_DIR}/_deps/imgui-src/backends/imgui_impl_dx12.h)
-endif ()
-
-add_library(imgui ${SOURCES} ${HEADERS})
-target_include_directories(
-        imgui
-        SYSTEM
-        PUBLIC
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/
-        ${CMAKE_BINARY_DIR}/_deps/imgui-src/backends/)
-target_compile_definitions(
-        imgui
-        PUBLIC
-        IMGUI_IMPL_VULKAN_USE_VOLK)
-target_link_libraries(
-        imgui
-        PUBLIC
-        SDL3::SDL3
-        volk)
-
-set_target_properties(
-        imgui
-        PROPERTIES
-        FOLDER "third_party")
-
-#-------------------------------------------------------------------------------------------
-# meshoptimizer (v0.24)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        meshoptimizer
-        SYSTEM
-        GIT_REPOSITORY https://github.com/zeux/meshoptimizer.git
-        GIT_TAG 7b2d4f4c817aea55d74dcd65d9763ac2ca608026)
-
-set(MESHOPT_BUILD_DEMO OFF CACHE INTERNAL "")
-set(MESHOPT_BUILD_GLTFPACK OFF CACHE INTERNAL "")
-set(MESHOPT_BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
-set(MESHOPT_STABLE_EXPORTS OFF CACHE INTERNAL "")
-set(MESHOPT_WERROR OFF CACHE INTERNAL "")
-set(MESHOPT_INSTALL OFF CACHE INTERNAL "")
-
-FetchContent_MakeAvailable(meshoptimizer)
-
-set_target_properties(
-        meshoptimizer
-        PROPERTIES
-        FOLDER "third_party")
-
-#-------------------------------------------------------------------------------------------
-# SDL (v3.2.16)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        sdl
-        SYSTEM
-        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-        GIT_TAG c9a6709bd21750f1ad9597be21abace78c6378c9)
-
-set(SDL_SHARED OFF CACHE INTERNAL "")
-set(SDL_STATIC ON CACHE INTERNAL "")
-set(SDL_TEST_LIBRARY OFF CACHE INTERNAL "")
-set(SDL_TESTS OFF CACHE INTERNAL "")
-set(SDL_DISABLE_INSTALL ON CACHE INTERNAL "")
-set(SDL_DISABLE_INSTALL_DOCS ON CACHE INTERNAL "")
-set(SDL_INSTALL_TESTS OFF CACHE INTERNAL "")
-
-set(SDL_AUDIO OFF CACHE INTERNAL "")
-set(SDL_GPU OFF CACHE INTERNAL "")
-set(SDL_RENDER OFF CACHE INTERNAL "")
-set(SDL_CAMERA OFF CACHE INTERNAL "")
-set(SDL_JOYSTICK OFF CACHE INTERNAL "")
-set(SDL_HAPTIC OFF CACHE INTERNAL "")
-set(SDL_HIDAPI OFF CACHE INTERNAL "")
-set(SDL_POWER OFF CACHE INTERNAL "")
-set(SDL_SENSOR OFF CACHE INTERNAL "")
-set(SDL_DIALOG OFF CACHE INTERNAL "")
-
-set(SDL_DUMMYVIDEO OFF CACHE INTERNAL "")
-set(SDL_OFFSCREEN OFF CACHE INTERNAL "")
-set(SDL_OPENGL OFF CACHE INTERNAL "")
-set(SDL_OPENGLES OFF CACHE INTERNAL "")
-
-FetchContent_MakeAvailable(sdl)
-
-set_target_properties(
-        SDL3-static
-        PROPERTIES
-        FOLDER "third_party")
-set_target_properties(
-        SDL_uclibc
-        PROPERTIES
-        FOLDER "third_party")
-
-#-------------------------------------------------------------------------------------------
-# spdlog (v1.15.3)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        spdlog
-        SYSTEM
-        GIT_REPOSITORY https://github.com/gabime/spdlog.git
-        GIT_TAG 6fa36017cfd5731d617e1a934f0e5ea9c4445b13)
-
-set(SPDLOG_BUILD_ALL OFF CACHE INTERNAL "")
-set(SPDLOG_BUILD_SHARED OFF CACHE INTERNAL "")
-set(SPDLOG_ENABLE_PCH OFF CACHE INTERNAL "")
-set(SPDLOG_BUILD_PIC OFF CACHE INTERNAL "")
-set(SPDLOG_BUILD_EXAMPLE OFF CACHE INTERNAL "")
-set(SPDLOG_BUILD_EXAMPLE_HO OFF CACHE INTERNAL "")
-set(SPDLOG_BUILD_TESTS OFF CACHE INTERNAL "")
-set(SPDLOG_BUILD_TESTS_HO OFF CACHE INTERNAL "")
-set(SPDLOG_BUILD_BENCH OFF CACHE INTERNAL "")
-set(SPDLOG_SANITIZE_ADDRESS OFF CACHE INTERNAL "")
-set(SPDLOG_SANITIZE_THREAD OFF CACHE INTERNAL "")
-set(SPDLOG_BUILD_WARNINGS OFF CACHE INTERNAL "")
-set(SPDLOG_SYSTEM_INCLUDES OFF CACHE INTERNAL "")
-set(SPDLOG_INSTALL OFF CACHE INTERNAL "")
-set(SPDLOG_USE_STD_FORMAT OFF CACHE INTERNAL "")
-set(SPDLOG_FMT_EXTERNAL ON CACHE INTERNAL "")
-set(SPDLOG_FMT_EXTERNAL_HO OFF CACHE INTERNAL "")
-set(SPDLOG_NO_EXCEPTIONS OFF CACHE INTERNAL "")
-set(SPDLOG_PREVENT_CHILD_FD OFF CACHE INTERNAL "")
-set(SPDLOG_NO_THREAD_ID OFF CACHE INTERNAL "")
-set(SPDLOG_NO_TLS OFF CACHE INTERNAL "")
-set(SPDLOG_NO_ATOMIC_LEVELS OFF CACHE INTERNAL "")
-set(SPDLOG_DISABLE_DEFAULT_LOGGER OFF CACHE INTERNAL "")
-set(SPDLOG_FWRITE_UNLOCKED ON CACHE INTERNAL "")
-set(SPDLOG_TIDY OFF CACHE INTERNAL "")
-
-FetchContent_MakeAvailable(spdlog)
-
-set_target_properties(
-        spdlog
-        PROPERTIES
-        FOLDER "third_party")
-
-#-------------------------------------------------------------------------------------------
-# stb
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        stb
-        SYSTEM
-        GIT_REPOSITORY https://github.com/nothings/stb.git
-        GIT_TAG 5c205738c191bcb0abc65c4febfa9bd25ff35234)
-
-FetchContent_MakeAvailable(stb)
-
-add_subdirectory(stb)
-
-#-------------------------------------------------------------------------------------------
-# tracy (v0.12.2)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        tracy
-        SYSTEM
-        GIT_REPOSITORY https://github.com/wolfpld/tracy.git
-        GIT_TAG c556831ddc6fe26d2fce01c14c97205a9dad46d5)
-
-set(TRACY_STATIC ON CACHE INTERNAL "")
-set(TRACY_Fortran OFF CACHE INTERNAL "")
-set(TRACY_LTO OFF CACHE INTERNAL "")
-set(TRACY_ENABLE ON CACHE INTERNAL "")
-set(TRACY_ON_DEMAND OFF CACHE INTERNAL "")
-set(TRACY_CALLSTACK OFF CACHE INTERNAL "")
-set(TRACY_NO_CALLSTACK OFF CACHE INTERNAL "")
-set(TRACY_NO_CALLSTACK_INLINES OFF CACHE INTERNAL "")
-set(TRACY_ONLY_LOCALHOST OFF CACHE INTERNAL "")
-set(TRACY_NO_BROADCAST OFF CACHE INTERNAL "")
-set(TRACY_ONLY_IPV4 OFF CACHE INTERNAL "")
-set(TRACY_NO_CODE_TRANSFER OFF CACHE INTERNAL "")
-set(TRACY_NO_CONTEXT_SWITCH OFF CACHE INTERNAL "")
-set(TRACY_NO_EXIT OFF CACHE INTERNAL "")
-set(TRACY_NO_SAMPLING OFF CACHE INTERNAL "")
-set(TRACY_NO_VERIFY OFF CACHE INTERNAL "")
-set(TRACY_NO_VSYNC_CAPTURE OFF CACHE INTERNAL "")
-set(TRACY_NO_FRAME_IMAGE OFF CACHE INTERNAL "")
-set(TRACY_NO_SYSTEM_TRACING OFF CACHE INTERNAL "")
-set(TRACY_PATCHABLE_NOPSLEDS OFF CACHE INTERNAL "")
-set(TRACY_DELAYED_INIT OFF CACHE INTERNAL "")
-set(TRACY_MANUAL_LIFETIME OFF CACHE INTERNAL "")
-set(TRACY_FIBERS OFF CACHE INTERNAL "")
-set(TRACY_NO_CRASH_HANDLER OFF CACHE INTERNAL "")
-set(TRACY_TIMER_FALLBACK OFF CACHE INTERNAL "")
-set(TRACY_LIBUNWIND_BACKTRACE OFF CACHE INTERNAL "")
-set(TRACY_SYMBOL_OFFLINE_RESOLVE OFF CACHE INTERNAL "")
-set(TRACY_LIBBACKTRACE_ELF_DYNLOAD_SUPPORT OFF CACHE INTERNAL "")
-set(TRACY_DEBUGINFOD OFF CACHE INTERNAL "")
-set(TRACY_VERBOSE OFF CACHE INTERNAL "")
-set(TRACY_DEMANGLE OFF CACHE INTERNAL "")
-
-FetchContent_MakeAvailable(tracy)
-
-set_target_properties(
-        TracyClient
-        PROPERTIES
-        FOLDER "third_party")
-
-#-------------------------------------------------------------------------------------------
-# volk (v1.4.304)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        volk
-        SYSTEM
-        GIT_REPOSITORY https://github.com/zeux/volk.git
-        GIT_TAG 0b17a763ba5643e32da1b2152f8140461b3b7345)
-
-set(VOLK_PULL_IN_VULKAN ON CACHE INTERNAL "")
-set(VOLK_INSTALL OFF CACHE INTERNAL "")
-set(VOLK_HEADERS_ONLY OFF CACHE INTERNAL "")
-
-FetchContent_MakeAvailable(volk)
-
-set_target_properties(
-        volk
-        PROPERTIES
-        FOLDER "third_party")
-
-#-------------------------------------------------------------------------------------------
-# VulkanMemoryAllocator (v3.3.0)
-#-------------------------------------------------------------------------------------------
-FetchContent_Declare(
-        VulkanMemoryAllocator
-        SYSTEM
-        GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
-        GIT_TAG 1d8f600fd424278486eade7ed3e877c99f0846b1)
-
-set(VMA_ENABLE_INSTALL OFF CACHE INTERNAL "")
-set(VMA_BUILD_DOCUMENTATION OFF CACHE INTERNAL "")
-set(VMA_BUILD_SAMPLES OFF CACHE INTERNAL "")
-
-FetchContent_MakeAvailable(VulkanMemoryAllocator)
-
-set_target_properties(
-        VulkanMemoryAllocator
-        PROPERTIES
-        FOLDER "third_party")
