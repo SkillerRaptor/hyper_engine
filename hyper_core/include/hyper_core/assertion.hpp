@@ -35,17 +35,17 @@
 #    define HE_DEBUG_ASSERT(expression, ...) ((void) 0)
 #endif
 
-#define HE_PANIC(...)                                                                   \
-    do                                                                                  \
-    {                                                                                   \
-        constexpr ::std::source_location _location = ::std::source_location::current(); \
-        const ::std::filesystem::path _path = _location.file_name();                    \
-        HE_FATAL(                                                                       \
-            "Panic at {}:{}" __VA_OPT__(": {}"),                                        \
-            _path.filename().string(),                                                  \
-            _location.line() __VA_OPT__(, ::fmt::format(__VA_ARGS__)));                 \
-        ::he::logger::flush();                                                          \
-        ::std::abort();                                                                 \
+#define HE_PANIC(...)                                                                          \
+    do                                                                                         \
+    {                                                                                          \
+        static constexpr ::std::source_location _location = ::std::source_location::current(); \
+        const ::std::filesystem::path _path = _location.file_name();                           \
+        HE_FATAL(                                                                              \
+            "Panic at {}:{}" __VA_OPT__(": {}"),                                               \
+            _path.filename().string(),                                                         \
+            _location.line() __VA_OPT__(, ::fmt::format(__VA_ARGS__)));                        \
+        ::he::logger::flush();                                                                 \
+        ::std::abort();                                                                        \
     } while (false)
 
 #define HE_UNREACHABLE() ::std::unreachable()
