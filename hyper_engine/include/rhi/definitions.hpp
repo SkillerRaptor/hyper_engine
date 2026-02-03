@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "core/types.hpp"
+#include <hyper_core/types.hpp>
 
 namespace he
 {

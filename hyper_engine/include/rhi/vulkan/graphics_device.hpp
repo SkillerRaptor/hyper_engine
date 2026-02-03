@@ -15,7 +15,8 @@
 
 #include <vector>
 
-#include "core/types.hpp"
+#include <hyper_core/types.hpp>
+
 #include "rhi/graphics_device.hpp"
 
 namespace he

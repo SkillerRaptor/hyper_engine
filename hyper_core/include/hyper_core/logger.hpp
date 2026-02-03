@@ -8,7 +8,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include "core/memory.hpp"
+#include "hyper_core/memory.hpp"
 
 namespace he::logger
 {

@@ -6,7 +6,8 @@
 
 #include "rhi/validation.hpp"
 
-#include "core/logger.hpp"
+#include <hyper_core/logger.hpp>
+
 #include "rhi/buffer.hpp"
 #include "rhi/compute_pipeline.hpp"
 #include "rhi/pipeline_layout.hpp"

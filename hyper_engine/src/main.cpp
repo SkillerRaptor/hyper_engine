@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "core/logger.hpp"
+#include <hyper_core/logger.hpp>
+
 #include "engine.hpp"
 
 using namespace he;

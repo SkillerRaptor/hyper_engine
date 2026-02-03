@@ -8,7 +8,7 @@
 
 #include <type_traits>
 
-#include "core/prerequisites.hpp"
+#include "hyper_core/prerequisites.hpp"
 
 namespace he
 {

@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "core/filesystem.hpp"
+#include "hyper_core/filesystem.hpp"
 
 #include <filesystem>
 #include <fstream>
 
 #include <fmt/format.h>
 
-#include "core/assertion.hpp"
+#include "hyper_core/assertion.hpp"
 
 namespace he::filesystem
 {

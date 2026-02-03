@@ -9,8 +9,8 @@
 #include <filesystem>
 #include <source_location>
 
-#include "core/logger.hpp"
-#include "core/prerequisites.hpp"
+#include "hyper_core/logger.hpp"
+#include "hyper_core/prerequisites.hpp"
 
 #define HE_ASSERT(expression, ...)                                                                 \
     do                                                                                             \

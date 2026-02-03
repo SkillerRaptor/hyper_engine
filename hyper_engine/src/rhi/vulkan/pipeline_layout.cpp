@@ -10,8 +10,9 @@
 
 #include <vulkan/vk_enum_string_helper.h>
 
-#include "core/assertion.hpp"
-#include "core/logger.hpp"
+#include <hyper_core/assertion.hpp>
+#include <hyper_core/logger.hpp>
+
 #include "rhi/validation.hpp"
 #include "rhi/vulkan/graphics_device.hpp"
 

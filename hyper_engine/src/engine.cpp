@@ -7,9 +7,8 @@
 #include "engine.hpp"
 
 #include <chrono>
-#include <ranges>
 
-#include "core/logger.hpp"
+#include <hyper_core/logger.hpp>
 
 namespace he
 {
@@ -93,15 +92,9 @@ namespace he
         }
     }
 
-    void Engine::fixed_update(const f32 delta_time)
-    {
-        (void) delta_time;
-    }
+    void Engine::fixed_update(const f32 delta_time) { (void) delta_time; }
 
-    void Engine::update(const f32 delta_time)
-    {
-        (void) delta_time;
-    }
+    void Engine::update(const f32 delta_time) { (void) delta_time; }
 
     void Engine::render() const { }
 } // namespace he

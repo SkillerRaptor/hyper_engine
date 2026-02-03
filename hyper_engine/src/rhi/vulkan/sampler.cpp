@@ -6,7 +6,8 @@
 
 #include "rhi/vulkan/sampler.hpp"
 
-#include "core/logger.hpp"
+#include <hyper_core/logger.hpp>
+
 #include "rhi/validation.hpp"
 
 namespace he

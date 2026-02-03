@@ -6,7 +6,8 @@
 
 #pragma once
 
-#include "core/memory.hpp"
+#include <hyper_core/memory.hpp>
+
 #include "rhi/buffer.hpp"
 #include "rhi/compute_pipeline.hpp"
 #include "rhi/pipeline_layout.hpp"

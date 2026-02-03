@@ -11,7 +11,8 @@
 #include <vk_mem_alloc.h>
 // clang-format on
 
-#include "core/memory.hpp"
+#include <hyper_core/memory.hpp>
+
 #include "rhi/texture.hpp"
 
 namespace he

@@ -11,7 +11,7 @@
 #include <string_view>
 #include <vector>
 
-#include "core/types.hpp"
+#include "hyper_core/types.hpp"
 
 namespace he::filesystem
 {

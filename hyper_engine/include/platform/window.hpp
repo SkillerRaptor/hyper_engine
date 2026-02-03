@@ -8,9 +8,9 @@
 
 #include <string>
 
-#include "core/logger.hpp"
-#include "core/prerequisites.hpp"
-#include "core/types.hpp"
+#include <hyper_core/logger.hpp>
+#include <hyper_core/prerequisites.hpp>
+#include <hyper_core/types.hpp>
 
 struct SDL_Window;
 

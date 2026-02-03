@@ -8,7 +8,7 @@
 
 #include <SDL3/SDL.h>
 
-#include "core/assertion.hpp"
+#include <hyper_core/assertion.hpp>
 
 namespace he
 {

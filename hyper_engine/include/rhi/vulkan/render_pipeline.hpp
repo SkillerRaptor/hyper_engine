@@ -8,8 +8,9 @@
 
 #include <volk.h>
 
-#include "core/memory.hpp"
-#include "core/prerequisites.hpp"
+#include <hyper_core/memory.hpp>
+#include <hyper_core/prerequisites.hpp>
+
 #include "rhi/render_pipeline.hpp"
 
 namespace he

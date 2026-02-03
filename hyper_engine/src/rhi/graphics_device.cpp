@@ -6,7 +6,8 @@
 
 #include "rhi/graphics_device.hpp"
 
-#include "core/assertion.hpp"
+#include <hyper_core/assertion.hpp>
+
 #include "rhi/vulkan/graphics_device.hpp"
 
 namespace he

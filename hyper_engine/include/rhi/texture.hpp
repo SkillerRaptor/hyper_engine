@@ -9,8 +9,9 @@
 #include <optional>
 #include <string_view>
 
-#include "core/bit_flags.hpp"
-#include "core/types.hpp"
+#include <hyper_core/bit_flags.hpp>
+#include <hyper_core/types.hpp>
+
 #include "rhi/definitions.hpp"
 
 namespace he

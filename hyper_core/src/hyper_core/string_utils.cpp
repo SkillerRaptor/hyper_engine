@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "core/string_utils.hpp"
+#include "hyper_core/string_utils.hpp"
 
 namespace he::string_utils
 {

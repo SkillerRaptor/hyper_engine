@@ -3,12 +3,10 @@
 #
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
+
 set(SOURCES
         src/engine.cpp
         src/main.cpp
-        src/core/filesystem.cpp
-        src/core/logger.cpp
-        src/core/string_utils.cpp
         src/platform/input.cpp
         src/platform/window.cpp
         src/rhi/graphics_device.cpp
@@ -25,14 +23,6 @@ set(SOURCES
 
 set(HEADERS
         include/engine.hpp
-        include/core/assertion.hpp
-        include/core/bit_flags.hpp
-        include/core/filesystem.hpp
-        include/core/logger.hpp
-        include/core/memory.hpp
-        include/core/prerequisites.hpp
-        include/core/string_utils.hpp
-        include/core/types.hpp
         include/platform/input.hpp
         include/platform/key_codes.hpp
         include/platform/mouse_codes.hpp
@@ -63,22 +53,21 @@ target_include_directories(
         hyper_engine
         PRIVATE
         ${CMAKE_SOURCE_DIR}/assets/shaders)
-target_compile_definitions(
+
+target_link_libraries(
         hyper_engine
         PRIVATE
-        GLM_FORCE_RADIANS
-        GLM_FORCE_DEPTH_ZE_TO_ONE)
+        hyper_core)
+
 target_link_libraries(
         hyper_engine
         PRIVATE
         DirectXShaderCompiler
         EnTT::EnTT
         fastgltf::fastgltf
-        fmt::fmt
         glm
         imgui
         SDL3::SDL3
-        spdlog::spdlog
         stb
         volk::volk
         GPUOpen::VulkanMemoryAllocator)
@@ -89,4 +78,10 @@ if (WIN32)
             PRIVATE
             D3D12MemoryAllocator)
 endif ()
+
+target_compile_definitions(
+        hyper_engine
+        PRIVATE
+        GLM_FORCE_RADIANS
+        GLM_FORCE_DEPTH_ZE_TO_ONE)
 

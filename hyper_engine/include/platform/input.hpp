@@ -10,7 +10,8 @@
 
 #include <glm/vec2.hpp>
 
-#include "core/prerequisites.hpp"
+#include <hyper_core/prerequisites.hpp>
+
 #include "platform/key_codes.hpp"
 #include "platform/mouse_codes.hpp"
 
@@ -27,7 +28,7 @@ namespace he
         HE_ALWAYS_INLINE glm::vec2 mouse_position() const { return m_mouse_position; }
 
     private:
-        std::array<bool, 512> m_key_states = { };
+        std::array<bool, 512> m_key_states = {};
         u32 m_mouse_state = 0;
         glm::vec2 m_mouse_position = { 0.0f, 0.0f };
     };

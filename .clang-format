@@ -15,12 +15,14 @@ ForEachMacros: [ ]
 IfMacros: [ ]
 IncludeBlocks: Regroup
 IncludeCategories:
-  - Regex: '<([A-Za-z0-9\Q/-_\E])+>'
+  - Regex: '^<[^/]+>$'
     Priority: 1
-  - Regex: '<([A-Za-z0-9.\Q/-_\E])+>'
-    Priority: 2
-  - Regex: '"([A-Za-z0-9.\Q/-_\E])+"'
+  - Regex: '^<hyper_[^>]+>$'
     Priority: 3
+  - Regex: '^<[^/]+/.+>$'
+    Priority: 2
+  - Regex: '^"[^"]+"$'
+    Priority: 4
 IncludeIsMainRegex: ''
 IndentExternBlock: NoIndent
 IndentPPDirectives: AfterHash
