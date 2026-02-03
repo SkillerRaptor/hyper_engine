@@ -72,10 +72,7 @@ namespace he::logger
         HE_INFO("Initialized logger");
     }
 
-    void flush()
-    {
-        s_logger->flush();
-    }
+    void flush() { s_logger->flush(); }
 
     void log(const Level level, const std::string_view format)
     {
