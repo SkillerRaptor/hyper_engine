@@ -9,8 +9,6 @@
 #include <chrono>
 #include <ranges>
 
-#include <tracy/Tracy.hpp>
-
 #include "core/logger.hpp"
 
 namespace he
@@ -92,24 +90,18 @@ namespace he
 
             // Render
             render();
-
-            FrameMark;
         }
     }
 
     void Engine::fixed_update(const f32 delta_time)
     {
-        ZoneScopedN("FixedUpdate");
-
         (void) delta_time;
     }
 
     void Engine::update(const f32 delta_time)
     {
-        ZoneScopedN("Update");
-
         (void) delta_time;
     }
 
-    void Engine::render() const { ZoneScopedN("Render"); }
+    void Engine::render() const { }
 } // namespace he
