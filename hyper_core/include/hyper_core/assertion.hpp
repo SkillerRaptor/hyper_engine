@@ -18,12 +18,13 @@
         if (!(expression)) [[unlikely]]                                                            \
         {                                                                                          \
             static constexpr ::std::source_location _location = ::std::source_location::current(); \
-            const ::std::filesystem::path _path { _location.file_name() };                         \
+            const ::std::filesystem::path _path = _location.file_name();                           \
             HE_FATAL(                                                                              \
                 "Assertion failed at {}:{}: {}" __VA_OPT__(": {}"),                                \
                 _path.filename().string(),                                                         \
                 _location.line(),                                                                  \
                 HE_STRINGIFY(expression) __VA_OPT__(, ::fmt::format(__VA_ARGS__)));                \
+            ::he::logger::flush();                                                                 \
             ::std::abort();                                                                        \
         }                                                                                          \
     } while (false)
@@ -38,11 +39,12 @@
     do                                                                                  \
     {                                                                                   \
         constexpr ::std::source_location _location = ::std::source_location::current(); \
-        const ::std::filesystem::path _path { _location.file_name() };                  \
+        const ::std::filesystem::path _path = _location.file_name();                    \
         HE_FATAL(                                                                       \
             "Panic at {}:{}" __VA_OPT__(": {}"),                                        \
             _path.filename().string(),                                                  \
             _location.line() __VA_OPT__(, ::fmt::format(__VA_ARGS__)));                 \
+        ::he::logger::flush();                                                          \
         ::std::abort();                                                                 \
     } while (false)
 

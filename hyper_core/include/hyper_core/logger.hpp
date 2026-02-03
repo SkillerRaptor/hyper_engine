@@ -23,6 +23,7 @@ namespace he::logger
     };
 
     void initialize(Level level);
+    void flush();
 
     void log(Level level, std::string_view format);
 

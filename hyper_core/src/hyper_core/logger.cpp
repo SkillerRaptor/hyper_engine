@@ -72,6 +72,11 @@ namespace he::logger
         HE_INFO("Initialized logger");
     }
 
+    void flush()
+    {
+        s_logger->flush();
+    }
+
     void log(const Level level, const std::string_view format)
     {
         const spdlog::level::level_enum level_value = to_spdlog_level(level);
