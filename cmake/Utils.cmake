@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 #-------------------------------------------------------------------------------------------
 
-function(hyperengine_group_source SOURCE)
+function(he_group_source SOURCE)
     foreach (item IN ITEMS ${SOURCE})
         get_filename_component(src_path "${item}" PATH)
         string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "" group_path "${src_path}")
@@ -13,10 +13,10 @@ function(hyperengine_group_source SOURCE)
     endforeach ()
 endfunction()
 
-function(hyperengine_define_executable target)
-    hyperengine_group_source(${SOURCES})
+function(he_define_executable target)
+    he_group_source(${SOURCES})
     if (HEADERS)
-        hyperengine_group_source(${HEADERS})
+        he_group_source(${HEADERS})
     endif ()
 
     add_executable(${target} ${SOURCES} ${HEADERS})
@@ -37,7 +37,7 @@ function(hyperengine_define_executable target)
     endif ()
 endfunction()
 
-function(hyperengine_download_and_extract URL DESTINATION FOLDER_NAME)
+function(he_download_and_extract URL DESTINATION FOLDER_NAME)
     if (NOT EXISTS ${CMAKE_BINARY_DIR}/download/${FOLDER_NAME}.zip)
         message(STATUS " Downloading ${URL} and unpacking to ${DESTINATION}/${FOLDER_NAME}.")
         file(
@@ -60,7 +60,7 @@ function(hyperengine_download_and_extract URL DESTINATION FOLDER_NAME)
 endfunction()
 
 
-function(hyperengine_deploy_files SOURCE DESTINATION)
+function(he_deploy_files SOURCE DESTINATION)
     set(DEPLOY_FILES_DESTINATION ${CMAKE_BINARY_DIR}/${DESTINATION})
     message(STATUS "Copying ${SOURCE} to ${DEPLOY_FILES_DESTINATION}")
     file(COPY ${SOURCE} DESTINATION ${DEPLOY_FILES_DESTINATION})

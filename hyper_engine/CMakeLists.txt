@@ -58,8 +58,19 @@ set(HEADERS
         include/rhi/vulkan/shader.hpp
         include/rhi/vulkan/texture.hpp)
 
-#-------------------------------------------------------------------------------------------
-link_libraries(
+he_define_executable(hyper_engine)
+target_include_directories(
+        hyper_engine
+        PRIVATE
+        ${CMAKE_SOURCE_DIR}/assets/shaders)
+target_compile_definitions(
+        hyper_engine
+        PRIVATE
+        GLM_FORCE_RADIANS
+        GLM_FORCE_DEPTH_ZE_TO_ONE)
+target_link_libraries(
+        hyper_engine
+        PRIVATE
         DirectXShaderCompiler
         EnTT::EnTT
         fastgltf
@@ -69,42 +80,15 @@ link_libraries(
         SDL3::SDL3
         spdlog
         stb
-        TracyClient
         volk
-        VulkanMemoryAllocator)
+        GPUOpen::VulkanMemoryAllocator)
+
 if (WIN32)
-    link_libraries(d3d12.lib dxgi.lib D3D12MemoryAllocator)
+    target_link_libraries(
+            hyper_engine
+            PRIVATE
+            d3d12.lib
+            dxgi.lib
+            D3D12MemoryAllocator)
 endif ()
 
-add_compile_definitions(GLM_FORCE_RADIANS GLM_FORCE_DEPTH_ZE_TO_ONE)
-include_directories(${CMAKE_SOURCE_DIR}/assets/shaders)
-
-#-------------------------------------------------------------------------------------------
-
-hyperengine_define_executable(hyper_engine)
-target_link_libraries(
-        hyper_engine
-        PRIVATE
-        Catch2::Catch2)
-
-hyperengine_define_executable(hyper_engine_tests)
-target_link_libraries(
-        hyper_engine_tests
-        PRIVATE
-        Catch2::Catch2WithMain)
-target_compile_definitions(
-        hyper_engine_tests
-        PRIVATE
-        CATCH_CONFIG_MAIN
-        HE_TESTS=1)
-
-hyperengine_define_executable(hyper_engine_profiling)
-target_link_libraries(
-        hyper_engine_profiling
-        PRIVATE
-        Catch2::Catch2)
-target_compile_definitions(
-        hyper_engine_tests
-        PRIVATE
-        TRACY_ENABLE
-        HE_PROFILING=1)

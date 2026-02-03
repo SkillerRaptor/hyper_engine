@@ -4,19 +4,18 @@
  * SPDX-License-Identifier: MIT
  */
 
-#if !HE_TESTS
-#    include "core/logger.hpp"
-#    include "engine.hpp"
+#include "core/logger.hpp"
+#include "engine.hpp"
 
 using namespace he;
 
 int main()
 {
-#    if HE_DEBUG_BUILD
+#if HE_DEBUG_BUILD
     logger::initialize(spdlog::level::debug);
-#    else
+#else
     logger::initialize(spdlog::level::info);
-#    endif
+#endif
 
     // TODO: Parse command line arguments
 
@@ -30,4 +29,3 @@ int main()
 
     return EXIT_SUCCESS;
 }
-#endif

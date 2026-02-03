@@ -231,10 +231,7 @@ CPMAddPackage(
         "VMA_BUILD_DOCUMENTATION OFF"
         "VMA_BUILD_SAMPLES OFF")
 
-#-------------------------------------------------------------------------------------------
-# DirectXShaderCompiler (v1.8.2502)
-#-------------------------------------------------------------------------------------------
-hyperengine_download_and_extract(
+he_download_and_extract(
         https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.8.2505/dxc_2025_05_24.zip
         ${CMAKE_SOURCE_DIR}/third_party
         DirectXShaderCompiler)
@@ -255,4 +252,4 @@ set_target_properties(
         PROPERTIES
         FOLDER "third_party")
 
-hyperengine_deploy_files(${CMAKE_CURRENT_LIST_DIR}/DirectXShaderCompiler/bin/x64/ hyper_engine/)
+he_deploy_files(${CMAKE_CURRENT_LIST_DIR}/DirectXShaderCompiler/bin/x64/ hyper_engine/)
