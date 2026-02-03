@@ -9,6 +9,7 @@
 #include <string>
 
 #include <hyper_core/logger.hpp>
+#include <hyper_core/memory.hpp>
 #include <hyper_core/prerequisites.hpp>
 #include <hyper_core/types.hpp>
 

@@ -6,23 +6,66 @@
 
 #pragma once
 
-#include <spdlog/spdlog.h>
+#include <fmt/format.h>
 
-#include "hyper_core/memory.hpp"
+#include "hyper_core/types.hpp"
 
 namespace he::logger
 {
-    namespace detail
+    enum class Level : u8
     {
-        RefPtr<spdlog::logger> spdlog_logger();
-    } // namespace detail
+        Info,
+        Warning,
+        Error,
+        Fatal,
+        Debug,
+        Trace,
+    };
 
-    void initialize(spdlog::level::level_enum);
+    void initialize(Level level);
+
+    void log(Level level, std::string_view format);
+
+    template <typename... Args>
+    void info(fmt::format_string<Args...> format, Args &&...args)
+    {
+        log(Level::Info, fmt::format(format, std::forward<Args>(args)...));
+    }
+
+    template <typename... Args>
+    void warn(fmt::format_string<Args...> format, Args &&...args)
+    {
+        log(Level::Warning, fmt::format(format, std::forward<Args>(args)...));
+    }
+
+    template <typename... Args>
+    void error(fmt::format_string<Args...> format, Args &&...args)
+    {
+        log(Level::Error, fmt::format(format, std::forward<Args>(args)...));
+    }
+
+    template <typename... Args>
+    void fatal(fmt::format_string<Args...> format, Args &&...args)
+    {
+        log(Level::Fatal, fmt::format(format, std::forward<Args>(args)...));
+    }
+
+    template <typename... Args>
+    void debug(fmt::format_string<Args...> format, Args &&...args)
+    {
+        log(Level::Debug, fmt::format(format, std::forward<Args>(args)...));
+    }
+
+    template <typename... Args>
+    void trace(fmt::format_string<Args...> format, Args &&...args)
+    {
+        log(Level::Trace, fmt::format(format, std::forward<Args>(args)...));
+    }
 } // namespace he::logger
 
-#define HE_INFO(...) SPDLOG_LOGGER_CALL(::he::logger::detail::spdlog_logger(), spdlog::level::info, __VA_ARGS__)
-#define HE_WARN(...) SPDLOG_LOGGER_CALL(::he::logger::detail::spdlog_logger(), spdlog::level::warn, __VA_ARGS__)
-#define HE_ERROR(...) SPDLOG_LOGGER_CALL(::he::logger::detail::spdlog_logger(), spdlog::level::err, __VA_ARGS__)
-#define HE_FATAL(...) SPDLOG_LOGGER_CALL(::he::logger::detail::spdlog_logger(), spdlog::level::critical, __VA_ARGS__)
-#define HE_DEBUG(...) SPDLOG_LOGGER_CALL(::he::logger::detail::spdlog_logger(), spdlog::level::debug, __VA_ARGS__)
-#define HE_TRACE(...) SPDLOG_LOGGER_CALL(::he::logger::detail::spdlog_logger(), spdlog::level::trace, __VA_ARGS__)
+#define HE_INFO(...) ::he::logger::info(__VA_ARGS__)
+#define HE_WARN(...) ::he::logger::warn(__VA_ARGS__)
+#define HE_ERROR(...) ::he::logger::error(__VA_ARGS__)
+#define HE_FATAL(...) ::he::logger::fatal(__VA_ARGS__)
+#define HE_DEBUG(...) ::he::logger::debug(__VA_ARGS__)
+#define HE_TRACE(...) ::he::logger::trace(__VA_ARGS__)

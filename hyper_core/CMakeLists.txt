@@ -22,10 +22,13 @@ set(HEADERS
 he_add_library(hyper_core)
 target_link_libraries(
         hyper_core
-        PRIVATE
+        PUBLIC
         fmt::fmt)
-
 target_link_libraries(
         hyper_core
-        PUBLIC
+        PRIVATE
         spdlog::spdlog)
+target_compile_definitions(
+        hyper_core
+        PRIVATE
+        SPDLOG_NO_SOURCE_LOC)

@@ -9,6 +9,8 @@
 #include <optional>
 #include <string_view>
 
+#include <hyper_core/memory.hpp>
+
 #include "rhi/pipeline_layout.hpp"
 #include "rhi/shader.hpp"
 

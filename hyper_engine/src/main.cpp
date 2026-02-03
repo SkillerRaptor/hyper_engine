@@ -13,9 +13,9 @@ using namespace he;
 int main()
 {
 #if HE_DEBUG_BUILD
-    logger::initialize(spdlog::level::debug);
+    logger::initialize(logger::Level::Debug);
 #else
-    logger::initialize(spdlog::level::info);
+    logger::initialize(logger::Level::Info);
 #endif
 
     // TODO: Parse command line arguments

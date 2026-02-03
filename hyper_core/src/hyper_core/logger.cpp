@@ -10,17 +10,37 @@
 #include <spdlog/sinks/ansicolor_sink-inl.h>
 #include <spdlog/sinks/ansicolor_sink.h>
 #include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
+
+#include "hyper_core/assertion.hpp"
+#include "hyper_core/memory.hpp"
 
 namespace he::logger
 {
     static RefPtr<spdlog::logger> s_logger = nullptr;
 
-    namespace detail
+    static spdlog::level::level_enum to_spdlog_level(const Level level)
     {
-        RefPtr<spdlog::logger> spdlog_logger() { return s_logger; }
-    } // namespace detail
+        switch (level)
+        {
+        case Level::Info:
+            return spdlog::level::info;
+        case Level::Warning:
+            return spdlog::level::warn;
+        case Level::Error:
+            return spdlog::level::err;
+        case Level::Fatal:
+            return spdlog::level::critical;
+        case Level::Debug:
+            return spdlog::level::debug;
+        case Level::Trace:
+            return spdlog::level::trace;
+        default:
+            HE_UNREACHABLE();
+        }
+    }
 
-    void initialize(const spdlog::level::level_enum level)
+    void initialize(const Level level)
     {
         const RefPtr<spdlog::sinks::ansicolor_stdout_sink_mt> stdout_sink
             = make_ref<spdlog::sinks::ansicolor_stdout_sink_mt>();
@@ -43,9 +63,18 @@ namespace he::logger
                 stdout_sink,
                 file_sink,
             });
-        s_logger->set_level(level);
-        s_logger->flush_on(level);
+
+        const spdlog::level::level_enum level_value = to_spdlog_level(level);
+
+        s_logger->set_level(level_value);
+        s_logger->flush_on(level_value);
 
         HE_INFO("Initialized logger");
+    }
+
+    void log(const Level level, const std::string_view format)
+    {
+        const spdlog::level::level_enum level_value = to_spdlog_level(level);
+        SPDLOG_LOGGER_CALL(s_logger, level_value, format);
     }
 } // namespace he::logger
