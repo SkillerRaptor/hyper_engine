@@ -10,6 +10,8 @@ jobs:
   build:
     name: ${{matrix.os}} ${{matrix.compiler}} ${{matrix.build_type}}
     runs-on: ${{ matrix.os }}
+    env:
+      SCCACHE_GHA_ENABLED: "true"
     strategy:
       fail-fast: false
       matrix:
@@ -47,12 +49,8 @@ jobs:
             libgl1-mesa-dev \
             xorg-dev
 
-      - name: Setup Cache
-        uses: ./.github/actions/setup_cache
-        with:
-          compiler: ${{ matrix.compiler }}
-          build_type: ${{ matrix.build_type }}
-          generator: ${{ matrix.generator }}
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
@@ -70,7 +68,7 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -S . -B ./build -G "${{ matrix.generator }}" -DCMAKE_BUILD_TYPE:STRING=${{ matrix.build_type }}
+          cmake -S . -B ./build -G "${{ matrix.generator }}" -DHE_ENABLE_CACHE=ON -DCMAKE_BUILD_TYPE:STRING=${{ matrix.build_type }}
 
       - name: Build
         run: |
