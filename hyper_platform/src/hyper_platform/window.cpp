@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "platform/window.hpp"
+#include "hyper_platform/window.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -12,7 +12,7 @@
 
 namespace he
 {
-    OwnPtr<Window> Window::create(const std::string_view title, const u32 width, const u32 height)
+    Window::Window(const std::string_view title, const u32 width, const u32 height)
     {
         HE_ASSERT(!title.empty());
         HE_ASSERT(width > 0);
@@ -20,24 +20,9 @@ namespace he
 
         if (SDL_WasInit(SDL_INIT_VIDEO) == 0 && !SDL_Init(SDL_INIT_VIDEO))
         {
-            HE_ERROR("Failed to initialize SDL: '{}'", SDL_GetError());
-            return nullptr;
+            HE_PANIC("Failed to initialize SDL: '{}'", SDL_GetError());
         }
 
-        OwnPtr<Window> window = wrap_own<Window>(new Window());
-        if (!window->initialize(title, width, height))
-        {
-            HE_ERROR("Failed to initialize window");
-            return nullptr;
-        }
-
-        HE_INFO("Created window (title='{}', width={}, height={})", title, width, height);
-
-        return window;
-    }
-
-    bool Window::initialize(const std::string_view title, const u32 width, const u32 height)
-    {
         m_native_handle = SDL_CreateWindow(
             title.data(),
             static_cast<i32>(width),
@@ -45,11 +30,10 @@ namespace he
             SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_VULKAN);
         if (m_native_handle == nullptr)
         {
-            HE_ERROR("Failed to create SDL window: '{}'", SDL_GetError());
-            return false;
+            HE_PANIC("Failed to create SDL window: '{}'", SDL_GetError());
         }
 
-        return true;
+        HE_INFO("Created window (title='{}', width={}, height={})", title, width, height);
     }
 
     Window::~Window()
@@ -104,7 +88,7 @@ namespace he
         SDL_SetWindowTitle(m_native_handle, title.data());
     }
 
-    std::string Window::title() const { return SDL_GetWindowTitle(m_native_handle); }
+    std::string_view Window::title() const { return SDL_GetWindowTitle(m_native_handle); }
 
     void Window::set_size(const u32 width, const u32 height)
     {

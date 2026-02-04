@@ -20,6 +20,10 @@ set(HEADERS
         include/hyper_core/types.hpp)
 
 he_add_library(hyper_core)
+target_compile_definitions(
+        hyper_core
+        PRIVATE
+        SPDLOG_NO_SOURCE_LOC)
 target_link_libraries(
         hyper_core
         PUBLIC
@@ -28,7 +32,3 @@ target_link_libraries(
         hyper_core
         PRIVATE
         spdlog::spdlog)
-target_compile_definitions(
-        hyper_core
-        PRIVATE
-        SPDLOG_NO_SOURCE_LOC)

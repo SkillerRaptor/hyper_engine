@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include "platform/input.hpp"
-#include "platform/window.hpp"
+#include <hyper_platform/input.hpp>
+#include <hyper_platform/window.hpp>
+
 #include "rhi/graphics_device.hpp"
 
 namespace he
@@ -15,7 +16,7 @@ namespace he
     class Engine
     {
     public:
-        static std::optional<Engine> create();
+        Engine();
         ~Engine() = default;
 
         Engine(const Engine &) = delete;
@@ -27,10 +28,6 @@ namespace he
         void run();
 
     private:
-        Engine() = default;
-
-        bool initialize();
-
         void fixed_update(f32 delta_time);
         void update(f32 delta_time);
         void render() const;

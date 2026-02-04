@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "platform/input.hpp"
+#include "hyper_platform/input.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -15,7 +15,7 @@ namespace he
         const bool *key_state = SDL_GetKeyboardState(nullptr);
         memcpy(m_key_states.data(), key_state, m_key_states.size() * sizeof(bool));
 
-        m_mouse_state = SDL_GetMouseState(&m_mouse_position.x, &m_mouse_position.y);
+        m_mouse_state = SDL_GetMouseState(&m_mouse_position.first, &m_mouse_position.second);
     }
 
     bool Input::is_key_pressed(const KeyCode key_code) const { return m_key_states[static_cast<u32>(key_code)]; }

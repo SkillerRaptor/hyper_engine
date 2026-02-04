@@ -20,13 +20,8 @@ int main()
 
     // TODO: Parse command line arguments
 
-    std::optional<Engine> engine = Engine::create();
-    if (!engine.has_value())
-    {
-        return EXIT_FAILURE;
-    }
-
-    engine->run();
+    Engine engine;
+    engine.run();
 
     return EXIT_SUCCESS;
 }

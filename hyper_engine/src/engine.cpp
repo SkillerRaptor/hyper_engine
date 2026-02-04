@@ -8,37 +8,17 @@
 
 #include <chrono>
 
+#include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
 
 namespace he
 {
-    std::optional<Engine> Engine::create()
+    Engine::Engine()
     {
         const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 
-        Engine engine;
-        if (!engine.initialize())
-        {
-            HE_ERROR("Failed to initialize engine");
-            return std::nullopt;
-        }
-
-        const std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
-        const std::chrono::duration<f64> elapsed_seconds = end_time - start_time;
-
-        HE_INFO("Completed engine initialization (time={:.2}s)", elapsed_seconds.count());
-
-        return engine;
-    }
-
-    bool Engine::initialize()
-    {
-        m_window = Window::create("HyperEngine", 1280, 720);
-        if (m_window == nullptr)
-        {
-            HE_ERROR("Failed to create window");
-            return false;
-        }
+        m_window = make_own<Window>("HyperEngine", 1280, 720);
+        HE_ASSERT(m_window != nullptr);
 
         const Validation validation =
 #if HE_DEBUG_BUILD
@@ -48,13 +28,12 @@ namespace he
 #endif
 
         m_graphics_device = GraphicsDevice::create(GraphicsApi::Vulkan, *m_window, validation);
-        if (m_graphics_device == nullptr)
-        {
-            HE_ERROR("Failed to create graphics device");
-            return false;
-        }
+        HE_ASSERT(m_graphics_device != nullptr);
 
-        return true;
+        const std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+        const std::chrono::duration<f64> elapsed_seconds = end_time - start_time;
+
+        HE_INFO("Completed engine initialization (time={:.2}s)", elapsed_seconds.count());
     }
 
     void Engine::run()

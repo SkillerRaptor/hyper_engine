@@ -8,8 +8,6 @@
 
 #include <string>
 
-#include <hyper_core/logger.hpp>
-#include <hyper_core/memory.hpp>
 #include <hyper_core/prerequisites.hpp>
 #include <hyper_core/types.hpp>
 
@@ -20,7 +18,7 @@ namespace he
     class Window
     {
     public:
-        static OwnPtr<Window> create(std::string_view title, u32 width, u32 height);
+        Window(std::string_view title, u32 width, u32 height);
         ~Window();
 
         Window(const Window &) = delete;
@@ -32,7 +30,7 @@ namespace he
         void update();
 
         void set_title(std::string_view);
-        std::string title() const;
+        std::string_view title() const;
 
         void set_size(u32 width, u32 height);
         std::pair<u32, u32> size() const;
@@ -46,11 +44,6 @@ namespace he
         HE_ALWAYS_INLINE bool is_close_requested() const { return m_close_requested; }
 
         HE_ALWAYS_INLINE SDL_Window *native_handle() const { return m_native_handle; }
-
-    private:
-        Window() = default;
-
-        bool initialize(std::string_view title, u32 width, u32 height);
 
     private:
         SDL_Window *m_native_handle = nullptr;

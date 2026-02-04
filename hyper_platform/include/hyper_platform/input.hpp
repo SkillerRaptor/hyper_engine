@@ -8,12 +8,10 @@
 
 #include <array>
 
-#include <glm/vec2.hpp>
-
 #include <hyper_core/prerequisites.hpp>
 
-#include "platform/key_codes.hpp"
-#include "platform/mouse_codes.hpp"
+#include "hyper_platform/key_codes.hpp"
+#include "hyper_platform/mouse_codes.hpp"
 
 namespace he
 {
@@ -25,11 +23,11 @@ namespace he
         bool is_key_pressed(KeyCode) const;
         bool is_mouse_button_pressed(MouseCode) const;
 
-        HE_ALWAYS_INLINE glm::vec2 mouse_position() const { return m_mouse_position; }
+        HE_ALWAYS_INLINE std::pair<f32, f32> mouse_position() const { return m_mouse_position; }
 
     private:
         std::array<bool, 512> m_key_states = {};
         u32 m_mouse_state = 0;
-        glm::vec2 m_mouse_position = { 0.0f, 0.0f };
+        std::pair<f32, f32> m_mouse_position = { 0.0f, 0.0f };
     };
 } // namespace he

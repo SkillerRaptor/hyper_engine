@@ -15,8 +15,8 @@
 
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
+#include <hyper_platform/window.hpp>
 
-#include "platform/window.hpp"
 #include "rhi/vulkan/buffer.hpp"
 #include "rhi/vulkan/compute_pipeline.hpp"
 #include "rhi/vulkan/pipeline_layout.hpp"

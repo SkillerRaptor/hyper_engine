@@ -7,8 +7,6 @@
 set(SOURCES
         src/engine.cpp
         src/main.cpp
-        src/platform/input.cpp
-        src/platform/window.cpp
         src/rhi/graphics_device.cpp
         src/rhi/validation.cpp
         src/rhi/vulkan/buffer.cpp
@@ -23,10 +21,6 @@ set(SOURCES
 
 set(HEADERS
         include/engine.hpp
-        include/platform/input.hpp
-        include/platform/key_codes.hpp
-        include/platform/mouse_codes.hpp
-        include/platform/window.hpp
         include/rhi/buffer.hpp
         include/rhi/compute_pipeline.hpp
         include/rhi/definitions.hpp
@@ -57,11 +51,8 @@ target_include_directories(
 target_link_libraries(
         hyper_engine
         PRIVATE
-        hyper_core)
-
-target_link_libraries(
-        hyper_engine
-        PRIVATE
+        hyper_core
+        hyper_platform
         DirectXShaderCompiler
         EnTT::EnTT
         fastgltf::fastgltf
