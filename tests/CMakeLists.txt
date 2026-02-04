@@ -9,7 +9,7 @@ enable_testing()
 include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
 
 set(SOURCES
-        src/tests.cpp)
+        src/bitflags_tests.cpp)
 
 add_executable(tests ${SOURCES})
 target_link_libraries(
@@ -17,12 +17,12 @@ target_link_libraries(
         PRIVATE
         ProjectWarnings
         ProjectOptions
-        Catch2::Catch2WithMain)
+        Catch2::Catch2WithMain
+        hyper_core
+        hyper_platform)
 
 catch_discover_tests(
         tests
-        TEST_PREFIX "unit_tests."
         REPORTER XML
         OUTPUT_DIR .
-        OUTPUT_PREFIX "unit_tests."
         OUTPUT_SUFFIX .xml)

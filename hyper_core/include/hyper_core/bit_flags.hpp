@@ -7,6 +7,7 @@
 #pragma once
 
 #include <type_traits>
+#include <utility>
 
 #include "hyper_core/prerequisites.hpp"
 
@@ -129,6 +130,12 @@ namespace he
         HE_ALWAYS_INLINE friend constexpr bool operator!=(const BitFlags &lhs, const BitFlags &rhs)
         {
             return !(lhs == rhs);
+        }
+
+    private:
+        constexpr explicit BitFlags(UnderlyingT flags)
+            : m_flags(flags)
+        {
         }
 
     private:
