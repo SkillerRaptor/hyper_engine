@@ -73,6 +73,7 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 #-------------------------------------------------------------------------------------------
 add_subdirectory(hyper_core)
 add_subdirectory(hyper_platform)
+add_subdirectory(hyper_rhi)
 add_subdirectory(hyper_engine)
 
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT hyper_engine)

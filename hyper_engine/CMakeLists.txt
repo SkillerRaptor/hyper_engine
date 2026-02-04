@@ -6,41 +6,10 @@
 
 set(SOURCES
         src/engine.cpp
-        src/main.cpp
-        src/rhi/graphics_device.cpp
-        src/rhi/validation.cpp
-        src/rhi/vulkan/buffer.cpp
-        src/rhi/vulkan/compute_pipeline.cpp
-        src/rhi/vulkan/graphics_device.cpp
-        src/rhi/vulkan/pipeline_layout.cpp
-        src/rhi/vulkan/render_conversion.cpp
-        src/rhi/vulkan/render_pipeline.cpp
-        src/rhi/vulkan/sampler.cpp
-        src/rhi/vulkan/shader.cpp
-        src/rhi/vulkan/texture.cpp)
+        src/main.cpp)
 
 set(HEADERS
-        include/engine.hpp
-        include/rhi/buffer.hpp
-        include/rhi/compute_pipeline.hpp
-        include/rhi/definitions.hpp
-        include/rhi/graphics_device.hpp
-        include/rhi/pipeline_layout.hpp
-        include/rhi/render_pipeline.hpp
-        include/rhi/resource_handle.hpp
-        include/rhi/sampler.hpp
-        include/rhi/shader.hpp
-        include/rhi/texture.hpp
-        include/rhi/validation.hpp
-        include/rhi/vulkan/buffer.hpp
-        include/rhi/vulkan/compute_pipeline.hpp
-        include/rhi/vulkan/graphics_device.hpp
-        include/rhi/vulkan/pipeline_layout.hpp
-        include/rhi/vulkan/render_conversion.hpp
-        include/rhi/vulkan/render_pipeline.hpp
-        include/rhi/vulkan/sampler.hpp
-        include/rhi/vulkan/shader.hpp
-        include/rhi/vulkan/texture.hpp)
+        include/engine.hpp)
 
 he_define_executable(hyper_engine)
 target_include_directories(
@@ -53,15 +22,12 @@ target_link_libraries(
         PRIVATE
         hyper_core
         hyper_platform
-        DirectXShaderCompiler
+        hyper_rhi
         EnTT::EnTT
         fastgltf::fastgltf
         glm
         imgui
-        SDL3::SDL3
-        stb
-        volk::volk
-        GPUOpen::VulkanMemoryAllocator)
+        stb)
 
 if (WIN32)
     target_link_libraries(

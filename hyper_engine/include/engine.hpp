@@ -8,8 +8,7 @@
 
 #include <hyper_platform/input.hpp>
 #include <hyper_platform/window.hpp>
-
-#include "rhi/graphics_device.hpp"
+#include <hyper_rhi/graphics_device.hpp>
 
 namespace he
 {

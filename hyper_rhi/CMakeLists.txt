@@ -1,0 +1,51 @@
+#-------------------------------------------------------------------------------------------
+# Copyright (c) 2026-present, SkillerRaptor
+#
+# SPDX-License-Identifier: MIT
+#-------------------------------------------------------------------------------------------
+
+set(SOURCES
+        src/hyper_rhi/graphics_device.cpp
+        src/hyper_rhi/validation.cpp
+        src/hyper_rhi/vulkan/buffer.cpp
+        src/hyper_rhi/vulkan/compute_pipeline.cpp
+        src/hyper_rhi/vulkan/graphics_device.cpp
+        src/hyper_rhi/vulkan/pipeline_layout.cpp
+        src/hyper_rhi/vulkan/render_conversion.cpp
+        src/hyper_rhi/vulkan/render_pipeline.cpp
+        src/hyper_rhi/vulkan/sampler.cpp
+        src/hyper_rhi/vulkan/shader.cpp
+        src/hyper_rhi/vulkan/texture.cpp)
+
+set(HEADERS
+        include/hyper_rhi/buffer.hpp
+        include/hyper_rhi/compute_pipeline.hpp
+        include/hyper_rhi/definitions.hpp
+        include/hyper_rhi/graphics_device.hpp
+        include/hyper_rhi/pipeline_layout.hpp
+        include/hyper_rhi/render_pipeline.hpp
+        include/hyper_rhi/resource_handle.hpp
+        include/hyper_rhi/sampler.hpp
+        include/hyper_rhi/shader.hpp
+        include/hyper_rhi/texture.hpp
+        include/hyper_rhi/validation.hpp
+        include/hyper_rhi/vulkan/buffer.hpp
+        include/hyper_rhi/vulkan/compute_pipeline.hpp
+        include/hyper_rhi/vulkan/graphics_device.hpp
+        include/hyper_rhi/vulkan/pipeline_layout.hpp
+        include/hyper_rhi/vulkan/render_conversion.hpp
+        include/hyper_rhi/vulkan/render_pipeline.hpp
+        include/hyper_rhi/vulkan/sampler.hpp
+        include/hyper_rhi/vulkan/shader.hpp
+        include/hyper_rhi/vulkan/texture.hpp)
+
+he_add_library(hyper_rhi)
+target_link_libraries(
+        hyper_rhi
+        PRIVATE
+        hyper_core
+        hyper_platform
+        DirectXShaderCompiler
+        SDL3::SDL3
+        volk::volk
+        GPUOpen::VulkanMemoryAllocator)
