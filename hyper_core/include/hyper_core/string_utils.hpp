@@ -10,5 +10,6 @@
 
 namespace he::string_utils
 {
+    std::string to_string(std::wstring_view);
     std::wstring to_wstring(std::string_view);
 } // namespace he::string_utils

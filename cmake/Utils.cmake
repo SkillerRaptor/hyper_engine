@@ -31,6 +31,7 @@ macro(he_define_executable target)
         target_compile_definitions(
                 ${target}
                 PRIVATE
+                _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
                 _CRT_SECURE_NO_WARNINGS
                 NOMINMAX
                 WIN32_LEAN_AND_MEAN)
@@ -57,6 +58,7 @@ macro(he_add_library target)
         target_compile_definitions(
                 ${target}
                 PRIVATE
+                _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
                 _CRT_SECURE_NO_WARNINGS
                 NOMINMAX
                 WIN32_LEAN_AND_MEAN)
