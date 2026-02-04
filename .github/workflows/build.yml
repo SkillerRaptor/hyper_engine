@@ -63,7 +63,7 @@ jobs:
           ccache: true
 
       - name: Prepare Vulkan SDK
-        uses: humbletim/install-vulkan-sdk@v1.2.1
+        uses: humbletim/install-vulkan-sdk@v1.2
         with:
           version: latest
           cache: true
