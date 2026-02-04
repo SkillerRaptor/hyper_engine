@@ -6,6 +6,8 @@
 
 #include "hyper_platform/window.hpp"
 
+#include <utility>
+
 #include <SDL3/SDL.h>
 
 #include <hyper_core/assertion.hpp>

@@ -33,14 +33,16 @@ CPMAddPackage(
         "ENTT_BUILD_TESTBED OFF"
         "ENTT_BUILD_DOCS OFF")
 
-CPMAddPackage(
-        NAME D3D12MemoryAllocator
-        GITHUB_REPOSITORY GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator
-        GIT_TAG v3.0.1
-        OPTIONS
-        "BUILD_DOCUMENTATION OFF"
-        "BUILD_SHARED_LIBS OFF"
-        "D3D12MA_BUILD_SAMPLE OFF")
+if (WIN32)
+    CPMAddPackage(
+            NAME D3D12MemoryAllocator
+            GITHUB_REPOSITORY GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator
+            GIT_TAG v3.0.1
+            OPTIONS
+            "BUILD_DOCUMENTATION OFF"
+            "BUILD_SHARED_LIBS OFF"
+            "D3D12MA_BUILD_SAMPLE OFF")
+endif ()
 
 CPMAddPackage(
         NAME fastgltf
