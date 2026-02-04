@@ -42,20 +42,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup Cache
-        uses: ./.github/actions/setup_cache
-        with:
-          compiler: ${{ matrix.compiler }}
-          build_type: ${{ matrix.build_type }}
-          generator: ${{ matrix.generator }}
-
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
           compiler: ${{ matrix.compiler }}
           cmake: true
           ninja: true
-          ccache: true
 
       - name: Unix -Install Vulkan SDK
         if: runner.os != 'Windows'
