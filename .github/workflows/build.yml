@@ -18,7 +18,6 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macos-latest
           - windows-latest
         compiler:
           - llvm
@@ -26,23 +25,12 @@ jobs:
         build_type:
           - Release
           - Debug
+        generator:
+          - "Ninja Multi-Config"
+        exclude:
+          - os: windows-latest
+            compiler: gcc
         include:
-          - os: ubuntu-latest
-            compiler: llvm
-            generator: "Ninja Multi-Config"
-            build_type: Debug
-          - os: ubuntu-latest
-            compiler: llvm
-            generator: "Ninja Multi-Config"
-            build_type: Release
-          - os: ubuntu-latest
-            compiler: gcc
-            generator: "Ninja Multi-Config"
-            build_type: Debug
-          - os: ubuntu-latest
-            compiler: gcc
-            generator: "Ninja Multi-Config"
-            build_type: Release
           - os: windows-latest
             compiler: msvc
             generator: "Visual Studio 17 2022"
@@ -121,7 +109,7 @@ jobs:
           7z a -tzip ${{ matrix.config.artifact }} build/*
 
       - name: Upload
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           path: ${{ matrix.config.artifact }}
           name: ${{ matrix.config.artifact }}
