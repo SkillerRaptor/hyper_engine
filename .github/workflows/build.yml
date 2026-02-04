@@ -82,16 +82,23 @@ jobs:
           ctest -C ${{ matrix.build_type }}
 
       - name: Prepare upload
-        if: runner.os != 'Windows'
         run: |
           if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            tar cfz ${{ matrix.config.artifact }} build
+            tar cfz linux-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.tar.xz build/
           elif [ "${{ matrix.os }}" == "windows-latest" ]; then
-            7z a -tzip ${{ matrix.config.artifact }} build/*
+            7z a -tzip windows-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.zip build/*
           fi
 
-      - name: Upload
+      - name: Upload (Linux)
         uses: actions/upload-artifact@v4
+        if: runner.os != 'Windows'
         with:
-          path: ${{ matrix.config.artifact }}
-          name: ${{ matrix.config.artifact }}
+          path: linux-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.tar.xz
+          name: linux-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.tar.xz
+
+      - name: Upload (Windows)
+        uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          path: windows-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.zip
+          name: windows-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.zip
