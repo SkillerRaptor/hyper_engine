@@ -11,7 +11,6 @@ jobs:
     name: ${{matrix.os}} ${{matrix.compiler}} ${{matrix.build_type}}
     runs-on: ${{ matrix.os }}
     env:
-      vulkan_sdk: "${{ github.workspace }}/vulkan_sdk/"
       vulkan_version: "1.4.341.1"
     strategy:
       fail-fast: false
@@ -42,53 +41,47 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Setup Cache
+        uses: ./.github/actions/setup_cache
+        with:
+          compiler: ${{ matrix.compiler }}
+          build_type: ${{ matrix.build_type }}
+          generator: ${{ matrix.generator }}
+
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
           compiler: ${{ matrix.compiler }}
           cmake: true
           ninja: true
+          ccache: true
 
-      - name: Unix -Install Vulkan SDK
-        if: runner.os != 'Windows'
-        run: |
-          curl -LS -o vulkansdk.tar.gz https://sdk.lunarg.com/sdk/download/${{ env.vulkan_version }}/linux/vulkansdk-linux-x86_64-${{ env.vulkan_version }}.tar.gz
-
-          mkdir "${{ env.vulkan_sdk }}"
-          tar xfz vulkansdk.tar.gz -C "${{ env.vulkan_sdk }}"
-          
-          export VULKAN_SDK="${{ env.vulkan_sdk }}/${{ env.vulkan_version }}/x86_64"
-          export PATH=$PATH:$VULKAN_SDK/bin
-          export LD_LIBRARY_PATH=$VULKAN_SDK/lib:$LD_LIBRARY_PATH
-          export VK_LAYER_PATH=$VULKAN_SDK/etc/explicit_layer.d
-
-      - name: Windows - Install Vulkan SDK
-        if: runner.os == 'Windows'
-        run: |
-          curl -LS -o vulkansdk.exe https://sdk.lunarg.com/sdk/download/${{ env.vulkan_version }}/windows/VulkanSDK-${{ env.vulkan_version }}-Installer.exe?Human=true
-          7z x vulkansdk.exe -o"${{ env.vulkan_sdk }}"
-          
-          set PATH=%PATH%;${{ env.vulkan_sdk }}\;${{ env.vulkan_sdk }}\Bin\
+      - name: Prepare Vulkan SDK
+        uses: humbletim/setup-vulkan-sdk@v1.2.1
+        with:
+          vulkan-query-version: ${{ env.vulkan_version }}
+          vulkan-components: Vulkan-Headers, Vulkan-Loader
+          vulkan-use-cache: true
 
       - name: Configure CMake
         run: |
-          cmake -S . -B ./build -G "${{matrix.generator}}" -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}}
+          cmake -S . -B ./build -G "${{ matrix.generator }}" -DCMAKE_BUILD_TYPE:STRING=${{ matrix.build_type }}
 
       - name: Build
         run: |
-          cmake --build ./build --config ${{matrix.build_type}}
+          cmake --build ./build --config ${{ matrix.build_type }}
 
       - name: Unix - Test
         if: runner.os != 'Windows'
         working-directory: ./build
         run: |
-          ctest -C ${{matrix.build_type}}
+          ctest -C ${{ matrix.build_type }}
 
       - name: Windows - Test
         if: runner.os == 'Windows'
         working-directory: ./build
         run: |
-          ctest -C ${{matrix.build_type}}
+          ctest -C ${{ matrix.build_type }}
 
       - name: Unix - Prepare upload
         if: runner.os != 'Windows'
