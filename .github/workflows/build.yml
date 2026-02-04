@@ -81,13 +81,10 @@ jobs:
         run: |
           ctest -C ${{ matrix.build_type }}
 
-      - name: Prepare upload
+      - name: Prepare upload (Linux)
+        if: runner.os != 'Windows'
         run: |
-          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            tar cfz linux-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.tar.xz build/
-          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
-            7z a -tzip windows-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.zip build/*
-          fi
+          tar cfz linux-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.tar.xz build/
 
       - name: Upload (Linux)
         uses: actions/upload-artifact@v4
@@ -95,6 +92,11 @@ jobs:
         with:
           path: linux-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.tar.xz
           name: linux-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.tar.xz
+
+      - name: Prepare upload (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          7z a -tzip windows-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.zip build/*
 
       - name: Upload (Windows)
         uses: actions/upload-artifact@v4
