@@ -20,7 +20,8 @@ target_link_libraries(
         ProjectOptions
         Catch2::Catch2WithMain
         hyper_core
-        hyper_platform)
+        hyper_platform
+        hyper_rhi)
 
 catch_discover_tests(
         tests
