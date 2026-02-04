@@ -10,8 +10,6 @@ jobs:
   build:
     name: ${{matrix.os}} ${{matrix.compiler}} ${{matrix.build_type}}
     runs-on: ${{ matrix.os }}
-    env:
-      vulkan_version: "1.4.341.1"
     strategy:
       fail-fast: false
       matrix:
@@ -41,6 +39,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Update environment
+        if: runner.os != 'Windows'
+        run: |
+          sudo apt update -qq
+          sudo apt install -y \
+            libgl1-mesa-dev \
+            xorg-dev
+
       - name: Setup Cache
         uses: ./.github/actions/setup_cache
         with:
@@ -57,11 +63,10 @@ jobs:
           ccache: true
 
       - name: Prepare Vulkan SDK
-        uses: humbletim/setup-vulkan-sdk@v1.2.1
+        uses: humbletim/install-vulkan-sdk@v1.2.1
         with:
-          vulkan-query-version: ${{ env.vulkan_version }}
-          vulkan-components: Vulkan-Headers, Vulkan-Loader
-          vulkan-use-cache: true
+          version: latest
+          cache: true
 
       - name: Configure CMake
         run: |
@@ -71,27 +76,19 @@ jobs:
         run: |
           cmake --build ./build --config ${{ matrix.build_type }}
 
-      - name: Unix - Test
-        if: runner.os != 'Windows'
+      - name: Test
         working-directory: ./build
         run: |
           ctest -C ${{ matrix.build_type }}
 
-      - name: Windows - Test
-        if: runner.os == 'Windows'
-        working-directory: ./build
-        run: |
-          ctest -C ${{ matrix.build_type }}
-
-      - name: Unix - Prepare upload
+      - name: Prepare upload
         if: runner.os != 'Windows'
         run: |
-          tar cfz ${{ matrix.config.artifact }} build
-
-      - name: Windows - Prepare upload
-        if: runner.os == 'Windows'
-        run: |
-          7z a -tzip ${{ matrix.config.artifact }} build/*
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            tar cfz ${{ matrix.config.artifact }} build
+          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
+            7z a -tzip ${{ matrix.config.artifact }} build/*
+          fi
 
       - name: Upload
         uses: actions/upload-artifact@v4
