@@ -5,8 +5,8 @@
 #-------------------------------------------------------------------------------------------
 
 function(he_enable_cache)
-    set(CACHE_OPTION "ccache" CACHE STRING "Compiler cache to be used")
-    set(CACHE_OPTION_VALUES "ccache" "sccache")
+    set(CACHE_OPTION "sccache" CACHE STRING "Compiler cache to be used")
+    set(CACHE_OPTION_VALUES "sccache" "ccache")
     set_property(CACHE CACHE_OPTION PROPERTY STRINGS ${CACHE_OPTION_VALUES})
     list(
             FIND
