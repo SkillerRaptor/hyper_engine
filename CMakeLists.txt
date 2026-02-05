@@ -11,7 +11,6 @@ cmake_minimum_required(VERSION 3.24)
 project(
         HyperEngine
         VERSION 0.0.1
-        DESCRIPTION ""
         LANGUAGES C CXX)
 
 cmake_policy(SET CMP0069 NEW)
