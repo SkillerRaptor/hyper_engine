@@ -6,33 +6,16 @@
 
 #include "hyper_rhi/vulkan/shader.hpp"
 
-#include <hyper_core/logger.hpp>
-
 #include "hyper_rhi/validation.hpp"
 
 namespace he
 {
-    RefPtr<VulkanShader> VulkanShader::create(VulkanGraphicsDevice &graphics_device, const ShaderDescriptor &desc)
+    VulkanShader::VulkanShader(VulkanGraphicsDevice &graphics_device, const ShaderDescriptor &desc)
+        : Shader(desc)
+        , m_graphics_device(graphics_device)
     {
-        RefPtr<VulkanShader> shader = wrap_ref<VulkanShader>(new VulkanShader(graphics_device, desc));
-        if (!shader->initialize(desc))
-        {
-            HE_ERROR("Failed to initialize shader");
-            return nullptr;
-        }
-
-        return shader;
+        validate_shader_descriptor(desc);
     }
 
     VulkanShader::~VulkanShader() { }
-
-    bool VulkanShader::initialize(const ShaderDescriptor &desc)
-    {
-        if (!validate_shader_descriptor(desc))
-        {
-            return false;
-        }
-
-        return true;
-    }
 } // namespace he

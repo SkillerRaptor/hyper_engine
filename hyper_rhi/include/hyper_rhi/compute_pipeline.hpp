@@ -29,7 +29,6 @@ namespace he
         virtual ~ComputePipeline() = default;
 
         HE_ALWAYS_INLINE RefPtr<PipelineLayout> layout() const { return m_layout; }
-
         HE_ALWAYS_INLINE RefPtr<Shader> shader() const { return m_shader; }
 
     protected:

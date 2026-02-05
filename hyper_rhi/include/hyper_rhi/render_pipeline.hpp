@@ -90,20 +90,14 @@ namespace he
         virtual ~RenderPipeline() = default;
 
         HE_ALWAYS_INLINE RefPtr<PipelineLayout> layout() const { return m_layout; }
-
         HE_ALWAYS_INLINE RefPtr<Shader> vertex_shader() const { return m_vertex_shader; }
-
         HE_ALWAYS_INLINE RefPtr<Shader> fragment_shader() const { return m_fragment_shader; }
-
         HE_ALWAYS_INLINE PrimitiveState primitive_state() const { return m_primitive_state; }
-
         HE_ALWAYS_INLINE MultisampleState multisample_state() const { return m_multisample_state; }
-
         HE_ALWAYS_INLINE std::span<const ColorAttachmentState> color_attachment_states() const
         {
             return m_color_attachment_states;
         }
-
         HE_ALWAYS_INLINE std::optional<DepthStencilState> depth_stencil_state() const { return m_depth_stencil_state; }
 
     protected:

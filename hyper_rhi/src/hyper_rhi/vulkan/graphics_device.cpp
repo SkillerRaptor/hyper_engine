@@ -70,37 +70,37 @@ namespace he
 
     RefPtr<Buffer> VulkanGraphicsDevice::create_buffer(const BufferDescriptor &desc)
     {
-        return VulkanBuffer::create(*this, desc);
+        return make_ref<VulkanBuffer>(*this, desc, false);
     }
 
     RefPtr<Shader> VulkanGraphicsDevice::create_shader(const ShaderDescriptor &desc)
     {
-        return VulkanShader::create(*this, desc);
+        return make_ref<VulkanShader>(*this, desc);
     }
 
     RefPtr<Sampler> VulkanGraphicsDevice::create_sampler(const SamplerDescriptor &desc)
     {
-        return VulkanSampler::create(*this, desc);
+        return make_ref<VulkanSampler>(*this, desc);
     }
 
     RefPtr<Texture> VulkanGraphicsDevice::create_texture(const TextureDescriptor &desc)
     {
-        return VulkanTexture::create(*this, desc);
+        return make_ref<VulkanTexture>(*this, desc);
     }
 
     RefPtr<PipelineLayout> VulkanGraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &desc)
     {
-        return VulkanPipelineLayout::create(*this, desc);
+        return make_ref<VulkanPipelineLayout>(*this, desc);
     }
 
     RefPtr<ComputePipeline> VulkanGraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &desc)
     {
-        return VulkanComputePipeline::create(*this, desc);
+        return make_ref<VulkanComputePipeline>(*this, desc);
     }
 
     RefPtr<RenderPipeline> VulkanGraphicsDevice::create_render_pipeline(const RenderPipelineDescriptor &desc)
     {
-        return VulkanRenderPipeline::create(*this, desc);
+        return make_ref<VulkanRenderPipeline>(*this, desc);
     }
 
     void VulkanGraphicsDevice::create_instance(const Validation validation_requested)

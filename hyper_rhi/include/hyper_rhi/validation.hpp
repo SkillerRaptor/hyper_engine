@@ -6,21 +6,15 @@
 
 #pragma once
 
+#include "hyper_rhi/forward.hpp"
+
 namespace he
 {
-    struct BufferDescriptor;
-    struct ComputePipelineDescriptor;
-    struct PipelineLayoutDescriptor;
-    struct RenderPipelineDescriptor;
-    struct SamplerDescriptor;
-    struct ShaderDescriptor;
-    struct TextureDescriptor;
-
-    bool validate_buffer_descriptor(const BufferDescriptor &desc);
-    bool validate_compute_pipeline_descriptor(const ComputePipelineDescriptor &desc);
-    bool validate_pipeline_layout_descriptor(const PipelineLayoutDescriptor &desc);
-    bool validate_render_pipeline_descriptor(const RenderPipelineDescriptor &desc);
-    bool validate_sampler_descriptor(const SamplerDescriptor &desc);
-    bool validate_shader_descriptor(const ShaderDescriptor &desc);
-    bool validate_texture_descriptor(const TextureDescriptor &desc);
+    void validate_buffer_descriptor(const BufferDescriptor &);
+    void validate_compute_pipeline_descriptor(const ComputePipelineDescriptor &);
+    void validate_pipeline_layout_descriptor(const PipelineLayoutDescriptor &);
+    void validate_render_pipeline_descriptor(const RenderPipelineDescriptor &);
+    void validate_sampler_descriptor(const SamplerDescriptor &);
+    void validate_shader_descriptor(const ShaderDescriptor &);
+    void validate_texture_descriptor(const TextureDescriptor &);
 } // namespace he

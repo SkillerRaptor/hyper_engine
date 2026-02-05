@@ -10,6 +10,7 @@
 #include <string_view>
 
 #include <hyper_core/bit_flags.hpp>
+#include <hyper_core/memory.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/definitions.hpp"
@@ -54,15 +55,10 @@ namespace he
         virtual ~Texture() = default;
 
         HE_ALWAYS_INLINE Extent3d extent() const { return m_extent; }
-
         HE_ALWAYS_INLINE u32 mip_levels() const { return m_mip_levels; }
-
         HE_ALWAYS_INLINE u32 sample_count() const { return m_sample_count; }
-
         HE_ALWAYS_INLINE Format format() const { return m_format; }
-
         HE_ALWAYS_INLINE Dimension dimension() const { return m_dimension; }
-
         HE_ALWAYS_INLINE BitFlags<TextureUsage> usage() const { return m_usage; }
 
     protected:
@@ -91,15 +87,10 @@ namespace he
         virtual ~TextureView() = default;
 
         HE_ALWAYS_INLINE RefPtr<Texture> texture() const { return m_texture; }
-
         HE_ALWAYS_INLINE ViewDimension dimension() const { return m_dimension; }
-
         HE_ALWAYS_INLINE u32 base_mip_level() const { return m_base_mip_level; }
-
         HE_ALWAYS_INLINE u32 mip_levels() const { return m_mip_levels; }
-
         HE_ALWAYS_INLINE u32 base_array_layer() const { return m_base_array_layer; }
-
         HE_ALWAYS_INLINE u32 array_layers() const { return m_array_layers; }
 
     protected:

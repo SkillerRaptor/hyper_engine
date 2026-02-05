@@ -6,42 +6,24 @@
 
 #include "hyper_rhi/vulkan/compute_pipeline.hpp"
 
-#include <vulkan/vk_enum_string_helper.h>
-
 #include <hyper_core/assertion.hpp>
-#include <hyper_core/logger.hpp>
 
 #include "hyper_rhi/validation.hpp"
 #include "hyper_rhi/vulkan/graphics_device.hpp"
 #include "hyper_rhi/vulkan/pipeline_layout.hpp"
 #include "hyper_rhi/vulkan/shader.hpp"
+#include "hyper_rhi/vulkan/utils.hpp"
 
 namespace he
 {
-    RefPtr<VulkanComputePipeline>
-        VulkanComputePipeline::create(VulkanGraphicsDevice &graphics_device, const ComputePipelineDescriptor &desc)
+    VulkanComputePipeline::VulkanComputePipeline(
+        VulkanGraphicsDevice &graphics_device, const ComputePipelineDescriptor &desc)
+        : ComputePipeline(desc)
+        , m_graphics_device(graphics_device)
     {
-        RefPtr<VulkanComputePipeline> compute_pipeline
-            = wrap_ref<VulkanComputePipeline>(new VulkanComputePipeline(graphics_device, desc));
-        if (!compute_pipeline->initialize(desc))
-        {
-            HE_ERROR("Failed to initialize compute pipeline");
-            return nullptr;
-        }
+        validate_compute_pipeline_descriptor(desc);
 
-        return compute_pipeline;
-    }
-
-    VulkanComputePipeline::~VulkanComputePipeline() { }
-
-    bool VulkanComputePipeline::initialize(const ComputePipelineDescriptor &desc)
-    {
-        if (!validate_compute_pipeline_descriptor(desc))
-        {
-            return false;
-        }
-
-        const VkPipelineShaderStageCreateInfo pipeline_shader_stage_create_info {
+        const VkPipelineShaderStageCreateInfo pipeline_shader_stage_create_info = {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
             .pNext = nullptr,
             .flags = 0,
@@ -51,7 +33,7 @@ namespace he
             .pSpecializationInfo = nullptr,
         };
 
-        const VkComputePipelineCreateInfo compute_pipeline_create_info {
+        const VkComputePipelineCreateInfo compute_pipeline_create_info = {
             .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
             .pNext = nullptr,
             .flags = 0,
@@ -61,16 +43,12 @@ namespace he
             .basePipelineIndex = -1,
         };
 
-        const VkResult result = vkCreateComputePipelines(
-            m_graphics_device.device(), VK_NULL_HANDLE, 1, &compute_pipeline_create_info, nullptr, &m_raw);
-        if (result != VK_SUCCESS)
-        {
-            HE_ERROR("Failed to create vulkan compute pipeline ({})", string_VkResult(result));
-            return result;
-        }
-
+        HE_VK_CHECK(
+            vkCreateComputePipelines(
+                m_graphics_device.device(), VK_NULL_HANDLE, 1, &compute_pipeline_create_info, nullptr, &m_raw),
+            "Failed to create vulkan compute pipeline");
         HE_ASSERT(m_raw != VK_NULL_HANDLE);
-
-        return true;
     }
+
+    VulkanComputePipeline::~VulkanComputePipeline() { vkDestroyPipeline(m_graphics_device.device(), m_raw, nullptr); }
 } // namespace he

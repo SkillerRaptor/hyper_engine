@@ -6,35 +6,17 @@
 
 #include "hyper_rhi/vulkan/render_pipeline.hpp"
 
-#include <hyper_core/logger.hpp>
-
 #include "hyper_rhi/validation.hpp"
 
 namespace he
 {
-    RefPtr<VulkanRenderPipeline>
-        VulkanRenderPipeline::create(VulkanGraphicsDevice &graphics_device, const RenderPipelineDescriptor &desc)
+    VulkanRenderPipeline::VulkanRenderPipeline(
+        VulkanGraphicsDevice &graphics_device, const RenderPipelineDescriptor &desc)
+        : RenderPipeline(desc)
+        , m_graphics_device(graphics_device)
     {
-        RefPtr<VulkanRenderPipeline> render_pipeline
-            = wrap_ref<VulkanRenderPipeline>(new VulkanRenderPipeline(graphics_device, desc));
-        if (!render_pipeline->initialize(desc))
-        {
-            HE_ERROR("Failed to initialize render pipeline");
-            return nullptr;
-        }
-
-        return render_pipeline;
+        validate_render_pipeline_descriptor(desc);
     }
 
     VulkanRenderPipeline::~VulkanRenderPipeline() { }
-
-    bool VulkanRenderPipeline::initialize(const RenderPipelineDescriptor &desc)
-    {
-        if (!validate_render_pipeline_descriptor(desc))
-        {
-            return false;
-        }
-
-        return true;
-    }
 } // namespace he

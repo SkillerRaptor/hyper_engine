@@ -43,7 +43,6 @@ namespace he
         virtual void unmap() const = 0;
 
         HE_ALWAYS_INLINE u32 size() const { return m_size; }
-
         HE_ALWAYS_INLINE BitFlags<BufferUsage> usage() const { return m_usage; }
 
     protected:

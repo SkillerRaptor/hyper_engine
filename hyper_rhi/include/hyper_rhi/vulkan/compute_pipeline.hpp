@@ -8,7 +8,6 @@
 
 #include <volk.h>
 
-#include <hyper_core/memory.hpp>
 #include <hyper_core/prerequisites.hpp>
 
 #include "hyper_rhi/compute_pipeline.hpp"
@@ -20,19 +19,10 @@ namespace he
     class VulkanComputePipeline final : public ComputePipeline
     {
     public:
-        static RefPtr<VulkanComputePipeline> create(VulkanGraphicsDevice &, const ComputePipelineDescriptor &);
+        VulkanComputePipeline(VulkanGraphicsDevice &, const ComputePipelineDescriptor &);
         ~VulkanComputePipeline() override;
 
         HE_ALWAYS_INLINE VkPipeline raw() const { return m_raw; }
-
-    private:
-        explicit VulkanComputePipeline(VulkanGraphicsDevice &graphics_device, const ComputePipelineDescriptor &desc)
-            : ComputePipeline(desc)
-            , m_graphics_device(graphics_device)
-        {
-        }
-
-        bool initialize(const ComputePipelineDescriptor &);
 
     private:
         VulkanGraphicsDevice &m_graphics_device;

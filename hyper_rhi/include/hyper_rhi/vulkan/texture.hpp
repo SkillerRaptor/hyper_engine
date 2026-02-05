@@ -11,8 +11,6 @@
 #include <vk_mem_alloc.h>
 // clang-format on
 
-#include <hyper_core/memory.hpp>
-
 #include "hyper_rhi/texture.hpp"
 
 namespace he
@@ -22,17 +20,8 @@ namespace he
     class VulkanTexture final : public Texture
     {
     public:
-        static RefPtr<VulkanTexture> create(VulkanGraphicsDevice &, const TextureDescriptor &);
+        VulkanTexture(VulkanGraphicsDevice &, const TextureDescriptor &);
         ~VulkanTexture() override;
-
-    private:
-        explicit VulkanTexture(VulkanGraphicsDevice &graphics_device, const TextureDescriptor &desc)
-            : Texture(desc)
-            , m_graphics_device(graphics_device)
-        {
-        }
-
-        bool initialize(const TextureDescriptor &);
 
     private:
         VulkanGraphicsDevice &m_graphics_device;

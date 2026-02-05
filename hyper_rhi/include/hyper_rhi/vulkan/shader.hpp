@@ -8,7 +8,6 @@
 
 #include <volk.h>
 
-#include <hyper_core/memory.hpp>
 #include <hyper_core/prerequisites.hpp>
 
 #include "hyper_rhi/shader.hpp"
@@ -20,19 +19,10 @@ namespace he
     class VulkanShader final : public Shader
     {
     public:
-        static RefPtr<VulkanShader> create(VulkanGraphicsDevice &, const ShaderDescriptor &);
+        VulkanShader(VulkanGraphicsDevice &, const ShaderDescriptor &);
         ~VulkanShader() override;
 
         HE_ALWAYS_INLINE VkShaderModule raw() const { return m_raw; }
-
-    private:
-        explicit VulkanShader(VulkanGraphicsDevice &graphics_device, const ShaderDescriptor &desc)
-            : Shader(desc)
-            , m_graphics_device { graphics_device }
-        {
-        }
-
-        bool initialize(const ShaderDescriptor &);
 
     private:
         VulkanGraphicsDevice &m_graphics_device;

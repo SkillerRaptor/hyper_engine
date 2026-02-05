@@ -6,33 +6,16 @@
 
 #include "hyper_rhi/vulkan/texture.hpp"
 
-#include <hyper_core/logger.hpp>
-
 #include "hyper_rhi/validation.hpp"
 
 namespace he
 {
-    RefPtr<VulkanTexture> VulkanTexture::create(VulkanGraphicsDevice &graphics_device, const TextureDescriptor &desc)
+    VulkanTexture::VulkanTexture(VulkanGraphicsDevice &graphics_device, const TextureDescriptor &desc)
+        : Texture(desc)
+        , m_graphics_device(graphics_device)
     {
-        RefPtr<VulkanTexture> texture = wrap_ref<VulkanTexture>(new VulkanTexture(graphics_device, desc));
-        if (!texture->initialize(desc))
-        {
-            HE_ERROR("Failed to initialize texture");
-            return nullptr;
-        }
-
-        return texture;
+        validate_texture_descriptor(desc);
     }
 
     VulkanTexture::~VulkanTexture() { }
-
-    bool VulkanTexture::initialize(const TextureDescriptor &desc)
-    {
-        if (!validate_texture_descriptor(desc))
-        {
-            return false;
-        }
-
-        return true;
-    }
 } // namespace he

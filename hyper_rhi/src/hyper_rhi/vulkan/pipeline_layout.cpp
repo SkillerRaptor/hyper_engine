@@ -8,41 +8,20 @@
 
 #include <array>
 
-#include <vulkan/vk_enum_string_helper.h>
-
 #include <hyper_core/assertion.hpp>
-#include <hyper_core/logger.hpp>
 
 #include "hyper_rhi/validation.hpp"
 #include "hyper_rhi/vulkan/graphics_device.hpp"
+#include "hyper_rhi/vulkan/utils.hpp"
 
 namespace he
 {
-    RefPtr<VulkanPipelineLayout>
-        VulkanPipelineLayout::create(VulkanGraphicsDevice &graphics_device, const PipelineLayoutDescriptor &desc)
+    VulkanPipelineLayout::VulkanPipelineLayout(
+        VulkanGraphicsDevice &graphics_device, const PipelineLayoutDescriptor &desc)
+        : PipelineLayout(desc)
+        , m_graphics_device(graphics_device)
     {
-        RefPtr<VulkanPipelineLayout> pipeline_layout
-            = wrap_ref<VulkanPipelineLayout>(new VulkanPipelineLayout(graphics_device, desc));
-        if (!pipeline_layout->initialize(desc))
-        {
-            HE_ERROR("Failed to initialize pipeline layout");
-            return nullptr;
-        }
-
-        return pipeline_layout;
-    }
-
-    VulkanPipelineLayout::~VulkanPipelineLayout()
-    {
-        vkDestroyPipelineLayout(m_graphics_device.device(), m_raw, nullptr);
-    }
-
-    bool VulkanPipelineLayout::initialize(const PipelineLayoutDescriptor &desc)
-    {
-        if (!validate_pipeline_layout_descriptor(desc))
-        {
-            return false;
-        }
+        validate_pipeline_layout_descriptor(desc);
 
         const VkPushConstantRange push_constant_range = {
             .stageFlags = VK_SHADER_STAGE_ALL,
@@ -67,16 +46,14 @@ namespace he
             .pPushConstantRanges = desc.push_constant_size == 0 ? nullptr : &push_constant_range,
         };
 
-        const VkResult result
-            = vkCreatePipelineLayout(m_graphics_device.device(), &pipeline_layout_create_info, nullptr, &m_raw);
-        if (result != VK_SUCCESS)
-        {
-            HE_ERROR("Failed to create vulkan pipeline layout ({})", string_VkResult(result));
-            return false;
-        }
-
+        HE_VK_CHECK(
+            vkCreatePipelineLayout(m_graphics_device.device(), &pipeline_layout_create_info, nullptr, &m_raw),
+            "Failed to create vulkan pipeline layout");
         HE_ASSERT(m_raw != VK_NULL_HANDLE);
+    }
 
-        return true;
+    VulkanPipelineLayout::~VulkanPipelineLayout()
+    {
+        vkDestroyPipelineLayout(m_graphics_device.device(), m_raw, nullptr);
     }
 } // namespace he
