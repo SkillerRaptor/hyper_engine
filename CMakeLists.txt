@@ -7,7 +7,7 @@
 #-------------------------------------------------------------------------------------------
 # CMake Info
 #-------------------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.24)
 project(
         HyperEngine
         VERSION 0.0.1
@@ -47,9 +47,15 @@ if (HE_ENABLE_IPO)
 endif ()
 
 if (MSVC)
-    if (${CMAKE_GENERATOR} STREQUAL "Ninja")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /FS")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FS")
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+        string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+    elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+        string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+        string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+    elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+        string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+        string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
     endif ()
 endif ()
 
