@@ -271,3 +271,5 @@ set_target_properties(
         FOLDER "third_party")
 
 he_deploy_files(${CMAKE_CURRENT_LIST_DIR}/DirectXShaderCompiler/bin/x64/ hyper_engine/)
+
+he_make_all_targets_system()

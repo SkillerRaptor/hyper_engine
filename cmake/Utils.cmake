@@ -89,9 +89,33 @@ function(he_download_and_extract URL DESTINATION FOLDER_NAME)
     endif ()
 endfunction()
 
-
 function(he_deploy_files SOURCE DESTINATION)
     set(DEPLOY_FILES_DESTINATION ${CMAKE_BINARY_DIR}/${DESTINATION})
     message(STATUS "Copying ${SOURCE} to ${DEPLOY_FILES_DESTINATION}")
     file(COPY ${SOURCE} DESTINATION ${DEPLOY_FILES_DESTINATION})
+endfunction()
+
+macro(he_get_all_targets_recursive targets dir)
+    get_property(subdirectories DIRECTORY ${dir} PROPERTY SUBDIRECTORIES)
+    foreach (subdir ${subdirectories})
+        he_get_all_targets_recursive(${targets} ${subdir})
+    endforeach ()
+
+    get_property(current_targets DIRECTORY ${dir} PROPERTY BUILDSYSTEM_TARGETS)
+    list(APPEND ${targets} ${current_targets})
+endmacro()
+
+function(he_get_all_targets var)
+    set(targets)
+    he_get_all_targets_recursive(targets ${CMAKE_CURRENT_SOURCE_DIR})
+    set(${var} ${targets} PARENT_SCOPE)
+endfunction()
+
+function(he_make_all_targets_system)
+    he_get_all_targets(all_targets)
+
+    foreach (target ${all_targets})
+        get_property(${target}_include_dirs TARGET ${target} PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+        set_property(TARGET ${target} PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${${target}_include_dirs})
+    endforeach ()
 endfunction()

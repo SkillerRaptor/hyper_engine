@@ -24,6 +24,8 @@ he_add_library(hyper_core)
 target_compile_definitions(
         hyper_core
         PRIVATE
+        FMT_USE_EXCEPTIONS=0
+        FMT_USE_LOCALE=0
         SPDLOG_NO_SOURCE_LOC)
 target_link_libraries(
         hyper_core
