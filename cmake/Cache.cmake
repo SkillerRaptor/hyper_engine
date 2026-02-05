@@ -29,6 +29,11 @@ function(he_enable_cache)
         set(CMAKE_C_COMPILER_LAUNCHER
                 ${CACHE_BINARY}
                 CACHE FILEPATH "C compiler cache used")
+
+        if (MSVC)
+            set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
+            cmake_policy(SET CMP0141 NEW)
+        endif ()
     else ()
         message(WARNING "${CACHE_OPTION} is enabled but was not found. Not using it")
     endif ()
