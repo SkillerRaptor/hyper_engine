@@ -21,23 +21,17 @@ jobs:
         compiler:
           - llvm
           - gcc
+          - msvc
         build_type:
           - Release
           - Debug
         generator:
-          - "Ninja Multi-Config"
+          - "Ninja"
         exclude:
+          - os: ubuntu-latest
+            compiler: msvc
           - os: windows-latest
             compiler: gcc
-        include:
-          - os: windows-latest
-            compiler: msvc
-            generator: "Visual Studio 17 2022"
-            build_type: Debug
-          - os: windows-latest
-            compiler: msvc
-            generator: "Visual Studio 17 2022"
-            build_type: Release
     steps:
       - uses: actions/checkout@v6
 
