@@ -49,6 +49,16 @@ jobs:
             libgl1-mesa-dev \
             xorg-dev
 
+      - name: Setup Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.ccache
+            ~/.cpm-cache
+          key: ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}-${{ matrix.generator }}-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}
+
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.9
 
@@ -68,7 +78,7 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -S . -B ./build -G "${{ matrix.generator }}" -DHE_ENABLE_CACHE=ON -DCMAKE_BUILD_TYPE:STRING=${{ matrix.build_type }}
+          cmake -S . -B ./build -G "${{ matrix.generator }}" -DHE_ENABLE_CACHE=ON -DCPM_SOURCE_CACHE=~/.cpm-cache -DCMAKE_BUILD_TYPE:STRING=${{ matrix.build_type }}
 
       - name: Build
         run: |
