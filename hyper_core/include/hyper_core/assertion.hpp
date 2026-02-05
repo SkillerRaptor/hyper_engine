@@ -8,6 +8,7 @@
 
 #include <filesystem>
 #include <source_location>
+#include <utility>
 
 #include "hyper_core/logger.hpp"
 #include "hyper_core/prerequisites.hpp"
