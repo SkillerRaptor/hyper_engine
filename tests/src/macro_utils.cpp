@@ -10,7 +10,7 @@
 
 using namespace he;
 
-static constexpr int foo(const usize a, const usize b) { return a + b; }
+static constexpr usize foo(const usize a, const usize b) { return a + b; }
 
 TEST_CASE("argument_count counts zero arguments", "[argument_count]") { STATIC_REQUIRE(detail::argument_count() == 0); }
 

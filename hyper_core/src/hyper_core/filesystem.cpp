@@ -35,7 +35,7 @@ namespace he::filesystem
 
         const std::ifstream::pos_type size = file.tellg();
 
-        std::vector<u8> data(size);
+        std::vector<u8> data(static_cast<usize>(size));
         file.seekg(0, std::ios::beg);
         file.read(reinterpret_cast<char *>(data.data()), size);
 
@@ -62,7 +62,7 @@ namespace he::filesystem
 
         const std::ifstream::pos_type size = file.tellg();
 
-        std::string buffer(size, '\0');
+        std::string buffer(static_cast<usize>(size), '\0');
         file.seekg(0, std::ios::beg);
         file.read(buffer.data(), size);
 

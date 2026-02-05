@@ -6,8 +6,6 @@
 
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 
-include(FetchContent)
-
 CPMAddPackage(
         NAME Catch2
         GITHUB_REPOSITORY catchorg/Catch2
@@ -17,6 +15,8 @@ CPMAddPackage(
         "CATCH_INSTALL_EXTRAS ON"
         "CATCH_DEVELOPMENT_BUILD OFF"
         "CATCH_ENABLE_REPRODUCIBLE_BUILD ON")
+
+he_systemize(Catch2)
 
 CPMAddPackage(
         NAME entt
@@ -33,6 +33,8 @@ CPMAddPackage(
         "ENTT_BUILD_TESTBED OFF"
         "ENTT_BUILD_DOCS OFF")
 
+he_systemize(EnTT)
+
 if (WIN32)
     CPMAddPackage(
             NAME D3D12MemoryAllocator
@@ -43,6 +45,8 @@ if (WIN32)
             "BUILD_SHARED_LIBS OFF"
             "D3D12MA_BUILD_SAMPLE OFF")
 endif ()
+
+# he_systemize(D3D12MemoryAllocator)
 
 CPMAddPackage(
         NAME fastgltf
@@ -64,10 +68,12 @@ CPMAddPackage(
         "FASTGLTF_ENABLE_KHR_IMPLICIT_SHAPES OFF"
         "FASTGLTF_ENABLE_KHR_PHYSICS_RIGID_BODIES OFF")
 
+# he_systemize(fastgltf)
+
 CPMAddPackage(
         NAME fmt
         GITHUB_REPOSITORY fmtlib/fmt
-        GIT_TAG 12.1.0
+        GIT_TAG 5ac44cd1282f12947d25f439b59c5e55944cdb04
         OPTIONS
         "FMT_PEDANTIC OFF"
         "FMT_WERROR OFF"
@@ -80,6 +86,8 @@ CPMAddPackage(
         "FMT_MODULE OFF"
         "FMT_SYSTEM_HEADERS OFF"
         "FMT_UNICODE ON")
+
+he_systemize(fmt)
 
 CPMAddPackage(
         NAME glm
@@ -104,6 +112,8 @@ CPMAddPackage(
         "GLM_ENABLE_SIMD_NEON OFF"
         "GLM_FORCE_PURE OFF")
 
+he_systemize(glm)
+
 CPMAddPackage(
         NAME imgui
         GITHUB_REPOSITORY ocornut/imgui
@@ -113,6 +123,8 @@ CPMAddPackage(
 if (imgui_ADDED)
     add_subdirectory(imgui)
 endif ()
+
+he_systemize(imgui)
 
 CPMAddPackage(
         NAME meshoptimizer
@@ -125,6 +137,8 @@ CPMAddPackage(
         "MESHOPT_STABLE_EXPORTS OFF"
         "MESHOPT_WERROR OFF"
         "MESHOPT_INSTALL OFF")
+
+he_systemize(meshoptimizer)
 
 CPMAddPackage(
         NAME SDL
@@ -153,6 +167,8 @@ CPMAddPackage(
         "SDL_OPENGL OFF"
         "SDL_OPENGLES OFF")
 
+he_systemize(SDL3-static)
+
 CPMAddPackage(
         NAME spdlog
         GITHUB_REPOSITORY gabime/spdlog
@@ -175,7 +191,7 @@ CPMAddPackage(
         "SPDLOG_USE_STD_FORMAT OFF"
         "SPDLOG_FMT_EXTERNAL ON"
         "SPDLOG_FMT_EXTERNAL_HO OFF"
-        "SPDLOG_NO_EXCEPTIONS ON"
+        "SPDLOG_NO_EXCEPTIONS OFF"
         "SPDLOG_PREVENT_CHILD_FD OFF"
         "SPDLOG_NO_THREAD_ID OFF"
         "SPDLOG_NO_TLS OFF"
@@ -183,6 +199,8 @@ CPMAddPackage(
         "SPDLOG_DISABLE_DEFAULT_LOGGER OFF"
         "SPDLOG_FWRITE_UNLOCKED ON"
         "SPDLOG_TIDY OFF")
+
+he_systemize(spdlog)
 
 CPMAddPackage(
         NAME stb
@@ -193,6 +211,8 @@ CPMAddPackage(
 if (stb_ADDED)
     add_subdirectory(stb)
 endif ()
+
+he_systemize(stb)
 
 CPMAddPackage(
         NAME tracy
@@ -231,6 +251,8 @@ CPMAddPackage(
         "TRACY_VERBOSE OFF"
         "TRACY_DEMANGLE OFF")
 
+# he_systemize(TracyClient)
+
 CPMAddPackage(
         NAME volk
         GITHUB_REPOSITORY zeux/volk
@@ -240,6 +262,8 @@ CPMAddPackage(
         "VOLK_INSTALL OFF"
         "VOLK_HEADERS_ONLY OFF")
 
+he_systemize(volk)
+
 CPMAddPackage(
         NAME VulkanMemoryAllocator
         GITHUB_REPOSITORY GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
@@ -248,6 +272,8 @@ CPMAddPackage(
         "VMA_ENABLE_INSTALL OFF"
         "VMA_BUILD_DOCUMENTATION OFF"
         "VMA_BUILD_SAMPLES OFF")
+
+he_systemize(VulkanMemoryAllocator)
 
 he_download_and_extract(
         https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.8.2505/dxc_2025_05_24.zip
@@ -265,11 +291,4 @@ target_include_directories(
         INTERFACE
         ${CMAKE_SOURCE_DIR}/third_party/DirectXShaderCompiler/inc)
 
-set_target_properties(
-        DirectXShaderCompiler
-        PROPERTIES
-        FOLDER "third_party")
-
 he_deploy_files(${CMAKE_CURRENT_LIST_DIR}/DirectXShaderCompiler/bin/x64/ hyper_engine/)
-
-he_make_all_targets_system()
