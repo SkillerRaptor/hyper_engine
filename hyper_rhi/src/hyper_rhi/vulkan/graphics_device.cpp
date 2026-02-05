@@ -24,59 +24,26 @@
 #include "hyper_rhi/vulkan/sampler.hpp"
 #include "hyper_rhi/vulkan/shader.hpp"
 #include "hyper_rhi/vulkan/texture.hpp"
+#include "hyper_rhi/vulkan/utils.hpp"
 
 namespace he
 {
-    RefPtr<VulkanGraphicsDevice>
-        VulkanGraphicsDevice::create(const Window &window, const Validation validation_requested)
+    VulkanGraphicsDevice::VulkanGraphicsDevice(const Window &window, const Validation validation_requested)
     {
         const VkResult result = volkInitialize();
         if (result != VK_SUCCESS)
         {
-            HE_ERROR("Failed to initialize volk ({})", string_VkResult(result));
-            return nullptr;
+            HE_PANIC("Failed to initialize volk ({})", string_VkResult(result));
         }
 
-        RefPtr<VulkanGraphicsDevice> graphics_device = wrap_ref<VulkanGraphicsDevice>(new VulkanGraphicsDevice());
-        if (!graphics_device->create_instance(validation_requested))
-        {
-            HE_ERROR("Failed to create instance");
-            return nullptr;
-        }
-
-        if (!graphics_device->create_device())
-        {
-            HE_ERROR("Failed to create logical device");
-            return nullptr;
-        }
-
-        if (!graphics_device->create_allocator())
-        {
-            HE_ERROR("Failed to create allocator");
-            return nullptr;
-        }
-
-        if (!graphics_device->create_surface(window))
-        {
-            HE_ERROR("Failed to create surface");
-            return nullptr;
-        }
-
-        if (!graphics_device->create_swapchain(window))
-        {
-            HE_ERROR("Failed to create swapchain");
-            return nullptr;
-        }
-
-        if (!graphics_device->create_descriptors())
-        {
-            HE_ERROR("Failed to create descriptors");
-            return nullptr;
-        }
+        create_instance(validation_requested);
+        create_device();
+        create_allocator();
+        create_surface(window);
+        create_swapchain(window);
+        create_descriptors();
 
         HE_INFO("Created graphics device");
-
-        return graphics_device;
     }
 
     VulkanGraphicsDevice::~VulkanGraphicsDevice()
@@ -98,6 +65,8 @@ namespace he
 
         HE_INFO("Destroyed graphics device");
     }
+
+    void VulkanGraphicsDevice::wait_idle() const { HE_VK_CHECK(vkDeviceWaitIdle(m_device)); }
 
     RefPtr<Buffer> VulkanGraphicsDevice::create_buffer(const BufferDescriptor &desc)
     {
@@ -134,12 +103,10 @@ namespace he
         return VulkanRenderPipeline::create(*this, desc);
     }
 
-    bool VulkanGraphicsDevice::create_instance(const Validation validation_requested)
+    void VulkanGraphicsDevice::create_instance(const Validation validation_requested)
     {
         static constexpr const char *s_validation_layer = "VK_LAYER_KHRONOS_validation";
         static constexpr const char *s_validation_extension = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
-
-        VkResult result = VK_SUCCESS;
 
         const bool validation_enabled = [&]()
         {
@@ -149,20 +116,14 @@ namespace he
             }
 
             u32 layer_count = 0;
-            result = vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to enumerate instance layer properties ({})", string_VkResult(result));
-                return false;
-            }
+            HE_VK_CHECK(
+                vkEnumerateInstanceLayerProperties(&layer_count, nullptr),
+                "Failed to enumerate instance layer properties");
 
             std::vector<VkLayerProperties> layers(layer_count);
-            result = vkEnumerateInstanceLayerProperties(&layer_count, layers.data());
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to enumerate instance layer properties ({})", string_VkResult(result));
-                return false;
-            }
+            HE_VK_CHECK(
+                vkEnumerateInstanceLayerProperties(&layer_count, layers.data()),
+                "Failed to enumerate instance layer properties");
 
             bool found_layer = false;
             for (const VkLayerProperties &properties : layers)
@@ -181,20 +142,14 @@ namespace he
             }
 
             u32 extension_count = 0;
-            result = vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to enumerate instance extension properties ({})", string_VkResult(result));
-                return false;
-            }
+            HE_VK_CHECK(
+                vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr),
+                "Failed to enumerate instance extension properties");
 
             std::vector<VkExtensionProperties> extensions(extension_count);
-            result = vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extensions.data());
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to enumerate instance extension properties ({})", string_VkResult(result));
-                return false;
-            }
+            HE_VK_CHECK(
+                vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extensions.data()),
+                "Failed to enumerate instance extension properties");
 
             bool found_extension = false;
             for (const VkExtensionProperties &properties : extensions)
@@ -260,59 +215,38 @@ namespace he
             create_info.pNext = &debug_create_info;
         }
 
-        result = vkCreateInstance(&create_info, nullptr, &m_instance);
-        if (result != VK_SUCCESS)
-        {
-            HE_ERROR("Failed to create vulkan instance ({})", string_VkResult(result));
-            return false;
-        }
-
+        HE_VK_CHECK(vkCreateInstance(&create_info, nullptr, &m_instance), "Failed to create vulkan instance");
         HE_ASSERT(m_instance != VK_NULL_HANDLE);
 
         volkLoadInstance(m_instance);
 
         if (validation_enabled)
         {
-            result = vkCreateDebugUtilsMessengerEXT(m_instance, &debug_create_info, nullptr, &m_debug_messenger);
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to create vulkan debug messenger ({})", string_VkResult(result));
-                return false;
-            }
-
+            HE_VK_CHECK(
+                vkCreateDebugUtilsMessengerEXT(m_instance, &debug_create_info, nullptr, &m_debug_messenger),
+                "Failed to create vulkan debug messenger");
             HE_ASSERT(m_debug_messenger != VK_NULL_HANDLE);
         }
-
-        return true;
     }
 
-    bool VulkanGraphicsDevice::create_device()
+    void VulkanGraphicsDevice::create_device()
     {
         static constexpr const char *s_swapchain_extension = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
-        VkResult result = VK_SUCCESS;
-
         u32 physical_device_count = 0;
-        result = vkEnumeratePhysicalDevices(m_instance, &physical_device_count, nullptr);
-        if (result != VK_SUCCESS)
-        {
-            HE_ERROR("Failed to enumerate physical devices ({})", string_VkResult(result));
-            return false;
-        }
+        HE_VK_CHECK(
+            vkEnumeratePhysicalDevices(m_instance, &physical_device_count, nullptr),
+            "Failed to enumerate physical devices");
 
         if (physical_device_count == 0)
         {
-            HE_ERROR("Failed to find physical devices with vulkan support");
-            return false;
+            HE_PANIC("Failed to find physical devices with vulkan support");
         }
 
         std::vector<VkPhysicalDevice> physical_devices(physical_device_count);
-        result = vkEnumeratePhysicalDevices(m_instance, &physical_device_count, physical_devices.data());
-        if (result != VK_SUCCESS)
-        {
-            HE_ERROR("Failed to enumerate physical devices ({})", string_VkResult(result));
-            return false;
-        }
+        HE_VK_CHECK(
+            vkEnumeratePhysicalDevices(m_instance, &physical_device_count, physical_devices.data()),
+            "Failed to enumerate physical devices");
 
         VkPhysicalDeviceVulkan13Features features_13 = {
             .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
@@ -374,21 +308,14 @@ namespace he
 
             // Extensions
             u32 extension_count = 0;
-            result = vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, nullptr);
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to enumerate device extension properties ({})", string_VkResult(result));
-                return false;
-            }
+            HE_VK_CHECK(
+                vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, nullptr),
+                "Failed to enumerate device extension properties");
 
             std::vector<VkExtensionProperties> extensions(extension_count);
-            result
-                = vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, extensions.data());
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to enumerate device extension properties ({})", string_VkResult(result));
-                return false;
-            }
+            HE_VK_CHECK(
+                vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, extensions.data()),
+                "Failed to enumerate device extension properties");
 
             const bool extension_found = [&]()
             {
@@ -415,7 +342,7 @@ namespace he
     if (s.feature == VK_FALSE)                                                                           \
     {                                                                                                    \
         HE_INFO("Skipped device due to missing required feature (feature='{}')", HE_STRINGIFY(feature)); \
-        return false;                                                                                    \
+        continue;                                                                                        \
     }
 
             REQUIRE_FEATURE(features.features, sampleRateShading);
@@ -441,13 +368,13 @@ namespace he
             if (limits.timestampPeriod == 0.0f)
             {
                 HE_INFO("Skipped device due to missing timestamp query support");
-                return false;
+                continue;
             }
 
             if (limits.timestampComputeAndGraphics == VK_FALSE)
             {
                 HE_INFO("Skipped device due to missing timestamp query support");
-                return false;
+                continue;
             }
 
             const u32 device_type_score = [properties]()
@@ -510,8 +437,7 @@ namespace he
 
         if (m_physical_device == VK_NULL_HANDLE)
         {
-            HE_ERROR("Failed to find a suitable physical device");
-            return false;
+            HE_PANIC("Failed to find a suitable physical device");
         }
 
         VkPhysicalDeviceProperties properties;
@@ -561,24 +487,18 @@ namespace he
             .pEnabledFeatures = nullptr,
         };
 
-        result = vkCreateDevice(m_physical_device, &create_info, nullptr, &m_device);
-        if (result != VK_SUCCESS)
-        {
-            HE_ERROR("Failed to create vulkan logical device ({})", string_VkResult(result));
-            return false;
-        }
-
+        HE_VK_CHECK(
+            vkCreateDevice(m_physical_device, &create_info, nullptr, &m_device),
+            "Failed to create vulkan logical device");
         HE_ASSERT(m_device != VK_NULL_HANDLE);
 
         volkLoadDevice(m_device);
 
         vkGetDeviceQueue(m_device, m_queue_family, 0, &m_queue);
         HE_ASSERT(m_queue != VK_NULL_HANDLE);
-
-        return true;
     }
 
-    bool VulkanGraphicsDevice::create_allocator()
+    void VulkanGraphicsDevice::create_allocator()
     {
         const VmaVulkanFunctions functions = {
             .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
@@ -623,44 +543,27 @@ namespace he
             .pTypeExternalMemoryHandleTypes = nullptr,
         };
 
-        const VkResult result = vmaCreateAllocator(&allocator_create_info, &m_allocator);
-        if (result != VK_SUCCESS)
-        {
-            HE_ERROR("Failed to create vulkan allocator ({})", string_VkResult(result));
-            return false;
-        }
-
+        HE_VK_CHECK(vmaCreateAllocator(&allocator_create_info, &m_allocator), "Failed to create vulkan allocator");
         HE_ASSERT(m_allocator != VK_NULL_HANDLE);
-
-        return true;
     }
 
-    bool VulkanGraphicsDevice::create_surface(const Window &window)
+    void VulkanGraphicsDevice::create_surface(const Window &window)
     {
         if (!SDL_Vulkan_CreateSurface(window.native_handle(), m_instance, nullptr, &m_surface))
         {
-            HE_ERROR("Failed to create vulkan surface ({})", SDL_GetError());
-            return false;
+            HE_PANIC("Failed to create vulkan surface: {}", SDL_GetError());
         }
-
         HE_ASSERT(m_surface != VK_NULL_HANDLE);
-
-        return true;
     }
 
-    bool VulkanGraphicsDevice::create_swapchain(const Window &window)
+    void VulkanGraphicsDevice::create_swapchain(const Window &window)
     {
-        VkResult result = VK_SUCCESS;
-
-        const std::optional<VkExtent2D> extent = [&]() -> std::optional<VkExtent2D>
+        const VkExtent2D extent = [&]() -> VkExtent2D
         {
             VkSurfaceCapabilitiesKHR capabilities;
-            result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &capabilities);
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to get the physical device surface capabilities ({})", string_VkResult(result));
-                return std::nullopt;
-            }
+            HE_VK_CHECK(
+                vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &capabilities),
+                "Failed to get the physical device surface capabilities");
 
             VkExtent2D current_extent = {
                 .width = capabilities.currentExtent.width,
@@ -683,29 +586,17 @@ namespace he
             return current_extent;
         }();
 
-        if (!extent.has_value())
-        {
-            HE_ERROR("Failed to choose swapchain extent");
-            return false;
-        }
-
-        const std::optional<VkSurfaceFormatKHR> surface_format = [&]() -> std::optional<VkSurfaceFormatKHR>
+        const VkSurfaceFormatKHR surface_format = [&]() -> VkSurfaceFormatKHR
         {
             u32 format_count = 0;
-            result = vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, m_surface, &format_count, nullptr);
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to get the physical device surface formats ({})", string_VkResult(result));
-                return std::nullopt;
-            }
+            HE_VK_CHECK(
+                vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, m_surface, &format_count, nullptr),
+                "Failed to get the physical device surface formats");
 
             std::vector<VkSurfaceFormatKHR> formats(format_count);
-            result = vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, m_surface, &format_count, formats.data());
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to get the physical device surface formats ({})", string_VkResult(result));
-                return std::nullopt;
-            }
+            HE_VK_CHECK(
+                vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, m_surface, &format_count, formats.data()),
+                "Failed to get the physical device surface formats");
 
             for (const VkSurfaceFormatKHR format : formats)
             {
@@ -715,39 +606,21 @@ namespace he
                 }
             }
 
-            HE_ERROR(
-                "Failed to find a suitable surface format (format={}, color_space={})",
-                string_VkFormat(VK_FORMAT_B8G8R8A8_UNORM),
-                string_VkColorSpaceKHR(VK_COLOR_SPACE_SRGB_NONLINEAR_KHR));
-
-            return std::nullopt;
+            return formats[0];
         }();
 
-        if (!surface_format.has_value())
-        {
-            HE_ERROR("Failed to choose swapchain format");
-            return false;
-        }
-
-        const std::optional<VkPresentModeKHR> present_mode = [&]() -> std::optional<VkPresentModeKHR>
+        const VkPresentModeKHR present_mode = [&]() -> VkPresentModeKHR
         {
             u32 present_mode_count = 0;
-            result
-                = vkGetPhysicalDeviceSurfacePresentModesKHR(m_physical_device, m_surface, &present_mode_count, nullptr);
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to get the physical device surface present modes ({})", string_VkResult(result));
-                return std::nullopt;
-            }
+            HE_VK_CHECK(
+                vkGetPhysicalDeviceSurfacePresentModesKHR(m_physical_device, m_surface, &present_mode_count, nullptr),
+                "Failed to get the physical device surface present modes");
 
             std::vector<VkPresentModeKHR> present_modes(present_mode_count);
-            result = vkGetPhysicalDeviceSurfacePresentModesKHR(
-                m_physical_device, m_surface, &present_mode_count, present_modes.data());
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to get the physical device surface present modes ({})", string_VkResult(result));
-                return std::nullopt;
-            }
+            HE_VK_CHECK(
+                vkGetPhysicalDeviceSurfacePresentModesKHR(
+                    m_physical_device, m_surface, &present_mode_count, present_modes.data()),
+                "Failed to get the physical device surface present modes");
 
             for (const VkPresentModeKHR mode : present_modes)
             {
@@ -760,19 +633,10 @@ namespace he
             return present_modes[0];
         }();
 
-        if (!present_mode.has_value())
-        {
-            HE_ERROR("Failed to choose swapchain present mode");
-            return false;
-        }
-
         VkSurfaceCapabilitiesKHR capabilities;
-        result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &capabilities);
-        if (result != VK_SUCCESS)
-        {
-            HE_ERROR("Failed to get the physical device surface capabilities ({})", string_VkResult(result));
-            return false;
-        }
+        HE_VK_CHECK(
+            vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &capabilities),
+            "Failed to get the physical device surface capabilities");
 
         u32 min_image_count = capabilities.minImageCount + 1;
         if (capabilities.maxImageCount > 0 && min_image_count > capabilities.maxImageCount)
@@ -786,9 +650,9 @@ namespace he
             .flags = 0,
             .surface = m_surface,
             .minImageCount = min_image_count,
-            .imageFormat = surface_format->format,
-            .imageColorSpace = surface_format->colorSpace,
-            .imageExtent = extent.value(),
+            .imageFormat = surface_format.format,
+            .imageColorSpace = surface_format.colorSpace,
+            .imageExtent = extent,
             .imageArrayLayers = 1,
             .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
             .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
@@ -796,18 +660,14 @@ namespace he
             .pQueueFamilyIndices = nullptr,
             .preTransform = capabilities.currentTransform,
             .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
-            .presentMode = present_mode.value(),
+            .presentMode = present_mode,
             .clipped = true,
             .oldSwapchain = m_swapchain,
         };
 
-        result = vkCreateSwapchainKHR(m_device, &swapchain_create_info, nullptr, &m_swapchain);
-        if (result != VK_SUCCESS)
-        {
-            HE_ERROR("Failed to create vulkan swapchain ({})", string_VkResult(result));
-            return false;
-        }
-
+        HE_VK_CHECK(
+            vkCreateSwapchainKHR(m_device, &swapchain_create_info, nullptr, &m_swapchain),
+            "Failed to create vulkan swapchain");
         HE_ASSERT(m_swapchain != VK_NULL_HANDLE);
 
         /*
@@ -895,14 +755,10 @@ namespace he
                    })
                | std::ranges::to<std::vector<TextureId>>();
                */
-
-        return true;
     }
 
-    bool VulkanGraphicsDevice::create_descriptors()
+    void VulkanGraphicsDevice::create_descriptors()
     {
-        VkResult result = VK_SUCCESS;
-
         std::array<VkDescriptorPoolSize, 4> pool_sizes = {
             VkDescriptorPoolSize { .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = 1000 },
             VkDescriptorPoolSize { .type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,  .descriptorCount = 1000 },
@@ -948,13 +804,9 @@ namespace he
             .pPoolSizes = pool_sizes.data(),
         };
 
-        result = vkCreateDescriptorPool(m_device, &descriptor_pool_create_info, nullptr, &m_descriptor_pool);
-        if (result != VK_SUCCESS)
-        {
-            HE_ERROR("Failed to create vulkan descriptor pool ({})", string_VkResult(result));
-            return false;
-        }
-
+        HE_VK_CHECK(
+            vkCreateDescriptorPool(m_device, &descriptor_pool_create_info, nullptr, &m_descriptor_pool),
+            "Failed to create vulkan descriptor pool");
         HE_ASSERT(m_descriptor_pool != VK_NULL_HANDLE);
 
         for (const VkDescriptorPoolSize descriptor_pool_size : pool_sizes)
@@ -1002,14 +854,10 @@ namespace he
                 }
             }();
 
-            result = vkCreateDescriptorSetLayout(
-                m_device, &descriptor_set_layout_create_info, nullptr, descriptor_set_layout);
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to create vulkan descriptor set layout ({})", string_VkResult(result));
-                return false;
-            }
-
+            HE_VK_CHECK(
+                vkCreateDescriptorSetLayout(
+                    m_device, &descriptor_set_layout_create_info, nullptr, descriptor_set_layout),
+                "Failed to create vulkan descriptor set layout");
             HE_ASSERT(descriptor_set_layout != VK_NULL_HANDLE);
 
             VkDescriptorSetVariableDescriptorCountAllocateInfo descriptor_set_variable_descriptor_count_info = {
@@ -1044,17 +892,11 @@ namespace he
                 }
             }();
 
-            result = vkAllocateDescriptorSets(m_device, &descriptor_set_allocate_info, descriptor_set);
-            if (result != VK_SUCCESS)
-            {
-                HE_ERROR("Failed to allocate vulkan descriptor set ({})", string_VkResult(result));
-                return false;
-            }
-
+            HE_VK_CHECK(
+                vkAllocateDescriptorSets(m_device, &descriptor_set_allocate_info, descriptor_set),
+                "Failed to allocate vulkan descriptor set");
             HE_ASSERT(descriptor_set != VK_NULL_HANDLE);
         }
-
-        return true;
     }
 
     VKAPI_ATTR VkBool32 VKAPI_CALL VulkanGraphicsDevice::debug_callback(

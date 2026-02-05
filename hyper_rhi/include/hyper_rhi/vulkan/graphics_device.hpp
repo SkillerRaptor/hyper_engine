@@ -15,6 +15,7 @@
 
 #include <vector>
 
+#include <hyper_core/prerequisites.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/graphics_device.hpp"
@@ -24,8 +25,10 @@ namespace he
     class VulkanGraphicsDevice final : public GraphicsDevice
     {
     public:
-        static RefPtr<VulkanGraphicsDevice> create(const Window &, Validation validation_requested);
+        VulkanGraphicsDevice(const Window &, Validation validation_requested);
         ~VulkanGraphicsDevice() override;
+
+        void wait_idle() const override;
 
         RefPtr<Buffer> create_buffer(const BufferDescriptor &) override;
         RefPtr<Shader> create_shader(const ShaderDescriptor &) override;
@@ -44,14 +47,12 @@ namespace he
         HE_ALWAYS_INLINE VkDescriptorSetLayout sampler_layout() const { return m_sampler_layout; };
 
     private:
-        VulkanGraphicsDevice() = default;
-
-        bool create_instance(Validation validation_requested);
-        bool create_device();
-        bool create_allocator();
-        bool create_surface(const Window &);
-        bool create_swapchain(const Window &window);
-        bool create_descriptors();
+        void create_instance(Validation validation_requested);
+        void create_device();
+        void create_allocator();
+        void create_surface(const Window &);
+        void create_swapchain(const Window &);
+        void create_descriptors();
 
         static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
             VkDebugUtilsMessageSeverityFlagBitsEXT,

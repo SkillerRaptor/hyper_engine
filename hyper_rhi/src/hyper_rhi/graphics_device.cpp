@@ -12,13 +12,13 @@
 
 namespace he
 {
-    RefPtr<GraphicsDevice> GraphicsDevice::create(
+    OwnPtr<GraphicsDevice> GraphicsDevice::create(
         const GraphicsApi graphics_api, const Window &window, const Validation validation_requested)
     {
         switch (graphics_api)
         {
         case GraphicsApi::Vulkan:
-            return VulkanGraphicsDevice::create(window, validation_requested);
+            return make_own<VulkanGraphicsDevice>(window, validation_requested);
         default:
             HE_UNREACHABLE();
         }

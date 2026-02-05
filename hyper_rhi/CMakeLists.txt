@@ -21,6 +21,7 @@ set(HEADERS
         include/hyper_rhi/buffer.hpp
         include/hyper_rhi/compute_pipeline.hpp
         include/hyper_rhi/definitions.hpp
+        include/hyper_rhi/forward.hpp
         include/hyper_rhi/graphics_device.hpp
         include/hyper_rhi/pipeline_layout.hpp
         include/hyper_rhi/render_pipeline.hpp
@@ -37,7 +38,8 @@ set(HEADERS
         include/hyper_rhi/vulkan/render_pipeline.hpp
         include/hyper_rhi/vulkan/sampler.hpp
         include/hyper_rhi/vulkan/shader.hpp
-        include/hyper_rhi/vulkan/texture.hpp)
+        include/hyper_rhi/vulkan/texture.hpp
+        include/hyper_rhi/vulkan/utils.hpp)
 
 he_add_library(hyper_rhi)
 target_link_libraries(

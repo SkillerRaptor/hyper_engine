@@ -35,7 +35,7 @@ namespace he
         OwnPtr<Window> m_window = nullptr;
         Input m_input;
 
-        RefPtr<GraphicsDevice> m_graphics_device = nullptr;
+        OwnPtr<GraphicsDevice> m_graphics_device = nullptr;
 
         bool m_running = true;
     };

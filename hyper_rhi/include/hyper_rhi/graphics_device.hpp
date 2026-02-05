@@ -7,19 +7,12 @@
 #pragma once
 
 #include <hyper_core/memory.hpp>
+#include <hyper_platform/forward.hpp>
 
-#include "hyper_rhi/buffer.hpp"
-#include "hyper_rhi/compute_pipeline.hpp"
-#include "hyper_rhi/pipeline_layout.hpp"
-#include "hyper_rhi/render_pipeline.hpp"
-#include "hyper_rhi/sampler.hpp"
-#include "hyper_rhi/shader.hpp"
-#include "hyper_rhi/texture.hpp"
+#include "hyper_rhi/forward.hpp"
 
 namespace he
 {
-    class Window;
-
     enum class GraphicsApi
     {
         DirectX12,
@@ -35,7 +28,7 @@ namespace he
     class GraphicsDevice
     {
     public:
-        static RefPtr<GraphicsDevice> create(GraphicsApi, const Window &, Validation validation_requested);
+        static OwnPtr<GraphicsDevice> create(GraphicsApi, const Window &, Validation validation_requested);
         virtual ~GraphicsDevice() = default;
 
         GraphicsDevice(const GraphicsDevice &) = delete;
@@ -44,6 +37,8 @@ namespace he
         GraphicsDevice(GraphicsDevice &&) noexcept = default;
         GraphicsDevice &operator=(GraphicsDevice &&) noexcept = default;
 
+        virtual void wait_idle() const = 0;
+
         virtual RefPtr<Buffer> create_buffer(const BufferDescriptor &) = 0;
         virtual RefPtr<Shader> create_shader(const ShaderDescriptor &) = 0;
         virtual RefPtr<Sampler> create_sampler(const SamplerDescriptor &) = 0;
@@ -51,8 +46,6 @@ namespace he
         virtual RefPtr<PipelineLayout> create_pipeline_layout(const PipelineLayoutDescriptor &) = 0;
         virtual RefPtr<ComputePipeline> create_compute_pipeline(const ComputePipelineDescriptor &) = 0;
         virtual RefPtr<RenderPipeline> create_render_pipeline(const RenderPipelineDescriptor &) = 0;
-
-        // virtual void wait_idle() const = 0;
 
     protected:
         GraphicsDevice() = default;
