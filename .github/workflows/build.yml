@@ -53,10 +53,10 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            $HOME/.cpm-cache
+            ${{ env.HOME }}/.cpm-cache
           key: ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}-
+            ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}
 
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.9
@@ -76,7 +76,7 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -S . -B ./build -G "${{ matrix.generator }}" -DHE_ENABLE_CACHE=ON -DCPM_SOURCE_CACHE="$HOME/.cpm-cache" -DCMAKE_BUILD_TYPE:STRING=${{ matrix.build_type }}
+          cmake -S . -B ./build -G "${{ matrix.generator }}" -DHE_ENABLE_CACHE=ON -DCPM_SOURCE_CACHE="${{ env.HOME }}/.cpm-cache" -DCMAKE_BUILD_TYPE:STRING=${{ matrix.build_type }}
 
       - name: Build
         run: |
