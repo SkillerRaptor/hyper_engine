@@ -10,6 +10,7 @@ include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
 
 set(SOURCES
         src/bitflags_tests.cpp
+        src/macro_utils.cpp
         src/string_utils_tests.cpp)
 
 add_executable(tests ${SOURCES})

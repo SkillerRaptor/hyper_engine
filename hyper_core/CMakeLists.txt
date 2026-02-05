@@ -14,6 +14,7 @@ set(HEADERS
         include/hyper_core/bit_flags.hpp
         include/hyper_core/filesystem.hpp
         include/hyper_core/logger.hpp
+        include/hyper_core/macro_utils.hpp
         include/hyper_core/memory.hpp
         include/hyper_core/prerequisites.hpp
         include/hyper_core/string_utils.hpp
