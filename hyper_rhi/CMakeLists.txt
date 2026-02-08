@@ -15,7 +15,8 @@ set(SOURCES
         src/hyper_rhi/vulkan/render_pipeline.cpp
         src/hyper_rhi/vulkan/sampler.cpp
         src/hyper_rhi/vulkan/shader.cpp
-        src/hyper_rhi/vulkan/texture.cpp)
+        src/hyper_rhi/vulkan/texture.cpp
+        src/hyper_rhi/vulkan/texture_view.cpp)
 
 set(HEADERS
         include/hyper_rhi/buffer.hpp
@@ -29,6 +30,7 @@ set(HEADERS
         include/hyper_rhi/sampler.hpp
         include/hyper_rhi/shader.hpp
         include/hyper_rhi/texture.hpp
+        include/hyper_rhi/texture_view.hpp
         include/hyper_rhi/validation.hpp
         include/hyper_rhi/vulkan/buffer.hpp
         include/hyper_rhi/vulkan/compute_pipeline.hpp
@@ -39,6 +41,7 @@ set(HEADERS
         include/hyper_rhi/vulkan/sampler.hpp
         include/hyper_rhi/vulkan/shader.hpp
         include/hyper_rhi/vulkan/texture.hpp
+        include/hyper_rhi/vulkan/texture_view.hpp
         include/hyper_rhi/vulkan/utils.hpp)
 
 he_add_library(hyper_rhi)

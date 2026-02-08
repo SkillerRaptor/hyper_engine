@@ -43,6 +43,7 @@ namespace he
         virtual RefPtr<Shader> create_shader(const ShaderDescriptor &) = 0;
         virtual RefPtr<Sampler> create_sampler(const SamplerDescriptor &) = 0;
         virtual RefPtr<Texture> create_texture(const TextureDescriptor &) = 0;
+        virtual RefPtr<TextureView> create_texture_view(const TextureViewDescriptor &) = 0;
         virtual RefPtr<PipelineLayout> create_pipeline_layout(const PipelineLayoutDescriptor &) = 0;
         virtual RefPtr<ComputePipeline> create_compute_pipeline(const ComputePipelineDescriptor &) = 0;
         virtual RefPtr<RenderPipeline> create_render_pipeline(const RenderPipelineDescriptor &) = 0;

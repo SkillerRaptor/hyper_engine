@@ -1,0 +1,30 @@
+/*
+ * Copyright (c) 2026-present, SkillerRaptor
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#pragma once
+
+#include <volk.h>
+
+#include "hyper_rhi/texture_view.hpp"
+
+namespace he
+{
+    class VulkanGraphicsDevice;
+
+    class VulkanTextureView final : public TextureView
+    {
+    public:
+        VulkanTextureView(VulkanGraphicsDevice &, const TextureViewDescriptor &);
+        ~VulkanTextureView() override;
+
+        HE_ALWAYS_INLINE VkImageView raw() const { return m_raw; }
+
+    private:
+        VulkanGraphicsDevice &m_graphics_device;
+
+        VkImageView m_raw = VK_NULL_HANDLE;
+    };
+} // namespace he

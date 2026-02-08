@@ -15,6 +15,7 @@
 #include "hyper_rhi/sampler.hpp"
 #include "hyper_rhi/shader.hpp"
 #include "hyper_rhi/texture.hpp"
+#include "hyper_rhi/texture_view.hpp"
 
 namespace he
 {
@@ -116,6 +117,17 @@ namespace he
         HE_ASSERT(desc.mip_levels != 0);
         HE_ASSERT(desc.mip_levels <= max_mip_levels);
 
+        if (desc.dimension == Dimension::D1)
+        {
+            HE_ASSERT(desc.extent.height == 1);
+            HE_ASSERT(desc.extent.depth == 1);
+        }
+
+        if (desc.dimension == Dimension::D2)
+        {
+            HE_ASSERT(desc.extent.depth == 1);
+        }
+
         HE_ASSERT(desc.format != Format::None);
 
         if (desc.format == Format::D16Unorm || desc.format == Format::D32Sfloat || desc.format == Format::S8Uint
@@ -130,6 +142,45 @@ namespace he
         if (desc.usage.has(TextureUsage::RenderAttachment))
         {
             HE_ASSERT(desc.dimension == Dimension::D2 || desc.dimension == Dimension::D3);
+        }
+    }
+
+    void validate_texture_view_descriptor(const TextureViewDescriptor &desc)
+    {
+        if (desc.label.has_value())
+        {
+            HE_ASSERT(!desc.label->empty());
+        }
+
+        HE_ASSERT(desc.texture != nullptr);
+
+        switch (desc.texture->dimension())
+        {
+        case Dimension::D1:
+            HE_ASSERT(desc.dimension == ViewDimension::D1);
+            break;
+        case Dimension::D2:
+            HE_ASSERT(
+                desc.dimension == ViewDimension::D2 || desc.dimension == ViewDimension::D2Array
+                || desc.dimension == ViewDimension::Cube);
+            break;
+        case Dimension::D3:
+            HE_ASSERT(desc.dimension == ViewDimension::D3);
+            break;
+        default:
+            HE_UNREACHABLE();
+        }
+
+        HE_ASSERT(desc.base_mip_level <= desc.mip_levels.value_or(desc.texture->mip_levels()));
+        if (desc.mip_levels.has_value())
+        {
+            HE_ASSERT(desc.base_mip_level + desc.mip_levels.value() <= desc.texture->mip_levels());
+        }
+
+        HE_ASSERT(desc.base_array_layer <= desc.array_layers.value_or(desc.texture->extent().depth));
+        if (desc.array_layers.has_value())
+        {
+            HE_ASSERT(desc.base_array_layer + desc.array_layers.value() <= desc.texture->extent().depth);
         }
     }
 } // namespace he

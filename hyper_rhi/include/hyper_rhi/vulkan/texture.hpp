@@ -20,15 +20,15 @@ namespace he
     class VulkanTexture final : public Texture
     {
     public:
-        VulkanTexture(VulkanGraphicsDevice &, const TextureDescriptor &);
+        VulkanTexture(VulkanGraphicsDevice &, const TextureDescriptor &, VkImage image);
         ~VulkanTexture() override;
+
+        HE_ALWAYS_INLINE VkImage raw() const { return m_raw; }
 
     private:
         VulkanGraphicsDevice &m_graphics_device;
 
         VkImage m_raw = VK_NULL_HANDLE;
         VmaAllocation m_allocation = VK_NULL_HANDLE;
-        VkImageLayout m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-        VkImageView m_main_view = VK_NULL_HANDLE;
     };
 } // namespace he

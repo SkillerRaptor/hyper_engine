@@ -6,8 +6,6 @@
 
 #include "hyper_rhi/vulkan/compute_pipeline.hpp"
 
-#include <hyper_core/assertion.hpp>
-
 #include "hyper_rhi/validation.hpp"
 #include "hyper_rhi/vulkan/graphics_device.hpp"
 #include "hyper_rhi/vulkan/pipeline_layout.hpp"

@@ -34,6 +34,7 @@ namespace he
         RefPtr<Shader> create_shader(const ShaderDescriptor &) override;
         RefPtr<Sampler> create_sampler(const SamplerDescriptor &) override;
         RefPtr<Texture> create_texture(const TextureDescriptor &) override;
+        RefPtr<TextureView> create_texture_view(const TextureViewDescriptor &) override;
         RefPtr<PipelineLayout> create_pipeline_layout(const PipelineLayoutDescriptor &) override;
         RefPtr<ComputePipeline> create_compute_pipeline(const ComputePipelineDescriptor &) override;
         RefPtr<RenderPipeline> create_render_pipeline(const RenderPipelineDescriptor &) override;
@@ -76,9 +77,7 @@ namespace he
 
         VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
         std::vector<RefPtr<Texture>> m_swapchain_textures;
-        // std::vector<RefPtr<TextureView>> m_swapchain_textures_views;
-        u32 m_swapchain_texture_index = 0;
-        bool m_swapchain_out_of_date = false;
+        std::vector<RefPtr<TextureView>> m_swapchain_texture_views;
 
         VkDescriptorPool m_descriptor_pool = VK_NULL_HANDLE;
         VkDescriptorSetLayout m_storage_buffer_layout = VK_NULL_HANDLE;

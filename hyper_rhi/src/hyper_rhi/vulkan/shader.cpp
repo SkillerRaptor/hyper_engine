@@ -7,6 +7,8 @@
 #include "hyper_rhi/vulkan/shader.hpp"
 
 #include "hyper_rhi/validation.hpp"
+#include "hyper_rhi/vulkan/graphics_device.hpp"
+#include "hyper_rhi/vulkan/utils.hpp"
 
 namespace he
 {
@@ -15,7 +17,20 @@ namespace he
         , m_graphics_device(graphics_device)
     {
         validate_shader_descriptor(desc);
+
+        const VkShaderModuleCreateInfo shader_module_create_info = {
+            .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .codeSize = desc.byte_code.size(),
+            .pCode = reinterpret_cast<const uint32_t *>(desc.byte_code.data()),
+        };
+
+        HE_VK_CHECK(
+            vkCreateShaderModule(m_graphics_device.device(), &shader_module_create_info, nullptr, &m_raw),
+            "Failed to create vulkan shader module");
+        HE_ASSERT(m_raw != VK_NULL_HANDLE);
     }
 
-    VulkanShader::~VulkanShader() { }
+    VulkanShader::~VulkanShader() { vkDestroyShaderModule(m_graphics_device.device(), m_raw, nullptr); }
 } // namespace he

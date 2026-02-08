@@ -17,4 +17,5 @@ namespace he
     void validate_sampler_descriptor(const SamplerDescriptor &);
     void validate_shader_descriptor(const ShaderDescriptor &);
     void validate_texture_descriptor(const TextureDescriptor &);
+    void validate_texture_view_descriptor(const TextureViewDescriptor &);
 } // namespace he

@@ -12,6 +12,7 @@ namespace he
     class Shader;
     class Sampler;
     class Texture;
+    class TextureView;
     class PipelineLayout;
     class ComputePipeline;
     class RenderPipeline;
@@ -20,6 +21,7 @@ namespace he
     struct ShaderDescriptor;
     struct SamplerDescriptor;
     struct TextureDescriptor;
+    struct TextureViewDescriptor;
     struct PipelineLayoutDescriptor;
     struct ComputePipelineDescriptor;
     struct RenderPipelineDescriptor;

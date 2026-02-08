@@ -20,10 +20,12 @@
 #include "hyper_rhi/vulkan/buffer.hpp"
 #include "hyper_rhi/vulkan/compute_pipeline.hpp"
 #include "hyper_rhi/vulkan/pipeline_layout.hpp"
+#include "hyper_rhi/vulkan/render_conversion.hpp"
 #include "hyper_rhi/vulkan/render_pipeline.hpp"
 #include "hyper_rhi/vulkan/sampler.hpp"
 #include "hyper_rhi/vulkan/shader.hpp"
 #include "hyper_rhi/vulkan/texture.hpp"
+#include "hyper_rhi/vulkan/texture_view.hpp"
 #include "hyper_rhi/vulkan/utils.hpp"
 
 namespace he
@@ -53,6 +55,9 @@ namespace he
         vkDestroyDescriptorSetLayout(m_device, m_sampled_image_layout, nullptr);
         vkDestroyDescriptorSetLayout(m_device, m_storage_buffer_layout, nullptr);
         vkDestroyDescriptorPool(m_device, m_descriptor_pool, nullptr);
+
+        m_swapchain_texture_views.clear();
+        m_swapchain_textures.clear();
 
         vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
         vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
@@ -85,7 +90,12 @@ namespace he
 
     RefPtr<Texture> VulkanGraphicsDevice::create_texture(const TextureDescriptor &desc)
     {
-        return make_ref<VulkanTexture>(*this, desc);
+        return make_ref<VulkanTexture>(*this, desc, VK_NULL_HANDLE);
+    }
+
+    RefPtr<TextureView> VulkanGraphicsDevice::create_texture_view(const TextureViewDescriptor &desc)
+    {
+        return make_ref<VulkanTextureView>(*this, desc);
     }
 
     RefPtr<PipelineLayout> VulkanGraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &desc)
@@ -670,91 +680,51 @@ namespace he
             "Failed to create vulkan swapchain");
         HE_ASSERT(m_swapchain != VK_NULL_HANDLE);
 
-        /*
-           std::vector<VkImage> images(image_count);
-           HE_VK_CHECK(vkGetSwapchainImagesKHR(device.raw, raw, &image_count, images.data()), vkGetSwapchainImagesKHR);
+        u32 image_count = 0;
+        HE_VK_CHECK(
+            vkGetSwapchainImagesKHR(m_device, m_swapchain, &image_count, nullptr),
+            "Failed to get vulkan swapchain images");
 
-           const std::vector<TextureId> textures = images
-               | std::views::transform(
-                   [&](const VkImage image)
-                   {
-                       VulkanTexture *texture = new VulkanTexture {
-                           .raw = image,
-                           .allocation = VK_NULL_HANDLE,
-                           .layout = VK_IMAGE_LAYOUT_UNDEFINED,
-                       };
-                       texture->views = {};
+        std::vector<VkImage> images(image_count);
+        HE_VK_CHECK(
+            vkGetSwapchainImagesKHR(m_device, m_swapchain, &image_count, images.data()),
+            "Failed to get vulkan swapchain images");
 
-                       const TextureId texture_id(texture);
+        for (VkImage image : images)
+        {
+            const Extent3d texture_extent = {
+                .width = extent.width,
+                .height = extent.height,
+                .depth = 1,
+            };
 
-                       const Extent3d texture_extent {
-                           .width = width,
-                           .height = height,
-                           .depth = 1,
-                       };
+            const TextureDescriptor texture_descriptor = {
+                .label = std::nullopt,
+                .extent = texture_extent,
+                .mip_levels = 1,
+                .sample_count = 1,
+                .format = map_vk_format(surface_format.format),
+                .dimension = Dimension::D2,
+                .usage = TextureUsage::RenderAttachment,
+            };
 
-                       const TextureDescriptor texture_desc {
-                           .label = std::nullopt,
-                           .extent = texture_extent,
-                           .mip_levels = 1,
-                           .format = map_vk_format(format.format),
-                           .dimension = Dimension::D2,
-                           .usage = TextureUsage::RenderAttachment,
-                       };
-                       texture->desc = texture_desc;
+            RefPtr<Texture> texture = make_ref<VulkanTexture>(*this, texture_descriptor, image);
 
-                       constexpr VkComponentMapping component_mapping {
-                           .r = VK_COMPONENT_SWIZZLE_IDENTITY,
-                           .g = VK_COMPONENT_SWIZZLE_IDENTITY,
-                           .b = VK_COMPONENT_SWIZZLE_IDENTITY,
-                           .a = VK_COMPONENT_SWIZZLE_IDENTITY,
-                       };
+            const TextureViewDescriptor texture_view_descriptor = {
+                .label = std::nullopt,
+                .texture = texture,
+                .dimension = ViewDimension::D2,
+                .base_mip_level = 0,
+                .mip_levels = 1,
+                .base_array_layer = 0,
+                .array_layers = 1,
+            };
 
-                       const VkImageSubresourceRange subresource_range {
-                           .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                           .baseMipLevel = 0,
-                           .levelCount = 1,
-                           .baseArrayLayer = 0,
-                           .layerCount = 1,
-                       };
+            RefPtr<TextureView> texture_view = make_ref<VulkanTextureView>(*this, texture_view_descriptor);
+            m_swapchain_texture_views.push_back(std::move(texture_view));
 
-                       const VkImageViewCreateInfo image_view_create_info {
-                           .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-                           .pNext = nullptr,
-                           .flags = 0,
-                           .image = texture->raw,
-                           .viewType = VK_IMAGE_VIEW_TYPE_2D,
-                           .format = format.format,
-                           .components = component_mapping,
-                           .subresourceRange = subresource_range,
-                       };
-
-                       VkImageView image_view { VK_NULL_HANDLE };
-                       HE_VK_CHECK(vkCreateImageView(device.raw, &image_view_create_info, nullptr, &image_view),
-        vkCreateImageView); HE_ASSERT(image_view != VK_NULL_HANDLE);
-
-                       VulkanTextureView *texture_view = new VulkanTextureView {
-                           .raw = image_view,
-                       };
-                       const TextureViewId texture_view_id(texture_view);
-
-                       const TextureViewDescriptor texture_view_desc {
-                           .label = std::nullopt,
-                           .texture = texture_id,
-                           .dimension = ViewDimension::D2,
-                           .base_mip_level = 0,
-                           .mip_levels = 1,
-                           .base_array_layer = 0,
-                           .array_layers = 1,
-                       };
-                       texture_view->desc = texture_view_desc;
-
-                       texture->views.push_back(texture_view_id);
-
-                       return texture_id;
-                   })
-               | std::ranges::to<std::vector<TextureId>>();
-               */
+            m_swapchain_textures.push_back(std::move(texture));
+        }
     }
 
     void VulkanGraphicsDevice::create_descriptors()
