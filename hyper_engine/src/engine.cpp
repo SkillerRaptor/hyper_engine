@@ -10,6 +10,7 @@
 
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
+#include <hyper_rhi/command_encoder.hpp>
 
 namespace he
 {
@@ -75,5 +76,9 @@ namespace he
 
     void Engine::update(const f32 delta_time) { (void) delta_time; }
 
-    void Engine::render() const { }
+    void Engine::render() const
+    {
+        CommandEncoder &command_encoder = m_graphics_device->acquire_command_encoder();
+        m_graphics_device->submit_command_encoder(command_encoder);
+    }
 } // namespace he

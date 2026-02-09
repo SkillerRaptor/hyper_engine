@@ -5,9 +5,11 @@
 #-------------------------------------------------------------------------------------------
 
 set(SOURCES
+        src/hyper_rhi/command_encoder.cpp
         src/hyper_rhi/graphics_device.cpp
         src/hyper_rhi/validation.cpp
         src/hyper_rhi/vulkan/buffer.cpp
+        src/hyper_rhi/vulkan/command_encoder.cpp
         src/hyper_rhi/vulkan/compute_pipeline.cpp
         src/hyper_rhi/vulkan/graphics_device.cpp
         src/hyper_rhi/vulkan/pipeline_layout.cpp
@@ -20,6 +22,7 @@ set(SOURCES
 
 set(HEADERS
         include/hyper_rhi/buffer.hpp
+        include/hyper_rhi/command_encoder.hpp
         include/hyper_rhi/compute_pipeline.hpp
         include/hyper_rhi/definitions.hpp
         include/hyper_rhi/forward.hpp
@@ -33,6 +36,7 @@ set(HEADERS
         include/hyper_rhi/texture_view.hpp
         include/hyper_rhi/validation.hpp
         include/hyper_rhi/vulkan/buffer.hpp
+        include/hyper_rhi/vulkan/command_encoder.hpp
         include/hyper_rhi/vulkan/compute_pipeline.hpp
         include/hyper_rhi/vulkan/graphics_device.hpp
         include/hyper_rhi/vulkan/pipeline_layout.hpp

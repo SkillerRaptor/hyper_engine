@@ -18,6 +18,7 @@
 #include <hyper_platform/window.hpp>
 
 #include "hyper_rhi/vulkan/buffer.hpp"
+#include "hyper_rhi/vulkan/command_encoder.hpp"
 #include "hyper_rhi/vulkan/compute_pipeline.hpp"
 #include "hyper_rhi/vulkan/pipeline_layout.hpp"
 #include "hyper_rhi/vulkan/render_conversion.hpp"
@@ -45,11 +46,20 @@ namespace he
         create_swapchain(window);
         create_descriptors();
 
+        for (usize i = 0; i < s_frames_in_flight; ++i)
+        {
+            m_command_encoders.push_back(make_own<VulkanCommandEncoder>(*this));
+        }
+
         HE_INFO("Created graphics device");
     }
 
     VulkanGraphicsDevice::~VulkanGraphicsDevice()
     {
+        wait_idle();
+
+        m_command_encoders.clear();
+
         vkDestroyDescriptorSetLayout(m_device, m_sampler_layout, nullptr);
         vkDestroyDescriptorSetLayout(m_device, m_storage_image_layout, nullptr);
         vkDestroyDescriptorSetLayout(m_device, m_sampled_image_layout, nullptr);
@@ -70,8 +80,6 @@ namespace he
 
         HE_INFO("Destroyed graphics device");
     }
-
-    void VulkanGraphicsDevice::wait_idle() const { HE_VK_CHECK(vkDeviceWaitIdle(m_device)); }
 
     RefPtr<Buffer> VulkanGraphicsDevice::create_buffer(const BufferDescriptor &desc)
     {
@@ -111,6 +119,23 @@ namespace he
     RefPtr<RenderPipeline> VulkanGraphicsDevice::create_render_pipeline(const RenderPipelineDescriptor &desc)
     {
         return make_ref<VulkanRenderPipeline>(*this, desc);
+    }
+
+    void VulkanGraphicsDevice::wait_idle() const { HE_VK_CHECK(vkDeviceWaitIdle(m_device)); }
+
+    CommandEncoder &VulkanGraphicsDevice::acquire_command_encoder_impl(const u32 frame_id)
+    {
+        VulkanCommandEncoder &command_encoder = static_cast<VulkanCommandEncoder &>(*m_command_encoders[frame_id]);
+        command_encoder.acquire();
+        command_encoder.set_ready(true);
+        return command_encoder;
+    }
+
+    void VulkanGraphicsDevice::submit_command_encoder_impl(CommandEncoder &encoder)
+    {
+        VulkanCommandEncoder &command_encoder = static_cast<VulkanCommandEncoder &>(encoder);
+        command_encoder.set_ready(false);
+        command_encoder.submit();
     }
 
     void VulkanGraphicsDevice::create_instance(const Validation validation_requested)

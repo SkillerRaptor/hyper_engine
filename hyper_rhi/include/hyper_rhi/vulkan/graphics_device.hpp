@@ -6,14 +6,14 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
+#include <vector>
 
 // clang-format off
 #include <volk.h>
 #include <vk_mem_alloc.h>
 // clang-format on
-
-#include <vector>
 
 #include <hyper_core/prerequisites.hpp>
 #include <hyper_core/types.hpp>
@@ -28,8 +28,6 @@ namespace he
         VulkanGraphicsDevice(const Window &, Validation validation_requested);
         ~VulkanGraphicsDevice() override;
 
-        void wait_idle() const override;
-
         RefPtr<Buffer> create_buffer(const BufferDescriptor &) override;
         RefPtr<Shader> create_shader(const ShaderDescriptor &) override;
         RefPtr<Sampler> create_sampler(const SamplerDescriptor &) override;
@@ -39,7 +37,14 @@ namespace he
         RefPtr<ComputePipeline> create_compute_pipeline(const ComputePipelineDescriptor &) override;
         RefPtr<RenderPipeline> create_render_pipeline(const RenderPipelineDescriptor &) override;
 
+        void wait_idle() const override;
+
+        CommandEncoder &acquire_command_encoder_impl(u32 frame_id) override;
+        void submit_command_encoder_impl(CommandEncoder &) override;
+
+        HE_ALWAYS_INLINE u32 queue_family() const { return m_queue_family; }
         HE_ALWAYS_INLINE VkDevice device() const { return m_device; }
+        HE_ALWAYS_INLINE VkQueue queue() const { return m_queue; }
         HE_ALWAYS_INLINE VmaAllocator &allocator() { return m_allocator; }
 
         HE_ALWAYS_INLINE VkDescriptorSetLayout storage_buffer_layout() const { return m_storage_buffer_layout; };
@@ -88,5 +93,8 @@ namespace he
         VkDescriptorSet m_storage_image_set = VK_NULL_HANDLE;
         VkDescriptorSetLayout m_sampler_layout = VK_NULL_HANDLE;
         VkDescriptorSet m_sampler_set = VK_NULL_HANDLE;
+
+        std::vector<OwnPtr<CommandEncoder>> m_command_encoders;
+        u32 m_frame_index = 0;
     };
 } // namespace he

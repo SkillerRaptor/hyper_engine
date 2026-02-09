@@ -9,20 +9,28 @@
 namespace he
 {
     class Buffer;
-    class Shader;
-    class Sampler;
-    class Texture;
-    class TextureView;
-    class PipelineLayout;
-    class ComputePipeline;
-    class RenderPipeline;
-
     struct BufferDescriptor;
-    struct ShaderDescriptor;
-    struct SamplerDescriptor;
-    struct TextureDescriptor;
-    struct TextureViewDescriptor;
-    struct PipelineLayoutDescriptor;
+
+    class CommandEncoder;
+
+    class ComputePipeline;
     struct ComputePipelineDescriptor;
+
+    class PipelineLayout;
+    struct PipelineLayoutDescriptor;
+
+    class RenderPipeline;
     struct RenderPipelineDescriptor;
+
+    class Sampler;
+    struct SamplerDescriptor;
+
+    class Shader;
+    struct ShaderDescriptor;
+
+    class Texture;
+    struct TextureDescriptor;
+
+    class TextureView;
+    struct TextureViewDescriptor;
 } // namespace he
