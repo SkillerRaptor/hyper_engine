@@ -11,7 +11,11 @@
 #include <string>
 
 #include <hyper_core/bit_flags.hpp>
+#include <hyper_core/key.hpp>
+#include <hyper_core/memory.hpp>
 #include <hyper_core/types.hpp>
+
+#include "hyper_rhi/forward.hpp"
 
 namespace he
 {
@@ -37,22 +41,21 @@ namespace he
     class Buffer
     {
     public:
-        virtual ~Buffer() = default;
-
-        virtual void *map() const = 0;
-        virtual void unmap() const = 0;
-
-        HE_ALWAYS_INLINE u32 size() const { return m_size; }
-        HE_ALWAYS_INLINE BitFlags<BufferUsage> usage() const { return m_usage; }
-
-    protected:
-        explicit Buffer(const BufferDescriptor &desc)
-            : m_size(desc.size)
+        Buffer(Key<GraphicsDevice>, RefPtr<void> internal_state, const BufferDescriptor &desc)
+            : m_internal_state(std::move(internal_state))
+            , m_size(desc.size)
             , m_usage(desc.usage)
         {
         }
 
-    protected:
+        HE_ALWAYS_INLINE const void *internal_state(Key<GraphicsDevice>) const { return m_internal_state.get(); }
+
+        HE_ALWAYS_INLINE u32 size() const { return m_size; }
+        HE_ALWAYS_INLINE BitFlags<BufferUsage> usage() const { return m_usage; }
+
+    private:
+        RefPtr<void> m_internal_state = nullptr;
+
         u32 m_size = 0;
         BitFlags<BufferUsage> m_usage = BufferUsage::None;
     };

@@ -6,7 +6,6 @@
 
 #include "hyper_rhi/vulkan/texture.hpp"
 
-#include "hyper_rhi/validation.hpp"
 #include "hyper_rhi/vulkan/graphics_device.hpp"
 #include "hyper_rhi/vulkan/render_conversion.hpp"
 #include "hyper_rhi/vulkan/texture_view.hpp"
@@ -15,12 +14,9 @@
 namespace he
 {
     VulkanTextureView::VulkanTextureView(VulkanGraphicsDevice &graphics_device, const TextureViewDescriptor &desc)
-        : TextureView(desc)
-        , m_graphics_device(graphics_device)
+        : m_graphics_device(graphics_device)
     {
-        validate_texture_view_descriptor(desc);
-
-        const RefPtr<VulkanTexture> texture = cast_ref<VulkanTexture>(desc.texture);
+        const VulkanTexture *texture = graphics_device.get_internal_state<VulkanTexture>(desc.texture);
 
         constexpr VkComponentMapping component_mapping = {
             .r = VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -29,9 +25,9 @@ namespace he
             .a = VK_COMPONENT_SWIZZLE_IDENTITY,
         };
 
-        const Format format = texture->format();
+        const Format format = desc.texture.format();
 
-        const u32 mip_levels = desc.mip_levels.value_or(texture->mip_levels());
+        const u32 mip_levels = desc.mip_levels.value_or(desc.texture.mip_levels());
         const u32 array_layers = [&desc, &texture]() -> u32
         {
             if (desc.array_layers.has_value())
@@ -46,7 +42,7 @@ namespace he
             case ViewDimension::D3:
                 return 1;
             case ViewDimension::D2Array:
-                return texture->extent().depth;
+                return desc.texture.extent().depth;
             case ViewDimension::Cube:
                 return 6;
             default:

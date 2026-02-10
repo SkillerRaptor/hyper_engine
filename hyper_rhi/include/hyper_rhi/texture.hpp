@@ -10,10 +10,13 @@
 #include <string_view>
 
 #include <hyper_core/bit_flags.hpp>
+#include <hyper_core/key.hpp>
+#include <hyper_core/memory.hpp>
 #include <hyper_core/prerequisites.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/definitions.hpp"
+#include "hyper_rhi/forward.hpp"
 
 namespace he
 {
@@ -41,18 +44,9 @@ namespace he
     class Texture
     {
     public:
-        virtual ~Texture() = default;
-
-        HE_ALWAYS_INLINE Extent3d extent() const { return m_extent; }
-        HE_ALWAYS_INLINE u32 mip_levels() const { return m_mip_levels; }
-        HE_ALWAYS_INLINE u32 sample_count() const { return m_sample_count; }
-        HE_ALWAYS_INLINE Format format() const { return m_format; }
-        HE_ALWAYS_INLINE Dimension dimension() const { return m_dimension; }
-        HE_ALWAYS_INLINE BitFlags<TextureUsage> usage() const { return m_usage; }
-
-    protected:
-        explicit Texture(const TextureDescriptor &desc)
-            : m_extent(desc.extent)
+        Texture(Key<GraphicsDevice>, RefPtr<void> internal_state, const TextureDescriptor &desc)
+            : m_internal_state(std::move(internal_state))
+            , m_extent(desc.extent)
             , m_mip_levels(desc.mip_levels)
             , m_sample_count(desc.sample_count)
             , m_format(desc.format)
@@ -61,7 +55,18 @@ namespace he
         {
         }
 
-    protected:
+        HE_ALWAYS_INLINE void *internal_state(Key<GraphicsDevice>) const { return m_internal_state.get(); }
+
+        HE_ALWAYS_INLINE Extent3d extent() const { return m_extent; }
+        HE_ALWAYS_INLINE u32 mip_levels() const { return m_mip_levels; }
+        HE_ALWAYS_INLINE u32 sample_count() const { return m_sample_count; }
+        HE_ALWAYS_INLINE Format format() const { return m_format; }
+        HE_ALWAYS_INLINE Dimension dimension() const { return m_dimension; }
+        HE_ALWAYS_INLINE BitFlags<TextureUsage> usage() const { return m_usage; }
+
+    private:
+        RefPtr<void> m_internal_state = nullptr;
+
         Extent3d m_extent;
         u32 m_mip_levels = 1;
         u32 m_sample_count = 1;

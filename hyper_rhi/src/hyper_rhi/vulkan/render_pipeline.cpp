@@ -8,7 +8,6 @@
 
 #include <array>
 
-#include "hyper_rhi/validation.hpp"
 #include "hyper_rhi/vulkan/graphics_device.hpp"
 #include "hyper_rhi/vulkan/pipeline_layout.hpp"
 #include "hyper_rhi/vulkan/render_conversion.hpp"
@@ -19,30 +18,29 @@ namespace he
 {
     VulkanRenderPipeline::VulkanRenderPipeline(
         VulkanGraphicsDevice &graphics_device, const RenderPipelineDescriptor &desc)
-        : RenderPipeline(desc)
-        , m_graphics_device(graphics_device)
+        : m_graphics_device(graphics_device)
     {
-        validate_render_pipeline_descriptor(desc);
+        const VulkanShader *vertex_shader = graphics_device.get_internal_state<VulkanShader>(desc.vertex_shader);
 
-        const RefPtr<VulkanShader> vertex_shader = cast_ref<VulkanShader>(desc.vertex_shader);
         const VkPipelineShaderStageCreateInfo vertex_pipeline_shader_stage_create_info = {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
             .pNext = nullptr,
             .flags = 0,
             .stage = VK_SHADER_STAGE_VERTEX_BIT,
             .module = vertex_shader->raw(),
-            .pName = vertex_shader->entry().data(),
+            .pName = desc.vertex_shader.entry().data(),
             .pSpecializationInfo = nullptr,
         };
 
-        const RefPtr<VulkanShader> fragment_shader = cast_ref<VulkanShader>(desc.fragment_shader);
+        const VulkanShader *fragment_shader = graphics_device.get_internal_state<VulkanShader>(desc.fragment_shader);
+
         const VkPipelineShaderStageCreateInfo fragment_pipeline_shader_stage_create_info = {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
             .pNext = nullptr,
             .flags = 0,
             .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
             .module = fragment_shader->raw(),
-            .pName = fragment_shader->entry().data(),
+            .pName = desc.fragment_shader.entry().data(),
             .pSpecializationInfo = nullptr,
         };
 
@@ -212,6 +210,9 @@ namespace he
             .stencilAttachmentFormat = VK_FORMAT_UNDEFINED,
         };
 
+        const VulkanPipelineLayout *pipeline_layout
+            = graphics_device.get_internal_state<VulkanPipelineLayout>(desc.layout);
+
         const VkGraphicsPipelineCreateInfo graphics_pipeline_create_info = {
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
             .pNext = &rendering_create_info,
@@ -227,7 +228,7 @@ namespace he
             .pDepthStencilState = &depth_stencil_state_create_info,
             .pColorBlendState = &color_blend_state_create_info,
             .pDynamicState = &dynamic_state_create_info,
-            .layout = cast_ref<VulkanPipelineLayout>(desc.layout)->raw(),
+            .layout = pipeline_layout->raw(),
             .renderPass = VK_NULL_HANDLE,
             .subpass = 0,
             .basePipelineHandle = VK_NULL_HANDLE,

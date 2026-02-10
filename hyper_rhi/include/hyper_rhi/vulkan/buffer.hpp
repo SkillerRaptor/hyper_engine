@@ -17,16 +17,14 @@ namespace he
 {
     class VulkanGraphicsDevice;
 
-    class VulkanBuffer final : public Buffer
+    class VulkanBuffer
     {
     public:
         VulkanBuffer(VulkanGraphicsDevice &, const BufferDescriptor &, bool staging);
-        ~VulkanBuffer() override;
-
-        void *map() const override;
-        void unmap() const override;
+        ~VulkanBuffer();
 
         HE_ALWAYS_INLINE VkBuffer raw() const { return m_raw; }
+        HE_ALWAYS_INLINE VmaAllocation allocation() const { return m_allocation; }
 
     private:
         VulkanGraphicsDevice &m_graphics_device;

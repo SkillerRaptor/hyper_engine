@@ -6,7 +6,6 @@
 
 #include "hyper_rhi/vulkan/buffer.hpp"
 
-#include "hyper_rhi/validation.hpp"
 #include "hyper_rhi/vulkan/graphics_device.hpp"
 #include "hyper_rhi/vulkan/render_conversion.hpp"
 #include "hyper_rhi/vulkan/utils.hpp"
@@ -14,11 +13,8 @@
 namespace he
 {
     VulkanBuffer::VulkanBuffer(VulkanGraphicsDevice &graphics_device, const BufferDescriptor &desc, const bool staging)
-        : Buffer(desc)
-        , m_graphics_device(graphics_device)
+        : m_graphics_device(graphics_device)
     {
-        validate_buffer_descriptor(desc);
-
         const VkBufferCreateInfo buffer_create_info = {
             .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
             .pNext = nullptr,
@@ -59,24 +55,15 @@ namespace he
             "Failed to create vulkan buffer");
         HE_ASSERT(m_raw != VK_NULL_HANDLE);
         HE_ASSERT(m_allocation != VK_NULL_HANDLE);
-
-        if (!desc.initial_data.empty())
-        {
-            u8 *ptr = static_cast<u8 *>(map());
-            memcpy(ptr, desc.initial_data.data(), desc.initial_data.size());
-            unmap();
-        }
     }
 
-    VulkanBuffer::~VulkanBuffer() { vmaDestroyBuffer(m_graphics_device.allocator(), m_raw, m_allocation); }
-
-    void *VulkanBuffer::map() const
+    VulkanBuffer::~VulkanBuffer()
     {
-        void *ptr = nullptr;
-        vmaMapMemory(m_graphics_device.allocator(), m_allocation, &ptr);
-        HE_ASSERT(ptr != nullptr);
-        return ptr;
-    }
+        if (m_allocation == VK_NULL_HANDLE)
+        {
+            return;
+        }
 
-    void VulkanBuffer::unmap() const { vmaUnmapMemory(m_graphics_device.allocator(), m_allocation); }
+        vmaDestroyBuffer(m_graphics_device.allocator(), m_raw, m_allocation);
+    }
 } // namespace he

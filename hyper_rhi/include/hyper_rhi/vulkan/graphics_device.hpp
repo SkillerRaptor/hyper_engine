@@ -28,14 +28,23 @@ namespace he
         VulkanGraphicsDevice(const Window &, Validation validation_requested);
         ~VulkanGraphicsDevice() override;
 
-        RefPtr<Buffer> create_buffer(const BufferDescriptor &) override;
-        RefPtr<Shader> create_shader(const ShaderDescriptor &) override;
-        RefPtr<Sampler> create_sampler(const SamplerDescriptor &) override;
-        RefPtr<Texture> create_texture(const TextureDescriptor &) override;
-        RefPtr<TextureView> create_texture_view(const TextureViewDescriptor &) override;
-        RefPtr<PipelineLayout> create_pipeline_layout(const PipelineLayoutDescriptor &) override;
-        RefPtr<ComputePipeline> create_compute_pipeline(const ComputePipelineDescriptor &) override;
-        RefPtr<RenderPipeline> create_render_pipeline(const RenderPipelineDescriptor &) override;
+        Buffer create_buffer(const BufferDescriptor &) override;
+        void *map_buffer(const Buffer &) override;
+        void unmap_buffer(const Buffer &) override;
+
+        Shader create_shader(const ShaderDescriptor &) override;
+
+        Sampler create_sampler(const SamplerDescriptor &) override;
+
+        Texture create_texture(const TextureDescriptor &) override;
+
+        TextureView create_texture_view(const TextureViewDescriptor &) override;
+
+        PipelineLayout create_pipeline_layout(const PipelineLayoutDescriptor &) override;
+
+        ComputePipeline create_compute_pipeline(const ComputePipelineDescriptor &) override;
+
+        RenderPipeline create_render_pipeline(const RenderPipelineDescriptor &) override;
 
         void wait_idle() const override;
 
@@ -51,6 +60,8 @@ namespace he
         HE_ALWAYS_INLINE VkDescriptorSetLayout sampled_image_layout() const { return m_sampled_image_layout; };
         HE_ALWAYS_INLINE VkDescriptorSetLayout storage_image_layout() const { return m_storage_image_layout; };
         HE_ALWAYS_INLINE VkDescriptorSetLayout sampler_layout() const { return m_sampler_layout; };
+
+        using GraphicsDevice::get_internal_state;
 
     private:
         void create_instance(Validation validation_requested);
@@ -81,8 +92,8 @@ namespace he
         VkSurfaceKHR m_surface = VK_NULL_HANDLE;
 
         VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
-        std::vector<RefPtr<Texture>> m_swapchain_textures;
-        std::vector<RefPtr<TextureView>> m_swapchain_texture_views;
+        std::vector<Texture> m_swapchain_textures;
+        std::vector<TextureView> m_swapchain_texture_views;
 
         VkDescriptorPool m_descriptor_pool = VK_NULL_HANDLE;
         VkDescriptorSetLayout m_storage_buffer_layout = VK_NULL_HANDLE;

@@ -17,11 +17,11 @@ namespace he
 {
     class VulkanGraphicsDevice;
 
-    class VulkanTexture final : public Texture
+    class VulkanTexture
     {
     public:
         VulkanTexture(VulkanGraphicsDevice &, const TextureDescriptor &, VkImage image);
-        ~VulkanTexture() override;
+        ~VulkanTexture();
 
         HE_ALWAYS_INLINE VkImage raw() const { return m_raw; }
 

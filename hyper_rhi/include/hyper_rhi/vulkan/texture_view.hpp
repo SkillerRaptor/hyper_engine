@@ -14,11 +14,11 @@ namespace he
 {
     class VulkanGraphicsDevice;
 
-    class VulkanTextureView final : public TextureView
+    class VulkanTextureView
     {
     public:
         VulkanTextureView(VulkanGraphicsDevice &, const TextureViewDescriptor &);
-        ~VulkanTextureView() override;
+        ~VulkanTextureView();
 
         HE_ALWAYS_INLINE VkImageView raw() const { return m_raw; }
 

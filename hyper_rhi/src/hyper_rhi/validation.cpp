@@ -41,9 +41,6 @@ namespace he
         {
             HE_ASSERT(!desc.label->empty());
         }
-
-        HE_ASSERT(desc.layout != nullptr);
-        HE_ASSERT(desc.shader != nullptr);
     }
 
     void validate_pipeline_layout_descriptor(const PipelineLayoutDescriptor &desc)
@@ -63,9 +60,6 @@ namespace he
             HE_ASSERT(!desc.label->empty());
         }
 
-        HE_ASSERT(desc.layout != nullptr);
-        HE_ASSERT(desc.vertex_shader != nullptr);
-        HE_ASSERT(desc.fragment_shader != nullptr);
         HE_ASSERT(!desc.color_attachment_states.empty());
 
         for (const ColorAttachmentState &color_attachment_state : desc.color_attachment_states)
@@ -152,9 +146,7 @@ namespace he
             HE_ASSERT(!desc.label->empty());
         }
 
-        HE_ASSERT(desc.texture != nullptr);
-
-        switch (desc.texture->dimension())
+        switch (desc.texture.dimension())
         {
         case Dimension::D1:
             HE_ASSERT(desc.dimension == ViewDimension::D1);
@@ -171,16 +163,16 @@ namespace he
             HE_UNREACHABLE();
         }
 
-        HE_ASSERT(desc.base_mip_level <= desc.mip_levels.value_or(desc.texture->mip_levels()));
+        HE_ASSERT(desc.base_mip_level <= desc.mip_levels.value_or(desc.texture.mip_levels()));
         if (desc.mip_levels.has_value())
         {
-            HE_ASSERT(desc.base_mip_level + desc.mip_levels.value() <= desc.texture->mip_levels());
+            HE_ASSERT(desc.base_mip_level + desc.mip_levels.value() <= desc.texture.mip_levels());
         }
 
-        HE_ASSERT(desc.base_array_layer <= desc.array_layers.value_or(desc.texture->extent().depth));
+        HE_ASSERT(desc.base_array_layer <= desc.array_layers.value_or(desc.texture.extent().depth));
         if (desc.array_layers.has_value())
         {
-            HE_ASSERT(desc.base_array_layer + desc.array_layers.value() <= desc.texture->extent().depth);
+            HE_ASSERT(desc.base_array_layer + desc.array_layers.value() <= desc.texture.extent().depth);
         }
     }
 } // namespace he

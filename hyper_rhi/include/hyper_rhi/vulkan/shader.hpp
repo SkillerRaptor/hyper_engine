@@ -16,11 +16,11 @@ namespace he
 {
     class VulkanGraphicsDevice;
 
-    class VulkanShader final : public Shader
+    class VulkanShader
     {
     public:
         VulkanShader(VulkanGraphicsDevice &, const ShaderDescriptor &);
-        ~VulkanShader() override;
+        ~VulkanShader();
 
         HE_ALWAYS_INLINE VkShaderModule raw() const { return m_raw; }
 

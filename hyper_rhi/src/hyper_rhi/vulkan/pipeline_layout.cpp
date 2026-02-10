@@ -8,7 +8,6 @@
 
 #include <array>
 
-#include "hyper_rhi/validation.hpp"
 #include "hyper_rhi/vulkan/graphics_device.hpp"
 #include "hyper_rhi/vulkan/utils.hpp"
 
@@ -16,11 +15,8 @@ namespace he
 {
     VulkanPipelineLayout::VulkanPipelineLayout(
         VulkanGraphicsDevice &graphics_device, const PipelineLayoutDescriptor &desc)
-        : PipelineLayout(desc)
-        , m_graphics_device(graphics_device)
+        : m_graphics_device(graphics_device)
     {
-        validate_pipeline_layout_descriptor(desc);
-
         const VkPushConstantRange push_constant_range = {
             .stageFlags = VK_SHADER_STAGE_ALL,
             .offset = 0,

@@ -6,7 +6,6 @@
 
 #include "hyper_rhi/vulkan/texture.hpp"
 
-#include "hyper_rhi/validation.hpp"
 #include "hyper_rhi/vulkan/graphics_device.hpp"
 #include "hyper_rhi/vulkan/render_conversion.hpp"
 #include "hyper_rhi/vulkan/utils.hpp"
@@ -15,12 +14,9 @@ namespace he
 {
     VulkanTexture::VulkanTexture(
         VulkanGraphicsDevice &graphics_device, const TextureDescriptor &desc, const VkImage image)
-        : Texture(desc)
-        , m_graphics_device(graphics_device)
+        : m_graphics_device(graphics_device)
         , m_raw(image)
     {
-        validate_texture_descriptor(desc);
-
         if (image != VK_NULL_HANDLE)
         {
             return;
@@ -82,9 +78,11 @@ namespace he
 
     VulkanTexture::~VulkanTexture()
     {
-        if (m_allocation != VK_NULL_HANDLE)
+        if (m_allocation == VK_NULL_HANDLE)
         {
-            vmaDestroyImage(m_graphics_device.allocator(), m_raw, m_allocation);
+            return;
         }
+
+        vmaDestroyImage(m_graphics_device.allocator(), m_raw, m_allocation);
     }
 } // namespace he

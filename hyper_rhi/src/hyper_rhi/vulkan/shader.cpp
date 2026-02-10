@@ -6,18 +6,14 @@
 
 #include "hyper_rhi/vulkan/shader.hpp"
 
-#include "hyper_rhi/validation.hpp"
 #include "hyper_rhi/vulkan/graphics_device.hpp"
 #include "hyper_rhi/vulkan/utils.hpp"
 
 namespace he
 {
     VulkanShader::VulkanShader(VulkanGraphicsDevice &graphics_device, const ShaderDescriptor &desc)
-        : Shader(desc)
-        , m_graphics_device(graphics_device)
+        : m_graphics_device(graphics_device)
     {
-        validate_shader_descriptor(desc);
-
         const VkShaderModuleCreateInfo shader_module_create_info = {
             .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
             .pNext = nullptr,

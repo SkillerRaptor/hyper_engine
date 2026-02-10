@@ -16,11 +16,11 @@ namespace he
 {
     class VulkanGraphicsDevice;
 
-    class VulkanPipelineLayout final : public PipelineLayout
+    class VulkanPipelineLayout
     {
     public:
         VulkanPipelineLayout(VulkanGraphicsDevice &, const PipelineLayoutDescriptor &);
-        ~VulkanPipelineLayout() override;
+        ~VulkanPipelineLayout();
 
         HE_ALWAYS_INLINE VkPipelineLayout raw() const { return m_raw; }
 

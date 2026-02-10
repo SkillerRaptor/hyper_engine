@@ -14,7 +14,7 @@ using namespace he;
 
 struct Owner
 {
-    static constexpr Key<Owner> make_key() { return Key<Owner> { }; }
+    static constexpr Key<Owner> make_key() { return Key<Owner> {}; }
 };
 
 struct Other

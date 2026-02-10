@@ -16,11 +16,11 @@ namespace he
 {
     class VulkanGraphicsDevice;
 
-    class VulkanComputePipeline final : public ComputePipeline
+    class VulkanComputePipeline
     {
     public:
         VulkanComputePipeline(VulkanGraphicsDevice &, const ComputePipelineDescriptor &);
-        ~VulkanComputePipeline() override;
+        ~VulkanComputePipeline();
 
         HE_ALWAYS_INLINE VkPipeline raw() const { return m_raw; }
 

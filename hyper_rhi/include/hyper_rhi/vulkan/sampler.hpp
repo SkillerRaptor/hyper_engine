@@ -16,11 +16,11 @@ namespace he
 {
     class VulkanGraphicsDevice;
 
-    class VulkanSampler final : public Sampler
+    class VulkanSampler
     {
     public:
         VulkanSampler(VulkanGraphicsDevice &, const SamplerDescriptor &);
-        ~VulkanSampler() override;
+        ~VulkanSampler();
 
         HE_ALWAYS_INLINE VkSampler raw() const { return m_raw; }
 

@@ -6,7 +6,6 @@
 
 #include "hyper_rhi/vulkan/sampler.hpp"
 
-#include "hyper_rhi/validation.hpp"
 #include "hyper_rhi/vulkan/graphics_device.hpp"
 #include "hyper_rhi/vulkan/render_conversion.hpp"
 #include "hyper_rhi/vulkan/utils.hpp"
@@ -14,11 +13,8 @@
 namespace he
 {
     VulkanSampler::VulkanSampler(VulkanGraphicsDevice &graphics_device, const SamplerDescriptor &desc)
-        : Sampler(desc)
-        , m_graphics_device(graphics_device)
+        : m_graphics_device(graphics_device)
     {
-        validate_sampler_descriptor(desc);
-
         const VkSamplerCreateInfo sampler_create_info = {
             .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
             .pNext = nullptr,
