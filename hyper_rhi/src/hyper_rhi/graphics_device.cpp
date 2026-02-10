@@ -24,15 +24,15 @@ namespace he
         }
     }
 
-    CommandEncoder &GraphicsDevice::acquire_command_encoder()
+    CommandEncoder GraphicsDevice::acquire_command_encoder()
     {
         const u32 frame_id = m_frame_index % s_frames_in_flight;
         return acquire_command_encoder_impl(frame_id);
     }
 
-    void GraphicsDevice::submit_command_encoder(CommandEncoder &command_encoder)
+    void GraphicsDevice::submit_command_encoder(CommandEncoder command_encoder)
     {
-        submit_command_encoder_impl(command_encoder);
+        submit_command_encoder_impl(std::move(command_encoder));
         m_frame_index += 1;
     }
 } // namespace he

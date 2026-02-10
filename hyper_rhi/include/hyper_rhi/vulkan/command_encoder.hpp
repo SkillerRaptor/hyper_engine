@@ -16,7 +16,7 @@ namespace he
 {
     class VulkanGraphicsDevice;
 
-    class VulkanCommandEncoder : public CommandEncoder
+    class VulkanCommandEncoder : public BackendCommandEncoder
     {
     public:
         explicit VulkanCommandEncoder(VulkanGraphicsDevice &);
@@ -24,8 +24,6 @@ namespace he
 
         void acquire() override;
         void submit() override;
-
-        using CommandEncoder::set_ready;
 
     private:
         VulkanGraphicsDevice &m_graphics_device;

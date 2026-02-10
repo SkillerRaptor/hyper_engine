@@ -78,7 +78,7 @@ namespace he
 
     void Engine::render() const
     {
-        CommandEncoder &command_encoder = m_graphics_device->acquire_command_encoder();
-        m_graphics_device->submit_command_encoder(command_encoder);
+        CommandEncoder command_encoder = m_graphics_device->acquire_command_encoder();
+        m_graphics_device->submit_command_encoder(std::move(command_encoder));
     }
 } // namespace he

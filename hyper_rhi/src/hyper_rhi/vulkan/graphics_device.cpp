@@ -180,18 +180,19 @@ namespace he
 
     void VulkanGraphicsDevice::wait_idle() const { HE_VK_CHECK(vkDeviceWaitIdle(m_device)); }
 
-    CommandEncoder &VulkanGraphicsDevice::acquire_command_encoder_impl(const u32 frame_id)
+    CommandEncoder VulkanGraphicsDevice::acquire_command_encoder_impl(const u32 frame_id)
     {
         VulkanCommandEncoder &command_encoder = static_cast<VulkanCommandEncoder &>(*m_command_encoders[frame_id]);
         command_encoder.acquire();
-        command_encoder.set_ready(true);
-        return command_encoder;
+
+        CommandEncoder encoder(key(), command_encoder);
+        return std::move(encoder);
     }
 
-    void VulkanGraphicsDevice::submit_command_encoder_impl(CommandEncoder &encoder)
+    void VulkanGraphicsDevice::submit_command_encoder_impl(const CommandEncoder encoder)
     {
-        VulkanCommandEncoder &command_encoder = static_cast<VulkanCommandEncoder &>(encoder);
-        command_encoder.set_ready(false);
+        VulkanCommandEncoder &command_encoder
+            = static_cast<VulkanCommandEncoder &>(encoder.backend_command_encoder(key()));
         command_encoder.submit();
     }
 

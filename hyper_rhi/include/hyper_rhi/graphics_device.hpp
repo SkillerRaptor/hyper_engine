@@ -8,10 +8,11 @@
 
 #include <hyper_core/key.hpp>
 #include <hyper_core/memory.hpp>
+#include <hyper_core/prerequisites.hpp>
 #include <hyper_core/types.hpp>
 #include <hyper_platform/forward.hpp>
 
-#include "hyper_core/prerequisites.hpp"
+#include "hyper_rhi/command_encoder.hpp"
 #include "hyper_rhi/forward.hpp"
 
 namespace he
@@ -63,16 +64,16 @@ namespace he
 
         virtual void wait_idle() const = 0;
 
-        CommandEncoder &acquire_command_encoder();
-        void submit_command_encoder(CommandEncoder &);
+        CommandEncoder acquire_command_encoder();
+        void submit_command_encoder(CommandEncoder);
 
     protected:
         GraphicsDevice() = default;
 
-        virtual CommandEncoder &acquire_command_encoder_impl(u32 frame_id) = 0;
-        virtual void submit_command_encoder_impl(CommandEncoder &) = 0;
+        virtual CommandEncoder acquire_command_encoder_impl(u32 frame_id) = 0;
+        virtual void submit_command_encoder_impl(CommandEncoder) = 0;
 
-        static constexpr HE_ALWAYS_INLINE Key<GraphicsDevice> key() { return {}; }
+        static constexpr HE_ALWAYS_INLINE Key<GraphicsDevice> key() { return { }; }
 
         template <typename T, typename U>
         static const T *get_internal_state(const U &resource)
