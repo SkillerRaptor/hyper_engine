@@ -134,8 +134,8 @@ namespace he
 
     void VulkanGraphicsDevice::submit_command_encoder_impl(const CommandEncoder encoder)
     {
-        VulkanCommandEncoder &command_encoder = static_cast<VulkanCommandEncoder &>(encoder.backend(key()));
-        command_encoder.submit();
+        // VulkanCommandEncoder &command_encoder = static_cast<VulkanCommandEncoder &>(encoder.backend(key()));
+        // command_encoder.submit();
     }
 
     void VulkanGraphicsDevice::create_instance(const Validation validation_requested)
