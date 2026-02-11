@@ -17,7 +17,6 @@
 #include <hyper_core/logger.hpp>
 #include <hyper_platform/window.hpp>
 
-#include "hyper_rhi/validation.hpp"
 #include "hyper_rhi/vulkan/buffer.hpp"
 #include "hyper_rhi/vulkan/command_encoder.hpp"
 #include "hyper_rhi/vulkan/compute_pipeline.hpp"
@@ -82,100 +81,44 @@ namespace he
         HE_INFO("Destroyed graphics device");
     }
 
-    Buffer VulkanGraphicsDevice::create_buffer(const BufferDescriptor &desc)
+    Buffer VulkanGraphicsDevice::create_buffer_impl(const BufferDescriptor &desc)
     {
-        validate_buffer_descriptor(desc);
-
-        RefPtr<VulkanBuffer> internal_state = make_ref<VulkanBuffer>(*this, desc, false);
-        Buffer buffer(key(), std::move(internal_state), desc);
-        if (!desc.initial_data.empty())
-        {
-            u8 *ptr = static_cast<u8 *>(map_buffer(buffer));
-            memcpy(ptr, desc.initial_data.data(), desc.initial_data.size());
-            unmap_buffer(buffer);
-        }
-
-        return buffer;
+        return { key(), make_ref<VulkanBuffer>(*this, desc, false), desc };
     }
 
-    void *VulkanGraphicsDevice::map_buffer(const Buffer &buffer)
+    Shader VulkanGraphicsDevice::create_shader_impl(const ShaderDescriptor &desc)
     {
-        const VulkanBuffer *internal_state = get_internal_state<VulkanBuffer>(buffer);
-
-        void *ptr = nullptr;
-        vmaMapMemory(m_allocator, internal_state->allocation(), &ptr);
-        HE_ASSERT(ptr != nullptr);
-        return ptr;
+        return { key(), make_ref<VulkanShader>(*this, desc), desc };
     }
 
-    void VulkanGraphicsDevice::unmap_buffer(const Buffer &buffer)
+    Sampler VulkanGraphicsDevice::create_sampler_impl(const SamplerDescriptor &desc)
     {
-        const VulkanBuffer *internal_state = get_internal_state<VulkanBuffer>(buffer);
-
-        vmaUnmapMemory(m_allocator, internal_state->allocation());
+        return { key(), make_ref<VulkanSampler>(*this, desc), desc };
     }
 
-    Shader VulkanGraphicsDevice::create_shader(const ShaderDescriptor &desc)
+    Texture VulkanGraphicsDevice::create_texture_impl(const TextureDescriptor &desc)
     {
-        validate_shader_descriptor(desc);
-
-        RefPtr<VulkanShader> internal_state = make_ref<VulkanShader>(*this, desc);
-        Shader shader(key(), std::move(internal_state), desc);
-        return shader;
+        return { key(), make_ref<VulkanTexture>(*this, desc, VK_NULL_HANDLE), desc };
     }
 
-    Sampler VulkanGraphicsDevice::create_sampler(const SamplerDescriptor &desc)
+    TextureView VulkanGraphicsDevice::create_texture_view_impl(const TextureViewDescriptor &desc)
     {
-        validate_sampler_descriptor(desc);
-
-        RefPtr<VulkanSampler> internal_state = make_ref<VulkanSampler>(*this, desc);
-        Sampler sampler(key(), std::move(internal_state), desc);
-        return sampler;
+        return { key(), make_ref<VulkanTextureView>(*this, desc), desc };
     }
 
-    Texture VulkanGraphicsDevice::create_texture(const TextureDescriptor &desc)
+    PipelineLayout VulkanGraphicsDevice::create_pipeline_layout_impl(const PipelineLayoutDescriptor &desc)
     {
-        validate_texture_descriptor(desc);
-
-        RefPtr<VulkanTexture> internal_state = make_ref<VulkanTexture>(*this, desc, VK_NULL_HANDLE);
-        Texture texture(key(), std::move(internal_state), desc);
-        return texture;
+        return { key(), make_ref<VulkanPipelineLayout>(*this, desc), desc };
     }
 
-    TextureView VulkanGraphicsDevice::create_texture_view(const TextureViewDescriptor &desc)
+    ComputePipeline VulkanGraphicsDevice::create_compute_pipeline_impl(const ComputePipelineDescriptor &desc)
     {
-        validate_texture_view_descriptor(desc);
-
-        RefPtr<VulkanTextureView> internal_state = make_ref<VulkanTextureView>(*this, desc);
-        TextureView texture_view(key(), std::move(internal_state), desc);
-        return texture_view;
+        return { key(), make_ref<VulkanComputePipeline>(*this, desc), desc };
     }
 
-    PipelineLayout VulkanGraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &desc)
+    RenderPipeline VulkanGraphicsDevice::create_render_pipeline_impl(const RenderPipelineDescriptor &desc)
     {
-        validate_pipeline_layout_descriptor(desc);
-
-        RefPtr<VulkanPipelineLayout> internal_state = make_ref<VulkanPipelineLayout>(*this, desc);
-        PipelineLayout pipeline_layout(key(), std::move(internal_state), desc);
-        return pipeline_layout;
-    }
-
-    ComputePipeline VulkanGraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &desc)
-    {
-        validate_compute_pipeline_descriptor(desc);
-
-        RefPtr<VulkanComputePipeline> internal_state = make_ref<VulkanComputePipeline>(*this, desc);
-        ComputePipeline compute_pipeline(key(), std::move(internal_state), desc);
-        return compute_pipeline;
-    }
-
-    RenderPipeline VulkanGraphicsDevice::create_render_pipeline(const RenderPipelineDescriptor &desc)
-    {
-        validate_render_pipeline_descriptor(desc);
-
-        RefPtr<VulkanRenderPipeline> internal_state = make_ref<VulkanRenderPipeline>(*this, desc);
-        RenderPipeline render_pipeline(key(), std::move(internal_state), desc);
-        return render_pipeline;
+        return { key(), make_ref<VulkanRenderPipeline>(*this, desc), desc };
     }
 
     void VulkanGraphicsDevice::wait_idle() const { HE_VK_CHECK(vkDeviceWaitIdle(m_device)); }
@@ -191,8 +134,7 @@ namespace he
 
     void VulkanGraphicsDevice::submit_command_encoder_impl(const CommandEncoder encoder)
     {
-        VulkanCommandEncoder &command_encoder
-            = static_cast<VulkanCommandEncoder &>(encoder.backend_command_encoder(key()));
+        VulkanCommandEncoder &command_encoder = static_cast<VulkanCommandEncoder &>(encoder.backend(key()));
         command_encoder.submit();
     }
 

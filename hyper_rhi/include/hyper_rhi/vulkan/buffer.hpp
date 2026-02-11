@@ -24,7 +24,6 @@ namespace he
         ~VulkanBuffer();
 
         HE_ALWAYS_INLINE VkBuffer raw() const { return m_raw; }
-        HE_ALWAYS_INLINE VmaAllocation allocation() const { return m_allocation; }
 
     private:
         VulkanGraphicsDevice &m_graphics_device;

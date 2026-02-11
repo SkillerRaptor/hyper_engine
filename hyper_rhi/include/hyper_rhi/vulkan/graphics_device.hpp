@@ -28,23 +28,14 @@ namespace he
         VulkanGraphicsDevice(const Window &, Validation validation_requested);
         ~VulkanGraphicsDevice() override;
 
-        Buffer create_buffer(const BufferDescriptor &) override;
-        void *map_buffer(const Buffer &) override;
-        void unmap_buffer(const Buffer &) override;
-
-        Shader create_shader(const ShaderDescriptor &) override;
-
-        Sampler create_sampler(const SamplerDescriptor &) override;
-
-        Texture create_texture(const TextureDescriptor &) override;
-
-        TextureView create_texture_view(const TextureViewDescriptor &) override;
-
-        PipelineLayout create_pipeline_layout(const PipelineLayoutDescriptor &) override;
-
-        ComputePipeline create_compute_pipeline(const ComputePipelineDescriptor &) override;
-
-        RenderPipeline create_render_pipeline(const RenderPipelineDescriptor &) override;
+        Buffer create_buffer_impl(const BufferDescriptor &) override;
+        Shader create_shader_impl(const ShaderDescriptor &) override;
+        Sampler create_sampler_impl(const SamplerDescriptor &) override;
+        Texture create_texture_impl(const TextureDescriptor &) override;
+        TextureView create_texture_view_impl(const TextureViewDescriptor &) override;
+        PipelineLayout create_pipeline_layout_impl(const PipelineLayoutDescriptor &) override;
+        ComputePipeline create_compute_pipeline_impl(const ComputePipelineDescriptor &) override;
+        RenderPipeline create_render_pipeline_impl(const RenderPipelineDescriptor &) override;
 
         void wait_idle() const override;
 

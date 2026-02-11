@@ -44,23 +44,14 @@ namespace he
         GraphicsDevice(GraphicsDevice &&) noexcept = default;
         GraphicsDevice &operator=(GraphicsDevice &&) noexcept = default;
 
-        virtual Buffer create_buffer(const BufferDescriptor &) = 0;
-        virtual void *map_buffer(const Buffer &) = 0;
-        virtual void unmap_buffer(const Buffer &) = 0;
-
-        virtual Shader create_shader(const ShaderDescriptor &) = 0;
-
-        virtual Sampler create_sampler(const SamplerDescriptor &) = 0;
-
-        virtual Texture create_texture(const TextureDescriptor &) = 0;
-
-        virtual TextureView create_texture_view(const TextureViewDescriptor &) = 0;
-
-        virtual PipelineLayout create_pipeline_layout(const PipelineLayoutDescriptor &) = 0;
-
-        virtual ComputePipeline create_compute_pipeline(const ComputePipelineDescriptor &) = 0;
-
-        virtual RenderPipeline create_render_pipeline(const RenderPipelineDescriptor &) = 0;
+        Buffer create_buffer(const BufferDescriptor &);
+        Shader create_shader(const ShaderDescriptor &);
+        Sampler create_sampler(const SamplerDescriptor &);
+        Texture create_texture(const TextureDescriptor &);
+        TextureView create_texture_view(const TextureViewDescriptor &);
+        PipelineLayout create_pipeline_layout(const PipelineLayoutDescriptor &);
+        ComputePipeline create_compute_pipeline(const ComputePipelineDescriptor &);
+        RenderPipeline create_render_pipeline(const RenderPipelineDescriptor &);
 
         virtual void wait_idle() const = 0;
 
@@ -70,10 +61,19 @@ namespace he
     protected:
         GraphicsDevice() = default;
 
+        virtual Buffer create_buffer_impl(const BufferDescriptor &) = 0;
+        virtual Shader create_shader_impl(const ShaderDescriptor &) = 0;
+        virtual Sampler create_sampler_impl(const SamplerDescriptor &) = 0;
+        virtual Texture create_texture_impl(const TextureDescriptor &) = 0;
+        virtual TextureView create_texture_view_impl(const TextureViewDescriptor &) = 0;
+        virtual PipelineLayout create_pipeline_layout_impl(const PipelineLayoutDescriptor &) = 0;
+        virtual ComputePipeline create_compute_pipeline_impl(const ComputePipelineDescriptor &) = 0;
+        virtual RenderPipeline create_render_pipeline_impl(const RenderPipelineDescriptor &) = 0;
+
         virtual CommandEncoder acquire_command_encoder_impl(u32 frame_id) = 0;
         virtual void submit_command_encoder_impl(CommandEncoder) = 0;
 
-        static constexpr HE_ALWAYS_INLINE Key<GraphicsDevice> key() { return { }; }
+        static constexpr HE_ALWAYS_INLINE Key<GraphicsDevice> key() { return {}; }
 
         template <typename T, typename U>
         static const T *get_internal_state(const U &resource)

@@ -55,6 +55,16 @@ namespace he
             "Failed to create vulkan buffer");
         HE_ASSERT(m_raw != VK_NULL_HANDLE);
         HE_ASSERT(m_allocation != VK_NULL_HANDLE);
+
+        // FIXME: Maybe move this out?
+        if (!desc.initial_data.empty())
+        {
+            void *ptr = nullptr;
+            vmaMapMemory(m_graphics_device.allocator(), m_allocation, &ptr);
+            HE_ASSERT(ptr != nullptr);
+            memcpy(ptr, desc.initial_data.data(), desc.initial_data.size());
+            vmaUnmapMemory(m_graphics_device.allocator(), m_allocation);
+        }
     }
 
     VulkanBuffer::~VulkanBuffer()
