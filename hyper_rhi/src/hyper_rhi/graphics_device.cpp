@@ -16,7 +16,6 @@
 #include "hyper_rhi/shader.hpp"
 #include "hyper_rhi/texture.hpp"
 #include "hyper_rhi/texture_view.hpp"
-#include "hyper_rhi/validation.hpp"
 #include "hyper_rhi/vulkan/graphics_device.hpp"
 
 namespace he
@@ -35,49 +34,174 @@ namespace he
 
     Buffer GraphicsDevice::create_buffer(const BufferDescriptor &desc)
     {
-        validate_buffer_descriptor(desc);
+        if (desc.label.has_value())
+        {
+            HE_ASSERT(!desc.label->empty());
+        }
+
+        HE_ASSERT(desc.size != 0);
+        HE_ASSERT(desc.usage != BufferUsage::None);
+
+        if (!desc.initial_data.empty())
+        {
+            HE_ASSERT(desc.initial_data.size() <= desc.size);
+        }
+
         return create_buffer_impl(desc);
     }
 
     Shader GraphicsDevice::create_shader(const ShaderDescriptor &desc)
     {
-        validate_shader_descriptor(desc);
+        if (desc.label.has_value())
+        {
+            HE_ASSERT(!desc.label->empty());
+        }
+
+        HE_ASSERT(!desc.entry.empty());
+        HE_ASSERT(!desc.byte_code.empty());
+
         return create_shader_impl(desc);
     }
 
     Sampler GraphicsDevice::create_sampler(const SamplerDescriptor &desc)
     {
-        validate_sampler_descriptor(desc);
+        if (desc.label.has_value())
+        {
+            HE_ASSERT(!desc.label->empty());
+        }
+
+        HE_ASSERT(desc.min_lod >= 0.0f);
+        HE_ASSERT(desc.min_lod <= desc.max_lod);
+
         return create_sampler_impl(desc);
     }
 
     Texture GraphicsDevice::create_texture(const TextureDescriptor &desc)
     {
-        validate_texture_descriptor(desc);
+        if (desc.label.has_value())
+        {
+            HE_ASSERT(!desc.label->empty());
+        }
+
+        HE_ASSERT(desc.extent.width != 0);
+        HE_ASSERT(desc.extent.height != 0);
+        HE_ASSERT(desc.extent.depth != 0);
+
+        const u32 max_mip_levels
+            = std::min(static_cast<u32>(floor(log2(std::max(desc.extent.width, desc.extent.height))) + 1), 16u);
+        HE_ASSERT(desc.mip_levels != 0);
+        HE_ASSERT(desc.mip_levels <= max_mip_levels);
+
+        if (desc.dimension == Dimension::D1)
+        {
+            HE_ASSERT(desc.extent.height == 1);
+            HE_ASSERT(desc.extent.depth == 1);
+        }
+
+        if (desc.dimension == Dimension::D2)
+        {
+            HE_ASSERT(desc.extent.depth == 1);
+        }
+
+        HE_ASSERT(desc.format != Format::None);
+
+        if (desc.format == Format::D16Unorm || desc.format == Format::D32Sfloat || desc.format == Format::S8Uint
+            || desc.format == Format::D16UnormS8Uint || desc.format == Format::D24UnormS8Uint
+            || desc.format == Format::D32SfloatS8Uint)
+        {
+            HE_ASSERT(desc.dimension == Dimension::D2);
+        }
+
+        HE_ASSERT(desc.usage != TextureUsage::None);
+
+        if (desc.usage.has(TextureUsage::RenderAttachment))
+        {
+            HE_ASSERT(desc.dimension == Dimension::D2 || desc.dimension == Dimension::D3);
+        }
+
         return create_texture_impl(desc);
     }
 
     TextureView GraphicsDevice::create_texture_view(const TextureViewDescriptor &desc)
     {
-        validate_texture_view_descriptor(desc);
+        if (desc.label.has_value())
+        {
+            HE_ASSERT(!desc.label->empty());
+        }
+
+        switch (desc.texture.dimension())
+        {
+        case Dimension::D1:
+            HE_ASSERT(desc.dimension == ViewDimension::D1);
+            break;
+        case Dimension::D2:
+            HE_ASSERT(
+                desc.dimension == ViewDimension::D2 || desc.dimension == ViewDimension::D2Array
+                || desc.dimension == ViewDimension::Cube);
+            break;
+        case Dimension::D3:
+            HE_ASSERT(desc.dimension == ViewDimension::D3);
+            break;
+        default:
+            HE_UNREACHABLE();
+        }
+
+        HE_ASSERT(desc.base_mip_level <= desc.mip_levels.value_or(desc.texture.mip_levels()));
+        if (desc.mip_levels.has_value())
+        {
+            HE_ASSERT(desc.base_mip_level + desc.mip_levels.value() <= desc.texture.mip_levels());
+        }
+
+        HE_ASSERT(desc.base_array_layer <= desc.array_layers.value_or(desc.texture.extent().depth));
+        if (desc.array_layers.has_value())
+        {
+            HE_ASSERT(desc.base_array_layer + desc.array_layers.value() <= desc.texture.extent().depth);
+        }
+
         return create_texture_view_impl(desc);
     }
 
     PipelineLayout GraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &desc)
     {
-        validate_pipeline_layout_descriptor(desc);
+        if (desc.label.has_value())
+        {
+            HE_ASSERT(!desc.label->empty());
+        }
+
+        HE_ASSERT((desc.push_constant_size % 4) == 0);
+
         return create_pipeline_layout_impl(desc);
     }
 
     ComputePipeline GraphicsDevice::create_compute_pipeline(const ComputePipelineDescriptor &desc)
     {
-        validate_compute_pipeline_descriptor(desc);
+        if (desc.label.has_value())
+        {
+            HE_ASSERT(!desc.label->empty());
+        }
+
         return create_compute_pipeline_impl(desc);
     }
 
     RenderPipeline GraphicsDevice::create_render_pipeline(const RenderPipelineDescriptor &desc)
     {
-        validate_render_pipeline_descriptor(desc);
+        if (desc.label.has_value())
+        {
+            HE_ASSERT(!desc.label->empty());
+        }
+
+        HE_ASSERT(!desc.color_attachment_states.empty());
+
+        for (const ColorAttachmentState &color_attachment_state : desc.color_attachment_states)
+        {
+            HE_ASSERT(color_attachment_state.format != Format::None);
+        }
+
+        if (desc.depth_stencil_state.has_value())
+        {
+            HE_ASSERT(desc.depth_stencil_state->depth_format != Format::None);
+        }
+
         return create_render_pipeline_impl(desc);
     }
 
