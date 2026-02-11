@@ -7,7 +7,6 @@
 set(SOURCES
         src/hyper_rhi/command_encoder.cpp
         src/hyper_rhi/graphics_device.cpp
-        src/hyper_rhi/validation.cpp
         src/hyper_rhi/vulkan/buffer.cpp
         src/hyper_rhi/vulkan/command_encoder.cpp
         src/hyper_rhi/vulkan/compute_pipeline.cpp
@@ -34,7 +33,6 @@ set(HEADERS
         include/hyper_rhi/shader.hpp
         include/hyper_rhi/texture.hpp
         include/hyper_rhi/texture_view.hpp
-        include/hyper_rhi/validation.hpp
         include/hyper_rhi/vulkan/buffer.hpp
         include/hyper_rhi/vulkan/command_encoder.hpp
         include/hyper_rhi/vulkan/compute_pipeline.hpp
