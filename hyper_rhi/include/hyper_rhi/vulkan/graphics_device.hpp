@@ -20,83 +20,83 @@
 
 #include "hyper_rhi/graphics_device.hpp"
 
-namespace he
-{
-    class VulkanGraphicsDevice final : public GraphicsDevice
-    {
-    public:
-        VulkanGraphicsDevice(const Window &, Validation validation_requested);
-        ~VulkanGraphicsDevice() override;
+namespace he {
 
-        Buffer create_buffer_impl(const BufferDescriptor &) override;
-        Shader create_shader_impl(const ShaderDescriptor &) override;
-        Sampler create_sampler_impl(const SamplerDescriptor &) override;
-        Texture create_texture_impl(const TextureDescriptor &) override;
-        TextureView create_texture_view_impl(const TextureViewDescriptor &) override;
-        PipelineLayout create_pipeline_layout_impl(const PipelineLayoutDescriptor &) override;
-        ComputePipeline create_compute_pipeline_impl(const ComputePipelineDescriptor &) override;
-        RenderPipeline create_render_pipeline_impl(const RenderPipelineDescriptor &) override;
+class VulkanGraphicsDevice final : public GraphicsDevice {
+public:
+    VulkanGraphicsDevice(const Window &, Validation validation_requested);
+    ~VulkanGraphicsDevice() override;
 
-        void wait_idle() const override;
+    Buffer create_buffer_impl(const BufferDescriptor &) override;
+    Shader create_shader_impl(const ShaderDescriptor &) override;
+    Sampler create_sampler_impl(const SamplerDescriptor &) override;
+    Texture create_texture_impl(const TextureDescriptor &) override;
+    TextureView create_texture_view_impl(const TextureViewDescriptor &) override;
+    PipelineLayout create_pipeline_layout_impl(const PipelineLayoutDescriptor &) override;
+    ComputePipeline create_compute_pipeline_impl(const ComputePipelineDescriptor &) override;
+    RenderPipeline create_render_pipeline_impl(const RenderPipelineDescriptor &) override;
 
-        CommandEncoder acquire_command_encoder_impl(u32 frame_id) override;
-        void submit_command_encoder_impl(CommandEncoder) override;
+    void wait_idle() const override;
 
-        HE_ALWAYS_INLINE u32 queue_family() const { return m_queue_family; }
-        HE_ALWAYS_INLINE VkDevice device() const { return m_device; }
-        HE_ALWAYS_INLINE VkQueue queue() const { return m_queue; }
-        HE_ALWAYS_INLINE VmaAllocator &allocator() { return m_allocator; }
+    CommandEncoder acquire_command_encoder_impl(u32 frame_id) override;
+    void submit_command_encoder_impl(CommandEncoder) override;
 
-        HE_ALWAYS_INLINE VkDescriptorSetLayout storage_buffer_layout() const { return m_storage_buffer_layout; };
-        HE_ALWAYS_INLINE VkDescriptorSetLayout sampled_image_layout() const { return m_sampled_image_layout; };
-        HE_ALWAYS_INLINE VkDescriptorSetLayout storage_image_layout() const { return m_storage_image_layout; };
-        HE_ALWAYS_INLINE VkDescriptorSetLayout sampler_layout() const { return m_sampler_layout; };
+    HE_ALWAYS_INLINE u32 queue_family() const { return m_queue_family; }
+    HE_ALWAYS_INLINE VkDevice device() const { return m_device; }
+    HE_ALWAYS_INLINE VkQueue queue() const { return m_queue; }
+    HE_ALWAYS_INLINE VmaAllocator &allocator() { return m_allocator; }
 
-        using GraphicsDevice::get_internal_state;
+    HE_ALWAYS_INLINE VkDescriptorSetLayout storage_buffer_layout() const { return m_storage_buffer_layout; }
+    HE_ALWAYS_INLINE VkDescriptorSetLayout sampled_image_layout() const { return m_sampled_image_layout; }
+    HE_ALWAYS_INLINE VkDescriptorSetLayout storage_image_layout() const { return m_storage_image_layout; }
+    HE_ALWAYS_INLINE VkDescriptorSetLayout sampler_layout() const { return m_sampler_layout; }
 
-    private:
-        void create_instance(Validation validation_requested);
-        void create_device();
-        void create_allocator();
-        void create_surface(const Window &);
-        void create_swapchain(const Window &);
-        void create_descriptors();
+    using GraphicsDevice::get_internal_state;
 
-        static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
-            VkDebugUtilsMessageSeverityFlagBitsEXT,
-            VkDebugUtilsMessageTypeFlagsEXT,
-            const VkDebugUtilsMessengerCallbackDataEXT *,
-            void *);
+private:
+    void create_instance(Validation validation_requested);
+    void create_device();
+    void create_allocator();
+    void create_surface(const Window &);
+    void create_swapchain(const Window &);
+    void create_descriptors();
 
-    private:
-        VkInstance m_instance = VK_NULL_HANDLE;
-        VkDebugUtilsMessengerEXT m_debug_messenger = VK_NULL_HANDLE;
+    static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT,
+        VkDebugUtilsMessageTypeFlagsEXT,
+        const VkDebugUtilsMessengerCallbackDataEXT *,
+        void *);
 
-        u32 m_queue_family = 0;
-        u32 m_sample_count = 1;
-        VkPhysicalDevice m_physical_device = VK_NULL_HANDLE;
-        VkDevice m_device = VK_NULL_HANDLE;
-        VkQueue m_queue = VK_NULL_HANDLE;
+private:
+    VkInstance m_instance = VK_NULL_HANDLE;
+    VkDebugUtilsMessengerEXT m_debug_messenger = VK_NULL_HANDLE;
 
-        VmaAllocator m_allocator = VK_NULL_HANDLE;
+    u32 m_queue_family = 0;
+    u32 m_sample_count = 1;
+    VkPhysicalDevice m_physical_device = VK_NULL_HANDLE;
+    VkDevice m_device = VK_NULL_HANDLE;
+    VkQueue m_queue = VK_NULL_HANDLE;
 
-        VkSurfaceKHR m_surface = VK_NULL_HANDLE;
+    VmaAllocator m_allocator = VK_NULL_HANDLE;
 
-        VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
-        std::vector<Texture> m_swapchain_textures;
-        std::vector<TextureView> m_swapchain_texture_views;
+    VkSurfaceKHR m_surface = VK_NULL_HANDLE;
 
-        VkDescriptorPool m_descriptor_pool = VK_NULL_HANDLE;
-        VkDescriptorSetLayout m_storage_buffer_layout = VK_NULL_HANDLE;
-        VkDescriptorSet m_storage_buffer_set = VK_NULL_HANDLE;
-        VkDescriptorSetLayout m_sampled_image_layout = VK_NULL_HANDLE;
-        VkDescriptorSet m_sampled_image_set = VK_NULL_HANDLE;
-        VkDescriptorSetLayout m_storage_image_layout = VK_NULL_HANDLE;
-        VkDescriptorSet m_storage_image_set = VK_NULL_HANDLE;
-        VkDescriptorSetLayout m_sampler_layout = VK_NULL_HANDLE;
-        VkDescriptorSet m_sampler_set = VK_NULL_HANDLE;
+    VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
+    std::vector<Texture> m_swapchain_textures;
+    std::vector<TextureView> m_swapchain_texture_views;
 
-        std::vector<OwnPtr<BackendCommandEncoder>> m_command_encoders;
-        u32 m_frame_index = 0;
-    };
+    VkDescriptorPool m_descriptor_pool = VK_NULL_HANDLE;
+    VkDescriptorSetLayout m_storage_buffer_layout = VK_NULL_HANDLE;
+    VkDescriptorSet m_storage_buffer_set = VK_NULL_HANDLE;
+    VkDescriptorSetLayout m_sampled_image_layout = VK_NULL_HANDLE;
+    VkDescriptorSet m_sampled_image_set = VK_NULL_HANDLE;
+    VkDescriptorSetLayout m_storage_image_layout = VK_NULL_HANDLE;
+    VkDescriptorSet m_storage_image_set = VK_NULL_HANDLE;
+    VkDescriptorSetLayout m_sampler_layout = VK_NULL_HANDLE;
+    VkDescriptorSet m_sampler_set = VK_NULL_HANDLE;
+
+    std::vector<OwnPtr<BackendCommandEncoder>> m_command_encoders;
+    u32 m_frame_index = 0;
+};
+
 } // namespace he

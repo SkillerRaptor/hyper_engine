@@ -12,21 +12,21 @@
 
 #include "hyper_rhi/render_pipeline.hpp"
 
-namespace he
-{
-    class VulkanGraphicsDevice;
+namespace he {
 
-    class VulkanRenderPipeline
-    {
-    public:
-        VulkanRenderPipeline(VulkanGraphicsDevice &, const RenderPipelineDescriptor &);
-        ~VulkanRenderPipeline();
+class VulkanGraphicsDevice;
 
-        HE_ALWAYS_INLINE VkPipeline raw() const { return m_raw; }
+class VulkanRenderPipeline {
+public:
+    VulkanRenderPipeline(VulkanGraphicsDevice &, const RenderPipelineDescriptor &);
+    ~VulkanRenderPipeline();
 
-    private:
-        VulkanGraphicsDevice &m_graphics_device;
+    HE_ALWAYS_INLINE VkPipeline raw() const { return m_raw; }
 
-        VkPipeline m_raw = VK_NULL_HANDLE;
-    };
+private:
+    VulkanGraphicsDevice &m_graphics_device;
+
+    VkPipeline m_raw = VK_NULL_HANDLE;
+};
+
 } // namespace he

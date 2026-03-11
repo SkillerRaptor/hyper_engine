@@ -12,27 +12,27 @@
 
 #include "hyper_rhi/command_encoder.hpp"
 
-namespace he
-{
-    class VulkanGraphicsDevice;
+namespace he {
 
-    class VulkanCommandEncoder : public BackendCommandEncoder
-    {
-    public:
-        explicit VulkanCommandEncoder(VulkanGraphicsDevice &);
-        ~VulkanCommandEncoder() override;
+class VulkanGraphicsDevice;
 
-        void acquire() override;
-        void submit() override;
+class VulkanCommandEncoder : public BackendCommandEncoder {
+public:
+    explicit VulkanCommandEncoder(VulkanGraphicsDevice &);
+    ~VulkanCommandEncoder() override;
 
-    private:
-        VulkanGraphicsDevice &m_graphics_device;
+    void acquire() override;
+    void submit() override;
 
-        VkCommandPool m_command_pool = VK_NULL_HANDLE;
-        VkCommandBuffer m_command_buffer = VK_NULL_HANDLE;
-        VkFence m_fence = VK_NULL_HANDLE;
-        VkSemaphore m_submit_semaphore = VK_NULL_HANDLE;
-        u64 m_semaphore_counter = 0;
-        bool m_swapchain_texture_acquired = false;
-    };
+private:
+    VulkanGraphicsDevice &m_graphics_device;
+
+    VkCommandPool m_command_pool = VK_NULL_HANDLE;
+    VkCommandBuffer m_command_buffer = VK_NULL_HANDLE;
+    VkFence m_fence = VK_NULL_HANDLE;
+    VkSemaphore m_submit_semaphore = VK_NULL_HANDLE;
+    u64 m_semaphore_counter = 0;
+    bool m_swapchain_texture_acquired = false;
+};
+
 } // namespace he

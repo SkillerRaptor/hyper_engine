@@ -10,21 +10,21 @@
 
 #include "hyper_rhi/texture_view.hpp"
 
-namespace he
-{
-    class VulkanGraphicsDevice;
+namespace he {
 
-    class VulkanTextureView
-    {
-    public:
-        VulkanTextureView(VulkanGraphicsDevice &, const TextureViewDescriptor &);
-        ~VulkanTextureView();
+class VulkanGraphicsDevice;
 
-        HE_ALWAYS_INLINE VkImageView raw() const { return m_raw; }
+class VulkanTextureView {
+public:
+    VulkanTextureView(VulkanGraphicsDevice &, const TextureViewDescriptor &);
+    ~VulkanTextureView();
 
-    private:
-        VulkanGraphicsDevice &m_graphics_device;
+    HE_ALWAYS_INLINE VkImageView raw() const { return m_raw; }
 
-        VkImageView m_raw = VK_NULL_HANDLE;
-    };
+private:
+    VulkanGraphicsDevice &m_graphics_device;
+
+    VkImageView m_raw = VK_NULL_HANDLE;
+};
+
 } // namespace he

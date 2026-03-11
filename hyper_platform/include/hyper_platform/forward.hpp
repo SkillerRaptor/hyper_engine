@@ -6,7 +6,8 @@
 
 #pragma once
 
-namespace he
-{
-    class Window;
+namespace he {
+
+class Window;
+
 } // namespace he

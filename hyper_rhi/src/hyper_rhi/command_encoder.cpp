@@ -8,6 +8,5 @@
 
 #include <hyper_core/assertion.hpp>
 
-namespace he
-{
+namespace he {
 } // namespace he

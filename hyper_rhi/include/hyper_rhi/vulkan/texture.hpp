@@ -13,22 +13,22 @@
 
 #include "hyper_rhi/texture.hpp"
 
-namespace he
-{
-    class VulkanGraphicsDevice;
+namespace he {
 
-    class VulkanTexture
-    {
-    public:
-        VulkanTexture(VulkanGraphicsDevice &, const TextureDescriptor &, VkImage image);
-        ~VulkanTexture();
+class VulkanGraphicsDevice;
 
-        HE_ALWAYS_INLINE VkImage raw() const { return m_raw; }
+class VulkanTexture {
+public:
+    VulkanTexture(VulkanGraphicsDevice &, const TextureDescriptor &, VkImage image);
+    ~VulkanTexture();
 
-    private:
-        VulkanGraphicsDevice &m_graphics_device;
+    HE_ALWAYS_INLINE VkImage raw() const { return m_raw; }
 
-        VkImage m_raw = VK_NULL_HANDLE;
-        VmaAllocation m_allocation = VK_NULL_HANDLE;
-    };
+private:
+    VulkanGraphicsDevice &m_graphics_device;
+
+    VkImage m_raw = VK_NULL_HANDLE;
+    VmaAllocation m_allocation = VK_NULL_HANDLE;
+};
+
 } // namespace he

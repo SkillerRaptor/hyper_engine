@@ -8,19 +8,17 @@
 
 #include "engine.hpp"
 
-using namespace he;
-
 int main()
 {
 #if HE_DEBUG_BUILD
-    logger::initialize(logger::Level::Debug);
+    he::logger::initialize(he::logger::Level::Debug);
 #else
-    logger::initialize(logger::Level::Info);
+    he::logger::initialize(he::logger::Level::Info);
 #endif
 
     // TODO: Parse command line arguments
 
-    Engine engine;
+    he::Engine engine;
     engine.run();
 
     return EXIT_SUCCESS;

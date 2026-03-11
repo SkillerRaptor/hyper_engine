@@ -14,31 +14,25 @@
 #include <hyper_core/string_utils.hpp>
 
 #define HE_VK_CHECK(expression, ...)                                                                 \
-    do                                                                                               \
-    {                                                                                                \
+    do {                                                                                             \
         static constexpr usize _argument_count = HE_MACRO_SIZE(__VA_ARGS__);                         \
                                                                                                      \
         const VkResult _result = (expression);                                                       \
-        if ((_result) != VK_SUCCESS) [[unlikely]]                                                    \
-        {                                                                                            \
-            if constexpr (_argument_count == 0)                                                      \
-            {                                                                                        \
+        if ((_result) != VK_SUCCESS) [[unlikely]] {                                                  \
+            if constexpr (_argument_count == 0) {                                                    \
                 HE_PANIC(                                                                            \
                     "{}(...) failed: {}",                                                            \
                     ::he::string_utils::strip_namespace(                                             \
                         ::he::string_utils::extract_function_name(HE_STRINGIFY(expression))),        \
                     _result);                                                                        \
-            }                                                                                        \
-            else                                                                                     \
-            {                                                                                        \
+            } else {                                                                                 \
                 HE_PANIC(__VA_OPT__("{}: ") "{}", __VA_OPT__(::fmt::format(__VA_ARGS__), ) _result); \
             }                                                                                        \
         }                                                                                            \
     } while (false)
 
 template <>
-struct fmt::formatter<VkResult> : fmt::formatter<std::string_view>
-{
+struct fmt::formatter<VkResult> : fmt::formatter<std::string_view> {
     auto format(const VkResult &result, fmt::format_context &context) const
     {
         return fmt::format_to(context.out(), "{}", string_VkResult(result));

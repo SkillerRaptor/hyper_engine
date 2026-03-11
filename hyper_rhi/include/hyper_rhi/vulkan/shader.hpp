@@ -12,21 +12,21 @@
 
 #include "hyper_rhi/shader.hpp"
 
-namespace he
-{
-    class VulkanGraphicsDevice;
+namespace he {
 
-    class VulkanShader
-    {
-    public:
-        VulkanShader(VulkanGraphicsDevice &, const ShaderDescriptor &);
-        ~VulkanShader();
+class VulkanGraphicsDevice;
 
-        HE_ALWAYS_INLINE VkShaderModule raw() const { return m_raw; }
+class VulkanShader {
+public:
+    VulkanShader(VulkanGraphicsDevice &, const ShaderDescriptor &);
+    ~VulkanShader();
 
-    private:
-        VulkanGraphicsDevice &m_graphics_device;
+    HE_ALWAYS_INLINE VkShaderModule raw() const { return m_raw; }
 
-        VkShaderModule m_raw = VK_NULL_HANDLE;
-    };
+private:
+    VulkanGraphicsDevice &m_graphics_device;
+
+    VkShaderModule m_raw = VK_NULL_HANDLE;
+};
+
 } // namespace he

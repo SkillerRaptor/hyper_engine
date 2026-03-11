@@ -10,58 +10,58 @@
 
 #include "hyper_core/types.hpp"
 
-namespace he::logger
+namespace he::logger {
+
+enum class Level : u8 {
+    Info,
+    Warning,
+    Error,
+    Fatal,
+    Debug,
+    Trace,
+};
+
+void initialize(Level level);
+void flush();
+
+void log(Level level, std::string_view format);
+
+template <typename... Args>
+void info(fmt::format_string<Args...> format, Args &&...args)
 {
-    enum class Level : u8
-    {
-        Info,
-        Warning,
-        Error,
-        Fatal,
-        Debug,
-        Trace,
-    };
+    log(Level::Info, fmt::format(format, std::forward<Args>(args)...));
+}
 
-    void initialize(Level level);
-    void flush();
+template <typename... Args>
+void warn(fmt::format_string<Args...> format, Args &&...args)
+{
+    log(Level::Warning, fmt::format(format, std::forward<Args>(args)...));
+}
 
-    void log(Level level, std::string_view format);
+template <typename... Args>
+void error(fmt::format_string<Args...> format, Args &&...args)
+{
+    log(Level::Error, fmt::format(format, std::forward<Args>(args)...));
+}
 
-    template <typename... Args>
-    void info(fmt::format_string<Args...> format, Args &&...args)
-    {
-        log(Level::Info, fmt::format(format, std::forward<Args>(args)...));
-    }
+template <typename... Args>
+void fatal(fmt::format_string<Args...> format, Args &&...args)
+{
+    log(Level::Fatal, fmt::format(format, std::forward<Args>(args)...));
+}
 
-    template <typename... Args>
-    void warn(fmt::format_string<Args...> format, Args &&...args)
-    {
-        log(Level::Warning, fmt::format(format, std::forward<Args>(args)...));
-    }
+template <typename... Args>
+void debug(fmt::format_string<Args...> format, Args &&...args)
+{
+    log(Level::Debug, fmt::format(format, std::forward<Args>(args)...));
+}
 
-    template <typename... Args>
-    void error(fmt::format_string<Args...> format, Args &&...args)
-    {
-        log(Level::Error, fmt::format(format, std::forward<Args>(args)...));
-    }
+template <typename... Args>
+void trace(fmt::format_string<Args...> format, Args &&...args)
+{
+    log(Level::Trace, fmt::format(format, std::forward<Args>(args)...));
+}
 
-    template <typename... Args>
-    void fatal(fmt::format_string<Args...> format, Args &&...args)
-    {
-        log(Level::Fatal, fmt::format(format, std::forward<Args>(args)...));
-    }
-
-    template <typename... Args>
-    void debug(fmt::format_string<Args...> format, Args &&...args)
-    {
-        log(Level::Debug, fmt::format(format, std::forward<Args>(args)...));
-    }
-
-    template <typename... Args>
-    void trace(fmt::format_string<Args...> format, Args &&...args)
-    {
-        log(Level::Trace, fmt::format(format, std::forward<Args>(args)...));
-    }
 } // namespace he::logger
 
 #define HE_INFO(...) ::he::logger::info(__VA_ARGS__)

@@ -17,35 +17,34 @@
 #include "hyper_rhi/definitions.hpp"
 #include "hyper_rhi/resource.hpp"
 
-namespace he
-{
-    struct ShaderDescriptor
+namespace he {
+
+struct ShaderDescriptor {
+    std::optional<std::string_view> label = std::nullopt;
+    ShaderType type = ShaderType::Compute;
+    std::string entry;
+    std::span<const u8> byte_code;
+};
+
+class Shader : public Resource {
+private:
+    friend class GraphicsDevice;
+
+public:
+    HE_ALWAYS_INLINE ShaderType type() const { return m_type; }
+    HE_ALWAYS_INLINE std::string_view entry() const { return m_entry; }
+
+private:
+    Shader(RefPtr<void> internal_state, const ShaderDescriptor &desc)
+        : Resource(std::move(internal_state))
+        , m_type(desc.type)
+        , m_entry(desc.entry)
     {
-        std::optional<std::string_view> label = std::nullopt;
-        ShaderType type = ShaderType::Compute;
-        std::string entry;
-        std::span<const u8> byte_code;
-    };
+    }
 
-    class Shader : public Resource
-    {
-    private:
-        friend class GraphicsDevice;
+private:
+    ShaderType m_type = ShaderType::Compute;
+    std::string m_entry;
+};
 
-    public:
-        HE_ALWAYS_INLINE ShaderType type() const { return m_type; }
-        HE_ALWAYS_INLINE std::string_view entry() const { return m_entry; }
-
-    private:
-        Shader(RefPtr<void> internal_state, const ShaderDescriptor &desc)
-            : Resource(std::move(internal_state))
-            , m_type(desc.type)
-            , m_entry(desc.entry)
-        {
-        }
-
-    private:
-        ShaderType m_type = ShaderType::Compute;
-        std::string m_entry;
-    };
 } // namespace he

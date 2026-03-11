@@ -12,21 +12,21 @@
 
 #include "hyper_rhi/compute_pipeline.hpp"
 
-namespace he
-{
-    class VulkanGraphicsDevice;
+namespace he {
 
-    class VulkanComputePipeline
-    {
-    public:
-        VulkanComputePipeline(VulkanGraphicsDevice &, const ComputePipelineDescriptor &);
-        ~VulkanComputePipeline();
+class VulkanGraphicsDevice;
 
-        HE_ALWAYS_INLINE VkPipeline raw() const { return m_raw; }
+class VulkanComputePipeline {
+public:
+    VulkanComputePipeline(VulkanGraphicsDevice &, const ComputePipelineDescriptor &);
+    ~VulkanComputePipeline();
 
-    private:
-        VulkanGraphicsDevice &m_graphics_device;
+    HE_ALWAYS_INLINE VkPipeline raw() const { return m_raw; }
 
-        VkPipeline m_raw = VK_NULL_HANDLE;
-    };
+private:
+    VulkanGraphicsDevice &m_graphics_device;
+
+    VkPipeline m_raw = VK_NULL_HANDLE;
+};
+
 } // namespace he

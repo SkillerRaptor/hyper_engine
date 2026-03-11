@@ -10,11 +10,12 @@
 
 #define HE_MACRO_SIZE(...) ::he::detail::argument_count(__VA_ARGS__)
 
-namespace he::detail
+namespace he::detail {
+
+template <typename... Args>
+static constexpr usize argument_count(Args &&...)
 {
-    template <typename... Args>
-    static constexpr usize argument_count(Args &&...)
-    {
-        return sizeof...(Args);
-    }
+    return sizeof...(Args);
+}
+
 } // namespace he::detail

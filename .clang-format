@@ -1,18 +1,14 @@
-BasedOnStyle: WebKit
-AlignAfterOpenBracket: AlwaysBreak
-AlignArrayOfStructures: Left
 AlignEscapedNewlines: Left
-AttributeMacros: [ ]
+BasedOnStyle: WebKit
 BinPackArguments: false
 BinPackParameters: false
-BracedInitializerIndentWidth: 4
-BreakBeforeBraces: Allman
-BreakInheritanceList: BeforeComma
+BraceWrapping:
+  AfterFunction: true
+BreakBeforeBraces: Custom
 BreakTemplateDeclarations: Yes
-ColumnLimit: 120
+BreakBeforeInheritanceComma: true
+BreakConstructorInitializers: BeforeComma
 FixNamespaceComments: true
-ForEachMacros: [ ]
-IfMacros: [ ]
 IncludeBlocks: Regroup
 IncludeCategories:
   - Regex: '^<[^/]+>$'
@@ -23,28 +19,21 @@ IncludeCategories:
     Priority: 2
   - Regex: '^"[^"]+"$'
     Priority: 4
-IncludeIsMainRegex: ''
-IndentExternBlock: NoIndent
 IndentPPDirectives: AfterHash
-IndentWrappedFunctionNames: true
 InsertBraces: true
 InsertNewlineAtEOF: true
 KeepEmptyLines:
   AtEndOfFile: false
   AtStartOfBlock: false
   AtStartOfFile: false
-LambdaBodyIndentation: Signature
-Language: Cpp
 LineEnding: LF
-NamespaceIndentation: All
-PackConstructorInitializers: Never
+NamespaceIndentation: None
 PointerAlignment: Right
 QualifierAlignment: Left
+RemoveSemicolon: true
+RequiresExpressionIndentation: OuterScope
 ShortNamespaceLines: 0
-SortIncludes: CaseInsensitive
 SpaceAfterCStyleCast: true
-StatementAttributeLikeMacros: [ ]
-StatementMacros: [ ]
+SpaceAfterTemplateKeyword: true
 TabWidth: 4
 UseTab: Never
-WhitespaceSensitiveMacros: [ ]

@@ -15,34 +15,33 @@
 #include "hyper_rhi/resource.hpp"
 #include "hyper_rhi/shader.hpp"
 
-namespace he
-{
-    struct ComputePipelineDescriptor
+namespace he {
+
+struct ComputePipelineDescriptor {
+    std::optional<std::string_view> label = std::nullopt;
+    PipelineLayout layout;
+    Shader shader;
+};
+
+class ComputePipeline : public Resource {
+private:
+    friend class GraphicsDevice;
+
+public:
+    HE_ALWAYS_INLINE PipelineLayout layout() const { return m_layout; }
+    HE_ALWAYS_INLINE Shader shader() const { return m_shader; }
+
+private:
+    ComputePipeline(RefPtr<void> internal_state, const ComputePipelineDescriptor &desc)
+        : Resource(std::move(internal_state))
+        , m_layout(desc.layout)
+        , m_shader(desc.shader)
     {
-        std::optional<std::string_view> label = std::nullopt;
-        PipelineLayout layout;
-        Shader shader;
-    };
+    }
 
-    class ComputePipeline : public Resource
-    {
-    private:
-        friend class GraphicsDevice;
+private:
+    PipelineLayout m_layout;
+    Shader m_shader;
+};
 
-    public:
-        HE_ALWAYS_INLINE PipelineLayout layout() const { return m_layout; }
-        HE_ALWAYS_INLINE Shader shader() const { return m_shader; }
-
-    private:
-        ComputePipeline(RefPtr<void> internal_state, const ComputePipelineDescriptor &desc)
-            : Resource(std::move(internal_state))
-            , m_layout(desc.layout)
-            , m_shader(desc.shader)
-        {
-        }
-
-    private:
-        PipelineLayout m_layout;
-        Shader m_shader;
-    };
 } // namespace he

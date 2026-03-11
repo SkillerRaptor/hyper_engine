@@ -11,8 +11,7 @@
 
 using namespace he;
 
-enum class TestFlags : u32
-{
+enum class TestFlags : u32 {
     A = 1 << 0,
     B = 1 << 1,
     C = 1 << 2,

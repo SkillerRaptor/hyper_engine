@@ -14,10 +14,8 @@
 #include "hyper_core/prerequisites.hpp"
 
 #define HE_ASSERT(expression, ...)                                                                 \
-    do                                                                                             \
-    {                                                                                              \
-        if (!(expression)) [[unlikely]]                                                            \
-        {                                                                                          \
+    do {                                                                                           \
+        if (!(expression)) [[unlikely]] {                                                          \
             static constexpr ::std::source_location _location = ::std::source_location::current(); \
             const ::std::filesystem::path _path = _location.file_name();                           \
             HE_FATAL(                                                                              \
@@ -37,8 +35,7 @@
 #endif
 
 #define HE_PANIC(...)                                                                          \
-    do                                                                                         \
-    {                                                                                          \
+    do {                                                                                       \
         static constexpr ::std::source_location _location = ::std::source_location::current(); \
         const ::std::filesystem::path _path = _location.file_name();                           \
         HE_FATAL(                                                                              \

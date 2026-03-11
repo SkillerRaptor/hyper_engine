@@ -12,21 +12,21 @@
 
 #include "hyper_rhi/sampler.hpp"
 
-namespace he
-{
-    class VulkanGraphicsDevice;
+namespace he {
 
-    class VulkanSampler
-    {
-    public:
-        VulkanSampler(VulkanGraphicsDevice &, const SamplerDescriptor &);
-        ~VulkanSampler();
+class VulkanGraphicsDevice;
 
-        HE_ALWAYS_INLINE VkSampler raw() const { return m_raw; }
+class VulkanSampler {
+public:
+    VulkanSampler(VulkanGraphicsDevice &, const SamplerDescriptor &);
+    ~VulkanSampler();
 
-    private:
-        VulkanGraphicsDevice &m_graphics_device;
+    HE_ALWAYS_INLINE VkSampler raw() const { return m_raw; }
 
-        VkSampler m_raw = VK_NULL_HANDLE;
-    };
+private:
+    VulkanGraphicsDevice &m_graphics_device;
+
+    VkSampler m_raw = VK_NULL_HANDLE;
+};
+
 } // namespace he

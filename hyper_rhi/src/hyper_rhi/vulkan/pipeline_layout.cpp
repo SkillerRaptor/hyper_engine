@@ -11,43 +11,44 @@
 #include "hyper_rhi/vulkan/graphics_device.hpp"
 #include "hyper_rhi/vulkan/utils.hpp"
 
-namespace he
+namespace he {
+
+VulkanPipelineLayout::VulkanPipelineLayout(
+    VulkanGraphicsDevice &graphics_device, const PipelineLayoutDescriptor &desc)
+    : m_graphics_device(graphics_device)
 {
-    VulkanPipelineLayout::VulkanPipelineLayout(
-        VulkanGraphicsDevice &graphics_device, const PipelineLayoutDescriptor &desc)
-        : m_graphics_device(graphics_device)
-    {
-        const VkPushConstantRange push_constant_range = {
-            .stageFlags = VK_SHADER_STAGE_ALL,
-            .offset = 0,
-            .size = desc.push_constant_size,
-        };
+    const VkPushConstantRange push_constant_range = {
+        .stageFlags = VK_SHADER_STAGE_ALL,
+        .offset = 0,
+        .size = desc.push_constant_size,
+    };
 
-        const std::array<VkDescriptorSetLayout, 4> descriptor_set_layouts = {
-            m_graphics_device.storage_buffer_layout(),
-            m_graphics_device.sampled_image_layout(),
-            m_graphics_device.storage_image_layout(),
-            m_graphics_device.sampled_image_layout(),
-        };
+    const std::array<VkDescriptorSetLayout, 4> descriptor_set_layouts = {
+        m_graphics_device.storage_buffer_layout(),
+        m_graphics_device.sampled_image_layout(),
+        m_graphics_device.storage_image_layout(),
+        m_graphics_device.sampled_image_layout(),
+    };
 
-        const VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-            .pNext = nullptr,
-            .flags = 0,
-            .setLayoutCount = static_cast<u32>(descriptor_set_layouts.size()),
-            .pSetLayouts = descriptor_set_layouts.data(),
-            .pushConstantRangeCount = static_cast<u32>(desc.push_constant_size == 0 ? 0 : 1),
-            .pPushConstantRanges = desc.push_constant_size == 0 ? nullptr : &push_constant_range,
-        };
+    const VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .setLayoutCount = static_cast<u32>(descriptor_set_layouts.size()),
+        .pSetLayouts = descriptor_set_layouts.data(),
+        .pushConstantRangeCount = static_cast<u32>(desc.push_constant_size == 0 ? 0 : 1),
+        .pPushConstantRanges = desc.push_constant_size == 0 ? nullptr : &push_constant_range,
+    };
 
-        HE_VK_CHECK(
-            vkCreatePipelineLayout(m_graphics_device.device(), &pipeline_layout_create_info, nullptr, &m_raw),
-            "Failed to create vulkan pipeline layout");
-        HE_ASSERT(m_raw != VK_NULL_HANDLE);
-    }
+    HE_VK_CHECK(
+        vkCreatePipelineLayout(m_graphics_device.device(), &pipeline_layout_create_info, nullptr, &m_raw),
+        "Failed to create vulkan pipeline layout");
+    HE_ASSERT(m_raw != VK_NULL_HANDLE);
+}
 
-    VulkanPipelineLayout::~VulkanPipelineLayout()
-    {
-        vkDestroyPipelineLayout(m_graphics_device.device(), m_raw, nullptr);
-    }
+VulkanPipelineLayout::~VulkanPipelineLayout()
+{
+    vkDestroyPipelineLayout(m_graphics_device.device(), m_raw, nullptr);
+}
+
 } // namespace he

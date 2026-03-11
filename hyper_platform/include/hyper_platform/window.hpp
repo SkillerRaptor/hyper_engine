@@ -13,41 +13,41 @@
 
 struct SDL_Window;
 
-namespace he
-{
-    class Window
-    {
-    public:
-        Window(std::string_view title, u32 width, u32 height);
-        ~Window();
+namespace he {
 
-        Window(const Window &) = delete;
-        Window &operator=(const Window &) = delete;
+class Window {
+public:
+    Window(std::string_view title, u32 width, u32 height);
+    ~Window();
 
-        Window(Window &&) noexcept;
-        Window &operator=(Window &&) noexcept;
+    Window(const Window &) = delete;
+    Window &operator=(const Window &) = delete;
 
-        void update();
+    Window(Window &&) noexcept;
+    Window &operator=(Window &&) noexcept;
 
-        void set_title(std::string_view);
-        std::string_view title() const;
+    void update();
 
-        void set_size(u32 width, u32 height);
-        std::pair<u32, u32> size() const;
+    void set_title(std::string_view);
+    std::string_view title() const;
 
-        void set_fullscreen(bool);
-        bool is_fullscreen() const;
+    void set_size(u32 width, u32 height);
+    std::pair<u32, u32> size() const;
 
-        void set_resizable(bool);
-        bool is_resizable() const;
+    void set_fullscreen(bool);
+    bool is_fullscreen() const;
 
-        HE_ALWAYS_INLINE bool is_close_requested() const { return m_close_requested; }
+    void set_resizable(bool);
+    bool is_resizable() const;
 
-        HE_ALWAYS_INLINE SDL_Window *native_handle() const { return m_native_handle; }
+    HE_ALWAYS_INLINE bool is_close_requested() const { return m_close_requested; }
 
-    private:
-        SDL_Window *m_native_handle = nullptr;
+    HE_ALWAYS_INLINE SDL_Window *native_handle() const { return m_native_handle; }
 
-        bool m_close_requested = false;
-    };
+private:
+    SDL_Window *m_native_handle = nullptr;
+
+    bool m_close_requested = false;
+};
+
 } // namespace he

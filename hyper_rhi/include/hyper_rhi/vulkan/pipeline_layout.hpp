@@ -12,21 +12,21 @@
 
 #include "hyper_rhi/pipeline_layout.hpp"
 
-namespace he
-{
-    class VulkanGraphicsDevice;
+namespace he {
 
-    class VulkanPipelineLayout
-    {
-    public:
-        VulkanPipelineLayout(VulkanGraphicsDevice &, const PipelineLayoutDescriptor &);
-        ~VulkanPipelineLayout();
+class VulkanGraphicsDevice;
 
-        HE_ALWAYS_INLINE VkPipelineLayout raw() const { return m_raw; }
+class VulkanPipelineLayout {
+public:
+    VulkanPipelineLayout(VulkanGraphicsDevice &, const PipelineLayoutDescriptor &);
+    ~VulkanPipelineLayout();
 
-    private:
-        VulkanGraphicsDevice &m_graphics_device;
+    HE_ALWAYS_INLINE VkPipelineLayout raw() const { return m_raw; }
 
-        VkPipelineLayout m_raw = VK_NULL_HANDLE;
-    };
+private:
+    VulkanGraphicsDevice &m_graphics_device;
+
+    VkPipelineLayout m_raw = VK_NULL_HANDLE;
+};
+
 } // namespace he

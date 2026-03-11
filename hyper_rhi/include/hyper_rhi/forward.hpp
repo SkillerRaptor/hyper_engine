@@ -6,33 +6,34 @@
 
 #pragma once
 
-namespace he
-{
-    class Buffer;
-    struct BufferDescriptor;
+namespace he {
 
-    class CommandEncoder;
+class Buffer;
+struct BufferDescriptor;
 
-    class ComputePipeline;
-    struct ComputePipelineDescriptor;
+class CommandEncoder;
 
-    class GraphicsDevice;
+class ComputePipeline;
+struct ComputePipelineDescriptor;
 
-    class PipelineLayout;
-    struct PipelineLayoutDescriptor;
+class GraphicsDevice;
 
-    class RenderPipeline;
-    struct RenderPipelineDescriptor;
+class PipelineLayout;
+struct PipelineLayoutDescriptor;
 
-    class Sampler;
-    struct SamplerDescriptor;
+class RenderPipeline;
+struct RenderPipelineDescriptor;
 
-    class Shader;
-    struct ShaderDescriptor;
+class Sampler;
+struct SamplerDescriptor;
 
-    class Texture;
-    struct TextureDescriptor;
+class Shader;
+struct ShaderDescriptor;
 
-    class TextureView;
-    struct TextureViewDescriptor;
+class Texture;
+struct TextureDescriptor;
+
+class TextureView;
+struct TextureViewDescriptor;
+
 } // namespace he

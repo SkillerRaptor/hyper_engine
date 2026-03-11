@@ -13,22 +13,22 @@
 
 #include "hyper_rhi/buffer.hpp"
 
-namespace he
-{
-    class VulkanGraphicsDevice;
+namespace he {
 
-    class VulkanBuffer
-    {
-    public:
-        VulkanBuffer(VulkanGraphicsDevice &, const BufferDescriptor &, bool staging);
-        ~VulkanBuffer();
+class VulkanGraphicsDevice;
 
-        HE_ALWAYS_INLINE VkBuffer raw() const { return m_raw; }
+class VulkanBuffer {
+public:
+    VulkanBuffer(VulkanGraphicsDevice &, const BufferDescriptor &, bool staging);
+    ~VulkanBuffer();
 
-    private:
-        VulkanGraphicsDevice &m_graphics_device;
+    HE_ALWAYS_INLINE VkBuffer raw() const { return m_raw; }
 
-        VkBuffer m_raw = VK_NULL_HANDLE;
-        VmaAllocation m_allocation = VK_NULL_HANDLE;
-    };
+private:
+    VulkanGraphicsDevice &m_graphics_device;
+
+    VkBuffer m_raw = VK_NULL_HANDLE;
+    VmaAllocation m_allocation = VK_NULL_HANDLE;
+};
+
 } // namespace he

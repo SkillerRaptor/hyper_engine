@@ -10,33 +10,33 @@
 #include <hyper_platform/window.hpp>
 #include <hyper_rhi/graphics_device.hpp>
 
-namespace he
-{
-    class Engine
-    {
-    public:
-        Engine();
-        ~Engine() = default;
+namespace he {
 
-        Engine(const Engine &) = delete;
-        Engine &operator=(const Engine &) = delete;
+class Engine {
+public:
+    Engine();
+    ~Engine() = default;
 
-        Engine(Engine &&) noexcept = default;
-        Engine &operator=(Engine &&) noexcept = default;
+    Engine(const Engine &) = delete;
+    Engine &operator=(const Engine &) = delete;
 
-        void run();
+    Engine(Engine &&) noexcept = default;
+    Engine &operator=(Engine &&) noexcept = default;
 
-    private:
-        void fixed_update(f32 delta_time);
-        void update(f32 delta_time);
-        void render() const;
+    void run();
 
-    private:
-        OwnPtr<Window> m_window = nullptr;
-        Input m_input;
+private:
+    void fixed_update(f32 delta_time);
+    void update(f32 delta_time);
+    void render() const;
 
-        OwnPtr<GraphicsDevice> m_graphics_device = nullptr;
+private:
+    OwnPtr<Window> m_window = nullptr;
+    Input m_input;
 
-        bool m_running = true;
-    };
+    OwnPtr<GraphicsDevice> m_graphics_device = nullptr;
+
+    bool m_running = true;
+};
+
 } // namespace he
