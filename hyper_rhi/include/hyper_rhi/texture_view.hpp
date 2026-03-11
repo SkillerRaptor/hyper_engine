@@ -15,6 +15,7 @@
 
 #include "hyper_rhi/definitions.hpp"
 #include "hyper_rhi/resource.hpp"
+#include "hyper_rhi/texture.hpp"
 
 namespace he {
 
