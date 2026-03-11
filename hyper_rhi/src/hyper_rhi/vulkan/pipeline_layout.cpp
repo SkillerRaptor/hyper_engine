@@ -13,8 +13,7 @@
 
 namespace he {
 
-VulkanPipelineLayout::VulkanPipelineLayout(
-    VulkanGraphicsDevice &graphics_device, const PipelineLayoutDescriptor &desc)
+VulkanPipelineLayout::VulkanPipelineLayout(VulkanGraphicsDevice &graphics_device, const PipelineLayoutDescriptor &desc)
     : m_graphics_device(graphics_device)
 {
     const VkPushConstantRange push_constant_range = {
@@ -23,7 +22,7 @@ VulkanPipelineLayout::VulkanPipelineLayout(
         .size = desc.push_constant_size,
     };
 
-    const std::array<VkDescriptorSetLayout, 4> descriptor_set_layouts = {
+    const std::array descriptor_set_layouts = {
         m_graphics_device.storage_buffer_layout(),
         m_graphics_device.sampled_image_layout(),
         m_graphics_device.storage_image_layout(),
@@ -46,9 +45,6 @@ VulkanPipelineLayout::VulkanPipelineLayout(
     HE_ASSERT(m_raw != VK_NULL_HANDLE);
 }
 
-VulkanPipelineLayout::~VulkanPipelineLayout()
-{
-    vkDestroyPipelineLayout(m_graphics_device.device(), m_raw, nullptr);
-}
+VulkanPipelineLayout::~VulkanPipelineLayout() { vkDestroyPipelineLayout(m_graphics_device.device(), m_raw, nullptr); }
 
 } // namespace he

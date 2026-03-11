@@ -29,7 +29,7 @@ public:
 
     constexpr BitFlags(std::initializer_list<T> flags)
     {
-        for (const T flag : flags) {
+        for (const auto flag : flags) {
             m_flags |= std::to_underlying(flag);
         }
     }
@@ -47,10 +47,7 @@ public:
         return (m_flags & std::to_underlying(value)) == std::to_underlying(value);
     }
 
-    HE_ALWAYS_INLINE constexpr bool has_any(const T value) const
-    {
-        return (m_flags & std::to_underlying(value)) != 0;
-    }
+    HE_ALWAYS_INLINE constexpr bool has_any(const T value) const { return (m_flags & std::to_underlying(value)) != 0; }
 
     HE_ALWAYS_INLINE friend constexpr BitFlags operator|(const BitFlags lhs, const T rhs)
     {

@@ -38,6 +38,7 @@ static constexpr std::string_view strip_namespace(const std::string_view functio
         if (function_name[i - 1] == ':' && function_name[i - 2] == ':') {
             return function_name.substr(i);
         }
+
         --i;
     }
 

@@ -33,7 +33,7 @@ namespace he {
 
 VulkanGraphicsDevice::VulkanGraphicsDevice(const Window &window, const Validation validation_requested)
 {
-    const VkResult result = volkInitialize();
+    const auto result = volkInitialize();
     if (result != VK_SUCCESS) {
         HE_PANIC("Failed to initialize volk ({})", string_VkResult(result));
     }
@@ -81,49 +81,49 @@ VulkanGraphicsDevice::~VulkanGraphicsDevice()
 
 Buffer VulkanGraphicsDevice::create_buffer_impl(const BufferDescriptor &desc)
 {
-    RefPtr<void> internal_state = make_ref<VulkanBuffer>(*this, desc, false);
+    auto internal_state = make_ref<VulkanBuffer>(*this, desc, false);
     return create_resource<Buffer>(std::move(internal_state), desc);
 }
 
 Shader VulkanGraphicsDevice::create_shader_impl(const ShaderDescriptor &desc)
 {
-    RefPtr<void> internal_state = make_ref<VulkanShader>(*this, desc);
+    auto internal_state = make_ref<VulkanShader>(*this, desc);
     return create_resource<Shader>(std::move(internal_state), desc);
 }
 
 Sampler VulkanGraphicsDevice::create_sampler_impl(const SamplerDescriptor &desc)
 {
-    RefPtr<void> internal_state = make_ref<VulkanSampler>(*this, desc);
+    auto internal_state = make_ref<VulkanSampler>(*this, desc);
     return create_resource<Sampler>(std::move(internal_state), desc);
 }
 
 Texture VulkanGraphicsDevice::create_texture_impl(const TextureDescriptor &desc)
 {
-    RefPtr<void> internal_state = make_ref<VulkanTexture>(*this, desc, VK_NULL_HANDLE);
+    auto internal_state = make_ref<VulkanTexture>(*this, desc, VK_NULL_HANDLE);
     return create_resource<Texture>(std::move(internal_state), desc);
 }
 
 TextureView VulkanGraphicsDevice::create_texture_view_impl(const TextureViewDescriptor &desc)
 {
-    RefPtr<void> internal_state = make_ref<VulkanTextureView>(*this, desc);
+    auto internal_state = make_ref<VulkanTextureView>(*this, desc);
     return create_resource<TextureView>(std::move(internal_state), desc);
 }
 
 PipelineLayout VulkanGraphicsDevice::create_pipeline_layout_impl(const PipelineLayoutDescriptor &desc)
 {
-    RefPtr<void> internal_state = make_ref<VulkanPipelineLayout>(*this, desc);
+    auto internal_state = make_ref<VulkanPipelineLayout>(*this, desc);
     return create_resource<PipelineLayout>(std::move(internal_state), desc);
 }
 
 ComputePipeline VulkanGraphicsDevice::create_compute_pipeline_impl(const ComputePipelineDescriptor &desc)
 {
-    RefPtr<void> internal_state = make_ref<VulkanComputePipeline>(*this, desc);
+    auto internal_state = make_ref<VulkanComputePipeline>(*this, desc);
     return create_resource<ComputePipeline>(std::move(internal_state), desc);
 }
 
 RenderPipeline VulkanGraphicsDevice::create_render_pipeline_impl(const RenderPipelineDescriptor &desc)
 {
-    RefPtr<void> internal_state = make_ref<VulkanRenderPipeline>(*this, desc);
+    auto internal_state = make_ref<VulkanRenderPipeline>(*this, desc);
     return create_resource<RenderPipeline>(std::move(internal_state), desc);
 }
 
@@ -131,7 +131,7 @@ void VulkanGraphicsDevice::wait_idle() const { HE_VK_CHECK(vkDeviceWaitIdle(m_de
 
 CommandEncoder VulkanGraphicsDevice::acquire_command_encoder_impl(const u32 frame_id)
 {
-    VulkanCommandEncoder &command_encoder = static_cast<VulkanCommandEncoder &>(*m_command_encoders[frame_id]);
+    auto &command_encoder = static_cast<VulkanCommandEncoder &>(*m_command_encoders[frame_id]);
     command_encoder.acquire();
 
     // CommandEncoder encoder(key(), command_encoder);
@@ -150,7 +150,7 @@ void VulkanGraphicsDevice::create_instance(const Validation validation_requested
     static constexpr const char *s_validation_layer = "VK_LAYER_KHRONOS_validation";
     static constexpr const char *s_validation_extension = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 
-    const bool validation_enabled = [&]() {
+    const auto validation_enabled = [&]() {
         if (validation_requested == Validation::Disabled) {
             return false;
         }
@@ -160,13 +160,13 @@ void VulkanGraphicsDevice::create_instance(const Validation validation_requested
             vkEnumerateInstanceLayerProperties(&layer_count, nullptr),
             "Failed to enumerate instance layer properties");
 
-        std::vector<VkLayerProperties> layers(layer_count);
+        auto layers = std::vector<VkLayerProperties>(layer_count);
         HE_VK_CHECK(
             vkEnumerateInstanceLayerProperties(&layer_count, layers.data()),
             "Failed to enumerate instance layer properties");
 
-        bool found_layer = false;
-        for (const VkLayerProperties &properties : layers) {
+        auto found_layer = false;
+        for (const auto &properties : layers) {
             if (strcmp(properties.layerName, s_validation_layer) == 0) {
                 found_layer = true;
                 break;
@@ -183,13 +183,13 @@ void VulkanGraphicsDevice::create_instance(const Validation validation_requested
             vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr),
             "Failed to enumerate instance extension properties");
 
-        std::vector<VkExtensionProperties> extensions(extension_count);
+        auto extensions = std::vector<VkExtensionProperties>(extension_count);
         HE_VK_CHECK(
             vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extensions.data()),
             "Failed to enumerate instance extension properties");
 
-        bool found_extension = false;
-        for (const VkExtensionProperties &properties : extensions) {
+        auto found_extension = false;
+        for (const auto &properties : extensions) {
             if (strcmp(properties.extensionName, s_validation_extension) == 0) {
                 found_extension = true;
                 break;
@@ -220,8 +220,7 @@ void VulkanGraphicsDevice::create_instance(const Validation validation_requested
         .flags = 0,
         .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
             | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-        .messageType
-        = VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+        .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
         .pfnUserCallback = debug_callback,
         .pUserData = nullptr,
     };
@@ -229,8 +228,7 @@ void VulkanGraphicsDevice::create_instance(const Validation validation_requested
     u32 required_extension_count = 0;
     const char *const *required_instance_extensions = SDL_Vulkan_GetInstanceExtensions(&required_extension_count);
 
-    std::vector<const char *> extensions(
-        required_instance_extensions, required_instance_extensions + required_extension_count);
+    std::vector extensions(required_instance_extensions, required_instance_extensions + required_extension_count);
     extensions.push_back(s_validation_extension);
 
     VkInstanceCreateInfo create_info = {
@@ -274,7 +272,7 @@ void VulkanGraphicsDevice::create_device()
         HE_PANIC("Failed to find physical devices with vulkan support");
     }
 
-    std::vector<VkPhysicalDevice> physical_devices(physical_device_count);
+    auto physical_devices = std::vector<VkPhysicalDevice>(physical_device_count);
     HE_VK_CHECK(
         vkEnumeratePhysicalDevices(m_instance, &physical_device_count, physical_devices.data()),
         "Failed to enumerate physical devices");
@@ -296,9 +294,9 @@ void VulkanGraphicsDevice::create_device()
 
     u32 highest_score = 0;
     for (u32 i = 0; i < physical_device_count; ++i) {
-        const VkPhysicalDevice physical_device = physical_devices[i];
+        const auto physical_device = physical_devices[i];
 
-        VkPhysicalDeviceProperties properties;
+        VkPhysicalDeviceProperties properties = { };
         vkGetPhysicalDeviceProperties(physical_device, &properties);
 
         HE_INFO("Evaluating device (name='{}')", properties.deviceName);
@@ -307,12 +305,12 @@ void VulkanGraphicsDevice::create_device()
         u32 queue_family_count = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, nullptr);
 
-        std::vector<VkQueueFamilyProperties> queue_families(queue_family_count);
+        auto queue_families = std::vector<VkQueueFamilyProperties>(queue_family_count);
         vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, queue_families.data());
 
-        const std::optional<u32> queue_family_index = [&]() -> std::optional<u32> {
+        const auto queue_family_index = [&]() -> std::optional<u32> {
             u32 queue_index = 0;
-            for (const VkQueueFamilyProperties &queue_family : queue_families) {
+            for (const auto &queue_family : queue_families) {
                 const bool graphics_supported = queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT;
                 const bool present_supported
                     = SDL_Vulkan_GetPresentationSupport(m_instance, physical_device, queue_index);
@@ -338,13 +336,13 @@ void VulkanGraphicsDevice::create_device()
             vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, nullptr),
             "Failed to enumerate device extension properties");
 
-        std::vector<VkExtensionProperties> extensions(extension_count);
+        auto extensions = std::vector<VkExtensionProperties>(extension_count);
         HE_VK_CHECK(
             vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, extensions.data()),
             "Failed to enumerate device extension properties");
 
-        const bool extension_found = [&]() {
-            for (const VkExtensionProperties &extension_properties : extensions) {
+        const auto extension_found = [&]() {
+            for (const auto &extension_properties : extensions) {
                 if (strcmp(extension_properties.extensionName, s_swapchain_extension) == 0) {
                     return true;
                 }
@@ -385,7 +383,7 @@ void VulkanGraphicsDevice::create_device()
 
 #undef REQUIRE_FEATURE
 
-        const VkPhysicalDeviceLimits limits = properties.limits;
+        const auto limits = properties.limits;
         if (limits.timestampPeriod == 0.0f) {
             HE_INFO("Skipped device due to missing timestamp query support");
             continue;
@@ -442,10 +440,10 @@ void VulkanGraphicsDevice::create_device()
         HE_PANIC("Failed to find a suitable physical device");
     }
 
-    VkPhysicalDeviceProperties properties;
+    VkPhysicalDeviceProperties properties = { };
     vkGetPhysicalDeviceProperties(m_physical_device, &properties);
 
-    const std::string_view device_type = [properties]() {
+    const auto device_type = [properties]() {
         switch (properties.deviceType) {
         case VK_PHYSICAL_DEVICE_TYPE_OTHER:
             return "Other";
@@ -557,8 +555,8 @@ void VulkanGraphicsDevice::create_surface(const Window &window)
 
 void VulkanGraphicsDevice::create_swapchain(const Window &window)
 {
-    const VkExtent2D extent = [&]() -> VkExtent2D {
-        VkSurfaceCapabilitiesKHR capabilities;
+    const auto extent = [&]() -> VkExtent2D {
+        VkSurfaceCapabilitiesKHR capabilities = { };
         HE_VK_CHECK(
             vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &capabilities),
             "Failed to get the physical device surface capabilities");
@@ -582,18 +580,18 @@ void VulkanGraphicsDevice::create_swapchain(const Window &window)
         return current_extent;
     }();
 
-    const VkSurfaceFormatKHR surface_format = [&]() -> VkSurfaceFormatKHR {
+    const auto surface_format = [&]() -> VkSurfaceFormatKHR {
         u32 format_count = 0;
         HE_VK_CHECK(
             vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, m_surface, &format_count, nullptr),
             "Failed to get the physical device surface formats");
 
-        std::vector<VkSurfaceFormatKHR> formats(format_count);
+        auto formats = std::vector<VkSurfaceFormatKHR>(format_count);
         HE_VK_CHECK(
             vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, m_surface, &format_count, formats.data()),
             "Failed to get the physical device surface formats");
 
-        for (const VkSurfaceFormatKHR format : formats) {
+        for (const auto format : formats) {
             if (format.format == VK_FORMAT_B8G8R8A8_UNORM && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
                 return format;
             }
@@ -602,19 +600,22 @@ void VulkanGraphicsDevice::create_swapchain(const Window &window)
         return formats[0];
     }();
 
-    const VkPresentModeKHR present_mode = [&]() -> VkPresentModeKHR {
+    const auto present_mode = [&]() -> VkPresentModeKHR {
         u32 present_mode_count = 0;
         HE_VK_CHECK(
             vkGetPhysicalDeviceSurfacePresentModesKHR(m_physical_device, m_surface, &present_mode_count, nullptr),
             "Failed to get the physical device surface present modes");
 
-        std::vector<VkPresentModeKHR> present_modes(present_mode_count);
+        auto present_modes = std::vector<VkPresentModeKHR>(present_mode_count);
         HE_VK_CHECK(
             vkGetPhysicalDeviceSurfacePresentModesKHR(
-                m_physical_device, m_surface, &present_mode_count, present_modes.data()),
+                m_physical_device,
+                m_surface,
+                &present_mode_count,
+                present_modes.data()),
             "Failed to get the physical device surface present modes");
 
-        for (const VkPresentModeKHR mode : present_modes) {
+        for (const auto mode : present_modes) {
             if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
                 return mode;
             }
@@ -623,7 +624,7 @@ void VulkanGraphicsDevice::create_swapchain(const Window &window)
         return present_modes[0];
     }();
 
-    VkSurfaceCapabilitiesKHR capabilities;
+    VkSurfaceCapabilitiesKHR capabilities = { };
     HE_VK_CHECK(
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &capabilities),
         "Failed to get the physical device surface capabilities");
@@ -664,12 +665,12 @@ void VulkanGraphicsDevice::create_swapchain(const Window &window)
         vkGetSwapchainImagesKHR(m_device, m_swapchain, &image_count, nullptr),
         "Failed to get vulkan swapchain images");
 
-    std::vector<VkImage> images(image_count);
+    auto images = std::vector<VkImage>(image_count);
     HE_VK_CHECK(
         vkGetSwapchainImagesKHR(m_device, m_swapchain, &image_count, images.data()),
         "Failed to get vulkan swapchain images");
 
-    for (VkImage image : images) {
+    for (const auto image : images) {
         const Extent3d texture_extent = {
             .width = extent.width,
             .height = extent.height,
@@ -686,8 +687,8 @@ void VulkanGraphicsDevice::create_swapchain(const Window &window)
             .usage = TextureUsage::RenderAttachment,
         };
 
-        RefPtr<VulkanTexture> internal_texture = make_ref<VulkanTexture>(*this, texture_descriptor, image);
-        Texture texture = create_resource<Texture>(std::move(internal_texture), texture_descriptor);
+        auto internal_texture = make_ref<VulkanTexture>(*this, texture_descriptor, image);
+        auto texture = create_resource<Texture>(std::move(internal_texture), texture_descriptor);
 
         const TextureViewDescriptor texture_view_descriptor = {
             .label = std::nullopt,
@@ -699,10 +700,8 @@ void VulkanGraphicsDevice::create_swapchain(const Window &window)
             .array_layers = 1,
         };
 
-        RefPtr<VulkanTextureView> internal_texture_view
-            = make_ref<VulkanTextureView>(*this, texture_view_descriptor);
-        TextureView texture_view
-            = create_resource<TextureView>(std::move(internal_texture_view), texture_view_descriptor);
+        auto internal_texture_view = make_ref<VulkanTextureView>(*this, texture_view_descriptor);
+        auto texture_view = create_resource<TextureView>(std::move(internal_texture_view), texture_view_descriptor);
 
         m_swapchain_texture_views.push_back(texture_view);
         m_swapchain_textures.push_back(texture);
@@ -711,16 +710,17 @@ void VulkanGraphicsDevice::create_swapchain(const Window &window)
 
 void VulkanGraphicsDevice::create_descriptors()
 {
-    std::array<VkDescriptorPoolSize, 4> pool_sizes = {
+    std::array pool_sizes = {
         VkDescriptorPoolSize { .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = 1000 },
         VkDescriptorPoolSize { .type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = 1000 },
         VkDescriptorPoolSize { .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, .descriptorCount = 1000 },
         VkDescriptorPoolSize { .type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = 1000 },
     };
 
-    VkPhysicalDeviceProperties properties;
+    VkPhysicalDeviceProperties properties = { };
     vkGetPhysicalDeviceProperties(m_physical_device, &properties);
-    for (VkDescriptorPoolSize &descriptor_pool_size : pool_sizes) {
+
+    for (auto &descriptor_pool_size : pool_sizes) {
         const u32 limit = [&]() {
             switch (descriptor_pool_size.type) {
             case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
@@ -757,7 +757,7 @@ void VulkanGraphicsDevice::create_descriptors()
         "Failed to create vulkan descriptor pool");
     HE_ASSERT(m_descriptor_pool != VK_NULL_HANDLE);
 
-    for (const VkDescriptorPoolSize descriptor_pool_size : pool_sizes) {
+    for (const auto descriptor_pool_size : pool_sizes) {
         const VkDescriptorSetLayoutBinding descriptor_set_layout_binding = {
             .binding = 0,
             .descriptorType = descriptor_pool_size.type,
@@ -784,7 +784,7 @@ void VulkanGraphicsDevice::create_descriptors()
             .pBindings = &descriptor_set_layout_binding,
         };
 
-        VkDescriptorSetLayout *descriptor_set_layout = [this, descriptor_pool_size]() {
+        auto *descriptor_set_layout = [this, descriptor_pool_size]() {
             switch (descriptor_pool_size.type) {
             case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
                 return &m_storage_buffer_layout;
@@ -800,8 +800,7 @@ void VulkanGraphicsDevice::create_descriptors()
         }();
 
         HE_VK_CHECK(
-            vkCreateDescriptorSetLayout(
-                m_device, &descriptor_set_layout_create_info, nullptr, descriptor_set_layout),
+            vkCreateDescriptorSetLayout(m_device, &descriptor_set_layout_create_info, nullptr, descriptor_set_layout),
             "Failed to create vulkan descriptor set layout");
         HE_ASSERT(descriptor_set_layout != VK_NULL_HANDLE);
 
@@ -820,7 +819,7 @@ void VulkanGraphicsDevice::create_descriptors()
             .pSetLayouts = descriptor_set_layout,
         };
 
-        VkDescriptorSet *descriptor_set = [this, descriptor_pool_size]() {
+        auto *descriptor_set = [this, descriptor_pool_size]() {
             switch (descriptor_pool_size.type) {
             case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
                 return &m_storage_buffer_set;

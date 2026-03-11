@@ -41,8 +41,7 @@ static spdlog::level::level_enum to_spdlog_level(const Level level)
 
 void initialize(const Level level)
 {
-    const RefPtr<spdlog::sinks::ansicolor_stdout_sink_mt> stdout_sink
-        = make_ref<spdlog::sinks::ansicolor_stdout_sink_mt>();
+    const auto stdout_sink = make_ref<spdlog::sinks::ansicolor_stdout_sink_mt>();
     stdout_sink->set_color(spdlog::level::info, "\033[38;2;0;128;0m");
     stdout_sink->set_color(spdlog::level::warn, "\033[38;2;255;215;0m");
     stdout_sink->set_color(spdlog::level::err, "\033[38;2;255;0;0m");
@@ -52,8 +51,7 @@ void initialize(const Level level)
     stdout_sink->set_pattern(
         "\033[38;2;69;69;69m%Y-%m-%dT%H:%M:%S.%f %^%l%$\033[38;2;120;120;120m: \033[38;2;211;211;211m%v");
 
-    const RefPtr<spdlog::sinks::basic_file_sink_mt> file_sink
-        = make_ref<spdlog::sinks::basic_file_sink_mt>("latest.log", true);
+    const auto file_sink = make_ref<spdlog::sinks::basic_file_sink_mt>("latest.log", true);
     file_sink->set_pattern("%Y-%m-%d%H:%M:%S.%f %l: %v");
 
     s_logger = make_ref<spdlog::logger>(
@@ -63,8 +61,7 @@ void initialize(const Level level)
             file_sink,
         });
 
-    const spdlog::level::level_enum level_value = to_spdlog_level(level);
-
+    const auto level_value = to_spdlog_level(level);
     s_logger->set_level(level_value);
     s_logger->flush_on(level_value);
 

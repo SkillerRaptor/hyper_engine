@@ -105,7 +105,7 @@ void Window::set_fullscreen(const bool fullscreen) { SDL_SetWindowFullscreen(m_n
 
 bool Window::is_fullscreen() const
 {
-    const SDL_WindowFlags flags = SDL_GetWindowFlags(m_native_handle);
+    const auto flags = SDL_GetWindowFlags(m_native_handle);
     return (flags & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
 }
 
@@ -113,7 +113,7 @@ void Window::set_resizable(const bool resizable) { SDL_SetWindowResizable(m_nati
 
 bool Window::is_resizable() const
 {
-    const SDL_WindowFlags flags = SDL_GetWindowFlags(m_native_handle);
+    const auto flags = SDL_GetWindowFlags(m_native_handle);
     return (flags & SDL_WINDOW_RESIZABLE) == SDL_WINDOW_RESIZABLE;
 }
 

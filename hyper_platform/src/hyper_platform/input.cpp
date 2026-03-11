@@ -12,7 +12,7 @@ namespace he {
 
 void Input::update()
 {
-    const bool *key_state = SDL_GetKeyboardState(nullptr);
+    const auto *key_state = SDL_GetKeyboardState(nullptr);
     memcpy(m_key_states.data(), key_state, m_key_states.size() * sizeof(bool));
 
     m_mouse_state = SDL_GetMouseState(&m_mouse_position.first, &m_mouse_position.second);

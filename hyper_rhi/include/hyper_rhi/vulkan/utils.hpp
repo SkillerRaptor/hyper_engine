@@ -17,7 +17,7 @@
     do {                                                                                             \
         static constexpr usize _argument_count = HE_MACRO_SIZE(__VA_ARGS__);                         \
                                                                                                      \
-        const VkResult _result = (expression);                                                       \
+        const auto _result = (expression);                                                           \
         if ((_result) != VK_SUCCESS) [[unlikely]] {                                                  \
             if constexpr (_argument_count == 0) {                                                    \
                 HE_PANIC(                                                                            \

@@ -16,7 +16,7 @@ namespace he {
 VulkanTextureView::VulkanTextureView(VulkanGraphicsDevice &graphics_device, const TextureViewDescriptor &desc)
     : m_graphics_device(graphics_device)
 {
-    const VulkanTexture *texture = graphics_device.get_internal_state<VulkanTexture>(desc.texture);
+    const auto *texture = graphics_device.get_internal_state<VulkanTexture>(desc.texture);
 
     constexpr VkComponentMapping component_mapping = {
         .r = VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -25,7 +25,7 @@ VulkanTextureView::VulkanTextureView(VulkanGraphicsDevice &graphics_device, cons
         .a = VK_COMPONENT_SWIZZLE_IDENTITY,
     };
 
-    const Format format = desc.texture.format();
+    const auto format = desc.texture.format();
 
     const u32 mip_levels = desc.mip_levels.value_or(desc.texture.mip_levels());
     const u32 array_layers = [&desc, &texture]() -> u32 {

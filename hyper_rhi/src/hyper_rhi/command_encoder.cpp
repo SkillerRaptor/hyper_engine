@@ -6,7 +6,5 @@
 
 #include "hyper_rhi/command_encoder.hpp"
 
-#include <hyper_core/assertion.hpp>
-
 namespace he {
 } // namespace he

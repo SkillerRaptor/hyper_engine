@@ -12,8 +12,7 @@
 
 namespace he {
 
-VulkanTexture::VulkanTexture(
-    VulkanGraphicsDevice &graphics_device, const TextureDescriptor &desc, const VkImage image)
+VulkanTexture::VulkanTexture(VulkanGraphicsDevice &graphics_device, const TextureDescriptor &desc, const VkImage image)
     : m_graphics_device(graphics_device)
     , m_raw(image)
 {

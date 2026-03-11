@@ -20,8 +20,8 @@
 
 namespace he {
 
-OwnPtr<GraphicsDevice> GraphicsDevice::create(
-    const GraphicsApi graphics_api, const Window &window, const Validation validation_requested)
+OwnPtr<GraphicsDevice>
+    GraphicsDevice::create(const GraphicsApi graphics_api, const Window &window, const Validation validation_requested)
 {
     switch (graphics_api) {
     case GraphicsApi::Vulkan:
@@ -175,7 +175,7 @@ RenderPipeline GraphicsDevice::create_render_pipeline(const RenderPipelineDescri
 
     HE_ASSERT(!desc.color_attachment_states.empty());
 
-    for (const ColorAttachmentState &color_attachment_state : desc.color_attachment_states) {
+    for (const auto &color_attachment_state : desc.color_attachment_states) {
         HE_ASSERT(color_attachment_state.format != Format::None);
     }
 
