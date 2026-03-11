@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include <hyper_core/key.hpp>
 #include <hyper_core/memory.hpp>
 #include <hyper_core/prerequisites.hpp>
 #include <hyper_core/types.hpp>
