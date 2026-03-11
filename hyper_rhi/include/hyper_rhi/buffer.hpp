@@ -12,6 +12,7 @@
 
 #include <hyper_core/bit_flags.hpp>
 #include <hyper_core/memory.hpp>
+#include <hyper_core/span.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/resource.hpp"
@@ -32,7 +33,7 @@ struct BufferDescriptor {
     std::optional<std::string_view> label = std::nullopt;
     u32 size = 0;
     BitFlags<BufferUsage> usage = BufferUsage::None;
-    std::span<const u8> initial_data;
+    ReadonlySpan<u8> initial_data;
 };
 
 class Buffer : public Resource {

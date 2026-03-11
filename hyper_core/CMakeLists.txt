@@ -17,6 +17,7 @@ set(HEADERS
         include/hyper_core/macro_utils.hpp
         include/hyper_core/memory.hpp
         include/hyper_core/prerequisites.hpp
+        include/hyper_core/span.hpp
         include/hyper_core/string_utils.hpp
         include/hyper_core/types.hpp)
 

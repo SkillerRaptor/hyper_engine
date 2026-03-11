@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <hyper_core/memory.hpp>
+#include <hyper_core/span.hpp>
 
 #include "hyper_rhi/definitions.hpp"
 #include "hyper_rhi/pipeline_layout.hpp"
@@ -87,7 +88,7 @@ public:
     HE_ALWAYS_INLINE Shader fragment_shader() const { return m_fragment_shader; }
     HE_ALWAYS_INLINE PrimitiveState primitive_state() const { return m_primitive_state; }
     HE_ALWAYS_INLINE MultisampleState multisample_state() const { return m_multisample_state; }
-    HE_ALWAYS_INLINE std::span<const ColorAttachmentState> color_attachment_states() const
+    HE_ALWAYS_INLINE ReadonlySpan<ColorAttachmentState> color_attachment_states() const
     {
         return m_color_attachment_states;
     }
