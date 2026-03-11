@@ -21,13 +21,13 @@ std::optional<std::vector<u8>> read_to_bytes(const std::string_view path)
 
     const auto file_path = std::filesystem::path(path);
     if (!std::filesystem::exists(file_path)) {
-        HE_ERROR("Failed to find file: '%s'", path);
+        HE_ERROR("Failed to find file: '{}'", path);
         return std::nullopt;
     }
 
     auto file = std::ifstream(file_path, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
-        HE_ERROR("Failed to open file: '%s'", path);
+        HE_ERROR("Failed to open file: '{}'", path);
         return std::nullopt;
     }
 
