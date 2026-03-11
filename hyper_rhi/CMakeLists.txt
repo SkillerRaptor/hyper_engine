@@ -28,6 +28,7 @@ set(HEADERS
         include/hyper_rhi/graphics_device.hpp
         include/hyper_rhi/pipeline_layout.hpp
         include/hyper_rhi/render_pipeline.hpp
+        include/hyper_rhi/resource.hpp
         include/hyper_rhi/resource_handle.hpp
         include/hyper_rhi/sampler.hpp
         include/hyper_rhi/shader.hpp

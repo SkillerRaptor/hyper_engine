@@ -14,6 +14,7 @@
 
 #include "hyper_rhi/command_encoder.hpp"
 #include "hyper_rhi/forward.hpp"
+#include "hyper_rhi/resource.hpp"
 
 namespace he
 {
@@ -73,12 +74,18 @@ namespace he
         virtual CommandEncoder acquire_command_encoder_impl(u32 frame_id) = 0;
         virtual void submit_command_encoder_impl(CommandEncoder) = 0;
 
-        static constexpr HE_ALWAYS_INLINE Key<GraphicsDevice> key() { return {}; }
+        template <typename T, typename U>
+            requires std::derived_from<T, Resource>
+        static T create_resource(RefPtr<void> internal_state, const U &desc)
+        {
+            return T(std::move(internal_state), desc);
+        }
 
         template <typename T, typename U>
+            requires std::derived_from<U, Resource>
         static const T *get_internal_state(const U &resource)
         {
-            return static_cast<const T *>(resource.internal_state(key()));
+            return static_cast<const T *>(resource.internal_state());
         }
 
     protected:

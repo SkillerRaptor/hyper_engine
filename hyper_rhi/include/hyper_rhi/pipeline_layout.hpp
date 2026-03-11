@@ -9,11 +9,10 @@
 #include <optional>
 #include <string_view>
 
-#include <hyper_core/key.hpp>
 #include <hyper_core/memory.hpp>
 #include <hyper_core/types.hpp>
 
-#include "hyper_rhi/forward.hpp"
+#include "hyper_rhi/resource.hpp"
 
 namespace he
 {
@@ -23,22 +22,22 @@ namespace he
         u32 push_constant_size = 0;
     };
 
-    class PipelineLayout
+    class PipelineLayout : public Resource
     {
+    private:
+        friend class GraphicsDevice;
+
     public:
-        PipelineLayout(Key<GraphicsDevice>, RefPtr<void> internal_state, const PipelineLayoutDescriptor &desc)
-            : m_internal_state(std::move(internal_state))
+        HE_ALWAYS_INLINE u32 push_constant_size() const { return m_push_constant_size; }
+
+    private:
+        PipelineLayout(RefPtr<void> internal_state, const PipelineLayoutDescriptor &desc)
+            : Resource(std::move(internal_state))
             , m_push_constant_size(desc.push_constant_size)
         {
         }
 
-        HE_ALWAYS_INLINE void *internal_state(Key<GraphicsDevice>) const { return m_internal_state.get(); }
-
-        HE_ALWAYS_INLINE u32 push_constant_size() const { return m_push_constant_size; }
-
     private:
-        RefPtr<void> m_internal_state = nullptr;
-
         u32 m_push_constant_size = 0;
     };
 } // namespace he

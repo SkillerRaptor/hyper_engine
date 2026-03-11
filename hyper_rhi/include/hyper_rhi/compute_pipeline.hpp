@@ -9,11 +9,10 @@
 #include <optional>
 #include <string_view>
 
-#include <hyper_core/key.hpp>
 #include <hyper_core/memory.hpp>
 
-#include "hyper_rhi/forward.hpp"
 #include "hyper_rhi/pipeline_layout.hpp"
+#include "hyper_rhi/resource.hpp"
 #include "hyper_rhi/shader.hpp"
 
 namespace he
@@ -25,24 +24,24 @@ namespace he
         Shader shader;
     };
 
-    class ComputePipeline
+    class ComputePipeline : public Resource
     {
+    private:
+        friend class GraphicsDevice;
+
     public:
-        ComputePipeline(Key<GraphicsDevice>, RefPtr<void> internal_state, const ComputePipelineDescriptor &desc)
-            : m_internal_state(std::move(internal_state))
+        HE_ALWAYS_INLINE PipelineLayout layout() const { return m_layout; }
+        HE_ALWAYS_INLINE Shader shader() const { return m_shader; }
+
+    private:
+        ComputePipeline(RefPtr<void> internal_state, const ComputePipelineDescriptor &desc)
+            : Resource(std::move(internal_state))
             , m_layout(desc.layout)
             , m_shader(desc.shader)
         {
         }
 
-        HE_ALWAYS_INLINE void *internal_state(Key<GraphicsDevice>) const { return m_internal_state.get(); }
-
-        HE_ALWAYS_INLINE PipelineLayout layout() const { return m_layout; }
-        HE_ALWAYS_INLINE Shader shader() const { return m_shader; }
-
     private:
-        RefPtr<void> m_internal_state = nullptr;
-
         PipelineLayout m_layout;
         Shader m_shader;
     };

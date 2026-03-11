@@ -83,42 +83,50 @@ namespace he
 
     Buffer VulkanGraphicsDevice::create_buffer_impl(const BufferDescriptor &desc)
     {
-        return { key(), make_ref<VulkanBuffer>(*this, desc, false), desc };
+        RefPtr<void> internal_state = make_ref<VulkanBuffer>(*this, desc, false);
+        return create_resource<Buffer>(std::move(internal_state), desc);
     }
 
     Shader VulkanGraphicsDevice::create_shader_impl(const ShaderDescriptor &desc)
     {
-        return { key(), make_ref<VulkanShader>(*this, desc), desc };
+        RefPtr<void> internal_state = make_ref<VulkanShader>(*this, desc);
+        return create_resource<Shader>(std::move(internal_state), desc);
     }
 
     Sampler VulkanGraphicsDevice::create_sampler_impl(const SamplerDescriptor &desc)
     {
-        return { key(), make_ref<VulkanSampler>(*this, desc), desc };
+        RefPtr<void> internal_state = make_ref<VulkanSampler>(*this, desc);
+        return create_resource<Sampler>(std::move(internal_state), desc);
     }
 
     Texture VulkanGraphicsDevice::create_texture_impl(const TextureDescriptor &desc)
     {
-        return { key(), make_ref<VulkanTexture>(*this, desc, VK_NULL_HANDLE), desc };
+        RefPtr<void> internal_state = make_ref<VulkanTexture>(*this, desc, VK_NULL_HANDLE);
+        return create_resource<Texture>(std::move(internal_state), desc);
     }
 
     TextureView VulkanGraphicsDevice::create_texture_view_impl(const TextureViewDescriptor &desc)
     {
-        return { key(), make_ref<VulkanTextureView>(*this, desc), desc };
+        RefPtr<void> internal_state = make_ref<VulkanTextureView>(*this, desc);
+        return create_resource<TextureView>(std::move(internal_state), desc);
     }
 
     PipelineLayout VulkanGraphicsDevice::create_pipeline_layout_impl(const PipelineLayoutDescriptor &desc)
     {
-        return { key(), make_ref<VulkanPipelineLayout>(*this, desc), desc };
+        RefPtr<void> internal_state = make_ref<VulkanPipelineLayout>(*this, desc);
+        return create_resource<PipelineLayout>(std::move(internal_state), desc);
     }
 
     ComputePipeline VulkanGraphicsDevice::create_compute_pipeline_impl(const ComputePipelineDescriptor &desc)
     {
-        return { key(), make_ref<VulkanComputePipeline>(*this, desc), desc };
+        RefPtr<void> internal_state = make_ref<VulkanComputePipeline>(*this, desc);
+        return create_resource<ComputePipeline>(std::move(internal_state), desc);
     }
 
     RenderPipeline VulkanGraphicsDevice::create_render_pipeline_impl(const RenderPipelineDescriptor &desc)
     {
-        return { key(), make_ref<VulkanRenderPipeline>(*this, desc), desc };
+        RefPtr<void> internal_state = make_ref<VulkanRenderPipeline>(*this, desc);
+        return create_resource<RenderPipeline>(std::move(internal_state), desc);
     }
 
     void VulkanGraphicsDevice::wait_idle() const { HE_VK_CHECK(vkDeviceWaitIdle(m_device)); }
@@ -128,8 +136,9 @@ namespace he
         VulkanCommandEncoder &command_encoder = static_cast<VulkanCommandEncoder &>(*m_command_encoders[frame_id]);
         command_encoder.acquire();
 
-        CommandEncoder encoder(key(), command_encoder);
-        return std::move(encoder);
+        // CommandEncoder encoder(key(), command_encoder);
+        // return std::move(encoder);
+        std::abort();
     }
 
     void VulkanGraphicsDevice::submit_command_encoder_impl(const CommandEncoder encoder)
@@ -734,7 +743,7 @@ namespace he
             };
 
             RefPtr<VulkanTexture> internal_texture = make_ref<VulkanTexture>(*this, texture_descriptor, image);
-            Texture texture(key(), std::move(internal_texture), texture_descriptor);
+            Texture texture = create_resource<Texture>(std::move(internal_texture), texture_descriptor);
 
             const TextureViewDescriptor texture_view_descriptor = {
                 .label = std::nullopt,
@@ -748,7 +757,8 @@ namespace he
 
             RefPtr<VulkanTextureView> internal_texture_view
                 = make_ref<VulkanTextureView>(*this, texture_view_descriptor);
-            TextureView texture_view(key(), std::move(internal_texture_view), texture_view_descriptor);
+            TextureView texture_view
+                = create_resource<TextureView>(std::move(internal_texture_view), texture_view_descriptor);
 
             m_swapchain_texture_views.push_back(texture_view);
             m_swapchain_textures.push_back(texture);

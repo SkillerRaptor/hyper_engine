@@ -10,12 +10,11 @@
 #include <string_view>
 #include <vector>
 
-#include <hyper_core/key.hpp>
 #include <hyper_core/memory.hpp>
 
 #include "hyper_rhi/definitions.hpp"
-#include "hyper_rhi/forward.hpp"
 #include "hyper_rhi/pipeline_layout.hpp"
+#include "hyper_rhi/resource.hpp"
 #include "hyper_rhi/shader.hpp"
 
 namespace he
@@ -86,23 +85,12 @@ namespace he
         std::optional<DepthStencilState> depth_stencil_state = std::nullopt;
     };
 
-    class RenderPipeline
+    class RenderPipeline : public Resource
     {
+    private:
+        friend class GraphicsDevice;
+
     public:
-        RenderPipeline(Key<GraphicsDevice>, RefPtr<void> internal_state, const RenderPipelineDescriptor &desc)
-            : m_internal_state(std::move(internal_state))
-            , m_layout(desc.layout)
-            , m_vertex_shader(desc.vertex_shader)
-            , m_fragment_shader(desc.fragment_shader)
-            , m_primitive_state(desc.primitive_state)
-            , m_multisample_state(desc.multisample_state)
-            , m_color_attachment_states(desc.color_attachment_states)
-            , m_depth_stencil_state(desc.depth_stencil_state)
-        {
-        }
-
-        HE_ALWAYS_INLINE void *internal_state(Key<GraphicsDevice>) const { return m_internal_state.get(); }
-
         HE_ALWAYS_INLINE PipelineLayout layout() const { return m_layout; }
         HE_ALWAYS_INLINE Shader vertex_shader() const { return m_vertex_shader; }
         HE_ALWAYS_INLINE Shader fragment_shader() const { return m_fragment_shader; }
@@ -115,8 +103,19 @@ namespace he
         HE_ALWAYS_INLINE std::optional<DepthStencilState> depth_stencil_state() const { return m_depth_stencil_state; }
 
     private:
-        RefPtr<void> m_internal_state = nullptr;
+        RenderPipeline(RefPtr<void> internal_state, const RenderPipelineDescriptor &desc)
+            : Resource(std::move(internal_state))
+            , m_layout(desc.layout)
+            , m_vertex_shader(desc.vertex_shader)
+            , m_fragment_shader(desc.fragment_shader)
+            , m_primitive_state(desc.primitive_state)
+            , m_multisample_state(desc.multisample_state)
+            , m_color_attachment_states(desc.color_attachment_states)
+            , m_depth_stencil_state(desc.depth_stencil_state)
+        {
+        }
 
+    private:
         PipelineLayout m_layout;
         Shader m_vertex_shader;
         Shader m_fragment_shader;
