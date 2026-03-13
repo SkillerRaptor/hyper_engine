@@ -10,7 +10,6 @@
 #include <string_view>
 
 #include <hyper_core/memory.hpp>
-#include <hyper_core/prerequisites.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/definitions.hpp"
@@ -34,12 +33,12 @@ private:
     friend class GraphicsDevice;
 
 public:
-    HE_ALWAYS_INLINE Texture texture() const { return m_texture; }
-    HE_ALWAYS_INLINE ViewDimension dimension() const { return m_dimension; }
-    HE_ALWAYS_INLINE u32 base_mip_level() const { return m_base_mip_level; }
-    HE_ALWAYS_INLINE u32 mip_levels() const { return m_mip_levels; }
-    HE_ALWAYS_INLINE u32 base_array_layer() const { return m_base_array_layer; }
-    HE_ALWAYS_INLINE u32 array_layers() const { return m_array_layers; }
+    Texture texture() const { return m_texture; }
+    ViewDimension dimension() const { return m_dimension; }
+    u32 base_mip_level() const { return m_base_mip_level; }
+    u32 mip_levels() const { return m_mip_levels; }
+    u32 base_array_layer() const { return m_base_array_layer; }
+    u32 array_layers() const { return m_array_layers; }
 
 private:
     TextureView(RefPtr<void> internal_state, const TextureViewDescriptor &desc)

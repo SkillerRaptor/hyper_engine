@@ -28,8 +28,8 @@ private:
     friend class GraphicsDevice;
 
 public:
-    HE_ALWAYS_INLINE PipelineLayout layout() const { return m_layout; }
-    HE_ALWAYS_INLINE Shader shader() const { return m_shader; }
+    PipelineLayout layout() const { return m_layout; }
+    Shader shader() const { return m_shader; }
 
 private:
     ComputePipeline(RefPtr<void> internal_state, const ComputePipelineDescriptor &desc)

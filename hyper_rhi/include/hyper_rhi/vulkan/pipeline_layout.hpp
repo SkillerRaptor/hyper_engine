@@ -8,8 +8,6 @@
 
 #include <volk.h>
 
-#include <hyper_core/prerequisites.hpp>
-
 #include "hyper_rhi/pipeline_layout.hpp"
 
 namespace he {
@@ -21,7 +19,7 @@ public:
     VulkanPipelineLayout(VulkanGraphicsDevice &, const PipelineLayoutDescriptor &);
     ~VulkanPipelineLayout();
 
-    HE_ALWAYS_INLINE VkPipelineLayout raw() const { return m_raw; }
+    VkPipelineLayout raw() const { return m_raw; }
 
 private:
     VulkanGraphicsDevice &m_graphics_device;

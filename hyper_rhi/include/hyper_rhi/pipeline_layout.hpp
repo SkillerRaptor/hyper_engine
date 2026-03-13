@@ -26,7 +26,7 @@ private:
     friend class GraphicsDevice;
 
 public:
-    HE_ALWAYS_INLINE u32 push_constant_size() const { return m_push_constant_size; }
+    u32 push_constant_size() const { return m_push_constant_size; }
 
 private:
     PipelineLayout(RefPtr<void> internal_state, const PipelineLayoutDescriptor &desc)

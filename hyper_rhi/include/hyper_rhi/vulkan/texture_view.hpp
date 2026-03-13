@@ -19,7 +19,7 @@ public:
     VulkanTextureView(VulkanGraphicsDevice &, const TextureViewDescriptor &);
     ~VulkanTextureView();
 
-    HE_ALWAYS_INLINE VkImageView raw() const { return m_raw; }
+    VkImageView raw() const { return m_raw; }
 
 private:
     VulkanGraphicsDevice &m_graphics_device;

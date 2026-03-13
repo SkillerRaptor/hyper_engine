@@ -22,7 +22,7 @@ public:
     VulkanBuffer(VulkanGraphicsDevice &, const BufferDescriptor &, bool staging);
     ~VulkanBuffer();
 
-    HE_ALWAYS_INLINE VkBuffer raw() const { return m_raw; }
+    VkBuffer raw() const { return m_raw; }
 
 private:
     VulkanGraphicsDevice &m_graphics_device;

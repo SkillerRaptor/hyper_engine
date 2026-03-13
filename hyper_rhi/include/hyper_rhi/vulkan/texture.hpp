@@ -22,7 +22,7 @@ public:
     VulkanTexture(VulkanGraphicsDevice &, const TextureDescriptor &, VkImage image);
     ~VulkanTexture();
 
-    HE_ALWAYS_INLINE VkImage raw() const { return m_raw; }
+    VkImage raw() const { return m_raw; }
 
 private:
     VulkanGraphicsDevice &m_graphics_device;

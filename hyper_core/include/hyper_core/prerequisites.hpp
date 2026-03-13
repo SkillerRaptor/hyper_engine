@@ -29,11 +29,3 @@
 #define HE_CONCAT(a, b) _HE_CONCAT_HELPER(a, b)
 
 #define HE_EXPAND_MACRO(x) x
-
-#if HE_CLANG_COMPILER || HE_GCC_COMPILER
-#    define HE_ALWAYS_INLINE __attribute__((always_inline)) inline
-#elif HE_MSVC_COMPILER
-#    define HE_ALWAYS_INLINE __forceinline
-#else
-#    define HE_ALWAYS_INLINE inline
-#endif

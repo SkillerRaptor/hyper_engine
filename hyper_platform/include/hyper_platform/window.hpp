@@ -8,7 +8,6 @@
 
 #include <string>
 
-#include <hyper_core/prerequisites.hpp>
 #include <hyper_core/types.hpp>
 
 struct SDL_Window;
@@ -40,9 +39,9 @@ public:
     void set_resizable(bool);
     bool is_resizable() const;
 
-    HE_ALWAYS_INLINE bool is_close_requested() const { return m_close_requested; }
+    bool is_close_requested() const { return m_close_requested; }
 
-    HE_ALWAYS_INLINE SDL_Window *native_handle() const { return m_native_handle; }
+    SDL_Window *native_handle() const { return m_native_handle; }
 
 private:
     SDL_Window *m_native_handle { nullptr };

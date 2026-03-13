@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include <hyper_core/prerequisites.hpp>
 #include <hyper_core/types.hpp>
 
 namespace he {
@@ -20,8 +19,8 @@ public:
     {
     }
 
-    HE_ALWAYS_INLINE bool is_valid() const { return m_handle != 0xffffffff; }
-    HE_ALWAYS_INLINE u32 get() const { return m_handle; }
+    bool is_valid() const { return m_handle != 0xffffffff; }
+    u32 get() const { return m_handle; }
 
 private:
     u32 m_handle { 0xffffffff };

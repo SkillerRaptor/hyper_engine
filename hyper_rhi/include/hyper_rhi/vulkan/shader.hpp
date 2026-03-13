@@ -8,8 +8,6 @@
 
 #include <volk.h>
 
-#include <hyper_core/prerequisites.hpp>
-
 #include "hyper_rhi/shader.hpp"
 
 namespace he {
@@ -21,7 +19,7 @@ public:
     VulkanShader(VulkanGraphicsDevice &, const ShaderDescriptor &);
     ~VulkanShader();
 
-    HE_ALWAYS_INLINE VkShaderModule raw() const { return m_raw; }
+    VkShaderModule raw() const { return m_raw; }
 
 private:
     VulkanGraphicsDevice &m_graphics_device;

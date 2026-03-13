@@ -32,8 +32,8 @@ private:
     friend class GraphicsDevice;
 
 public:
-    HE_ALWAYS_INLINE ShaderType type() const { return m_type; }
-    HE_ALWAYS_INLINE std::string_view entry() const { return m_entry; }
+    ShaderType type() const { return m_type; }
+    std::string_view entry() const { return m_entry; }
 
 private:
     Shader(RefPtr<void> internal_state, const ShaderDescriptor &desc)

@@ -41,8 +41,8 @@ private:
     friend class GraphicsDevice;
 
 public:
-    HE_ALWAYS_INLINE u32 size() const { return m_size; }
-    HE_ALWAYS_INLINE BitFlags<BufferUsage> usage() const { return m_usage; }
+    u32 size() const { return m_size; }
+    BitFlags<BufferUsage> usage() const { return m_usage; }
 
 private:
     Buffer(RefPtr<void> internal_state, const BufferDescriptor &desc)

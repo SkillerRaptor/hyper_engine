@@ -11,7 +11,6 @@
 
 #include <hyper_core/bit_flags.hpp>
 #include <hyper_core/memory.hpp>
-#include <hyper_core/prerequisites.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/definitions.hpp"
@@ -43,12 +42,12 @@ private:
     friend class GraphicsDevice;
 
 public:
-    HE_ALWAYS_INLINE Extent3d extent() const { return m_extent; }
-    HE_ALWAYS_INLINE u32 mip_levels() const { return m_mip_levels; }
-    HE_ALWAYS_INLINE u32 sample_count() const { return m_sample_count; }
-    HE_ALWAYS_INLINE Format format() const { return m_format; }
-    HE_ALWAYS_INLINE Dimension dimension() const { return m_dimension; }
-    HE_ALWAYS_INLINE BitFlags<TextureUsage> usage() const { return m_usage; }
+    Extent3d extent() const { return m_extent; }
+    u32 mip_levels() const { return m_mip_levels; }
+    u32 sample_count() const { return m_sample_count; }
+    Format format() const { return m_format; }
+    Dimension dimension() const { return m_dimension; }
+    BitFlags<TextureUsage> usage() const { return m_usage; }
 
 private:
     Texture(RefPtr<void> internal_state, const TextureDescriptor &desc)

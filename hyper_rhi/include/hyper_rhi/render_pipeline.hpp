@@ -83,16 +83,13 @@ private:
     friend class GraphicsDevice;
 
 public:
-    HE_ALWAYS_INLINE PipelineLayout layout() const { return m_layout; }
-    HE_ALWAYS_INLINE Shader vertex_shader() const { return m_vertex_shader; }
-    HE_ALWAYS_INLINE Shader fragment_shader() const { return m_fragment_shader; }
-    HE_ALWAYS_INLINE PrimitiveState primitive_state() const { return m_primitive_state; }
-    HE_ALWAYS_INLINE MultisampleState multisample_state() const { return m_multisample_state; }
-    HE_ALWAYS_INLINE ReadonlySpan<ColorAttachmentState> color_attachment_states() const
-    {
-        return m_color_attachment_states;
-    }
-    HE_ALWAYS_INLINE std::optional<DepthStencilState> depth_stencil_state() const { return m_depth_stencil_state; }
+    PipelineLayout layout() const { return m_layout; }
+    Shader vertex_shader() const { return m_vertex_shader; }
+    Shader fragment_shader() const { return m_fragment_shader; }
+    PrimitiveState primitive_state() const { return m_primitive_state; }
+    MultisampleState multisample_state() const { return m_multisample_state; }
+    ReadonlySpan<ColorAttachmentState> color_attachment_states() const { return m_color_attachment_states; }
+    std::optional<DepthStencilState> depth_stencil_state() const { return m_depth_stencil_state; }
 
 private:
     RenderPipeline(RefPtr<void> internal_state, const RenderPipelineDescriptor &desc)

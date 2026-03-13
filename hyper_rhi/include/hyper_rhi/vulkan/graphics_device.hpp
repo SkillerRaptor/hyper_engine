@@ -13,7 +13,6 @@
 #include <vk_mem_alloc.h>
 // clang-format on
 
-#include <hyper_core/prerequisites.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/graphics_device.hpp"
@@ -39,15 +38,15 @@ public:
     CommandEncoder acquire_command_encoder_impl(u32 frame_id) override;
     void submit_command_encoder_impl(CommandEncoder) override;
 
-    HE_ALWAYS_INLINE u32 queue_family() const { return m_queue_family; }
-    HE_ALWAYS_INLINE VkDevice device() const { return m_device; }
-    HE_ALWAYS_INLINE VkQueue queue() const { return m_queue; }
-    HE_ALWAYS_INLINE VmaAllocator &allocator() { return m_allocator; }
+    u32 queue_family() const { return m_queue_family; }
+    VkDevice device() const { return m_device; }
+    VkQueue queue() const { return m_queue; }
+    VmaAllocator &allocator() { return m_allocator; }
 
-    HE_ALWAYS_INLINE VkDescriptorSetLayout storage_buffer_layout() const { return m_storage_buffer_layout; }
-    HE_ALWAYS_INLINE VkDescriptorSetLayout sampled_image_layout() const { return m_sampled_image_layout; }
-    HE_ALWAYS_INLINE VkDescriptorSetLayout storage_image_layout() const { return m_storage_image_layout; }
-    HE_ALWAYS_INLINE VkDescriptorSetLayout sampler_layout() const { return m_sampler_layout; }
+    VkDescriptorSetLayout storage_buffer_layout() const { return m_storage_buffer_layout; }
+    VkDescriptorSetLayout sampled_image_layout() const { return m_sampled_image_layout; }
+    VkDescriptorSetLayout storage_image_layout() const { return m_storage_image_layout; }
+    VkDescriptorSetLayout sampler_layout() const { return m_sampler_layout; }
 
     using GraphicsDevice::get_internal_state;
 

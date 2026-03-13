@@ -8,8 +8,6 @@
 
 #include <volk.h>
 
-#include <hyper_core/prerequisites.hpp>
-
 #include "hyper_rhi/sampler.hpp"
 
 namespace he {
@@ -21,7 +19,7 @@ public:
     VulkanSampler(VulkanGraphicsDevice &, const SamplerDescriptor &);
     ~VulkanSampler();
 
-    HE_ALWAYS_INLINE VkSampler raw() const { return m_raw; }
+    VkSampler raw() const { return m_raw; }
 
 private:
     VulkanGraphicsDevice &m_graphics_device;
