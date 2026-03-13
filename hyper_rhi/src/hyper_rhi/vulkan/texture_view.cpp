@@ -18,7 +18,7 @@ VulkanTextureView::VulkanTextureView(VulkanGraphicsDevice &graphics_device, cons
 {
     const auto *texture = graphics_device.get_internal_state<VulkanTexture>(desc.texture);
 
-    constexpr VkComponentMapping component_mapping = {
+    constexpr auto component_mapping = VkComponentMapping {
         .r = VK_COMPONENT_SWIZZLE_IDENTITY,
         .g = VK_COMPONENT_SWIZZLE_IDENTITY,
         .b = VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -27,8 +27,8 @@ VulkanTextureView::VulkanTextureView(VulkanGraphicsDevice &graphics_device, cons
 
     const auto format = desc.texture.format();
 
-    const u32 mip_levels = desc.mip_levels.value_or(desc.texture.mip_levels());
-    const u32 array_layers = [&desc, &texture]() -> u32 {
+    const auto mip_levels = desc.mip_levels.value_or(desc.texture.mip_levels());
+    const auto array_layers = [&desc, &texture]() -> u32 {
         if (desc.array_layers.has_value()) {
             return desc.array_layers.value();
         }
@@ -47,7 +47,7 @@ VulkanTextureView::VulkanTextureView(VulkanGraphicsDevice &graphics_device, cons
         }
     }();
 
-    const VkImageSubresourceRange subresource_range = {
+    const auto subresource_range = VkImageSubresourceRange {
         .aspectMask = map_aspect(format),
         .baseMipLevel = desc.base_mip_level,
         .levelCount = mip_levels,
@@ -55,7 +55,7 @@ VulkanTextureView::VulkanTextureView(VulkanGraphicsDevice &graphics_device, cons
         .layerCount = array_layers,
     };
 
-    const VkImageViewCreateInfo image_view_create_info = {
+    const auto image_view_create_info = VkImageViewCreateInfo {
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,

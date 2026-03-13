@@ -17,9 +17,9 @@
 
 namespace he::logger {
 
-static RefPtr<spdlog::logger> s_logger = nullptr;
+static RefPtr<spdlog::logger> s_logger { nullptr };
 
-static spdlog::level::level_enum to_spdlog_level(const Level level)
+static spdlog::level::level_enum convert_to_level(const Level level)
 {
     switch (level) {
     case Level::Info:
@@ -61,7 +61,7 @@ void initialize(const Level level)
             file_sink,
         });
 
-    const auto level_value = to_spdlog_level(level);
+    const auto level_value = convert_to_level(level);
     s_logger->set_level(level_value);
     s_logger->flush_on(level_value);
 
@@ -72,7 +72,7 @@ void flush() { s_logger->flush(); }
 
 void log(const Level level, const std::string_view format)
 {
-    const spdlog::level::level_enum level_value = to_spdlog_level(level);
+    const auto level_value = convert_to_level(level);
     SPDLOG_LOGGER_CALL(s_logger, level_value, format);
 }
 

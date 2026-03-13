@@ -27,12 +27,12 @@ public:
 private:
     VulkanGraphicsDevice &m_graphics_device;
 
-    VkCommandPool m_command_pool = VK_NULL_HANDLE;
-    VkCommandBuffer m_command_buffer = VK_NULL_HANDLE;
-    VkFence m_fence = VK_NULL_HANDLE;
-    VkSemaphore m_submit_semaphore = VK_NULL_HANDLE;
-    u64 m_semaphore_counter = 0;
-    bool m_swapchain_texture_acquired = false;
+    VkCommandPool m_command_pool { VK_NULL_HANDLE };
+    VkCommandBuffer m_command_buffer { VK_NULL_HANDLE };
+    VkFence m_fence { VK_NULL_HANDLE };
+    VkSemaphore m_submit_semaphore { VK_NULL_HANDLE };
+    u64 m_semaphore_counter { 0 };
+    bool m_swapchain_texture_acquired { false };
 };
 
 } // namespace he

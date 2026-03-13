@@ -27,8 +27,8 @@ public:
 private:
     VulkanGraphicsDevice &m_graphics_device;
 
-    VkImage m_raw = VK_NULL_HANDLE;
-    VmaAllocation m_allocation = VK_NULL_HANDLE;
+    VkImage m_raw { VK_NULL_HANDLE };
+    VmaAllocation m_allocation { VK_NULL_HANDLE };
 };
 
 } // namespace he

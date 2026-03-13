@@ -30,10 +30,10 @@ enum class BufferUsage : u8 {
 };
 
 struct BufferDescriptor {
-    std::optional<std::string_view> label = std::nullopt;
-    u32 size = 0;
-    BitFlags<BufferUsage> usage = BufferUsage::None;
-    ReadonlySpan<u8> initial_data;
+    std::optional<std::string_view> label { std::nullopt };
+    u32 size { 0 };
+    BitFlags<BufferUsage> usage { BufferUsage::None };
+    ReadonlySpan<u8> initial_data {};
 };
 
 class Buffer : public Resource {
@@ -53,8 +53,8 @@ private:
     }
 
 private:
-    u32 m_size = 0;
-    BitFlags<BufferUsage> m_usage = BufferUsage::None;
+    u32 m_size { 0 };
+    BitFlags<BufferUsage> m_usage { BufferUsage::None };
 };
 
 } // namespace he

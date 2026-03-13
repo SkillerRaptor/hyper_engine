@@ -134,7 +134,7 @@ private:
     }
 
 private:
-    UnderlyingT m_flags = 0;
+    UnderlyingT m_flags { 0 };
 };
 
 } // namespace he

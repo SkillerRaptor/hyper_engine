@@ -24,7 +24,7 @@ public:
 private:
     VulkanGraphicsDevice &m_graphics_device;
 
-    VkImageView m_raw = VK_NULL_HANDLE;
+    VkImageView m_raw { VK_NULL_HANDLE };
 };
 
 } // namespace he

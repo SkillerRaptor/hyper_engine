@@ -15,7 +15,7 @@ namespace he {
 VulkanSampler::VulkanSampler(VulkanGraphicsDevice &graphics_device, const SamplerDescriptor &desc)
     : m_graphics_device(graphics_device)
 {
-    const VkSamplerCreateInfo sampler_create_info = {
+    const auto sampler_create_info = VkSamplerCreateInfo {
         .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,

@@ -39,14 +39,14 @@ Engine::Engine()
 
 void Engine::run()
 {
-    constexpr f32 delta_time = 1.0f / 60.0f;
+    constexpr auto delta_time = 1.0f / 60.0f;
 
-    f32 total_time = 0.0;
-    f32 accumulator = 0.0;
+    auto total_time = 0.0f;
+    auto accumulator = 0.0f;
     auto current_time = std::chrono::steady_clock::now();
     while (!m_window->is_close_requested()) {
         const auto new_time = std::chrono::steady_clock::now();
-        const f32 frame_time = std::chrono::duration<f32>(new_time - current_time).count();
+        const auto frame_time = std::chrono::duration<f32>(new_time - current_time).count();
         current_time = new_time;
 
         accumulator += frame_time;

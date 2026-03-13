@@ -21,7 +21,7 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
 {
     const auto *vertex_shader = graphics_device.get_internal_state<VulkanShader>(desc.vertex_shader);
 
-    const VkPipelineShaderStageCreateInfo vertex_pipeline_shader_stage_create_info = {
+    const auto vertex_pipeline_shader_stage_create_info = VkPipelineShaderStageCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -33,7 +33,7 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
 
     const auto *fragment_shader = graphics_device.get_internal_state<VulkanShader>(desc.fragment_shader);
 
-    const VkPipelineShaderStageCreateInfo fragment_pipeline_shader_stage_create_info = {
+    const auto fragment_pipeline_shader_stage_create_info = VkPipelineShaderStageCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -43,12 +43,12 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
         .pSpecializationInfo = nullptr,
     };
 
-    const std::array shader_stage_create_infos = {
+    const auto shader_stage_create_infos = std::array {
         vertex_pipeline_shader_stage_create_info,
         fragment_pipeline_shader_stage_create_info,
     };
 
-    constexpr VkPipelineVertexInputStateCreateInfo vertex_input_state_create_info = {
+    constexpr auto vertex_input_state_create_info = VkPipelineVertexInputStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -58,7 +58,7 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
         .pVertexAttributeDescriptions = nullptr,
     };
 
-    const VkPipelineInputAssemblyStateCreateInfo input_assembly_state_create_info = {
+    const auto input_assembly_state_create_info = VkPipelineInputAssemblyStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -66,14 +66,14 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
         .primitiveRestartEnable = false,
     };
 
-    constexpr VkPipelineTessellationStateCreateInfo tessellation_state_create_info = {
+    constexpr auto tessellation_state_create_info = VkPipelineTessellationStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
         .patchControlPoints = 0,
     };
 
-    constexpr VkPipelineViewportStateCreateInfo viewport_state_create_info = {
+    constexpr auto viewport_state_create_info = VkPipelineViewportStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -83,7 +83,7 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
         .pScissors = nullptr,
     };
 
-    VkPipelineRasterizationStateCreateInfo rasterization_state_create_info = {
+    auto rasterization_state_create_info = VkPipelineRasterizationStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -107,7 +107,7 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
         rasterization_state_create_info.depthBiasSlopeFactor = depth_stencil_state.depth_bias_state.slope;
     }
 
-    const VkPipelineMultisampleStateCreateInfo multisample_state_create_info = {
+    const auto multisample_state_create_info = VkPipelineMultisampleStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -120,7 +120,7 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
     };
 
     // FIXME: Add depth bounds & stencil
-    VkPipelineDepthStencilStateCreateInfo depth_stencil_state_create_info = {
+    auto depth_stencil_state_create_info = VkPipelineDepthStencilStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -144,11 +144,11 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
         depth_stencil_state_create_info.depthCompareOp = depth_compare_operation;
     }
 
-    std::vector<VkPipelineColorBlendAttachmentState> color_blend_attachment_states;
+    auto color_blend_attachment_states = std::vector<VkPipelineColorBlendAttachmentState> { };
     for (const auto &color_attachment_state : desc.color_attachment_states) {
         const auto &blend_state = color_attachment_state.blend_state;
 
-        const VkPipelineColorBlendAttachmentState color_blend_attachment_state = {
+        const auto color_blend_attachment_state = VkPipelineColorBlendAttachmentState {
             .blendEnable = blend_state.enable,
             .srcColorBlendFactor = map_blend_factor(blend_state.src_factor),
             .dstColorBlendFactor = map_blend_factor(blend_state.dst_factor),
@@ -162,7 +162,7 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
         color_blend_attachment_states.push_back(color_blend_attachment_state);
     }
 
-    const VkPipelineColorBlendStateCreateInfo color_blend_state_create_info = {
+    const auto color_blend_state_create_info = VkPipelineColorBlendStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -173,12 +173,12 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
         .blendConstants = { 0.0, 0.0, 0.0, 0.0 },
     };
 
-    constexpr std::array dynamic_states = {
+    constexpr auto dynamic_states = std::array {
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR,
     };
 
-    const VkPipelineDynamicStateCreateInfo dynamic_state_create_info = {
+    const auto dynamic_state_create_info = VkPipelineDynamicStateCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -186,15 +186,15 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
         .pDynamicStates = dynamic_states.data(),
     };
 
-    std::vector<VkFormat> color_attachment_formats;
+    auto color_attachment_formats = std::vector<VkFormat> { };
     for (const auto &color_attachment_state : desc.color_attachment_states) {
         color_attachment_formats.push_back(map_format(color_attachment_state.format));
     }
 
-    const VkFormat depth_attachment_format = desc.depth_stencil_state.has_value()
+    const auto depth_attachment_format = desc.depth_stencil_state.has_value()
         ? map_format(desc.depth_stencil_state.value().depth_format)
         : VK_FORMAT_UNDEFINED;
-    const VkPipelineRenderingCreateInfo rendering_create_info = {
+    const auto rendering_create_info = VkPipelineRenderingCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
         .pNext = nullptr,
         .viewMask = 0,
@@ -206,7 +206,7 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
 
     const auto *pipeline_layout = graphics_device.get_internal_state<VulkanPipelineLayout>(desc.layout);
 
-    const VkGraphicsPipelineCreateInfo graphics_pipeline_create_info = {
+    const auto graphics_pipeline_create_info = VkGraphicsPipelineCreateInfo {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
         .pNext = &rendering_create_info,
         .flags = 0,

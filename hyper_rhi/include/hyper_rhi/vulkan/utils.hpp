@@ -15,7 +15,7 @@
 
 #define HE_VK_CHECK(expression, ...)                                                                 \
     do {                                                                                             \
-        static constexpr usize _argument_count = HE_MACRO_SIZE(__VA_ARGS__);                         \
+        constexpr auto _argument_count = HE_MACRO_SIZE(__VA_ARGS__);                                 \
                                                                                                      \
         const auto _result = (expression);                                                           \
         if ((_result) != VK_SUCCESS) [[unlikely]] {                                                  \

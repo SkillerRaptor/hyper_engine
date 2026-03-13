@@ -35,7 +35,7 @@ TEST_CASE("argument_count counts a large number of arguments", "[argument_count]
 
 TEST_CASE("argument_count is blind to argument type", "[argument_count]")
 {
-    constexpr Dummy d { };
+    constexpr Dummy d {};
     STATIC_REQUIRE(detail::argument_count(0, 0.0f, 0.0, 'x', d, "str") == 6);
 }
 

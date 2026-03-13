@@ -18,7 +18,7 @@
 namespace he {
 
 struct ComputePipelineDescriptor {
-    std::optional<std::string_view> label = std::nullopt;
+    std::optional<std::string_view> label { std::nullopt };
     PipelineLayout layout;
     Shader shader;
 };

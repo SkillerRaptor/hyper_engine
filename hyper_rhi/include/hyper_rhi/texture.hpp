@@ -29,13 +29,13 @@ enum class TextureUsage : u8 {
 };
 
 struct TextureDescriptor {
-    std::optional<std::string_view> label = std::nullopt;
-    Extent3d extent;
-    u32 mip_levels = 1;
-    u32 sample_count = 1;
-    Format format = Format::None;
-    Dimension dimension = Dimension::D2;
-    BitFlags<TextureUsage> usage = TextureUsage::None;
+    std::optional<std::string_view> label { std::nullopt };
+    Extent3d extent {};
+    u32 mip_levels { 1 };
+    u32 sample_count { 1 };
+    Format format { Format::None };
+    Dimension dimension { Dimension::D2 };
+    BitFlags<TextureUsage> usage { TextureUsage::None };
 };
 
 class Texture : public Resource {
@@ -63,12 +63,12 @@ private:
     }
 
 private:
-    Extent3d m_extent;
-    u32 m_mip_levels = 1;
-    u32 m_sample_count = 1;
-    Format m_format = Format::None;
-    Dimension m_dimension = Dimension::D2;
-    BitFlags<TextureUsage> m_usage = TextureUsage::None;
+    Extent3d m_extent {};
+    u32 m_mip_levels { 1 };
+    u32 m_sample_count { 1 };
+    Format m_format { Format::None };
+    Dimension m_dimension { Dimension::D2 };
+    BitFlags<TextureUsage> m_usage { TextureUsage::None };
 };
 
 } // namespace he

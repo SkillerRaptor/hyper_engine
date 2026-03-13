@@ -28,7 +28,7 @@ enum class Validation {
 
 class GraphicsDevice {
 protected:
-    static constexpr usize s_frames_in_flight = 3;
+    static constexpr auto s_frames_in_flight = u32 { 3 };
 
 public:
     static OwnPtr<GraphicsDevice> create(GraphicsApi, const Window &, Validation validation_requested);
@@ -84,7 +84,7 @@ protected:
     }
 
 protected:
-    u32 m_frame_index = 0;
+    u32 m_frame_index { 0 };
 };
 
 } // namespace he

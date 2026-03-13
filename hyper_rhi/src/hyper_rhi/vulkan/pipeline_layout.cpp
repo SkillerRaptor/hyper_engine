@@ -16,20 +16,20 @@ namespace he {
 VulkanPipelineLayout::VulkanPipelineLayout(VulkanGraphicsDevice &graphics_device, const PipelineLayoutDescriptor &desc)
     : m_graphics_device(graphics_device)
 {
-    const VkPushConstantRange push_constant_range = {
+    const auto push_constant_range = VkPushConstantRange {
         .stageFlags = VK_SHADER_STAGE_ALL,
         .offset = 0,
         .size = desc.push_constant_size,
     };
 
-    const std::array descriptor_set_layouts = {
+    const auto descriptor_set_layouts = std::array {
         m_graphics_device.storage_buffer_layout(),
         m_graphics_device.sampled_image_layout(),
         m_graphics_device.storage_image_layout(),
         m_graphics_device.sampled_image_layout(),
     };
 
-    const VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
+    const auto pipeline_layout_create_info = VkPipelineLayoutCreateInfo {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,

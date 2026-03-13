@@ -26,7 +26,7 @@ public:
 private:
     VulkanGraphicsDevice &m_graphics_device;
 
-    VkShaderModule m_raw = VK_NULL_HANDLE;
+    VkShaderModule m_raw { VK_NULL_HANDLE };
 };
 
 } // namespace he

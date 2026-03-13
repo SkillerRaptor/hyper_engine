@@ -15,7 +15,7 @@ namespace he {
 VulkanBuffer::VulkanBuffer(VulkanGraphicsDevice &graphics_device, const BufferDescriptor &desc, const bool staging)
     : m_graphics_device(graphics_device)
 {
-    const VkBufferCreateInfo buffer_create_info = {
+    const auto buffer_create_info = VkBufferCreateInfo {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -26,12 +26,12 @@ VulkanBuffer::VulkanBuffer(VulkanGraphicsDevice &graphics_device, const BufferDe
         .pQueueFamilyIndices = nullptr,
     };
 
-    VmaAllocationCreateFlags allocation_flags = 0;
+    auto allocation_flags = VmaAllocationCreateFlags { 0 };
     if (staging) {
         allocation_flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
     }
 
-    const VmaAllocationCreateInfo allocation_create_info = {
+    const auto allocation_create_info = VmaAllocationCreateInfo {
         .flags = allocation_flags,
         .usage = VMA_MEMORY_USAGE_AUTO,
         .requiredFlags = 0,

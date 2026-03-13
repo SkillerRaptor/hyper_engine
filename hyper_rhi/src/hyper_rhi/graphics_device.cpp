@@ -81,7 +81,7 @@ Texture GraphicsDevice::create_texture(const TextureDescriptor &desc)
     HE_ASSERT(desc.extent.height != 0);
     HE_ASSERT(desc.extent.depth != 0);
 
-    const u32 max_mip_levels
+    const auto max_mip_levels
         = std::min(static_cast<u32>(floor(log2(std::max(desc.extent.width, desc.extent.height))) + 1), 16u);
     HE_ASSERT(desc.mip_levels != 0);
     HE_ASSERT(desc.mip_levels <= max_mip_levels);
@@ -188,7 +188,7 @@ RenderPipeline GraphicsDevice::create_render_pipeline(const RenderPipelineDescri
 
 CommandEncoder GraphicsDevice::acquire_command_encoder()
 {
-    const u32 frame_id = m_frame_index % s_frames_in_flight;
+    const auto frame_id = m_frame_index % s_frames_in_flight;
     return acquire_command_encoder_impl(frame_id);
 }
 

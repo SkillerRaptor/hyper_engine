@@ -12,7 +12,7 @@ namespace he {
 
 VkBufferUsageFlags map_buffer_usage(const BitFlags<BufferUsage> usage)
 {
-    VkBufferUsageFlags usage_flags = 0;
+    auto usage_flags = VkBufferUsageFlags { 0 };
 
     if (usage.has(BufferUsage::TransferSrc)) {
         usage_flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -420,7 +420,7 @@ VkSampleCountFlagBits map_sample_count(const u32 sample_count)
 
 VkImageUsageFlags map_texture_usage(const BitFlags<TextureUsage> texture_usage_flags, const Format format)
 {
-    VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT;
+    auto usage = VkImageUsageFlags { VK_IMAGE_USAGE_SAMPLED_BIT };
 
     if (texture_usage_flags.has(TextureUsage::TransferSrc)) {
         usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
@@ -784,7 +784,7 @@ VkBlendOp map_blend_operation(const BlendOperation blend_operation)
 
 VkColorComponentFlags map_color_writes(const BitFlags<ColorWrites> color_writes)
 {
-    VkColorComponentFlags color_component_flags = 0;
+    auto color_component_flags = VkColorComponentFlags { 0 };
 
     if (color_writes.has(ColorWrites::R)) {
         color_component_flags |= VK_COLOR_COMPONENT_R_BIT;
