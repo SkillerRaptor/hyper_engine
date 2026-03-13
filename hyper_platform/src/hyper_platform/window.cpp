@@ -95,7 +95,7 @@ void Window::set_size(const u32 width, const u32 height)
 
 std::pair<u32, u32> Window::size() const
 {
-    auto widths = 0;
+    auto width = 0;
     auto height = 0;
     SDL_GetWindowSize(m_native_handle, &width, &height);
     return { static_cast<u32>(width), static_cast<u32>(height) };
