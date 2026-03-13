@@ -297,7 +297,7 @@ void VulkanGraphicsDevice::create_device()
     for (auto i = 0; i < physical_device_count; ++i) {
         const auto physical_device = physical_devices[i];
 
-        auto properties = VkPhysicalDeviceProperties { };
+        auto properties = VkPhysicalDeviceProperties {};
         vkGetPhysicalDeviceProperties(physical_device, &properties);
 
         HE_INFO("Evaluating device (name='{}')", properties.deviceName);
@@ -441,7 +441,7 @@ void VulkanGraphicsDevice::create_device()
         HE_PANIC("Failed to find a suitable physical device");
     }
 
-    auto properties = VkPhysicalDeviceProperties { };
+    auto properties = VkPhysicalDeviceProperties {};
     vkGetPhysicalDeviceProperties(m_physical_device, &properties);
 
     const auto *device_type = [properties]() {
@@ -557,7 +557,7 @@ void VulkanGraphicsDevice::create_surface(const Window &window)
 void VulkanGraphicsDevice::create_swapchain(const Window &window)
 {
     const auto extent = [&]() -> VkExtent2D {
-        auto capabilities = VkSurfaceCapabilitiesKHR { };
+        auto capabilities = VkSurfaceCapabilitiesKHR {};
         HE_VK_CHECK(
             vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &capabilities),
             "Failed to get the physical device surface capabilities");
@@ -625,7 +625,7 @@ void VulkanGraphicsDevice::create_swapchain(const Window &window)
         return present_modes[0];
     }();
 
-    auto capabilities = VkSurfaceCapabilitiesKHR { };
+    auto capabilities = VkSurfaceCapabilitiesKHR {};
     HE_VK_CHECK(
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &capabilities),
         "Failed to get the physical device surface capabilities");
@@ -718,7 +718,7 @@ void VulkanGraphicsDevice::create_descriptors()
         VkDescriptorPoolSize { .type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = 1000 },
     };
 
-    auto properties = VkPhysicalDeviceProperties { };
+    auto properties = VkPhysicalDeviceProperties {};
     vkGetPhysicalDeviceProperties(m_physical_device, &properties);
 
     for (auto &descriptor_pool_size : pool_sizes) {

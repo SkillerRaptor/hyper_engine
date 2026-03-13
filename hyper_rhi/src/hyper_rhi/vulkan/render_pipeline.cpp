@@ -129,8 +129,8 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
         .depthCompareOp = VK_COMPARE_OP_NEVER,
         .depthBoundsTestEnable = false,
         .stencilTestEnable = false,
-        .front = { },
-        .back = { },
+        .front = {},
+        .back = {},
         .minDepthBounds = 0.0,
         .maxDepthBounds = 1.0,
     };
@@ -144,7 +144,7 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
         depth_stencil_state_create_info.depthCompareOp = depth_compare_operation;
     }
 
-    auto color_blend_attachment_states = std::vector<VkPipelineColorBlendAttachmentState> { };
+    auto color_blend_attachment_states = std::vector<VkPipelineColorBlendAttachmentState> {};
     for (const auto &color_attachment_state : desc.color_attachment_states) {
         const auto &blend_state = color_attachment_state.blend_state;
 
@@ -186,7 +186,7 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
         .pDynamicStates = dynamic_states.data(),
     };
 
-    auto color_attachment_formats = std::vector<VkFormat> { };
+    auto color_attachment_formats = std::vector<VkFormat> {};
     for (const auto &color_attachment_state : desc.color_attachment_states) {
         color_attachment_formats.push_back(map_format(color_attachment_state.format));
     }
