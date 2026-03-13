@@ -69,7 +69,6 @@ VulkanTextureView::VulkanTextureView(VulkanGraphicsDevice &graphics_device, cons
     HE_VK_CHECK(
         vkCreateImageView(m_graphics_device.device(), &image_view_create_info, nullptr, &m_raw),
         "Failed to create vulkan texture view");
-    HE_ASSERT(m_raw != VK_NULL_HANDLE);
 }
 
 VulkanTextureView::~VulkanTextureView() { vkDestroyImageView(m_graphics_device.device(), m_raw, nullptr); }

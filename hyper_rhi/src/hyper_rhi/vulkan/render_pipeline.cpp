@@ -237,7 +237,6 @@ VulkanRenderPipeline::VulkanRenderPipeline(VulkanGraphicsDevice &graphics_device
             nullptr,
             &m_raw),
         "Failed to create vulkan graphics pipeline");
-    HE_ASSERT(m_raw != VK_NULL_HANDLE);
 }
 
 VulkanRenderPipeline::~VulkanRenderPipeline() { vkDestroyPipeline(m_graphics_device.device(), m_raw, nullptr); }

@@ -248,7 +248,6 @@ void VulkanGraphicsDevice::create_instance(const Validation validation_requested
     }
 
     HE_VK_CHECK(vkCreateInstance(&create_info, nullptr, &m_instance), "Failed to create vulkan instance");
-    HE_ASSERT(m_instance != VK_NULL_HANDLE);
 
     volkLoadInstance(m_instance);
 
@@ -256,7 +255,6 @@ void VulkanGraphicsDevice::create_instance(const Validation validation_requested
         HE_VK_CHECK(
             vkCreateDebugUtilsMessengerEXT(m_instance, &debug_create_info, nullptr, &m_debug_messenger),
             "Failed to create vulkan debug messenger");
-        HE_ASSERT(m_debug_messenger != VK_NULL_HANDLE);
     }
 }
 
@@ -489,12 +487,10 @@ void VulkanGraphicsDevice::create_device()
     HE_VK_CHECK(
         vkCreateDevice(m_physical_device, &create_info, nullptr, &m_device),
         "Failed to create vulkan logical device");
-    HE_ASSERT(m_device != VK_NULL_HANDLE);
 
     volkLoadDevice(m_device);
 
     vkGetDeviceQueue(m_device, m_queue_family, 0, &m_queue);
-    HE_ASSERT(m_queue != VK_NULL_HANDLE);
 }
 
 void VulkanGraphicsDevice::create_allocator()
@@ -543,7 +539,6 @@ void VulkanGraphicsDevice::create_allocator()
     };
 
     HE_VK_CHECK(vmaCreateAllocator(&allocator_create_info, &m_allocator), "Failed to create vulkan allocator");
-    HE_ASSERT(m_allocator != VK_NULL_HANDLE);
 }
 
 void VulkanGraphicsDevice::create_surface(const Window &window)
@@ -551,7 +546,6 @@ void VulkanGraphicsDevice::create_surface(const Window &window)
     if (!SDL_Vulkan_CreateSurface(window.native_handle(), m_instance, nullptr, &m_surface)) {
         HE_PANIC("Failed to create vulkan surface: {}", SDL_GetError());
     }
-    HE_ASSERT(m_surface != VK_NULL_HANDLE);
 }
 
 void VulkanGraphicsDevice::create_swapchain(const Window &window)
@@ -659,7 +653,6 @@ void VulkanGraphicsDevice::create_swapchain(const Window &window)
     HE_VK_CHECK(
         vkCreateSwapchainKHR(m_device, &swapchain_create_info, nullptr, &m_swapchain),
         "Failed to create vulkan swapchain");
-    HE_ASSERT(m_swapchain != VK_NULL_HANDLE);
 
     auto image_count = u32 { 0 };
     HE_VK_CHECK(
@@ -756,7 +749,6 @@ void VulkanGraphicsDevice::create_descriptors()
     HE_VK_CHECK(
         vkCreateDescriptorPool(m_device, &descriptor_pool_create_info, nullptr, &m_descriptor_pool),
         "Failed to create vulkan descriptor pool");
-    HE_ASSERT(m_descriptor_pool != VK_NULL_HANDLE);
 
     for (const auto descriptor_pool_size : pool_sizes) {
         const auto descriptor_set_layout_binding = VkDescriptorSetLayoutBinding {
@@ -805,7 +797,6 @@ void VulkanGraphicsDevice::create_descriptors()
         HE_VK_CHECK(
             vkCreateDescriptorSetLayout(m_device, &descriptor_set_layout_create_info, nullptr, descriptor_set_layout),
             "Failed to create vulkan descriptor set layout");
-        HE_ASSERT(descriptor_set_layout != VK_NULL_HANDLE);
 
         auto descriptor_set_variable_descriptor_count_info = VkDescriptorSetVariableDescriptorCountAllocateInfo {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO,
@@ -840,7 +831,6 @@ void VulkanGraphicsDevice::create_descriptors()
         HE_VK_CHECK(
             vkAllocateDescriptorSets(m_device, &descriptor_set_allocate_info, descriptor_set),
             "Failed to allocate vulkan descriptor set");
-        HE_ASSERT(descriptor_set != VK_NULL_HANDLE);
     }
 }
 

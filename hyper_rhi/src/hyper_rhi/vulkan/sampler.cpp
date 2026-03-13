@@ -39,7 +39,6 @@ VulkanSampler::VulkanSampler(VulkanGraphicsDevice &graphics_device, const Sample
     HE_VK_CHECK(
         vkCreateSampler(m_graphics_device.device(), &sampler_create_info, nullptr, &m_raw),
         "Failed to create vulkan sampler");
-    HE_ASSERT(m_raw != VK_NULL_HANDLE);
 }
 
 VulkanSampler::~VulkanSampler() { vkDestroySampler(m_graphics_device.device(), m_raw, nullptr); }

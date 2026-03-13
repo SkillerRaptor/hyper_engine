@@ -19,7 +19,7 @@ Engine::Engine()
     const auto start_time = std::chrono::steady_clock::now();
 
     m_window = make_own<Window>("HyperEngine", 1280, 720);
-    HE_ASSERT(m_window != nullptr);
+    HE_ASSERT(m_window);
 
     const auto validation =
 #if HE_DEBUG_BUILD
@@ -29,7 +29,7 @@ Engine::Engine()
 #endif
 
     m_graphics_device = GraphicsDevice::create(GraphicsApi::Vulkan, *m_window, validation);
-    HE_ASSERT(m_graphics_device != nullptr);
+    HE_ASSERT(m_graphics_device);
 
     const auto end_time = std::chrono::steady_clock::now();
     const auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<f64>>(end_time - start_time);

@@ -42,7 +42,6 @@ VulkanPipelineLayout::VulkanPipelineLayout(VulkanGraphicsDevice &graphics_device
     HE_VK_CHECK(
         vkCreatePipelineLayout(m_graphics_device.device(), &pipeline_layout_create_info, nullptr, &m_raw),
         "Failed to create vulkan pipeline layout");
-    HE_ASSERT(m_raw != VK_NULL_HANDLE);
 }
 
 VulkanPipelineLayout::~VulkanPipelineLayout() { vkDestroyPipelineLayout(m_graphics_device.device(), m_raw, nullptr); }

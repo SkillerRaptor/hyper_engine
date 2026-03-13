@@ -51,14 +51,12 @@ VulkanBuffer::VulkanBuffer(VulkanGraphicsDevice &graphics_device, const BufferDe
             &m_allocation,
             nullptr),
         "Failed to create vulkan buffer");
-    HE_ASSERT(m_raw != VK_NULL_HANDLE);
-    HE_ASSERT(m_allocation != VK_NULL_HANDLE);
 
     // FIXME: Maybe move this out?
     if (!desc.initial_data.empty()) {
-        void *ptr = nullptr;
+        auto *ptr = static_cast<void *>(nullptr);
         vmaMapMemory(m_graphics_device.allocator(), m_allocation, &ptr);
-        HE_ASSERT(ptr != nullptr);
+        HE_ASSERT(ptr);
         memcpy(ptr, desc.initial_data.data(), desc.initial_data.size());
         vmaUnmapMemory(m_graphics_device.allocator(), m_allocation);
     }

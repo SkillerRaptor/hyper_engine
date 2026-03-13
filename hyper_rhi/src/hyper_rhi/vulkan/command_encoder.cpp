@@ -26,7 +26,6 @@ VulkanCommandEncoder::VulkanCommandEncoder(VulkanGraphicsDevice &graphics_device
     HE_VK_CHECK(
         vkCreateCommandPool(m_graphics_device.device(), &command_pool_create_info, nullptr, &m_command_pool),
         "Failed to create vulkan command pool");
-    HE_ASSERT(m_command_pool != VK_NULL_HANDLE);
 
     const auto command_buffer_allocate_info = VkCommandBufferAllocateInfo {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -39,7 +38,6 @@ VulkanCommandEncoder::VulkanCommandEncoder(VulkanGraphicsDevice &graphics_device
     HE_VK_CHECK(
         vkAllocateCommandBuffers(m_graphics_device.device(), &command_buffer_allocate_info, &m_command_buffer),
         "Failed to allocate vulkan command buffer");
-    HE_ASSERT(m_command_buffer != VK_NULL_HANDLE);
 
     constexpr auto fence_create_info = VkFenceCreateInfo {
         .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
@@ -50,7 +48,6 @@ VulkanCommandEncoder::VulkanCommandEncoder(VulkanGraphicsDevice &graphics_device
     HE_VK_CHECK(
         vkCreateFence(m_graphics_device.device(), &fence_create_info, nullptr, &m_fence),
         "Failed to create vulkan fence");
-    HE_ASSERT(m_fence != VK_NULL_HANDLE);
 
     auto submit_semaphore_type_create_info = VkSemaphoreTypeCreateInfo {
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
@@ -68,7 +65,6 @@ VulkanCommandEncoder::VulkanCommandEncoder(VulkanGraphicsDevice &graphics_device
     HE_VK_CHECK(
         vkCreateSemaphore(m_graphics_device.device(), &submit_semaphore_create_info, nullptr, &m_submit_semaphore),
         "Failed to create vulkan semaphore");
-    HE_ASSERT(m_submit_semaphore != VK_NULL_HANDLE);
 }
 
 VulkanCommandEncoder::~VulkanCommandEncoder()

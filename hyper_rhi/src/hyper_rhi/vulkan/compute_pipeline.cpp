@@ -50,7 +50,6 @@ VulkanComputePipeline::VulkanComputePipeline(
             nullptr,
             &m_raw),
         "Failed to create vulkan compute pipeline");
-    HE_ASSERT(m_raw != VK_NULL_HANDLE);
 }
 
 VulkanComputePipeline::~VulkanComputePipeline() { vkDestroyPipeline(m_graphics_device.device(), m_raw, nullptr); }

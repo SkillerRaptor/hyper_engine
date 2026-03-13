@@ -25,7 +25,6 @@ VulkanShader::VulkanShader(VulkanGraphicsDevice &graphics_device, const ShaderDe
     HE_VK_CHECK(
         vkCreateShaderModule(m_graphics_device.device(), &shader_module_create_info, nullptr, &m_raw),
         "Failed to create vulkan shader module");
-    HE_ASSERT(m_raw != VK_NULL_HANDLE);
 }
 
 VulkanShader::~VulkanShader() { vkDestroyShaderModule(m_graphics_device.device(), m_raw, nullptr); }

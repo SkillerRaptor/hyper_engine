@@ -69,8 +69,6 @@ VulkanTexture::VulkanTexture(VulkanGraphicsDevice &graphics_device, const Textur
             &m_allocation,
             nullptr),
         "Failed to create vulkan texture");
-    HE_ASSERT(m_raw != VK_NULL_HANDLE);
-    HE_ASSERT(m_allocation != VK_NULL_HANDLE);
 }
 
 VulkanTexture::~VulkanTexture()
