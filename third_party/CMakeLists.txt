@@ -276,7 +276,7 @@ CPMAddPackage(
 he_systemize(VulkanMemoryAllocator)
 
 he_download_and_extract(
-        https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.8.2505/dxc_2025_05_24.zip
+        https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.9.2602/dxc_2026_02_20.zip
         ${CMAKE_SOURCE_DIR}/third_party
         DirectXShaderCompiler)
 
