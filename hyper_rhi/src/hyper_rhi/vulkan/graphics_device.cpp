@@ -45,7 +45,7 @@ VulkanGraphicsDevice::VulkanGraphicsDevice(const Window &window, const Validatio
     create_swapchain(window);
     create_descriptors();
 
-    for (auto i = 0; i < s_frames_in_flight; ++i) {
+    for (auto i = u32 { 0 }; i < s_frames_in_flight; ++i) {
         m_command_encoders.push_back(make_own<VulkanCommandEncoder>(*this));
     }
 
@@ -294,7 +294,7 @@ void VulkanGraphicsDevice::create_device()
     };
 
     auto highest_score = u32 { 0 };
-    for (auto i = 0; i < physical_device_count; ++i) {
+    for (auto i = u32 { 0 }; i < physical_device_count; ++i) {
         const auto physical_device = physical_devices[i];
 
         auto properties = VkPhysicalDeviceProperties {};
@@ -395,7 +395,7 @@ void VulkanGraphicsDevice::create_device()
             continue;
         }
 
-        const auto device_type_score = [properties]() {
+        const auto device_type_score = [properties]() -> u32 {
             switch (properties.deviceType) {
             case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
                 return 4;

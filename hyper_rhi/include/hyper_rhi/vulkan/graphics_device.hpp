@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <array>
-#include <memory>
 #include <vector>
 
 // clang-format off
@@ -82,8 +80,8 @@ private:
     VkSurfaceKHR m_surface { VK_NULL_HANDLE };
 
     VkSwapchainKHR m_swapchain { VK_NULL_HANDLE };
-    std::vector<Texture> m_swapchain_textures {};
-    std::vector<TextureView> m_swapchain_texture_views {};
+    std::vector<Texture> m_swapchain_textures;
+    std::vector<TextureView> m_swapchain_texture_views;
 
     VkDescriptorPool m_descriptor_pool { VK_NULL_HANDLE };
     VkDescriptorSetLayout m_storage_buffer_layout { VK_NULL_HANDLE };
@@ -95,7 +93,7 @@ private:
     VkDescriptorSetLayout m_sampler_layout { VK_NULL_HANDLE };
     VkDescriptorSet m_sampler_set { VK_NULL_HANDLE };
 
-    std::vector<OwnPtr<BackendCommandEncoder>> m_command_encoders {};
+    std::vector<OwnPtr<BackendCommandEncoder>> m_command_encoders;
     u32 m_frame_index { 0 };
 };
 

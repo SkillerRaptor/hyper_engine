@@ -74,7 +74,7 @@ struct RenderPipelineDescriptor {
     Shader fragment_shader;
     PrimitiveState primitive_state {};
     MultisampleState multisample_state {};
-    std::vector<ColorAttachmentState> color_attachment_states {};
+    std::vector<ColorAttachmentState> color_attachment_states;
     std::optional<DepthStencilState> depth_stencil_state { std::nullopt };
 };
 

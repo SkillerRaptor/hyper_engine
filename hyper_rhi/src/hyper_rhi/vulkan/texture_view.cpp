@@ -28,7 +28,7 @@ VulkanTextureView::VulkanTextureView(VulkanGraphicsDevice &graphics_device, cons
     const auto format = desc.texture.format();
 
     const auto mip_levels = desc.mip_levels.value_or(desc.texture.mip_levels());
-    const auto array_layers = [&desc, &texture]() -> u32 {
+    const auto array_layers = [&desc]() -> u32 {
         if (desc.array_layers.has_value()) {
             return desc.array_layers.value();
         }
