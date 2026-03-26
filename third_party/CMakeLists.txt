@@ -6,6 +6,9 @@
 
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 
+#-------------------------------------------------------------------------------------------
+# Catch2
+#-------------------------------------------------------------------------------------------
 CPMAddPackage(
         NAME Catch2
         GITHUB_REPOSITORY catchorg/Catch2
@@ -18,36 +21,30 @@ CPMAddPackage(
 
 he_systemize(Catch2)
 
-CPMAddPackage(
-        NAME entt
-        GITHUB_REPOSITORY skypjack/entt
-        GIT_TAG v3.16.0
-        OPTIONS
-        "ENTT_USE_LIBCPP OFF"
-        "ENTT_USE_SANITIZER OFF"
-        "ENTT_USE_CLANG_TIDY OFF"
-        "ENTT_INCLUDE_HEADERS OFF"
-        "ENTT_INCLUDE_NATVIS OFF"
-        "ENTT_INSTALL OFF"
-        "ENTT_BUILD_TESTING OFF"
-        "ENTT_BUILD_TESTBED OFF"
-        "ENTT_BUILD_DOCS OFF")
+#-------------------------------------------------------------------------------------------
+# DirectXShaderCompiler
+#-------------------------------------------------------------------------------------------
+he_download_and_extract(
+        https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.9.2602/dxc_2026_02_20.zip
+        ${CMAKE_SOURCE_DIR}/third_party
+        DirectXShaderCompiler)
 
-he_systemize(EnTT)
+add_library(DirectXShaderCompiler INTERFACE)
+target_link_libraries(
+        DirectXShaderCompiler
+        INTERFACE
+        ${CMAKE_SOURCE_DIR}/third_party/DirectXShaderCompiler/lib/x64/dxcompiler.lib)
+target_include_directories(
+        DirectXShaderCompiler
+        SYSTEM
+        INTERFACE
+        ${CMAKE_SOURCE_DIR}/third_party/DirectXShaderCompiler/inc)
 
-if (WIN32)
-    CPMAddPackage(
-            NAME D3D12MemoryAllocator
-            GITHUB_REPOSITORY GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator
-            GIT_TAG v3.0.1
-            OPTIONS
-            "BUILD_DOCUMENTATION OFF"
-            "BUILD_SHARED_LIBS OFF"
-            "D3D12MA_BUILD_SAMPLE OFF")
-endif ()
+he_deploy_files(${CMAKE_CURRENT_LIST_DIR}/DirectXShaderCompiler/bin/x64/ hyper_engine/)
 
-# he_systemize(D3D12MemoryAllocator)
-
+#-------------------------------------------------------------------------------------------
+# fastgltf
+#-------------------------------------------------------------------------------------------
 CPMAddPackage(
         NAME fastgltf
         GITHUB_REPOSITORY spnda/fastgltf
@@ -68,8 +65,11 @@ CPMAddPackage(
         "FASTGLTF_ENABLE_KHR_IMPLICIT_SHAPES OFF"
         "FASTGLTF_ENABLE_KHR_PHYSICS_RIGID_BODIES OFF")
 
-# he_systemize(fastgltf)
+he_systemize(fastgltf)
 
+#-------------------------------------------------------------------------------------------
+# fmt
+#-------------------------------------------------------------------------------------------
 CPMAddPackage(
         NAME fmt
         GITHUB_REPOSITORY fmtlib/fmt
@@ -89,6 +89,9 @@ CPMAddPackage(
 
 he_systemize(fmt)
 
+#-------------------------------------------------------------------------------------------
+# glm
+#-------------------------------------------------------------------------------------------
 CPMAddPackage(
         NAME glm
         GITHUB_REPOSITORY g-truc/glm
@@ -114,18 +117,9 @@ CPMAddPackage(
 
 he_systemize(glm)
 
-CPMAddPackage(
-        NAME imgui
-        GITHUB_REPOSITORY ocornut/imgui
-        GIT_TAG v1.92.5
-        DOWNLOAD_ONLY YES)
-
-if (imgui_ADDED)
-    add_subdirectory(imgui)
-endif ()
-
-he_systemize(imgui)
-
+#-------------------------------------------------------------------------------------------
+# meshoptimizer
+#-------------------------------------------------------------------------------------------
 CPMAddPackage(
         NAME meshoptimizer
         GITHUB_REPOSITORY zeux/meshoptimizer
@@ -140,6 +134,9 @@ CPMAddPackage(
 
 he_systemize(meshoptimizer)
 
+#-------------------------------------------------------------------------------------------
+# SDL
+#-------------------------------------------------------------------------------------------
 CPMAddPackage(
         NAME SDL
         GITHUB_REPOSITORY libsdl-org/SDL
@@ -169,6 +166,9 @@ CPMAddPackage(
 
 he_systemize(SDL3-static)
 
+#-------------------------------------------------------------------------------------------
+# spdlog
+#-------------------------------------------------------------------------------------------
 CPMAddPackage(
         NAME spdlog
         GITHUB_REPOSITORY gabime/spdlog
@@ -202,6 +202,9 @@ CPMAddPackage(
 
 he_systemize(spdlog)
 
+#-------------------------------------------------------------------------------------------
+# stb
+#-------------------------------------------------------------------------------------------
 CPMAddPackage(
         NAME stb
         GITHUB_REPOSITORY nothings/stb
@@ -214,45 +217,9 @@ endif ()
 
 he_systemize(stb)
 
-CPMAddPackage(
-        NAME tracy
-        GITHUB_REPOSITORY wolfpld/tracy
-        GIT_TAG v0.13.1
-        OPTIONS
-        "TRACY_STATIC ON"
-        "TRACY_Fortran OFF"
-        "TRACY_LTO OFF"
-        "TRACY_ENABLE ON"
-        "TRACY_ON_DEMAND OFF"
-        "TRACY_CALLSTACK OFF"
-        "TRACY_NO_CALLSTACK OFF"
-        "TRACY_NO_CALLSTACK_INLINES OFF"
-        "TRACY_ONLY_LOCALHOST OFF"
-        "TRACY_NO_BROADCAST OFF"
-        "TRACY_ONLY_IPV4 OFF"
-        "TRACY_NO_CODE_TRANSFER OFF"
-        "TRACY_NO_CONTEXT_SWITCH OFF"
-        "TRACY_NO_EXIT OFF"
-        "TRACY_NO_SAMPLING OFF"
-        "TRACY_NO_VERIFY OFF"
-        "TRACY_NO_VSYNC_CAPTURE OFF"
-        "TRACY_NO_FRAME_IMAGE OFF"
-        "TRACY_NO_SYSTEM_TRACING OFF"
-        "TRACY_PATCHABLE_NOPSLEDS OFF"
-        "TRACY_DELAYED_INIT OFF"
-        "TRACY_MANUAL_LIFETIME OFF"
-        "TRACY_FIBERS OFF"
-        "TRACY_NO_CRASH_HANDLER OFF"
-        "TRACY_TIMER_FALLBACK OFF"
-        "TRACY_LIBUNWIND_BACKTRACE OFF"
-        "TRACY_SYMBOL_OFFLINE_RESOLVE OFF"
-        "TRACY_LIBBACKTRACE_ELF_DYNLOAD_SUPPORT OFF"
-        "TRACY_DEBUGINFOD OFF"
-        "TRACY_VERBOSE OFF"
-        "TRACY_DEMANGLE OFF")
-
-# he_systemize(TracyClient)
-
+#-------------------------------------------------------------------------------------------
+# volk
+#-------------------------------------------------------------------------------------------
 CPMAddPackage(
         NAME volk
         GITHUB_REPOSITORY zeux/volk
@@ -264,6 +231,9 @@ CPMAddPackage(
 
 he_systemize(volk)
 
+#-------------------------------------------------------------------------------------------
+# VulkanMemoryAllocator
+#-------------------------------------------------------------------------------------------
 CPMAddPackage(
         NAME VulkanMemoryAllocator
         GITHUB_REPOSITORY GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
@@ -274,21 +244,3 @@ CPMAddPackage(
         "VMA_BUILD_SAMPLES OFF")
 
 he_systemize(VulkanMemoryAllocator)
-
-he_download_and_extract(
-        https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.9.2602/dxc_2026_02_20.zip
-        ${CMAKE_SOURCE_DIR}/third_party
-        DirectXShaderCompiler)
-
-add_library(DirectXShaderCompiler INTERFACE)
-target_link_libraries(
-        DirectXShaderCompiler
-        INTERFACE
-        ${CMAKE_SOURCE_DIR}/third_party/DirectXShaderCompiler/lib/x64/dxcompiler.lib)
-target_include_directories(
-        DirectXShaderCompiler
-        SYSTEM
-        INTERFACE
-        ${CMAKE_SOURCE_DIR}/third_party/DirectXShaderCompiler/inc)
-
-he_deploy_files(${CMAKE_CURRENT_LIST_DIR}/DirectXShaderCompiler/bin/x64/ hyper_engine/)

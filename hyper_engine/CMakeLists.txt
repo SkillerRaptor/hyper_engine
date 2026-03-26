@@ -23,18 +23,9 @@ target_link_libraries(
         hyper_core
         hyper_platform
         hyper_rhi
-        EnTT::EnTT
         fastgltf::fastgltf
         glm
-        imgui
         stb)
-
-if (WIN32)
-    target_link_libraries(
-            hyper_engine
-            PRIVATE
-            D3D12MemoryAllocator)
-endif ()
 
 target_compile_definitions(
         hyper_engine

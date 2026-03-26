@@ -54,6 +54,6 @@ target_link_libraries(
         hyper_core
         hyper_platform
         DirectXShaderCompiler
+        GPUOpen::VulkanMemoryAllocator
         SDL3::SDL3
-        volk::volk
-        GPUOpen::VulkanMemoryAllocator)
+        volk::volk)
