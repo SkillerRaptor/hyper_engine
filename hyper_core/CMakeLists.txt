@@ -21,15 +21,7 @@ set(HEADERS
         include/hyper_core/types.hpp)
 
 he_add_library(hyper_core)
-target_compile_definitions(
-        hyper_core
-        PUBLIC
-        -DSPDLOG_NO_SOURCE_LOC)
 target_link_libraries(
         hyper_core
         PUBLIC
         fmt::fmt)
-target_link_libraries(
-        hyper_core
-        PRIVATE
-        spdlog::spdlog)

@@ -167,42 +167,6 @@ CPMAddPackage(
 he_systemize(SDL3-static)
 
 #-------------------------------------------------------------------------------------------
-# spdlog
-#-------------------------------------------------------------------------------------------
-CPMAddPackage(
-        NAME spdlog
-        GITHUB_REPOSITORY gabime/spdlog
-        GIT_TAG v1.17.0
-        OPTIONS
-        "SPDLOG_BUILD_ALL OFF"
-        "SPDLOG_BUILD_SHARED OFF"
-        "SPDLOG_ENABLE_PCH OFF"
-        "SPDLOG_BUILD_PIC OFF"
-        "SPDLOG_BUILD_EXAMPLE OFF"
-        "SPDLOG_BUILD_EXAMPLE_HO OFF"
-        "SPDLOG_BUILD_TESTS OFF"
-        "SPDLOG_BUILD_TESTS_HO OFF"
-        "SPDLOG_BUILD_BENCH OFF"
-        "SPDLOG_SANITIZE_ADDRESS OFF"
-        "SPDLOG_SANITIZE_THREAD OFF"
-        "SPDLOG_BUILD_WARNINGS OFF"
-        "SPDLOG_SYSTEM_INCLUDES OFF"
-        "SPDLOG_INSTALL OFF"
-        "SPDLOG_USE_STD_FORMAT OFF"
-        "SPDLOG_FMT_EXTERNAL ON"
-        "SPDLOG_FMT_EXTERNAL_HO OFF"
-        "SPDLOG_NO_EXCEPTIONS OFF"
-        "SPDLOG_PREVENT_CHILD_FD OFF"
-        "SPDLOG_NO_THREAD_ID OFF"
-        "SPDLOG_NO_TLS OFF"
-        "SPDLOG_NO_ATOMIC_LEVELS OFF"
-        "SPDLOG_DISABLE_DEFAULT_LOGGER OFF"
-        "SPDLOG_FWRITE_UNLOCKED ON"
-        "SPDLOG_TIDY OFF")
-
-he_systemize(spdlog)
-
-#-------------------------------------------------------------------------------------------
 # stb
 #-------------------------------------------------------------------------------------------
 CPMAddPackage(

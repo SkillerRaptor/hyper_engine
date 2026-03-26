@@ -13,18 +13,18 @@
 namespace he::logger {
 
 enum class Level : u8 {
+    Trace = 0,
+    Debug,
     Info,
     Warning,
     Error,
     Fatal,
-    Debug,
-    Trace,
 };
 
 void initialize(Level level);
 void flush();
 
-void log(Level level, std::string_view format);
+void log(Level level, std::string_view message);
 
 template <typename... Args>
 void info(fmt::format_string<Args...> format, Args &&...args)

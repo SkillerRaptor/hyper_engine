@@ -6,74 +6,92 @@
 
 #include "hyper_core/logger.hpp"
 
+#include <array>
+#include <chrono>
+#include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <string_view>
+
+#include <fmt/chrono.h>
 #include <fmt/color.h>
-#include <spdlog/sinks/ansicolor_sink-inl.h>
-#include <spdlog/sinks/ansicolor_sink.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/spdlog.h>
 
 #include "hyper_core/assertion.hpp"
 #include "hyper_core/memory.hpp"
 
 namespace he::logger {
 
-static RefPtr<spdlog::logger> s_logger { nullptr };
+static constexpr std::string_view s_reset = "\033[0m";
+static constexpr std::string_view s_gray = "\033[38;2;120;120;120m";
+static constexpr std::string_view s_white = "\033[38;2;211;211;211m";
+static constexpr std::string_view s_dark_gray = "\033[38;2;69;69;69m";
 
-static spdlog::level::level_enum convert_to_level(const Level level)
-{
-    switch (level) {
-    case Level::Info:
-        return spdlog::level::info;
-    case Level::Warning:
-        return spdlog::level::warn;
-    case Level::Error:
-        return spdlog::level::err;
-    case Level::Fatal:
-        return spdlog::level::critical;
-    case Level::Debug:
-        return spdlog::level::debug;
-    case Level::Trace:
-        return spdlog::level::trace;
-    default:
-        HE_UNREACHABLE();
-    }
-}
+struct LevelData {
+    std::string_view label;
+    std::string_view color;
+};
+
+static constexpr std::array<LevelData, 6> s_level_data = { {
+    { .label = "trace", .color = "\033[38;2;128;0;128m" },
+    { .label = "debug", .color = "\033[38;2;0;0;255m" },
+    { .label = "info", .color = "\033[38;2;0;128;0m" },
+    { .label = "warning", .color = "\033[38;2;255;215;0m" },
+    { .label = "error", .color = "\033[38;2;255;0;0m" },
+    { .label = "fatal", .color = "\033[38;2;220;20;60m" },
+} };
+
+static Level s_level { Level::Info };
+static std::ofstream s_file { };
 
 void initialize(const Level level)
 {
-    const auto stdout_sink = make_ref<spdlog::sinks::ansicolor_stdout_sink_mt>();
-    stdout_sink->set_color(spdlog::level::info, "\033[38;2;0;128;0m");
-    stdout_sink->set_color(spdlog::level::warn, "\033[38;2;255;215;0m");
-    stdout_sink->set_color(spdlog::level::err, "\033[38;2;255;0;0m");
-    stdout_sink->set_color(spdlog::level::critical, "\033[38;2;220;20;60m");
-    stdout_sink->set_color(spdlog::level::debug, "\033[38;2;0;0;255m");
-    stdout_sink->set_color(spdlog::level::trace, "\033[38;2;128;0;128m");
-    stdout_sink->set_pattern(
-        "\033[38;2;69;69;69m%Y-%m-%dT%H:%M:%S.%f %^%l%$\033[38;2;120;120;120m: \033[38;2;211;211;211m%v");
-
-    const auto file_sink = make_ref<spdlog::sinks::basic_file_sink_mt>("latest.log", true);
-    file_sink->set_pattern("%Y-%m-%d%H:%M:%S.%f %l: %v");
-
-    s_logger = make_ref<spdlog::logger>(
-        "HyperEngine",
-        spdlog::sinks_init_list {
-            stdout_sink,
-            file_sink,
-        });
-
-    const auto level_value = convert_to_level(level);
-    s_logger->set_level(level_value);
-    s_logger->flush_on(level_value);
+    s_level = level;
+    s_file.open("latest.log", std::ios::out | std::ios::trunc);
 
     HE_INFO("Initialized logger");
 }
 
-void flush() { s_logger->flush(); }
-
-void log(const Level level, const std::string_view format)
+void flush()
 {
-    const auto level_value = convert_to_level(level);
-    SPDLOG_LOGGER_CALL(s_logger, level_value, format);
+    std::fflush(stdout);
+
+    if (s_file.is_open()) {
+        s_file.flush();
+    }
+}
+
+static bool is_enabled(const Level level) { return static_cast<u8>(level) <= static_cast<u8>(s_level); }
+
+static std::string current_timestamp()
+{
+    const auto now = std::chrono::system_clock::now();
+    return fmt::format("{:%Y-%m-%dT%H:%M:%S}", now);
+}
+
+void log(const Level level, const std::string_view message)
+{
+    if (!is_enabled(level)) {
+        return;
+    }
+
+    const auto &data = s_level_data[static_cast<u8>(level)];
+    const auto timestamp = current_timestamp();
+
+    fmt::print(
+        "{}{} {}{}{}{}: {}{}{}\n",
+        s_dark_gray,
+        timestamp,
+        data.color,
+        data.label,
+        s_reset,
+        s_gray,
+        s_white,
+        message,
+        s_reset);
+
+    if (s_file.is_open()) {
+        s_file << timestamp << ' ' << data.label << ": " << message << '\n';
+    }
 }
 
 } // namespace he::logger
