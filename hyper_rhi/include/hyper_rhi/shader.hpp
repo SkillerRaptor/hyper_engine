@@ -12,7 +12,6 @@
 #include <string_view>
 
 #include <hyper_core/memory.hpp>
-#include <hyper_core/span.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/definitions.hpp"
@@ -24,7 +23,7 @@ struct ShaderDescriptor {
     std::optional<std::string_view> label = std::nullopt;
     ShaderType type = ShaderType::Compute;
     std::string entry;
-    ReadonlySpan<u8> byte_code = { };
+    std::span<const u8> byte_code = { };
 };
 
 class Shader : public Resource {

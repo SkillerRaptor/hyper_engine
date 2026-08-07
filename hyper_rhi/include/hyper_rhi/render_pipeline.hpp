@@ -11,7 +11,6 @@
 #include <vector>
 
 #include <hyper_core/memory.hpp>
-#include <hyper_core/span.hpp>
 
 #include "hyper_rhi/definitions.hpp"
 #include "hyper_rhi/pipeline_layout.hpp"
@@ -88,7 +87,7 @@ public:
     Shader fragment_shader() const { return m_fragment_shader; }
     PrimitiveState primitive_state() const { return m_primitive_state; }
     MultisampleState multisample_state() const { return m_multisample_state; }
-    ReadonlySpan<ColorAttachmentState> color_attachment_states() const { return m_color_attachment_states; }
+    std::span<const ColorAttachmentState> color_attachment_states() const { return m_color_attachment_states; }
     std::optional<DepthStencilState> depth_stencil_state() const { return m_depth_stencil_state; }
 
 private:
