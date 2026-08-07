@@ -17,8 +17,8 @@
 namespace he {
 
 struct PipelineLayoutDescriptor {
-    std::optional<std::string_view> label { std::nullopt };
-    u32 push_constant_size { 0 };
+    std::optional<std::string_view> label = std::nullopt;
+    u32 push_constant_size = 0;
 };
 
 class PipelineLayout : public Resource {
@@ -36,7 +36,7 @@ private:
     }
 
 private:
-    u32 m_push_constant_size { 0 };
+    u32 m_push_constant_size = 0;
 };
 
 } // namespace he

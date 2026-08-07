@@ -24,7 +24,7 @@ public:
 private:
     VulkanGraphicsDevice &m_graphics_device;
 
-    VkPipelineLayout m_raw { VK_NULL_HANDLE };
+    VkPipelineLayout m_raw = VK_NULL_HANDLE;
 };
 
 } // namespace he

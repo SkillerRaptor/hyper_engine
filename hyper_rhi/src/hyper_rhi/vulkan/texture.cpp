@@ -20,18 +20,18 @@ VulkanTexture::VulkanTexture(VulkanGraphicsDevice &graphics_device, const Textur
         return;
     }
 
-    auto flags = VkImageCreateFlags { 0 };
+    VkImageCreateFlags flags = 0;
     if (desc.dimension == Dimension::D2 && desc.extent.depth % 6 == 0 && desc.extent.width == desc.extent.height) {
         flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
     }
 
-    const auto extent = VkExtent3D {
+    const VkExtent3D extent = {
         .width = desc.extent.width,
         .height = desc.extent.height,
         .depth = desc.dimension != Dimension::D3 ? 1 : desc.extent.depth,
     };
 
-    const auto image_create_info = VkImageCreateInfo {
+    const VkImageCreateInfo image_create_info = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
         .pNext = nullptr,
         .flags = flags,
@@ -49,7 +49,7 @@ VulkanTexture::VulkanTexture(VulkanGraphicsDevice &graphics_device, const Textur
         .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
     };
 
-    constexpr auto allocation_create_info = VmaAllocationCreateInfo {
+    constexpr VmaAllocationCreateInfo allocation_create_info = {
         .flags = 0,
         .usage = VMA_MEMORY_USAGE_AUTO,
         .requiredFlags = 0,

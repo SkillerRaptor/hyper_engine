@@ -14,7 +14,7 @@
 
 #define HE_VK_CHECK(expression, ...)                                                      \
     do {                                                                                  \
-        const auto _result = (expression);                                                \
+        const VkResult _result = (expression);                                            \
         if ((_result) != VK_SUCCESS) [[unlikely]] {                                       \
             HE_PANIC(                                                                     \
                 "{}(...) failed: {}",                                                     \

@@ -14,7 +14,7 @@ namespace he {
 VulkanShader::VulkanShader(VulkanGraphicsDevice &graphics_device, const ShaderDescriptor &desc)
     : m_graphics_device(graphics_device)
 {
-    const auto shader_module_create_info = VkShaderModuleCreateInfo {
+    const VkShaderModuleCreateInfo shader_module_create_info = {
         .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,

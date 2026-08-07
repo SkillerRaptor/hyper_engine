@@ -23,7 +23,7 @@ public:
     u32 get() const { return m_handle; }
 
 private:
-    u32 m_handle { 0xffffffff };
+    u32 m_handle = 0xffffffff;
 };
 
 } // namespace he

@@ -19,13 +19,13 @@
 namespace he {
 
 struct TextureViewDescriptor {
-    std::optional<std::string_view> label { std::nullopt };
+    std::optional<std::string_view> label = std::nullopt;
     Texture texture;
-    ViewDimension dimension { ViewDimension::D2 };
-    u32 base_mip_level { 0 };
-    std::optional<u32> mip_levels { std::nullopt };
-    u32 base_array_layer { 0 };
-    std::optional<u32> array_layers { std::nullopt };
+    ViewDimension dimension = ViewDimension::D2;
+    u32 base_mip_level = 0;
+    std::optional<u32> mip_levels = std::nullopt;
+    u32 base_array_layer = 0;
+    std::optional<u32> array_layers = std::nullopt;
 };
 
 class TextureView : public Resource {
@@ -54,11 +54,11 @@ private:
 
 private:
     Texture m_texture;
-    ViewDimension m_dimension { ViewDimension::D2 };
-    u32 m_base_mip_level { 0 };
-    u32 m_mip_levels { 1 };
-    u32 m_base_array_layer { 0 };
-    u32 m_array_layers { 1 };
+    ViewDimension m_dimension = ViewDimension::D2;
+    u32 m_base_mip_level = 0;
+    u32 m_mip_levels = 1;
+    u32 m_base_array_layer = 0;
+    u32 m_array_layers = 1;
 };
 
 } // namespace he

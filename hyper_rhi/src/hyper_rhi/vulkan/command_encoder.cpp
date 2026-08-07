@@ -16,7 +16,7 @@ namespace he {
 VulkanCommandEncoder::VulkanCommandEncoder(VulkanGraphicsDevice &graphics_device)
     : m_graphics_device(graphics_device)
 {
-    const auto command_pool_create_info = VkCommandPoolCreateInfo {
+    const VkCommandPoolCreateInfo command_pool_create_info = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
         .pNext = nullptr,
         .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
@@ -27,7 +27,7 @@ VulkanCommandEncoder::VulkanCommandEncoder(VulkanGraphicsDevice &graphics_device
         vkCreateCommandPool(m_graphics_device.device(), &command_pool_create_info, nullptr, &m_command_pool),
         "Failed to create vulkan command pool");
 
-    const auto command_buffer_allocate_info = VkCommandBufferAllocateInfo {
+    const VkCommandBufferAllocateInfo command_buffer_allocate_info = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
         .pNext = nullptr,
         .commandPool = m_command_pool,
@@ -39,7 +39,7 @@ VulkanCommandEncoder::VulkanCommandEncoder(VulkanGraphicsDevice &graphics_device
         vkAllocateCommandBuffers(m_graphics_device.device(), &command_buffer_allocate_info, &m_command_buffer),
         "Failed to allocate vulkan command buffer");
 
-    constexpr auto fence_create_info = VkFenceCreateInfo {
+    constexpr VkFenceCreateInfo fence_create_info = {
         .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -49,14 +49,14 @@ VulkanCommandEncoder::VulkanCommandEncoder(VulkanGraphicsDevice &graphics_device
         vkCreateFence(m_graphics_device.device(), &fence_create_info, nullptr, &m_fence),
         "Failed to create vulkan fence");
 
-    auto submit_semaphore_type_create_info = VkSemaphoreTypeCreateInfo {
+    VkSemaphoreTypeCreateInfo submit_semaphore_type_create_info = {
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
         .pNext = nullptr,
         .semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE,
         .initialValue = 0,
     };
 
-    const auto submit_semaphore_create_info = VkSemaphoreCreateInfo {
+    const VkSemaphoreCreateInfo submit_semaphore_create_info = {
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
         .pNext = &submit_semaphore_type_create_info,
         .flags = 0,
@@ -76,8 +76,8 @@ VulkanCommandEncoder::~VulkanCommandEncoder()
 
 void VulkanCommandEncoder::acquire()
 {
-    const auto wait_frame_index = m_semaphore_counter;
-    const auto semaphore_wait_info = VkSemaphoreWaitInfo {
+    const u64 wait_frame_index = m_semaphore_counter;
+    const VkSemaphoreWaitInfo semaphore_wait_info = {
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -91,7 +91,7 @@ void VulkanCommandEncoder::acquire()
 
     HE_VK_CHECK(vkResetCommandBuffer(m_command_buffer, 0), "Failed to reset vulkan command buffer");
 
-    constexpr auto command_buffer_begin_info = VkCommandBufferBeginInfo {
+    constexpr VkCommandBufferBeginInfo command_buffer_begin_info = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         .pNext = nullptr,
         .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
@@ -109,14 +109,14 @@ void VulkanCommandEncoder::submit()
 
     m_semaphore_counter += 1;
 
-    const auto command_buffer_submit_info = VkCommandBufferSubmitInfo {
+    const VkCommandBufferSubmitInfo command_buffer_submit_info = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
         .pNext = nullptr,
         .commandBuffer = m_command_buffer,
         .deviceMask = 0,
     };
 
-    const auto submit_semaphore_submit_info = VkSemaphoreSubmitInfo {
+    const VkSemaphoreSubmitInfo submit_semaphore_submit_info = {
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
         .pNext = nullptr,
         .semaphore = m_submit_semaphore,
@@ -125,7 +125,7 @@ void VulkanCommandEncoder::submit()
         .deviceIndex = 0,
     };
 
-    const auto submit_info = VkSubmitInfo2 {
+    const VkSubmitInfo2 submit_info = {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
         .pNext = nullptr,
         .flags = 0,

@@ -65,35 +65,35 @@ private:
         void *);
 
 private:
-    VkInstance m_instance { VK_NULL_HANDLE };
-    VkDebugUtilsMessengerEXT m_debug_messenger { VK_NULL_HANDLE };
+    VkInstance m_instance = VK_NULL_HANDLE;
+    VkDebugUtilsMessengerEXT m_debug_messenger = VK_NULL_HANDLE;
 
-    u32 m_queue_family { 0 };
-    u32 m_sample_count { 1 };
-    VkPhysicalDevice m_physical_device { VK_NULL_HANDLE };
-    VkDevice m_device { VK_NULL_HANDLE };
-    VkQueue m_queue { VK_NULL_HANDLE };
+    u32 m_queue_family = 0;
+    u32 m_sample_count = 1;
+    VkPhysicalDevice m_physical_device = VK_NULL_HANDLE;
+    VkDevice m_device = VK_NULL_HANDLE;
+    VkQueue m_queue = VK_NULL_HANDLE;
 
-    VmaAllocator m_allocator { VK_NULL_HANDLE };
+    VmaAllocator m_allocator = VK_NULL_HANDLE;
 
-    VkSurfaceKHR m_surface { VK_NULL_HANDLE };
+    VkSurfaceKHR m_surface = VK_NULL_HANDLE;
 
-    VkSwapchainKHR m_swapchain { VK_NULL_HANDLE };
+    VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
     std::vector<Texture> m_swapchain_textures;
     std::vector<TextureView> m_swapchain_texture_views;
 
-    VkDescriptorPool m_descriptor_pool { VK_NULL_HANDLE };
-    VkDescriptorSetLayout m_storage_buffer_layout { VK_NULL_HANDLE };
-    VkDescriptorSet m_storage_buffer_set { VK_NULL_HANDLE };
-    VkDescriptorSetLayout m_sampled_image_layout { VK_NULL_HANDLE };
-    VkDescriptorSet m_sampled_image_set { VK_NULL_HANDLE };
-    VkDescriptorSetLayout m_storage_image_layout { VK_NULL_HANDLE };
-    VkDescriptorSet m_storage_image_set { VK_NULL_HANDLE };
-    VkDescriptorSetLayout m_sampler_layout { VK_NULL_HANDLE };
-    VkDescriptorSet m_sampler_set { VK_NULL_HANDLE };
+    VkDescriptorPool m_descriptor_pool = VK_NULL_HANDLE;
+    VkDescriptorSetLayout m_storage_buffer_layout = VK_NULL_HANDLE;
+    VkDescriptorSet m_storage_buffer_set = VK_NULL_HANDLE;
+    VkDescriptorSetLayout m_sampled_image_layout = VK_NULL_HANDLE;
+    VkDescriptorSet m_sampled_image_set = VK_NULL_HANDLE;
+    VkDescriptorSetLayout m_storage_image_layout = VK_NULL_HANDLE;
+    VkDescriptorSet m_storage_image_set = VK_NULL_HANDLE;
+    VkDescriptorSetLayout m_sampler_layout = VK_NULL_HANDLE;
+    VkDescriptorSet m_sampler_set = VK_NULL_HANDLE;
 
-    std::vector<OwnPtr<BackendCommandEncoder>> m_command_encoders;
-    u32 m_frame_index { 0 };
+    std::vector<OwnPtr<BackendCommandEncoder>> m_command_encoders = { };
+    u32 m_frame_index = 0;
 };
 
 } // namespace he

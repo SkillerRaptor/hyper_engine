@@ -20,7 +20,7 @@ protected:
     const void *internal_state() const { return m_internal_state.get(); }
 
 private:
-    RefPtr<void> m_internal_state { nullptr };
+    RefPtr<void> m_internal_state = nullptr;
 };
 
 } // namespace he

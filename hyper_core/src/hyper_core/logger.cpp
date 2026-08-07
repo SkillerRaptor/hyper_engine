@@ -10,26 +10,23 @@
 #include <chrono>
 #include <cstdio>
 #include <fstream>
-#include <iostream>
 #include <string_view>
 
 #include <fmt/chrono.h>
-#include <fmt/color.h>
 
 #include "hyper_core/assertion.hpp"
-#include "hyper_core/memory.hpp"
 
 namespace he::logger {
-
-static constexpr std::string_view s_reset = "\033[0m";
-static constexpr std::string_view s_gray = "\033[38;2;120;120;120m";
-static constexpr std::string_view s_white = "\033[38;2;211;211;211m";
-static constexpr std::string_view s_dark_gray = "\033[38;2;69;69;69m";
 
 struct LevelData {
     std::string_view label;
     std::string_view color;
 };
+
+static constexpr std::string_view s_reset = "\033[0m";
+static constexpr std::string_view s_gray = "\033[38;2;120;120;120m";
+static constexpr std::string_view s_white = "\033[38;2;211;211;211m";
+static constexpr std::string_view s_dark_gray = "\033[38;2;69;69;69m";
 
 static constexpr std::array<LevelData, 6> s_level_data = { {
     { .label = "trace", .color = "\033[38;2;128;0;128m" },
@@ -40,8 +37,8 @@ static constexpr std::array<LevelData, 6> s_level_data = { {
     { .label = "fatal", .color = "\033[38;2;220;20;60m" },
 } };
 
-static Level s_level { Level::Info };
-static std::ofstream s_file { };
+static Level s_level = Level::Info;
+static std::ofstream s_file;
 
 void initialize(const Level level)
 {
@@ -64,7 +61,7 @@ static bool is_enabled(const Level level) { return static_cast<u8>(level) <= sta
 
 static std::string current_timestamp()
 {
-    const auto now = std::chrono::system_clock::now();
+    const std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
     return fmt::format("{:%Y-%m-%dT%H:%M:%S}", now);
 }
 
@@ -74,8 +71,8 @@ void log(const Level level, const std::string_view message)
         return;
     }
 
-    const auto &data = s_level_data[static_cast<u8>(level)];
-    const auto timestamp = current_timestamp();
+    const LevelData &data = s_level_data[static_cast<u8>(level)];
+    const std::string timestamp = current_timestamp();
 
     fmt::print(
         "{}{} {}{}{}{}: {}{}{}\n",

@@ -18,7 +18,7 @@ int main()
 
     // TODO: Parse command line arguments
 
-    auto engine = he::Engine {};
+    he::Engine engine;
     engine.run();
 
     return EXIT_SUCCESS;

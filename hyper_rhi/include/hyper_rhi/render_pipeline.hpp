@@ -21,61 +21,61 @@
 namespace he {
 
 struct Operations {
-    LoadOperation load_op { LoadOperation::Clear };
-    StoreOperation store_op { StoreOperation::Store };
+    LoadOperation load_op = LoadOperation::Clear;
+    StoreOperation store_op = StoreOperation::Store;
 };
 
 struct PrimitiveState {
-    PrimitiveTopology topology { PrimitiveTopology::TriangleList };
-    FrontFace front_face { FrontFace::CounterClockwise };
-    Face cull_mode { Face::None };
-    PolygonMode polygon_mode { PolygonMode::Fill };
+    PrimitiveTopology topology = PrimitiveTopology::TriangleList;
+    FrontFace front_face = FrontFace::CounterClockwise;
+    Face cull_mode = Face::None;
+    PolygonMode polygon_mode = PolygonMode::Fill;
 };
 
 struct MultisampleState {
-    u32 sample_count { 1 };
+    u32 sample_count = 1;
 };
 
 struct BlendState {
-    bool enable { false };
-    BlendFactor src_factor { BlendFactor::One };
-    BlendFactor dst_factor { BlendFactor::Zero };
-    BlendOperation operation { BlendOperation::Add };
-    BlendFactor alpha_src_factor { BlendFactor::One };
-    BlendFactor alpha_dst_factor { BlendFactor::Zero };
-    BlendOperation alpha_operation { BlendOperation::Add };
-    ColorWrites color_writes { ColorWrites::All };
+    bool enable = false;
+    BlendFactor src_factor = BlendFactor::One;
+    BlendFactor dst_factor = BlendFactor::Zero;
+    BlendOperation operation = BlendOperation::Add;
+    BlendFactor alpha_src_factor = BlendFactor::One;
+    BlendFactor alpha_dst_factor = BlendFactor::Zero;
+    BlendOperation alpha_operation = BlendOperation::Add;
+    ColorWrites color_writes = ColorWrites::All;
 };
 
 struct ColorAttachmentState {
     Format format { Format::None };
-    BlendState blend_state {};
+    BlendState blend_state { };
 };
 
 struct DepthBiasState {
-    bool enable { false };
-    float constant { 0.0f };
-    float clamp { 0.0f };
-    float slope { 0.0f };
+    bool enable = false;
+    f32 constant = 0.0f;
+    f32 clamp = 0.0f;
+    f32 slope = 0.0f;
 };
 
 struct DepthStencilState {
-    bool depth_test_enable { false };
-    bool depth_write_enable { false };
-    Format depth_format { Format::None };
-    CompareOperation depth_compare_operation { CompareOperation::Less };
-    DepthBiasState depth_bias_state {};
+    bool depth_test_enable = false;
+    bool depth_write_enable = false;
+    Format depth_format = Format::None;
+    CompareOperation depth_compare_operation = CompareOperation::Less;
+    DepthBiasState depth_bias_state = { };
 };
 
 struct RenderPipelineDescriptor {
-    std::optional<std::string_view> label { std::nullopt };
+    std::optional<std::string_view> label = std::nullopt;
     PipelineLayout layout;
     Shader vertex_shader;
     Shader fragment_shader;
-    PrimitiveState primitive_state {};
-    MultisampleState multisample_state {};
-    std::vector<ColorAttachmentState> color_attachment_states;
-    std::optional<DepthStencilState> depth_stencil_state { std::nullopt };
+    PrimitiveState primitive_state = { };
+    MultisampleState multisample_state = { };
+    std::vector<ColorAttachmentState> color_attachment_states = { };
+    std::optional<DepthStencilState> depth_stencil_state = std::nullopt;
 };
 
 class RenderPipeline : public Resource {
@@ -110,8 +110,8 @@ private:
     Shader m_fragment_shader;
     PrimitiveState m_primitive_state;
     MultisampleState m_multisample_state;
-    std::vector<ColorAttachmentState> m_color_attachment_states;
-    std::optional<DepthStencilState> m_depth_stencil_state { std::nullopt };
+    std::vector<ColorAttachmentState> m_color_attachment_states = { };
+    std::optional<DepthStencilState> m_depth_stencil_state = std::nullopt;
 };
 
 } // namespace he

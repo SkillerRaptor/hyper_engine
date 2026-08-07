@@ -12,7 +12,7 @@ namespace he {
 
 VkBufferUsageFlags map_buffer_usage(const BitFlags<BufferUsage> usage)
 {
-    auto usage_flags = VkBufferUsageFlags { 0 };
+    VkBufferUsageFlags usage_flags = 0;
 
     if (usage.has(BufferUsage::TransferSrc)) {
         usage_flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -420,7 +420,7 @@ VkSampleCountFlagBits map_sample_count(const u32 sample_count)
 
 VkImageUsageFlags map_texture_usage(const BitFlags<TextureUsage> texture_usage_flags, const Format format)
 {
-    auto usage = VkImageUsageFlags { VK_IMAGE_USAGE_SAMPLED_BIT };
+    VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT;
 
     if (texture_usage_flags.has(TextureUsage::TransferSrc)) {
         usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
@@ -784,7 +784,7 @@ VkBlendOp map_blend_operation(const BlendOperation blend_operation)
 
 VkColorComponentFlags map_color_writes(const BitFlags<ColorWrites> color_writes)
 {
-    auto color_component_flags = VkColorComponentFlags { 0 };
+    VkColorComponentFlags color_component_flags = 0;
 
     if (color_writes.has(ColorWrites::R)) {
         color_component_flags |= VK_COLOR_COMPONENT_R_BIT;
@@ -895,7 +895,7 @@ VkAttachmentStoreOp map_store_operation(const StoreOperation store_operation)
 
 VkExtent2D map_extent_2d(const Extent2d extent)
 {
-    return {
+    return VkExtent2D {
         .width = extent.width,
         .height = extent.height,
     };
@@ -903,7 +903,7 @@ VkExtent2D map_extent_2d(const Extent2d extent)
 
 VkExtent3D map_extent_3d(const Extent3d extent)
 {
-    return {
+    return VkExtent3D {
         .width = extent.width,
         .height = extent.height,
         .depth = extent.depth,
@@ -912,7 +912,7 @@ VkExtent3D map_extent_3d(const Extent3d extent)
 
 VkOffset2D map_offset_2d(const Offset2d offset)
 {
-    return {
+    return VkOffset2D {
         .x = offset.x,
         .y = offset.y,
     };
@@ -920,7 +920,7 @@ VkOffset2D map_offset_2d(const Offset2d offset)
 
 VkOffset3D map_offset_3d(const Offset3d offset)
 {
-    return {
+    return VkOffset3D {
         .x = offset.x,
         .y = offset.y,
         .z = offset.z,

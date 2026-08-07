@@ -16,12 +16,12 @@ namespace he {
 
 Engine::Engine()
 {
-    const auto start_time = std::chrono::steady_clock::now();
+    const std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
 
     m_window = make_own<Window>("HyperEngine", 1280, 720);
     HE_ASSERT(m_window);
 
-    const auto validation =
+    constexpr Validation validation =
 #if HE_DEBUG_BUILD
         Validation::Enabled;
 #elif HE_RELEASE_BUILD
@@ -31,22 +31,22 @@ Engine::Engine()
     m_graphics_device = GraphicsDevice::create(GraphicsApi::Vulkan, *m_window, validation);
     HE_ASSERT(m_graphics_device);
 
-    const auto end_time = std::chrono::steady_clock::now();
-    const auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<f64>>(end_time - start_time);
+    const std::chrono::time_point<std::chrono::steady_clock> end_time = std::chrono::steady_clock::now();
+    const std::chrono::duration<f32> elapsed_seconds = end_time - start_time;
 
     HE_INFO("Completed engine initialization (time={:.2}s)", elapsed_seconds.count());
 }
 
 void Engine::run()
 {
-    constexpr auto delta_time = 1.0f / 60.0f;
+    constexpr f32 delta_time = 1.0f / 60.0f;
 
-    auto total_time = 0.0f;
-    auto accumulator = 0.0f;
-    auto current_time = std::chrono::steady_clock::now();
+    f32 total_time = 0.0f;
+    f32 accumulator = 0.0f;
+    std::chrono::time_point<std::chrono::steady_clock> current_time = std::chrono::steady_clock::now();
     while (!m_window->is_close_requested()) {
-        const auto new_time = std::chrono::steady_clock::now();
-        const auto frame_time = std::chrono::duration<f32>(new_time - current_time).count();
+        const std::chrono::time_point<std::chrono::steady_clock> new_time = std::chrono::steady_clock::now();
+        const f32 frame_time = std::chrono::duration_cast<std::chrono::duration<f32>>(new_time - current_time).count();
         current_time = new_time;
 
         accumulator += frame_time;
@@ -76,7 +76,7 @@ void Engine::update(const f32 delta_time) { (void) delta_time; }
 
 void Engine::render() const
 {
-    auto command_encoder = m_graphics_device->acquire_command_encoder();
+    CommandEncoder command_encoder = m_graphics_device->acquire_command_encoder();
     m_graphics_device->submit_command_encoder(std::move(command_encoder));
 }
 

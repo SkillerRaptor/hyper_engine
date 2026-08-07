@@ -24,7 +24,7 @@ public:
 private:
     VulkanGraphicsDevice &m_graphics_device;
 
-    VkSampler m_raw { VK_NULL_HANDLE };
+    VkSampler m_raw = VK_NULL_HANDLE;
 };
 
 } // namespace he

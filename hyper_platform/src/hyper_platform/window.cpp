@@ -62,7 +62,7 @@ Window &Window::operator=(Window &&other) noexcept
 
 void Window::update()
 {
-    auto event = SDL_Event {};
+    SDL_Event event = { };
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
@@ -95,8 +95,8 @@ void Window::set_size(const u32 width, const u32 height)
 
 std::pair<u32, u32> Window::size() const
 {
-    auto width = 0;
-    auto height = 0;
+    i32 width = 0;
+    i32 height = 0;
     SDL_GetWindowSize(m_native_handle, &width, &height);
     return { static_cast<u32>(width), static_cast<u32>(height) };
 }
@@ -105,7 +105,7 @@ void Window::set_fullscreen(const bool fullscreen) { SDL_SetWindowFullscreen(m_n
 
 bool Window::is_fullscreen() const
 {
-    const auto flags = SDL_GetWindowFlags(m_native_handle);
+    const SDL_WindowFlags flags = SDL_GetWindowFlags(m_native_handle);
     return (flags & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN;
 }
 
@@ -113,7 +113,7 @@ void Window::set_resizable(const bool resizable) { SDL_SetWindowResizable(m_nati
 
 bool Window::is_resizable() const
 {
-    const auto flags = SDL_GetWindowFlags(m_native_handle);
+    const SDL_WindowFlags flags = SDL_GetWindowFlags(m_native_handle);
     return (flags & SDL_WINDOW_RESIZABLE) == SDL_WINDOW_RESIZABLE;
 }
 

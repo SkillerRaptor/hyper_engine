@@ -17,9 +17,9 @@ VulkanComputePipeline::VulkanComputePipeline(
     VulkanGraphicsDevice &graphics_device, const ComputePipelineDescriptor &desc)
     : m_graphics_device(graphics_device)
 {
-    const auto *shader = graphics_device.get_internal_state<VulkanShader>(desc.shader);
+    const VulkanShader *shader = graphics_device.get_internal_state<VulkanShader>(desc.shader);
 
-    const auto pipeline_shader_stage_create_info = VkPipelineShaderStageCreateInfo {
+    const VkPipelineShaderStageCreateInfo pipeline_shader_stage_create_info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -29,9 +29,9 @@ VulkanComputePipeline::VulkanComputePipeline(
         .pSpecializationInfo = nullptr,
     };
 
-    const auto *pipeline_layout = graphics_device.get_internal_state<VulkanPipelineLayout>(desc.layout);
+    const VulkanPipelineLayout *pipeline_layout = graphics_device.get_internal_state<VulkanPipelineLayout>(desc.layout);
 
-    const auto compute_pipeline_create_info = VkComputePipelineCreateInfo {
+    const VkComputePipelineCreateInfo compute_pipeline_create_info = {
         .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,

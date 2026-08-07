@@ -15,7 +15,7 @@ namespace he {
 VulkanBuffer::VulkanBuffer(VulkanGraphicsDevice &graphics_device, const BufferDescriptor &desc, const bool staging)
     : m_graphics_device(graphics_device)
 {
-    const auto buffer_create_info = VkBufferCreateInfo {
+    const VkBufferCreateInfo buffer_create_info = {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -26,12 +26,12 @@ VulkanBuffer::VulkanBuffer(VulkanGraphicsDevice &graphics_device, const BufferDe
         .pQueueFamilyIndices = nullptr,
     };
 
-    auto allocation_flags = VmaAllocationCreateFlags { 0 };
+    VmaAllocationCreateFlags allocation_flags = 0;
     if (staging) {
         allocation_flags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
     }
 
-    const auto allocation_create_info = VmaAllocationCreateInfo {
+    const VmaAllocationCreateInfo allocation_create_info = {
         .flags = allocation_flags,
         .usage = VMA_MEMORY_USAGE_AUTO,
         .requiredFlags = 0,
@@ -54,7 +54,7 @@ VulkanBuffer::VulkanBuffer(VulkanGraphicsDevice &graphics_device, const BufferDe
 
     // FIXME: Maybe move this out?
     if (!desc.initial_data.empty()) {
-        auto *ptr = static_cast<void *>(nullptr);
+        void *ptr = nullptr;
         vmaMapMemory(m_graphics_device.allocator(), m_allocation, &ptr);
         HE_ASSERT(ptr);
         memcpy(ptr, desc.initial_data.data(), desc.initial_data.size());

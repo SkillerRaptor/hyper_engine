@@ -44,8 +44,8 @@ public:
     SDL_Window *native_handle() const { return m_native_handle; }
 
 private:
-    SDL_Window *m_native_handle { nullptr };
-    bool m_close_requested { false };
+    SDL_Window *m_native_handle = nullptr;
+    bool m_close_requested = false;
 };
 
 } // namespace he

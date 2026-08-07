@@ -13,13 +13,13 @@ namespace he::string_utils {
 
 std::string to_string(const std::wstring_view input)
 {
-    auto converter = std::wstring_convert<std::codecvt_utf8<wchar_t>> {};
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
     return converter.to_bytes(input.data(), input.data() + input.size());
 }
 
 std::wstring to_wstring(const std::string_view input)
 {
-    auto converter = std::wstring_convert<std::codecvt_utf8<wchar_t>> {};
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
     return converter.from_bytes(input.data(), input.data() + input.size());
 }
 

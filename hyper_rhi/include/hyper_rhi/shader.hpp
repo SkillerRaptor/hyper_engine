@@ -21,10 +21,10 @@
 namespace he {
 
 struct ShaderDescriptor {
-    std::optional<std::string_view> label { std::nullopt };
-    ShaderType type { ShaderType::Compute };
+    std::optional<std::string_view> label = std::nullopt;
+    ShaderType type = ShaderType::Compute;
     std::string entry;
-    ReadonlySpan<u8> byte_code {};
+    ReadonlySpan<u8> byte_code = { };
 };
 
 class Shader : public Resource {
@@ -44,7 +44,7 @@ private:
     }
 
 private:
-    ShaderType m_type { ShaderType::Compute };
+    ShaderType m_type = ShaderType::Compute;
     std::string m_entry;
 };
 

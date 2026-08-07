@@ -81,7 +81,7 @@ Texture GraphicsDevice::create_texture(const TextureDescriptor &desc)
     HE_ASSERT(desc.extent.height != 0);
     HE_ASSERT(desc.extent.depth != 0);
 
-    const auto max_mip_levels
+    const u32 max_mip_levels
         = std::min(static_cast<u32>(floor(log2(std::max(desc.extent.width, desc.extent.height))) + 1), 16u);
     HE_ASSERT(desc.mip_levels != 0);
     HE_ASSERT(desc.mip_levels <= max_mip_levels);
@@ -175,7 +175,7 @@ RenderPipeline GraphicsDevice::create_render_pipeline(const RenderPipelineDescri
 
     HE_ASSERT(!desc.color_attachment_states.empty());
 
-    for (const auto &color_attachment_state : desc.color_attachment_states) {
+    for (const ColorAttachmentState &color_attachment_state : desc.color_attachment_states) {
         HE_ASSERT(color_attachment_state.format != Format::None);
     }
 
@@ -188,7 +188,7 @@ RenderPipeline GraphicsDevice::create_render_pipeline(const RenderPipelineDescri
 
 CommandEncoder GraphicsDevice::acquire_command_encoder()
 {
-    const auto frame_id = m_frame_index % s_frames_in_flight;
+    const u32 frame_id = m_frame_index % s_frames_in_flight;
     return acquire_command_encoder_impl(frame_id);
 }
 

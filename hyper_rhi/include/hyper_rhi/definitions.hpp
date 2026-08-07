@@ -81,14 +81,14 @@ enum class Dimension : u8 {
 };
 
 struct Extent2d {
-    u32 width { 0 };
-    u32 height { 0 };
+    u32 width = 0;
+    u32 height = 0;
 };
 
 struct Extent3d {
-    u32 width { 0 };
-    u32 height { 0 };
-    u32 depth { 0 };
+    u32 width = 0;
+    u32 height = 0;
+    u32 depth = 0;
 };
 
 enum class Face : u8 {
@@ -217,14 +217,14 @@ enum class LoadOperation : u8 {
 };
 
 struct Offset2d {
-    i32 x { 0 };
-    i32 y { 0 };
+    i32 x = 0;
+    i32 y = 0;
 };
 
 struct Offset3d {
-    i32 x { 0 };
-    i32 y { 0 };
-    i32 z { 0 };
+    i32 x = 0;
+    i32 y = 0;
+    i32 z = 0;
 };
 
 enum class PolygonMode : u8 {

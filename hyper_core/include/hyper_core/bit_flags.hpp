@@ -27,7 +27,7 @@ public:
 
     constexpr BitFlags(std::initializer_list<T> flags)
     {
-        for (const auto flag : flags) {
+        for (const T flag : flags) {
             m_flags |= std::to_underlying(flag);
         }
     }
@@ -117,8 +117,6 @@ public:
 
     friend constexpr bool operator==(const BitFlags &lhs, const BitFlags &rhs) { return lhs.m_flags == rhs.m_flags; }
 
-    friend constexpr bool operator!=(const BitFlags &lhs, const BitFlags &rhs) { return !(lhs == rhs); }
-
 private:
     constexpr explicit BitFlags(UnderlyingT flags)
         : m_flags(flags)
@@ -126,7 +124,7 @@ private:
     }
 
 private:
-    UnderlyingT m_flags { 0 };
+    UnderlyingT m_flags = 0;
 };
 
 } // namespace he

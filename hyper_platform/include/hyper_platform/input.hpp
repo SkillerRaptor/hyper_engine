@@ -23,9 +23,9 @@ public:
     std::pair<f32, f32> mouse_position() const { return m_mouse_position; }
 
 private:
-    std::array<bool, 512> m_key_states {};
-    u32 m_mouse_state { 0 };
-    std::pair<f32, f32> m_mouse_position { 0.0f, 0.0f };
+    std::array<bool, 512> m_key_states = { };
+    u32 m_mouse_state = 0;
+    std::pair<f32, f32> m_mouse_position = { 0.0f, 0.0f };
 };
 
 } // namespace he
