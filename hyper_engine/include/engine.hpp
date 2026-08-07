@@ -31,10 +31,10 @@ private:
     void render() const;
 
 private:
-    OwnPtr<Window> m_window = nullptr;
+    std::unique_ptr<Window> m_window = nullptr;
     Input m_input;
 
-    OwnPtr<GraphicsDevice> m_graphics_device = nullptr;
+    std::unique_ptr<GraphicsDevice> m_graphics_device = nullptr;
 
     bool m_running = true;
 };

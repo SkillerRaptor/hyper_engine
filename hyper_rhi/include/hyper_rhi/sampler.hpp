@@ -9,8 +9,6 @@
 #include <optional>
 #include <string_view>
 
-#include <hyper_core/memory.hpp>
-
 #include "hyper_rhi/definitions.hpp"
 #include "hyper_rhi/resource.hpp"
 
@@ -47,7 +45,7 @@ public:
     BorderColor border_color() const { return m_border_color; }
 
 private:
-    Sampler(RefPtr<void> internal_state, const SamplerDescriptor &desc)
+    Sampler(std::shared_ptr<void> internal_state, const SamplerDescriptor &desc)
         : Resource(std::move(internal_state))
         , m_mag_filter(desc.mag_filter)
         , m_min_filter(desc.min_filter)

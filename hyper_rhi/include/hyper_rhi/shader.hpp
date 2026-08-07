@@ -11,7 +11,6 @@
 #include <string>
 #include <string_view>
 
-#include <hyper_core/memory.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/definitions.hpp"
@@ -35,7 +34,7 @@ public:
     std::string_view entry() const { return m_entry; }
 
 private:
-    Shader(RefPtr<void> internal_state, const ShaderDescriptor &desc)
+    Shader(std::shared_ptr<void> internal_state, const ShaderDescriptor &desc)
         : Resource(std::move(internal_state))
         , m_type(desc.type)
         , m_entry(desc.entry)

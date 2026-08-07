@@ -9,8 +9,6 @@
 #include <optional>
 #include <string_view>
 
-#include <hyper_core/memory.hpp>
-
 #include "hyper_rhi/pipeline_layout.hpp"
 #include "hyper_rhi/resource.hpp"
 #include "hyper_rhi/shader.hpp"
@@ -32,7 +30,7 @@ public:
     Shader shader() const { return m_shader; }
 
 private:
-    ComputePipeline(RefPtr<void> internal_state, const ComputePipelineDescriptor &desc)
+    ComputePipeline(std::shared_ptr<void> internal_state, const ComputePipelineDescriptor &desc)
         : Resource(std::move(internal_state))
         , m_layout(desc.layout)
         , m_shader(desc.shader)

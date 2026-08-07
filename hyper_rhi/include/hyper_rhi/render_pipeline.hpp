@@ -10,8 +10,6 @@
 #include <string_view>
 #include <vector>
 
-#include <hyper_core/memory.hpp>
-
 #include "hyper_rhi/definitions.hpp"
 #include "hyper_rhi/pipeline_layout.hpp"
 #include "hyper_rhi/resource.hpp"
@@ -91,7 +89,7 @@ public:
     std::optional<DepthStencilState> depth_stencil_state() const { return m_depth_stencil_state; }
 
 private:
-    RenderPipeline(RefPtr<void> internal_state, const RenderPipelineDescriptor &desc)
+    RenderPipeline(std::shared_ptr<void> internal_state, const RenderPipelineDescriptor &desc)
         : Resource(std::move(internal_state))
         , m_layout(desc.layout)
         , m_vertex_shader(desc.vertex_shader)

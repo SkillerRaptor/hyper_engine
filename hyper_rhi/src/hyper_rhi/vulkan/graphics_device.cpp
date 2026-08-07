@@ -46,7 +46,7 @@ VulkanGraphicsDevice::VulkanGraphicsDevice(const Window &window, const Validatio
     create_descriptors();
 
     for (u32 i = 0; i < s_frames_in_flight; ++i) {
-        m_command_encoders.push_back(make_own<VulkanCommandEncoder>(*this));
+        m_command_encoders.push_back(std::make_unique<VulkanCommandEncoder>(*this));
     }
 
     HE_INFO("Created graphics device");
@@ -81,49 +81,49 @@ VulkanGraphicsDevice::~VulkanGraphicsDevice()
 
 Buffer VulkanGraphicsDevice::create_buffer_impl(const BufferDescriptor &desc)
 {
-    RefPtr<VulkanBuffer> internal_state = make_ref<VulkanBuffer>(*this, desc, false);
+    std::shared_ptr<VulkanBuffer> internal_state = std::make_shared<VulkanBuffer>(*this, desc, false);
     return create_resource<Buffer>(std::move(internal_state), desc);
 }
 
 Shader VulkanGraphicsDevice::create_shader_impl(const ShaderDescriptor &desc)
 {
-    RefPtr<VulkanShader> internal_state = make_ref<VulkanShader>(*this, desc);
+    std::shared_ptr<VulkanShader> internal_state = std::make_shared<VulkanShader>(*this, desc);
     return create_resource<Shader>(std::move(internal_state), desc);
 }
 
 Sampler VulkanGraphicsDevice::create_sampler_impl(const SamplerDescriptor &desc)
 {
-    RefPtr<VulkanSampler> internal_state = make_ref<VulkanSampler>(*this, desc);
+    std::shared_ptr<VulkanSampler> internal_state = std::make_shared<VulkanSampler>(*this, desc);
     return create_resource<Sampler>(std::move(internal_state), desc);
 }
 
 Texture VulkanGraphicsDevice::create_texture_impl(const TextureDescriptor &desc)
 {
-    RefPtr<VulkanTexture> internal_state = make_ref<VulkanTexture>(*this, desc, VK_NULL_HANDLE);
+    std::shared_ptr<VulkanTexture> internal_state = std::make_shared<VulkanTexture>(*this, desc, VK_NULL_HANDLE);
     return create_resource<Texture>(std::move(internal_state), desc);
 }
 
 TextureView VulkanGraphicsDevice::create_texture_view_impl(const TextureViewDescriptor &desc)
 {
-    RefPtr<VulkanTextureView> internal_state = make_ref<VulkanTextureView>(*this, desc);
+    std::shared_ptr<VulkanTextureView> internal_state = std::make_shared<VulkanTextureView>(*this, desc);
     return create_resource<TextureView>(std::move(internal_state), desc);
 }
 
 PipelineLayout VulkanGraphicsDevice::create_pipeline_layout_impl(const PipelineLayoutDescriptor &desc)
 {
-    RefPtr<VulkanPipelineLayout> internal_state = make_ref<VulkanPipelineLayout>(*this, desc);
+    std::shared_ptr<VulkanPipelineLayout> internal_state = std::make_shared<VulkanPipelineLayout>(*this, desc);
     return create_resource<PipelineLayout>(std::move(internal_state), desc);
 }
 
 ComputePipeline VulkanGraphicsDevice::create_compute_pipeline_impl(const ComputePipelineDescriptor &desc)
 {
-    RefPtr<VulkanComputePipeline> internal_state = make_ref<VulkanComputePipeline>(*this, desc);
+    std::shared_ptr<VulkanComputePipeline> internal_state = std::make_shared<VulkanComputePipeline>(*this, desc);
     return create_resource<ComputePipeline>(std::move(internal_state), desc);
 }
 
 RenderPipeline VulkanGraphicsDevice::create_render_pipeline_impl(const RenderPipelineDescriptor &desc)
 {
-    RefPtr<VulkanRenderPipeline> internal_state = make_ref<VulkanRenderPipeline>(*this, desc);
+    std::shared_ptr<VulkanRenderPipeline> internal_state = std::make_shared<VulkanRenderPipeline>(*this, desc);
     return create_resource<RenderPipeline>(std::move(internal_state), desc);
 }
 
@@ -682,7 +682,8 @@ void VulkanGraphicsDevice::create_swapchain(const Window &window)
             .usage = TextureUsage::RenderAttachment,
         };
 
-        RefPtr<VulkanTexture> internal_texture = make_ref<VulkanTexture>(*this, texture_descriptor, image);
+        std::shared_ptr<VulkanTexture> internal_texture
+            = std::make_shared<VulkanTexture>(*this, texture_descriptor, image);
         Texture texture = create_resource<Texture>(std::move(internal_texture), texture_descriptor);
 
         const TextureViewDescriptor texture_view_descriptor = {
@@ -695,7 +696,8 @@ void VulkanGraphicsDevice::create_swapchain(const Window &window)
             .array_layers = 1,
         };
 
-        RefPtr<VulkanTextureView> internal_texture_view = make_ref<VulkanTextureView>(*this, texture_view_descriptor);
+        std::shared_ptr<VulkanTextureView> internal_texture_view
+            = std::make_shared<VulkanTextureView>(*this, texture_view_descriptor);
         TextureView texture_view
             = create_resource<TextureView>(std::move(internal_texture_view), texture_view_descriptor);
 

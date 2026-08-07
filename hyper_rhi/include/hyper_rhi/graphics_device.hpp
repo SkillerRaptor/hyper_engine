@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include <hyper_core/memory.hpp>
 #include <hyper_core/types.hpp>
 #include <hyper_platform/forward.hpp>
 
@@ -31,7 +30,7 @@ protected:
     static constexpr u32 s_frames_in_flight = 3;
 
 public:
-    static OwnPtr<GraphicsDevice> create(GraphicsApi, const Window &, Validation validation_requested);
+    static std::unique_ptr<GraphicsDevice> create(GraphicsApi, const Window &, Validation validation_requested);
     virtual ~GraphicsDevice() = default;
 
     GraphicsDevice(const GraphicsDevice &) = delete;
@@ -71,7 +70,7 @@ protected:
 
     template <typename T, typename U>
         requires std::derived_from<T, Resource>
-    static T create_resource(RefPtr<void> internal_state, const U &desc)
+    static T create_resource(std::shared_ptr<void> internal_state, const U &desc)
     {
         return T(std::move(internal_state), desc);
     }

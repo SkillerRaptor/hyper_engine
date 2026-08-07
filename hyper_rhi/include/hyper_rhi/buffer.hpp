@@ -11,7 +11,6 @@
 #include <string_view>
 
 #include <hyper_core/bit_flags.hpp>
-#include <hyper_core/memory.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/resource.hpp"
@@ -44,7 +43,7 @@ public:
     BitFlags<BufferUsage> usage() const { return m_usage; }
 
 private:
-    Buffer(RefPtr<void> internal_state, const BufferDescriptor &desc)
+    Buffer(std::shared_ptr<void> internal_state, const BufferDescriptor &desc)
         : Resource(std::move(internal_state))
         , m_size(desc.size)
         , m_usage(desc.usage)

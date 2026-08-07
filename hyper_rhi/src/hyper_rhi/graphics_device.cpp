@@ -20,12 +20,12 @@
 
 namespace he {
 
-OwnPtr<GraphicsDevice>
+std::unique_ptr<GraphicsDevice>
     GraphicsDevice::create(const GraphicsApi graphics_api, const Window &window, const Validation validation_requested)
 {
     switch (graphics_api) {
     case GraphicsApi::Vulkan:
-        return make_own<VulkanGraphicsDevice>(window, validation_requested);
+        return std::make_unique<VulkanGraphicsDevice>(window, validation_requested);
     default:
         HE_UNREACHABLE();
     }

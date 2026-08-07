@@ -9,7 +9,6 @@
 #include <optional>
 #include <string_view>
 
-#include <hyper_core/memory.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/definitions.hpp"
@@ -41,7 +40,7 @@ public:
     u32 array_layers() const { return m_array_layers; }
 
 private:
-    TextureView(RefPtr<void> internal_state, const TextureViewDescriptor &desc)
+    TextureView(std::shared_ptr<void> internal_state, const TextureViewDescriptor &desc)
         : Resource(std::move(internal_state))
         , m_texture(desc.texture)
         , m_dimension(desc.dimension)

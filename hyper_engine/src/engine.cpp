@@ -18,7 +18,7 @@ Engine::Engine()
 {
     const std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
 
-    m_window = make_own<Window>("HyperEngine", 1280, 720);
+    m_window = std::make_unique<Window>("HyperEngine", 1280, 720);
     HE_ASSERT(m_window);
 
     constexpr Validation validation =

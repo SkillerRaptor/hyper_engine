@@ -9,7 +9,6 @@
 #include <optional>
 #include <string_view>
 
-#include <hyper_core/memory.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/resource.hpp"
@@ -29,7 +28,7 @@ public:
     u32 push_constant_size() const { return m_push_constant_size; }
 
 private:
-    PipelineLayout(RefPtr<void> internal_state, const PipelineLayoutDescriptor &desc)
+    PipelineLayout(std::shared_ptr<void> internal_state, const PipelineLayoutDescriptor &desc)
         : Resource(std::move(internal_state))
         , m_push_constant_size(desc.push_constant_size)
     {

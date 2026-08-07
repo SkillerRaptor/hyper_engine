@@ -10,7 +10,6 @@
 #include <string_view>
 
 #include <hyper_core/bit_flags.hpp>
-#include <hyper_core/memory.hpp>
 #include <hyper_core/types.hpp>
 
 #include "hyper_rhi/definitions.hpp"
@@ -50,7 +49,7 @@ public:
     BitFlags<TextureUsage> usage() const { return m_usage; }
 
 private:
-    Texture(RefPtr<void> internal_state, const TextureDescriptor &desc)
+    Texture(std::shared_ptr<void> internal_state, const TextureDescriptor &desc)
         : Resource(std::move(internal_state))
         , m_extent(desc.extent)
         , m_mip_levels(desc.mip_levels)

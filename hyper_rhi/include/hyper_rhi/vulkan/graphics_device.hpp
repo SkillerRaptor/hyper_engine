@@ -92,7 +92,7 @@ private:
     VkDescriptorSetLayout m_sampler_layout = VK_NULL_HANDLE;
     VkDescriptorSet m_sampler_set = VK_NULL_HANDLE;
 
-    std::vector<OwnPtr<BackendCommandEncoder>> m_command_encoders = { };
+    std::vector<std::unique_ptr<BackendCommandEncoder>> m_command_encoders = { };
     u32 m_frame_index = 0;
 };
 
