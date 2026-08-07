@@ -19,8 +19,6 @@ CPMAddPackage(
         "CATCH_DEVELOPMENT_BUILD OFF"
         "CATCH_ENABLE_REPRODUCIBLE_BUILD ON")
 
-he_systemize(Catch2)
-
 #-------------------------------------------------------------------------------------------
 # DirectXShaderCompiler
 #-------------------------------------------------------------------------------------------
@@ -65,8 +63,6 @@ CPMAddPackage(
         "FASTGLTF_ENABLE_KHR_IMPLICIT_SHAPES OFF"
         "FASTGLTF_ENABLE_KHR_PHYSICS_RIGID_BODIES OFF")
 
-he_systemize(fastgltf)
-
 #-------------------------------------------------------------------------------------------
 # fmt
 #-------------------------------------------------------------------------------------------
@@ -86,8 +82,6 @@ CPMAddPackage(
         "FMT_MODULE OFF"
         "FMT_SYSTEM_HEADERS OFF"
         "FMT_UNICODE ON")
-
-he_systemize(fmt)
 
 #-------------------------------------------------------------------------------------------
 # glm
@@ -115,8 +109,6 @@ CPMAddPackage(
         "GLM_ENABLE_SIMD_NEON OFF"
         "GLM_FORCE_PURE OFF")
 
-he_systemize(glm)
-
 #-------------------------------------------------------------------------------------------
 # meshoptimizer
 #-------------------------------------------------------------------------------------------
@@ -131,8 +123,6 @@ CPMAddPackage(
         "MESHOPT_STABLE_EXPORTS OFF"
         "MESHOPT_WERROR OFF"
         "MESHOPT_INSTALL OFF")
-
-he_systemize(meshoptimizer)
 
 #-------------------------------------------------------------------------------------------
 # SDL
@@ -164,8 +154,6 @@ CPMAddPackage(
         "SDL_OPENGL OFF"
         "SDL_OPENGLES OFF")
 
-he_systemize(SDL3-static)
-
 #-------------------------------------------------------------------------------------------
 # stb
 #-------------------------------------------------------------------------------------------
@@ -179,8 +167,6 @@ if (stb_ADDED)
     add_subdirectory(stb)
 endif ()
 
-he_systemize(stb)
-
 #-------------------------------------------------------------------------------------------
 # volk
 #-------------------------------------------------------------------------------------------
@@ -193,8 +179,6 @@ CPMAddPackage(
         "VOLK_INSTALL OFF"
         "VOLK_HEADERS_ONLY OFF")
 
-he_systemize(volk)
-
 #-------------------------------------------------------------------------------------------
 # VulkanMemoryAllocator
 #-------------------------------------------------------------------------------------------
@@ -206,5 +190,3 @@ CPMAddPackage(
         "VMA_ENABLE_INSTALL OFF"
         "VMA_BUILD_DOCUMENTATION OFF"
         "VMA_BUILD_SAMPLES OFF")
-
-he_systemize(VulkanMemoryAllocator)

@@ -94,8 +94,3 @@ function(he_deploy_files SOURCE DESTINATION)
     message(STATUS "Copying ${SOURCE} to ${DEPLOY_FILES_DESTINATION}")
     file(COPY ${SOURCE} DESTINATION ${DEPLOY_FILES_DESTINATION})
 endfunction()
-
-function(he_systemize target)
-    get_target_property(${target}_include_dirs ${target} INTERFACE_INCLUDE_DIRECTORIES)
-    set_target_properties(${target} PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${target}_include_dirs)
-endfunction()
