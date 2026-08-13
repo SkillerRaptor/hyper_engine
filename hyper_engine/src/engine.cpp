@@ -44,10 +44,10 @@ void Engine::run()
     std::chrono::time_point<std::chrono::steady_clock> current_time = std::chrono::steady_clock::now();
     while (!m_window->is_close_requested()) {
         const std::chrono::time_point<std::chrono::steady_clock> new_time = std::chrono::steady_clock::now();
-        const f32 frame_time = (new_time - current_time).count();
+        const std::chrono::duration<f32> frame_time = new_time - current_time;
         current_time = new_time;
 
-        accumulator += frame_time;
+        accumulator += frame_time.count();
 
         m_window->update();
         m_input.update();
