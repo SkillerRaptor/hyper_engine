@@ -19,7 +19,6 @@ Engine::Engine()
     const std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
 
     m_window = std::make_unique<Window>("HyperEngine", 1280, 720);
-    HE_ASSERT(m_window);
 
     constexpr Validation validation =
 #if HE_DEBUG_BUILD
@@ -29,7 +28,6 @@ Engine::Engine()
 #endif
 
     m_graphics_device = GraphicsDevice::create(GraphicsApi::Vulkan, *m_window, validation);
-    HE_ASSERT(m_graphics_device);
 
     const std::chrono::time_point<std::chrono::steady_clock> end_time = std::chrono::steady_clock::now();
     const std::chrono::duration<f32> elapsed_seconds = end_time - start_time;
@@ -74,10 +72,6 @@ void Engine::fixed_update(const f32 delta_time) { (void) delta_time; }
 
 void Engine::update(const f32 delta_time) { (void) delta_time; }
 
-void Engine::render() const
-{
-    CommandEncoder command_encoder = m_graphics_device->acquire_command_encoder();
-    m_graphics_device->submit_command_encoder(std::move(command_encoder));
-}
+void Engine::render() const { }
 
 } // namespace he
