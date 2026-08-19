@@ -57,7 +57,7 @@ void flush()
     }
 }
 
-static bool is_enabled(const Level level) { return static_cast<u8>(level) <= static_cast<u8>(s_level); }
+static bool is_enabled(const Level level) { return static_cast<u8>(level) >= static_cast<u8>(s_level); }
 
 static std::string current_timestamp()
 {
