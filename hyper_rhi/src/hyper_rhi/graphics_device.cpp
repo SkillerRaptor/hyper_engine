@@ -44,6 +44,12 @@ void GraphicsDevice::destroy_buffer(Buffer *buffer)
     destroy_buffer_impl(buffer);
 }
 
+void GraphicsDevice::bind_buffer(const Buffer *buffer, const u32 slot) const
+{
+    HE_ASSERT(buffer != nullptr);
+    bind_buffer_impl(buffer, slot);
+}
+
 Shader *GraphicsDevice::create_shader(const ShaderDescriptor &desc)
 {
     validate_shader_descriptor(desc);
@@ -68,6 +74,12 @@ void GraphicsDevice::destroy_sampler(Sampler *sampler)
     destroy_sampler_impl(sampler);
 }
 
+void GraphicsDevice::bind_sampler(const Sampler *sampler, const u32 slot) const
+{
+    HE_ASSERT(sampler != nullptr);
+    bind_sampler_impl(sampler, slot);
+}
+
 Texture *GraphicsDevice::create_texture(const TextureDescriptor &desc)
 {
     validate_texture_descriptor(desc);
@@ -90,6 +102,18 @@ void GraphicsDevice::destroy_texture_view(TextureView *texture_view)
 {
     HE_ASSERT(texture_view != nullptr);
     destroy_texture_view_impl(texture_view);
+}
+
+void GraphicsDevice::bind_sampled_texture_view(const TextureView *texture_view, const u32 slot) const
+{
+    HE_ASSERT(texture_view != nullptr);
+    bind_sampled_texture_view_impl(texture_view, slot);
+}
+
+void GraphicsDevice::bind_storage_texture_view(const TextureView *texture_view, const u32 slot) const
+{
+    HE_ASSERT(texture_view != nullptr);
+    bind_storage_texture_view_impl(texture_view, slot);
 }
 
 PipelineLayout *GraphicsDevice::create_pipeline_layout(const PipelineLayoutDescriptor &desc)

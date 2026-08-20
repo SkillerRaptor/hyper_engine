@@ -103,6 +103,32 @@ Buffer *VulkanGraphicsDevice::create_buffer_impl(const BufferDescriptor &desc)
 
 void VulkanGraphicsDevice::destroy_buffer_impl(Buffer *buffer) { HE_PANIC(); }
 
+void VulkanGraphicsDevice::bind_buffer_impl(const Buffer *buffer, const u32 slot) const
+{
+    const VulkanBuffer *vulkan_buffer = static_cast<const VulkanBuffer *>(buffer);
+
+    const VkDescriptorBufferInfo descriptor_buffer_info = {
+        .buffer = vulkan_buffer->raw(),
+        .offset = 0,
+        .range = VK_WHOLE_SIZE,
+    };
+
+    const VkWriteDescriptorSet write_descriptor_set = {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .pNext = nullptr,
+        .dstSet = m_storage_buffer_set,
+        .dstBinding = 0,
+        .dstArrayElement = slot,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        .pImageInfo = nullptr,
+        .pBufferInfo = &descriptor_buffer_info,
+        .pTexelBufferView = nullptr,
+    };
+
+    vkUpdateDescriptorSets(m_device, 1, &write_descriptor_set, 0, nullptr);
+}
+
 Shader *VulkanGraphicsDevice::create_shader_impl(const ShaderDescriptor &desc)
 {
     return new VulkanShader(desc, m_device);
@@ -117,6 +143,32 @@ Sampler *VulkanGraphicsDevice::create_sampler_impl(const SamplerDescriptor &desc
 
 void VulkanGraphicsDevice::destroy_sampler_impl(Sampler *sampler) { HE_PANIC(); }
 
+void VulkanGraphicsDevice::bind_sampler_impl(const Sampler *sampler, const u32 slot) const
+{
+    const VulkanSampler *vulkan_sampler = static_cast<const VulkanSampler *>(sampler);
+
+    const VkDescriptorImageInfo descriptor_image_info = {
+        .sampler = vulkan_sampler->raw(),
+        .imageView = VK_NULL_HANDLE,
+        .imageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    const VkWriteDescriptorSet write_descriptor_set = {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .pNext = nullptr,
+        .dstSet = m_sampler_set,
+        .dstBinding = 0,
+        .dstArrayElement = slot,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
+        .pImageInfo = &descriptor_image_info,
+        .pBufferInfo = nullptr,
+        .pTexelBufferView = nullptr,
+    };
+
+    vkUpdateDescriptorSets(m_device, 1, &write_descriptor_set, 0, nullptr);
+}
+
 Texture *VulkanGraphicsDevice::create_texture_impl(const TextureDescriptor &desc)
 {
     return new VulkanTexture(desc, m_allocator);
@@ -130,6 +182,58 @@ TextureView *VulkanGraphicsDevice::create_texture_view_impl(const TextureViewDes
 }
 
 void VulkanGraphicsDevice::destroy_texture_view_impl(TextureView *texture_view) { HE_PANIC(); }
+
+void VulkanGraphicsDevice::bind_sampled_texture_view_impl(const TextureView *texture_view, const u32 slot) const
+{
+    const VulkanTextureView *vulkan_texture_view = static_cast<const VulkanTextureView *>(texture_view);
+
+    const VkDescriptorImageInfo descriptor_image_info = {
+        .sampler = VK_NULL_HANDLE,
+        .imageView = vulkan_texture_view->raw(),
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+    };
+
+    const VkWriteDescriptorSet write_descriptor_set = {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .pNext = nullptr,
+        .dstSet = m_sampled_image_set,
+        .dstBinding = 0,
+        .dstArrayElement = slot,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+        .pImageInfo = &descriptor_image_info,
+        .pBufferInfo = nullptr,
+        .pTexelBufferView = nullptr,
+    };
+
+    vkUpdateDescriptorSets(m_device, 1, &write_descriptor_set, 0, nullptr);
+}
+
+void VulkanGraphicsDevice::bind_storage_texture_view_impl(const TextureView *texture_view, const u32 slot) const
+{
+    const VulkanTextureView *vulkan_texture_view = static_cast<const VulkanTextureView *>(texture_view);
+
+    const VkDescriptorImageInfo descriptor_image_info = {
+        .sampler = VK_NULL_HANDLE,
+        .imageView = vulkan_texture_view->raw(),
+        .imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+    };
+
+    const VkWriteDescriptorSet write_descriptor_set = {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .pNext = nullptr,
+        .dstSet = m_storage_image_set,
+        .dstBinding = 0,
+        .dstArrayElement = slot,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+        .pImageInfo = &descriptor_image_info,
+        .pBufferInfo = nullptr,
+        .pTexelBufferView = nullptr,
+    };
+
+    vkUpdateDescriptorSets(m_device, 1, &write_descriptor_set, 0, nullptr);
+}
 
 PipelineLayout *VulkanGraphicsDevice::create_pipeline_layout_impl(const PipelineLayoutDescriptor &desc)
 {

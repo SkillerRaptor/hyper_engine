@@ -32,18 +32,22 @@ public:
 protected:
     Buffer *create_buffer_impl(const BufferDescriptor &) override;
     void destroy_buffer_impl(Buffer *) override;
+    void bind_buffer_impl(const Buffer *, u32 slot) const override;
 
     Shader *create_shader_impl(const ShaderDescriptor &) override;
     void destroy_shader_impl(Shader *) override;
 
     Sampler *create_sampler_impl(const SamplerDescriptor &) override;
     void destroy_sampler_impl(Sampler *) override;
+    void bind_sampler_impl(const Sampler *, u32 slot) const override;
 
     Texture *create_texture_impl(const TextureDescriptor &) override;
     void destroy_texture_impl(Texture *) override;
 
     TextureView *create_texture_view_impl(const TextureViewDescriptor &) override;
     void destroy_texture_view_impl(TextureView *) override;
+    void bind_sampled_texture_view_impl(const TextureView *, u32 slot) const override;
+    void bind_storage_texture_view_impl(const TextureView *, u32 slot) const override;
 
     PipelineLayout *create_pipeline_layout_impl(const PipelineLayoutDescriptor &) override;
     void destroy_pipeline_layout_impl(PipelineLayout *) override;

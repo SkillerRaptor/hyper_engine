@@ -30,18 +30,22 @@ public:
 
     Buffer *create_buffer(const BufferDescriptor &);
     void destroy_buffer(Buffer *);
+    void bind_buffer(const Buffer *, u32 slot) const;
 
     Shader *create_shader(const ShaderDescriptor &);
     void destroy_shader(Shader *);
 
     Sampler *create_sampler(const SamplerDescriptor &);
     void destroy_sampler(Sampler *);
+    void bind_sampler(const Sampler *, u32 slot) const;
 
     Texture *create_texture(const TextureDescriptor &);
     void destroy_texture(Texture *);
 
     TextureView *create_texture_view(const TextureViewDescriptor &);
     void destroy_texture_view(TextureView *);
+    void bind_sampled_texture_view(const TextureView *, u32 slot) const;
+    void bind_storage_texture_view(const TextureView *, u32 slot) const;
 
     PipelineLayout *create_pipeline_layout(const PipelineLayoutDescriptor &);
     void destroy_pipeline_layout(PipelineLayout *);
@@ -55,18 +59,22 @@ public:
 protected:
     virtual Buffer *create_buffer_impl(const BufferDescriptor &) = 0;
     virtual void destroy_buffer_impl(Buffer *) = 0;
+    virtual void bind_buffer_impl(const Buffer *, u32 slot) const = 0;
 
     virtual Shader *create_shader_impl(const ShaderDescriptor &) = 0;
     virtual void destroy_shader_impl(Shader *) = 0;
 
     virtual Sampler *create_sampler_impl(const SamplerDescriptor &) = 0;
     virtual void destroy_sampler_impl(Sampler *) = 0;
+    virtual void bind_sampler_impl(const Sampler *, u32 slot) const = 0;
 
     virtual Texture *create_texture_impl(const TextureDescriptor &) = 0;
     virtual void destroy_texture_impl(Texture *) = 0;
 
     virtual TextureView *create_texture_view_impl(const TextureViewDescriptor &) = 0;
     virtual void destroy_texture_view_impl(TextureView *) = 0;
+    virtual void bind_sampled_texture_view_impl(const TextureView *, u32 slot) const = 0;
+    virtual void bind_storage_texture_view_impl(const TextureView *, u32 slot) const = 0;
 
     virtual PipelineLayout *create_pipeline_layout_impl(const PipelineLayoutDescriptor &) = 0;
     virtual void destroy_pipeline_layout_impl(PipelineLayout *) = 0;
