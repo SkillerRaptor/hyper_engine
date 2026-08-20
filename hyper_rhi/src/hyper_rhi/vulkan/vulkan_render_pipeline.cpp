@@ -14,7 +14,6 @@
 #include "hyper_rhi/vulkan/vulkan_shader.hpp"
 
 namespace he {
-class VulkanPipelineLayout;
 
 VulkanRenderPipeline::VulkanRenderPipeline(const RenderPipelineDescriptor &desc, const VkDevice device)
     : RenderPipeline(desc)

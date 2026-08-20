@@ -36,6 +36,7 @@ public:
         , m_address_mode_u(desc.address_mode_u)
         , m_address_mode_v(desc.address_mode_v)
         , m_address_mode_w(desc.address_mode_w)
+        , m_compare_operation(desc.compare_operation)
         , m_min_lod(desc.min_lod)
         , m_max_lod(desc.max_lod)
         , m_border_color(desc.border_color)

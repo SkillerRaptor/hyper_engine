@@ -137,7 +137,7 @@ PipelineLayout *VulkanGraphicsDevice::create_pipeline_layout_impl(const Pipeline
         m_storage_buffer_layout,
         m_sampled_image_layout,
         m_storage_image_layout,
-        m_sampled_image_layout,
+        m_sampler_layout,
     };
 
     return new VulkanPipelineLayout(desc, m_device, descriptor_set_layouts);
