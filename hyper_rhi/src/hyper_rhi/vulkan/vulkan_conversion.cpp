@@ -810,10 +810,6 @@ VkImageViewType to_vk_image_view_type(const ViewDimension view_dimension)
         return VK_IMAGE_VIEW_TYPE_2D;
     case ViewDimension::D2Array:
         return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
-    case ViewDimension::D3:
-        return VK_IMAGE_VIEW_TYPE_3D;
-    case ViewDimension::Cube:
-        return VK_IMAGE_VIEW_TYPE_CUBE;
     default:
         HE_UNREACHABLE();
     }

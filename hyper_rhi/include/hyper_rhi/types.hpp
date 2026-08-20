@@ -257,8 +257,6 @@ enum class ViewDimension : u8 {
     D1 = 0,
     D2,
     D2Array,
-    D3,
-    Cube,
 };
 
 } // namespace he

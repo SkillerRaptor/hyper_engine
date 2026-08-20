@@ -208,9 +208,7 @@ void GraphicsDevice::validate_texture_view_descriptor(const TextureViewDescripto
         HE_ASSERT(desc.dimension == ViewDimension::D1);
         break;
     case Dimension::D2:
-        HE_ASSERT(
-            desc.dimension == ViewDimension::D2 || desc.dimension == ViewDimension::D2Array
-            || desc.dimension == ViewDimension::Cube);
+        HE_ASSERT(desc.dimension == ViewDimension::D2 || desc.dimension == ViewDimension::D2Array);
         break;
     default:
         HE_UNREACHABLE();

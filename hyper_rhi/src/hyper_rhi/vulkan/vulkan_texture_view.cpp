@@ -35,12 +35,9 @@ VulkanTextureView::VulkanTextureView(const TextureViewDescriptor &desc, const Vk
         switch (desc.dimension) {
         case ViewDimension::D1:
         case ViewDimension::D2:
-        case ViewDimension::D3:
             return 1;
         case ViewDimension::D2Array:
             return texture->array_layers() - desc.base_array_layer;
-        case ViewDimension::Cube:
-            return 6;
         default:
             HE_UNREACHABLE();
         }

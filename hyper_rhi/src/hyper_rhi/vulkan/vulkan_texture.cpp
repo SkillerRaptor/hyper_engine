@@ -15,11 +15,6 @@ VulkanTexture::VulkanTexture(const TextureDescriptor &desc, const VmaAllocator a
     : Texture(desc)
     , m_allocator(allocator)
 {
-    VkImageCreateFlags flags = 0;
-    if (desc.dimension == Dimension::D2 && desc.array_layers % 6 == 0 && desc.extent.width == desc.extent.height) {
-        flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
-    }
-
     const VkExtent3D extent = {
         .width = desc.extent.width,
         .height = desc.extent.height,
@@ -29,7 +24,7 @@ VulkanTexture::VulkanTexture(const TextureDescriptor &desc, const VmaAllocator a
     const VkImageCreateInfo create_info = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
         .pNext = nullptr,
-        .flags = flags,
+        .flags = 0,
         .imageType = conversion::to_vk_image_type(desc.dimension),
         .format = conversion::to_vk_format(desc.format),
         .extent = extent,
