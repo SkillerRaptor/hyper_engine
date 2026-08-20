@@ -23,6 +23,7 @@ target_link_libraries(
         hyper_core
         hyper_platform
         hyper_rhi
+        hyper_script
         fastgltf::fastgltf
         glm
         stb)

@@ -10,6 +10,7 @@
 
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
+#include <hyper_script/lexer.hpp>
 
 namespace he {
 
@@ -20,7 +21,20 @@ Engine::Engine()
     m_window = std::make_unique<Window>("HyperEngine", 1280, 720);
     m_graphics_device = GraphicsDevice::create(GraphicsApi::Vulkan, *m_window);
 
-    const std::chrono::time_point<std::chrono::steady_clock> end_time = std::chrono::steady_clock::now();
+    constexpr std::string_view source = "5 + 4 - 3 * 2 / 1";
+
+    HE_INFO("Evaluating \"{}\"", source);
+
+    Lexer lexer(source);
+    const std::vector<Token> tokens = lexer.lex();
+
+    HE_INFO("Lexer dump:");
+    for (size_t i = 0; i < tokens.size(); ++i) {
+        const Token &token = tokens[i];
+        HE_INFO(" [{:2}] {}", i, token);
+    }
+
+    std::chrono::time_point<std::chrono::steady_clock> end_time = std::chrono::steady_clock::now();
     const std::chrono::duration<f32> elapsed_seconds = end_time - start_time;
 
     HE_INFO("Completed engine initialization (time={:.2}s)", elapsed_seconds.count());
