@@ -26,8 +26,10 @@ VulkanBuffer::VulkanBuffer(const BufferDescriptor &desc, const VmaAllocator allo
         .pQueueFamilyIndices = nullptr,
     };
 
-    constexpr VmaAllocationCreateInfo allocation_create_info = {
-        .flags = 0,
+    const VmaAllocationCreateFlags flags
+        = desc.initial_data.empty() ? 0 : VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+    const VmaAllocationCreateInfo allocation_create_info = {
+        .flags = flags,
         .usage = VMA_MEMORY_USAGE_AUTO,
         .requiredFlags = 0,
         .preferredFlags = 0,
@@ -38,6 +40,14 @@ VulkanBuffer::VulkanBuffer(const BufferDescriptor &desc, const VmaAllocator allo
     };
 
     HE_VK_CHECK(vmaCreateBuffer(m_allocator, &create_info, &allocation_create_info, &m_raw, &m_allocation, nullptr));
+
+    if (!desc.initial_data.empty()) {
+        void *ptr = nullptr;
+        HE_VK_CHECK(vmaMapMemory(m_allocator, m_allocation, &ptr));
+        memcpy(ptr, desc.initial_data.data(), desc.initial_data.size());
+        vmaFlushAllocation(m_allocator, m_allocation, 0, VK_WHOLE_SIZE);
+        vmaUnmapMemory(m_allocator, m_allocation);
+    }
 }
 
 VulkanBuffer::~VulkanBuffer() { vmaDestroyBuffer(m_allocator, m_raw, m_allocation); }
