@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <hyper_platform/input.hpp>
 #include <hyper_platform/window.hpp>
 #include <hyper_rhi/graphics_device.hpp>

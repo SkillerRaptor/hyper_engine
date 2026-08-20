@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-present, SkillerRaptor
+ * Copyright (c) 2026-present, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
@@ -11,35 +11,29 @@
 #include <string>
 #include <string_view>
 
-#include <hyper_core/types.hpp>
-
-#include "hyper_rhi/definitions.hpp"
-#include "hyper_rhi/resource.hpp"
+#include "hyper_rhi/types.hpp"
 
 namespace he {
 
 struct ShaderDescriptor {
     std::optional<std::string_view> label = std::nullopt;
     ShaderType type = ShaderType::Compute;
-    std::string entry;
+    std::string_view entry;
     std::span<const u8> byte_code = { };
 };
 
-class Shader : public Resource {
-private:
-    friend class GraphicsDevice;
-
+class Shader {
 public:
-    ShaderType type() const { return m_type; }
-    std::string_view entry() const { return m_entry; }
-
-private:
-    Shader(std::shared_ptr<void> internal_state, const ShaderDescriptor &desc)
-        : Resource(std::move(internal_state))
-        , m_type(desc.type)
+    explicit Shader(const ShaderDescriptor &desc)
+        : m_type(desc.type)
         , m_entry(desc.entry)
     {
     }
+
+    virtual ~Shader() = default;
+
+    ShaderType type() const { return m_type; }
+    std::string_view entry() const { return m_entry; }
 
 private:
     ShaderType m_type = ShaderType::Compute;

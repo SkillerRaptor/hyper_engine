@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-present, SkillerRaptor
+ * Copyright (c) 2026-present, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
@@ -7,20 +7,14 @@
 #pragma once
 
 #include <optional>
+#include <span>
 #include <string_view>
 #include <vector>
 
-#include "hyper_rhi/definitions.hpp"
-#include "hyper_rhi/pipeline_layout.hpp"
-#include "hyper_rhi/resource.hpp"
-#include "hyper_rhi/shader.hpp"
+#include "hyper_rhi/forward.hpp"
+#include "hyper_rhi/types.hpp"
 
 namespace he {
-
-struct Operations {
-    LoadOperation load_op = LoadOperation::Clear;
-    StoreOperation store_op = StoreOperation::Store;
-};
 
 struct PrimitiveState {
     PrimitiveTopology topology = PrimitiveTopology::TriangleList;
@@ -45,8 +39,8 @@ struct BlendState {
 };
 
 struct ColorAttachmentState {
-    Format format { Format::None };
-    BlendState blend_state { };
+    Format format = Format::None;
+    BlendState blend_state = { };
 };
 
 struct DepthBiasState {
@@ -66,32 +60,19 @@ struct DepthStencilState {
 
 struct RenderPipelineDescriptor {
     std::optional<std::string_view> label = std::nullopt;
-    PipelineLayout layout;
-    Shader vertex_shader;
-    Shader fragment_shader;
+    PipelineLayout *layout = nullptr;
+    Shader *vertex_shader = nullptr;
+    Shader *fragment_shader = nullptr;
     PrimitiveState primitive_state = { };
     MultisampleState multisample_state = { };
     std::vector<ColorAttachmentState> color_attachment_states = { };
     std::optional<DepthStencilState> depth_stencil_state = std::nullopt;
 };
 
-class RenderPipeline : public Resource {
-private:
-    friend class GraphicsDevice;
-
+class RenderPipeline {
 public:
-    PipelineLayout layout() const { return m_layout; }
-    Shader vertex_shader() const { return m_vertex_shader; }
-    Shader fragment_shader() const { return m_fragment_shader; }
-    PrimitiveState primitive_state() const { return m_primitive_state; }
-    MultisampleState multisample_state() const { return m_multisample_state; }
-    std::span<const ColorAttachmentState> color_attachment_states() const { return m_color_attachment_states; }
-    std::optional<DepthStencilState> depth_stencil_state() const { return m_depth_stencil_state; }
-
-private:
-    RenderPipeline(std::shared_ptr<void> internal_state, const RenderPipelineDescriptor &desc)
-        : Resource(std::move(internal_state))
-        , m_layout(desc.layout)
+    explicit RenderPipeline(const RenderPipelineDescriptor &desc)
+        : m_layout(desc.layout)
         , m_vertex_shader(desc.vertex_shader)
         , m_fragment_shader(desc.fragment_shader)
         , m_primitive_state(desc.primitive_state)
@@ -101,12 +82,22 @@ private:
     {
     }
 
+    virtual ~RenderPipeline() = default;
+
+    PipelineLayout *layout() const { return m_layout; }
+    Shader *vertex_shader() const { return m_vertex_shader; }
+    Shader *fragment_shader() const { return m_fragment_shader; }
+    PrimitiveState primitive_state() const { return m_primitive_state; }
+    MultisampleState multisample_state() const { return m_multisample_state; }
+    std::span<const ColorAttachmentState> color_attachment_states() const { return m_color_attachment_states; }
+    std::optional<DepthStencilState> depth_stencil_state() const { return m_depth_stencil_state; }
+
 private:
-    PipelineLayout m_layout;
-    Shader m_vertex_shader;
-    Shader m_fragment_shader;
-    PrimitiveState m_primitive_state;
-    MultisampleState m_multisample_state;
+    PipelineLayout *m_layout = nullptr;
+    Shader *m_vertex_shader = nullptr;
+    Shader *m_fragment_shader = nullptr;
+    PrimitiveState m_primitive_state = { };
+    MultisampleState m_multisample_state = { };
     std::vector<ColorAttachmentState> m_color_attachment_states = { };
     std::optional<DepthStencilState> m_depth_stencil_state = std::nullopt;
 };

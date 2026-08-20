@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-present, SkillerRaptor
+ * Copyright (c) 2026-present, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
@@ -9,8 +9,7 @@
 #include <optional>
 #include <string_view>
 
-#include "hyper_rhi/definitions.hpp"
-#include "hyper_rhi/resource.hpp"
+#include "hyper_rhi/types.hpp"
 
 namespace he {
 
@@ -28,11 +27,23 @@ struct SamplerDescriptor {
     BorderColor border_color = BorderColor::TransparentBlack;
 };
 
-class Sampler : public Resource {
-private:
-    friend class GraphicsDevice;
-
+class Sampler {
 public:
+    explicit Sampler(const SamplerDescriptor &desc)
+        : m_mag_filter(desc.mag_filter)
+        , m_min_filter(desc.min_filter)
+        , m_mipmap_filter(desc.mipmap_filter)
+        , m_address_mode_u(desc.address_mode_u)
+        , m_address_mode_v(desc.address_mode_v)
+        , m_address_mode_w(desc.address_mode_w)
+        , m_min_lod(desc.min_lod)
+        , m_max_lod(desc.max_lod)
+        , m_border_color(desc.border_color)
+    {
+    }
+
+    virtual ~Sampler() = default;
+
     Filter mag_filter() const { return m_mag_filter; }
     Filter min_filter() const { return m_min_filter; }
     Filter mipmap_filter() const { return m_mipmap_filter; }
@@ -40,25 +51,9 @@ public:
     AddressMode address_mode_v() const { return m_address_mode_v; }
     AddressMode address_mode_w() const { return m_address_mode_w; }
     CompareOperation compare_operation() const { return m_compare_operation; }
-    float min_lod() const { return m_min_lod; }
-    float max_lod() const { return m_max_lod; }
+    f32 min_lod() const { return m_min_lod; }
+    f32 max_lod() const { return m_max_lod; }
     BorderColor border_color() const { return m_border_color; }
-
-private:
-    Sampler(std::shared_ptr<void> internal_state, const SamplerDescriptor &desc)
-        : Resource(std::move(internal_state))
-        , m_mag_filter(desc.mag_filter)
-        , m_min_filter(desc.min_filter)
-        , m_mipmap_filter(desc.mipmap_filter)
-        , m_address_mode_u(desc.address_mode_u)
-        , m_address_mode_v(desc.address_mode_v)
-        , m_address_mode_w(desc.address_mode_w)
-        , m_compare_operation(desc.compare_operation)
-        , m_min_lod(desc.min_lod)
-        , m_max_lod(desc.max_lod)
-        , m_border_color(desc.border_color)
-    {
-    }
 
 private:
     Filter m_mag_filter = Filter::Linear;

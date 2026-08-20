@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-present, SkillerRaptor
+ * Copyright (c) 2026-present, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
@@ -9,37 +9,32 @@
 #include <optional>
 #include <string_view>
 
-#include "hyper_rhi/pipeline_layout.hpp"
-#include "hyper_rhi/resource.hpp"
-#include "hyper_rhi/shader.hpp"
+#include "hyper_rhi/forward.hpp"
 
 namespace he {
 
 struct ComputePipelineDescriptor {
     std::optional<std::string_view> label = std::nullopt;
-    PipelineLayout layout;
-    Shader shader;
+    PipelineLayout *layout = nullptr;
+    Shader *shader = nullptr;
 };
 
-class ComputePipeline : public Resource {
-private:
-    friend class GraphicsDevice;
-
+class ComputePipeline {
 public:
-    PipelineLayout layout() const { return m_layout; }
-    Shader shader() const { return m_shader; }
-
-private:
-    ComputePipeline(std::shared_ptr<void> internal_state, const ComputePipelineDescriptor &desc)
-        : Resource(std::move(internal_state))
-        , m_layout(desc.layout)
+    explicit ComputePipeline(const ComputePipelineDescriptor &desc)
+        : m_layout(desc.layout)
         , m_shader(desc.shader)
     {
     }
 
+    virtual ~ComputePipeline() = default;
+
+    PipelineLayout *layout() const { return m_layout; }
+    Shader *shader() const { return m_shader; }
+
 private:
-    PipelineLayout m_layout;
-    Shader m_shader;
+    PipelineLayout *m_layout = nullptr;
+    Shader *m_shader = nullptr;
 };
 
 } // namespace he

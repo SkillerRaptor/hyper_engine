@@ -10,7 +10,6 @@
 
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
-#include <hyper_rhi/command_encoder.hpp>
 
 namespace he {
 
@@ -19,15 +18,7 @@ Engine::Engine()
     const std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
 
     m_window = std::make_unique<Window>("HyperEngine", 1280, 720);
-
-    constexpr Validation validation =
-#if HE_DEBUG_BUILD
-        Validation::Enabled;
-#elif HE_RELEASE_BUILD
-        Validation::Disabled;
-#endif
-
-    m_graphics_device = GraphicsDevice::create(GraphicsApi::Vulkan, *m_window, validation);
+    m_graphics_device = GraphicsDevice::create(GraphicsApi::Vulkan, *m_window);
 
     const std::chrono::time_point<std::chrono::steady_clock> end_time = std::chrono::steady_clock::now();
     const std::chrono::duration<f32> elapsed_seconds = end_time - start_time;

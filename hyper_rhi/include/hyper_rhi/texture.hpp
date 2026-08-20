@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-present, SkillerRaptor
+ * Copyright (c) 2026-present, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
@@ -10,10 +10,8 @@
 #include <string_view>
 
 #include <hyper_core/bit_flags.hpp>
-#include <hyper_core/types.hpp>
 
-#include "hyper_rhi/definitions.hpp"
-#include "hyper_rhi/resource.hpp"
+#include "hyper_rhi/types.hpp"
 
 namespace he {
 
@@ -23,36 +21,25 @@ enum class TextureUsage : u8 {
     TransferDst = 1 << 1,
     RenderAttachment = 1 << 2,
     Storage = 1 << 3,
-    ShaderResource = 1 << 4,
 };
 
 struct TextureDescriptor {
     std::optional<std::string_view> label = std::nullopt;
-    Extent3d extent = { };
+    Extent2d extent = { };
     u32 mip_levels = 1;
+    u32 array_layers = 1;
     u32 sample_count = 1;
     Format format = Format::None;
     Dimension dimension = Dimension::D2;
     BitFlags<TextureUsage> usage = TextureUsage::None;
 };
 
-class Texture : public Resource {
-private:
-    friend class GraphicsDevice;
-
+class Texture {
 public:
-    Extent3d extent() const { return m_extent; }
-    u32 mip_levels() const { return m_mip_levels; }
-    u32 sample_count() const { return m_sample_count; }
-    Format format() const { return m_format; }
-    Dimension dimension() const { return m_dimension; }
-    BitFlags<TextureUsage> usage() const { return m_usage; }
-
-private:
-    Texture(std::shared_ptr<void> internal_state, const TextureDescriptor &desc)
-        : Resource(std::move(internal_state))
-        , m_extent(desc.extent)
+    explicit Texture(const TextureDescriptor &desc)
+        : m_extent(desc.extent)
         , m_mip_levels(desc.mip_levels)
+        , m_array_layers(desc.array_layers)
         , m_sample_count(desc.sample_count)
         , m_format(desc.format)
         , m_dimension(desc.dimension)
@@ -60,9 +47,20 @@ private:
     {
     }
 
+    virtual ~Texture() = default;
+
+    Extent2d extent() const { return m_extent; }
+    u32 mip_levels() const { return m_mip_levels; }
+    u32 array_layers() const { return m_array_layers; }
+    u32 sample_count() const { return m_sample_count; }
+    Format format() const { return m_format; }
+    Dimension dimension() const { return m_dimension; }
+    BitFlags<TextureUsage> usage() const { return m_usage; }
+
 private:
-    Extent3d m_extent = { };
+    Extent2d m_extent = { };
     u32 m_mip_levels = 1;
+    u32 m_array_layers = 1;
     u32 m_sample_count = 1;
     Format m_format = Format::None;
     Dimension m_dimension = Dimension::D2;

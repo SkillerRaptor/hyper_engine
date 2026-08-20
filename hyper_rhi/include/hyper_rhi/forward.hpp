@@ -11,12 +11,8 @@ namespace he {
 class Buffer;
 struct BufferDescriptor;
 
-class CommandEncoder;
-
 class ComputePipeline;
 struct ComputePipelineDescriptor;
-
-class GraphicsDevice;
 
 class PipelineLayout;
 struct PipelineLayoutDescriptor;

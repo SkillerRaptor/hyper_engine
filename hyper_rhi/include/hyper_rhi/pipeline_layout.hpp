@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-present, SkillerRaptor
+ * Copyright (c) 2026-present, SkillerRaptor
  *
  * SPDX-License-Identifier: MIT
  */
@@ -11,8 +11,6 @@
 
 #include <hyper_core/types.hpp>
 
-#include "hyper_rhi/resource.hpp"
-
 namespace he {
 
 struct PipelineLayoutDescriptor {
@@ -20,19 +18,16 @@ struct PipelineLayoutDescriptor {
     u32 push_constant_size = 0;
 };
 
-class PipelineLayout : public Resource {
-private:
-    friend class GraphicsDevice;
-
+class PipelineLayout {
 public:
-    u32 push_constant_size() const { return m_push_constant_size; }
-
-private:
-    PipelineLayout(std::shared_ptr<void> internal_state, const PipelineLayoutDescriptor &desc)
-        : Resource(std::move(internal_state))
-        , m_push_constant_size(desc.push_constant_size)
+    explicit PipelineLayout(const PipelineLayoutDescriptor &desc)
+        : m_push_constant_size(desc.push_constant_size)
     {
     }
+
+    virtual ~PipelineLayout() = default;
+
+    u32 push_constant_size() const { return m_push_constant_size; }
 
 private:
     u32 m_push_constant_size = 0;
