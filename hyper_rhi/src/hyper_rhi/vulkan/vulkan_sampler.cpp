@@ -28,7 +28,7 @@ VulkanSampler::VulkanSampler(const SamplerDescriptor &desc, const VkDevice devic
         .mipLodBias = 0.0f,
         .anisotropyEnable = VK_FALSE,
         .maxAnisotropy = 0.0,
-        .compareEnable = VK_TRUE,
+        .compareEnable = desc.compare_enable,
         .compareOp = conversion::to_vk_compare_operation(desc.compare_operation),
         .minLod = desc.min_lod,
         .maxLod = desc.max_lod,

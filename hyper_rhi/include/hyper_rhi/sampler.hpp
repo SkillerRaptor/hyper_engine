@@ -21,6 +21,7 @@ struct SamplerDescriptor {
     AddressMode address_mode_u = AddressMode::ClampToEdge;
     AddressMode address_mode_v = AddressMode::ClampToEdge;
     AddressMode address_mode_w = AddressMode::ClampToEdge;
+    bool compare_enable = false;
     CompareOperation compare_operation = CompareOperation::Less;
     f32 min_lod = 0.0f;
     f32 max_lod = 1.0f;
@@ -36,6 +37,7 @@ public:
         , m_address_mode_u(desc.address_mode_u)
         , m_address_mode_v(desc.address_mode_v)
         , m_address_mode_w(desc.address_mode_w)
+        , m_compare_enable(desc.compare_enable)
         , m_compare_operation(desc.compare_operation)
         , m_min_lod(desc.min_lod)
         , m_max_lod(desc.max_lod)
@@ -51,6 +53,7 @@ public:
     AddressMode address_mode_u() const { return m_address_mode_u; }
     AddressMode address_mode_v() const { return m_address_mode_v; }
     AddressMode address_mode_w() const { return m_address_mode_w; }
+    bool compare_enable() const { return m_compare_enable; }
     CompareOperation compare_operation() const { return m_compare_operation; }
     f32 min_lod() const { return m_min_lod; }
     f32 max_lod() const { return m_max_lod; }
@@ -63,6 +66,7 @@ private:
     AddressMode m_address_mode_u = AddressMode::ClampToEdge;
     AddressMode m_address_mode_v = AddressMode::ClampToEdge;
     AddressMode m_address_mode_w = AddressMode::ClampToEdge;
+    bool m_compare_enable = false;
     CompareOperation m_compare_operation = CompareOperation::Less;
     f32 m_min_lod = 0.0f;
     f32 m_max_lod = 1.0f;
