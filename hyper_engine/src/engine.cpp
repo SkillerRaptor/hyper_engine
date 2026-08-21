@@ -31,7 +31,7 @@ Engine::Engine()
     HE_INFO("Lexer dump:");
     for (size_t i = 0; i < tokens.size(); ++i) {
         const Token &token = tokens[i];
-        HE_INFO(" [{:2}] {}", i, token);
+        HE_INFO(" [{:2}] {}", i, token.to_string());
     }
 
     std::chrono::time_point<std::chrono::steady_clock> end_time = std::chrono::steady_clock::now();

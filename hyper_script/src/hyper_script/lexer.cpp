@@ -6,6 +6,8 @@
 
 #include "hyper_script/lexer.hpp"
 
+#include <cctype>
+
 #include <hyper_core/assertion.hpp>
 
 namespace he {
@@ -27,6 +29,8 @@ std::vector<Token> Lexer::lex()
 
         tokens.push_back(token.value());
     }
+
+    tokens.push_back(Token(TokenKind::Eof, "", 0, 0, 0));
 
     return tokens;
 }

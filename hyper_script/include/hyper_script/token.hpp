@@ -8,8 +8,6 @@
 
 #include <string_view>
 
-#include <fmt/format.h>
-
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/types.hpp>
 
@@ -24,72 +22,37 @@ enum class TokenKind : u8 {
     Slash,
 
     IntegerLiteral,
+
+    Eof,
 };
 
 class Token {
 public:
     Token(const TokenKind kind, const std::string_view value, const u32 line, const u32 column, const size_t offset)
         : m_kind(kind)
-        , m_value(value)
+        , m_lexeme(value)
         , m_line(line)
         , m_column(column)
         , m_offset(offset)
     {
     }
 
+    std::string to_string() const;
+
+    u32 integer_value() const;
+
     TokenKind kind() const { return m_kind; }
-    std::string_view value() const { return m_value; }
+    std::string_view lexeme() const { return m_lexeme; }
     u32 line() const { return m_line; }
     u32 column() const { return m_column; }
     size_t offset() const { return m_offset; }
 
 private:
     TokenKind m_kind = TokenKind::Invalid;
-    std::string_view m_value;
+    std::string_view m_lexeme;
     u32 m_line = 0;
     u32 m_column = 0;
     size_t m_offset = 0;
 };
 
 } // namespace he
-
-template <>
-struct fmt::formatter<he::TokenKind> : fmt::formatter<std::string_view> {
-    auto format(const he::TokenKind &kind, const fmt::format_context &context) const
-    {
-        const std::string_view kind_string = [kind]() {
-            switch (kind) {
-            case he::TokenKind::Invalid:
-                return "Invalid";
-            case he::TokenKind::Plus:
-                return "Plus";
-            case he::TokenKind::Minus:
-                return "Minus";
-            case he::TokenKind::Star:
-                return "Star";
-            case he::TokenKind::Slash:
-                return "Slash";
-            case he::TokenKind::IntegerLiteral:
-                return "IntegerLiteral";
-            default:
-                HE_UNREACHABLE();
-            }
-        }();
-
-        return fmt::format_to(context.out(), "{}", kind_string);
-    }
-};
-
-template <>
-struct fmt::formatter<he::Token> : fmt::formatter<std::string_view> {
-    auto format(const he::Token &token, const fmt::format_context &context) const
-    {
-        return fmt::format_to(
-            context.out(),
-            "{} (\"{}\") [{}:{}]",
-            token.kind(),
-            token.value(),
-            token.line(),
-            token.column());
-    }
-};
