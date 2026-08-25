@@ -6,9 +6,9 @@
 
 #pragma once
 
+#include <string>
 #include <string_view>
 
-#include <hyper_core/assertion.hpp>
 #include <hyper_core/types.hpp>
 
 namespace he {
