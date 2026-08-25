@@ -10,7 +10,7 @@
 
 #include <hyper_core/assertion.hpp>
 
-namespace he {
+namespace he::script {
 
 Lexer::Lexer(const std::string_view source)
     : m_source(source)
@@ -123,4 +123,4 @@ void Lexer::skip_whitespaces()
 
 bool Lexer::has_reached_end() const { return m_current_index >= m_source.length(); }
 
-} // namespace he
+} // namespace he::script

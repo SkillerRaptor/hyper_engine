@@ -8,7 +8,7 @@
 
 #include <hyper_core/assertion.hpp>
 
-namespace he {
+namespace he::script {
 
 std::string Token::to_string() const
 {
@@ -45,4 +45,4 @@ u32 Token::integer_value() const
     return value;
 }
 
-} // namespace he
+} // namespace he::script

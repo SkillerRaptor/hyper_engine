@@ -12,7 +12,7 @@
 
 #include "hyper_script/token.hpp"
 
-namespace he {
+namespace he::script {
 
 class Lexer {
 public:
@@ -39,4 +39,4 @@ private:
     u32 m_column = 1;
 };
 
-} // namespace he
+} // namespace he::script

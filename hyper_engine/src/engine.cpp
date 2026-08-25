@@ -26,17 +26,17 @@ Engine::Engine()
 
     HE_INFO("Evaluating \"{}\"", source);
 
-    Lexer lexer(source);
-    const std::vector<Token> tokens = lexer.lex();
+    script::Lexer lexer(source);
+    const std::vector<script::Token> tokens = lexer.lex();
 
     HE_INFO("Lexer dump:");
     for (size_t i = 0; i < tokens.size(); ++i) {
-        const Token &token = tokens[i];
+        const script::Token &token = tokens[i];
         HE_INFO(" [{:2}] {}", i, token.to_string());
     }
 
-    Parser parser(tokens);
-    const std::unique_ptr<AstNode> _ast = parser.parse();
+    script::Parser parser(tokens);
+    const std::unique_ptr<script::AstNode> _ast = parser.parse();
 
     const std::chrono::time_point<std::chrono::steady_clock> end_time = std::chrono::steady_clock::now();
     const std::chrono::duration<f32> elapsed_seconds = end_time - start_time;

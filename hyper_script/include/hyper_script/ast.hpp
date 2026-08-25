@@ -8,7 +8,7 @@
 
 #include <hyper_core/assertion.hpp>
 
-namespace he {
+namespace he::script {
 
 class AstNode {
 public:
@@ -71,4 +71,4 @@ class Statement : public AstNode {
 public:
 };
 
-} // namespace he
+} // namespace he::script

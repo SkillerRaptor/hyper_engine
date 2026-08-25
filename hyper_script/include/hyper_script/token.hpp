@@ -11,7 +11,7 @@
 
 #include <hyper_core/types.hpp>
 
-namespace he {
+namespace he::script {
 
 enum class TokenKind : u8 {
     Plus,
@@ -53,4 +53,4 @@ private:
     size_t m_offset;
 };
 
-} // namespace he
+} // namespace he::script

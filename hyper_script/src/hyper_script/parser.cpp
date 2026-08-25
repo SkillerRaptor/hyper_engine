@@ -8,7 +8,7 @@
 
 #include <hyper_core/assertion.hpp>
 
-namespace he {
+namespace he::script {
 
 std::unique_ptr<AstNode> Parser::parse() { return parse_binary_expression(0); }
 
@@ -121,4 +121,4 @@ Token Parser::consume(const TokenKind kind)
 
 bool Parser::has_reached_end() const { return m_current_token_index >= m_tokens.size(); }
 
-} // namespace he
+} // namespace he::script

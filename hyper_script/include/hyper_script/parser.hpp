@@ -11,7 +11,7 @@
 #include "hyper_script/ast.hpp"
 #include "hyper_script/token.hpp"
 
-namespace he {
+namespace he::script {
 
 class Parser {
 public:
@@ -45,4 +45,4 @@ private:
     size_t m_current_token_index = 0;
 };
 
-} // namespace he
+} // namespace he::script
