@@ -10,9 +10,23 @@
 
 namespace he::script {
 
+enum class AstNodeKind : u8 {
+    // Declarations
+
+    // Expressions
+    BinaryExpression,
+
+    // Literals
+    IntegerLiteral,
+
+    // Statements
+};
+
 class AstNode {
 public:
     virtual ~AstNode() = default;
+
+    virtual AstNodeKind kind() const = 0;
 };
 
 class Declaration : public AstNode {
@@ -42,6 +56,8 @@ public:
         HE_ASSERT(m_right != nullptr);
     }
 
+    AstNodeKind kind() const override { return AstNodeKind::BinaryExpression; }
+
     BinaryOperation operation() const { return m_operation; }
     const Expression *left() const { return m_left.get(); }
     const Expression *right() const { return m_right.get(); }
@@ -62,6 +78,10 @@ public:
         : m_value(value)
     {
     }
+
+    AstNodeKind kind() const override { return AstNodeKind::IntegerLiteral; }
+
+    u32 value() const { return m_value; }
 
 private:
     u32 m_value;

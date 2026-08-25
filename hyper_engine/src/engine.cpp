@@ -10,6 +10,7 @@
 
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
+#include <hyper_script/debug.hpp>
 #include <hyper_script/lexer.hpp>
 #include <hyper_script/parser.hpp>
 
@@ -29,14 +30,12 @@ Engine::Engine()
     script::Lexer lexer(source);
     const std::vector<script::Token> tokens = lexer.lex();
 
-    HE_INFO("Lexer dump:");
-    for (size_t i = 0; i < tokens.size(); ++i) {
-        const script::Token &token = tokens[i];
-        HE_INFO(" [{:2}] {}", i, token.to_string());
-    }
+    script::dump_tokens(tokens);
 
     script::Parser parser(tokens);
-    const std::unique_ptr<script::AstNode> _ast = parser.parse();
+    const std::unique_ptr<script::AstNode> ast = parser.parse();
+
+    script::dump_ast(*ast);
 
     const std::chrono::time_point<std::chrono::steady_clock> end_time = std::chrono::steady_clock::now();
     const std::chrono::duration<f32> elapsed_seconds = end_time - start_time;
