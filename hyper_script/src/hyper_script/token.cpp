@@ -14,8 +14,6 @@ std::string Token::to_string() const
 {
     const std::string_view kind = [&]() {
         switch (m_kind) {
-        case TokenKind::Invalid:
-            return "Invalid";
         case TokenKind::Plus:
             return "Plus";
         case TokenKind::Minus:

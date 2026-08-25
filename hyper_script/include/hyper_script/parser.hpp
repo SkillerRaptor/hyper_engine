@@ -1,0 +1,48 @@
+/*
+ * Copyright (c) 2026-present, SkillerRaptor
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#pragma once
+
+#include <span>
+
+#include "hyper_script/ast.hpp"
+#include "hyper_script/token.hpp"
+
+namespace he {
+
+class Parser {
+public:
+    explicit Parser(const std::span<const Token> tokens)
+        : m_tokens(tokens)
+    {
+    }
+
+    std::unique_ptr<AstNode> parse();
+
+private:
+    std::unique_ptr<Expression> parse_primary_expression();
+    std::unique_ptr<Expression> parse_binary_expression(u8 precedence);
+
+    std::unique_ptr<Literal> parse_integer_literal();
+
+    static u8 get_operator_precedence(TokenKind);
+
+    std::optional<Token> current_token() const;
+    std::optional<Token> peek_token() const;
+
+    bool match(TokenKind) const;
+
+    Token consume();
+    Token consume(TokenKind);
+
+    bool has_reached_end() const;
+
+private:
+    std::span<const Token> m_tokens;
+    size_t m_current_token_index = 0;
+};
+
+} // namespace he

@@ -11,6 +11,7 @@
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
 #include <hyper_script/lexer.hpp>
+#include <hyper_script/parser.hpp>
 
 namespace he {
 
@@ -34,7 +35,10 @@ Engine::Engine()
         HE_INFO(" [{:2}] {}", i, token.to_string());
     }
 
-    std::chrono::time_point<std::chrono::steady_clock> end_time = std::chrono::steady_clock::now();
+    Parser parser(tokens);
+    const std::unique_ptr<AstNode> _ast = parser.parse();
+
+    const std::chrono::time_point<std::chrono::steady_clock> end_time = std::chrono::steady_clock::now();
     const std::chrono::duration<f32> elapsed_seconds = end_time - start_time;
 
     HE_INFO("Completed engine initialization (time={:.2}s)", elapsed_seconds.count());

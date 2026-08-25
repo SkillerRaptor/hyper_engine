@@ -14,8 +14,6 @@
 namespace he {
 
 enum class TokenKind : u8 {
-    Invalid,
-
     Plus,
     Minus,
     Star,
@@ -48,11 +46,11 @@ public:
     size_t offset() const { return m_offset; }
 
 private:
-    TokenKind m_kind = TokenKind::Invalid;
+    TokenKind m_kind;
     std::string_view m_lexeme;
-    u32 m_line = 0;
-    u32 m_column = 0;
-    size_t m_offset = 0;
+    u32 m_line;
+    u32 m_column;
+    size_t m_offset;
 };
 
 } // namespace he
