@@ -44,21 +44,10 @@ public:
     virtual constexpr AstNodeKind kind() const = 0;
 };
 
-class Declaration : public AstNode {
-public:
-};
-
-class Expression : public AstNode {
-public:
-};
-
-class Literal : public Expression {
-public:
-};
-
-class Statement : public AstNode {
-public:
-};
+class Declaration : public AstNode { };
+class Expression : public AstNode { };
+class Literal : public Expression { };
+class Statement : public AstNode { };
 
 class FunctionDeclaration : public Declaration {
 public:
