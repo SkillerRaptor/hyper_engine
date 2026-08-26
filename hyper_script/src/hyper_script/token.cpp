@@ -46,8 +46,14 @@ std::string Token::to_string() const
             return "Greater";
         case TokenKind::GreaterEqual:
             return "GreaterEqual";
+        case TokenKind::Else:
+            return "Else";
         case TokenKind::Fn:
             return "Fn";
+        case TokenKind::If:
+            return "If";
+        case TokenKind::While:
+            return "While";
         case TokenKind::IntegerLiteral:
             return "IntegerLiteral";
         case TokenKind::Identifier:

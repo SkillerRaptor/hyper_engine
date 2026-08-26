@@ -35,7 +35,10 @@ enum class TokenKind : u8 {
     GreaterEqual,
 
     // Keywords
+    Else,
     Fn,
+    If,
+    While,
 
     IntegerLiteral,
     Identifier,

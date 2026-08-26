@@ -21,7 +21,7 @@ std::unique_ptr<Declaration> Parser::parse_declaration()
         break;
     }
 
-    HE_ERROR("Unexpected token while parsing declaration");
+    HE_PANIC("Unexpected token while parsing declaration");
 
     return nullptr;
 }
@@ -37,7 +37,7 @@ std::unique_ptr<Declaration> Parser::parse_function_declaration()
     consume(TokenKind::RightParenthesis);
 
     std::unique_ptr<Statement> body = parse_compound_statement();
-    
+
     return std::make_unique<FunctionDeclaration>(identifier, std::move(body));
 }
 
@@ -62,7 +62,7 @@ std::unique_ptr<Expression> Parser::parse_primary_expression()
         break;
     }
 
-    HE_ERROR("Unexpected token while parsing primary expression");
+    HE_PANIC("Unexpected token while parsing primary expression");
 
     return nullptr;
 }
@@ -134,6 +134,12 @@ std::unique_ptr<Literal> Parser::parse_integer_literal()
 std::unique_ptr<Statement> Parser::parse_statement()
 {
     switch (current_token()->kind()) {
+    case TokenKind::If: {
+        return parse_if_statement();
+    }
+    case TokenKind::While: {
+        return parse_while_statement();
+    }
     case TokenKind::Identifier: {
         std::unique_ptr<Expression> expression = parse_call_expression();
         consume(TokenKind::Semicolon);
@@ -143,7 +149,7 @@ std::unique_ptr<Statement> Parser::parse_statement()
         break;
     }
 
-    HE_ERROR("Unexpected token while parsing statement");
+    HE_PANIC("Unexpected token while parsing statement");
 
     return nullptr;
 }
@@ -166,6 +172,41 @@ std::unique_ptr<Statement> Parser::parse_compound_statement()
 std::unique_ptr<Statement> Parser::parse_expression_statement(std::unique_ptr<Expression> expression)
 {
     return std::make_unique<ExpressionStatement>(std::move(expression));
+}
+
+std::unique_ptr<Statement> Parser::parse_if_statement()
+{
+    consume(TokenKind::If);
+    consume(TokenKind::LeftParenthesis);
+
+    std::unique_ptr<Expression> condition = parse_binary_expression(0);
+
+    consume(TokenKind::RightParenthesis);
+
+    std::unique_ptr<Statement> then_body = parse_compound_statement();
+
+    std::unique_ptr<Statement> else_body = nullptr;
+    if (match(TokenKind::Else)) {
+        consume(TokenKind::Else);
+
+        else_body = parse_compound_statement();
+    }
+
+    return std::make_unique<IfStatement>(std::move(condition), std::move(then_body), std::move(else_body));
+}
+
+std::unique_ptr<Statement> Parser::parse_while_statement()
+{
+    consume(TokenKind::While);
+    consume(TokenKind::LeftParenthesis);
+
+    std::unique_ptr<Expression> condition = parse_binary_expression(0);
+
+    consume(TokenKind::RightParenthesis);
+
+    std::unique_ptr<Statement> body = parse_compound_statement();
+
+    return std::make_unique<WhileStatement>(std::move(condition), std::move(body));
 }
 
 u8 Parser::get_operator_precedence(const TokenKind kind)

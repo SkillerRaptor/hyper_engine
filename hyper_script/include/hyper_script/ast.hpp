@@ -6,7 +6,11 @@
 
 #pragma once
 
-#include <hyper_core/assertion.hpp>
+#include <memory>
+#include <string_view>
+#include <vector>
+
+#include <hyper_core/types.hpp>
 
 namespace he::script {
 
@@ -25,6 +29,8 @@ enum class AstNodeKind : u8 {
     // Statements
     CompoundStatement,
     ExpressionStatement,
+    IfStatement,
+    WhileStatement,
 };
 
 class AstNode {
@@ -107,8 +113,6 @@ public:
         , m_left(std::move(left))
         , m_right(std::move(right))
     {
-        HE_ASSERT(m_left != nullptr);
-        HE_ASSERT(m_right != nullptr);
     }
 
     constexpr AstNodeKind kind() const override { return AstNodeKind::BinaryExpression; }
@@ -186,6 +190,48 @@ public:
 
 private:
     std::unique_ptr<Expression> m_expression;
+};
+
+class IfStatement : public Statement {
+public:
+    explicit IfStatement(
+        std::unique_ptr<Expression> condition,
+        std::unique_ptr<Statement> then_body,
+        std::unique_ptr<Statement> else_body)
+        : m_condition(std::move(condition))
+        , m_then_body(std::move(then_body))
+        , m_else_body(std::move(else_body))
+    {
+    }
+
+    constexpr AstNodeKind kind() const override { return AstNodeKind::IfStatement; }
+
+    Expression *condition() const { return m_condition.get(); }
+    Statement *then_body() const { return m_then_body.get(); }
+    Statement *else_body() const { return m_else_body.get(); }
+
+private:
+    std::unique_ptr<Expression> m_condition;
+    std::unique_ptr<Statement> m_then_body;
+    std::unique_ptr<Statement> m_else_body;
+};
+
+class WhileStatement : public Statement {
+public:
+    explicit WhileStatement(std::unique_ptr<Expression> condition, std::unique_ptr<Statement> body)
+        : m_condition(std::move(condition))
+        , m_body(std::move(body))
+    {
+    }
+
+    constexpr AstNodeKind kind() const override { return AstNodeKind::WhileStatement; }
+
+    Expression *condition() const { return m_condition.get(); }
+    Statement *body() const { return m_body.get(); }
+
+private:
+    std::unique_ptr<Expression> m_condition;
+    std::unique_ptr<Statement> m_body;
 };
 
 } // namespace he::script

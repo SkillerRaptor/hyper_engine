@@ -6,6 +6,9 @@
 
 #include "hyper_script/debug.hpp"
 
+#include <hyper_core/assertion.hpp>
+#include <hyper_core/logger.hpp>
+
 namespace he::script {
 
 void dump_tokens(const std::span<const Token> tokens)
@@ -116,6 +119,23 @@ static void dump_node(const AstNode &node, const std::string &prefix, const bool
         const ExpressionStatement &expression_statement = static_cast<const ExpressionStatement &>(node);
         HE_INFO("{}{}ExpressionStatement", prefix, connector);
         dump_node(*expression_statement.expression(), child_prefix, true);
+        break;
+    }
+    case AstNodeKind::IfStatement: {
+        const IfStatement &if_statement = static_cast<const IfStatement &>(node);
+        HE_INFO("{}{}IfStatement", prefix, connector);
+        dump_node(*if_statement.condition(), child_prefix, false);
+        dump_node(*if_statement.then_body(), child_prefix, if_statement.else_body() == nullptr);
+        if (if_statement.else_body()) {
+            dump_node(*if_statement.else_body(), child_prefix, true);
+        }
+        break;
+    }
+    case AstNodeKind::WhileStatement: {
+        const WhileStatement &while_statement = static_cast<const WhileStatement &>(node);
+        HE_INFO("{}{}WhileStatement", prefix, connector);
+        dump_node(*while_statement.condition(), child_prefix, false);
+        dump_node(*while_statement.body(), child_prefix, true);
         break;
     }
     default:

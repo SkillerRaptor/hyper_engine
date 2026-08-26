@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <optional>
 #include <span>
 
 #include "hyper_script/ast.hpp"
@@ -36,6 +37,8 @@ private:
     std::unique_ptr<Statement> parse_statement();
     std::unique_ptr<Statement> parse_compound_statement();
     std::unique_ptr<Statement> parse_expression_statement(std::unique_ptr<Expression>);
+    std::unique_ptr<Statement> parse_if_statement();
+    std::unique_ptr<Statement> parse_while_statement();
 
     static u8 get_operator_precedence(TokenKind);
 

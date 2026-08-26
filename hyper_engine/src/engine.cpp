@@ -25,11 +25,15 @@ Engine::Engine()
 
     constexpr std::string_view source = R"(
 fn foo() {
-    print(5 + 4 - 3 * 2 / 1);
-}
+    if (1 > 2) {
+        print(2 + 1);
+    } else {
+        print(2 - 1);
+    }
 
-fn bar() {
-    print(5 + 4 - 3 * 2 / 1);
+    while (3 <= 2) {
+        print(0);
+    }
 }
     )";
 

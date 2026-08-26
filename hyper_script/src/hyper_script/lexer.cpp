@@ -57,6 +57,18 @@ std::optional<Token> Lexer::next_token()
             return Token(TokenKind::Fn, token.lexeme(), token.line(), token.column(), token.offset());
         }
 
+        if (token.lexeme() == "else") {
+            return Token(TokenKind::Else, token.lexeme(), token.line(), token.column(), token.offset());
+        }
+
+        if (token.lexeme() == "if") {
+            return Token(TokenKind::If, token.lexeme(), token.line(), token.column(), token.offset());
+        }
+
+        if (token.lexeme() == "while") {
+            return Token(TokenKind::While, token.lexeme(), token.line(), token.column(), token.offset());
+        }
+
         return token;
     }
 
