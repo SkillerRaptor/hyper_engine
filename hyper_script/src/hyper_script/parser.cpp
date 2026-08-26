@@ -10,7 +10,48 @@
 
 namespace he::script {
 
-std::unique_ptr<AstNode> Parser::parse() { return parse_compound_statement(); }
+std::unique_ptr<AstNode> Parser::parse() { return parse_translation_unit_declaration(); }
+
+std::unique_ptr<Declaration> Parser::parse_declaration()
+{
+    switch (current_token()->kind()) {
+    case TokenKind::Fn:
+        return parse_function_declaration();
+    default:
+        break;
+    }
+
+    HE_ERROR("Unexpected token while parsing declaration");
+
+    return nullptr;
+}
+
+std::unique_ptr<Declaration> Parser::parse_function_declaration()
+{
+    consume(TokenKind::Fn);
+
+    const std::string_view identifier = consume(TokenKind::Identifier).string_value();
+
+    consume(TokenKind::LeftParenthesis);
+    // TODO: Parse arguments
+    consume(TokenKind::RightParenthesis);
+
+    std::unique_ptr<Statement> body = parse_compound_statement();
+    
+    return std::make_unique<FunctionDeclaration>(identifier, std::move(body));
+}
+
+std::unique_ptr<Declaration> Parser::parse_translation_unit_declaration()
+{
+    std::vector<std::unique_ptr<Declaration>> declarations;
+
+    while (current_token()->kind() != TokenKind::Eof) {
+        std::unique_ptr<Declaration> declaration = parse_declaration();
+        declarations.push_back(std::move(declaration));
+    }
+
+    return std::make_unique<TranslationUnitDeclaration>(std::move(declarations));
+}
 
 std::unique_ptr<Expression> Parser::parse_primary_expression()
 {
@@ -70,7 +111,7 @@ std::unique_ptr<Expression> Parser::parse_binary_expression(const u8 precedence)
 
 std::unique_ptr<Expression> Parser::parse_call_expression()
 {
-    const std::string_view identifier = consume(TokenKind::Identifier).lexeme();
+    const std::string_view identifier = consume(TokenKind::Identifier).string_value();
 
     consume(TokenKind::LeftParenthesis);
 

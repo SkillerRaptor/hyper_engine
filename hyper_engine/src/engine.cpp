@@ -24,9 +24,11 @@ Engine::Engine()
     m_graphics_device = GraphicsDevice::create(GraphicsApi::Vulkan, *m_window);
 
     constexpr std::string_view source = R"(
-{
+fn foo() {
     print(5 + 4 - 3 * 2 / 1);
-    print(5 + 4 - 3 * 2 / 1);
+}
+
+fn bar() {
     print(5 + 4 - 3 * 2 / 1);
 }
     )";

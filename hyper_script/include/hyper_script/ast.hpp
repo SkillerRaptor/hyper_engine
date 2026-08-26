@@ -12,6 +12,8 @@ namespace he::script {
 
 enum class AstNodeKind : u8 {
     // Declarations
+    FunctionDeclaration,
+    TranslationUnitDeclaration,
 
     // Expressions
     BinaryExpression,
@@ -38,6 +40,50 @@ public:
 
 class Expression : public AstNode {
 public:
+};
+
+class Literal : public Expression {
+public:
+};
+
+class Statement : public AstNode {
+public:
+};
+
+class FunctionDeclaration : public Declaration {
+public:
+    FunctionDeclaration(const std::string_view identifier, std::unique_ptr<Statement> body)
+        : m_identifier(identifier)
+        , m_body(std::move(body))
+    {
+    }
+
+    constexpr AstNodeKind kind() const override { return AstNodeKind::FunctionDeclaration; }
+
+    std::string_view identifier() const { return m_identifier; }
+    Statement *body() const { return m_body.get(); }
+
+private:
+    std::string_view m_identifier;
+    // TODO: Add arguments
+    // TODO: Add return type
+    std::unique_ptr<Statement> m_body;
+};
+
+class TranslationUnitDeclaration : public Declaration {
+public:
+    explicit TranslationUnitDeclaration(std::vector<std::unique_ptr<Declaration>> declarations)
+        : m_declarations(std::move(declarations))
+    {
+    }
+
+    constexpr AstNodeKind kind() const override { return AstNodeKind::TranslationUnitDeclaration; }
+
+    usize declaration_count() const { return m_declarations.size(); }
+    Declaration *declaration(const usize index) const { return m_declarations[index].get(); }
+
+private:
+    std::vector<std::unique_ptr<Declaration>> m_declarations;
 };
 
 enum class BinaryOperation : u8 {
@@ -96,10 +142,6 @@ private:
     std::vector<std::unique_ptr<Expression>> m_arguments;
 };
 
-class Literal : public Expression {
-public:
-};
-
 class IntegerLiteral : public Literal {
 public:
     explicit IntegerLiteral(const u32 value)
@@ -113,10 +155,6 @@ public:
 
 private:
     u32 m_value;
-};
-
-class Statement : public AstNode {
-public:
 };
 
 class CompoundStatement : public Statement {

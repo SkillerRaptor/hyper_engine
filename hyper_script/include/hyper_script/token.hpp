@@ -34,6 +34,9 @@ enum class TokenKind : u8 {
     Greater,
     GreaterEqual,
 
+    // Keywords
+    Fn,
+
     IntegerLiteral,
     Identifier,
 
@@ -42,9 +45,9 @@ enum class TokenKind : u8 {
 
 class Token {
 public:
-    Token(const TokenKind kind, const std::string_view value, const u32 line, const u32 column, const size_t offset)
+    Token(const TokenKind kind, const std::string_view lexeme, const u32 line, const u32 column, const size_t offset)
         : m_kind(kind)
-        , m_lexeme(value)
+        , m_lexeme(lexeme)
         , m_line(line)
         , m_column(column)
         , m_offset(offset)

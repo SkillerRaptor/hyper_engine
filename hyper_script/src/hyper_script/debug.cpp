@@ -27,6 +27,28 @@ static void dump_node(const AstNode &node, const std::string &prefix, const bool
     const std::string child_prefix = prefix + (is_root ? "" : (is_last ? "   " : "|  "));
 
     switch (node.kind()) {
+    case AstNodeKind::FunctionDeclaration: {
+        const FunctionDeclaration &function_declaration = static_cast<const FunctionDeclaration &>(node);
+        HE_INFO("{}{}FunctionDeclaration {{ identifier: {} }}", prefix, connector, function_declaration.identifier());
+        dump_node(*function_declaration.body(), child_prefix, true);
+        break;
+    }
+    case AstNodeKind::TranslationUnitDeclaration: {
+        const TranslationUnitDeclaration &translation_unit_declaration
+            = static_cast<const TranslationUnitDeclaration &>(node);
+        HE_INFO("{}{}TranslationUnitDeclaration", prefix, connector);
+        if (translation_unit_declaration.declaration_count() > 0) {
+            for (usize i = 0; i < translation_unit_declaration.declaration_count() - 1; ++i) {
+                dump_node(*translation_unit_declaration.declaration(i), child_prefix, false);
+            }
+
+            dump_node(
+                *translation_unit_declaration.declaration(translation_unit_declaration.declaration_count() - 1),
+                child_prefix,
+                true);
+        }
+        break;
+    }
     case AstNodeKind::BinaryExpression: {
         const BinaryExpression &binary_expression = static_cast<const BinaryExpression &>(node);
         const std::string_view operation = [&]() {

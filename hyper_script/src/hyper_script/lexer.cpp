@@ -50,7 +50,14 @@ std::optional<Token> Lexer::next_token()
     const char current_character = advance();
 
     if (std::isalpha(static_cast<unsigned char>(current_character)) || current_character == '_') {
-        return lex_identifier(start_line, start_column, start_index);
+        const Token token = lex_identifier(start_line, start_column, start_index);
+
+        // TODO: Improve this
+        if (token.lexeme() == "fn") {
+            return Token(TokenKind::Fn, token.lexeme(), token.line(), token.column(), token.offset());
+        }
+
+        return token;
     }
 
     if (std::isdigit(static_cast<unsigned char>(current_character))) {

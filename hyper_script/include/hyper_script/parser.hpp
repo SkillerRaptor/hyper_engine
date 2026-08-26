@@ -23,6 +23,10 @@ public:
     std::unique_ptr<AstNode> parse();
 
 private:
+    std::unique_ptr<Declaration> parse_declaration();
+    std::unique_ptr<Declaration> parse_function_declaration();
+    std::unique_ptr<Declaration> parse_translation_unit_declaration();
+
     std::unique_ptr<Expression> parse_primary_expression();
     std::unique_ptr<Expression> parse_binary_expression(u8 precedence);
     std::unique_ptr<Expression> parse_call_expression();
