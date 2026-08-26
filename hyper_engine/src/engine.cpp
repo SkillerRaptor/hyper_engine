@@ -23,7 +23,13 @@ Engine::Engine()
     m_window = std::make_unique<Window>("HyperEngine", 1280, 720);
     m_graphics_device = GraphicsDevice::create(GraphicsApi::Vulkan, *m_window);
 
-    constexpr std::string_view source = "5 + 4 - 3 * 2 / 1";
+    constexpr std::string_view source = R"(
+{
+    print(5 + 4 - 3 * 2 / 1);
+    print(5 + 4 - 3 * 2 / 1);
+    print(5 + 4 - 3 * 2 / 1);
+}
+    )";
 
     HE_INFO("Evaluating \"{}\"", source);
 

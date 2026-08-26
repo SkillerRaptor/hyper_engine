@@ -14,6 +14,16 @@ std::string Token::to_string() const
 {
     const std::string_view kind = [&]() {
         switch (m_kind) {
+        case TokenKind::LeftBrace:
+            return "LeftBrace";
+        case TokenKind::RightBrace:
+            return "RightBrace";
+        case TokenKind::LeftParenthesis:
+            return "LeftParenthesis";
+        case TokenKind::RightParenthesis:
+            return "RightParenthesis";
+        case TokenKind::Semicolon:
+            return "Semicolon";
         case TokenKind::Plus:
             return "Plus";
         case TokenKind::Minus:
@@ -24,6 +34,8 @@ std::string Token::to_string() const
             return "Slash";
         case TokenKind::IntegerLiteral:
             return "IntegerLiteral";
+        case TokenKind::Identifier:
+            return "Identifier";
         case TokenKind::Eof:
             return "Eof";
         }
@@ -43,6 +55,13 @@ u32 Token::integer_value() const
     HE_ASSERT(end_ptr == m_lexeme.data() + m_lexeme.size());
 
     return value;
+}
+
+std::string_view Token::string_value() const
+{
+    HE_ASSERT(m_kind == TokenKind::Identifier);
+
+    return m_lexeme;
 }
 
 } // namespace he::script

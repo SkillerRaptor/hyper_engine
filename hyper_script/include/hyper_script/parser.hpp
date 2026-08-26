@@ -25,8 +25,13 @@ public:
 private:
     std::unique_ptr<Expression> parse_primary_expression();
     std::unique_ptr<Expression> parse_binary_expression(u8 precedence);
+    std::unique_ptr<Expression> parse_call_expression();
 
     std::unique_ptr<Literal> parse_integer_literal();
+
+    std::unique_ptr<Statement> parse_statement();
+    std::unique_ptr<Statement> parse_compound_statement();
+    std::unique_ptr<Statement> parse_expression_statement(std::unique_ptr<Expression>);
 
     static u8 get_operator_precedence(TokenKind);
 

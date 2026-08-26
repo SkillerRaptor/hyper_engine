@@ -48,13 +48,44 @@ static void dump_node(const AstNode &node, const std::string &prefix, const bool
         dump_node(*binary_expression.right(), child_prefix, true);
         break;
     }
+    case AstNodeKind::CallExpression: {
+        const CallExpression &call_expression = static_cast<const CallExpression &>(node);
+        HE_INFO("{}{}CallExpression {{ identifier: {} }}", prefix, connector, call_expression.identifier());
+
+        if (call_expression.argument_count() > 0) {
+            for (usize i = 0; i < call_expression.argument_count() - 1; ++i) {
+                dump_node(*call_expression.argument(i), child_prefix, false);
+            }
+
+            dump_node(*call_expression.argument(call_expression.argument_count() - 1), child_prefix, true);
+        }
+        break;
+    }
     case AstNodeKind::IntegerLiteral: {
         const IntegerLiteral &integer_literal = static_cast<const IntegerLiteral &>(node);
         HE_INFO("{}{}IntegerLiteral {{ value: {} }}", prefix, connector, integer_literal.value());
         break;
     }
+    case AstNodeKind::CompoundStatement: {
+        const CompoundStatement &compound_statement = static_cast<const CompoundStatement &>(node);
+        HE_INFO("{}{}CompoundStatement", prefix, connector);
+        if (compound_statement.statement_count() > 0) {
+            for (usize i = 0; i < compound_statement.statement_count() - 1; ++i) {
+                dump_node(*compound_statement.statement(i), child_prefix, false);
+            }
+
+            dump_node(*compound_statement.statement(compound_statement.statement_count() - 1), child_prefix, true);
+        }
+        break;
+    }
+    case AstNodeKind::ExpressionStatement: {
+        const ExpressionStatement &expression_statement = static_cast<const ExpressionStatement &>(node);
+        HE_INFO("{}{}ExpressionStatement", prefix, connector);
+        dump_node(*expression_statement.expression(), child_prefix, true);
+        break;
+    }
     default:
-        HE_PANIC();
+        HE_PANIC("Encountered an unexpected node while dumping");
     }
 }
 

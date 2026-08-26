@@ -14,12 +14,20 @@
 namespace he::script {
 
 enum class TokenKind : u8 {
+    LeftBrace,
+    RightBrace,
+    LeftParenthesis,
+    RightParenthesis,
+
+    Semicolon,
+
     Plus,
     Minus,
     Star,
     Slash,
 
     IntegerLiteral,
+    Identifier,
 
     Eof,
 };
@@ -38,6 +46,7 @@ public:
     std::string to_string() const;
 
     u32 integer_value() const;
+    std::string_view string_value() const;
 
     TokenKind kind() const { return m_kind; }
     std::string_view lexeme() const { return m_lexeme; }

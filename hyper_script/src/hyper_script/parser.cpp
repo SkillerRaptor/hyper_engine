@@ -10,7 +10,7 @@
 
 namespace he::script {
 
-std::unique_ptr<AstNode> Parser::parse() { return parse_binary_expression(0); }
+std::unique_ptr<AstNode> Parser::parse() { return parse_compound_statement(); }
 
 std::unique_ptr<Expression> Parser::parse_primary_expression()
 {
@@ -21,7 +21,7 @@ std::unique_ptr<Expression> Parser::parse_primary_expression()
         break;
     }
 
-    HE_ERROR("Unexpected token while parsing a primary expression");
+    HE_ERROR("Unexpected token while parsing primary expression");
 
     return nullptr;
 }
@@ -56,10 +56,63 @@ std::unique_ptr<Expression> Parser::parse_binary_expression(const u8 precedence)
     return left;
 }
 
+std::unique_ptr<Expression> Parser::parse_call_expression()
+{
+    const std::string_view identifier = consume(TokenKind::Identifier).lexeme();
+
+    consume(TokenKind::LeftParenthesis);
+
+    std::vector<std::unique_ptr<Expression>> arguments;
+    if (!match(TokenKind::RightParenthesis)) {
+        arguments.push_back(parse_binary_expression(0));
+    }
+
+    consume(TokenKind::RightParenthesis);
+
+    return std::make_unique<CallExpression>(identifier, std::move(arguments));
+}
+
 std::unique_ptr<Literal> Parser::parse_integer_literal()
 {
     const Token token = consume(TokenKind::IntegerLiteral);
     return std::make_unique<IntegerLiteral>(token.integer_value());
+}
+
+std::unique_ptr<Statement> Parser::parse_statement()
+{
+    switch (current_token()->kind()) {
+    case TokenKind::Identifier: {
+        std::unique_ptr<Expression> expression = parse_call_expression();
+        consume(TokenKind::Semicolon);
+        return parse_expression_statement(std::move(expression));
+    }
+    default:
+        break;
+    }
+
+    HE_ERROR("Unexpected token while parsing statement");
+
+    return nullptr;
+}
+
+std::unique_ptr<Statement> Parser::parse_compound_statement()
+{
+    consume(TokenKind::LeftBrace);
+
+    std::vector<std::unique_ptr<Statement>> statements;
+    while (!match(TokenKind::RightBrace)) {
+        std::unique_ptr<Statement> statement = parse_statement();
+        statements.push_back(std::move(statement));
+    }
+
+    consume(TokenKind::RightBrace);
+
+    return std::make_unique<CompoundStatement>(std::move(statements));
+}
+
+std::unique_ptr<Statement> Parser::parse_expression_statement(std::unique_ptr<Expression> expression)
+{
+    return std::make_unique<ExpressionStatement>(std::move(expression));
 }
 
 u8 Parser::get_operator_precedence(const TokenKind kind)

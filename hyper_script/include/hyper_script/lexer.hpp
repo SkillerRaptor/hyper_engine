@@ -24,6 +24,7 @@ private:
     std::optional<Token> next_token();
 
     Token lex_number(u32 start_line, u32 start_column, size_t start_index);
+    Token lex_identifier(u32 start_line, u32 start_column, size_t start_index);
 
     char advance();
     char peek() const;

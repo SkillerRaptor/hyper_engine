@@ -30,7 +30,7 @@ std::vector<Token> Lexer::lex()
         tokens.push_back(token.value());
     }
 
-    tokens.push_back(Token(TokenKind::Eof, "", 0, 0, 0));
+    tokens.push_back(Token(TokenKind::Eof, "", m_line, m_column, m_current_index));
 
     return tokens;
 }
@@ -48,6 +48,11 @@ std::optional<Token> Lexer::next_token()
     }
 
     const char current_character = advance();
+
+    if (std::isalpha(static_cast<unsigned char>(current_character)) || current_character == '_') {
+        return lex_identifier(start_line, start_column, start_index);
+    }
+
     if (std::isdigit(static_cast<unsigned char>(current_character))) {
         return lex_number(start_line, start_column, start_index);
     }
@@ -58,6 +63,16 @@ std::optional<Token> Lexer::next_token()
     };
 
     switch (current_character) {
+    case '{':
+        return make_token(TokenKind::LeftBrace);
+    case '}':
+        return make_token(TokenKind::RightBrace);
+    case '(':
+        return make_token(TokenKind::LeftParenthesis);
+    case ')':
+        return make_token(TokenKind::RightParenthesis);
+    case ';':
+        return make_token(TokenKind::Semicolon);
     case '+':
         return make_token(TokenKind::Plus);
     case '-':
@@ -79,6 +94,18 @@ Token Lexer::lex_number(const u32 start_line, const u32 start_column, const size
 
     const std::string_view value = m_source.substr(start_index, m_current_index - start_index);
     return Token(TokenKind::IntegerLiteral, value, start_line, start_column, start_index);
+}
+
+Token Lexer::lex_identifier(const u32 start_line, const u32 start_column, const size_t start_index)
+{
+    // NOTE: We can check if the character is a digit or alphabetic and assume that the first character will always
+    // be not a digit, because under normal circumstances this function should be called with a valid first character.
+    while (std::isalnum(static_cast<unsigned char>(peek())) || peek() == '_') {
+        advance();
+    }
+
+    const std::string_view value = m_source.substr(start_index, m_current_index - start_index);
+    return Token(TokenKind::Identifier, value, start_line, start_column, start_index);
 }
 
 char Lexer::advance()
