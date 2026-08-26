@@ -38,6 +38,7 @@ enum class TokenKind : u8 {
     Else,
     Fn,
     If,
+    Let,
     While,
 
     IntegerLiteral,

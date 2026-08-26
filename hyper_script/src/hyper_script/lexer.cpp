@@ -65,6 +65,10 @@ std::optional<Token> Lexer::next_token()
             return Token(TokenKind::If, token.lexeme(), token.line(), token.column(), token.offset());
         }
 
+        if (token.lexeme() == "let") {
+            return Token(TokenKind::Let, token.lexeme(), token.line(), token.column(), token.offset());
+        }
+
         if (token.lexeme() == "while") {
             return Token(TokenKind::While, token.lexeme(), token.line(), token.column(), token.offset());
         }

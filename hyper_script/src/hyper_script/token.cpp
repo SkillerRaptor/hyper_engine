@@ -52,6 +52,8 @@ std::string Token::to_string() const
             return "Fn";
         case TokenKind::If:
             return "If";
+        case TokenKind::Let:
+            return "Let";
         case TokenKind::While:
             return "While";
         case TokenKind::IntegerLiteral:

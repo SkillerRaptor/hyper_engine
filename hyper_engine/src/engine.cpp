@@ -25,15 +25,24 @@ Engine::Engine()
 
     constexpr std::string_view source = R"(
 fn foo() {
-    if (1 > 2) {
-        print(2 + 1);
+    let a = 0;
+    let b = a + 10;
+    let c = a + b;
+    let d = a + b + c;
+
+    let x = 10;
+    let y = 20;
+    print(x);
+    print(y);
+
+    let z = 0;
+    if (x > y) {
+      z = x - y;
     } else {
-        print(2 - 1);
+      z = x + y;
     }
 
-    while (3 <= 2) {
-        print(0);
-    }
+    print(z);
 }
     )";
 

@@ -53,11 +53,32 @@ std::unique_ptr<Declaration> Parser::parse_translation_unit_declaration()
     return std::make_unique<TranslationUnitDeclaration>(std::move(declarations));
 }
 
+std::unique_ptr<Declaration> Parser::parse_variable_declaration()
+{
+    consume(TokenKind::Let);
+
+    const std::string_view identifier = consume(TokenKind::Identifier).string_value();
+
+    consume(TokenKind::Equal);
+
+    std::unique_ptr<Expression> initializer = parse_binary_expression(0);
+
+    consume(TokenKind::Semicolon);
+
+    return std::make_unique<VariableDeclaration>(identifier, std::move(initializer));
+}
+
 std::unique_ptr<Expression> Parser::parse_primary_expression()
 {
     switch (current_token()->kind()) {
     case TokenKind::IntegerLiteral:
         return parse_integer_literal();
+    case TokenKind::Identifier:
+        if (peek_token()->kind() == TokenKind::LeftParenthesis) {
+            return parse_call_expression();
+        }
+
+        return parse_variable_expression();
     default:
         break;
     }
@@ -118,11 +139,18 @@ std::unique_ptr<Expression> Parser::parse_call_expression()
     std::vector<std::unique_ptr<Expression>> arguments;
     if (!match(TokenKind::RightParenthesis)) {
         arguments.push_back(parse_binary_expression(0));
+        // TODO: Continue parsing arguments
     }
 
     consume(TokenKind::RightParenthesis);
 
     return std::make_unique<CallExpression>(identifier, std::move(arguments));
+}
+
+std::unique_ptr<Expression> Parser::parse_variable_expression()
+{
+    const std::string_view identifier = consume(TokenKind::Identifier).string_value();
+    return std::make_unique<VariableExpression>(identifier);
 }
 
 std::unique_ptr<Literal> Parser::parse_integer_literal()
@@ -137,13 +165,26 @@ std::unique_ptr<Statement> Parser::parse_statement()
     case TokenKind::If: {
         return parse_if_statement();
     }
+    case TokenKind::Let: {
+        std::unique_ptr<Declaration> declaration = parse_variable_declaration();
+        return parse_declaration_statement(std::move(declaration));
+    }
     case TokenKind::While: {
         return parse_while_statement();
     }
     case TokenKind::Identifier: {
-        std::unique_ptr<Expression> expression = parse_call_expression();
-        consume(TokenKind::Semicolon);
-        return parse_expression_statement(std::move(expression));
+        switch (peek_token()->kind()) {
+        case TokenKind::LeftParenthesis: {
+            std::unique_ptr<Expression> expression = parse_call_expression();
+            consume(TokenKind::Semicolon);
+            return parse_expression_statement(std::move(expression));
+        }
+        case TokenKind::Equal: {
+            return parse_assign_statement();
+        }
+        default:
+            HE_PANIC();
+        }
     }
     default:
         break;
@@ -152,6 +193,19 @@ std::unique_ptr<Statement> Parser::parse_statement()
     HE_PANIC("Unexpected token while parsing statement");
 
     return nullptr;
+}
+
+std::unique_ptr<Statement> Parser::parse_assign_statement()
+{
+    const std::string_view identifier = consume(TokenKind::Identifier).string_value();
+
+    consume(TokenKind::Equal);
+
+    std::unique_ptr<Expression> value = parse_binary_expression(0);
+
+    consume(TokenKind::Semicolon);
+
+    return std::make_unique<AssignStatement>(identifier, std::move(value));
 }
 
 std::unique_ptr<Statement> Parser::parse_compound_statement()
@@ -167,6 +221,11 @@ std::unique_ptr<Statement> Parser::parse_compound_statement()
     consume(TokenKind::RightBrace);
 
     return std::make_unique<CompoundStatement>(std::move(statements));
+}
+
+std::unique_ptr<Statement> Parser::parse_declaration_statement(std::unique_ptr<Declaration> declaration)
+{
+    return std::make_unique<DeclarationStatement>(std::move(declaration));
 }
 
 std::unique_ptr<Statement> Parser::parse_expression_statement(std::unique_ptr<Expression> expression)

@@ -27,15 +27,19 @@ private:
     std::unique_ptr<Declaration> parse_declaration();
     std::unique_ptr<Declaration> parse_function_declaration();
     std::unique_ptr<Declaration> parse_translation_unit_declaration();
+    std::unique_ptr<Declaration> parse_variable_declaration();
 
     std::unique_ptr<Expression> parse_primary_expression();
     std::unique_ptr<Expression> parse_binary_expression(u8 precedence);
     std::unique_ptr<Expression> parse_call_expression();
+    std::unique_ptr<Expression> parse_variable_expression();
 
     std::unique_ptr<Literal> parse_integer_literal();
 
     std::unique_ptr<Statement> parse_statement();
+    std::unique_ptr<Statement> parse_assign_statement();
     std::unique_ptr<Statement> parse_compound_statement();
+    std::unique_ptr<Statement> parse_declaration_statement(std::unique_ptr<Declaration>);
     std::unique_ptr<Statement> parse_expression_statement(std::unique_ptr<Expression>);
     std::unique_ptr<Statement> parse_if_statement();
     std::unique_ptr<Statement> parse_while_statement();

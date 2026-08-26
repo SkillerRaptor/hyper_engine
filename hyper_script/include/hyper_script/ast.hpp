@@ -18,16 +18,20 @@ enum class AstNodeKind : u8 {
     // Declarations
     FunctionDeclaration,
     TranslationUnitDeclaration,
+    VariableDeclaration,
 
     // Expressions
     BinaryExpression,
     CallExpression,
+    VariableExpression,
 
     // Literals
     IntegerLiteral,
 
     // Statements
+    AssignStatement,
     CompoundStatement,
+    DeclarationStatement,
     ExpressionStatement,
     IfStatement,
     WhileStatement,
@@ -92,6 +96,24 @@ private:
     std::vector<std::unique_ptr<Declaration>> m_declarations;
 };
 
+class VariableDeclaration : public Declaration {
+public:
+    explicit VariableDeclaration(const std::string_view identifier, std::unique_ptr<Expression> initializer)
+        : m_identifier(identifier)
+        , m_initializer(std::move(initializer))
+    {
+    }
+
+    constexpr AstNodeKind kind() const override { return AstNodeKind::VariableDeclaration; }
+
+    std::string_view identifier() const { return m_identifier; }
+    Expression *initializer() const { return m_initializer.get(); }
+
+private:
+    std::string_view m_identifier;
+    std::unique_ptr<Expression> m_initializer;
+};
+
 enum class BinaryOperation : u8 {
     Addition,
     Subtraction,
@@ -146,6 +168,21 @@ private:
     std::vector<std::unique_ptr<Expression>> m_arguments;
 };
 
+class VariableExpression : public Expression {
+public:
+    explicit VariableExpression(const std::string_view identifier)
+        : m_identifier(identifier)
+    {
+    }
+
+    constexpr AstNodeKind kind() const override { return AstNodeKind::VariableExpression; }
+
+    std::string_view identifier() const { return m_identifier; }
+
+private:
+    std::string_view m_identifier;
+};
+
 class IntegerLiteral : public Literal {
 public:
     explicit IntegerLiteral(const u32 value)
@@ -159,6 +196,24 @@ public:
 
 private:
     u32 m_value;
+};
+
+class AssignStatement : public Statement {
+public:
+    explicit AssignStatement(const std::string_view identifier, std::unique_ptr<Expression> value)
+        : m_identifier(identifier)
+        , m_value(std::move(value))
+    {
+    }
+
+    constexpr AstNodeKind kind() const override { return AstNodeKind::AssignStatement; }
+
+    std::string_view identifier() const { return m_identifier; }
+    Expression *value() const { return m_value.get(); }
+
+private:
+    std::string_view m_identifier;
+    std::unique_ptr<Expression> m_value;
 };
 
 class CompoundStatement : public Statement {
@@ -175,6 +230,21 @@ public:
 
 private:
     std::vector<std::unique_ptr<Statement>> m_statements;
+};
+
+class DeclarationStatement : public Statement {
+public:
+    explicit DeclarationStatement(std::unique_ptr<Declaration> declaration)
+        : m_declaration(std::move(declaration))
+    {
+    }
+
+    constexpr AstNodeKind kind() const override { return AstNodeKind::DeclarationStatement; }
+
+    Declaration *declaration() const { return m_declaration.get(); }
+
+private:
+    std::unique_ptr<Declaration> m_declaration;
 };
 
 class ExpressionStatement : public Statement {

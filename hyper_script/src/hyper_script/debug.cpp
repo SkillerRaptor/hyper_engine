@@ -52,6 +52,12 @@ static void dump_node(const AstNode &node, const std::string &prefix, const bool
         }
         break;
     }
+    case AstNodeKind::VariableDeclaration: {
+        const VariableDeclaration &variable_declaration = static_cast<const VariableDeclaration &>(node);
+        HE_INFO("{}{}VariableDeclaration {{ identifier: {} }}", prefix, connector, variable_declaration.identifier());
+        dump_node(*variable_declaration.initializer(), child_prefix, true);
+        break;
+    }
     case AstNodeKind::BinaryExpression: {
         const BinaryExpression &binary_expression = static_cast<const BinaryExpression &>(node);
         const std::string_view operation = [&]() {
@@ -98,9 +104,20 @@ static void dump_node(const AstNode &node, const std::string &prefix, const bool
         }
         break;
     }
+    case AstNodeKind::VariableExpression: {
+        const VariableExpression &variable_expression = static_cast<const VariableExpression &>(node);
+        HE_INFO("{}{}VariableExpression {{ identifier: {} }}", prefix, connector, variable_expression.identifier());
+        break;
+    }
     case AstNodeKind::IntegerLiteral: {
         const IntegerLiteral &integer_literal = static_cast<const IntegerLiteral &>(node);
         HE_INFO("{}{}IntegerLiteral {{ value: {} }}", prefix, connector, integer_literal.value());
+        break;
+    }
+    case AstNodeKind::AssignStatement: {
+        const AssignStatement &assign_statement = static_cast<const AssignStatement &>(node);
+        HE_INFO("{}{}AssignStatement {{ identifier: {} }}", prefix, connector, assign_statement.identifier());
+        dump_node(*assign_statement.value(), child_prefix, true);
         break;
     }
     case AstNodeKind::CompoundStatement: {
@@ -113,6 +130,12 @@ static void dump_node(const AstNode &node, const std::string &prefix, const bool
 
             dump_node(*compound_statement.statement(compound_statement.statement_count() - 1), child_prefix, true);
         }
+        break;
+    }
+    case AstNodeKind::DeclarationStatement: {
+        const DeclarationStatement &declaration_statement = static_cast<const DeclarationStatement &>(node);
+        HE_INFO("{}{}DeclarationStatement", prefix, connector);
+        dump_node(*declaration_statement.declaration(), child_prefix, true);
         break;
     }
     case AstNodeKind::ExpressionStatement: {
