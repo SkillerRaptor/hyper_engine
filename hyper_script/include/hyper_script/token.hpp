@@ -26,6 +26,14 @@ enum class TokenKind : u8 {
     Star,
     Slash,
 
+    Equal,
+    EqualEqual,
+    NotEqual,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+
     IntegerLiteral,
     Identifier,
 

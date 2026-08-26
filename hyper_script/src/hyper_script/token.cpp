@@ -32,6 +32,18 @@ std::string Token::to_string() const
             return "Star";
         case TokenKind::Slash:
             return "Slash";
+        case TokenKind::EqualEqual:
+            return "EqualEqual";
+        case TokenKind::NotEqual:
+            return "NotEqual";
+        case TokenKind::Less:
+            return "Less";
+        case TokenKind::LessEqual:
+            return "LessEqual";
+        case TokenKind::Greater:
+            return "Greater";
+        case TokenKind::GreaterEqual:
+            return "GreaterEqual";
         case TokenKind::IntegerLiteral:
             return "IntegerLiteral";
         case TokenKind::Identifier:

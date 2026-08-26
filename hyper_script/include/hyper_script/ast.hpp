@@ -45,6 +45,12 @@ enum class BinaryOperation : u8 {
     Subtraction,
     Multiplication,
     Division,
+    Equal,
+    NotEqual,
+    LessThan,
+    LessThanOrEqual,
+    GreaterThan,
+    GreaterThanOrEqual,
 };
 
 class BinaryExpression final : public Expression {

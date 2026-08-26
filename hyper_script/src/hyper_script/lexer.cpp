@@ -81,6 +81,31 @@ std::optional<Token> Lexer::next_token()
         return make_token(TokenKind::Star);
     case '/':
         return make_token(TokenKind::Slash);
+    case '=':
+        if (peek() == '=') {
+            advance();
+            return make_token(TokenKind::EqualEqual);
+        }
+        return make_token(TokenKind::Equal);
+    case '!':
+        if (peek() == '=') {
+            advance();
+            return make_token(TokenKind::NotEqual);
+        }
+
+        HE_PANIC();
+    case '<':
+        if (peek() == '=') {
+            advance();
+            return make_token(TokenKind::LessEqual);
+        }
+        return make_token(TokenKind::Less);
+    case '>':
+        if (peek() == '=') {
+            advance();
+            return make_token(TokenKind::GreaterEqual);
+        }
+        return make_token(TokenKind::Greater);
     default:
         HE_PANIC("Unknown character '{}' at line {}, column {}", current_character, start_line, start_column);
     }

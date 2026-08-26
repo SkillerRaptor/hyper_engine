@@ -42,6 +42,18 @@ std::unique_ptr<Expression> Parser::parse_binary_expression(const u8 precedence)
                 return BinaryOperation::Multiplication;
             case TokenKind::Slash:
                 return BinaryOperation::Division;
+            case TokenKind::EqualEqual:
+                return BinaryOperation::Equal;
+            case TokenKind::NotEqual:
+                return BinaryOperation::NotEqual;
+            case TokenKind::Less:
+                return BinaryOperation::LessThan;
+            case TokenKind::LessEqual:
+                return BinaryOperation::LessThanOrEqual;
+            case TokenKind::Greater:
+                return BinaryOperation::GreaterThan;
+            case TokenKind::GreaterEqual:
+                return BinaryOperation::GreaterThanOrEqual;
             default:
                 HE_UNREACHABLE();
             }
@@ -124,6 +136,14 @@ u8 Parser::get_operator_precedence(const TokenKind kind)
     case TokenKind::Star:
     case TokenKind::Slash:
         return 20;
+    case TokenKind::EqualEqual:
+    case TokenKind::NotEqual:
+        return 30;
+    case TokenKind::Less:
+    case TokenKind::LessEqual:
+    case TokenKind::Greater:
+    case TokenKind::GreaterEqual:
+        return 40;
     default:
         return 0;
     }

@@ -39,6 +39,18 @@ static void dump_node(const AstNode &node, const std::string &prefix, const bool
                 return "Multiplication";
             case BinaryOperation::Division:
                 return "Division";
+            case BinaryOperation::Equal:
+                return "Equal";
+            case BinaryOperation::NotEqual:
+                return "NotEqual";
+            case BinaryOperation::LessThan:
+                return "LessThan";
+            case BinaryOperation::LessThanOrEqual:
+                return "LessThanOrEqual";
+            case BinaryOperation::GreaterThan:
+                return "GreaterThan";
+            case BinaryOperation::GreaterThanOrEqual:
+                return "GreaterThanOrEqual";
             default:
                 HE_UNREACHABLE();
             }
