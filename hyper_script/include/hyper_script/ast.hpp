@@ -10,6 +10,7 @@
 #include <string_view>
 #include <vector>
 
+#include <hyper_core/assertion.hpp>
 #include <hyper_core/types.hpp>
 
 namespace he::script {
@@ -55,12 +56,14 @@ public:
         : m_identifier(identifier)
         , m_body(std::move(body))
     {
+        HE_ASSERT(!m_identifier.empty());
+        HE_ASSERT(m_body != nullptr);
     }
 
     constexpr AstNodeKind kind() const override { return AstNodeKind::FunctionDeclaration; }
 
     std::string_view identifier() const { return m_identifier; }
-    Statement *body() const { return m_body.get(); }
+    const Statement &body() const { return *m_body; }
 
 private:
     std::string_view m_identifier;
@@ -79,7 +82,7 @@ public:
     constexpr AstNodeKind kind() const override { return AstNodeKind::TranslationUnitDeclaration; }
 
     usize declaration_count() const { return m_declarations.size(); }
-    Declaration *declaration(const usize index) const { return m_declarations[index].get(); }
+    const Declaration &declaration(const usize index) const { return *m_declarations[index]; }
 
 private:
     std::vector<std::unique_ptr<Declaration>> m_declarations;
@@ -91,12 +94,14 @@ public:
         : m_identifier(identifier)
         , m_initializer(std::move(initializer))
     {
+        HE_ASSERT(!m_identifier.empty());
+        HE_ASSERT(m_initializer != nullptr);
     }
 
     constexpr AstNodeKind kind() const override { return AstNodeKind::VariableDeclaration; }
 
     std::string_view identifier() const { return m_identifier; }
-    Expression *initializer() const { return m_initializer.get(); }
+    const Expression &initializer() const { return *m_initializer; }
 
 private:
     std::string_view m_identifier;
@@ -124,13 +129,15 @@ public:
         , m_left(std::move(left))
         , m_right(std::move(right))
     {
+        HE_ASSERT(m_left != nullptr);
+        HE_ASSERT(m_right != nullptr);
     }
 
     constexpr AstNodeKind kind() const override { return AstNodeKind::BinaryExpression; }
 
     BinaryOperation operation() const { return m_operation; }
-    const Expression *left() const { return m_left.get(); }
-    const Expression *right() const { return m_right.get(); }
+    const Expression &left() const { return *m_left; }
+    const Expression &right() const { return *m_right; }
 
 private:
     BinaryOperation m_operation;
@@ -144,13 +151,14 @@ public:
         : m_identifier(identifier)
         , m_arguments(std::move(arguments))
     {
+        HE_ASSERT(!m_identifier.empty());
     }
 
     constexpr AstNodeKind kind() const override { return AstNodeKind::CallExpression; }
 
     std::string_view identifier() const { return m_identifier; }
     usize argument_count() const { return m_arguments.size(); }
-    Expression *argument(const usize index) const { return m_arguments[index].get(); }
+    const Expression &argument(const usize index) const { return *m_arguments[index]; }
 
 private:
     std::string_view m_identifier;
@@ -162,6 +170,7 @@ public:
     explicit VariableExpression(const std::string_view identifier)
         : m_identifier(identifier)
     {
+        HE_ASSERT(!m_identifier.empty());
     }
 
     constexpr AstNodeKind kind() const override { return AstNodeKind::VariableExpression; }
@@ -193,12 +202,14 @@ public:
         : m_identifier(identifier)
         , m_value(std::move(value))
     {
+        HE_ASSERT(!m_identifier.empty());
+        HE_ASSERT(m_value != nullptr);
     }
 
     constexpr AstNodeKind kind() const override { return AstNodeKind::AssignStatement; }
 
     std::string_view identifier() const { return m_identifier; }
-    Expression *value() const { return m_value.get(); }
+    const Expression &value() const { return *m_value; }
 
 private:
     std::string_view m_identifier;
@@ -215,7 +226,7 @@ public:
     constexpr AstNodeKind kind() const override { return AstNodeKind::CompoundStatement; }
 
     usize statement_count() const { return m_statements.size(); }
-    Statement *statement(const usize index) const { return m_statements[index].get(); }
+    const Statement &statement(const usize index) const { return *m_statements[index]; }
 
 private:
     std::vector<std::unique_ptr<Statement>> m_statements;
@@ -226,11 +237,12 @@ public:
     explicit DeclarationStatement(std::unique_ptr<Declaration> declaration)
         : m_declaration(std::move(declaration))
     {
+        HE_ASSERT(m_declaration != nullptr);
     }
 
     constexpr AstNodeKind kind() const override { return AstNodeKind::DeclarationStatement; }
 
-    Declaration *declaration() const { return m_declaration.get(); }
+    const Declaration &declaration() const { return *m_declaration; }
 
 private:
     std::unique_ptr<Declaration> m_declaration;
@@ -241,11 +253,12 @@ public:
     explicit ExpressionStatement(std::unique_ptr<Expression> expression)
         : m_expression(std::move(expression))
     {
+        HE_ASSERT(m_expression != nullptr);
     }
 
     constexpr AstNodeKind kind() const override { return AstNodeKind::ExpressionStatement; }
 
-    Expression *expression() const { return m_expression.get(); }
+    const Expression &expression() const { return *m_expression; }
 
 private:
     std::unique_ptr<Expression> m_expression;
@@ -261,13 +274,15 @@ public:
         , m_then_body(std::move(then_body))
         , m_else_body(std::move(else_body))
     {
+        HE_ASSERT(m_condition != nullptr);
+        HE_ASSERT(m_then_body != nullptr);
     }
 
     constexpr AstNodeKind kind() const override { return AstNodeKind::IfStatement; }
 
-    Expression *condition() const { return m_condition.get(); }
-    Statement *then_body() const { return m_then_body.get(); }
-    Statement *else_body() const { return m_else_body.get(); }
+    const Expression &condition() const { return *m_condition; }
+    const Statement &then_body() const { return *m_then_body; }
+    const Statement *else_body() const { return m_else_body.get(); }
 
 private:
     std::unique_ptr<Expression> m_condition;
@@ -281,12 +296,14 @@ public:
         : m_condition(std::move(condition))
         , m_body(std::move(body))
     {
+        HE_ASSERT(m_condition != nullptr);
+        HE_ASSERT(m_body != nullptr);
     }
 
     constexpr AstNodeKind kind() const override { return AstNodeKind::WhileStatement; }
 
-    Expression *condition() const { return m_condition.get(); }
-    Statement *body() const { return m_body.get(); }
+    const Expression &condition() const { return *m_condition; }
+    const Statement &body() const { return *m_body; }
 
 private:
     std::unique_ptr<Expression> m_condition;
