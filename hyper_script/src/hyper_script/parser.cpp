@@ -72,7 +72,7 @@ std::unique_ptr<Expression> Parser::parse_primary_expression()
 {
     switch (current_token()->kind) {
     case TokenKind::IntegerLiteral:
-        return parse_integer_literal();
+        return parse_literal_expression(parse_integer_literal());
     case TokenKind::Identifier:
         if (peek_token()->kind == TokenKind::LeftParenthesis) {
             return parse_call_expression();
@@ -145,6 +145,11 @@ std::unique_ptr<Expression> Parser::parse_call_expression()
     consume(TokenKind::RightParenthesis);
 
     return std::make_unique<CallExpression>(identifier, std::move(arguments));
+}
+
+std::unique_ptr<Expression> Parser::parse_literal_expression(std::unique_ptr<Literal> literal)
+{
+    return std::make_unique<LiteralExpression>(std::move(literal));
 }
 
 std::unique_ptr<Expression> Parser::parse_variable_expression()

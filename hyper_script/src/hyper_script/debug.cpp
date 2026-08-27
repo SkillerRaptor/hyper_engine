@@ -95,35 +95,35 @@ static void dump_node(const AstNode &node, const std::string &prefix, const bool
     const std::string connector = is_root ? "" : (is_last ? "`- " : "|- ");
     const std::string child_prefix = prefix + (is_root ? "" : (is_last ? "   " : "|  "));
 
-    switch (node.kind()) {
+    switch (node.kind) {
     case AstNodeKind::FunctionDeclaration: {
         const FunctionDeclaration &declaration = static_cast<const FunctionDeclaration &>(node);
-        HE_INFO("{}{}FunctionDeclaration {{ identifier: {} }}", prefix, connector, declaration.identifier());
-        dump_node(declaration.body(), child_prefix, true);
+        HE_INFO("{}{}FunctionDeclaration {{ identifier: {} }}", prefix, connector, declaration.identifier);
+        dump_node(*declaration.body, child_prefix, true);
         break;
     }
     case AstNodeKind::TranslationUnitDeclaration: {
         const TranslationUnitDeclaration &declaration = static_cast<const TranslationUnitDeclaration &>(node);
         HE_INFO("{}{}TranslationUnitDeclaration", prefix, connector);
-        if (declaration.declaration_count() > 0) {
-            for (usize i = 0; i < declaration.declaration_count() - 1; ++i) {
-                dump_node(declaration.declaration(i), child_prefix, false);
-            }
-
-            dump_node(declaration.declaration(declaration.declaration_count() - 1), child_prefix, true);
+        if (declaration.declarations.empty()) {
+            break;
         }
+        for (usize i = 0; i < declaration.declarations.size() - 1; ++i) {
+            dump_node(*declaration.declarations[i], child_prefix, false);
+        }
+        dump_node(*declaration.declarations.back(), child_prefix, true);
         break;
     }
     case AstNodeKind::VariableDeclaration: {
         const VariableDeclaration &declaration = static_cast<const VariableDeclaration &>(node);
-        HE_INFO("{}{}VariableDeclaration {{ identifier: {} }}", prefix, connector, declaration.identifier());
-        dump_node(declaration.initializer(), child_prefix, true);
+        HE_INFO("{}{}VariableDeclaration {{ identifier: {} }}", prefix, connector, declaration.identifier);
+        dump_node(*declaration.initializer, child_prefix, true);
         break;
     }
     case AstNodeKind::BinaryExpression: {
         const BinaryExpression &expression = static_cast<const BinaryExpression &>(node);
         const std::string_view operation = [&]() {
-            switch (expression.operation()) {
+            switch (expression.operation) {
             case BinaryOperation::Addition:
                 return "Addition";
             case BinaryOperation::Subtraction:
@@ -149,78 +149,83 @@ static void dump_node(const AstNode &node, const std::string &prefix, const bool
             }
         }();
         HE_INFO("{}{}BinaryExpression {{ operation: {} }}", prefix, connector, operation);
-        dump_node(expression.left(), child_prefix, false);
-        dump_node(expression.right(), child_prefix, true);
+        dump_node(*expression.left, child_prefix, false);
+        dump_node(*expression.right, child_prefix, true);
         break;
     }
     case AstNodeKind::CallExpression: {
         const CallExpression &expression = static_cast<const CallExpression &>(node);
-        HE_INFO("{}{}CallExpression {{ identifier: {} }}", prefix, connector, expression.identifier());
-
-        if (expression.argument_count() > 0) {
-            for (usize i = 0; i < expression.argument_count() - 1; ++i) {
-                dump_node(expression.argument(i), child_prefix, false);
-            }
-
-            dump_node(expression.argument(expression.argument_count() - 1), child_prefix, true);
+        HE_INFO("{}{}CallExpression {{ identifier: {} }}", prefix, connector, expression.identifier);
+        if (expression.arguments.empty()) {
+            break;
         }
+        for (usize i = 0; i < expression.arguments.size() - 1; ++i) {
+            dump_node(*expression.arguments[i], child_prefix, false);
+        }
+        dump_node(*expression.arguments.back(), child_prefix, true);
+        break;
+    }
+    case AstNodeKind::LiteralExpression: {
+        const LiteralExpression &expression = static_cast<const LiteralExpression &>(node);
+        HE_INFO("{}{}LiteralExpression", prefix, connector);
+        dump_node(*expression.literal, child_prefix, true);
         break;
     }
     case AstNodeKind::VariableExpression: {
         const VariableExpression &expression = static_cast<const VariableExpression &>(node);
-        HE_INFO("{}{}VariableExpression {{ identifier: {} }}", prefix, connector, expression.identifier());
+        HE_INFO("{}{}VariableExpression {{ identifier: {} }}", prefix, connector, expression.identifier);
         break;
     }
     case AstNodeKind::IntegerLiteral: {
         const IntegerLiteral &literal = static_cast<const IntegerLiteral &>(node);
-        HE_INFO("{}{}IntegerLiteral {{ value: {} }}", prefix, connector, literal.value());
+        HE_INFO("{}{}IntegerLiteral {{ value: {} }}", prefix, connector, literal.value);
         break;
     }
     case AstNodeKind::AssignStatement: {
         const AssignStatement &statement = static_cast<const AssignStatement &>(node);
-        HE_INFO("{}{}AssignStatement {{ identifier: {} }}", prefix, connector, statement.identifier());
-        dump_node(statement.value(), child_prefix, true);
+        HE_INFO("{}{}AssignStatement {{ identifier: {} }}", prefix, connector, statement.identifier);
+        dump_node(*statement.value, child_prefix, true);
         break;
     }
     case AstNodeKind::CompoundStatement: {
         const CompoundStatement &statement = static_cast<const CompoundStatement &>(node);
         HE_INFO("{}{}CompoundStatement", prefix, connector);
-        if (statement.statement_count() > 0) {
-            for (usize i = 0; i < statement.statement_count() - 1; ++i) {
-                dump_node(statement.statement(i), child_prefix, false);
-            }
-
-            dump_node(statement.statement(statement.statement_count() - 1), child_prefix, true);
+        if (statement.statements.empty()) {
+            break;
         }
+        for (usize i = 0; i < statement.statements.size() - 1; ++i) {
+            dump_node(*statement.statements[i], child_prefix, false);
+        }
+        dump_node(*statement.statements.back(), child_prefix, true);
         break;
     }
     case AstNodeKind::DeclarationStatement: {
         const DeclarationStatement &statement = static_cast<const DeclarationStatement &>(node);
         HE_INFO("{}{}DeclarationStatement", prefix, connector);
-        dump_node(statement.declaration(), child_prefix, true);
+        dump_node(*statement.declaration, child_prefix, true);
         break;
     }
     case AstNodeKind::ExpressionStatement: {
         const ExpressionStatement &statement = static_cast<const ExpressionStatement &>(node);
         HE_INFO("{}{}ExpressionStatement", prefix, connector);
-        dump_node(statement.expression(), child_prefix, true);
+        dump_node(*statement.expression, child_prefix, true);
         break;
     }
     case AstNodeKind::IfStatement: {
         const IfStatement &statement = static_cast<const IfStatement &>(node);
         HE_INFO("{}{}IfStatement", prefix, connector);
-        dump_node(statement.condition(), child_prefix, false);
-        dump_node(statement.then_body(), child_prefix, statement.else_body() == nullptr);
-        if (statement.else_body()) {
-            dump_node(*statement.else_body(), child_prefix, true);
+        dump_node(*statement.condition, child_prefix, false);
+        dump_node(*statement.then_body, child_prefix, statement.else_body == nullptr);
+        if (statement.else_body) {
+            dump_node(*statement.else_body, child_prefix, true);
         }
         break;
     }
     case AstNodeKind::WhileStatement: {
         const WhileStatement &statement = static_cast<const WhileStatement &>(node);
         HE_INFO("{}{}WhileStatement", prefix, connector);
-        dump_node(statement.condition(), child_prefix, false);
-        dump_node(statement.body(), child_prefix, true);
+        dump_node(*statement.condition, child_prefix, false);
+        dump_node(*statement.body, child_prefix, true);
         break;
     }
     default:

@@ -32,6 +32,7 @@ private:
     std::unique_ptr<Expression> parse_primary_expression();
     std::unique_ptr<Expression> parse_binary_expression(u8 precedence);
     std::unique_ptr<Expression> parse_call_expression();
+    std::unique_ptr<Expression> parse_literal_expression(std::unique_ptr<Literal>);
     std::unique_ptr<Expression> parse_variable_expression();
 
     std::unique_ptr<Literal> parse_integer_literal();

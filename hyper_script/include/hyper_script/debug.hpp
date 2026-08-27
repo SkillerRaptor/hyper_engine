@@ -7,6 +7,8 @@
 #pragma once
 
 #include <span>
+#include <string>
+#include <string_view>
 
 #include "hyper_script/ast.hpp"
 #include "hyper_script/token.hpp"
