@@ -235,4 +235,114 @@ static void dump_node(const AstNode &node, const std::string &prefix, const bool
 
 void dump_ast(const AstNode &node) { dump_node(node, "", true, true); }
 
+void dump_ir(const IrFunction &function)
+{
+    HE_INFO("define @{}() {{", function.name);
+
+    for (usize i = 0; i < function.blocks.size(); ++i) {
+        const std::unique_ptr<IrBlock> &block = function.blocks[i];
+
+        if (block->id > 0) {
+            HE_INFO("");
+        }
+        HE_INFO("block_{}:", block->id);
+
+        for (const IrValue *instruction : block->instructions) {
+            switch (instruction->kind) {
+            case IrValueKind::Unknown:
+                break;
+            case IrValueKind::Constant: {
+                const IrConstant *constant = static_cast<const IrConstant *>(instruction);
+                HE_INFO("  %{} = iconst {}", instruction->id, constant->value);
+                break;
+            }
+            case IrValueKind::Addition: {
+                const IrAdd *add = static_cast<const IrAdd *>(instruction);
+                HE_INFO("  %{} = iadd %{} %{}", instruction->id, add->left->id, add->right->id);
+                break;
+            }
+            case IrValueKind::Subtraction: {
+                const IrSub *sub = static_cast<const IrSub *>(instruction);
+                HE_INFO("  %{} = isub %{} %{}", instruction->id, sub->left->id, sub->right->id);
+                break;
+            }
+            case IrValueKind::Multiplication: {
+                const IrMul *mul = static_cast<const IrMul *>(instruction);
+                HE_INFO("  %{} = imul %{} %{}", instruction->id, mul->left->id, mul->right->id);
+                break;
+            }
+            case IrValueKind::Division: {
+                const IrDiv *div = static_cast<const IrDiv *>(instruction);
+                HE_INFO("  %{} = idiv %{} %{}", instruction->id, div->left->id, div->right->id);
+                break;
+            }
+            case IrValueKind::Compare: {
+                const IrCmp *cmp = static_cast<const IrCmp *>(instruction);
+                switch (cmp->operation) {
+                case CompareOperation::Equal:
+                    HE_INFO("  %{} = icmp eq %{} %{}", instruction->id, cmp->left->id, cmp->right->id);
+                    break;
+                case CompareOperation::NotEqual:
+                    HE_INFO("  %{} = icmp ne %{} %{}", instruction->id, cmp->left->id, cmp->right->id);
+                    break;
+                case CompareOperation::LessThan:
+                    HE_INFO("  %{} = icmp lt %{} %{}", instruction->id, cmp->left->id, cmp->right->id);
+                    break;
+                case CompareOperation::LessThanOrEqual:
+                    HE_INFO("  %{} = icmp le %{} %{}", instruction->id, cmp->left->id, cmp->right->id);
+                    break;
+                case CompareOperation::GreaterThan:
+                    HE_INFO("  %{} = icmp gt %{} %{}", instruction->id, cmp->left->id, cmp->right->id);
+                    break;
+                case CompareOperation::GreaterThanOrEqual:
+                    HE_INFO("  %{} = icmp ge %{} %{}", instruction->id, cmp->left->id, cmp->right->id);
+                    break;
+                }
+                break;
+            }
+            case IrValueKind::Branch: {
+                const IrBranch *branch = static_cast<const IrBranch *>(instruction);
+                if (branch->condition != nullptr) {
+                    HE_INFO(
+                        "  br %{}, %block_{}, %block_{}",
+                        branch->condition->id,
+                        branch->true_target->id,
+                        branch->false_target->id);
+                } else {
+                    HE_INFO("  br %block_{}", branch->true_target->id);
+                }
+                break;
+            }
+            case IrValueKind::Call: {
+                const IrCall *call = static_cast<const IrCall *>(instruction);
+                std::string arguments;
+                for (usize j = 0; j < call->arguments.size(); ++j) {
+                    arguments += fmt::format("%{}", call->arguments[j]->id);
+                    if (j + 1 < call->arguments.size()) {
+                        arguments += ", ";
+                    }
+                }
+                HE_INFO("  %{} = call @{}({})", instruction->id, call->callee, arguments);
+                break;
+            }
+            case IrValueKind::Phi: {
+                const IrPhi *phi = static_cast<const IrPhi *>(instruction);
+                std::string operands;
+                for (usize j = 0; j < phi->operands.size(); ++j) {
+                    operands
+                        += fmt::format("[ %{}, %block_{} ]", phi->operands[j]->id, phi->parent->predecessors[j]->id);
+                    if (j + 1 < phi->operands.size()) {
+                        operands += ", ";
+                    }
+                }
+                HE_INFO("  %{} = φ {}", instruction->id, operands);
+                break;
+            }
+            }
+        }
+    }
+
+    HE_INFO("}}");
+}
+
 } // namespace he::script

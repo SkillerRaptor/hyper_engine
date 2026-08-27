@@ -11,6 +11,7 @@
 #include <string_view>
 
 #include "hyper_script/ast.hpp"
+#include "hyper_script/ir.hpp"
 #include "hyper_script/token.hpp"
 
 namespace he::script {
@@ -20,5 +21,6 @@ std::string token_to_string(const Token &);
 
 void dump_tokens(std::span<const Token>);
 void dump_ast(const AstNode &);
+void dump_ir(const IrFunction &);
 
 } // namespace he::script

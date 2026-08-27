@@ -11,6 +11,7 @@
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
 #include <hyper_script/debug.hpp>
+#include <hyper_script/ir_builder.hpp>
 #include <hyper_script/lexer.hpp>
 #include <hyper_script/parser.hpp>
 
@@ -57,6 +58,23 @@ fn foo() {
     const std::unique_ptr<script::AstNode> ast = parser.parse();
 
     script::dump_ast(*ast);
+
+    HE_ASSERT(ast->kind == script::AstNodeKind::TranslationUnitDeclaration);
+
+    const script::TranslationUnitDeclaration &translation_unit_declaration
+        = static_cast<const script::TranslationUnitDeclaration &>(*ast);
+
+    for (const std::unique_ptr<script::Declaration> &declaration : translation_unit_declaration.declarations) {
+        HE_ASSERT(declaration->kind == script::AstNodeKind::FunctionDeclaration);
+
+        const script::FunctionDeclaration &function_declaration
+            = static_cast<const script::FunctionDeclaration &>(*declaration);
+
+        script::IrBuilder builder(function_declaration);
+        const std::unique_ptr<script::IrFunction> function = builder.build();
+
+        script::dump_ir(*function);
+    }
 
     const std::chrono::time_point<std::chrono::steady_clock> end_time = std::chrono::steady_clock::now();
     const std::chrono::duration<f32> elapsed_seconds = end_time - start_time;
