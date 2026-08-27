@@ -30,14 +30,8 @@ std::vector<Token> Lexer::lex()
         tokens.push_back(token.value());
     }
 
-    tokens.push_back(
-        Token {
-            .kind = TokenKind::Eof,
-            .lexeme = "",
-            .line = m_line,
-            .column = m_column,
-        });
-    
+    tokens.push_back(Token(TokenKind::Eof, "", m_line, m_column));
+
     return tokens;
 }
 
@@ -79,12 +73,7 @@ std::optional<Token> Lexer::next_token()
 
     auto make_token = [&](const TokenKind kind) {
         const size_t length = m_current_index - start_index;
-        return Token {
-            .kind = kind,
-            .lexeme = m_source.substr(start_index, length),
-            .line = start_line,
-            .column = start_column,
-        };
+        return Token(kind, m_source.substr(start_index, length), start_line, start_column);
     };
 
     switch (current_character) {
@@ -143,12 +132,7 @@ Token Lexer::lex_number(const u32 start_line, const u32 start_column, const size
     }
 
     const std::string_view value = m_source.substr(start_index, m_current_index - start_index);
-    return Token {
-        .kind = TokenKind::IntegerLiteral,
-        .lexeme = value,
-        .line = start_line,
-        .column = start_column,
-    };
+    return Token(TokenKind::IntegerLiteral, value, start_line, start_column);
 }
 
 Token Lexer::lex_identifier(const u32 start_line, const u32 start_column, const size_t start_index)
@@ -160,12 +144,7 @@ Token Lexer::lex_identifier(const u32 start_line, const u32 start_column, const 
     }
 
     const std::string_view value = m_source.substr(start_index, m_current_index - start_index);
-    return Token {
-        .kind = TokenKind::Identifier,
-        .lexeme = value,
-        .line = start_line,
-        .column = start_column,
-    };
+    return Token(TokenKind::Identifier, value, start_line, start_column);
 }
 
 char Lexer::advance()
