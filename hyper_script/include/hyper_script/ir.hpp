@@ -30,15 +30,15 @@ enum class IrValueKind : u8 {
     Branch,
     Call,
     Phi,
+    Undef,
 };
 
 struct IrValue {
     IrValueKind kind;
-    u32 id;
+    u32 id = std::numeric_limits<u32>::max();
 
-    explicit IrValue(const IrValueKind kind, const u32 id)
+    explicit IrValue(const IrValueKind kind)
         : kind(kind)
-        , id(id)
     {
     }
 
@@ -48,8 +48,8 @@ struct IrValue {
 struct IrConstant : IrValue {
     u32 value;
 
-    IrConstant(const u32 id, const u32 value)
-        : IrValue(IrValueKind::Constant, id)
+    IrConstant(const u32 value)
+        : IrValue(IrValueKind::Constant)
         , value(value)
     {
     }
@@ -59,8 +59,8 @@ struct IrAdd : IrValue {
     IrValue *left;
     IrValue *right;
 
-    IrAdd(const u32 id, IrValue *left, IrValue *right)
-        : IrValue(IrValueKind::Addition, id)
+    IrAdd(IrValue *left, IrValue *right)
+        : IrValue(IrValueKind::Addition)
         , left(left)
         , right(right)
     {
@@ -71,8 +71,8 @@ struct IrSub : IrValue {
     IrValue *left;
     IrValue *right;
 
-    IrSub(const u32 id, IrValue *left, IrValue *right)
-        : IrValue(IrValueKind::Subtraction, id)
+    IrSub(IrValue *left, IrValue *right)
+        : IrValue(IrValueKind::Subtraction)
         , left(left)
         , right(right)
     {
@@ -83,8 +83,8 @@ struct IrMul : IrValue {
     IrValue *left;
     IrValue *right;
 
-    IrMul(const u32 id, IrValue *left, IrValue *right)
-        : IrValue(IrValueKind::Multiplication, id)
+    IrMul(IrValue *left, IrValue *right)
+        : IrValue(IrValueKind::Multiplication)
         , left(left)
         , right(right)
     {
@@ -95,8 +95,8 @@ struct IrDiv : IrValue {
     IrValue *left;
     IrValue *right;
 
-    IrDiv(const u32 id, IrValue *left, IrValue *right)
-        : IrValue(IrValueKind::Division, id)
+    IrDiv(IrValue *left, IrValue *right)
+        : IrValue(IrValueKind::Division)
         , left(left)
         , right(right)
     {
@@ -117,8 +117,8 @@ struct IrCmp : IrValue {
     IrValue *left;
     IrValue *right;
 
-    IrCmp(const u32 id, const CompareOperation operation, IrValue *left, IrValue *right)
-        : IrValue(IrValueKind::Compare, id)
+    IrCmp(const CompareOperation operation, IrValue *left, IrValue *right)
+        : IrValue(IrValueKind::Compare)
         , operation(operation)
         , left(left)
         , right(right)
@@ -131,16 +131,16 @@ struct IrBranch : IrValue {
     IrBlock *true_target;
     IrBlock *false_target;
 
-    IrBranch(const u32 id, IrBlock *target)
-        : IrValue(IrValueKind::Branch, id)
+    IrBranch(IrBlock *target)
+        : IrValue(IrValueKind::Branch)
         , condition(nullptr)
         , true_target(target)
         , false_target(nullptr)
     {
     }
 
-    IrBranch(const u32 id, IrValue *condition, IrBlock *true_target, IrBlock *false_target)
-        : IrValue(IrValueKind::Branch, id)
+    IrBranch(IrValue *condition, IrBlock *true_target, IrBlock *false_target)
+        : IrValue(IrValueKind::Branch)
         , condition(condition)
         , true_target(true_target)
         , false_target(false_target)
@@ -152,8 +152,8 @@ struct IrCall : IrValue {
     std::string_view callee;
     std::vector<IrValue *> arguments;
 
-    IrCall(const u32 id, const std::string_view callee, std::vector<IrValue *> arguments)
-        : IrValue(IrValueKind::Call, id)
+    IrCall(const std::string_view callee, std::vector<IrValue *> arguments)
+        : IrValue(IrValueKind::Call)
         , callee(callee)
         , arguments(std::move(arguments))
     {
@@ -163,24 +163,27 @@ struct IrCall : IrValue {
 struct IrPhi : IrValue {
     IrBlock *parent;
     std::vector<IrValue *> operands;
+    std::vector<IrValue *> users;
 
-    IrPhi(const u32 id, IrBlock *parent)
-        : IrValue(IrValueKind::Phi, id)
+    IrPhi(IrBlock *parent)
+        : IrValue(IrValueKind::Phi)
         , parent(parent)
     {
     }
 };
 
+struct IrUndef : IrValue {
+    explicit IrUndef()
+        : IrValue(IrValueKind::Undef)
+    {
+    }
+};
+
 struct IrBlock {
-    u32 id;
+    u32 id = std::numeric_limits<u32>::max();
     bool sealed = false;
     std::vector<IrBlock *> predecessors;
     std::vector<IrValue *> instructions;
-
-    explicit IrBlock(const u32 id)
-        : id(id)
-    {
-    }
 };
 
 struct IrFunction {

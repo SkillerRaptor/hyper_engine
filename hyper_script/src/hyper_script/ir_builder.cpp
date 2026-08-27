@@ -24,13 +24,24 @@ std::unique_ptr<IrFunction> IrBuilder::build()
 
     build_node(m_function);
 
+    u32 next_block_id = 0;
+    u32 next_value_id = 0;
+    for (const std::unique_ptr<IrBlock> &block : m_ir_function->blocks) {
+        block->id = next_block_id;
+        next_block_id += 1;
+
+        for (IrValue *instruction : block->instructions) {
+            instruction->id = next_value_id;
+            next_value_id += 1;
+        }
+    }
+
     return std::move(m_ir_function);
 }
 
 IrBlock *IrBuilder::create_block()
 {
-    std::unique_ptr<IrBlock> block = std::make_unique<IrBlock>(m_next_block_id);
-    m_next_block_id += 1;
+    std::unique_ptr<IrBlock> block = std::make_unique<IrBlock>();
     IrBlock *block_ptr = block.get();
     m_ir_function->blocks.push_back(std::move(block));
     return block_ptr;
@@ -38,8 +49,7 @@ IrBlock *IrBuilder::create_block()
 
 IrPhi *IrBuilder::create_phi(IrBlock *block)
 {
-    std::unique_ptr<IrPhi> phi = std::make_unique<IrPhi>(m_next_value_id, block);
-    m_next_value_id += 1;
+    std::unique_ptr<IrPhi> phi = std::make_unique<IrPhi>(block);
     IrPhi *phi_ptr = phi.get();
     m_ir_function->values.push_back(std::move(phi));
     block->instructions.insert(block->instructions.begin(), phi_ptr);
@@ -66,28 +76,44 @@ IrValue *IrBuilder::build_node(const AstNode &node)
         IrValue *left = build_node(*expression.left);
         IrValue *right = build_node(*expression.right);
 
+        IrValue *result = nullptr;
         switch (expression.operation) {
         case BinaryOperation::Addition:
-            return emit<IrAdd>(left, right);
+            result = emit<IrAdd>(left, right);
+            break;
         case BinaryOperation::Subtraction:
-            return emit<IrSub>(left, right);
+            result = emit<IrSub>(left, right);
+            break;
         case BinaryOperation::Multiplication:
-            return emit<IrMul>(left, right);
+            result = emit<IrMul>(left, right);
+            break;
         case BinaryOperation::Division:
-            return emit<IrDiv>(left, right);
+            result = emit<IrDiv>(left, right);
+            break;
         case BinaryOperation::Equal:
-            return emit<IrCmp>(CompareOperation::Equal, left, right);
+            result = emit<IrCmp>(CompareOperation::Equal, left, right);
+            break;
         case BinaryOperation::NotEqual:
-            return emit<IrCmp>(CompareOperation::NotEqual, left, right);
+            result = emit<IrCmp>(CompareOperation::NotEqual, left, right);
+            break;
         case BinaryOperation::LessThan:
-            return emit<IrCmp>(CompareOperation::LessThan, left, right);
+            result = emit<IrCmp>(CompareOperation::LessThan, left, right);
+            break;
         case BinaryOperation::LessThanOrEqual:
-            return emit<IrCmp>(CompareOperation::LessThanOrEqual, left, right);
+            result = emit<IrCmp>(CompareOperation::LessThanOrEqual, left, right);
+            break;
         case BinaryOperation::GreaterThan:
-            return emit<IrCmp>(CompareOperation::GreaterThan, left, right);
+            result = emit<IrCmp>(CompareOperation::GreaterThan, left, right);
+            break;
         case BinaryOperation::GreaterThanOrEqual:
-            return emit<IrCmp>(CompareOperation::GreaterThanOrEqual, left, right);
+            result = emit<IrCmp>(CompareOperation::GreaterThanOrEqual, left, right);
+            break;
         }
+
+        add_use(left, result);
+        add_use(right, result);
+
+        return result;
     }
     case AstNodeKind::CallExpression: {
         const CallExpression &expression = static_cast<const CallExpression &>(node);
@@ -95,7 +121,12 @@ IrValue *IrBuilder::build_node(const AstNode &node)
         for (const std::unique_ptr<Expression> &argument : expression.arguments) {
             arguments.push_back(build_node(*argument));
         }
-        return emit<IrCall>(expression.identifier, std::move(arguments));
+
+        IrValue *result = emit<IrCall>(expression.identifier, arguments);
+        for (IrValue *argument : arguments) {
+            add_use(argument, result);
+        }
+        return result;
     }
     case AstNodeKind::LiteralExpression: {
         const LiteralExpression &expression = static_cast<const LiteralExpression &>(node);
@@ -141,7 +172,8 @@ IrValue *IrBuilder::build_node(const AstNode &node)
         IrBlock *merge_block = create_block();
 
         IrBlock *else_target = else_block != nullptr ? else_block : merge_block;
-        emit<IrBranch>(condition, then_block, else_target);
+        IrValue *branch = emit<IrBranch>(condition, then_block, else_target);
+        add_use(condition, branch);
 
         then_block->predecessors.push_back(branch_block);
         seal_block(then_block);
@@ -180,7 +212,8 @@ IrValue *IrBuilder::build_node(const AstNode &node)
 
         IrBlock *loop_body_block = create_block();
         IrBlock *loop_exit_block = create_block();
-        emit<IrBranch>(condition, loop_body_block, loop_exit_block);
+        IrValue *branch = emit<IrBranch>(condition, loop_body_block, loop_exit_block);
+        add_use(condition, branch);
 
         loop_body_block->predecessors.push_back(loop_header_block);
         seal_block(loop_body_block);
@@ -242,16 +275,53 @@ IrValue *IrBuilder::read_variable_recursive(const std::string_view variable, IrB
 IrValue *IrBuilder::add_phi_operands(const std::string_view variable, IrPhi *phi)
 {
     for (IrBlock *predecessor : phi->parent->predecessors) {
-        phi->operands.push_back(read_variable(variable, predecessor));
+        IrValue *operand = read_variable(variable, predecessor);
+        phi->operands.push_back(operand);
+        add_use(operand, phi);
     }
 
-    return try_remove_trivial_phi(phi);
+    return phi;
 }
 
 IrValue *IrBuilder::try_remove_trivial_phi(IrPhi *phi)
 {
-    // TODO: Implement
-    return phi;
+    IrValue *same = nullptr;
+    for (IrValue *operand : phi->operands) {
+        if (operand == same || operand == phi) {
+            continue;
+        }
+
+        if (same != nullptr) {
+            return phi;
+        }
+
+        same = operand;
+    }
+
+    if (same == nullptr) {
+        same = get_undef();
+    }
+
+    std::vector<IrValue *> users;
+    for (IrValue *user : phi->users) {
+        if (user != phi) {
+            users.push_back(user);
+        }
+    }
+
+    for (IrValue *user : users) {
+        replace_value(user, phi, same);
+    }
+
+    std::erase(phi->parent->instructions, static_cast<IrValue *>(phi));
+
+    for (IrValue *user : users) {
+        if (user->kind == IrValueKind::Phi) {
+            try_remove_trivial_phi(static_cast<IrPhi *>(user));
+        }
+    }
+
+    return same;
 }
 
 void IrBuilder::seal_block(IrBlock *block)
@@ -261,6 +331,109 @@ void IrBuilder::seal_block(IrBlock *block)
     }
 
     block->sealed = true;
+}
+
+IrValue *IrBuilder::get_undef()
+{
+    if (m_undef_value == nullptr) {
+        std::unique_ptr<IrUndef> undef = std::make_unique<IrUndef>();
+        m_undef_value = undef.get();
+        m_ir_function->values.push_back(std::move(undef));
+    }
+
+    return m_undef_value;
+}
+
+void IrBuilder::add_use(IrValue *operand, IrValue *user)
+{
+    if (operand != nullptr && operand->kind == IrValueKind::Phi) {
+        static_cast<IrPhi *>(operand)->users.push_back(user);
+    }
+}
+
+void IrBuilder::replace_value(IrValue *user, const IrValue *old_value, IrValue *new_value)
+{
+    switch (user->kind) {
+    case IrValueKind::Addition: {
+        IrAdd *add = static_cast<IrAdd *>(user);
+        if (add->left == old_value) {
+            add->left = new_value;
+        }
+        if (add->right == old_value) {
+            add->right = new_value;
+        }
+        break;
+    }
+    case IrValueKind::Subtraction: {
+        IrSub *sub = static_cast<IrSub *>(user);
+        if (sub->left == old_value) {
+            sub->left = new_value;
+        }
+        if (sub->right == old_value) {
+            sub->right = new_value;
+        }
+        break;
+    }
+    case IrValueKind::Multiplication: {
+        IrMul *mul = static_cast<IrMul *>(user);
+        if (mul->left == old_value) {
+            mul->left = new_value;
+        }
+        if (mul->right == old_value) {
+            mul->right = new_value;
+        }
+        break;
+    }
+    case IrValueKind::Division: {
+        IrDiv *div = static_cast<IrDiv *>(user);
+        if (div->left == old_value) {
+            div->left = new_value;
+        }
+        if (div->right == old_value) {
+            div->right = new_value;
+        }
+        break;
+    }
+    case IrValueKind::Compare: {
+        IrCmp *cmp = static_cast<IrCmp *>(user);
+        if (cmp->left == old_value) {
+            cmp->left = new_value;
+        }
+        if (cmp->right == old_value) {
+            cmp->right = new_value;
+        }
+        break;
+    }
+    case IrValueKind::Branch: {
+        IrBranch *branch = static_cast<IrBranch *>(user);
+        if (branch->condition == old_value) {
+            branch->condition = new_value;
+        }
+        break;
+    }
+    case IrValueKind::Call: {
+        IrCall *call = static_cast<IrCall *>(user);
+        for (IrValue *&argument : call->arguments) {
+            if (argument == old_value) {
+                argument = new_value;
+            }
+        }
+        break;
+    }
+    case IrValueKind::Phi: {
+        IrPhi *phi = static_cast<IrPhi *>(user);
+        for (IrValue *&operand : phi->operands) {
+            if (operand == old_value) {
+                operand = new_value;
+            }
+        }
+        break;
+    }
+    default:
+        break;
+    }
+
+    add_use(new_value, user);
 }
 
 } // namespace he::script

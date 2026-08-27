@@ -29,8 +29,7 @@ private:
     template <typename T, typename... Args>
     IrValue *emit(Args &&...args)
     {
-        std::unique_ptr<T> value = std::make_unique<T>(m_next_value_id, std::forward<Args>(args)...);
-        m_next_value_id += 1;
+        std::unique_ptr<T> value = std::make_unique<T>(std::forward<Args>(args)...);
         T *value_ptr = value.get();
         m_ir_function->values.push_back(std::move(value));
         m_current_block->instructions.push_back(value_ptr);
@@ -48,13 +47,17 @@ private:
 
     void seal_block(IrBlock *block);
 
+    IrValue *get_undef();
+
+    void add_use(IrValue *operand, IrValue *user);
+    void replace_value(IrValue *user, const IrValue *old_value, IrValue *new_value);
+
 private:
     const FunctionDeclaration &m_function;
 
     std::unique_ptr<IrFunction> m_ir_function = nullptr;
     IrBlock *m_current_block = nullptr;
-    u32 m_next_block_id = 0;
-    u32 m_next_value_id = 0;
+    IrValue *m_undef_value = nullptr;
 
     std::unordered_map<std::string_view, std::unordered_map<IrBlock *, IrValue *>> m_current_definitions;
     std::unordered_map<IrBlock *, std::unordered_map<std::string_view, IrPhi *>> m_incomplete_phis;
