@@ -11,6 +11,72 @@
 
 namespace he::script {
 
+std::string_view token_kind_to_string(const TokenKind kind)
+{
+    switch (kind) {
+    case TokenKind::LeftBrace:
+        return "LeftBrace";
+    case TokenKind::RightBrace:
+        return "RightBrace";
+    case TokenKind::LeftParenthesis:
+        return "LeftParenthesis";
+    case TokenKind::RightParenthesis:
+        return "RightParenthesis";
+    case TokenKind::Semicolon:
+        return "Semicolon";
+    case TokenKind::Plus:
+        return "Plus";
+    case TokenKind::Minus:
+        return "Minus";
+    case TokenKind::Star:
+        return "Star";
+    case TokenKind::Slash:
+        return "Slash";
+    case TokenKind::Equal:
+        return "Equal";
+    case TokenKind::EqualEqual:
+        return "EqualEqual";
+    case TokenKind::NotEqual:
+        return "NotEqual";
+    case TokenKind::Less:
+        return "Less";
+    case TokenKind::LessEqual:
+        return "LessEqual";
+    case TokenKind::Greater:
+        return "Greater";
+    case TokenKind::GreaterEqual:
+        return "GreaterEqual";
+    case TokenKind::Else:
+        return "Else";
+    case TokenKind::Fn:
+        return "Fn";
+    case TokenKind::If:
+        return "If";
+    case TokenKind::Let:
+        return "Let";
+    case TokenKind::While:
+        return "While";
+    case TokenKind::IntegerLiteral:
+        return "IntegerLiteral";
+    case TokenKind::Identifier:
+        return "Identifier";
+    case TokenKind::Eof:
+        return "Eof";
+    default:
+        HE_PANIC("Encountered an unknown token kind (token_kind={})", static_cast<u8>(kind));
+    }
+}
+
+std::string token_to_string(const Token &token)
+{
+    return fmt::format(
+        "Token {{ kind: {}, lexeme: \"{}\", line: {}, column: {} }}",
+        token_kind_to_string(token.kind),
+        token.lexeme,
+        token.line,
+        token.column);
+}
+
 void dump_tokens(const std::span<const Token> tokens)
 {
     if (tokens.empty()) {
@@ -18,10 +84,10 @@ void dump_tokens(const std::span<const Token> tokens)
     }
 
     for (size_t i = 0; i < tokens.size() - 1; ++i) {
-        HE_INFO("|- {}", tokens[i].to_string());
+        HE_INFO("|- {}", token_to_string(tokens[i]));
     }
 
-    HE_INFO("`- {}", tokens.back().to_string());
+    HE_INFO("`- {}", token_to_string(tokens.back()));
 }
 
 static void dump_node(const AstNode &node, const std::string &prefix, const bool is_last, const bool is_root = false)

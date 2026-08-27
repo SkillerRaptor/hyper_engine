@@ -13,6 +13,9 @@
 
 namespace he::script {
 
+std::string_view token_kind_to_string(TokenKind);
+std::string token_to_string(const Token &);
+
 void dump_tokens(std::span<const Token>);
 void dump_ast(const AstNode &);
 

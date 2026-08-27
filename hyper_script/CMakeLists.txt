@@ -7,8 +7,7 @@
 set(SOURCES
         src/hyper_script/debug.cpp
         src/hyper_script/lexer.cpp
-        src/hyper_script/parser.cpp
-        src/hyper_script/token.cpp)
+        src/hyper_script/parser.cpp)
 
 set(HEADERS
         include/hyper_script/ast.hpp

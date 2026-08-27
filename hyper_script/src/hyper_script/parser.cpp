@@ -14,7 +14,7 @@ std::unique_ptr<AstNode> Parser::parse() { return parse_translation_unit_declara
 
 std::unique_ptr<Declaration> Parser::parse_declaration()
 {
-    switch (current_token()->kind()) {
+    switch (current_token()->kind) {
     case TokenKind::Fn:
         return parse_function_declaration();
     default:
@@ -30,7 +30,7 @@ std::unique_ptr<Declaration> Parser::parse_function_declaration()
 {
     consume(TokenKind::Fn);
 
-    const std::string_view identifier = consume(TokenKind::Identifier).string_value();
+    const std::string_view identifier = parse_identifier();
 
     consume(TokenKind::LeftParenthesis);
     // TODO: Parse arguments
@@ -45,7 +45,7 @@ std::unique_ptr<Declaration> Parser::parse_translation_unit_declaration()
 {
     std::vector<std::unique_ptr<Declaration>> declarations;
 
-    while (current_token()->kind() != TokenKind::Eof) {
+    while (current_token()->kind != TokenKind::Eof) {
         std::unique_ptr<Declaration> declaration = parse_declaration();
         declarations.push_back(std::move(declaration));
     }
@@ -57,7 +57,7 @@ std::unique_ptr<Declaration> Parser::parse_variable_declaration()
 {
     consume(TokenKind::Let);
 
-    const std::string_view identifier = consume(TokenKind::Identifier).string_value();
+    const std::string_view identifier = parse_identifier();
 
     consume(TokenKind::Equal);
 
@@ -70,11 +70,11 @@ std::unique_ptr<Declaration> Parser::parse_variable_declaration()
 
 std::unique_ptr<Expression> Parser::parse_primary_expression()
 {
-    switch (current_token()->kind()) {
+    switch (current_token()->kind) {
     case TokenKind::IntegerLiteral:
         return parse_integer_literal();
     case TokenKind::Identifier:
-        if (peek_token()->kind() == TokenKind::LeftParenthesis) {
+        if (peek_token()->kind == TokenKind::LeftParenthesis) {
             return parse_call_expression();
         }
 
@@ -92,8 +92,8 @@ std::unique_ptr<Expression> Parser::parse_binary_expression(const u8 precedence)
 {
     std::unique_ptr<Expression> left = parse_primary_expression();
 
-    while (get_operator_precedence(current_token()->kind()) > precedence) {
-        const TokenKind operation_kind = consume().kind();
+    while (get_operator_precedence(current_token()->kind) > precedence) {
+        const TokenKind operation_kind = consume().kind;
         const BinaryOperation operation = [operation_kind]() {
             switch (operation_kind) {
             case TokenKind::Plus:
@@ -132,7 +132,7 @@ std::unique_ptr<Expression> Parser::parse_binary_expression(const u8 precedence)
 
 std::unique_ptr<Expression> Parser::parse_call_expression()
 {
-    const std::string_view identifier = consume(TokenKind::Identifier).string_value();
+    const std::string_view identifier = parse_identifier();
 
     consume(TokenKind::LeftParenthesis);
 
@@ -149,19 +149,27 @@ std::unique_ptr<Expression> Parser::parse_call_expression()
 
 std::unique_ptr<Expression> Parser::parse_variable_expression()
 {
-    const std::string_view identifier = consume(TokenKind::Identifier).string_value();
+    const std::string_view identifier = parse_identifier();
     return std::make_unique<VariableExpression>(identifier);
 }
 
 std::unique_ptr<Literal> Parser::parse_integer_literal()
 {
     const Token token = consume(TokenKind::IntegerLiteral);
-    return std::make_unique<IntegerLiteral>(token.integer_value());
+
+    u32 value = 0;
+    const std::from_chars_result result
+        = std::from_chars(token.lexeme.data(), token.lexeme.data() + token.lexeme.size(), value);
+
+    HE_ASSERT(result.ptr == token.lexeme.data() + token.lexeme.size());
+    HE_ASSERT(result.ec == std::errc());
+
+    return std::make_unique<IntegerLiteral>(value);
 }
 
 std::unique_ptr<Statement> Parser::parse_statement()
 {
-    switch (current_token()->kind()) {
+    switch (current_token()->kind) {
     case TokenKind::If: {
         return parse_if_statement();
     }
@@ -173,7 +181,7 @@ std::unique_ptr<Statement> Parser::parse_statement()
         return parse_while_statement();
     }
     case TokenKind::Identifier: {
-        switch (peek_token()->kind()) {
+        switch (peek_token()->kind) {
         case TokenKind::LeftParenthesis: {
             std::unique_ptr<Expression> expression = parse_call_expression();
             consume(TokenKind::Semicolon);
@@ -197,7 +205,7 @@ std::unique_ptr<Statement> Parser::parse_statement()
 
 std::unique_ptr<Statement> Parser::parse_assign_statement()
 {
-    const std::string_view identifier = consume(TokenKind::Identifier).string_value();
+    const std::string_view identifier = parse_identifier();
 
     consume(TokenKind::Equal);
 
@@ -268,6 +276,12 @@ std::unique_ptr<Statement> Parser::parse_while_statement()
     return std::make_unique<WhileStatement>(std::move(condition), std::move(body));
 }
 
+std::string_view Parser::parse_identifier()
+{
+    const Token identifier = consume(TokenKind::Identifier);
+    return identifier.lexeme;
+}
+
 u8 Parser::get_operator_precedence(const TokenKind kind)
 {
     switch (kind) {
@@ -315,7 +329,7 @@ bool Parser::match(const TokenKind kind) const
         return false;
     }
 
-    return token->kind() == kind;
+    return token->kind == kind;
 }
 
 Token Parser::consume()

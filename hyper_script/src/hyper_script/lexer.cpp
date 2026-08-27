@@ -30,8 +30,14 @@ std::vector<Token> Lexer::lex()
         tokens.push_back(token.value());
     }
 
-    tokens.push_back(Token(TokenKind::Eof, "", m_line, m_column, m_current_index));
-
+    tokens.push_back(
+        Token {
+            .kind = TokenKind::Eof,
+            .lexeme = "",
+            .line = m_line,
+            .column = m_column,
+        });
+    
     return tokens;
 }
 
@@ -50,27 +56,18 @@ std::optional<Token> Lexer::next_token()
     const char current_character = advance();
 
     if (std::isalpha(static_cast<unsigned char>(current_character)) || current_character == '_') {
-        const Token token = lex_identifier(start_line, start_column, start_index);
+        Token token = lex_identifier(start_line, start_column, start_index);
 
-        // TODO: Improve this
-        if (token.lexeme() == "fn") {
-            return Token(TokenKind::Fn, token.lexeme(), token.line(), token.column(), token.offset());
-        }
-
-        if (token.lexeme() == "else") {
-            return Token(TokenKind::Else, token.lexeme(), token.line(), token.column(), token.offset());
-        }
-
-        if (token.lexeme() == "if") {
-            return Token(TokenKind::If, token.lexeme(), token.line(), token.column(), token.offset());
-        }
-
-        if (token.lexeme() == "let") {
-            return Token(TokenKind::Let, token.lexeme(), token.line(), token.column(), token.offset());
-        }
-
-        if (token.lexeme() == "while") {
-            return Token(TokenKind::While, token.lexeme(), token.line(), token.column(), token.offset());
+        if (token.lexeme == "else") {
+            token.kind = TokenKind::Else;
+        } else if (token.lexeme == "fn") {
+            token.kind = TokenKind::Fn;
+        } else if (token.lexeme == "if") {
+            token.kind = TokenKind::If;
+        } else if (token.lexeme == "let") {
+            token.kind = TokenKind::Let;
+        } else if (token.lexeme == "while") {
+            token.kind = TokenKind::While;
         }
 
         return token;
@@ -82,7 +79,12 @@ std::optional<Token> Lexer::next_token()
 
     auto make_token = [&](const TokenKind kind) {
         const size_t length = m_current_index - start_index;
-        return Token(kind, m_source.substr(start_index, length), start_line, start_column, start_index);
+        return Token {
+            .kind = kind,
+            .lexeme = m_source.substr(start_index, length),
+            .line = start_line,
+            .column = start_column,
+        };
     };
 
     switch (current_character) {
@@ -141,7 +143,12 @@ Token Lexer::lex_number(const u32 start_line, const u32 start_column, const size
     }
 
     const std::string_view value = m_source.substr(start_index, m_current_index - start_index);
-    return Token(TokenKind::IntegerLiteral, value, start_line, start_column, start_index);
+    return Token {
+        .kind = TokenKind::IntegerLiteral,
+        .lexeme = value,
+        .line = start_line,
+        .column = start_column,
+    };
 }
 
 Token Lexer::lex_identifier(const u32 start_line, const u32 start_column, const size_t start_index)
@@ -153,7 +160,12 @@ Token Lexer::lex_identifier(const u32 start_line, const u32 start_column, const 
     }
 
     const std::string_view value = m_source.substr(start_index, m_current_index - start_index);
-    return Token(TokenKind::Identifier, value, start_line, start_column, start_index);
+    return Token {
+        .kind = TokenKind::Identifier,
+        .lexeme = value,
+        .line = start_line,
+        .column = start_column,
+    };
 }
 
 char Lexer::advance()

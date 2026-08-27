@@ -44,6 +44,8 @@ private:
     std::unique_ptr<Statement> parse_if_statement();
     std::unique_ptr<Statement> parse_while_statement();
 
+    std::string_view parse_identifier();
+
     static u8 get_operator_precedence(TokenKind);
 
     std::optional<Token> current_token() const;
