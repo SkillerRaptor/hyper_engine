@@ -55,9 +55,9 @@ static void dump_node(const AstNode &node, const std::string &prefix, const bool
         break;
     }
     case AstNodeKind::BinaryExpression: {
-        const BinaryExpression &expresison = static_cast<const BinaryExpression &>(node);
+        const BinaryExpression &expression = static_cast<const BinaryExpression &>(node);
         const std::string_view operation = [&]() {
-            switch (expresison.operation()) {
+            switch (expression.operation()) {
             case BinaryOperation::Addition:
                 return "Addition";
             case BinaryOperation::Subtraction:
@@ -83,8 +83,8 @@ static void dump_node(const AstNode &node, const std::string &prefix, const bool
             }
         }();
         HE_INFO("{}{}BinaryExpression {{ operation: {} }}", prefix, connector, operation);
-        dump_node(expresison.left(), child_prefix, false);
-        dump_node(expresison.right(), child_prefix, true);
+        dump_node(expression.left(), child_prefix, false);
+        dump_node(expression.right(), child_prefix, true);
         break;
     }
     case AstNodeKind::CallExpression: {
