@@ -36,6 +36,7 @@ add_custom_command(
 
 catch_discover_tests(
         tests
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         REPORTER XML
         OUTPUT_DIR .
         OUTPUT_SUFFIX .xml)
