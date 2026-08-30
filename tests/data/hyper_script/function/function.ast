@@ -1,0 +1,3 @@
+TranslationUnitDeclaration
+   FunctionDeclaration { identifier: foo }
+      CompoundStatement

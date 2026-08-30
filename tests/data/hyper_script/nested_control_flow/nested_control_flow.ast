@@ -1,0 +1,41 @@
+TranslationUnitDeclaration
+   FunctionDeclaration { identifier: main }
+      CompoundStatement
+         DeclarationStatement
+            VariableDeclaration { identifier: i }
+               LiteralExpression
+                  IntegerLiteral { value: 0 }
+         DeclarationStatement
+            VariableDeclaration { identifier: total }
+               LiteralExpression
+                  IntegerLiteral { value: 0 }
+         WhileStatement
+            BinaryExpression { operation: LessThan }
+               VariableExpression { identifier: i }
+               LiteralExpression
+                  IntegerLiteral { value: 10 }
+            CompoundStatement
+               IfStatement
+                  BinaryExpression { operation: Equal }
+                     VariableExpression { identifier: i }
+                     LiteralExpression
+                        IntegerLiteral { value: 5 }
+                  CompoundStatement
+                     AssignStatement { identifier: total }
+                        BinaryExpression { operation: Addition }
+                           VariableExpression { identifier: total }
+                           LiteralExpression
+                              IntegerLiteral { value: 100 }
+                  CompoundStatement
+                     AssignStatement { identifier: total }
+                        BinaryExpression { operation: Addition }
+                           VariableExpression { identifier: total }
+                           VariableExpression { identifier: i }
+               AssignStatement { identifier: i }
+                  BinaryExpression { operation: Addition }
+                     VariableExpression { identifier: i }
+                     LiteralExpression
+                        IntegerLiteral { value: 1 }
+         ExpressionStatement
+            CallExpression { identifier: print }
+               VariableExpression { identifier: total }

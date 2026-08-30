@@ -1,0 +1,37 @@
+define @main() {
+block_0:
+  %0 = iconst 0
+  %1 = iconst 0
+  br %block_1
+
+block_1:
+  %3 = φ [ %1, %block_0 ], [ %17, %block_6 ]
+  %4 = φ [ %0, %block_0 ], [ %20, %block_6 ]
+  %5 = iconst 10
+  %6 = icmp lt %4 %5
+  br %6, %block_2, %block_3
+
+block_2:
+  %8 = iconst 5
+  %9 = icmp eq %4 %8
+  br %9, %block_4, %block_5
+
+block_3:
+  %11 = call @print(%3)
+
+block_4:
+  %12 = iconst 100
+  %13 = iadd %3 %12
+  br %block_6
+
+block_5:
+  %15 = iadd %3 %4
+  br %block_6
+
+block_6:
+  %17 = φ [ %13, %block_4 ], [ %15, %block_5 ]
+  %18 = φ [ %4, %block_4 ], [ %4, %block_5 ]
+  %19 = iconst 1
+  %20 = iadd %18 %19
+  br %block_1
+}

@@ -1,0 +1,23 @@
+define @main() {
+block_0:
+  %0 = iconst 0
+  %1 = iconst 0
+  br %block_1
+
+block_1:
+  %3 = φ [ %1, %block_0 ], [ %8, %block_2 ]
+  %4 = φ [ %0, %block_0 ], [ %10, %block_2 ]
+  %5 = iconst 5
+  %6 = icmp lt %4 %5
+  br %6, %block_2, %block_3
+
+block_2:
+  %8 = iadd %3 %4
+  %9 = iconst 1
+  %10 = iadd %4 %9
+  br %block_1
+
+block_3:
+  %12 = call @print(%4)
+  %13 = call @print(%3)
+}

@@ -1,0 +1,17 @@
+fn main() {
+    let x = 15;
+    let y = 20;
+    let result = 0;
+
+    if (x <= y) {
+        result = y - x;
+    } else {
+        result = x - y;
+    }
+
+    if (result == 5) {
+        print(1);
+    } else {
+        print(0);
+    }
+}

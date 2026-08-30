@@ -1,0 +1,46 @@
+TranslationUnitDeclaration
+   FunctionDeclaration { identifier: main }
+      CompoundStatement
+         DeclarationStatement
+            VariableDeclaration { identifier: a }
+               LiteralExpression
+                  IntegerLiteral { value: 5 }
+         DeclarationStatement
+            VariableDeclaration { identifier: b }
+               LiteralExpression
+                  IntegerLiteral { value: 10 }
+         DeclarationStatement
+            VariableDeclaration { identifier: c }
+               BinaryExpression { operation: Addition }
+                  VariableExpression { identifier: a }
+                  BinaryExpression { operation: Multiplication }
+                     VariableExpression { identifier: b }
+                     LiteralExpression
+                        IntegerLiteral { value: 2 }
+         DeclarationStatement
+            VariableDeclaration { identifier: d }
+               BinaryExpression { operation: Subtraction }
+                  VariableExpression { identifier: c }
+                  LiteralExpression
+                     IntegerLiteral { value: 5 }
+         DeclarationStatement
+            VariableDeclaration { identifier: e }
+               BinaryExpression { operation: Division }
+                  VariableExpression { identifier: d }
+                  LiteralExpression
+                     IntegerLiteral { value: 4 }
+         ExpressionStatement
+            CallExpression { identifier: print }
+               VariableExpression { identifier: a }
+         ExpressionStatement
+            CallExpression { identifier: print }
+               VariableExpression { identifier: b }
+         ExpressionStatement
+            CallExpression { identifier: print }
+               VariableExpression { identifier: c }
+         ExpressionStatement
+            CallExpression { identifier: print }
+               VariableExpression { identifier: d }
+         ExpressionStatement
+            CallExpression { identifier: print }
+               VariableExpression { identifier: e }

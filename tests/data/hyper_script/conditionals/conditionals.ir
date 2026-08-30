@@ -1,0 +1,34 @@
+define @main() {
+block_0:
+  %0 = iconst 15
+  %1 = iconst 20
+  %2 = iconst 0
+  %3 = icmp le %0 %1
+  br %3, %block_1, %block_2
+
+block_1:
+  %5 = isub %1 %0
+  br %block_3
+
+block_2:
+  %7 = isub %0 %1
+  br %block_3
+
+block_3:
+  %9 = φ [ %5, %block_1 ], [ %7, %block_2 ]
+  %10 = iconst 5
+  %11 = icmp eq %9 %10
+  br %11, %block_4, %block_5
+
+block_4:
+  %13 = iconst 1
+  %14 = call @print(%13)
+  br %block_6
+
+block_5:
+  %16 = iconst 0
+  %17 = call @print(%16)
+  br %block_6
+
+block_6:
+}

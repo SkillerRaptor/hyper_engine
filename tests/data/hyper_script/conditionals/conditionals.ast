@@ -1,0 +1,44 @@
+TranslationUnitDeclaration
+   FunctionDeclaration { identifier: main }
+      CompoundStatement
+         DeclarationStatement
+            VariableDeclaration { identifier: x }
+               LiteralExpression
+                  IntegerLiteral { value: 15 }
+         DeclarationStatement
+            VariableDeclaration { identifier: y }
+               LiteralExpression
+                  IntegerLiteral { value: 20 }
+         DeclarationStatement
+            VariableDeclaration { identifier: result }
+               LiteralExpression
+                  IntegerLiteral { value: 0 }
+         IfStatement
+            BinaryExpression { operation: LessThanOrEqual }
+               VariableExpression { identifier: x }
+               VariableExpression { identifier: y }
+            CompoundStatement
+               AssignStatement { identifier: result }
+                  BinaryExpression { operation: Subtraction }
+                     VariableExpression { identifier: y }
+                     VariableExpression { identifier: x }
+            CompoundStatement
+               AssignStatement { identifier: result }
+                  BinaryExpression { operation: Subtraction }
+                     VariableExpression { identifier: x }
+                     VariableExpression { identifier: y }
+         IfStatement
+            BinaryExpression { operation: Equal }
+               VariableExpression { identifier: result }
+               LiteralExpression
+                  IntegerLiteral { value: 5 }
+            CompoundStatement
+               ExpressionStatement
+                  CallExpression { identifier: print }
+                     LiteralExpression
+                        IntegerLiteral { value: 1 }
+            CompoundStatement
+               ExpressionStatement
+                  CallExpression { identifier: print }
+                     LiteralExpression
+                        IntegerLiteral { value: 0 }

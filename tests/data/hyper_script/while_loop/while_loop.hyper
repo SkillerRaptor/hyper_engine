@@ -1,0 +1,12 @@
+fn main() {
+    let count = 0;
+    let sum = 0;
+
+    while (count < 5) {
+        sum = sum + count;
+        count = count + 1;
+    }
+
+    print(count);
+    print(sum);
+}

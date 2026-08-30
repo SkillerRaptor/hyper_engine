@@ -1,0 +1,60 @@
+TranslationUnitDeclaration
+   FunctionDeclaration { identifier: foo }
+      CompoundStatement
+         DeclarationStatement
+            VariableDeclaration { identifier: a }
+               LiteralExpression
+                  IntegerLiteral { value: 0 }
+         DeclarationStatement
+            VariableDeclaration { identifier: b }
+               BinaryExpression { operation: Addition }
+                  VariableExpression { identifier: a }
+                  LiteralExpression
+                     IntegerLiteral { value: 10 }
+         DeclarationStatement
+            VariableDeclaration { identifier: c }
+               BinaryExpression { operation: Addition }
+                  VariableExpression { identifier: a }
+                  VariableExpression { identifier: b }
+         DeclarationStatement
+            VariableDeclaration { identifier: d }
+               BinaryExpression { operation: Addition }
+                  BinaryExpression { operation: Addition }
+                     VariableExpression { identifier: a }
+                     VariableExpression { identifier: b }
+                  VariableExpression { identifier: c }
+         DeclarationStatement
+            VariableDeclaration { identifier: x }
+               LiteralExpression
+                  IntegerLiteral { value: 10 }
+         DeclarationStatement
+            VariableDeclaration { identifier: y }
+               LiteralExpression
+                  IntegerLiteral { value: 20 }
+         ExpressionStatement
+            CallExpression { identifier: print }
+               VariableExpression { identifier: x }
+         ExpressionStatement
+            CallExpression { identifier: print }
+               VariableExpression { identifier: y }
+         DeclarationStatement
+            VariableDeclaration { identifier: z }
+               LiteralExpression
+                  IntegerLiteral { value: 0 }
+         IfStatement
+            BinaryExpression { operation: GreaterThan }
+               VariableExpression { identifier: x }
+               VariableExpression { identifier: y }
+            CompoundStatement
+               AssignStatement { identifier: z }
+                  BinaryExpression { operation: Subtraction }
+                     VariableExpression { identifier: x }
+                     VariableExpression { identifier: y }
+            CompoundStatement
+               AssignStatement { identifier: z }
+                  BinaryExpression { operation: Addition }
+                     VariableExpression { identifier: x }
+                     VariableExpression { identifier: y }
+         ExpressionStatement
+            CallExpression { identifier: print }
+               VariableExpression { identifier: z }

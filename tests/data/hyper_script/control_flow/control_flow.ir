@@ -1,0 +1,28 @@
+define @foo() {
+block_0:
+  %0 = iconst 0
+  %1 = iconst 10
+  %2 = iadd %0 %1
+  %3 = iadd %0 %2
+  %4 = iadd %0 %2
+  %5 = iadd %4 %3
+  %6 = iconst 10
+  %7 = iconst 20
+  %8 = call @print(%6)
+  %9 = call @print(%7)
+  %10 = iconst 0
+  %11 = icmp gt %6 %7
+  br %11, %block_1, %block_2
+
+block_1:
+  %13 = isub %6 %7
+  br %block_3
+
+block_2:
+  %15 = iadd %6 %7
+  br %block_3
+
+block_3:
+  %17 = φ [ %13, %block_1 ], [ %15, %block_2 ]
+  %18 = call @print(%17)
+}
