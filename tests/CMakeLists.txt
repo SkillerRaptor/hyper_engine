@@ -9,7 +9,7 @@ enable_testing()
 include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
 
 set(SOURCES
-        src/tests.cpp)
+        src/lexer_tests.cpp)
 
 add_executable(tests ${SOURCES})
 target_link_libraries(
@@ -20,7 +20,9 @@ target_link_libraries(
         Catch2::Catch2WithMain
         hyper_core
         hyper_platform
-        hyper_rhi)
+        hyper_rhi
+        hyper_script)
+target_compile_options(tests PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/Zc:preprocessor>")
 
 catch_discover_tests(
         tests
