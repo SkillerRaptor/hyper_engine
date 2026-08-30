@@ -7,6 +7,7 @@
 #pragma once
 
 #include <memory>
+#include <span>
 
 #include <hyper_platform/input.hpp>
 #include <hyper_platform/window.hpp>
@@ -15,6 +16,12 @@
 namespace he {
 
 class Engine {
+private:
+    struct File {
+        std::string path;
+        std::string source;
+    };
+
 public:
     Engine();
     ~Engine() = default;
@@ -31,6 +38,8 @@ private:
     void fixed_update(f32 delta_time);
     void update(f32 delta_time);
     void render() const;
+
+    void compile(std::span<const File>);
 
 private:
     std::unique_ptr<Window> m_window = nullptr;

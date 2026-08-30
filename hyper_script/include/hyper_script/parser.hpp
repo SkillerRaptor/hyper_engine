@@ -10,14 +10,16 @@
 #include <span>
 
 #include "hyper_script/ast.hpp"
+#include "hyper_script/diagnostics.hpp"
 #include "hyper_script/token.hpp"
 
 namespace he::script {
 
 class Parser {
 public:
-    explicit Parser(const std::span<const Token> tokens)
-        : m_tokens(tokens)
+    explicit Parser(DiagnosticEngine &diagnostic_engine, const std::span<const Token> tokens)
+        : m_diagnostic_engine(diagnostic_engine)
+        , m_tokens(tokens)
     {
     }
 
@@ -60,6 +62,7 @@ private:
     bool has_reached_end() const;
 
 private:
+    DiagnosticEngine &m_diagnostic_engine;
     std::span<const Token> m_tokens;
     size_t m_current_token_index = 0;
 };

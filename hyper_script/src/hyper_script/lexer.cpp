@@ -12,11 +12,6 @@
 
 namespace he::script {
 
-Lexer::Lexer(const std::string_view source)
-    : m_source(source)
-{
-}
-
 std::vector<Token> Lexer::lex()
 {
     std::vector<Token> tokens = { };
@@ -121,7 +116,18 @@ std::optional<Token> Lexer::next_token()
         }
         return make_token(TokenKind::Greater);
     default:
-        HE_PANIC("Unknown character '{}' at line {}, column {}", current_character, start_line, start_column);
+        m_diagnostic_engine.emit(
+            Diagnostic::new_error("unexpected character")
+                .with_label(
+                    {
+                        .source_id = m_source_id,
+                        .start_offset = start_index,
+                        .end_offset = m_current_index,
+                    },
+                    std::nullopt,
+                    LabelStyle::Primary)
+                .with_help("remove the character"));
+        return make_token(TokenKind::Unknown);
     }
 }
 

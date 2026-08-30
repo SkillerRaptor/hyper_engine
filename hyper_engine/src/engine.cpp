@@ -11,9 +11,11 @@
 #include <hyper_core/assertion.hpp>
 #include <hyper_core/logger.hpp>
 #include <hyper_script/debug.hpp>
+#include <hyper_script/diagnostics.hpp>
 #include <hyper_script/ir_builder.hpp>
 #include <hyper_script/lexer.hpp>
 #include <hyper_script/parser.hpp>
+#include <hyper_script/source_manager.hpp>
 
 namespace he {
 
@@ -47,34 +49,13 @@ fn foo() {
 }
     )";
 
-    HE_INFO("Evaluating \"{}\"", source);
+    const File file = {
+        .path = "./test.hyper",
+        .source = std::string(source),
+    };
 
-    script::Lexer lexer(source);
-    const std::vector<script::Token> tokens = lexer.lex();
-
-    script::dump_tokens(tokens);
-
-    script::Parser parser(tokens);
-    const std::unique_ptr<script::AstNode> ast = parser.parse();
-
-    script::dump_ast(*ast);
-
-    HE_ASSERT(ast->kind == script::AstNodeKind::TranslationUnitDeclaration);
-
-    const script::TranslationUnitDeclaration &translation_unit_declaration
-        = static_cast<const script::TranslationUnitDeclaration &>(*ast);
-
-    for (const std::unique_ptr<script::Declaration> &declaration : translation_unit_declaration.declarations) {
-        HE_ASSERT(declaration->kind == script::AstNodeKind::FunctionDeclaration);
-
-        const script::FunctionDeclaration &function_declaration
-            = static_cast<const script::FunctionDeclaration &>(*declaration);
-
-        script::IrBuilder builder(function_declaration);
-        const std::unique_ptr<script::IrFunction> function = builder.build();
-
-        script::dump_ir(*function);
-    }
+    const std::vector<File> files = { file };
+    compile({ files });
 
     const std::chrono::time_point<std::chrono::steady_clock> end_time = std::chrono::steady_clock::now();
     const std::chrono::duration<f32> elapsed_seconds = end_time - start_time;
@@ -120,5 +101,50 @@ void Engine::fixed_update(const f32 delta_time) { (void) delta_time; }
 void Engine::update(const f32 delta_time) { (void) delta_time; }
 
 void Engine::render() const { }
+
+void Engine::compile(const std::span<const File> files)
+{
+    script::SourceManager source_manager;
+    script::DiagnosticEngine diagnostic_engine;
+
+    for (const File file : files) {
+        const script::SourceId source_id = source_manager.add_file(file.path, file.source);
+        const usize errors_before = diagnostic_engine.error_count();
+
+        script::Lexer lexer(source_manager, diagnostic_engine, source_id);
+        const std::vector<script::Token> tokens = lexer.lex();
+        if (diagnostic_engine.error_count() > errors_before) {
+            continue;
+        }
+
+        script::dump_tokens(tokens);
+
+        script::Parser parser(diagnostic_engine, tokens);
+        const std::unique_ptr<script::AstNode> ast = parser.parse();
+        if (diagnostic_engine.error_count() > errors_before) {
+            continue;
+        }
+
+        script::dump_ast(*ast);
+
+        const script::TranslationUnitDeclaration &translation_unit_declaration
+            = static_cast<const script::TranslationUnitDeclaration &>(*ast);
+
+        for (const std::unique_ptr<script::Declaration> &declaration : translation_unit_declaration.declarations) {
+            HE_ASSERT(declaration->kind == script::AstNodeKind::FunctionDeclaration);
+
+            const script::FunctionDeclaration &function_declaration
+                = static_cast<const script::FunctionDeclaration &>(*declaration);
+
+            script::IrBuilder builder(function_declaration);
+            const std::unique_ptr<script::IrFunction> function = builder.build();
+
+            script::dump_ir(*function);
+        }
+    }
+
+    script::DiagnosticRenderer renderer(source_manager);
+    renderer.render_all(diagnostic_engine.diagnostics());
+}
 
 } // namespace he
