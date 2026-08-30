@@ -6,6 +6,7 @@
 
 #include "hyper_script/diagnostics.hpp"
 
+#include <algorithm>
 #include <array>
 
 #include <fmt/format.h>
