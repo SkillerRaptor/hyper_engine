@@ -11,6 +11,15 @@
 
 namespace he::script {
 
+std::string span_to_string(const Span &span)
+{
+    return fmt::format(
+        "Span {{ source_id: {}, start_offset: {}, end_offset: {} }}",
+        span.source_id,
+        span.start_offset,
+        span.end_offset);
+}
+
 std::string_view token_kind_to_string(const TokenKind kind)
 {
     switch (kind) {
@@ -70,11 +79,10 @@ std::string_view token_kind_to_string(const TokenKind kind)
 std::string token_to_string(const Token &token)
 {
     return fmt::format(
-        "Token {{ kind: {}, lexeme: \"{}\", line: {}, column: {} }}",
+        "Token {{ kind: {}, lexeme: \"{}\", span: {} }}",
         token_kind_to_string(token.kind),
         token.lexeme,
-        token.line,
-        token.column);
+        span_to_string(token.span));
 }
 
 void dump_tokens(const std::span<const Token> tokens)

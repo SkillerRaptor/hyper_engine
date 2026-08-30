@@ -25,7 +25,14 @@ std::vector<Token> Lexer::lex()
         tokens.push_back(token.value());
     }
 
-    tokens.push_back(Token(TokenKind::Eof, "", m_line, m_column));
+    tokens.push_back(Token(
+        TokenKind::Eof,
+        "",
+        Span {
+            .source_id = m_source_id,
+            .start_offset = m_current_index,
+            .end_offset = m_current_index,
+        }));
 
     return tokens;
 }
@@ -34,8 +41,6 @@ std::optional<Token> Lexer::next_token()
 {
     skip_whitespaces();
 
-    const u32 start_line = m_line;
-    const u32 start_column = m_column;
     const size_t start_index = m_current_index;
 
     if (has_reached_end()) {
@@ -45,7 +50,7 @@ std::optional<Token> Lexer::next_token()
     const char current_character = advance();
 
     if (std::isalpha(static_cast<unsigned char>(current_character)) || current_character == '_') {
-        Token token = lex_identifier(start_line, start_column, start_index);
+        Token token = lex_identifier(start_index);
 
         if (token.lexeme == "else") {
             token.kind = TokenKind::Else;
@@ -63,12 +68,19 @@ std::optional<Token> Lexer::next_token()
     }
 
     if (std::isdigit(static_cast<unsigned char>(current_character))) {
-        return lex_number(start_line, start_column, start_index);
+        return lex_number(start_index);
     }
 
     auto make_token = [&](const TokenKind kind) {
         const size_t length = m_current_index - start_index;
-        return Token(kind, m_source.substr(start_index, length), start_line, start_column);
+        return Token(
+            kind,
+            m_source.substr(start_index, length),
+            Span {
+                .source_id = m_source_id,
+                .start_offset = start_index,
+                .end_offset = m_current_index,
+            });
     };
 
     switch (current_character) {
@@ -127,21 +139,28 @@ std::optional<Token> Lexer::next_token()
                     std::nullopt,
                     LabelStyle::Primary)
                 .with_help("remove the character"));
-        return make_token(TokenKind::Unknown);
+        return make_token(TokenKind::Error);
     }
 }
 
-Token Lexer::lex_number(const u32 start_line, const u32 start_column, const size_t start_index)
+Token Lexer::lex_number(const size_t start_index)
 {
     while (std::isdigit(static_cast<unsigned char>(peek()))) {
         advance();
     }
 
     const std::string_view value = m_source.substr(start_index, m_current_index - start_index);
-    return Token(TokenKind::IntegerLiteral, value, start_line, start_column);
+    return Token(
+        TokenKind::IntegerLiteral,
+        value,
+        Span {
+            .source_id = m_source_id,
+            .start_offset = start_index,
+            .end_offset = m_current_index,
+        });
 }
 
-Token Lexer::lex_identifier(const u32 start_line, const u32 start_column, const size_t start_index)
+Token Lexer::lex_identifier(const size_t start_index)
 {
     // NOTE: We can check if the character is a digit or alphabetic and assume that the first character will always
     // be not a digit, because under normal circumstances this function should be called with a valid first character.
@@ -150,7 +169,14 @@ Token Lexer::lex_identifier(const u32 start_line, const u32 start_column, const 
     }
 
     const std::string_view value = m_source.substr(start_index, m_current_index - start_index);
-    return Token(TokenKind::Identifier, value, start_line, start_column);
+    return Token(
+        TokenKind::Identifier,
+        value,
+        Span {
+            .source_id = m_source_id,
+            .start_offset = start_index,
+            .end_offset = m_current_index,
+        });
 }
 
 char Lexer::advance()
@@ -161,13 +187,6 @@ char Lexer::advance()
 
     const char character = m_source[m_current_index];
     m_current_index += 1;
-
-    if (character == '\n') {
-        m_line += 1;
-        m_column = 1;
-    } else {
-        m_column += 1;
-    }
 
     return character;
 }

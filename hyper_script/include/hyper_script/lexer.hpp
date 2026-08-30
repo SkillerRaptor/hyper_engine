@@ -30,8 +30,8 @@ public:
 private:
     std::optional<Token> next_token();
 
-    Token lex_number(u32 start_line, u32 start_column, size_t start_index);
-    Token lex_identifier(u32 start_line, u32 start_column, size_t start_index);
+    Token lex_number(size_t start_index);
+    Token lex_identifier(size_t start_index);
 
     char advance();
     char peek() const;
@@ -44,9 +44,6 @@ private:
     SourceId m_source_id;
     std::string_view m_source;
     size_t m_current_index = 0;
-
-    u32 m_line = 1;
-    u32 m_column = 1;
 };
 
 } // namespace he::script

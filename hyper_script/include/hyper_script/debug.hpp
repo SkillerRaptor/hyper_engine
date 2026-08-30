@@ -11,10 +11,13 @@
 #include <string_view>
 
 #include "hyper_script/ast.hpp"
+#include "hyper_script/diagnostics.hpp"
 #include "hyper_script/ir.hpp"
 #include "hyper_script/token.hpp"
 
 namespace he::script {
+
+std::string span_to_string(const Span &);
 
 std::string_view token_kind_to_string(TokenKind);
 std::string token_to_string(const Token &);

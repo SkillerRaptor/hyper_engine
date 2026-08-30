@@ -10,11 +10,11 @@
 
 #include <hyper_core/types.hpp>
 
+#include "hyper_script/diagnostics.hpp"
+
 namespace he::script {
 
 enum class TokenKind : u8 {
-    Unknown = 0,
-
     LeftBrace,
     RightBrace,
     LeftParenthesis,
@@ -45,19 +45,18 @@ enum class TokenKind : u8 {
     Identifier,
 
     Eof,
+    Error,
 };
 
 struct Token {
-    TokenKind kind = TokenKind::Unknown;
+    TokenKind kind;
     std::string_view lexeme;
-    u32 line = 0;
-    u32 column = 0;
+    Span span;
 
-    Token(const TokenKind kind, const std::string_view lexeme, const u32 line, const u32 column)
+    Token(const TokenKind kind, const std::string_view lexeme, const Span span)
         : kind(kind)
         , lexeme(lexeme)
-        , line(line)
-        , column(column)
+        , span(span)
     {
     }
 };
