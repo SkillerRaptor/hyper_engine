@@ -34,7 +34,10 @@ jobs:
           - os: windows-latest
             compiler: gcc
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          autocrlf: false
 
       - name: Update environment
         if: runner.os != 'Windows'
@@ -82,26 +85,8 @@ jobs:
         run: |
           ctest -C ${{ matrix.build_type }}
 
-      - name: Prepare upload (Linux)
-        if: runner.os != 'Windows'
-        run: |
-          tar cfz linux-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.tar.xz build/
-
-      - name: Upload (Linux)
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
-        if: runner.os != 'Windows'
         with:
-          path: linux-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.tar.xz
-          name: linux-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.tar.xz
-
-      - name: Prepare upload (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          7z a -tzip windows-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.zip build/*
-
-      - name: Upload (Windows)
-        uses: actions/upload-artifact@v4
-        if: runner.os == 'Windows'
-        with:
-          path: windows-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.zip
-          name: windows-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}.zip
+          name: ${{ runner.os == 'Windows' && 'windows' || 'linux' }}-${{ matrix.compiler }}-${{ matrix.build_type == 'Debug' && 'debug' || 'release' }}
+          path: build/
