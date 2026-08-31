@@ -1,4 +1,4 @@
-define @foo() {
+define @main() {
 block_0:
   %0 = iconst 0
   %1 = iconst 10

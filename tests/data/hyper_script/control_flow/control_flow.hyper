@@ -1,4 +1,4 @@
-fn foo() {
+fn main() {
     let a = 0;
     let b = a + 10;
     let c = a + b;

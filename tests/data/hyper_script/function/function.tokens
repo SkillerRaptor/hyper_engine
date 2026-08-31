@@ -1,7 +1,7 @@
 Token { kind: Fn, lexeme: "fn", span: Span { source_id: 0, start_offset: 0, end_offset: 2 } }
-Token { kind: Identifier, lexeme: "foo", span: Span { source_id: 0, start_offset: 3, end_offset: 6 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 6, end_offset: 7 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 7, end_offset: 8 } }
-Token { kind: LeftBrace, lexeme: "{", span: Span { source_id: 0, start_offset: 9, end_offset: 10 } }
-Token { kind: RightBrace, lexeme: "}", span: Span { source_id: 0, start_offset: 11, end_offset: 12 } }
-Token { kind: Eof, lexeme: "", span: Span { source_id: 0, start_offset: 12, end_offset: 12 } }
+Token { kind: Identifier, lexeme: "main", span: Span { source_id: 0, start_offset: 3, end_offset: 7 } }
+Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 7, end_offset: 8 } }
+Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 8, end_offset: 9 } }
+Token { kind: LeftBrace, lexeme: "{", span: Span { source_id: 0, start_offset: 10, end_offset: 11 } }
+Token { kind: RightBrace, lexeme: "}", span: Span { source_id: 0, start_offset: 12, end_offset: 13 } }
+Token { kind: Eof, lexeme: "", span: Span { source_id: 0, start_offset: 13, end_offset: 13 } }
