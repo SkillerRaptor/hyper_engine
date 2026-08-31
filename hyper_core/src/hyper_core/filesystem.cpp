@@ -50,7 +50,7 @@ std::optional<std::string> read_to_string(std::string_view path)
         return std::nullopt;
     }
 
-    std::ifstream file(file_path, std::ios::ate);
+    std::ifstream file(file_path, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
         HE_ERROR("Failed to open file: '{}'", path);
         return std::nullopt;

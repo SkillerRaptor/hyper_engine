@@ -11,14 +11,30 @@
 
 namespace he::script {
 
-SourceId SourceManager::add_file(std::string path, std::string source)
+SourceId SourceManager::add_file(std::string path, const std::string &source)
 {
+    std::string trimmed_source;
+    trimmed_source.reserve(source.size());
+
+    for (usize i = 0; i < source.size(); ++i) {
+        if (source[i] == '\r') {
+            if (i + 1 < source.size() && source[i + 1] == '\n') {
+                trimmed_source.push_back('\n');
+                i += 1;
+            }
+
+            continue;
+        }
+
+        trimmed_source.push_back(source[i]);
+    }
+
     const SourceId id = m_files.size();
-    std::vector<usize> line_starts = compute_line_starts(source);
+    std::vector<usize> line_starts = compute_line_starts(trimmed_source);
     m_files.push_back(
         {
             .path = std::move(path),
-            .source = std::move(source),
+            .source = std::move(trimmed_source),
             .line_starts = std::move(line_starts),
         });
     return id;

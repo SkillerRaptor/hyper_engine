@@ -30,7 +30,7 @@ private:
     };
 
 public:
-    SourceId add_file(std::string path, std::string source);
+    SourceId add_file(std::string path, const std::string &source);
 
     std::string_view get_path(SourceId) const;
     std::string_view get_source(SourceId) const;
