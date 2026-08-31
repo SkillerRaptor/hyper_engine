@@ -29,7 +29,7 @@ SourceId SourceManager::add_file(std::string path, const std::string &source)
         trimmed_source.push_back(source[i]);
     }
 
-    const SourceId id = m_files.size();
+    const SourceId id = static_cast<u32>(m_files.size());
     std::vector<usize> line_starts = compute_line_starts(trimmed_source);
     m_files.push_back(
         {
@@ -65,7 +65,7 @@ SourcePosition SourceManager::get_position(const SourceId source_id, const usize
         ++line;
     }
 
-    const u32 column = offset - file.line_starts[line - 1] + 1;
+    const u32 column = static_cast<u32>(offset - file.line_starts[line - 1] + 1);
 
     return SourcePosition {
         .line = line,
