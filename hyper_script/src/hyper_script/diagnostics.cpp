@@ -15,61 +15,6 @@
 
 namespace he::script {
 
-Diagnostic Diagnostic::new_note(std::string msg)
-{
-    return Diagnostic {
-        .severity = Severity::Note,
-        .message = std::move(msg),
-        .labels = { },
-        .note = std::nullopt,
-        .help = std::nullopt,
-    };
-}
-
-Diagnostic Diagnostic::new_help(std::string msg)
-{
-    return Diagnostic {
-        .severity = Severity::Help,
-        .message = std::move(msg),
-        .labels = { },
-        .note = std::nullopt,
-        .help = std::nullopt,
-    };
-}
-
-Diagnostic Diagnostic::new_warning(std::string msg)
-{
-    return Diagnostic {
-        .severity = Severity::Warning,
-        .message = std::move(msg),
-        .labels = { },
-        .note = std::nullopt,
-        .help = std::nullopt,
-    };
-}
-
-Diagnostic Diagnostic::new_error(std::string msg)
-{
-    return Diagnostic {
-        .severity = Severity::Error,
-        .message = std::move(msg),
-        .labels = { },
-        .note = std::nullopt,
-        .help = std::nullopt,
-    };
-}
-
-Diagnostic Diagnostic::new_fatal(std::string msg)
-{
-    return Diagnostic {
-        .severity = Severity::Fatal,
-        .message = std::move(msg),
-        .labels = { },
-        .note = std::nullopt,
-        .help = std::nullopt,
-    };
-}
-
 Diagnostic &Diagnostic::with_label(const Span &span, std::optional<std::string> msg, const LabelStyle style)
 {
     labels.emplace_back(span, std::move(msg), style);
@@ -88,13 +33,81 @@ Diagnostic &Diagnostic::with_help(std::string new_help)
     return *this;
 }
 
-void DiagnosticEngine::emit(const Diagnostic &diagnostic)
+Diagnostic &DiagnosticEngine::emit_note(std::string message)
 {
-    if (diagnostic.severity >= Severity::Error) {
-        m_error_count += 1;
-    }
+    const Diagnostic diagnostic = {
+        .severity = Severity::Note,
+        .message = std::move(message),
+        .labels = { },
+        .note = std::nullopt,
+        .help = std::nullopt,
+    };
 
-    m_diagnostics.push_back(diagnostic);
+    m_diagnostics.push_back(std::move(diagnostic));
+
+    return m_diagnostics.back();
+}
+
+Diagnostic &DiagnosticEngine::emit_help(std::string message)
+{
+    const Diagnostic diagnostic = {
+        .severity = Severity::Help,
+        .message = std::move(message),
+        .labels = { },
+        .note = std::nullopt,
+        .help = std::nullopt,
+    };
+
+    m_diagnostics.push_back(std::move(diagnostic));
+
+    return m_diagnostics.back();
+}
+
+Diagnostic &DiagnosticEngine::emit_warning(std::string message)
+{
+    const Diagnostic diagnostic = {
+        .severity = Severity::Warning,
+        .message = std::move(message),
+        .labels = { },
+        .note = std::nullopt,
+        .help = std::nullopt,
+    };
+
+    m_diagnostics.push_back(std::move(diagnostic));
+    m_warning_count += 1;
+
+    return m_diagnostics.back();
+}
+
+Diagnostic &DiagnosticEngine::emit_error(std::string message)
+{
+    const Diagnostic diagnostic = {
+        .severity = Severity::Error,
+        .message = std::move(message),
+        .labels = { },
+        .note = std::nullopt,
+        .help = std::nullopt,
+    };
+
+    m_diagnostics.push_back(std::move(diagnostic));
+    m_error_count += 1;
+
+    return m_diagnostics.back();
+}
+
+Diagnostic &DiagnosticEngine::emit_fatal(std::string message)
+{
+    const Diagnostic diagnostic = {
+        .severity = Severity::Fatal,
+        .message = std::move(message),
+        .labels = { },
+        .note = std::nullopt,
+        .help = std::nullopt,
+    };
+
+    m_diagnostics.push_back(std::move(diagnostic));
+
+    return m_diagnostics.back();
 }
 
 void DiagnosticRenderer::render(const Diagnostic &diagnostic) const

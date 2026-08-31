@@ -14,37 +14,28 @@ namespace he::script {
 
 std::vector<Token> Lexer::lex()
 {
-    std::vector<Token> tokens = { };
+    std::vector<Token> tokens;
 
     while (true) {
-        const std::optional<Token> token = next_token();
-        if (!token.has_value()) {
+        const Token token = next_token();
+        tokens.push_back(token);
+
+        if (token.kind == TokenKind::Eof) {
             break;
         }
-
-        tokens.push_back(token.value());
     }
-
-    tokens.push_back(Token(
-        TokenKind::Eof,
-        "",
-        Span {
-            .source_id = m_source_id,
-            .start_offset = m_current_index,
-            .end_offset = m_current_index,
-        }));
 
     return tokens;
 }
 
-std::optional<Token> Lexer::next_token()
+Token Lexer::next_token()
 {
     skip_whitespaces();
 
-    const size_t start_index = m_current_index;
+    const usize start_index = m_current_index;
 
     if (has_reached_end()) {
-        return std::nullopt;
+        return Token(TokenKind::Eof, "", make_span(start_index));
     }
 
     const char current_character = advance();
@@ -73,14 +64,7 @@ std::optional<Token> Lexer::next_token()
 
     auto make_token = [&](const TokenKind kind) {
         const size_t length = m_current_index - start_index;
-        return Token(
-            kind,
-            m_source.substr(start_index, length),
-            Span {
-                .source_id = m_source_id,
-                .start_offset = start_index,
-                .end_offset = m_current_index,
-            });
+        return Token(kind, m_source.substr(start_index, length), make_span(start_index));
     };
 
     switch (current_character) {
@@ -114,7 +98,11 @@ std::optional<Token> Lexer::next_token()
             return make_token(TokenKind::NotEqual);
         }
 
-        HE_PANIC();
+        m_diagnostics.emit_error("unexpected character '!'")
+            .with_label(make_span(start_index), std::nullopt, LabelStyle::Primary)
+            .with_help("did you mean '!='?");
+
+        return make_token(TokenKind::Error);
     case '<':
         if (peek() == '=') {
             advance();
@@ -128,17 +116,10 @@ std::optional<Token> Lexer::next_token()
         }
         return make_token(TokenKind::Greater);
     default:
-        m_diagnostic_engine.emit(
-            Diagnostic::new_error("unexpected character")
-                .with_label(
-                    {
-                        .source_id = m_source_id,
-                        .start_offset = start_index,
-                        .end_offset = m_current_index,
-                    },
-                    std::nullopt,
-                    LabelStyle::Primary)
-                .with_help("remove the character"));
+        m_diagnostics.emit_error("unexpected character")
+            .with_label(make_span(start_index), std::nullopt, LabelStyle::Primary)
+            .with_help("remove the character");
+
         return make_token(TokenKind::Error);
     }
 }
@@ -150,14 +131,7 @@ Token Lexer::lex_number(const size_t start_index)
     }
 
     const std::string_view value = m_source.substr(start_index, m_current_index - start_index);
-    return Token(
-        TokenKind::IntegerLiteral,
-        value,
-        Span {
-            .source_id = m_source_id,
-            .start_offset = start_index,
-            .end_offset = m_current_index,
-        });
+    return Token(TokenKind::IntegerLiteral, value, make_span(start_index));
 }
 
 Token Lexer::lex_identifier(const size_t start_index)
@@ -169,14 +143,7 @@ Token Lexer::lex_identifier(const size_t start_index)
     }
 
     const std::string_view value = m_source.substr(start_index, m_current_index - start_index);
-    return Token(
-        TokenKind::Identifier,
-        value,
-        Span {
-            .source_id = m_source_id,
-            .start_offset = start_index,
-            .end_offset = m_current_index,
-        });
+    return Token(TokenKind::Identifier, value, make_span(start_index));
 }
 
 char Lexer::advance()
@@ -213,5 +180,14 @@ void Lexer::skip_whitespaces()
 }
 
 bool Lexer::has_reached_end() const { return m_current_index >= m_source.length(); }
+
+Span Lexer::make_span(const usize start) const
+{
+    return Span {
+        .source_id = m_source_id,
+        .start_offset = start,
+        .end_offset = m_current_index,
+    };
+}
 
 } // namespace he::script

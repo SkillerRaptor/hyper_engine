@@ -49,20 +49,18 @@ struct Diagnostic {
     std::optional<std::string> note;
     std::optional<std::string> help;
 
-    static Diagnostic new_note(std::string msg);
-    static Diagnostic new_help(std::string msg);
-    static Diagnostic new_warning(std::string msg);
-    static Diagnostic new_error(std::string msg);
-    static Diagnostic new_fatal(std::string msg);
-
-    Diagnostic &with_label(const Span &, std::optional<std::string> msg, LabelStyle style = LabelStyle::Primary);
+    Diagnostic &with_label(const Span &, std::optional<std::string> msg, LabelStyle);
     Diagnostic &with_note(std::string new_note);
     Diagnostic &with_help(std::string new_help);
 };
 
 class DiagnosticEngine {
 public:
-    void emit(const Diagnostic &);
+    Diagnostic &emit_note(std::string message);
+    Diagnostic &emit_help(std::string message);
+    Diagnostic &emit_warning(std::string message);
+    Diagnostic &emit_error(std::string message);
+    Diagnostic &emit_fatal(std::string message);
 
     std::span<const Diagnostic> diagnostics() const { return m_diagnostics; }
 
