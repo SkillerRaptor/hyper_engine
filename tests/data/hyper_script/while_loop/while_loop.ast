@@ -1,32 +1,32 @@
 TranslationUnitDeclaration
-   FunctionDeclaration { identifier: main }
-      CompoundStatement
-         DeclarationStatement
-            VariableDeclaration { identifier: count }
-               LiteralExpression
-                  IntegerLiteral { value: 0 }
-         DeclarationStatement
-            VariableDeclaration { identifier: sum }
-               LiteralExpression
-                  IntegerLiteral { value: 0 }
-         WhileStatement
-            BinaryExpression { operation: LessThan }
-               VariableExpression { identifier: count }
-               LiteralExpression
-                  IntegerLiteral { value: 5 }
-            CompoundStatement
-               AssignStatement { identifier: sum }
-                  BinaryExpression { operation: Addition }
-                     VariableExpression { identifier: sum }
-                     VariableExpression { identifier: count }
-               AssignStatement { identifier: count }
-                  BinaryExpression { operation: Addition }
-                     VariableExpression { identifier: count }
-                     LiteralExpression
-                        IntegerLiteral { value: 1 }
-         ExpressionStatement
-            CallExpression { identifier: print }
-               VariableExpression { identifier: count }
-         ExpressionStatement
-            CallExpression { identifier: print }
-               VariableExpression { identifier: sum }
+  FunctionDeclaration { identifier: main }
+    CompoundStatement
+      DeclarationStatement
+        VariableDeclaration { identifier: count }
+          LiteralExpression
+            IntegerLiteral { value: 0 }
+      DeclarationStatement
+        VariableDeclaration { identifier: sum }
+          LiteralExpression
+            IntegerLiteral { value: 0 }
+      WhileStatement
+        BinaryExpression { operation: LessThan }
+          VariableExpression { identifier: count }
+          LiteralExpression
+            IntegerLiteral { value: 5 }
+        CompoundStatement
+          AssignStatement { identifier: sum }
+            BinaryExpression { operation: Addition }
+              VariableExpression { identifier: sum }
+              VariableExpression { identifier: count }
+          AssignStatement { identifier: count }
+            BinaryExpression { operation: Addition }
+              VariableExpression { identifier: count }
+              LiteralExpression
+                IntegerLiteral { value: 1 }
+      ExpressionStatement
+        CallExpression { identifier: print }
+          VariableExpression { identifier: count }
+      ExpressionStatement
+        CallExpression { identifier: print }
+          VariableExpression { identifier: sum }

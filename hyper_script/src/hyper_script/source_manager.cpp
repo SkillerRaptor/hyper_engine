@@ -58,7 +58,7 @@ std::string_view SourceManager::get_line(const SourceId source_id, const u32 lin
 SourcePosition SourceManager::get_position(const SourceId source_id, const usize offset) const
 {
     const File &file = m_files[source_id];
-    HE_ASSERT(offset < file.source.size());
+    HE_ASSERT(offset <= file.source.size());
 
     u32 line = 1;
     for (usize i = 1; i < file.line_starts.size() && file.line_starts[i] <= offset; ++i) {

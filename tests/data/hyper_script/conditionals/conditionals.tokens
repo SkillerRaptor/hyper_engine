@@ -1,66 +1,66 @@
-Token { kind: Fn, lexeme: "fn", span: Span { source_id: 0, start_offset: 0, end_offset: 2 } }
-Token { kind: Identifier, lexeme: "main", span: Span { source_id: 0, start_offset: 3, end_offset: 7 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 7, end_offset: 8 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 8, end_offset: 9 } }
-Token { kind: LeftBrace, lexeme: "{", span: Span { source_id: 0, start_offset: 10, end_offset: 11 } }
-Token { kind: Let, lexeme: "let", span: Span { source_id: 0, start_offset: 16, end_offset: 19 } }
-Token { kind: Identifier, lexeme: "x", span: Span { source_id: 0, start_offset: 20, end_offset: 21 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 22, end_offset: 23 } }
-Token { kind: IntegerLiteral, lexeme: "15", span: Span { source_id: 0, start_offset: 24, end_offset: 26 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 26, end_offset: 27 } }
-Token { kind: Let, lexeme: "let", span: Span { source_id: 0, start_offset: 32, end_offset: 35 } }
-Token { kind: Identifier, lexeme: "y", span: Span { source_id: 0, start_offset: 36, end_offset: 37 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 38, end_offset: 39 } }
-Token { kind: IntegerLiteral, lexeme: "20", span: Span { source_id: 0, start_offset: 40, end_offset: 42 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 42, end_offset: 43 } }
-Token { kind: Let, lexeme: "let", span: Span { source_id: 0, start_offset: 48, end_offset: 51 } }
-Token { kind: Identifier, lexeme: "result", span: Span { source_id: 0, start_offset: 52, end_offset: 58 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 59, end_offset: 60 } }
-Token { kind: IntegerLiteral, lexeme: "0", span: Span { source_id: 0, start_offset: 61, end_offset: 62 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 62, end_offset: 63 } }
-Token { kind: If, lexeme: "if", span: Span { source_id: 0, start_offset: 69, end_offset: 71 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 72, end_offset: 73 } }
-Token { kind: Identifier, lexeme: "x", span: Span { source_id: 0, start_offset: 73, end_offset: 74 } }
-Token { kind: LessEqual, lexeme: "<=", span: Span { source_id: 0, start_offset: 75, end_offset: 77 } }
-Token { kind: Identifier, lexeme: "y", span: Span { source_id: 0, start_offset: 78, end_offset: 79 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 79, end_offset: 80 } }
-Token { kind: LeftBrace, lexeme: "{", span: Span { source_id: 0, start_offset: 81, end_offset: 82 } }
-Token { kind: Identifier, lexeme: "result", span: Span { source_id: 0, start_offset: 91, end_offset: 97 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 98, end_offset: 99 } }
-Token { kind: Identifier, lexeme: "y", span: Span { source_id: 0, start_offset: 100, end_offset: 101 } }
-Token { kind: Minus, lexeme: "-", span: Span { source_id: 0, start_offset: 102, end_offset: 103 } }
-Token { kind: Identifier, lexeme: "x", span: Span { source_id: 0, start_offset: 104, end_offset: 105 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 105, end_offset: 106 } }
-Token { kind: RightBrace, lexeme: "}", span: Span { source_id: 0, start_offset: 111, end_offset: 112 } }
-Token { kind: Else, lexeme: "else", span: Span { source_id: 0, start_offset: 113, end_offset: 117 } }
-Token { kind: LeftBrace, lexeme: "{", span: Span { source_id: 0, start_offset: 118, end_offset: 119 } }
-Token { kind: Identifier, lexeme: "result", span: Span { source_id: 0, start_offset: 128, end_offset: 134 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 135, end_offset: 136 } }
-Token { kind: Identifier, lexeme: "x", span: Span { source_id: 0, start_offset: 137, end_offset: 138 } }
-Token { kind: Minus, lexeme: "-", span: Span { source_id: 0, start_offset: 139, end_offset: 140 } }
-Token { kind: Identifier, lexeme: "y", span: Span { source_id: 0, start_offset: 141, end_offset: 142 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 142, end_offset: 143 } }
-Token { kind: RightBrace, lexeme: "}", span: Span { source_id: 0, start_offset: 148, end_offset: 149 } }
-Token { kind: If, lexeme: "if", span: Span { source_id: 0, start_offset: 155, end_offset: 157 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 158, end_offset: 159 } }
-Token { kind: Identifier, lexeme: "result", span: Span { source_id: 0, start_offset: 159, end_offset: 165 } }
-Token { kind: EqualEqual, lexeme: "==", span: Span { source_id: 0, start_offset: 166, end_offset: 168 } }
-Token { kind: IntegerLiteral, lexeme: "5", span: Span { source_id: 0, start_offset: 169, end_offset: 170 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 170, end_offset: 171 } }
-Token { kind: LeftBrace, lexeme: "{", span: Span { source_id: 0, start_offset: 172, end_offset: 173 } }
-Token { kind: Identifier, lexeme: "print", span: Span { source_id: 0, start_offset: 182, end_offset: 187 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 187, end_offset: 188 } }
-Token { kind: IntegerLiteral, lexeme: "1", span: Span { source_id: 0, start_offset: 188, end_offset: 189 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 189, end_offset: 190 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 190, end_offset: 191 } }
-Token { kind: RightBrace, lexeme: "}", span: Span { source_id: 0, start_offset: 196, end_offset: 197 } }
-Token { kind: Else, lexeme: "else", span: Span { source_id: 0, start_offset: 198, end_offset: 202 } }
-Token { kind: LeftBrace, lexeme: "{", span: Span { source_id: 0, start_offset: 203, end_offset: 204 } }
-Token { kind: Identifier, lexeme: "print", span: Span { source_id: 0, start_offset: 213, end_offset: 218 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 218, end_offset: 219 } }
-Token { kind: IntegerLiteral, lexeme: "0", span: Span { source_id: 0, start_offset: 219, end_offset: 220 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 220, end_offset: 221 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 221, end_offset: 222 } }
-Token { kind: RightBrace, lexeme: "}", span: Span { source_id: 0, start_offset: 227, end_offset: 228 } }
-Token { kind: RightBrace, lexeme: "}", span: Span { source_id: 0, start_offset: 229, end_offset: 230 } }
-Token { kind: Eof, lexeme: "", span: Span { source_id: 0, start_offset: 230, end_offset: 230 } }
+Fn "fn" 1:1
+Identifier "main" 1:4
+LeftParenthesis "(" 1:8
+RightParenthesis ")" 1:9
+LeftBrace "{" 1:11
+Let "let" 2:5
+Identifier "x" 2:9
+Equal "=" 2:11
+IntegerLiteral "15" 2:13
+Semicolon ";" 2:15
+Let "let" 3:5
+Identifier "y" 3:9
+Equal "=" 3:11
+IntegerLiteral "20" 3:13
+Semicolon ";" 3:15
+Let "let" 4:5
+Identifier "result" 4:9
+Equal "=" 4:16
+IntegerLiteral "0" 4:18
+Semicolon ";" 4:19
+If "if" 6:5
+LeftParenthesis "(" 6:8
+Identifier "x" 6:9
+LessEqual "<=" 6:11
+Identifier "y" 6:14
+RightParenthesis ")" 6:15
+LeftBrace "{" 6:17
+Identifier "result" 7:9
+Equal "=" 7:16
+Identifier "y" 7:18
+Minus "-" 7:20
+Identifier "x" 7:22
+Semicolon ";" 7:23
+RightBrace "}" 8:5
+Else "else" 8:7
+LeftBrace "{" 8:12
+Identifier "result" 9:9
+Equal "=" 9:16
+Identifier "x" 9:18
+Minus "-" 9:20
+Identifier "y" 9:22
+Semicolon ";" 9:23
+RightBrace "}" 10:5
+If "if" 12:5
+LeftParenthesis "(" 12:8
+Identifier "result" 12:9
+EqualEqual "==" 12:16
+IntegerLiteral "5" 12:19
+RightParenthesis ")" 12:20
+LeftBrace "{" 12:22
+Identifier "print" 13:9
+LeftParenthesis "(" 13:14
+IntegerLiteral "1" 13:15
+RightParenthesis ")" 13:16
+Semicolon ";" 13:17
+RightBrace "}" 14:5
+Else "else" 14:7
+LeftBrace "{" 14:12
+Identifier "print" 15:9
+LeftParenthesis "(" 15:14
+IntegerLiteral "0" 15:15
+RightParenthesis ")" 15:16
+Semicolon ";" 15:17
+RightBrace "}" 16:5
+RightBrace "}" 17:1
+Eof "" 17:2

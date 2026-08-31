@@ -1,65 +1,65 @@
-Token { kind: Fn, lexeme: "fn", span: Span { source_id: 0, start_offset: 0, end_offset: 2 } }
-Token { kind: Identifier, lexeme: "main", span: Span { source_id: 0, start_offset: 3, end_offset: 7 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 7, end_offset: 8 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 8, end_offset: 9 } }
-Token { kind: LeftBrace, lexeme: "{", span: Span { source_id: 0, start_offset: 10, end_offset: 11 } }
-Token { kind: Let, lexeme: "let", span: Span { source_id: 0, start_offset: 16, end_offset: 19 } }
-Token { kind: Identifier, lexeme: "a", span: Span { source_id: 0, start_offset: 20, end_offset: 21 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 22, end_offset: 23 } }
-Token { kind: IntegerLiteral, lexeme: "5", span: Span { source_id: 0, start_offset: 24, end_offset: 25 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 25, end_offset: 26 } }
-Token { kind: Let, lexeme: "let", span: Span { source_id: 0, start_offset: 31, end_offset: 34 } }
-Token { kind: Identifier, lexeme: "b", span: Span { source_id: 0, start_offset: 35, end_offset: 36 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 37, end_offset: 38 } }
-Token { kind: IntegerLiteral, lexeme: "10", span: Span { source_id: 0, start_offset: 39, end_offset: 41 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 41, end_offset: 42 } }
-Token { kind: Let, lexeme: "let", span: Span { source_id: 0, start_offset: 47, end_offset: 50 } }
-Token { kind: Identifier, lexeme: "c", span: Span { source_id: 0, start_offset: 51, end_offset: 52 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 53, end_offset: 54 } }
-Token { kind: Identifier, lexeme: "a", span: Span { source_id: 0, start_offset: 55, end_offset: 56 } }
-Token { kind: Plus, lexeme: "+", span: Span { source_id: 0, start_offset: 57, end_offset: 58 } }
-Token { kind: Identifier, lexeme: "b", span: Span { source_id: 0, start_offset: 59, end_offset: 60 } }
-Token { kind: Star, lexeme: "*", span: Span { source_id: 0, start_offset: 61, end_offset: 62 } }
-Token { kind: IntegerLiteral, lexeme: "2", span: Span { source_id: 0, start_offset: 63, end_offset: 64 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 64, end_offset: 65 } }
-Token { kind: Let, lexeme: "let", span: Span { source_id: 0, start_offset: 70, end_offset: 73 } }
-Token { kind: Identifier, lexeme: "d", span: Span { source_id: 0, start_offset: 74, end_offset: 75 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 76, end_offset: 77 } }
-Token { kind: Identifier, lexeme: "c", span: Span { source_id: 0, start_offset: 78, end_offset: 79 } }
-Token { kind: Minus, lexeme: "-", span: Span { source_id: 0, start_offset: 80, end_offset: 81 } }
-Token { kind: IntegerLiteral, lexeme: "5", span: Span { source_id: 0, start_offset: 82, end_offset: 83 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 83, end_offset: 84 } }
-Token { kind: Let, lexeme: "let", span: Span { source_id: 0, start_offset: 89, end_offset: 92 } }
-Token { kind: Identifier, lexeme: "e", span: Span { source_id: 0, start_offset: 93, end_offset: 94 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 95, end_offset: 96 } }
-Token { kind: Identifier, lexeme: "d", span: Span { source_id: 0, start_offset: 97, end_offset: 98 } }
-Token { kind: Slash, lexeme: "/", span: Span { source_id: 0, start_offset: 99, end_offset: 100 } }
-Token { kind: IntegerLiteral, lexeme: "4", span: Span { source_id: 0, start_offset: 101, end_offset: 102 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 102, end_offset: 103 } }
-Token { kind: Identifier, lexeme: "print", span: Span { source_id: 0, start_offset: 109, end_offset: 114 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 114, end_offset: 115 } }
-Token { kind: Identifier, lexeme: "a", span: Span { source_id: 0, start_offset: 115, end_offset: 116 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 116, end_offset: 117 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 117, end_offset: 118 } }
-Token { kind: Identifier, lexeme: "print", span: Span { source_id: 0, start_offset: 123, end_offset: 128 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 128, end_offset: 129 } }
-Token { kind: Identifier, lexeme: "b", span: Span { source_id: 0, start_offset: 129, end_offset: 130 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 130, end_offset: 131 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 131, end_offset: 132 } }
-Token { kind: Identifier, lexeme: "print", span: Span { source_id: 0, start_offset: 137, end_offset: 142 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 142, end_offset: 143 } }
-Token { kind: Identifier, lexeme: "c", span: Span { source_id: 0, start_offset: 143, end_offset: 144 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 144, end_offset: 145 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 145, end_offset: 146 } }
-Token { kind: Identifier, lexeme: "print", span: Span { source_id: 0, start_offset: 151, end_offset: 156 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 156, end_offset: 157 } }
-Token { kind: Identifier, lexeme: "d", span: Span { source_id: 0, start_offset: 157, end_offset: 158 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 158, end_offset: 159 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 159, end_offset: 160 } }
-Token { kind: Identifier, lexeme: "print", span: Span { source_id: 0, start_offset: 165, end_offset: 170 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 170, end_offset: 171 } }
-Token { kind: Identifier, lexeme: "e", span: Span { source_id: 0, start_offset: 171, end_offset: 172 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 172, end_offset: 173 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 173, end_offset: 174 } }
-Token { kind: RightBrace, lexeme: "}", span: Span { source_id: 0, start_offset: 175, end_offset: 176 } }
-Token { kind: Eof, lexeme: "", span: Span { source_id: 0, start_offset: 176, end_offset: 176 } }
+Fn "fn" 1:1
+Identifier "main" 1:4
+LeftParenthesis "(" 1:8
+RightParenthesis ")" 1:9
+LeftBrace "{" 1:11
+Let "let" 2:5
+Identifier "a" 2:9
+Equal "=" 2:11
+IntegerLiteral "5" 2:13
+Semicolon ";" 2:14
+Let "let" 3:5
+Identifier "b" 3:9
+Equal "=" 3:11
+IntegerLiteral "10" 3:13
+Semicolon ";" 3:15
+Let "let" 4:5
+Identifier "c" 4:9
+Equal "=" 4:11
+Identifier "a" 4:13
+Plus "+" 4:15
+Identifier "b" 4:17
+Star "*" 4:19
+IntegerLiteral "2" 4:21
+Semicolon ";" 4:22
+Let "let" 5:5
+Identifier "d" 5:9
+Equal "=" 5:11
+Identifier "c" 5:13
+Minus "-" 5:15
+IntegerLiteral "5" 5:17
+Semicolon ";" 5:18
+Let "let" 6:5
+Identifier "e" 6:9
+Equal "=" 6:11
+Identifier "d" 6:13
+Slash "/" 6:15
+IntegerLiteral "4" 6:17
+Semicolon ";" 6:18
+Identifier "print" 8:5
+LeftParenthesis "(" 8:10
+Identifier "a" 8:11
+RightParenthesis ")" 8:12
+Semicolon ";" 8:13
+Identifier "print" 9:5
+LeftParenthesis "(" 9:10
+Identifier "b" 9:11
+RightParenthesis ")" 9:12
+Semicolon ";" 9:13
+Identifier "print" 10:5
+LeftParenthesis "(" 10:10
+Identifier "c" 10:11
+RightParenthesis ")" 10:12
+Semicolon ";" 10:13
+Identifier "print" 11:5
+LeftParenthesis "(" 11:10
+Identifier "d" 11:11
+RightParenthesis ")" 11:12
+Semicolon ";" 11:13
+Identifier "print" 12:5
+LeftParenthesis "(" 12:10
+Identifier "e" 12:11
+RightParenthesis ")" 12:12
+Semicolon ";" 12:13
+RightBrace "}" 13:1
+Eof "" 13:2

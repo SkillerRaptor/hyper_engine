@@ -87,95 +87,47 @@ std::string token_to_string(const Token &token)
         span_to_string(token.span));
 }
 
-static void print_lines(const std::string &content)
-{
-    std::stringstream ss(content);
-    std::string line;
-    while (std::getline(ss, line)) {
-        HE_INFO("{}", line);
-    }
-}
-
-void dump_tokens(const std::span<const Token> tokens, const bool use_pipes)
-{
-    std::ostringstream ss;
-    dump_tokens(ss, tokens, use_pipes);
-    print_lines(ss.str());
-}
-
-void dump_ast(const AstNode &node, const bool use_pipes)
-{
-    std::ostringstream ss;
-    dump_ast(ss, node, use_pipes);
-    print_lines(ss.str());
-}
-
-void dump_ir(const IrFunction &function)
-{
-    std::ostringstream ss;
-    dump_ir(ss, function);
-    print_lines(ss.str());
-}
-
-void dump_tokens(std::ostream &stream, const std::span<const Token> tokens, const bool use_pipes)
+void dump_tokens(const std::span<const Token> tokens)
 {
     if (tokens.empty()) {
         return;
     }
 
-    for (size_t i = 0; i < tokens.size(); ++i) {
-        std::string prefix;
-        if (use_pipes) {
-            prefix = (i == tokens.size() - 1) ? "`- " : "|- ";
-        }
-        stream << fmt::format("{}{}\n", prefix, token_to_string(tokens[i]));
+    for (size_t i = 0; i < tokens.size() - 1; ++i) {
+        HE_INFO("|- {}", token_to_string(tokens[i]));
     }
+
+    HE_INFO("`- {}", token_to_string(tokens.back()));
 }
 
-static void dump_node(
-    std::ostream &stream,
-    const AstNode &node,
-    const std::string &prefix,
-    const bool is_last,
-    const bool use_pipes,
-    const bool is_root = false)
+static void dump_node(const AstNode &node, const std::string &prefix, const bool is_last, const bool is_root = false)
 {
-    std::string connector;
-    std::string child_prefix;
-
-    if (use_pipes) {
-        connector = is_root ? "" : (is_last ? "`- " : "|- ");
-        child_prefix = prefix + (is_root ? "" : (is_last ? "   " : "|  "));
-    } else {
-        connector = is_root ? "" : "   ";
-        child_prefix = prefix + (is_root ? "" : "   ");
-    }
+    const std::string connector = is_root ? "" : (is_last ? "`- " : "|- ");
+    const std::string child_prefix = prefix + (is_root ? "" : (is_last ? "   " : "|  "));
 
     switch (node.kind) {
     case AstNodeKind::FunctionDeclaration: {
         const FunctionDeclaration &declaration = static_cast<const FunctionDeclaration &>(node);
-        stream
-            << fmt::format("{}{}FunctionDeclaration {{ identifier: {} }}\n", prefix, connector, declaration.identifier);
-        dump_node(stream, *declaration.body, child_prefix, true, use_pipes);
+        HE_INFO("{}{}FunctionDeclaration {{ identifier: {} }}", prefix, connector, declaration.identifier);
+        dump_node(*declaration.body, child_prefix, true);
         break;
     }
     case AstNodeKind::TranslationUnitDeclaration: {
         const TranslationUnitDeclaration &declaration = static_cast<const TranslationUnitDeclaration &>(node);
-        stream << fmt::format("{}{}TranslationUnitDeclaration\n", prefix, connector);
+        HE_INFO("{}{}TranslationUnitDeclaration", prefix, connector);
         if (declaration.declarations.empty()) {
             break;
         }
         for (usize i = 0; i < declaration.declarations.size() - 1; ++i) {
-            dump_node(stream, *declaration.declarations[i], child_prefix, false, use_pipes);
+            dump_node(*declaration.declarations[i], child_prefix, false);
         }
-        dump_node(stream, *declaration.declarations.back(), child_prefix, true, use_pipes);
+        dump_node(*declaration.declarations.back(), child_prefix, true);
         break;
     }
     case AstNodeKind::VariableDeclaration: {
         const VariableDeclaration &declaration = static_cast<const VariableDeclaration &>(node);
-        stream
-            << fmt::format("{}{}VariableDeclaration {{ identifier: {} }}\n", prefix, connector, declaration.identifier);
-        dump_node(stream, *declaration.initializer, child_prefix, true, use_pipes);
+        HE_INFO("{}{}VariableDeclaration {{ identifier: {} }}", prefix, connector, declaration.identifier);
+        dump_node(*declaration.initializer, child_prefix, true);
         break;
     }
     case AstNodeKind::BinaryExpression: {
@@ -206,85 +158,84 @@ static void dump_node(
                 HE_UNREACHABLE();
             }
         }();
-        stream << fmt::format("{}{}BinaryExpression {{ operation: {} }}\n", prefix, connector, operation);
-        dump_node(stream, *expression.left, child_prefix, false, use_pipes);
-        dump_node(stream, *expression.right, child_prefix, true, use_pipes);
+        HE_INFO("{}{}BinaryExpression {{ operation: {} }}", prefix, connector, operation);
+        dump_node(*expression.left, child_prefix, false);
+        dump_node(*expression.right, child_prefix, true);
         break;
     }
     case AstNodeKind::CallExpression: {
         const CallExpression &expression = static_cast<const CallExpression &>(node);
-        stream << fmt::format("{}{}CallExpression {{ identifier: {} }}\n", prefix, connector, expression.identifier);
+        HE_INFO("{}{}CallExpression {{ identifier: {} }}", prefix, connector, expression.identifier);
         if (expression.arguments.empty()) {
             break;
         }
         for (usize i = 0; i < expression.arguments.size() - 1; ++i) {
-            dump_node(stream, *expression.arguments[i], child_prefix, false, use_pipes);
+            dump_node(*expression.arguments[i], child_prefix, false);
         }
-        dump_node(stream, *expression.arguments.back(), child_prefix, true, use_pipes);
+        dump_node(*expression.arguments.back(), child_prefix, true);
         break;
     }
     case AstNodeKind::LiteralExpression: {
         const LiteralExpression &expression = static_cast<const LiteralExpression &>(node);
-        stream << fmt::format("{}{}LiteralExpression\n", prefix, connector);
-        dump_node(stream, *expression.literal, child_prefix, true, use_pipes);
+        HE_INFO("{}{}LiteralExpression", prefix, connector);
+        dump_node(*expression.literal, child_prefix, true);
         break;
     }
     case AstNodeKind::VariableExpression: {
         const VariableExpression &expression = static_cast<const VariableExpression &>(node);
-        stream
-            << fmt::format("{}{}VariableExpression {{ identifier: {} }}\n", prefix, connector, expression.identifier);
+        HE_INFO("{}{}VariableExpression {{ identifier: {} }}", prefix, connector, expression.identifier);
         break;
     }
     case AstNodeKind::IntegerLiteral: {
         const IntegerLiteral &literal = static_cast<const IntegerLiteral &>(node);
-        stream << fmt::format("{}{}IntegerLiteral {{ value: {} }}\n", prefix, connector, literal.value);
+        HE_INFO("{}{}IntegerLiteral {{ value: {} }}", prefix, connector, literal.value);
         break;
     }
     case AstNodeKind::AssignStatement: {
         const AssignStatement &statement = static_cast<const AssignStatement &>(node);
-        stream << fmt::format("{}{}AssignStatement {{ identifier: {} }}\n", prefix, connector, statement.identifier);
-        dump_node(stream, *statement.value, child_prefix, true, use_pipes);
+        HE_INFO("{}{}AssignStatement {{ identifier: {} }}", prefix, connector, statement.identifier);
+        dump_node(*statement.value, child_prefix, true);
         break;
     }
     case AstNodeKind::CompoundStatement: {
         const CompoundStatement &statement = static_cast<const CompoundStatement &>(node);
-        stream << fmt::format("{}{}CompoundStatement\n", prefix, connector);
+        HE_INFO("{}{}CompoundStatement", prefix, connector);
         if (statement.statements.empty()) {
             break;
         }
         for (usize i = 0; i < statement.statements.size() - 1; ++i) {
-            dump_node(stream, *statement.statements[i], child_prefix, false, use_pipes);
+            dump_node(*statement.statements[i], child_prefix, false);
         }
-        dump_node(stream, *statement.statements.back(), child_prefix, true, use_pipes);
+        dump_node(*statement.statements.back(), child_prefix, true);
         break;
     }
     case AstNodeKind::DeclarationStatement: {
         const DeclarationStatement &statement = static_cast<const DeclarationStatement &>(node);
-        stream << fmt::format("{}{}DeclarationStatement\n", prefix, connector);
-        dump_node(stream, *statement.declaration, child_prefix, true, use_pipes);
+        HE_INFO("{}{}DeclarationStatement", prefix, connector);
+        dump_node(*statement.declaration, child_prefix, true);
         break;
     }
     case AstNodeKind::ExpressionStatement: {
         const ExpressionStatement &statement = static_cast<const ExpressionStatement &>(node);
-        stream << fmt::format("{}{}ExpressionStatement\n", prefix, connector);
-        dump_node(stream, *statement.expression, child_prefix, true, use_pipes);
+        HE_INFO("{}{}ExpressionStatement", prefix, connector);
+        dump_node(*statement.expression, child_prefix, true);
         break;
     }
     case AstNodeKind::IfStatement: {
         const IfStatement &statement = static_cast<const IfStatement &>(node);
-        stream << fmt::format("{}{}IfStatement\n", prefix, connector);
-        dump_node(stream, *statement.condition, child_prefix, false, use_pipes);
-        dump_node(stream, *statement.then_body, child_prefix, statement.else_body == nullptr, use_pipes);
+        HE_INFO("{}{}IfStatement", prefix, connector);
+        dump_node(*statement.condition, child_prefix, false);
+        dump_node(*statement.then_body, child_prefix, statement.else_body == nullptr);
         if (statement.else_body) {
-            dump_node(stream, *statement.else_body, child_prefix, true, use_pipes);
+            dump_node(*statement.else_body, child_prefix, true);
         }
         break;
     }
     case AstNodeKind::WhileStatement: {
         const WhileStatement &statement = static_cast<const WhileStatement &>(node);
-        stream << fmt::format("{}{}WhileStatement\n", prefix, connector);
-        dump_node(stream, *statement.condition, child_prefix, false, use_pipes);
-        dump_node(stream, *statement.body, child_prefix, true, use_pipes);
+        HE_INFO("{}{}WhileStatement", prefix, connector);
+        dump_node(*statement.condition, child_prefix, false);
+        dump_node(*statement.body, child_prefix, true);
         break;
     }
     default:
@@ -292,50 +243,48 @@ static void dump_node(
     }
 }
 
-void dump_ast(std::ostream &stream, const AstNode &node, const bool use_pipes)
-{
-    dump_node(stream, node, "", true, use_pipes, true);
-}
+void dump_ast(const AstNode &node) { dump_node(node, "", true, true); }
 
-void dump_ir(std::ostream &stream, const IrFunction &function)
+void dump_ir(const IrFunction &function)
 {
-    stream << fmt::format("define @{}() {{\n", function.name);
+    HE_INFO("define @{}() {{", function.name);
 
     for (usize i = 0; i < function.blocks.size(); ++i) {
         const std::unique_ptr<IrBlock> &block = function.blocks[i];
 
         if (block->id > 0) {
-            stream << "\n";
+            HE_INFO("");
         }
-        stream << fmt::format("block_{}:\n", block->id);
+        HE_INFO("block_{}:", block->id);
 
         for (const IrValue *instruction : block->instructions) {
             switch (instruction->kind) {
             case IrValueKind::Unknown:
+            case IrValueKind::Undef:
                 break;
             case IrValueKind::Constant: {
                 const IrConstant *constant = static_cast<const IrConstant *>(instruction);
-                stream << fmt::format("  %{} = iconst {}\n", instruction->id, constant->value);
+                HE_INFO("  %{} = iconst {}", instruction->id, constant->value);
                 break;
             }
             case IrValueKind::Addition: {
                 const IrAdd *add = static_cast<const IrAdd *>(instruction);
-                stream << fmt::format("  %{} = iadd %{} %{}\n", instruction->id, add->left->id, add->right->id);
+                HE_INFO("  %{} = iadd %{} %{}", instruction->id, add->left->id, add->right->id);
                 break;
             }
             case IrValueKind::Subtraction: {
                 const IrSub *sub = static_cast<const IrSub *>(instruction);
-                stream << fmt::format("  %{} = isub %{} %{}\n", instruction->id, sub->left->id, sub->right->id);
+                HE_INFO("  %{} = isub %{} %{}", instruction->id, sub->left->id, sub->right->id);
                 break;
             }
             case IrValueKind::Multiplication: {
                 const IrMul *mul = static_cast<const IrMul *>(instruction);
-                stream << fmt::format("  %{} = imul %{} %{}\n", instruction->id, mul->left->id, mul->right->id);
+                HE_INFO("  %{} = imul %{} %{}", instruction->id, mul->left->id, mul->right->id);
                 break;
             }
             case IrValueKind::Division: {
                 const IrDiv *div = static_cast<const IrDiv *>(instruction);
-                stream << fmt::format("  %{} = idiv %{} %{}\n", instruction->id, div->left->id, div->right->id);
+                HE_INFO("  %{} = idiv %{} %{}", instruction->id, div->left->id, div->right->id);
                 break;
             }
             case IrValueKind::Compare: {
@@ -361,24 +310,19 @@ void dump_ir(std::ostream &stream, const IrFunction &function)
                     operation_string = "ge";
                     break;
                 }
-                stream << fmt::format(
-                    "  %{} = icmp {} %{} %{}\n",
-                    instruction->id,
-                    operation_string,
-                    cmp->left->id,
-                    cmp->right->id);
+                HE_INFO("  %{} = icmp {} %{} %{}", instruction->id, operation_string, cmp->left->id, cmp->right->id);
                 break;
             }
             case IrValueKind::Branch: {
                 const IrBranch *branch = static_cast<const IrBranch *>(instruction);
                 if (branch->condition != nullptr) {
-                    stream << fmt::format(
-                        "  br %{}, %block_{}, %block_{}\n",
+                    HE_INFO(
+                        "  br %{}, %block_{}, %block_{}",
                         branch->condition->id,
                         branch->true_target->id,
                         branch->false_target->id);
                 } else {
-                    stream << fmt::format("  br %block_{}\n", branch->true_target->id);
+                    HE_INFO("  br %block_{}", branch->true_target->id);
                 }
                 break;
             }
@@ -391,7 +335,7 @@ void dump_ir(std::ostream &stream, const IrFunction &function)
                         arguments += ", ";
                     }
                 }
-                stream << fmt::format("  %{} = call @{}({})\n", instruction->id, call->callee, arguments);
+                HE_INFO("  %{} = call @{}({})", instruction->id, call->callee, arguments);
                 break;
             }
             case IrValueKind::Phi: {
@@ -404,16 +348,14 @@ void dump_ir(std::ostream &stream, const IrFunction &function)
                         operands += ", ";
                     }
                 }
-                stream << fmt::format("  %{} = φ {}\n", instruction->id, operands);
+                HE_INFO("  %{} = φ {}", instruction->id, operands);
                 break;
             }
-            case IrValueKind::Undef:
-                break;
             }
         }
     }
 
-    stream << "}\n";
+    HE_INFO("}}");
 }
 
 } // namespace he::script

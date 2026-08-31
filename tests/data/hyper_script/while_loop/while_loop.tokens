@@ -1,47 +1,47 @@
-Token { kind: Fn, lexeme: "fn", span: Span { source_id: 0, start_offset: 0, end_offset: 2 } }
-Token { kind: Identifier, lexeme: "main", span: Span { source_id: 0, start_offset: 3, end_offset: 7 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 7, end_offset: 8 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 8, end_offset: 9 } }
-Token { kind: LeftBrace, lexeme: "{", span: Span { source_id: 0, start_offset: 10, end_offset: 11 } }
-Token { kind: Let, lexeme: "let", span: Span { source_id: 0, start_offset: 16, end_offset: 19 } }
-Token { kind: Identifier, lexeme: "count", span: Span { source_id: 0, start_offset: 20, end_offset: 25 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 26, end_offset: 27 } }
-Token { kind: IntegerLiteral, lexeme: "0", span: Span { source_id: 0, start_offset: 28, end_offset: 29 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 29, end_offset: 30 } }
-Token { kind: Let, lexeme: "let", span: Span { source_id: 0, start_offset: 35, end_offset: 38 } }
-Token { kind: Identifier, lexeme: "sum", span: Span { source_id: 0, start_offset: 39, end_offset: 42 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 43, end_offset: 44 } }
-Token { kind: IntegerLiteral, lexeme: "0", span: Span { source_id: 0, start_offset: 45, end_offset: 46 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 46, end_offset: 47 } }
-Token { kind: While, lexeme: "while", span: Span { source_id: 0, start_offset: 53, end_offset: 58 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 59, end_offset: 60 } }
-Token { kind: Identifier, lexeme: "count", span: Span { source_id: 0, start_offset: 60, end_offset: 65 } }
-Token { kind: Less, lexeme: "<", span: Span { source_id: 0, start_offset: 66, end_offset: 67 } }
-Token { kind: IntegerLiteral, lexeme: "5", span: Span { source_id: 0, start_offset: 68, end_offset: 69 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 69, end_offset: 70 } }
-Token { kind: LeftBrace, lexeme: "{", span: Span { source_id: 0, start_offset: 71, end_offset: 72 } }
-Token { kind: Identifier, lexeme: "sum", span: Span { source_id: 0, start_offset: 81, end_offset: 84 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 85, end_offset: 86 } }
-Token { kind: Identifier, lexeme: "sum", span: Span { source_id: 0, start_offset: 87, end_offset: 90 } }
-Token { kind: Plus, lexeme: "+", span: Span { source_id: 0, start_offset: 91, end_offset: 92 } }
-Token { kind: Identifier, lexeme: "count", span: Span { source_id: 0, start_offset: 93, end_offset: 98 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 98, end_offset: 99 } }
-Token { kind: Identifier, lexeme: "count", span: Span { source_id: 0, start_offset: 108, end_offset: 113 } }
-Token { kind: Equal, lexeme: "=", span: Span { source_id: 0, start_offset: 114, end_offset: 115 } }
-Token { kind: Identifier, lexeme: "count", span: Span { source_id: 0, start_offset: 116, end_offset: 121 } }
-Token { kind: Plus, lexeme: "+", span: Span { source_id: 0, start_offset: 122, end_offset: 123 } }
-Token { kind: IntegerLiteral, lexeme: "1", span: Span { source_id: 0, start_offset: 124, end_offset: 125 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 125, end_offset: 126 } }
-Token { kind: RightBrace, lexeme: "}", span: Span { source_id: 0, start_offset: 131, end_offset: 132 } }
-Token { kind: Identifier, lexeme: "print", span: Span { source_id: 0, start_offset: 138, end_offset: 143 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 143, end_offset: 144 } }
-Token { kind: Identifier, lexeme: "count", span: Span { source_id: 0, start_offset: 144, end_offset: 149 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 149, end_offset: 150 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 150, end_offset: 151 } }
-Token { kind: Identifier, lexeme: "print", span: Span { source_id: 0, start_offset: 156, end_offset: 161 } }
-Token { kind: LeftParenthesis, lexeme: "(", span: Span { source_id: 0, start_offset: 161, end_offset: 162 } }
-Token { kind: Identifier, lexeme: "sum", span: Span { source_id: 0, start_offset: 162, end_offset: 165 } }
-Token { kind: RightParenthesis, lexeme: ")", span: Span { source_id: 0, start_offset: 165, end_offset: 166 } }
-Token { kind: Semicolon, lexeme: ";", span: Span { source_id: 0, start_offset: 166, end_offset: 167 } }
-Token { kind: RightBrace, lexeme: "}", span: Span { source_id: 0, start_offset: 168, end_offset: 169 } }
-Token { kind: Eof, lexeme: "", span: Span { source_id: 0, start_offset: 169, end_offset: 169 } }
+Fn "fn" 1:1
+Identifier "main" 1:4
+LeftParenthesis "(" 1:8
+RightParenthesis ")" 1:9
+LeftBrace "{" 1:11
+Let "let" 2:5
+Identifier "count" 2:9
+Equal "=" 2:15
+IntegerLiteral "0" 2:17
+Semicolon ";" 2:18
+Let "let" 3:5
+Identifier "sum" 3:9
+Equal "=" 3:13
+IntegerLiteral "0" 3:15
+Semicolon ";" 3:16
+While "while" 5:5
+LeftParenthesis "(" 5:11
+Identifier "count" 5:12
+Less "<" 5:18
+IntegerLiteral "5" 5:20
+RightParenthesis ")" 5:21
+LeftBrace "{" 5:23
+Identifier "sum" 6:9
+Equal "=" 6:13
+Identifier "sum" 6:15
+Plus "+" 6:19
+Identifier "count" 6:21
+Semicolon ";" 6:26
+Identifier "count" 7:9
+Equal "=" 7:15
+Identifier "count" 7:17
+Plus "+" 7:23
+IntegerLiteral "1" 7:25
+Semicolon ";" 7:26
+RightBrace "}" 8:5
+Identifier "print" 10:5
+LeftParenthesis "(" 10:10
+Identifier "count" 10:11
+RightParenthesis ")" 10:16
+Semicolon ";" 10:17
+Identifier "print" 11:5
+LeftParenthesis "(" 11:10
+Identifier "sum" 11:11
+RightParenthesis ")" 11:14
+Semicolon ";" 11:15
+RightBrace "}" 12:1
+Eof "" 12:2
