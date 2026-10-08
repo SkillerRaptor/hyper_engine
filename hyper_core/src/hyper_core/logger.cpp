@@ -16,7 +16,7 @@
 
 #include "hyper_core/assertion.hpp"
 
-namespace he::logger {
+namespace he::core::logger {
 
 struct LevelData {
     std::string_view label;
@@ -91,4 +91,4 @@ void log(const Level level, const std::string_view message)
     }
 }
 
-} // namespace he::logger
+} // namespace he::core::logger

@@ -11,7 +11,7 @@
 
 #include "hyper_rhi/types.hpp"
 
-namespace he {
+namespace he::rhi {
 
 struct SamplerDescriptor {
     std::optional<std::string_view> label = std::nullopt;
@@ -73,4 +73,4 @@ private:
     BorderColor m_border_color = BorderColor::TransparentBlack;
 };
 
-} // namespace he
+} // namespace he::rhi

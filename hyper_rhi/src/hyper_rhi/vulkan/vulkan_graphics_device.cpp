@@ -26,9 +26,9 @@
 #include "hyper_rhi/vulkan/vulkan_texture.hpp"
 #include "hyper_rhi/vulkan/vulkan_texture_view.hpp"
 
-namespace he {
+namespace he::rhi {
 
-VulkanGraphicsDevice::VulkanGraphicsDevice(const Window &window)
+VulkanGraphicsDevice::VulkanGraphicsDevice(const platform::Window &window)
 {
     HE_VK_CHECK(volkInitialize());
 
@@ -600,14 +600,14 @@ void VulkanGraphicsDevice::create_allocator()
     HE_VK_CHECK(vmaCreateAllocator(&allocator_create_info, &m_allocator));
 }
 
-void VulkanGraphicsDevice::create_surface(const Window &window)
+void VulkanGraphicsDevice::create_surface(const platform::Window &window)
 {
     if (!SDL_Vulkan_CreateSurface(window.native_handle(), m_instance, nullptr, &m_surface)) {
         HE_PANIC("Failed to create vulkan surface: {}", SDL_GetError());
     }
 }
 
-void VulkanGraphicsDevice::create_swapchain(const Window &window)
+void VulkanGraphicsDevice::create_swapchain(const platform::Window &window)
 {
     const VkExtent2D extent = choose_extent(window);
     const VkSurfaceFormatKHR surface_format = choose_surface_format();
@@ -688,7 +688,7 @@ void VulkanGraphicsDevice::create_swapchain(const Window &window)
     m_swapchain_image_views = std::move(image_views);
 }
 
-VkExtent2D VulkanGraphicsDevice::choose_extent(const Window &window) const
+VkExtent2D VulkanGraphicsDevice::choose_extent(const platform::Window &window) const
 {
     VkSurfaceCapabilitiesKHR capabilities = { };
     HE_VK_CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &capabilities));
@@ -910,4 +910,4 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VulkanGraphicsDevice::debug_callback(
     return VK_FALSE;
 }
 
-} // namespace he
+} // namespace he::rhi

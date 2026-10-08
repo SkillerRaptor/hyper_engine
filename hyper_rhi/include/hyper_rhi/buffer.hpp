@@ -14,7 +14,7 @@
 
 #include "hyper_rhi/types.hpp"
 
-namespace he {
+namespace he::rhi {
 
 enum class BufferUsage : u8 {
     None = 0,
@@ -28,7 +28,7 @@ enum class BufferUsage : u8 {
 struct BufferDescriptor {
     std::optional<std::string_view> label = std::nullopt;
     u32 size = 0;
-    BitFlags<BufferUsage> usage = BufferUsage::None;
+    core::BitFlags<BufferUsage> usage = BufferUsage::None;
     std::span<const u8> initial_data = { };
 };
 
@@ -43,11 +43,11 @@ public:
     virtual ~Buffer() = default;
 
     u32 size() const { return m_size; }
-    BitFlags<BufferUsage> usage() const { return m_usage; }
+    core::BitFlags<BufferUsage> usage() const { return m_usage; }
 
 private:
     u32 m_size = 0;
-    BitFlags<BufferUsage> m_usage = BufferUsage::None;
+    core::BitFlags<BufferUsage> m_usage = BufferUsage::None;
 };
 
 } // namespace he

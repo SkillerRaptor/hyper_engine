@@ -11,7 +11,7 @@
 
 #include "hyper_rhi/forward.hpp"
 
-namespace he {
+namespace he::rhi {
 
 struct ComputePipelineDescriptor {
     std::optional<std::string_view> label = std::nullopt;

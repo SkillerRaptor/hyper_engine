@@ -8,7 +8,7 @@
 
 #include <hyper_core/types.hpp>
 
-namespace he {
+namespace he::rhi {
 
 enum class AddressMode : u8 {
     Repeat = 0,

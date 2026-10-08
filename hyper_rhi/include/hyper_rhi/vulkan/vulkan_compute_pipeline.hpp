@@ -10,7 +10,7 @@
 
 #include "hyper_rhi/compute_pipeline.hpp"
 
-namespace he {
+namespace he::rhi {
 
 class VulkanComputePipeline : public ComputePipeline {
 public:

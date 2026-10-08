@@ -11,9 +11,9 @@
 int main()
 {
 #if HE_DEBUG_BUILD
-    he::logger::initialize(he::logger::Level::Debug);
+    he::core::logger::initialize(he::core::logger::Level::Debug);
 #else
-    he::logger::initialize(he::logger::Level::Info);
+    he::core::logger::initialize(he::core::logger::Level::Info);
 #endif
 
     // TODO: Parse command line arguments

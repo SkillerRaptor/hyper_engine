@@ -10,7 +10,7 @@
 #include "hyper_rhi/vulkan/vulkan_macros.hpp"
 #include "hyper_rhi/vulkan/vulkan_texture.hpp"
 
-namespace he {
+namespace he::rhi {
 
 VulkanTextureView::VulkanTextureView(const TextureViewDescriptor &desc, const VkDevice device)
     : TextureView(desc)
@@ -67,4 +67,4 @@ VulkanTextureView::VulkanTextureView(const TextureViewDescriptor &desc, const Vk
 
 VulkanTextureView::~VulkanTextureView() { vkDestroyImageView(m_device, m_raw, nullptr); }
 
-} // namespace he
+} // namespace he::rhi

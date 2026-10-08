@@ -11,7 +11,7 @@
 #include "hyper_platform/key_codes.hpp"
 #include "hyper_platform/mouse_codes.hpp"
 
-namespace he {
+namespace he::platform {
 
 class Input {
 public:

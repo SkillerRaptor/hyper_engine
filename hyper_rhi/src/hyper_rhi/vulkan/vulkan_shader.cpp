@@ -8,7 +8,7 @@
 
 #include "hyper_rhi/vulkan/vulkan_macros.hpp"
 
-namespace he {
+namespace he::rhi {
 
 VulkanShader::VulkanShader(const ShaderDescriptor &desc, const VkDevice device)
     : Shader(desc)
@@ -27,4 +27,4 @@ VulkanShader::VulkanShader(const ShaderDescriptor &desc, const VkDevice device)
 
 VulkanShader::~VulkanShader() { vkDestroyShaderModule(m_device, m_raw, nullptr); }
 
-} // namespace he
+} // namespace he::rhi

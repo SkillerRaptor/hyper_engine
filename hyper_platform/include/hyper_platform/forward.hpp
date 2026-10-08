@@ -6,8 +6,8 @@
 
 #pragma once
 
-namespace he {
+namespace he::platform {
 
 class Window;
 
-} // namespace he
+} // namespace he::platform

@@ -8,7 +8,7 @@
 
 #include <hyper_core/assertion.hpp>
 
-namespace he::conversion {
+namespace he::rhi::conversion {
 
 Format to_format(const VkFormat format)
 {
@@ -286,7 +286,7 @@ VkBorderColor to_vk_border_color(const BorderColor border_color)
     }
 }
 
-VkBufferUsageFlags to_vk_buffer_usage(const BitFlags<BufferUsage> usage)
+VkBufferUsageFlags to_vk_buffer_usage(const core::BitFlags<BufferUsage> usage)
 {
     VkBufferUsageFlags usage_flags = 0;
 
@@ -313,7 +313,7 @@ VkBufferUsageFlags to_vk_buffer_usage(const BitFlags<BufferUsage> usage)
     return usage_flags;
 }
 
-VkColorComponentFlags to_vk_color_component(const BitFlags<ColorWrites> color_writes)
+VkColorComponentFlags to_vk_color_component(const core::BitFlags<ColorWrites> color_writes)
 {
     VkColorComponentFlags color_component_flags = 0;
 
@@ -690,7 +690,7 @@ VkImageType to_vk_image_type(const Dimension dimension)
     }
 }
 
-VkImageUsageFlags to_vk_image_usage(const BitFlags<TextureUsage> texture_usage_flags, const Format format)
+VkImageUsageFlags to_vk_image_usage(const core::BitFlags<TextureUsage> texture_usage_flags, const Format format)
 {
     VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT;
 

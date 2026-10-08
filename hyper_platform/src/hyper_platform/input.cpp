@@ -8,7 +8,7 @@
 
 #include <SDL3/SDL.h>
 
-namespace he {
+namespace he::platform {
 
 void Input::update()
 {
@@ -25,4 +25,4 @@ bool Input::is_mouse_button_pressed(const MouseCode mouse_code) const
     return (SDL_BUTTON_MASK(static_cast<u32>(mouse_code)) & m_mouse_state) > 0;
 }
 
-} // namespace he
+} // namespace he::platform

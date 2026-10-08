@@ -9,8 +9,6 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace he {
-
 using i8 = int8_t;
 static_assert(sizeof(i8) == 1);
 
@@ -46,5 +44,3 @@ static_assert(sizeof(isize) == 8);
 
 using usize = size_t;
 static_assert(sizeof(usize) == 8);
-
-} // namespace he

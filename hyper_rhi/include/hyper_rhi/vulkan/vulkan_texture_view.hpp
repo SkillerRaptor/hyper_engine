@@ -10,7 +10,7 @@
 
 #include "hyper_rhi/texture_view.hpp"
 
-namespace he {
+namespace he::rhi {
 
 class VulkanTextureView : public TextureView {
 public:
@@ -25,4 +25,4 @@ private:
     VkImageView m_raw = VK_NULL_HANDLE;
 };
 
-} // namespace he
+} // namespace he::rhi

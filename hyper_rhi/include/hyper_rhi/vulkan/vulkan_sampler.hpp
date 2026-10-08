@@ -10,7 +10,7 @@
 
 #include "hyper_rhi/sampler.hpp"
 
-namespace he {
+namespace he::rhi {
 
 class VulkanSampler : public Sampler {
 public:
@@ -25,4 +25,4 @@ private:
     VkSampler m_raw = VK_NULL_HANDLE;
 };
 
-} // namespace he
+} // namespace he::rhi

@@ -42,10 +42,10 @@ private:
     void compile(std::span<const File>);
 
 private:
-    std::unique_ptr<Window> m_window = nullptr;
-    Input m_input;
+    std::unique_ptr<platform::Window> m_window = nullptr;
+    platform::Input m_input;
 
-    std::unique_ptr<GraphicsDevice> m_graphics_device = nullptr;
+    std::unique_ptr<rhi::GraphicsDevice> m_graphics_device = nullptr;
 
     bool m_running = true;
 };

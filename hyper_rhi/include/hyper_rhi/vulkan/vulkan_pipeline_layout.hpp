@@ -11,7 +11,7 @@
 
 #include "hyper_rhi/pipeline_layout.hpp"
 
-namespace he {
+namespace he::rhi {
 
 class VulkanPipelineLayout : public PipelineLayout {
 public:

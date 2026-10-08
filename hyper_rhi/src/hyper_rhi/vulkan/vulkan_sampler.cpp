@@ -9,7 +9,7 @@
 #include "hyper_rhi/vulkan/vulkan_conversion.hpp"
 #include "hyper_rhi/vulkan/vulkan_macros.hpp"
 
-namespace he {
+namespace he::rhi {
 
 VulkanSampler::VulkanSampler(const SamplerDescriptor &desc, const VkDevice device)
     : Sampler(desc)

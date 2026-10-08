@@ -14,7 +14,7 @@
 #include "hyper_rhi/forward.hpp"
 #include "hyper_rhi/types.hpp"
 
-namespace he {
+namespace he::rhi {
 
 struct PrimitiveState {
     PrimitiveTopology topology = PrimitiveTopology::TriangleList;
@@ -102,4 +102,4 @@ private:
     std::optional<DepthStencilState> m_depth_stencil_state = std::nullopt;
 };
 
-} // namespace he
+} // namespace he::rhi

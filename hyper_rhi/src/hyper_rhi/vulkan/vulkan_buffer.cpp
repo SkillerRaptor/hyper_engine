@@ -9,7 +9,7 @@
 #include "hyper_rhi/vulkan/vulkan_conversion.hpp"
 #include "hyper_rhi/vulkan/vulkan_macros.hpp"
 
-namespace he {
+namespace he::rhi {
 
 VulkanBuffer::VulkanBuffer(const BufferDescriptor &desc, const VmaAllocator allocator)
     : Buffer(desc)

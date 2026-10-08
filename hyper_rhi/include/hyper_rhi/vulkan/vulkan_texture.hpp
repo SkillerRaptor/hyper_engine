@@ -13,7 +13,7 @@
 
 #include "hyper_rhi/texture.hpp"
 
-namespace he {
+namespace he::rhi {
 
 class VulkanTexture : public Texture {
 public:
@@ -30,4 +30,4 @@ private:
     VmaAllocation m_allocation = VK_NULL_HANDLE;
 };
 
-} // namespace he
+} // namespace he::rhi

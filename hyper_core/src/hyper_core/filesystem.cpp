@@ -13,7 +13,7 @@
 
 #include "hyper_core/assertion.hpp"
 
-namespace he::filesystem {
+namespace he::core::fs {
 
 std::optional<std::vector<u8>> read_to_bytes(const std::string_view path)
 {
@@ -65,4 +65,4 @@ std::optional<std::string> read_to_string(std::string_view path)
     return buffer;
 }
 
-} // namespace he::filesystem
+} // namespace he::core::fs

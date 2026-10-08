@@ -23,8 +23,8 @@ Engine::Engine()
 {
     const std::chrono::time_point<std::chrono::steady_clock> start_time = std::chrono::steady_clock::now();
 
-    m_window = std::make_unique<Window>("HyperEngine", 1280, 720);
-    m_graphics_device = GraphicsDevice::create(GraphicsApi::Vulkan, *m_window);
+    m_window = std::make_unique<platform::Window>("HyperEngine", 1280, 720);
+    m_graphics_device = rhi::GraphicsDevice::create(rhi::GraphicsApi::Vulkan, *m_window);
 
     constexpr std::string_view source = R"(
 fn foo() {

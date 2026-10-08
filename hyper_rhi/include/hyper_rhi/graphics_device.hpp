@@ -13,7 +13,7 @@
 
 #include "hyper_rhi/forward.hpp"
 
-namespace he {
+namespace he::rhi {
 
 enum class GraphicsApi {
     D3D12,
@@ -25,7 +25,7 @@ protected:
     static constexpr u32 s_frames_in_flight = 3;
 
 public:
-    static std::unique_ptr<GraphicsDevice> create(GraphicsApi, const Window &);
+    static std::unique_ptr<GraphicsDevice> create(GraphicsApi, const platform::Window &);
     virtual ~GraphicsDevice() = default;
 
     Buffer *create_buffer(const BufferDescriptor &);
@@ -96,4 +96,4 @@ private:
     static void validate_render_pipeline_descriptor(const RenderPipelineDescriptor &);
 };
 
-} // namespace he
+} // namespace he::rhi

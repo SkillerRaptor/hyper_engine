@@ -13,7 +13,7 @@
 
 #include "hyper_rhi/types.hpp"
 
-namespace he {
+namespace he::rhi {
 
 enum class TextureUsage : u8 {
     None = 0,
@@ -31,7 +31,7 @@ struct TextureDescriptor {
     u32 sample_count = 1;
     Format format = Format::None;
     Dimension dimension = Dimension::D2;
-    BitFlags<TextureUsage> usage = TextureUsage::None;
+    core::BitFlags<TextureUsage> usage = TextureUsage::None;
 };
 
 class Texture {
@@ -55,7 +55,7 @@ public:
     u32 sample_count() const { return m_sample_count; }
     Format format() const { return m_format; }
     Dimension dimension() const { return m_dimension; }
-    BitFlags<TextureUsage> usage() const { return m_usage; }
+    core::BitFlags<TextureUsage> usage() const { return m_usage; }
 
 private:
     Extent2d m_extent = { };
@@ -64,7 +64,7 @@ private:
     u32 m_sample_count = 1;
     Format m_format = Format::None;
     Dimension m_dimension = Dimension::D2;
-    BitFlags<TextureUsage> m_usage = TextureUsage::None;
+    core::BitFlags<TextureUsage> m_usage = TextureUsage::None;
 };
 
-} // namespace he
+} // namespace he::rhi

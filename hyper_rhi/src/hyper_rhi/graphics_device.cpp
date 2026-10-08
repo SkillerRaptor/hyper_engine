@@ -20,9 +20,9 @@
 #include "hyper_rhi/types.hpp"
 #include "hyper_rhi/vulkan/vulkan_graphics_device.hpp"
 
-namespace he {
+namespace he::rhi {
 
-std::unique_ptr<GraphicsDevice> GraphicsDevice::create(const GraphicsApi graphics_api, const Window &window)
+std::unique_ptr<GraphicsDevice> GraphicsDevice::create(const GraphicsApi graphics_api, const platform::Window &window)
 {
     switch (graphics_api) {
     case GraphicsApi::Vulkan:
@@ -289,4 +289,4 @@ void GraphicsDevice::validate_render_pipeline_descriptor(const RenderPipelineDes
     }
 }
 
-} // namespace he
+} // namespace he::rhi

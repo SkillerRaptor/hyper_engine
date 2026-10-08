@@ -13,7 +13,7 @@
 #include "hyper_rhi/vulkan/vulkan_pipeline_layout.hpp"
 #include "hyper_rhi/vulkan/vulkan_shader.hpp"
 
-namespace he {
+namespace he::rhi {
 
 VulkanRenderPipeline::VulkanRenderPipeline(const RenderPipelineDescriptor &desc, const VkDevice device)
     : RenderPipeline(desc)
@@ -235,4 +235,4 @@ VulkanRenderPipeline::VulkanRenderPipeline(const RenderPipelineDescriptor &desc,
 
 VulkanRenderPipeline::~VulkanRenderPipeline() { vkDestroyPipeline(m_device, m_raw, nullptr); }
 
-} // namespace he
+} // namespace he::rhi

@@ -8,7 +8,7 @@
 
 #include <hyper_core/types.hpp>
 
-namespace he {
+namespace he::platform {
 
 enum class MouseCode : u8 {
     Left = 1,
@@ -18,4 +18,4 @@ enum class MouseCode : u8 {
     X2 = 5,
 };
 
-} // namespace he
+} // namespace he::platform

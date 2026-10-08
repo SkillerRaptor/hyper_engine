@@ -23,7 +23,7 @@
                 _path.filename().string(),                                              \
                 _location.line(),                                                       \
                 HE_STRINGIFY(expression) __VA_OPT__(, ::fmt::format(__VA_ARGS__)));     \
-            ::he::logger::flush();                                                      \
+            ::he::core::logger::flush();                                                \
             ::std::abort();                                                             \
         }                                                                               \
     } while (false)
@@ -42,7 +42,7 @@
             "Panic at {}:{}" __VA_OPT__(": {}"),                                    \
             _path.filename().string(),                                              \
             _location.line() __VA_OPT__(, ::fmt::format(__VA_ARGS__)));             \
-        ::he::logger::flush();                                                      \
+        ::he::core::logger::flush();                                                \
         ::std::abort();                                                             \
     } while (false)
 

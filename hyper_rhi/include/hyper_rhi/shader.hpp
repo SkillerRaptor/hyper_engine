@@ -13,7 +13,7 @@
 
 #include "hyper_rhi/types.hpp"
 
-namespace he {
+namespace he::rhi {
 
 struct ShaderDescriptor {
     std::optional<std::string_view> label = std::nullopt;
@@ -40,4 +40,4 @@ private:
     std::string m_entry;
 };
 
-} // namespace he
+} // namespace he::rhi

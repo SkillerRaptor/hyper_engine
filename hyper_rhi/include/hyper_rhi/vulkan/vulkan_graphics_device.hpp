@@ -17,7 +17,7 @@
 
 #include "hyper_rhi/graphics_device.hpp"
 
-namespace he {
+namespace he::rhi {
 
 class VulkanGraphicsDevice : public GraphicsDevice {
 private:
@@ -26,7 +26,7 @@ private:
     static constexpr const char *s_swapchain_extension = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
 public:
-    explicit VulkanGraphicsDevice(const Window &);
+    explicit VulkanGraphicsDevice(const platform::Window &);
     ~VulkanGraphicsDevice() override;
 
 protected:
@@ -67,9 +67,9 @@ private:
 
     void create_allocator();
 
-    void create_surface(const Window &);
-    void create_swapchain(const Window &);
-    VkExtent2D choose_extent(const Window &) const;
+    void create_surface(const platform::Window &);
+    void create_swapchain(const platform::Window &);
+    VkExtent2D choose_extent(const platform::Window &) const;
     VkSurfaceFormatKHR choose_surface_format() const;
     VkPresentModeKHR choose_present_mode() const;
 
@@ -112,4 +112,4 @@ private:
     VkDescriptorSet m_sampler_set = VK_NULL_HANDLE;
 };
 
-} // namespace he
+} // namespace he::rhi

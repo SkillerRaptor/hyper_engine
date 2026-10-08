@@ -10,7 +10,7 @@
 
 #include "hyper_core/types.hpp"
 
-namespace he::logger {
+namespace he::core::logger {
 
 enum class Level : u8 {
     Trace = 0,
@@ -62,11 +62,11 @@ void trace(fmt::format_string<Args...> format, Args &&...args)
     log(Level::Trace, fmt::format(format, std::forward<Args>(args)...));
 }
 
-} // namespace he::logger
+} // namespace he::core::logger
 
-#define HE_INFO(...) ::he::logger::info(__VA_ARGS__)
-#define HE_WARN(...) ::he::logger::warn(__VA_ARGS__)
-#define HE_ERROR(...) ::he::logger::error(__VA_ARGS__)
-#define HE_FATAL(...) ::he::logger::fatal(__VA_ARGS__)
-#define HE_DEBUG(...) ::he::logger::debug(__VA_ARGS__)
-#define HE_TRACE(...) ::he::logger::trace(__VA_ARGS__)
+#define HE_INFO(...) ::he::core::logger::info(__VA_ARGS__)
+#define HE_WARN(...) ::he::core::logger::warn(__VA_ARGS__)
+#define HE_ERROR(...) ::he::core::logger::error(__VA_ARGS__)
+#define HE_FATAL(...) ::he::core::logger::fatal(__VA_ARGS__)
+#define HE_DEBUG(...) ::he::core::logger::debug(__VA_ARGS__)
+#define HE_TRACE(...) ::he::core::logger::trace(__VA_ARGS__)

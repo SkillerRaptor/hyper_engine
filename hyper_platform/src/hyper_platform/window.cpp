@@ -12,7 +12,7 @@
 
 #include <hyper_core/assertion.hpp>
 
-namespace he {
+namespace he::platform {
 
 Window::Window(const std::string_view title, const u32 width, const u32 height)
 {

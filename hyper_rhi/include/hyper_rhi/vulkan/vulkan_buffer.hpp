@@ -13,7 +13,7 @@
 
 #include "hyper_rhi/buffer.hpp"
 
-namespace he {
+namespace he::rhi {
 
 class VulkanBuffer : public Buffer {
 public:
@@ -30,4 +30,4 @@ private:
     VmaAllocation m_allocation = VK_NULL_HANDLE;
 };
 
-} // namespace he
+} // namespace he::rhi

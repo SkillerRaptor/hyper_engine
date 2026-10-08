@@ -10,7 +10,7 @@
 
 #include "hyper_rhi/render_pipeline.hpp"
 
-namespace he {
+namespace he::rhi {
 
 class VulkanRenderPipeline : public RenderPipeline {
 public:

@@ -9,7 +9,7 @@
 #include "hyper_core/types.hpp"
 #include "hyper_rhi/vulkan/vulkan_macros.hpp"
 
-namespace he {
+namespace he::rhi {
 
 VulkanPipelineLayout::VulkanPipelineLayout(
     const PipelineLayoutDescriptor &desc,
@@ -39,4 +39,4 @@ VulkanPipelineLayout::VulkanPipelineLayout(
 
 VulkanPipelineLayout::~VulkanPipelineLayout() { vkDestroyPipelineLayout(m_device, m_raw, nullptr); }
 
-} // namespace he
+} // namespace he::rhi

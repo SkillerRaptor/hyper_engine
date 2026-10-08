@@ -10,7 +10,7 @@
 #include "hyper_rhi/vulkan/vulkan_pipeline_layout.hpp"
 #include "hyper_rhi/vulkan/vulkan_shader.hpp"
 
-namespace he {
+namespace he::rhi {
 
 VulkanComputePipeline::VulkanComputePipeline(const ComputePipelineDescriptor &desc, const VkDevice device)
     : ComputePipeline(desc)
@@ -45,4 +45,4 @@ VulkanComputePipeline::VulkanComputePipeline(const ComputePipelineDescriptor &de
 
 VulkanComputePipeline::~VulkanComputePipeline() { vkDestroyPipeline(m_device, m_raw, nullptr); }
 
-} // namespace he
+} // namespace he::rhi

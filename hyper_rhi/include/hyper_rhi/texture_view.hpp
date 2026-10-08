@@ -12,7 +12,7 @@
 #include "hyper_rhi/forward.hpp"
 #include "hyper_rhi/types.hpp"
 
-namespace he {
+namespace he::rhi {
 
 struct TextureViewDescriptor {
     std::optional<std::string_view> label = std::nullopt;

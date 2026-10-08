@@ -11,7 +11,7 @@
 
 #include <hyper_core/types.hpp>
 
-namespace he {
+namespace he::rhi {
 
 struct PipelineLayoutDescriptor {
     std::optional<std::string_view> label = std::nullopt;
@@ -33,4 +33,4 @@ private:
     u32 m_push_constant_size = 0;
 };
 
-} // namespace he
+} // namespace he::rhi

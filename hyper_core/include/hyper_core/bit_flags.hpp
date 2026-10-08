@@ -9,7 +9,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace he {
+namespace he::core {
 
 template <typename T>
     requires std::is_enum_v<T>
@@ -127,4 +127,4 @@ private:
     UnderlyingT m_flags = 0;
 };
 
-} // namespace he
+} // namespace he::core

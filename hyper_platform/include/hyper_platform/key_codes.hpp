@@ -8,7 +8,7 @@
 
 #include <hyper_core/types.hpp>
 
-namespace he {
+namespace he::platform {
 
 enum class KeyCode : u32 {
     Unknown = 0,

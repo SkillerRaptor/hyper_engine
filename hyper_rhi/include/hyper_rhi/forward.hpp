@@ -6,7 +6,7 @@
 
 #pragma once
 
-namespace he {
+namespace he::rhi {
 
 class Buffer;
 struct BufferDescriptor;
@@ -32,4 +32,4 @@ struct TextureDescriptor;
 class TextureView;
 struct TextureViewDescriptor;
 
-} // namespace he
+} // namespace he::rhi

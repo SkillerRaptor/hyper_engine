@@ -9,7 +9,7 @@
 #include "hyper_rhi/vulkan/vulkan_conversion.hpp"
 #include "hyper_rhi/vulkan/vulkan_macros.hpp"
 
-namespace he {
+namespace he::rhi {
 
 VulkanTexture::VulkanTexture(const TextureDescriptor &desc, const VmaAllocator allocator)
     : Texture(desc)
@@ -55,4 +55,4 @@ VulkanTexture::VulkanTexture(const TextureDescriptor &desc, const VmaAllocator a
 
 VulkanTexture::~VulkanTexture() { vmaDestroyImage(m_allocator, m_raw, m_allocation); }
 
-} // namespace he
+} // namespace he::rhi

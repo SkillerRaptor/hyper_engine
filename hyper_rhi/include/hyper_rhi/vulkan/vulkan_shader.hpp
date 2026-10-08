@@ -10,7 +10,7 @@
 
 #include "hyper_rhi/shader.hpp"
 
-namespace he {
+namespace he::rhi {
 
 class VulkanShader : public Shader {
 public:
@@ -25,4 +25,4 @@ private:
     VkShaderModule m_raw = VK_NULL_HANDLE;
 };
 
-} // namespace he
+} // namespace he::rhi

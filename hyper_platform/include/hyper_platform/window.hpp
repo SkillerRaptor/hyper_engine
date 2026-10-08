@@ -12,7 +12,7 @@
 
 struct SDL_Window;
 
-namespace he {
+namespace he::platform {
 
 class Window {
 public:
@@ -48,4 +48,4 @@ private:
     bool m_close_requested = false;
 };
 
-} // namespace he
+} // namespace he::platform
